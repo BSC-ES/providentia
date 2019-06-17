@@ -1,0 +1,4 @@
+*.nc !text !filter !merge !diff
+*.npy !text !filter !merge !diff
+*.xlsx !text !filter !merge !diff
+*.csv !text !filter !merge !diff
