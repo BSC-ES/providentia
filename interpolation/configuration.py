@@ -11,7 +11,6 @@ start_date = '201001' #YYYYMM   START FROM THIS POINT
 end_date =   '201901' #YYYYMM   GO UP TO THIS POINT    
 
 #define all experiments (by ID) to process
-#experiments_to_process = ['b012','a148','b007','a1wd','a1vv','a1vw','a1x8','a1xf','a1yz','a1zc','cams50','cams50_chimere','cams50_emep','cams50_match','cams50_mocage','cams50_silam']
 experiments_to_process = ['a1vv']
 
 #define complete list of desired species to process (this is later filtered based on availability of species in experiment directories)
