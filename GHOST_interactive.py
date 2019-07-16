@@ -488,6 +488,10 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         #create dictionary to hold indices of selected values in pop-up windows
         self.selected_indices = {'EXPERIMENTS':[[]], 'FLAGS':[[]], 'QA':[[]], 'CLASSIFICATIONS':[[],[]], 'METHODS':[[]]}
 
+        #define observations/experiment root data directories
+        self.obs_root = '/esarchive/obs/ghost'
+        self.exp_root = '/esarchive/recon/ghost_interp'
+
         #initialise configuration bar fields
         self.config_bar_initialisation = True
         self.update_configuration_bar_fields()  
@@ -607,24 +611,30 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         selected_end_date = int(self.selected_end_date) 
 
         #get all available networks
-        available_networks = sorted([dir.split('/')[-1] for dir in glob.glob('ghost/*')])
+        #available_networks = sorted([dir.split('/')[-1] for dir in glob.glob('ghost/*')])
+        available_networks =    ['EBAS','EIONET']
+        available_resolutions = ['hourly','daily','monthly']
 
         #iterate through available networks
         for network in available_networks:
 
+            print(network)
+
             #get available resolutions for network
-            available_resolutions = sorted([dir.split('/')[-1] for dir in glob.glob('ghost/%s/*'%(network))])
+           # available_resolutions = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/*'%(self.obs_root,network))])
 
             #iterate through available resolutions
             for resolution in available_resolutions:
 
+                print(resolution)
+
                 #get available species for network/resolution
-                available_species = sorted([dir.split('/')[-1] for dir in glob.glob('ghost/%s/%s/*'%(network,resolution))])
+                available_species = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/%s/*'%(self.obs_root,network,resolution))])
                 
                 #iterate through available files per species and limit species to just those with files in set date range
                 valid_species = []
                 for species in available_species:                
-                    species_files = sorted(glob.glob('ghost/%s/%s/%s/*.nc'%(network,resolution,species)))
+                    species_files = sorted(glob.glob('%s/%s/%s/%s/*.nc'%(self.obs_root,network,resolution,species)))
                     species_files_yearmonth = [int(species_file.split('%s_'%(species))[-1].split('.nc')[0]+'01') for species_file in species_files]
                     for species_file_yearmonth in species_files_yearmonth:
                         if (species_file_yearmonth >= selected_start_date_firstdayofmonth) & (species_file_yearmonth < selected_end_date):           
@@ -661,13 +671,16 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.available_experiment_data = {}
 
         #get all different experiment names
-        available_experiments = sorted([dir.split('/')[-1] for dir in glob.glob('exp/*')])
-
+        #available_experiments = sorted([dir.split('/')[-1] for dir in glob.glob('%s/*'%(self.exp_root))])
+        available_experiments = ['a1wd']
+          
         #iterate through available experiments
         for experiment in available_experiments:
-            
+
+            print(experiment)           
+ 
             #get all available grid types by experiment 
-            available_grids = sorted([dir.split('/')[-1] for dir in glob.glob('exp/%s/*'%(experiment))])
+            available_grids = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/*'%(self.exp_root,experiment))])
 
             #iterate through all available grids
             for grid in available_grids:
@@ -676,24 +689,24 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
                 experiment_grid = '%s-%s'%(experiment,grid)
                 
                 #get all available resolutions for experiment/grid
-                available_resolutions = sorted([dir.split('/')[-1] for dir in glob.glob('exp/%s/%s/*'%(experiment, grid))])
+                available_resolutions = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/%s/*'%(self.exp_root,experiment,grid))])
                 
                 #iterate trough all available resolutions
                 for resolution in available_resolutions:
                     
                     #get all available species for experiment/grid/resolution
-                    available_species = sorted([dir.split('/')[-1] for dir in glob.glob('exp/%s/%s/%s/*'%(experiment, grid, resolution))])
+                    available_species = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/%s/%s/*'%(self.exp_root,experiment,grid,resolution))])
                     
                     #iterate through available species    
                     for species in available_species:
                         
                         #get all available networks for experiment/grid/resolution/species
-                        available_networks = sorted([dir.split('/')[-1] for dir in glob.glob('exp/%s/%s/%s/%s/*'%(experiment, grid, resolution, species))])
+                        available_networks = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/%s/%s/%s/*'%(self.exp_root,experiment,grid,resolution,species))])
                             
                         #iterate through available files per network and limit networks to just those with files in set date range
                         valid_networks = []
                         for network in available_networks:              
-                            network_files = sorted(glob.glob('exp/%s/%s/%s/%s/%s/*.nc'%(experiment, grid, resolution, species, network)))
+                            network_files = sorted(glob.glob('%s/%s/%s/%s/%s/%s/*.nc'%(self.exp_root,experiment,grid,resolution,species,network)))
                             network_files_yearmonth = [int(network_file.split('%s_'%(species))[-1].split('.nc')[0]+'01') for network_file in network_files]
                             for network_file_yearmonth in network_files_yearmonth:
                                 if (network_file_yearmonth >= selected_start_date_firstdayofmonth) & (network_file_yearmonth < selected_end_date):           
@@ -1129,7 +1142,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.time_array = pd.date_range(start = datetime.datetime(int(self.active_start_date[:4]), int(self.active_start_date[4:6]), int(self.active_start_date[6:8])),end = datetime.datetime(int(self.active_end_date[:4]), int(self.active_end_date[4:6]), int(self.active_end_date[6:8])), freq = self.active_frequency_code)[:-1]
 
         #get all relevant observational files
-        relevant_files = sorted(glob.glob('ghost/%s/%s/%s/*.nc'%(self.active_network, self.active_resolution, self.active_species)))
+        relevant_files = sorted(glob.glob('%s/%s/%s/%s/*.nc'%(self.obs_root, self.active_network, self.active_resolution, self.active_species)))
          
         #limit data files to required date range
         relevant_file_start_dates = [file.split('%s_'%(self.active_species))[-1].split('.nc')[0] for file in relevant_files]
@@ -1262,12 +1275,12 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
      
         #get all relevant observational/experiment files 
         if process_type == 'observations':
-            relevant_files = sorted(glob.glob('ghost/%s/%s/%s/*.nc'%(self.active_network, self.active_resolution, self.active_species)))
+            relevant_files = sorted(glob.glob('%s/%s/%s/%s/*.nc'%(self.obs_root, self.active_network, self.active_resolution, self.active_species)))
         elif process_type == 'experiment':
             experiment_grid_split = data_label.split('-')
             active_experiment = experiment_grid_split[0]
             active_grid = experiment_grid_split[1]      
-            relevant_files = sorted(glob.glob('exp/%s/%s/%s/%s/%s/*.nc'%(active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network)))
+            relevant_files = sorted(glob.glob('%s/%s/%s/%s/%s/%s/*.nc'%(self.exp_root, active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network)))
 
         #limit data files to required date range to read
         #if files are given in monthly chunked files, add '01' string file start date 

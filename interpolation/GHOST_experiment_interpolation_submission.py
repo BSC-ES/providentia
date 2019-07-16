@@ -20,7 +20,7 @@ import time
 start = time.time()
 
 #define job GHOST_interpolation process root directory and arguments/submit/interpolation log subdirectories
-GHOST_interpolation_root = '.'
+GHOST_interpolation_root = os.getcwd()
 arguments_dir = '%s/arguments'%(GHOST_interpolation_root)
 submit_dir = '%s/submit'%(GHOST_interpolation_root)
 interpolation_log_dir = '%s/interpolation_logs'%(GHOST_interpolation_root)
