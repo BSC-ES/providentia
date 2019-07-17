@@ -43,6 +43,9 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 import scipy.stats
 import seaborn as sns
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 ###------------------------------------------------------------------------------------###
 ###------------------------------------------------------------------------------------###
 
@@ -1521,7 +1524,7 @@ class MPL_Canvas(FigureCanvas):
         #--------------------------------------------------#
         #setup interactive picker/lasso on map
         self.figure.canvas.mpl_connect('pick_event', self.on_click)
-        self.lasso = LassoSelector(self.map_ax, onselect=self.onlassoselect, useblit=False, lineprops=dict(alpha=0.5, color='hotpink', linewidth=1))
+        self.lasso = LassoSelector(self.map_ax, onselect=self.onlassoselect, useblit=True, lineprops=dict(alpha=0.5, color='hotpink', linewidth=1))
         #initialise variable that informs whether to use picker/lasso for updates
         self.map_already_updated = False
         #initialise variable of valid station indices plotted on map as empty list
