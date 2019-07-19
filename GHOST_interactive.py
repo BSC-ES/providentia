@@ -603,69 +603,66 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             #set initial station references to be None
             self.station_references = None
         
-        #--------------------------------------------------------------------------------------#
-        #gather available observational data
-        #create nested dictionary storing available observational species data by species matrix, by temporal resolution, by network in set date range
+            #--------------------------------------------------------------------------------------#
+            #gather available observational data
+            #create nested dictionary storing available observational species data by species matrix, by temporal resolution, by network in set date range
 
-        self.available_observation_data = {}
+            self.available_observation_data = {}
 
-        #set needed date range information as type int 
-        selected_start_date_firstdayofmonth = int(self.selected_start_date[:6]+'01')
-        selected_end_date = int(self.selected_end_date) 
+            #set needed date range information as type int 
+            selected_start_date_firstdayofmonth = int(self.selected_start_date[:6]+'01')
+            selected_end_date = int(self.selected_end_date) 
 
-        #get all available networks
-        #available_networks = sorted([dir.split('/')[-1] for dir in glob.glob('ghost/*')])
-        available_networks =    ['EBAS','EIONET']
-        available_resolutions = ['hourly','daily','monthly']
+            #set all available networks
+            available_networks = ['EBAS','EIONET']
+        
+            #set all available temporal resolutions
+            available_resolutions = ['hourly','daily','monthly']
 
-        #iterate through available networks
-        for network in available_networks:
+            #iterate through available networks
+            for network in available_networks:
 
-            print(network)
+                #iterate through available resolutions
+                for resolution in available_resolutions:
 
-            #get available resolutions for network
-           # available_resolutions = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/*'%(self.obs_root,network))])
+                    #get available species for network/resolution
+                    available_species = os.listdir('%s/%s/%s'%(self.obs_root, network, resolution))
 
-            #iterate through available resolutions
-            for resolution in available_resolutions:
+                    #iterate through available files per species
+                    for species_count, species in enumerate(available_species):   
 
-                print(resolution)
+                        if species_count == 0:
+                            #write nested empty dictionary for network
+                            self.available_observation_data[network] = {}
 
-                #get available species for network/resolution
-                available_species = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/%s/*'%(self.obs_root,network,resolution))])
+                            #write nested empty dictionary for resolution
+                            self.available_observation_data[network][resolution] = {}
+
+                        #get all netCDF monthly files per species
+                        species_files = os.listdir('%s/%s/%s/%s'%(self.obs_root, network, resolution, speci))
+
+                        #get monthly start date (YYYYMM) of all species files
+                        species_files_yearmonths = [f.split('_')[-1][:6] for f in files if f != 'temporary'] 
+
+                        #get matrix for current species
+                        matrix = parameter_dictionary[species]['matrix']
+            
+                        if matrix not in list(self.available_observation_data[network][resolution].keys()):
+                            #write nested empty dictionary for matrix
+                            self.available_observation_data[network][resolution][matrix] = {}                            
+
+                        #write nested dictionary for species, with associated file yearmonths
+                        self.available_observation_data[network][resolution][matrix][species] = species_files_yearmonths
+
+                        
+
                 
                 #iterate through available files per species and limit species to just those with files in set date range
-                valid_species = []
-                for species in available_species:                
-                    species_files = sorted(glob.glob('%s/%s/%s/%s/*.nc'%(self.obs_root,network,resolution,species)))
-                    species_files_yearmonth = [int(species_file.split('%s_'%(species))[-1].split('.nc')[0]+'01') for species_file in species_files]
+
                     for species_file_yearmonth in species_files_yearmonth:
                         if (species_file_yearmonth >= selected_start_date_firstdayofmonth) & (species_file_yearmonth < selected_end_date):           
                             valid_species.append(species)
                             break
-                #if have some species with valid associated files, write species names to available observational data dictionary
-                if len(valid_species) != 0:
-                    #check if have written specific network previously to data dictionary, if not write it 
-                    if network not in list(self.available_observation_data.keys()):
-                        self.available_observation_data[network] = {}
-
-                    #check if have written specific resolution previously to data dictionary, if not write it 
-                    if resolution not in list(self.available_observation_data[network].keys()):
-                        self.available_observation_data[network][resolution] = {}
-            
-                    #split valid species by matrix
-                    valid_species_matrices = [parameter_dictionary[species]['matrix'] for species in valid_species]
-                    unique_matrices = np.unique(valid_species_matrices)
-                    species_by_matrix = {}
-                    for unique_matrix in unique_matrices:
-                        species_by_matrix[unique_matrix] = []
-                        for species_i, species_matrix in enumerate(valid_species_matrices):
-                            if species_matrix == unique_matrix:
-                                species_by_matrix[unique_matrix].append(valid_species[species_i])
-                    
-                    #write valid species names by matrix
-                    for unique_matrix in unique_matrices:
-                        self.available_observation_data[network][resolution][unique_matrix] = species_by_matrix[unique_matrix]
 
         #--------------------------------------------------------------------------------------#
         #gather available experiment data
@@ -816,6 +813,13 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
 
         #unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
+
+    #--------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------------#
+    
+    def get_valid_files_in_date_range(self):
+        
+        '''define function that returns '''
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
