@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 #WRITTEN BY DENE BOWDALO
 
 ###------------------------------------------------------------------------------------###
@@ -19,18 +16,14 @@ import time
 
 start = time.time()
 
-#define job GHOST_interpolation process root directory and arguments/submit/interpolation log subdirectories
-GHOST_interpolation_root = os.getcwd()
-arguments_dir = '%s/arguments'%(GHOST_interpolation_root)
-submit_dir = '%s/submit'%(GHOST_interpolation_root)
-interpolation_log_dir = '%s/interpolation_logs'%(GHOST_interpolation_root)
+#define current working directory and arguments/submit/interpolation log subdirectories
+working_directory = os.getcwd()
+arguments_dir = '%s/arguments'%(working_directory)
+submit_dir = '%s/submit'%(working_directory)
+interpolation_log_dir = '%s/interpolation_logs'%(working_directory)
 
 #set SLURM job ID as unique ID for tracking tasks defined to process in the configuration file
 unique_ID = sys.argv[1]
-#get the working directory where the user has submitted the interpolation job (where local configuration and experiment dictionaries are stored)
-working_directory = sys.argv[2]
-#add working directory as first element in python path 
-sys.path.insert(0, working_directory)
 
 #Read configuration file
 from configuration import start_date, end_date, experiments_to_process, species_to_process, grid_types_to_process, model_temporal_resolutions_to_process, GHOST_networks_to_interpolate_against, temporal_resolutions_to_output
@@ -164,7 +157,7 @@ submit_file.write("argument_e=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_T
 submit_file.write("argument_f=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $6}')\n")
 submit_file.write("argument_g=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $7}')\n")
 submit_file.write("\n") 
-submit_file.write("srun --cpu-bind=core --output=%s/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.out --error=%s/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.err python -u %s/GHOST_experiment_interpolation.py $argument_a $argument_b $argument_c $argument_d $argument_e $argument_f $argument_g %s"%(interpolation_log_dir, interpolation_log_dir, GHOST_interpolation_root, working_directory))
+submit_file.write("srun --cpu-bind=core --output=%s/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.out --error=%s/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.err python -u %s/GHOST_experiment_interpolation.py $argument_a $argument_b $argument_c $argument_d $argument_e $argument_f $argument_g"%(interpolation_log_dir, interpolation_log_dir, working_directory))
 
 #close submit file
 submit_file.close()
@@ -184,7 +177,7 @@ while submit_complete == False:
         continue
     else:
         submit_complete = True
-        print '%s INTERPOLATION JOB/S SUBMITTED'%(N_tasks)
+        print('%s INTERPOLATION JOB/S SUBMITTED'%(N_tasks))
 
 #now all interpoaltion tasks have been submitted
 #monitor number of jobs in queue (every 30 seconds) until there are 0 left in the squeue
@@ -192,7 +185,7 @@ all_tasks_finished = False
 
 while all_tasks_finished == False:
     cmd = ['squeue', '-h', '-n', 'G%s'%(unique_ID)]
-    squeue_process =  subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    squeue_process =  subprocess.Popen(cmd, stdout=subprocess.PIPE, encoding='utf8')
     squeue_status = squeue_process.communicate()[0]
     n_jobs_in_queue = len(squeue_status.split('\n')[:-1])
     #if number of jobs in queue > 0, then sleep for 10 seconds and then check again how many jobs there are in queue
@@ -204,7 +197,7 @@ while all_tasks_finished == False:
     #if any jobs have failed, write them out to file
     failed_tasks=[]
     for task_out in task_out_names:
-        line = subprocess.check_output(['tail', '-1', task_out]).strip()
+        line = subprocess.check_output(['tail', '-1', task_out], encoding='utf8').strip()
         if line != 'DONE':
             failed_tasks.append(task_out)
 
@@ -213,17 +206,17 @@ while all_tasks_finished == False:
 
 end = time.time()
 
-#remove default .out files generated in submit directory (don't know why these are created --> probably to do  with calling srun...)
+#remove default .out files generated in submit directory (don't know why these are created --> probably to do with calling srun...)
 for f in glob.glob("%s/*.out"%(submit_dir)):
     os.remove(f)
 
-#remove default .out file generated in working directory (don't know why this is created --> probably to do  with calling srun...)
+#remove default .out file generated in working directory (don't know why this is created --> probably to do with calling srun...)
 for f in glob.glob("%s/*.out"%(working_directory)):
     os.remove(f)
 
 if len(failed_tasks) == 0:
-    print 'ALL INTERPOLATIONS COMPLETED SUCCESSFULLY IN %s MINUTES'%((end-start)/60.)
+    print('ALL INTERPOLATIONS COMPLETED SUCCESSFULLY IN %s MINUTES'%((end-start)/60.))
 else:
-    print '%s INTERPOLATIONS FINISHED SUCCESSFULLY IN %s MINUTES'%(N_tasks-len(failed_tasks),(end-start)/60.)
-    print 'THE FOLLOWING INTERPOLATIONS FAILED:'
-    print failed_tasks
+    print('%s INTERPOLATIONS FINISHED SUCCESSFULLY IN %s MINUTES'%(N_tasks-len(failed_tasks),(end-start)/60.))
+    print('THE FOLLOWING INTERPOLATIONS FAILED:')
+    print(failed_tasks)

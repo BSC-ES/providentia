@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 #WRITTEN BY DENE BOWDALO
 
 ###------------------------------------------------------------------------------------###
@@ -237,9 +234,9 @@ class convert_units(object):
 
         '''check if input quantity is same as output quantity'''
 
-        #print 'cleaned units are: {} --> {}'.format(self.input_cleaned_units,self.output_cleaned_units)
-        #print 'reference units are: {} --> {}'.format(self.input_reference_units,self.output_reference_units)
-        #print 'standard units are: {} --> {}'.format(self.input_standard_units,self.output_standard_units)
+        #print('cleaned units are: {} --> {}'.format(self.input_cleaned_units,self.output_cleaned_units))
+        #print('reference units are: {} --> {}'.format(self.input_reference_units,self.output_reference_units))
+        #print('standard units are: {} --> {}'.format(self.input_standard_units,self.output_standard_units))
         
         #get SI quantities that are represented by input/output units
         self.input_represented_quantity = self.get_quantity_representation(self.input_reference_units)
@@ -286,7 +283,6 @@ class convert_units(object):
                     return    
             
             #if do not valid input quantities for one of the formula return error message
-            print formula_quantities
             self.error_message = 'Do not have correct input quantities to calculate desired output quantity'
             return 1+'a'
              
@@ -478,7 +474,6 @@ class convert_units(object):
                 scaling_factors_to_reference.append(1.0)
                 reference_units.append(self.SI_base_quantities[quantity]['base_units'])
                 standard_units.append(self.SI_base_quantities[quantity]['base_units'])
-                #print 1,  self.SI_base_quantities[quantity]['base_units']
             
             for equiv_unit in self.SI_base_quantities[quantity]['equiv_units']:
                 #does unit string contain one of the SI base equivalent units?
@@ -487,7 +482,6 @@ class convert_units(object):
                     scaling_factors_to_reference.append(1.0)
                     reference_units.append(self.SI_base_quantities[quantity]['base_units'])
                     standard_units.append(self.SI_base_quantities[quantity]['base_units'])
-                    #print 2, equiv_unit
         
             for prefix in self.standard_prefixes:
                 for prefix_variant in self.standard_prefixes[prefix]['units']:
@@ -497,7 +491,6 @@ class convert_units(object):
                         scaling_factors_to_reference.append(self.standard_prefixes[prefix]['factor']) 
                         reference_units.append(self.SI_base_quantities[quantity]['base_units'])
                         standard_units.append(self.standard_prefixes[prefix]['standard_units']+self.SI_base_quantities[quantity]['base_units'])
-                        #print 3, prefix_variant+self.SI_base_quantities[quantity]['base_units']
                 
                     for equiv_unit in self.SI_base_quantities[quantity]['equiv_units']:
                         #does unit string contain one of the SI base equivalent units + prefix?
@@ -506,7 +499,6 @@ class convert_units(object):
                             scaling_factors_to_reference.append(self.standard_prefixes[prefix]['factor']) 
                             reference_units.append(self.SI_base_quantities[quantity]['base_units'])
                             standard_units.append(self.standard_prefixes[prefix]['standard_units']+self.SI_base_quantities[quantity]['base_units'])
-                            #print 4, prefix_variant+equiv_unit
             
         #SI derived equivalent units
         for quantity in self.SI_derived_quantities:
@@ -517,7 +509,6 @@ class convert_units(object):
                     scaling_factors_to_reference.append(1.0)
                     reference_units.append(self.SI_derived_quantities[quantity]['base_units'])
                     standard_units.append(self.SI_derived_quantities[quantity]['standard_units'])
-                    #print 5, equiv_unit
             
                 for prefix in self.standard_prefixes:
                     for prefix_variant in self.standard_prefixes[prefix]['units']:
@@ -527,7 +518,6 @@ class convert_units(object):
                             scaling_factors_to_reference.append(self.standard_prefixes[prefix]['factor'])
                             reference_units.append(self.SI_derived_quantities[quantity]['base_units'])
                             standard_units.append(self.standard_prefixes[prefix]['standard_units']+self.SI_derived_quantities[quantity]['standard_units'])
-                            #print 6, prefix_variant+equiv_unit
             
         #non-SI units
         for quantity in self.non_SI_quantities:
@@ -542,7 +532,6 @@ class convert_units(object):
                             reference_units.append(self.SI_base_quantities[quantity]['base_units'])
                         except:
                             reference_units.append(self.SI_derived_quantities[quantity]['base_units'])
-                        #print 7, unit
                         
                         
                     for prefix in self.standard_prefixes:
@@ -559,13 +548,11 @@ class convert_units(object):
                                     reference_units.append(self.SI_base_quantities[quantity]['base_units'])
                                 except:
                                     reference_units.append(self.SI_derived_quantities[quantity]['base_units'])
-                                #print 8, prefix_variant+unit
-         
          
         #sort match list by length of string (biggest first), then alphabetically
         #sort scaling factors/unit lists with match list 
         xyzs= zip(match_list, scaling_factors_to_reference, reference_units, standard_units)
-        xyzs.sort(key=lambda item: (-len(item[0]), item[0]))
+        xyzs = sorted(xyzs, key=lambda item: (-len(item[0]), item[0]))
         match_list = [x for x, y, z, s in xyzs]
         scaling_factors_to_reference = [y for x, y, z, s in xyzs]
         reference_units = [z for x, y, z, s in xyzs]
@@ -593,12 +580,12 @@ class convert_units(object):
             #only proceed if match still exists in cut original units
             if match in cut_units:
                 #get all inds of match occurances in unit_string
-                match_inds = [i for i in range(len(units)) if units.startswith(match, i)]
+                match_inds = [i for i in list(range(len(units))) if units.startswith(match, i)]
                 #iterate through match inds, if ind not already part of another distinct unit string then proceed
                 for match_ind in match_inds:
                     if any(match_ind in x for x in separate_unit_inds) == False:
                         #get range of inds for each separate unit match, related to the original string
-                        valid_inds = range(match_ind, match_ind+len(match))
+                        valid_inds = list(range(match_ind, match_ind+len(match)))
                         separate_unit_inds.append(valid_inds)
                         scaling_factor_inds.append(mm)
                         cut_units = cut_units.replace(match,'')
@@ -618,7 +605,7 @@ class convert_units(object):
         #sort each of list indices by first integer in each list
         #sort scaling factors/unit lists equivalently
         xyzs = zip(separate_unit_inds, scaling_factors_to_reference, reference_units, standard_units)
-        xyzs.sort(key=lambda x: x[0][0])
+        xyzs = sorted(xyzs, key=lambda x: x[0][0])
         separate_unit_inds = [x for x, y, z, s in xyzs]
         scaling_factors_to_reference = [y for x, y, z, s in xyzs]  
         reference_units = [z for x, y, z, s in xyzs] 
@@ -635,7 +622,7 @@ class convert_units(object):
             #do not test on first iteration (don't have prev list)
             if ii != 0:
                 if (current_list_start - prev_list_end) > 1:
-                    missing_inds = range(prev_list_end+1,current_list_start)
+                    missing_inds = list(range(prev_list_end+1,current_list_start))
                     #get exponent
                     exponent = ''
                     for m_i in missing_inds:
@@ -666,7 +653,7 @@ class convert_units(object):
             #if last element, get difference between len of original unit string and ind+1, append ind differences
             if ii == (len(separate_unit_inds)-1):
                 if (prev_list_end+1) != len(units):
-                    missing_inds = range(prev_list_end+1,len(units))
+                    missing_inds = list(range(prev_list_end+1,len(units)))
                     #get exponent
                     exponent = ''
                     for m_i in missing_inds:
