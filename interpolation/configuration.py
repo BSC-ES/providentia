@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-#WRITTEN BY DENE BOWDALO
-
-###------------------------------------------------------------------------------------###
-###------------------------------------------------------------------------------------###
-
 #define date range to process
 start_date = '201001' #YYYYMM   START FROM THIS POINT 
 end_date =   '201901' #YYYYMM   GO UP TO THIS POINT    
