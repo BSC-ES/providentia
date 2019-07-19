@@ -1,13 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 #WRITTEN BY DENE BOWDALO
 
 ###------------------------------------------------------------------------------------###
 ###IMPORT MODULES
 ###------------------------------------------------------------------------------------###
 
-import __builtin__
 from calendar import monthrange
 import cartopy.crs as ccrs
 import glob
@@ -28,7 +24,7 @@ import unit_converter
 
 def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth):
 
-    print 'Interpolating in %s'%(yearmonth)
+    print('Interpolating in %s'%(yearmonth))
 
     #get year/month string
     year = yearmonth[:4]
@@ -75,7 +71,7 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
             mod_nc_root = Dataset(model_file)
             
             #get all variable names in file
-            mod_nc_varnames = mod_nc_root.variables.keys()
+            mod_nc_varnames = list(mod_nc_root.variables.keys())
 
             #get instance of species variable
             mod_speci_obj = mod_nc_root[speci_to_process]
@@ -92,7 +88,7 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
         except:
             #if have got to last file of month and that is corrupted, return from function
             if model_file_ii == (len(model_files)-1):
-                print '------ All model files corrupted in %s. Skipping month.'%(yearmonth)
+                print('------ All model files corrupted in %s. Skipping month.'%(yearmonth))
                 return
             #else, continue to next file in month
             else:
@@ -119,23 +115,23 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
                 z_index = -1
             #if cannot determine a surface index, terminate process
             else: 
-                print 'Cannot determine surface index in vertical dimension. Terminating process.'
+                print('Cannot determine surface index in vertical dimension. Terminating process.')
                 sys.exit()
 
         #check if species grid dimensions are named correctly, and in correct BSC standard order, if not terminate process
         #this is done by checking the variable names of the x, y (and z if required) dimensions
         #X dimension is valid if 'lon' is contained within name, or is == 'x'
         if ('lon' not in x_varname) & (x_varname != 'x'):
-           print 'X dimension incorrectly named. Terminating process.'
+           print('X dimension incorrectly named. Terminating process.')
            sys.exit()
         #Y dimension is valid if 'lat' is contained within name, or is == 'y'
         if ('lat' not in y_varname) & (y_varname != 'y'):
-           print 'Y dimension incorrectly named. Terminating process.'
+           print('Y dimension incorrectly named. Terminating process.')
            sys.exit()
         #Z dimension is valid if == 'z' or 'lev' or 'alt'
         if len(mod_speci_obj.shape) == 4:
             if (z_varname != 'lev') & (z_varname != 'z') & (z_varname != 'alt'):
-                print 'Z dimension incorrectly named. Terminating process.'
+                print('Z dimension incorrectly named. Terminating process.')
                 sys.exit()
 
         #get instances of x/y grid dimension variables
@@ -153,11 +149,11 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
         #check if species grid centre coordinate are named correctly, and in correct BSC standard order, if not terminate process
         #longitude coordinate is valid if 'lon' is contained within name
         if ('lon' not in lon_centre_varname):
-            print 'Longitude grid centre coordinate incorrectly named. Terminating process.'
+            print('Longitude grid centre coordinate incorrectly named. Terminating process.')
             sys.exit()
         #latitude coordinate is valid if 'lat' is contained within name
         if ('lat' not in lat_centre_varname):
-            print 'Latitude grid centre coordinate incorrectly named. Terminating process.'
+            print('Latitude grid centre coordinate incorrectly named. Terminating process.')
             sys.exit()
 
         #get longitude and latitude grid centre values
@@ -330,7 +326,7 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
 
     #the grid type cannot be handled, therefore terminate process
     else:
-        print 'Cannot handle grid of type: %s. Terminating process'%(mod_grid_type)
+        print('Cannot handle grid of type: %s. Terminating process'%(mod_grid_type))
         sys.exit()
 
     #close model netcdf - now have all neccessary grid information
@@ -349,8 +345,8 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
             mod_nc_root = Dataset(model_file)
 
             #check if have time dimension in daily file, if do not, do not process file
-            if 'time' not in mod_nc_root.dimensions.keys():
-                print '------ File %s is corrupt. Skipping.'%(model_file)
+            if 'time' not in list(mod_nc_root.dimensions.keys()):
+                print('------ File %s is corrupt. Skipping.'%(model_file))
                 continue 
 
             #get day of month from filename
@@ -393,7 +389,7 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
             mod_nc_root.close()
 
         except:
-            print '------ File %s is corrupt. Skipping.'%(model_file)
+            print('------ File %s is corrupt. Skipping.'%(model_file))
 
     #for monthly resolution output case, now take average and set output time array
     if temporal_resolution_to_output == 'monthly':
@@ -614,11 +610,8 @@ def n_nearest_neighbour_inverse_distance_weights(obs_lons,obs_lats,mod_lons_cent
 ###------------------------------------------------------------------------------------###
 ###------------------------------------------------------------------------------------###
 
-#get command line arguments variables passed upon execution, as well as working directory where user submitted interpolation job (where local configuration and experiment dictionaries are stored)
-experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth, working_directory = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8]
-
-#add working directory as first element in python path
-sys.path.insert(0, working_directory)
+#get command line arguments variables passed upon execution
+experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7]
 
 #read defined experiments dictionary
 from defined_experiments import defined_experiments_dictionary
@@ -626,4 +619,4 @@ from defined_experiments import defined_experiments_dictionary
 #pass variables to interpolation function and do interpolation 
 process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth)
 
-print 'DONE'
+print('DONE')
