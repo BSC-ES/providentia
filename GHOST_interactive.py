@@ -43,6 +43,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 import scipy.stats
 import seaborn as sns
 
+#TEMPORARY FIX FOR ISSUE WITH PYTHON CERTIFICATES
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -571,10 +572,12 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             #set initially selected/active start-end date as default 201601-201701
             self.le_start_date.setText('20160101')
             self.le_end_date.setText('20170101')
-            self.selected_start_date = self.le_start_date.text()
-            self.selected_end_date = self.le_end_date.text()
-            self.active_start_date = self.le_start_date.text()
-            self.active_end_date = self.le_end_date.text()
+            self.selected_start_date = int(self.le_start_date.text())
+            self.selected_end_date = int(self.le_end_date.text())
+            self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
+            self.active_start_date = int(self.le_start_date.text())
+            self.active_end_date = int(self.le_end_date.text())
+            self.date_range_has_changed = False
 
             #set initially selected minimum data availability % to 0.0
             self.le_minimum_data_availability.setText('0.0')
@@ -590,8 +593,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             self.active_species = None
 
             #set selected/active values of variables associated with pop up windows to be empty lists
-            self.previous_available_experiments = np.array([])
-            self.active_experiments = []  
+            self.active_experiment_grids = []  
             self.active_qa_inds = []
             self.active_flag_inds = []  
             self.active_classifications_to_retain_inds = []
@@ -600,18 +602,16 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             #set initial time array to be None
             self.time_array = None      
 
-            #set initial station references to be None
-            self.station_references = None
+            #set initial station references to be empty list
+            self.station_references = []
+            #set initial unique station methods to be empty list
+            self.station_unique_methods = [] 
         
             #--------------------------------------------------------------------------------------#
-            #gather available observational data
-            #create nested dictionary storing available observational species data by species matrix, by temporal resolution, by network in set date range
+            #gather all observational data
+            #create nested dictionary storing all observational species data by species matrix, by temporal resolution, by network, associated with list of start YYYYMM yearmonths of data files
 
-            self.available_observation_data = {}
-
-            #set needed date range information as type int 
-            selected_start_date_firstdayofmonth = int(self.selected_start_date[:6]+'01')
-            selected_end_date = int(self.selected_end_date) 
+            self.all_observation_data = {}
 
             #set all available networks
             available_networks = ['EBAS','EIONET']
@@ -622,112 +622,43 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             #iterate through available networks
             for network in available_networks:
 
+                self.all_observation_data[network] = {}
+
                 #iterate through available resolutions
                 for resolution in available_resolutions:
+
+                    #write nested empty dictionary for resolution
+                    self.all_observation_data[network][resolution] = {}
 
                     #get available species for network/resolution
                     available_species = os.listdir('%s/%s/%s'%(self.obs_root, network, resolution))
 
                     #iterate through available files per species
-                    for species_count, species in enumerate(available_species):   
-
-                        if species_count == 0:
-                            #write nested empty dictionary for network
-                            self.available_observation_data[network] = {}
-
-                            #write nested empty dictionary for resolution
-                            self.available_observation_data[network][resolution] = {}
+                    for species in available_species:   
 
                         #get all netCDF monthly files per species
-                        species_files = os.listdir('%s/%s/%s/%s'%(self.obs_root, network, resolution, speci))
+                        species_files = os.listdir('%s/%s/%s/%s'%(self.obs_root, network, resolution, species))
 
                         #get monthly start date (YYYYMM) of all species files
-                        species_files_yearmonths = [f.split('_')[-1][:6] for f in files if f != 'temporary'] 
+                        species_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in species_files if f != 'temporary'] 
 
                         #get matrix for current species
                         matrix = parameter_dictionary[species]['matrix']
             
-                        if matrix not in list(self.available_observation_data[network][resolution].keys()):
+                        if matrix not in list(self.all_observation_data[network][resolution].keys()):
                             #write nested empty dictionary for matrix
-                            self.available_observation_data[network][resolution][matrix] = {}                            
+                            self.all_observation_data[network][resolution][matrix] = {}                            
 
                         #write nested dictionary for species, with associated file yearmonths
-                        self.available_observation_data[network][resolution][matrix][species] = species_files_yearmonths
+                        self.all_observation_data[network][resolution][matrix][species] = species_files_yearmonths
 
-                        
-
-                
-                #iterate through available files per species and limit species to just those with files in set date range
-
-                    for species_file_yearmonth in species_files_yearmonth:
-                        if (species_file_yearmonth >= selected_start_date_firstdayofmonth) & (species_file_yearmonth < selected_end_date):           
-                            valid_species.append(species)
-                            break
+            #create dictionary of observational data inside date range
+            self.get_valid_obs_files_in_date_range()
 
         #--------------------------------------------------------------------------------------#
-        #gather available experiment data
-        #create nested dictionary storing available experiment-grid names by temporal resolution, by species, by network in set date range
-    
-        self.available_experiment_data = {}
-
-        #get all different experiment names
-        #available_experiments = sorted([dir.split('/')[-1] for dir in glob.glob('%s/*'%(self.exp_root))])
-        available_experiments = ['a1wd']
-          
-        #iterate through available experiments
-        for experiment in available_experiments:
-
-            print(experiment)           
- 
-            #get all available grid types by experiment 
-            available_grids = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/*'%(self.exp_root,experiment))])
-
-            #iterate through all available grids
-            for grid in available_grids:
-
-                #create string of combined current experiment and grid
-                experiment_grid = '%s-%s'%(experiment,grid)
-                
-                #get all available resolutions for experiment/grid
-                available_resolutions = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/%s/*'%(self.exp_root,experiment,grid))])
-                
-                #iterate trough all available resolutions
-                for resolution in available_resolutions:
-                    
-                    #get all available species for experiment/grid/resolution
-                    available_species = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/%s/%s/*'%(self.exp_root,experiment,grid,resolution))])
-                    
-                    #iterate through available species    
-                    for species in available_species:
-                        
-                        #get all available networks for experiment/grid/resolution/species
-                        available_networks = sorted([dir.split('/')[-1] for dir in glob.glob('%s/%s/%s/%s/%s/*'%(self.exp_root,experiment,grid,resolution,species))])
-                            
-                        #iterate through available files per network and limit networks to just those with files in set date range
-                        valid_networks = []
-                        for network in available_networks:              
-                            network_files = sorted(glob.glob('%s/%s/%s/%s/%s/%s/*.nc'%(self.exp_root,experiment,grid,resolution,species,network)))
-                            network_files_yearmonth = [int(network_file.split('%s_'%(species))[-1].split('.nc')[0]+'01') for network_file in network_files]
-                            for network_file_yearmonth in network_files_yearmonth:
-                                if (network_file_yearmonth >= selected_start_date_firstdayofmonth) & (network_file_yearmonth < selected_end_date):           
-                                    valid_networks.append(network)
-                                    break
-                
-                        #if have some networks with valid associated files, write network names to available experiment data dictionary
-                        for network in valid_networks:
-                                      
-                            #check if have written specific resolution previously to data dictionary, if not write it   
-                            if resolution not in list(self.available_experiment_data.keys()):
-                                self.available_experiment_data[resolution] = {}
-                            #check if have written specific species previously to data dictionary, if not write it   
-                            if species not in list(self.available_experiment_data[resolution].keys()):
-                                self.available_experiment_data[resolution][species] = {}
-                            
-                            #for each valid network associate current experiment-grid string name
-                            if network not in list(self.available_experiment_data[resolution][species].keys()):
-                                self.available_experiment_data[resolution][species][network] = [experiment_grid]
-                            else:
-                                self.available_experiment_data[resolution][species][network].append(experiment_grid)
+        #if date range has changed then update available observational data dictionary 
+        if self.date_range_has_changed == True:
+             self.get_valid_obs_files_in_date_range()
 
         #--------------------------------------------------------------------------------------#
         #initialise/update fields - maintain previously selected values wherever possible
@@ -737,7 +668,6 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.cb_resolution.clear()
         self.cb_matrix.clear()
         self.cb_species.clear()
-        self.available_experiments = np.array([], dtype=np.object) 
         
         #if have no available observational data, return from function, updating variable informing that have no data 
         if len(self.available_observation_data) == 0:
@@ -774,42 +704,17 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             self.selected_matrix = self.cb_matrix.currentText()
 
         #update species field
-        previous_selected_species = self.selected_species
-        available_species = self.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()][self.cb_matrix.currentText()]
+        available_species = sorted(self.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()][self.cb_matrix.currentText()])
         self.cb_species.addItems(available_species)
         if self.selected_species in available_species:
             self.cb_species.setCurrentText(self.selected_species) 
         if self.config_bar_initialisation == True:
-            self.selected_species = self.cb_species.currentText()
-
-        #update available experiments 
-        #add in try/except to catch for when no experiments are available
-        try:
-            self.available_experiments = np.array(self.available_experiment_data[self.cb_resolution.currentText()][self.cb_species.currentText()][self.cb_network.currentText()], dtype=np.object)
-        except:   
-            self.available_experiments = np.array([], dtype=np.object)  
-
-        #update selected indices for experiments  
-        #for experiments, keep previously selected values selected if still available
-        #update previously selected experiments variable
-        previous_selected_experiments = self.previous_available_experiments[self.selected_indices['EXPERIMENTS'][0]]
-        #set selected indices as previously selected indices in current available list of experiments
-        selected_experiments = [previous_selected_experiment for previous_selected_experiment in previous_selected_experiments if previous_selected_experiment in self.available_experiments]
-        selected_experiment_inds = np.array([np.where(self.available_experiments == selected_experiment)[0][0] for selected_experiment in selected_experiments], dtype=np.uint8)
-        self.selected_indices['EXPERIMENTS'] = [selected_experiment_inds]     
+            self.selected_species = self.cb_species.currentText()  
 
         #update selected indices for QA
         #if initialising config bar then check default selection
         if self.config_bar_initialisation == True:
             self.selected_indices['QA'] = [self.qa_default_inds]
-         
-        #update selected indices for measurement methods 
-        #automatically re-select all methods upon selected species change
-        #if self.selected_species != previous_selected_species:
-        #    self.selected_indices['METHODS'] = [[]]    
-
-        #set previous available experiments variable   
-        self.previous_available_experiments = np.array(self.available_experiments)
 
         #unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -817,17 +722,45 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
     
-    def get_valid_files_in_date_range(self):
+    def get_valid_obs_files_in_date_range(self):
         
-        '''define function that returns '''
+        '''define function that iterates through observational dictionary tree and returns a dictionary of available data in the selected date range'''
 
+        #create dictionary to store available observational data
+        self.available_observation_data = {}
+
+        #iterate through networks
+        for network in list(self.all_observation_data.keys()):
+            #iterate through resolutions
+            for resolution in list(self.all_observation_data[network].keys()):
+                #iterate through matrices
+                for matrix in list(self.all_observation_data[network][resolution].keys()):
+                    #iterate through species
+                    for species in list(self.all_observation_data[network][resolution][matrix].keys()):
+                        #get all file yearmonths associated with species
+                        species_file_yearmonths = self.all_observation_data[network][resolution][matrix][species]
+                        #get file yearmonths within date range
+                        valid_species_files_yearmonths = [ym for ym in species_file_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) & (ym < self.selected_end_date)]
+                        if len(valid_species_files_yearmonths) > 0:
+                            #if network not in dictionary yet, add it
+                            if network not in list(self.available_observation_data.keys()):
+                                self.available_observation_data[network] = {}
+                            #if resolution not in dictionary yet, add it
+                            if resolution not in list(self.available_observation_data[network].keys()):
+                                self.available_observation_data[network][resolution] = {}
+                            #if matrix not in dictionary yet, add it
+                            if matrix not in list(self.available_observation_data[network][resolution].keys()):
+                                self.available_observation_data[network][resolution][matrix] = {}
+                            #add species with associated list of file start yearmonths
+                            self.available_observation_data[network][resolution][matrix][species] = valid_species_files_yearmonths
+                            
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
 
     def config_bar_params_change_handler(self, changed_param):
 
         '''define function which handles interactive updates of combo box fields'''
-        
+
         if (changed_param != '') & (self.block_config_bar_handling_updates == False):
         
             #get event origin source
@@ -844,6 +777,9 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
 
+            #set variable to check if date range changes
+            self.date_range_has_changed = False
+
             #if have start date/end date have changed, make sure both have 8 characters (YYYYMMDD), are both numbers, and that end date is > start_date, before doing update of selection/fields
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
                 valid_date = False 
@@ -852,9 +788,11 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
                 if (len(selected_start_date) == 8) & (len(selected_end_date) ==  8):
                     if (selected_start_date.isdigit() == True) & (selected_end_date.isdigit() == True):
                         if int(selected_end_date) > int(selected_start_date):
-                            self.selected_start_date = selected_start_date
-                            self.selected_end_date = selected_end_date
+                            self.selected_start_date = int(selected_start_date)
+                            self.selected_end_date = int(selected_end_date)
+                            self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
                             valid_date = True
+                            self.date_range_has_changed = True
                 if valid_date == False:
                     return
                     
@@ -866,19 +804,71 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
     #define functions which generate pop up configuration windows for some fields
 
     def handle_pop_up_experiments_window(self):
-        self.experiments_window = pop_up_window(window_type='EXPERIMENTS', window_titles=['Select Experiment/s'], checkbox_labels=[self.available_experiments], default_checkbox_selection=[[]], selected_indices=self.selected_indices)
+
+        #gather available experiment data for selected network/resolution/species
+        #create dictionary storing available experiment-grid names associated with valid files in set date range
+        self.available_experiment_data = {}
+
+        #get all different experiment names
+        available_experiments = os.listdir('%s'%(self.exp_root))          
+
+        #iterate through available experiments
+        for experiment in available_experiments:      
+ 
+            #get all available grid types by experiment 
+            available_grids = os.listdir('%s/%s'%(self.exp_root,experiment))
+
+            #iterate through all available grids
+            for grid in available_grids:
+
+                #get all experiment netCDF files by experiment/grid/selected resolution/selected species/selected network
+                network_files = os.listdir('%s/%s/%s/%s/%s/%s'%(self.exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network))
+                #get start YYYYMM yearmonths of data files
+                network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files] 
+                #limit data files to just those within date range
+                valid_network_files_yearmonths = [ym for ym in network_files_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) & (ym < self.selected_end_date)]
+                #if have some valid data files for experiment-grid, add experiment grid (with associated yearmonths) to dictionary
+                if len(valid_network_files_yearmonths) > 0:
+                    self.available_experiment_data['%s-%s'%(experiment,grid)] = valid_network_files_yearmonths
+
+        #get list of available experiment-grid names
+        self.available_experiment_grids = np.array(sorted(list(self.available_experiment_data.keys())))
+
+        #update selected indices for experiments  
+        #for experiments, keep previously selected values selected if still available
+        #update previously selected experiments variable
+        if len(self.selected_indices['EXPERIMENTS'][0]) > 0:
+            previous_selected_experiments = self.previous_available_experiment_grids[self.selected_indices['EXPERIMENTS'][0]]
+        else:
+            previous_selected_experiments = []
+        #set selected indices as previously selected indices in current available list of experiments
+        selected_experiments = [previous_selected_experiment for previous_selected_experiment in previous_selected_experiments if previous_selected_experiment in self.available_experiment_grids]
+        selected_experiment_inds = np.array([np.where(self.available_experiment_grids == selected_experiment)[0][0] for selected_experiment in selected_experiments], dtype=np.uint8)
+        self.selected_indices['EXPERIMENTS'] = [selected_experiment_inds]   
+
+        #set previous available experiments variable   
+        self.previous_available_experiment_grids = np.array(self.available_experiment_grids)
+
+        #setup pop up window
+        self.experiments_window = pop_up_window(window_type='EXPERIMENTS', window_titles=['Select Experiment/s'], checkbox_labels=[self.available_experiment_grids], default_checkbox_selection=[[]], selected_indices=self.selected_indices)
 
     def handle_pop_up_flags_window(self):
+        #setup pop up window
         self.qa_window = pop_up_window(window_type='FLAGS', window_titles=['Select standardised data reporter provided flags to filter by'], checkbox_labels=[self.flag_names], default_checkbox_selection=[self.flag_default_inds], selected_indices=self.selected_indices)
 
     def handle_pop_up_qa_window(self):
+        #setup pop up window
         self.qa_window = pop_up_window(window_type='QA', window_titles=['Select standardised QA flags to filter by'], checkbox_labels=[self.qa_names], default_checkbox_selection=[self.qa_default_inds], selected_indices=self.selected_indices)
 
     def handle_pop_up_classifications_window(self):
+        #setup pop up window
         self.qa_window = pop_up_window(window_type='CLASSIFICATIONS', window_titles=['Select standardised classifications to retain','Select standardised classifications to remove'], checkbox_labels=[self.classification_names,self.classification_names], default_checkbox_selection=[self.classification_default_inds_to_retain,self.classification_default_inds_to_remove], selected_indices=self.selected_indices)
 
     def handle_pop_up_methods_window(self):
-        pass
+        #only proceed if have some valid stations in memory
+        if len(self.station_references) > 0:
+            #setup pop up window
+            self.qa_window = pop_up_window(window_type='METHODS', window_titles=['Select standardised measurement methodologies to retain'], checkbox_labels=[self.station_unique_methods], default_checkbox_selection=[np.arange(len(self.station_unique_methods), dtype=np.int)], selected_indices=self.selected_indices)
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
@@ -900,7 +890,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.previous_active_species = self.active_species  
         self.previous_active_start_date = self.active_start_date
         self.previous_active_end_date = self.active_end_date
-        self.previous_active_experiments = self.active_experiments
+        self.previous_active_experiment_grids = self.active_experiment_grids
         self.previous_active_qa_inds = self.active_qa_inds
         self.previous_active_flag_inds = self.active_flag_inds
         self.previous_active_classifications_to_retain_inds = self.active_classifications_to_retain_inds
@@ -913,12 +903,15 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.active_species = self.selected_species
         self.active_start_date = self.selected_start_date
         self.active_end_date = self.selected_end_date
-        self.active_experiments = self.available_experiments[self.selected_indices['EXPERIMENTS'][0]]
+        if len(self.selected_indices['EXPERIMENTS'][0]) > 0:
+            self.active_experiment_grids = self.available_experiment_grids[self.selected_indices['EXPERIMENTS'][0]]
+        else:
+            self.active_experiment_grids = []
         self.active_qa_inds = self.selected_indices['QA'][0]
         self.active_flag_inds = self.selected_indices['FLAGS'][0]
         self.active_classifications_to_retain_inds = self.selected_indices['CLASSIFICATIONS'][0]
         self.active_classifications_to_remove_inds = self.selected_indices['CLASSIFICATIONS'][1]
-
+        
         #--------------------------------------------------------------------#
         #determine what data (if any) needs to be read
 
@@ -975,11 +968,11 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
 
         #determine if any of the active experiments have changed 
         #remove experiments that are no longer selected from data_in_memory dictionary
-        experiments_to_remove = [experiment for experiment in self.previous_active_experiments if experiment not in self.active_experiments]
+        experiments_to_remove = [experiment for experiment in self.previous_active_experiment_grids if experiment not in self.active_experiment_grids]
         for experiment in experiments_to_remove:
             del self.data_in_memory[experiment]
         #any new experiments will need completely re-reading
-        experiments_to_read = [experiment for experiment in self.active_experiments if experiment not in self.previous_active_experiments]
+        experiments_to_read = [experiment for experiment in self.active_experiment_grids if experiment not in self.previous_active_experiment_grids]
         
         #has date range changed? 
         if (read_all == True) or (read_left == True) or (read_right == True) or (cut_left == True) or (cut_right == True):         
@@ -995,7 +988,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
                 #read observations
                 self.read_data('observations', self.active_start_date, self.active_end_date)    
                 #read selected experiments (iterate through)
-                for data_label in self.active_experiments:
+                for data_label in self.active_experiment_grids:
                     self.read_data(data_label, self.active_start_date, self.active_end_date)  
                     #if experiment in experiments_to_read list, remove it (as no longer need to read it)
                     if data_label in experiments_to_read:
@@ -1104,7 +1097,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         #else, generate combobox lists
         else:
             #set all experiment bias types
-            self.experiment_bias_types = np.array(['Aggregated','Total','Rank'])
+            self.experiment_bias_types = np.array(['Aggregated'])
             
             #initialise experiment bias comboboxes
             self.mpl_canvas.handle_experiment_bias_update()
@@ -1146,21 +1139,14 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             self.active_frequency_code = 'D'
         elif self.active_resolution == 'monthly':
             self.active_frequency_code = 'MS'
-        self.time_array = pd.date_range(start = datetime.datetime(int(self.active_start_date[:4]), int(self.active_start_date[4:6]), int(self.active_start_date[6:8])),end = datetime.datetime(int(self.active_end_date[:4]), int(self.active_end_date[4:6]), int(self.active_end_date[6:8])), freq = self.active_frequency_code)[:-1]
+        str_active_start_date = str(self.active_start_date)
+        str_active_end_date = str(self.active_end_date)
+        self.time_array = pd.date_range(start = datetime.datetime(int(str_active_start_date[:4]), int(str_active_start_date[4:6]), int(str_active_start_date[6:8])),end = datetime.datetime(int(str_active_end_date[:4]), int(str_active_end_date[4:6]), int(str_active_end_date[6:8])), freq = self.active_frequency_code)[:-1]
 
         #get all relevant observational files
-        relevant_files = sorted(glob.glob('%s/%s/%s/%s/*.nc'%(self.obs_root, self.active_network, self.active_resolution, self.active_species)))
-         
-        #limit data files to required date range
-        relevant_file_start_dates = [file.split('%s_'%(self.active_species))[-1].split('.nc')[0] for file in relevant_files]
-        #if files are given in monthly chunked files, add '01' string to date 
-        relevant_file_start_dates = [int(relevant_file_start_date+'01') if len(relevant_file_start_date) == 6 else int(relevant_file_start_date) for relevant_file_start_date in relevant_file_start_dates] 
-        first_valid_file_ind = bisect.bisect_right(relevant_file_start_dates, int(self.active_start_date))-1
-        last_valid_file_ind = bisect.bisect_left(relevant_file_start_dates, int(self.active_end_date))
-        if first_valid_file_ind == last_valid_file_ind:
-            relevant_files = [relevant_files[first_valid_file_ind-1]]   
-        else:
-            relevant_files = relevant_files[first_valid_file_ind:last_valid_file_ind] 
+        #relevant_files = sorted(glob.glob('%s/%s/%s/%s/*.nc'%(self.obs_root, self.active_network, self.active_resolution, self.active_species)))
+        file_root = '%s/%s/%s/%s/%s_'%(self.obs_root, self.active_network, self.active_resolution, self.active_species, self.active_species)
+        relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species]])       
 
         #redefine some key variables globally (for access by parallel netCDF reading functions)
         global time_array, active_species, selected_qa, selected_flags, selected_classifications_to_retain, selected_classifications_to_remove
@@ -1240,7 +1226,10 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         #get unique sorted station references across all files (make global, and also add to self)
         global station_references
         station_references, unique_indices = np.unique(all_read_metadata['station_reference'], return_index=True)
-        self.station_references = station_references
+        self.station_references = station_references  
+
+        #get standard measurement methodology per station
+        self.station_methods = np.array([ref.split('_')[-1] for ref in self.station_references]) 
 
         #for latitude/longitude/measurement altitude/GSFC coastline proximity variables, set static metadata variables (taking the first available value per station in the given time window)
         self.station_longitudes = all_read_metadata['longitude'][unique_indices]
@@ -1274,25 +1263,25 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         gc.collect()
  
         #set global process_type variable (for access by parallel read function)
+        #also get relevant file start dates 
         global process_type
         if data_label == 'observations':
             process_type = 'observations'
+            file_root = '%s/%s/%s/%s/%s_'%(self.obs_root, self.active_network, self.active_resolution, self.active_species, self.active_species)
+            relevant_file_start_dates = sorted(self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species])  
+
         else:
             process_type = 'experiment'
-     
-        #get all relevant observational/experiment files 
-        if process_type == 'observations':
-            relevant_files = sorted(glob.glob('%s/%s/%s/%s/*.nc'%(self.obs_root, self.active_network, self.active_resolution, self.active_species)))
-        elif process_type == 'experiment':
             experiment_grid_split = data_label.split('-')
             active_experiment = experiment_grid_split[0]
-            active_grid = experiment_grid_split[1]      
-            relevant_files = sorted(glob.glob('%s/%s/%s/%s/%s/%s/*.nc'%(self.exp_root, active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network)))
+            active_grid = experiment_grid_split[1]  
+            file_root = '%s/%s/%s/%s/%s/%s/%s_'%(self.exp_root, active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network, self.active_species)
+            relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 
-        #limit data files to required date range to read
-        #if files are given in monthly chunked files, add '01' string file start date 
-        relevant_file_start_dates = [file.split('%s_'%(self.active_species))[-1].split('.nc')[0] for file in relevant_files]        
-        relevant_file_start_dates = [int(relevant_file_start_date+'01') if len(relevant_file_start_date) == 6 else int(relevant_file_start_date) for relevant_file_start_date in relevant_file_start_dates] 
+        #create list of relevant files to read
+        relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in relevant_file_start_dates]     
+
+        #limit data files to required date range to read (i.e. taking care not to re-read what has already been read)
         first_valid_file_ind = bisect.bisect_right(relevant_file_start_dates, int(start_date_to_read))
         if first_valid_file_ind != 0:
             first_valid_file_ind = first_valid_file_ind - 1 
@@ -1595,6 +1584,7 @@ class MPL_Canvas(FigureCanvas):
             self.temporal_aggregation_resolutions = ['month']
 
         #reset relative index lists of selected station on map as empty lists
+        self.previous_relative_selected_station_inds = np.array([],dtype=np.int) 
         self.relative_selected_station_inds = np.array([],dtype=np.int) 
         self.absolute_selected_station_inds = np.array([],dtype=np.int)
 
@@ -1672,7 +1662,8 @@ class MPL_Canvas(FigureCanvas):
         #colocate data (if necessary) 
         self.colocate_data()
 
-        #get intersect of indices of stations with >= % minimum data availability percent, and indices of stations with > 1 valid measurements ,in all observational data arrays (colocated and non-colocated)
+        #get intersect of indices of stations with >= % minimum data availability percent, and with > 1 valid measurements ,in all observational data arrays (colocated and non-colocated)
+        #then subset these indices with standard methods == selected methods, 
         #iterate through all data arrays
         for data_label in list(self.read_instance.data_in_memory_filtered.keys()): 
 
@@ -1690,7 +1681,18 @@ class MPL_Canvas(FigureCanvas):
                 valid_station_indices_absolute = np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
 
                 #get indices of valid stations in intersect of valid_station_indices_percent and valid_station_indices_absolute
-                valid_station_indices = np.intersect1d(valid_station_indices_percent, valid_station_indices_absolute)
+                valid_station_indices_availability = np.intersect1d(valid_station_indices_percent, valid_station_indices_absolute)
+
+                #get unique standard measurement methodologies across stations 
+                self.read_instance.previous_station_unique_methods = copy.deepcopy(self.read_instance.station_unique_methods)
+                self.read_instance.station_unique_methods = np.unique(self.read_instance.station_methods[valid_station_indices_availability])
+                #if are reading new data into memory and unique methods have changed from previous, update all methods to be checked by default
+                if (np.array_equal(self.read_instance.previous_station_unique_methods, self.read_instance.station_unique_methods) == False) & (self.read_instance.block_MPL_canvas_updates == True):
+                    self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
+
+                #get indices of subset stations which use checked standard methodologies
+                checked_methods = self.read_instance.station_unique_methods[self.read_instance.selected_indices['METHODS'][0]]
+                valid_station_indices = valid_station_indices_availability[np.isin(self.read_instance.station_methods[valid_station_indices_availability], checked_methods)]
 
                 #save valid station indices with data array
                 self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_indices
@@ -1732,6 +1734,10 @@ class MPL_Canvas(FigureCanvas):
 
             #update plotted map z statistic
             self.update_map_z_statisitic()
+
+            #if selected stations have changed from previous selected, update associated plots
+            if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) == False:
+                self.update_associated_selected_station_plots()
 
             #draw changes
             self.draw()
@@ -1859,6 +1865,7 @@ class MPL_Canvas(FigureCanvas):
             self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
             self.read_instance.block_MPL_canvas_updates = False
             #clear previously selected relative/absolute station indices
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
             self.relative_selected_station_inds = np.array([],dtype=np.int)
             self.absolute_selected_station_inds = np.array([],dtype=np.int)
 
@@ -1873,6 +1880,7 @@ class MPL_Canvas(FigureCanvas):
                 self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.block_MPL_canvas_updates = False
                 #reset relative/absolute selected station indices to be empty lists
+                self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
                 self.relative_selected_station_inds = np.array([],dtype=np.int)
                 self.absolute_selected_station_inds = np.array([],dtype=np.int)
 
@@ -2442,6 +2450,31 @@ class MPL_Canvas(FigureCanvas):
             #change axis tick labels
             aggregation_dict[temporal_aggregation_resolution]['ax'].tick_params(labelsize=8.0)
 
+        #------------------------------------------------------------------------------------------------#
+        #plot title (with units)
+        
+        #create title string to plot (based on type of statistic plotting)
+        if selected_stat not in self.read_instance.basic_z_stats:
+            stats_dict = experiment_bias_stats_dict[selected_stat]
+            plot_title = 'Experiment %s'%(stats_dict['label'])
+        else:
+            stats_dict = basic_stats_dict[selected_stat]
+            if selected_stat != 'Data %':
+                title_units = ' (%s)'%(self.read_instance.measurement_units)
+            else:
+                title_units = ''
+            plot_title = 'Experiment %s bias%s'%(stats_dict['label'], title_units)
+
+        #if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis 
+        if self.read_instance.active_resolution == 'hourly':
+            self.exp_bias_hours_ax.set_title(plot_title, fontsize=8.0, weight='light', loc='left') 
+        #otherwise, plot the units on the monthly aggregation axis
+        else:    
+            self.exp_bias_months_ax.set_title(plot_title, fontsize=8.0, weight='light', loc='left') 
+
+        #get value/s of minimum bias for statistic
+        minimum_bias = stats_dict['minimum_bias']
+
         #------------------------------------------------------------------------------------------------# 
         #now, make experiment bias plots for active bias statistic for all relevant temporal aggregation resolutions       
 
@@ -2467,30 +2500,9 @@ class MPL_Canvas(FigureCanvas):
                 aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticks(aggregation_dict[temporal_aggregation_resolution]['xticks'])
                 aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticklabels([temporal_axis_mapping_dict[temporal_aggregation_resolution][xtick] for xtick in aggregation_dict[temporal_aggregation_resolution]['xticks']])
                 
-            #plot horizontal line across x axis at 0 (to show zero bias)
-            aggregation_dict[temporal_aggregation_resolution]['ax'].axhline(y=0, linestyle='--', linewidth=1.0, color='black', zorder=0)
-            
-        #------------------------------------------------------------------------------------------------#
-        #plot title (with units)
-        
-        #create title string to plot (based on type of statistic plotting)
-        if selected_stat not in self.read_instance.basic_z_stats:
-            stats_dict = experiment_bias_stats_dict[selected_stat]
-            plot_title = 'Experiment %s'%(stats_dict['label'])
-        else:
-            stats_dict = basic_stats_dict[selected_stat]
-            if selected_stat != 'Data %':
-                title_units = ' (%s)'%(self.read_instance.measurement_units)
-            else:
-                title_units = ''
-            plot_title = 'Experiment %s bias%s'%(stats_dict['label'], title_units)
-
-        #if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis 
-        if self.read_instance.active_resolution == 'hourly':
-            self.exp_bias_hours_ax.set_title(plot_title, fontsize=8.0, weight='light', loc='left') 
-        #otherwise, plot the units on the monthly aggregation axis
-        else:    
-            self.exp_bias_months_ax.set_title(plot_title, fontsize=8.0, weight='light', loc='left') 
+            #plot horizontal line/s across x axis at value/s of minimum experiment bias
+            for mb in minimum_bias:
+                aggregation_dict[temporal_aggregation_resolution]['ax'].axhline(y=mb, linestyle='--', linewidth=1.0, color='black', zorder=0)
 
         #------------------------------------------------------------------------------------------------#
         #as are re-plotting on experiment bias axes, reset the navigation toolbar stack dictionaries entries associated with each of the axes 
@@ -2949,7 +2961,7 @@ class MPL_Canvas(FigureCanvas):
                 selected_experiment_bias_type = self.read_instance.cb_experiment_bias_type.currentText()
                 selected_experiment_bias_stat = self.read_instance.cb_experiment_bias_stat.currentText()
 
-                #update experiment bias statistics (used for Aggregated and Total fields), to all basic stats if colocation not-active, and basic+bias stats if colocation active
+                #update experiment bias statistics (used for Aggregated field), to all basic stats if colocation not-active, and basic+bias stats if colocation active
                 if self.colocate_active == False:
                     available_experiment_bias_stats = copy.deepcopy(self.read_instance.basic_z_stats)
                 else:
@@ -3013,7 +3025,7 @@ class MPL_Canvas(FigureCanvas):
         if self.read_instance.block_MPL_canvas_updates == False:
 
             #make copy of current full array relative selected stations indices, before selecting new ones
-            previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
     
             #check if checkbox to select all stations is checked or unchecked   
             check_state = self.read_instance.ch_select_all.checkState()
@@ -3039,7 +3051,7 @@ class MPL_Canvas(FigureCanvas):
             self.update_map_station_selection() 
 
             #if selected stations have changed from previous selected, update associated plots
-            if np.array_equal(previous_relative_selected_station_inds, self.relative_selected_station_inds) == False:
+            if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) == False:
                 self.update_associated_selected_station_plots()
 
             #draw changes
@@ -3055,7 +3067,7 @@ class MPL_Canvas(FigureCanvas):
         if self.read_instance.block_MPL_canvas_updates == False:
 
             #make copy of current full array relative selected stations indices, before selecting new ones
-            previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
             #check if checkbox to select intersection of stations is checked or unchecked   
             check_state = self.read_instance.ch_intersect.checkState()
@@ -3093,7 +3105,7 @@ class MPL_Canvas(FigureCanvas):
             self.update_map_station_selection() 
 
             #if selected stations have changed from previous selected, update associated plots
-            if np.array_equal(previous_relative_selected_station_inds, self.relative_selected_station_inds) == False:
+            if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) == False:
                 self.update_associated_selected_station_plots()
 
             #draw changes
@@ -3114,7 +3126,7 @@ class MPL_Canvas(FigureCanvas):
         self.map_already_updated = True
 
         #make copy of current full array relative selected stations indices, before selecting new ones
-        previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+        self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
         #get absolute selected index of station on map 
         self.absolute_selected_station_inds = np.array([event.ind[0]], dtype=np.int)
@@ -3126,7 +3138,7 @@ class MPL_Canvas(FigureCanvas):
         self.update_map_station_selection()
 
         #if selected stations have changed from previous selected, update associated plots
-        if np.array_equal(previous_relative_selected_station_inds, self.relative_selected_station_inds) == False:
+        if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) == False:
             self.update_associated_selected_station_plots()
 
         #draw changes
@@ -3153,7 +3165,7 @@ class MPL_Canvas(FigureCanvas):
             return
 
         #make copy of current full array relative selected stations indices, before selecting new ones
-        previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+        self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
         #get coordinates of drawn lasso
         lasso_path = Path(verts)
@@ -3175,7 +3187,7 @@ class MPL_Canvas(FigureCanvas):
         self.lasso.set_visible(False)
 
         #if selected stations have changed from previous selected, update associated plots
-        if np.array_equal(previous_relative_selected_station_inds, self.relative_selected_station_inds) == False:
+        if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) == False:
             self.update_associated_selected_station_plots()
 
         #draw changes
@@ -3243,19 +3255,19 @@ def calculate_data_availability_number(data):
     return np.count_nonzero(~np.isnan(data),axis=0)
 
 #define dictionary storing basic statistics that can be plotted
-basic_stats_dict = {'Mean':  {'function':calculate_mean,                       'order':0,  'label':'Mean',                'arguments':{}},
-                    'StdDev':{'function':calculate_standard_deviation,         'order':1,  'label':'StdDev',              'arguments':{}},
-                    'Var':   {'function':calculate_variance,                   'order':2,  'label':'Variance',            'arguments':{}},
-                    'Data %':{'function':calculate_data_availability_fraction, 'order':3,  'label':'Data Availability %', 'arguments':{}, 'vmin':0.0, 'vmax':100.0},
-                    'p1'  :  {'function':calculate_percentile,                 'order':4,  'label':'p1',                  'arguments':{'percentile':1.0}},
-                    'p5'  :  {'function':calculate_percentile,                 'order':5,  'label':'p5',                  'arguments':{'percentile':5.0}},
-                    'p10' :  {'function':calculate_percentile,                 'order':6,  'label':'p10',                 'arguments':{'percentile':10.0}},
-                    'p25' :  {'function':calculate_percentile,                 'order':7,  'label':'p25',                 'arguments':{'percentile':25.0}},
-                    'p50' :  {'function':calculate_percentile,                 'order':8,  'label':'p50',                 'arguments':{'percentile':50.0}},
-                    'p75' :  {'function':calculate_percentile,                 'order':9,  'label':'p75',                 'arguments':{'percentile':75.0}},
-                    'p90' :  {'function':calculate_percentile,                 'order':10, 'label':'p90',                 'arguments':{'percentile':90.0}},
-                    'p95' :  {'function':calculate_percentile,                 'order':11, 'label':'p95',                 'arguments':{'percentile':95.0}},
-                    'p99' :  {'function':calculate_percentile,                 'order':12, 'label':'p99',                 'arguments':{'percentile':99.0}}}
+basic_stats_dict = {'Mean':  {'function':calculate_mean,                       'order':0,  'label':'Mean',                'arguments':{},                  'minimum_bias':[0.0]},
+                    'StdDev':{'function':calculate_standard_deviation,         'order':1,  'label':'StdDev',              'arguments':{},                  'minimum_bias':[0.0]},
+                    'Var':   {'function':calculate_variance,                   'order':2,  'label':'Variance',            'arguments':{},                  'minimum_bias':[0.0]},
+                    'Data %':{'function':calculate_data_availability_fraction, 'order':3,  'label':'Data Availability %', 'arguments':{},                  'minimum_bias':[0.0],  'vmin':0.0, 'vmax':100.0},
+                    'p1'  :  {'function':calculate_percentile,                 'order':4,  'label':'p1',                  'arguments':{'percentile':1.0},  'minimum_bias':[0.0]},
+                    'p5'  :  {'function':calculate_percentile,                 'order':5,  'label':'p5',                  'arguments':{'percentile':5.0},  'minimum_bias':[0.0]},
+                    'p10' :  {'function':calculate_percentile,                 'order':6,  'label':'p10',                 'arguments':{'percentile':10.0}, 'minimum_bias':[0.0]},
+                    'p25' :  {'function':calculate_percentile,                 'order':7,  'label':'p25',                 'arguments':{'percentile':25.0}, 'minimum_bias':[0.0]},
+                    'p50' :  {'function':calculate_percentile,                 'order':8,  'label':'p50',                 'arguments':{'percentile':50.0}, 'minimum_bias':[0.0]},
+                    'p75' :  {'function':calculate_percentile,                 'order':9,  'label':'p75',                 'arguments':{'percentile':75.0}, 'minimum_bias':[0.0]},
+                    'p90' :  {'function':calculate_percentile,                 'order':10, 'label':'p90',                 'arguments':{'percentile':90.0}, 'minimum_bias':[0.0]},
+                    'p95' :  {'function':calculate_percentile,                 'order':11, 'label':'p95',                 'arguments':{'percentile':95.0}, 'minimum_bias':[0.0]},
+                    'p99' :  {'function':calculate_percentile,                 'order':12, 'label':'p99',                 'arguments':{'percentile':99.0}, 'minimum_bias':[0.0]}}
     
 #---------------------------------------------------------#
 #---------------------------------------------------------#
@@ -3383,20 +3395,20 @@ def calculate_UPA(obs, exp):
     return (exp_max - obs_max) - obs_max
 
 #define dictionary storing experiment bias evaluation statistics that can be plotted
-experiment_bias_stats_dict = {'MAE':  {'function':calculate_MAE,       'order':0,  'label':'MAE',     'arguments':{}, 'vmin':0.0, 'colourbar':'Reds'},
-                              'NMAE': {'function':calculate_MAE,       'order':1,  'label':'NMAE',    'arguments':{'normalisation_type':'mean'}, 'vmin':0.0, 'colourbar':'Reds'},
-                              'MBE':  {'function':calculate_MBE,       'order':2,  'label':'MBE',     'arguments':{}},
-                              'NMBE': {'function':calculate_MBE,       'order':3,  'label':'NMBE',    'arguments':{'normalisation_type':'mean'}},
-                              'RMSE': {'function':calculate_RMSE,      'order':4,  'label':'RMSE',    'arguments':{}},
-                              'NRMSE':{'function':calculate_RMSE,      'order':5,  'label':'NRMSE',   'arguments':{'normalisation_type':'mean'}},
-                              'ABPE': {'function':calculate_APBE,      'order':6,  'label':'ABPE',    'arguments':{}, 'vmin':0.0,  'vmax':100.0, 'colourbar':'Reds'},
-                              'PBE':  {'function':calculate_PBE,       'order':7,  'label':'PBE',     'arguments':{}},
-                              'COE':  {'function':calculate_COE,       'order':8,  'label':'COE',     'arguments':{}, 'vmax':1.0},
-                              'FAC2': {'function':calculate_FAC2,      'order':9,  'label':'FAC2',    'arguments':{}, 'vmin':0.0,  'vmax':100.0, 'colourbar':'Reds'},
-                              'IOA':  {'function':calculate_IOA,       'order':10, 'label':'IOA',     'arguments':{}, 'vmin':-1.0, 'vmax':1.0},
-                              'r':    {'function':calculate_r,         'order':11, 'label':'r',       'arguments':{}, 'vmin':-1.0, 'vmax':1.0},
-                              'r2':   {'function':calculate_r_squared, 'order':12, 'label':'r$^{2}$', 'arguments':{}, 'vmin':0.0,  'vmax':1.0, 'colourbar':'Reds'},
-                              'UPA':  {'function':calculate_UPA,       'order':13, 'label':'UPA',     'arguments':{}}}
+experiment_bias_stats_dict = {'MAE':  {'function':calculate_MAE,       'order':0,  'label':'MAE',     'arguments':{},                            'minimum_bias':[0.0],   'vmin':0.0,                'colourbar':'Reds'},
+                              'NMAE': {'function':calculate_MAE,       'order':1,  'label':'NMAE',    'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0],   'vmin':0.0,                'colourbar':'Reds'},
+                              'MBE':  {'function':calculate_MBE,       'order':2,  'label':'MBE',     'arguments':{},                            'minimum_bias':[0.0]},
+                              'NMBE': {'function':calculate_MBE,       'order':3,  'label':'NMBE',    'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0]},
+                              'RMSE': {'function':calculate_RMSE,      'order':4,  'label':'RMSE',    'arguments':{},                            'minimum_bias':[0.0]},
+                              'NRMSE':{'function':calculate_RMSE,      'order':5,  'label':'NRMSE',   'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0]},
+                              'ABPE': {'function':calculate_APBE,      'order':6,  'label':'ABPE',    'arguments':{},                            'minimum_bias':[0.0],   'vmin':0.0,  'vmax':100.0, 'colourbar':'Reds'},
+                              'PBE':  {'function':calculate_PBE,       'order':7,  'label':'PBE',     'arguments':{},                            'minimum_bias':[0.0]},
+                              'COE':  {'function':calculate_COE,       'order':8,  'label':'COE',     'arguments':{},                            'minimum_bias':[1.0],                'vmax':1.0},
+                              'FAC2': {'function':calculate_FAC2,      'order':9,  'label':'FAC2',    'arguments':{},                            'minimum_bias':[100.0], 'vmin':0.0,  'vmax':100.0, 'colourbar':'Reds'},
+                              'IOA':  {'function':calculate_IOA,       'order':10, 'label':'IOA',     'arguments':{},                            'minimum_bias':[1.0],   'vmin':-1.0, 'vmax':1.0},
+                              'r':    {'function':calculate_r,         'order':11, 'label':'r',       'arguments':{},                            'minimum_bias':[1.0],   'vmin':-1.0, 'vmax':1.0},
+                              'r2':   {'function':calculate_r_squared, 'order':12, 'label':'r$^{2}$', 'arguments':{},                            'minimum_bias':[1.0],   'vmin':0.0,  'vmax':1.0,   'colourbar':'Reds'},
+                              'UPA':  {'function':calculate_UPA,       'order':13, 'label':'UPA',     'arguments':{},                            'minimum_bias':[0.0]}}
 
 #------------------------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------------------------#
