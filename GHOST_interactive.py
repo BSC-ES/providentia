@@ -773,7 +773,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
                 self.selected_resolution = changed_param
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
-                self.selected_species = self.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()][self.cb_matrix.currentText()][0]
+                self.selected_species = sorted(list(self.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()][self.cb_matrix.currentText()].keys()))[0]
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
 
