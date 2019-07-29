@@ -95,9 +95,6 @@ class pop_up_window(QtWidgets.QWidget):
         
         #set window title
         self.setWindowTitle(self.window_type)
-        
-        #maximise window to fit screen
-        self.showMaximized()
 
         #get pop up window dimensions
         window_width = self.width()
@@ -207,6 +204,9 @@ class pop_up_window(QtWidgets.QWidget):
         #------------------------------------------------------------------------#
         #set finalised layout
         self.setLayout(parent_layout)
+
+        #maximise window to fit screen
+        self.showMaximized()  
         
         #------------------------------------------------------------------------#
 
@@ -278,9 +278,6 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
 
         #set window title
         self.setWindowTitle("GHOST Interactive")
-        
-        #maximise window to fit screen
-        self.showMaximized()
 
         #create parent layout to pull together a configuration bar, a MPL navigation toolbar, and a MPL canvas of plots
         parent_layout = QtWidgets.QVBoxLayout()
@@ -563,6 +560,9 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         #------------------------------------------------------------------------#
         #plot whole dashboard
         self.show()
+
+        #maximise window to fit screen
+        self.showMaximized()  
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
