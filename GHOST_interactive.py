@@ -13,6 +13,7 @@ import glob
 import multiprocessing
 import os
 import re
+import socket
 import sys
 import textwrap
 from weakref import WeakKeyDictionary
@@ -44,8 +45,8 @@ import scipy.stats
 import seaborn as sns
 
 #TEMPORARY FIX FOR ISSUE WITH PYTHON CERTIFICATES
-import ssl
-ssl._create_default_https_context = ssl._create_unverified_context
+#import ssl
+#ssl._create_default_https_context = ssl._create_unverified_context
 
 ###------------------------------------------------------------------------------------###
 ###------------------------------------------------------------------------------------###
@@ -492,10 +493,16 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         #create dictionary to hold indices of selected values in pop-up windows
         self.selected_indices = {'EXPERIMENTS':[[]], 'FLAGS':[[]], 'QA':[[]], 'CLASSIFICATIONS':[[],[]], 'METHODS':[[]]}
 
-        #define observations/experiment root data directories
-        self.obs_root = '/esarchive/obs/ghost'
-        self.exp_root = '/esarchive/recon/ghost_interp'
-
+        #define observations/experiment root data directories based on machine name
+	#on workstation?
+        if 'bscearth' in socket.gethostname():
+            self.obs_root = '/esarchive/obs/ghost'
+            self.exp_root = '/esarchive/recon/ghost_interp'
+        #else, assume on power9
+        else:
+            self.obs_root = '/gpfs/projects/bsc32/earth_diags_data/obs/ghost'
+            self.exp_root = '/gpfs/projects/bsc32/earth_diags_data/recon/ghost_interp'
+        
         #initialise configuration bar fields
         self.config_bar_initialisation = True
         self.update_configuration_bar_fields()  
@@ -820,16 +827,21 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
 
             #iterate through all available grids
             for grid in available_grids:
-
-                #get all experiment netCDF files by experiment/grid/selected resolution/selected species/selected network
-                network_files = os.listdir('%s/%s/%s/%s/%s/%s'%(self.exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network))
-                #get start YYYYMM yearmonths of data files
-                network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files] 
-                #limit data files to just those within date range
-                valid_network_files_yearmonths = [ym for ym in network_files_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) & (ym < self.selected_end_date)]
-                #if have some valid data files for experiment-grid, add experiment grid (with associated yearmonths) to dictionary
-                if len(valid_network_files_yearmonths) > 0:
-                    self.available_experiment_data['%s-%s'%(experiment,grid)] = valid_network_files_yearmonths
+            
+                #test first if interpolated directory exists before trying to get files from it
+                #if it does not exit, continue
+                if not os.path.exists('%s/%s/%s/%s/%s/%s'%(self.exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network)):       
+                    continue
+                else:
+                    #get all experiment netCDF files by experiment/grid/selected resolution/selected species/selected network
+                    network_files = os.listdir('%s/%s/%s/%s/%s/%s'%(self.exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network))
+                    #get start YYYYMM yearmonths of data files
+                    network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files] 
+                    #limit data files to just those within date range
+                    valid_network_files_yearmonths = [ym for ym in network_files_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) & (ym < self.selected_end_date)]
+                    #if have some valid data files for experiment-grid, add experiment grid (with associated yearmonths) to dictionary
+                    if len(valid_network_files_yearmonths) > 0:
+                        self.available_experiment_data['%s-%s'%(experiment,grid)] = valid_network_files_yearmonths
 
         #get list of available experiment-grid names
         self.available_experiment_grids = np.array(sorted(list(self.available_experiment_data.keys())))
@@ -1206,7 +1218,8 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         elif self.read_type == 'parallel':
 
             #setup pool of N workers taking N available CPUs)
-            pool = multiprocessing.Pool(multiprocessing.cpu_count())
+            #pool = multiprocessing.Pool(multiprocessing.cpu_count())
+            pool = multiprocessing.Pool(8)
 
             #read netCDF files in parallel
             all_file_metadata = pool.map(read_netCDF_station_information, relevant_files)
@@ -1320,8 +1333,9 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         elif self.read_type == 'parallel':
 
             #setup pool of N workers taking N available CPUs)
-            pool = multiprocessing.Pool(multiprocessing.cpu_count())
- 
+            #pool = multiprocessing.Pool(multiprocessing.cpu_count())
+            pool = multiprocessing.Pool(8) 
+
             #read netCDF files in parallel
             all_file_data = pool.map(read_netCDF_data, relevant_files)
             #will not submit more files to pool, so close access to it
@@ -1570,6 +1584,7 @@ class MPL_Canvas(FigureCanvas):
         #also initialise navigation toolbar stack with dictionary containing view of map axis
         if self.map_initialised == False:
             self.map_ax.axis('on')
+            #self.map_ax.coastlines()
             self.map_ax.add_feature(cfeature.LAND, facecolor='0.85')
             self.map_ax.gridlines(linestyle='-', alpha=0.4)
             self.reset_ax_navigation_toolbar_stack(self.map_ax)
