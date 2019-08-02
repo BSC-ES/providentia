@@ -690,6 +690,8 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         #if have no available observational data, return from function, updating variable informing that have no data 
         if len(self.available_observation_data) == 0:
             self.no_data_to_read = True
+            #unset variable to allow interactive handling from now
+            self.block_config_bar_handling_updates = False
             return
         else:
             self.no_data_to_read = False
@@ -805,14 +807,12 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
                 selected_end_date = self.le_end_date.text()
                 if (len(selected_start_date) == 8) & (len(selected_end_date) ==  8):
                     if (selected_start_date.isdigit() == True) & (selected_end_date.isdigit() == True):
-                        if int(selected_end_date) > int(selected_start_date):
-                            self.selected_start_date = int(selected_start_date)
-                            self.selected_end_date = int(selected_end_date)
-                            self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
-                            valid_date = True
-                            self.date_range_has_changed = True
-                if valid_date == False:
-                    return
+                        self.date_range_has_changed = True
+                        self.selected_start_date = int(selected_start_date)
+                        self.selected_end_date = int(selected_end_date)
+                        self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
+                    else:
+                        return
                     
             #update configuration bar fields
             self.update_configuration_bar_fields()  
