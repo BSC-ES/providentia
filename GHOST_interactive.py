@@ -1,6 +1,19 @@
 #WRITTEN BY DENE BOWDALO
 
 ###------------------------------------------------------------------------------------###
+###------------------------------------------------------------------------------------###
+
+#GHOST_interactive.py
+
+#executable of the GHOST interactive tool
+
+###------------------------------------------------------------------------------------###
+###IMPORT CONFIGURATION FILE VARIABLES
+###------------------------------------------------------------------------------------###
+
+from configuration import n_CPUs, obs_root, exp_root, sequential_colourmap, sequential_colourmap_warm, diverging_colourmap, cartopy_data_dir
+
+###------------------------------------------------------------------------------------###
 ###IMPORT BUILT-IN MODULES
 ###------------------------------------------------------------------------------------###
 import bisect
@@ -12,16 +25,15 @@ import gc
 import glob
 import multiprocessing
 import os
-import re
-import socket
 import sys
-import textwrap
 from weakref import WeakKeyDictionary
 
 ###------------------------------------------------------------------------------------###
 ###IMPORT THIRD-PARTY MODULES
 ###------------------------------------------------------------------------------------###
-
+import cartopy
+#set cartopy data directory
+cartopy.config['pre_existing_data_dir'] = cartopy_data_dir
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib
@@ -44,9 +56,25 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 import scipy.stats
 import seaborn as sns
 
-#TEMPORARY FIX FOR ISSUE WITH PYTHON CERTIFICATES
-#import ssl
-#ssl._create_default_https_context = ssl._create_unverified_context
+###------------------------------------------------------------------------------------###
+###------------------------------------------------------------------------------------###
+
+class NavigationToolbar(NavigationToolbar):
+
+    '''define class that updates available buttons on matplotlib toolbar'''    
+
+    #only display wanted buttons
+    NavigationToolbar.toolitems = (
+        ('Home', 'Reset original view', 'home', 'home'),
+        ('Back', 'Back to previous view', 'back', 'back'),
+        ('Forward', 'Forward to next view', 'forward', 'forward'),
+        (None, None, None, None),
+        ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
+        ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
+        (None, None, None, None),
+        ('Save', 'Save the figure', 'filesave', 'save_figure'),
+        (None, None, None, None)
+    )
 
 ###------------------------------------------------------------------------------------###
 ###------------------------------------------------------------------------------------###
@@ -277,13 +305,14 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         '''initialise user interface'''
 
         #set window title
-        self.setWindowTitle("GHOST Interactive")
+        self.window_title = "GHOST Interactive"
+        self.setWindowTitle(self.window_title)
 
         #create parent layout to pull together a configuration bar, a MPL navigation toolbar, and a MPL canvas of plots
         parent_layout = QtWidgets.QVBoxLayout()
         
         #define spacing/margin variables
-        parent_layout.setSpacing(1)
+        parent_layout.setSpacing(0)
         parent_layout.setContentsMargins(0,0,0,0)
         
         #------------------------------------------------------------------------#
@@ -293,8 +322,8 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
 
         #define spacing/margin variables
         config_bar.setHorizontalSpacing(3)
-        config_bar.setVerticalSpacing(0)
-        config_bar.setContentsMargins(0,0,0,0)
+        config_bar.setVerticalSpacing(1)
+        config_bar.setContentsMargins(5,0,0,0)
         config_bar.setAlignment(QtCore.Qt.AlignLeft) 
 
         #define all configuration box objects (labels, comboboxes etc.)
@@ -304,14 +333,11 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.lb_data_selection.setFont(title_font)
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
         self.bu_read = QtWidgets.QPushButton('READ', self)
-        self.bu_read.setMinimumWidth(60)
-        self.bu_read.setMaximumWidth(60)
-        self.bu_read.setMaximumHeight(32)
+        self.bu_read.setMinimumWidth(40)
+        self.bu_read.setMaximumWidth(40)
         self.bu_read.setStyleSheet("color: red;")
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.ch_colocate = QtWidgets.QCheckBox("Colocate")
-        self.ch_colocate.setMinimumHeight(27)  
-        self.ch_colocate.setMaximumHeight(27) 
         self.cb_network = QtWidgets.QComboBox(self)
         self.cb_network.setMinimumWidth(95)
         self.cb_network.setMaximumWidth(95)
@@ -321,37 +347,36 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.cb_resolution.setMaximumWidth(95)
         self.cb_resolution.setToolTip('Select temporal resolution of data')
         self.cb_matrix = QtWidgets.QComboBox(self)
-        self.cb_matrix.setMinimumWidth(110)
-        self.cb_matrix.setMaximumWidth(110)
+        self.cb_matrix.setMinimumWidth(95)
+        self.cb_matrix.setMaximumWidth(95)
         self.cb_matrix.setToolTip('Select data matrix')
         self.cb_species = QtWidgets.QComboBox(self)
-        self.cb_species.setMinimumWidth(110)
-        self.cb_species.setMaximumWidth(110)
+        self.cb_species.setMinimumWidth(95)
+        self.cb_species.setMaximumWidth(95)
         self.cb_species.setToolTip('Select species')
         self.bu_experiments = QtWidgets.QPushButton('EXPS', self)
-        self.bu_experiments.setMinimumWidth(65)
-        self.bu_experiments.setMaximumWidth(65)
+        self.bu_experiments.setMinimumWidth(44)
+        self.bu_experiments.setMaximumWidth(44)
         self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.le_start_date = QtWidgets.QLineEdit(self)
-        self.le_start_date.setMinimumWidth(65)
-        self.le_start_date.setMaximumWidth(65)
+        self.le_start_date.setMinimumWidth(70)
+        self.le_start_date.setMaximumWidth(70)
         self.le_start_date.setToolTip('Set data start date: YYYYMMDD')
         self.le_end_date = QtWidgets.QLineEdit(self)
-        self.le_end_date.setMinimumWidth(65)
-        self.le_end_date.setMaximumWidth(65)
+        self.le_end_date.setMinimumWidth(70)
+        self.le_end_date.setMaximumWidth(70)
         self.le_end_date.setToolTip('Set data end date: YYYYMMDD')
         self.bu_QA = QtWidgets.QPushButton('QA', self)
-        self.bu_QA.setMinimumWidth(65)
-        self.bu_QA.setMaximumWidth(65)
-        self.bu_QA.setMaximumHeight(32)
+        self.bu_QA.setMinimumWidth(45)
+        self.bu_QA.setMaximumWidth(45)
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
         self.bu_flags = QtWidgets.QPushButton('FLAGS', self)
-        self.bu_flags.setMinimumWidth(65)
-        self.bu_flags.setMaximumWidth(65)
+        self.bu_flags.setMinimumWidth(44)
+        self.bu_flags.setMaximumWidth(44)
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
         self.bu_classifications = QtWidgets.QPushButton('CLASS', self)
-        self.bu_classifications.setMinimumWidth(65)
-        self.bu_classifications.setMaximumWidth(65)
+        self.bu_classifications.setMinimumWidth(44)
+        self.bu_classifications.setMaximumWidth(44)
         self.bu_classifications.setToolTip('Select standardised classifications to filter by')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
@@ -360,64 +385,60 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.lb_data_filter.setMaximumWidth(65)
         self.lb_data_filter.setFont(title_font)
         self.bu_screen = QtWidgets.QPushButton('FILTER', self)
-        self.bu_screen.setMinimumWidth(65)
-        self.bu_screen.setMaximumWidth(65)
+        self.bu_screen.setMinimumWidth(46)
+        self.bu_screen.setMaximumWidth(46)
         self.bu_screen.setStyleSheet("color: blue;")
         self.lb_data_bounds = QtWidgets.QLabel(self, text = "Bounds")
         self.lb_data_bounds.setMinimumWidth(47)
         self.lb_data_bounds.setMaximumWidth(47)
         self.le_minimum_value = QtWidgets.QLineEdit(self)
-        self.le_minimum_value.setMinimumWidth(55)
-        self.le_minimum_value.setMaximumWidth(55)
+        self.le_minimum_value.setMinimumWidth(60)
+        self.le_minimum_value.setMaximumWidth(60)
         self.le_maximum_value = QtWidgets.QLineEdit(self)
-        self.le_maximum_value.setMinimumWidth(55)
-        self.le_maximum_value.setMaximumWidth(55)
+        self.le_maximum_value.setMinimumWidth(60)
+        self.le_maximum_value.setMaximumWidth(60)
         self.lb_minimum_data_availability = QtWidgets.QLabel(self, text = "% Min.")
         self.lb_minimum_data_availability.setMinimumWidth(47)
         self.lb_minimum_data_availability.setMaximumWidth(47)
         self.le_minimum_data_availability = QtWidgets.QLineEdit(self)
-        self.le_minimum_data_availability.setMinimumWidth(40)
-        self.le_minimum_data_availability.setMaximumWidth(40)
+        self.le_minimum_data_availability.setMinimumWidth(45)
+        self.le_minimum_data_availability.setMaximumWidth(45)
         self.bu_methods = QtWidgets.QPushButton('METHOD', self)
-        self.bu_methods.setMinimumWidth(78)
-        self.bu_methods.setMaximumWidth(78)
+        self.bu_methods.setMinimumWidth(60)
+        self.bu_methods.setMaximumWidth(60)
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
         self.lb_z = QtWidgets.QLabel(self, text = "Map Z")
         self.lb_z.setFont(title_font)
         self.cb_z_stat = QtWidgets.QComboBox(self)
-        self.cb_z_stat.setMinimumWidth(90)
-        self.cb_z_stat.setMaximumWidth(90)
+        self.cb_z_stat.setMinimumWidth(80)
+        self.cb_z_stat.setMaximumWidth(80)
         self.cb_z1 = QtWidgets.QComboBox(self)
-        self.cb_z1.setMinimumWidth(135)
-        self.cb_z1.setMaximumWidth(135)
+        self.cb_z1.setMinimumWidth(125)
+        self.cb_z1.setMaximumWidth(125)
         self.cb_z2 = QtWidgets.QComboBox(self)
-        self.cb_z2.setMinimumWidth(135)
-        self.cb_z2.setMaximumWidth(135)
+        self.cb_z2.setMinimumWidth(125)
+        self.cb_z2.setMaximumWidth(125)
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
         self.lb_experiment_bias = QtWidgets.QLabel(self, text = "Exp. Bias")
         self.lb_experiment_bias.setFont(title_font)
         self.cb_experiment_bias_type = QtWidgets.QComboBox(self)
-        self.cb_experiment_bias_type.setMinimumWidth(112)
-        self.cb_experiment_bias_type.setMaximumWidth(112)
+        self.cb_experiment_bias_type.setMinimumWidth(100)
+        self.cb_experiment_bias_type.setMaximumWidth(100)
         self.cb_experiment_bias_stat = QtWidgets.QComboBox(self)
-        self.cb_experiment_bias_stat.setMinimumWidth(112)
-        self.cb_experiment_bias_stat.setMaximumWidth(112)
+        self.cb_experiment_bias_stat.setMinimumWidth(100)
+        self.cb_experiment_bias_stat.setMaximumWidth(100)
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
         self.lb_station_selection = QtWidgets.QLabel(self, text = "Site Select")
         self.lb_station_selection.setFont(title_font)
         self.ch_select_all = QtWidgets.QCheckBox("All")
-        self.ch_select_all.setMinimumHeight(27)  
-        self.ch_select_all.setMaximumHeight(27) 
         self.ch_intersect = QtWidgets.QCheckBox("Intersect")
-        self.ch_intersect.setMinimumHeight(27)  
-        self.ch_intersect.setMaximumHeight(27)  
 
         #position objects on gridded configuration bar
-        config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 2, QtCore.Qt.AlignCenter)
-        config_bar.addWidget(self.bu_read, 0, 2)  
+        config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_read, 0, 1, 1, 1, QtCore.Qt.AlignCenter)  
         config_bar.addWidget(self.ch_colocate, 0, 3, 1, 2, QtCore.Qt.AlignCenter)
         config_bar.addWidget(self.cb_network, 1, 0)
         config_bar.addWidget(self.cb_resolution, 2, 0)
@@ -489,16 +510,6 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
 
         #create dictionary to hold indices of selected values in pop-up windows
         self.selected_indices = {'EXPERIMENTS':[[]], 'FLAGS':[[]], 'QA':[[]], 'CLASSIFICATIONS':[[],[]], 'METHODS':[[]]}
-
-        #define observations/experiment root data directories based on machine name
-	#on workstation?
-        if 'bscearth' in socket.gethostname():
-            self.obs_root = '/esarchive/obs/ghost'
-            self.exp_root = '/esarchive/recon/ghost_interp'
-        #else, assume on power9
-        else:
-            self.obs_root = '/gpfs/projects/bsc32/earth_diags_data/obs/ghost'
-            self.exp_root = '/gpfs/projects/bsc32/earth_diags_data/recon/ghost_interp'
         
         #initialise configuration bar fields
         self.config_bar_initialisation = True
@@ -638,13 +649,13 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
                     self.all_observation_data[network][resolution] = {}
 
                     #get available species for network/resolution
-                    available_species = os.listdir('%s/%s/%s'%(self.obs_root, network, resolution))
+                    available_species = os.listdir('%s/%s/%s'%(obs_root, network, resolution))
 
                     #iterate through available files per species
                     for species in available_species:   
 
                         #get all netCDF monthly files per species
-                        species_files = os.listdir('%s/%s/%s/%s'%(self.obs_root, network, resolution, species))
+                        species_files = os.listdir('%s/%s/%s/%s'%(obs_root, network, resolution, species))
 
                         #get monthly start date (YYYYMM) of all species files
                         species_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in species_files if f != 'temporary'] 
@@ -817,24 +828,24 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.available_experiment_data = {}
 
         #get all different experiment names
-        available_experiments = os.listdir('%s'%(self.exp_root))          
+        available_experiments = os.listdir('%s'%(exp_root))          
 
         #iterate through available experiments
         for experiment in available_experiments:      
  
             #get all available grid types by experiment 
-            available_grids = os.listdir('%s/%s'%(self.exp_root,experiment))
+            available_grids = os.listdir('%s/%s'%(exp_root,experiment))
 
             #iterate through all available grids
             for grid in available_grids:
             
                 #test first if interpolated directory exists before trying to get files from it
                 #if it does not exit, continue
-                if not os.path.exists('%s/%s/%s/%s/%s/%s'%(self.exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network)):       
+                if not os.path.exists('%s/%s/%s/%s/%s/%s'%(exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network)):       
                     continue
                 else:
                     #get all experiment netCDF files by experiment/grid/selected resolution/selected species/selected network
-                    network_files = os.listdir('%s/%s/%s/%s/%s/%s'%(self.exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network))
+                    network_files = os.listdir('%s/%s/%s/%s/%s/%s'%(exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network))
                     #get start YYYYMM yearmonths of data files
                     network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files] 
                     #limit data files to just those within date range
@@ -891,6 +902,9 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         #if have no data to read, then do not read any data
         if self.no_data_to_read == True:
             return
+
+        #Update mouse cursor to a waiting cursor
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         #set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
@@ -1126,6 +1140,9 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         #update MPL canvas
         self.mpl_canvas.update_MPL_canvas()
 
+        #Restore mouse cursor to normal 
+        QtWidgets.QApplication.restoreOverrideCursor()
+
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#   
     
@@ -1156,8 +1173,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.time_array = pd.date_range(start = datetime.datetime(int(str_active_start_date[:4]), int(str_active_start_date[4:6]), int(str_active_start_date[6:8])),end = datetime.datetime(int(str_active_end_date[:4]), int(str_active_end_date[4:6]), int(str_active_end_date[6:8])), freq = self.active_frequency_code)[:-1]
 
         #get all relevant observational files
-        #relevant_files = sorted(glob.glob('%s/%s/%s/%s/*.nc'%(self.obs_root, self.active_network, self.active_resolution, self.active_species)))
-        file_root = '%s/%s/%s/%s/%s_'%(self.obs_root, self.active_network, self.active_resolution, self.active_species, self.active_species)
+        file_root = '%s/%s/%s/%s/%s_'%(obs_root, self.active_network, self.active_resolution, self.active_species, self.active_species)
         relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species]])       
 
         #redefine some key variables globally (for access by parallel netCDF reading functions)
@@ -1214,12 +1230,11 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
                 for meta_var in metadata_vars_to_read:
                     all_read_metadata[meta_var] = np.append(all_read_metadata[meta_var], file_metadata[meta_var])
                     
-        #read in parallel (utilising all available CPUs)
+        #read in parallel
         elif self.read_type == 'parallel':
 
-            #setup pool of N workers taking N available CPUs)
-            #pool = multiprocessing.Pool(multiprocessing.cpu_count())
-            pool = multiprocessing.Pool(8)
+            #setup pool of N workers on N CPUs
+            pool = multiprocessing.Pool(n_CPUs)
 
             #read netCDF files in parallel
             all_file_metadata = pool.map(read_netCDF_station_information, relevant_files)
@@ -1280,7 +1295,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         global process_type
         if data_label == 'observations':
             process_type = 'observations'
-            file_root = '%s/%s/%s/%s/%s_'%(self.obs_root, self.active_network, self.active_resolution, self.active_species, self.active_species)
+            file_root = '%s/%s/%s/%s/%s_'%(obs_root, self.active_network, self.active_resolution, self.active_species, self.active_species)
             relevant_file_start_dates = sorted(self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species])  
 
         else:
@@ -1288,7 +1303,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             experiment_grid_split = data_label.split('-')
             active_experiment = experiment_grid_split[0]
             active_grid = experiment_grid_split[1]  
-            file_root = '%s/%s/%s/%s/%s/%s/%s_'%(self.exp_root, active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network, self.active_species)
+            file_root = '%s/%s/%s/%s/%s/%s/%s_'%(exp_root, active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network, self.active_species)
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 
         #create list of relevant files to read
@@ -1329,12 +1344,11 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
                 #place read data into big array as appropriate
                 self.data_in_memory[data_label]['data'][time_indices[:,np.newaxis], full_array_station_indices[np.newaxis,:]] = file_data
      
-        #read in parallel (utilising all available CPUs)
+        #read in parallel 
         elif self.read_type == 'parallel':
 
-            #setup pool of N workers taking N available CPUs)
-            #pool = multiprocessing.Pool(multiprocessing.cpu_count())
-            pool = multiprocessing.Pool(8) 
+            #setup pool of N workers on N CPUs
+            pool = multiprocessing.Pool(n_CPUs)
 
             #read netCDF files in parallel
             all_file_data = pool.map(read_netCDF_data, relevant_files)
@@ -1484,26 +1498,22 @@ class MPL_Canvas(FigureCanvas):
         
         #--------------------------------------------------#
         #setup gridding of canvas
-        gridspec = GridSpec(100, 100)
-        gridspec.update(left=0.01,right=0.99,top=0.96,bottom=0.04, wspace=0.00, hspace=0.00)
+        self.gridspec = GridSpec(100, 100)
+        self.gridspec.update(left=0.01,right=0.99,top=0.96,bottom=0.04, wspace=0.00, hspace=0.00)
         
-        map_ax =              gridspec.new_subplotspec((0, 0),   rowspan=45, colspan=45)
-        legend_ax =           gridspec.new_subplotspec((0, 46),  rowspan=8,  colspan=54)
-        ts_ax =               gridspec.new_subplotspec((12, 54), rowspan=34, colspan=46)
-        violin_hours_ax =     gridspec.new_subplotspec((57, 70), rowspan=19, colspan=30)    
-        violin_months_ax =    gridspec.new_subplotspec((81, 70), rowspan=19, colspan=18)
-        violin_days_ax =      gridspec.new_subplotspec((81, 91), rowspan=19, colspan=9)
-        exp_bias_hours_ax =   gridspec.new_subplotspec((57, 35), rowspan=19, colspan=30)    
-        exp_bias_months_ax =  gridspec.new_subplotspec((81, 35), rowspan=19, colspan=18)
-        exp_bias_days_ax =    gridspec.new_subplotspec((81, 56), rowspan=19, colspan=9)
-        station_metadata_ax = gridspec.new_subplotspec((55, 0),  rowspan=45, colspan=30)
-        
-        #define projections for map plot and actual geographic coordinates 
-        self.datacrs = ccrs.PlateCarree()
-        self.plotcrs = ccrs.Robinson()
+        #map_ax =              gridspec.new_subplotspec((0, 0),   rowspan=45, colspan=45)
+        legend_ax =           self.gridspec.new_subplotspec((0, 46),  rowspan=8,  colspan=54)
+        ts_ax =               self.gridspec.new_subplotspec((12, 54), rowspan=34, colspan=46)
+        violin_hours_ax =     self.gridspec.new_subplotspec((57, 70), rowspan=19, colspan=30)    
+        violin_months_ax =    self.gridspec.new_subplotspec((81, 70), rowspan=19, colspan=18)
+        violin_days_ax =      self.gridspec.new_subplotspec((81, 91), rowspan=19, colspan=9)
+        exp_bias_hours_ax =   self.gridspec.new_subplotspec((57, 35), rowspan=19, colspan=30)    
+        exp_bias_months_ax =  self.gridspec.new_subplotspec((81, 35), rowspan=19, colspan=18)
+        exp_bias_days_ax =    self.gridspec.new_subplotspec((81, 56), rowspan=19, colspan=9)
+        station_metadata_ax = self.gridspec.new_subplotspec((55, 0),  rowspan=45, colspan=30)
         
         #create subplot axes on grid
-        self.map_ax =              self.figure.add_subplot(map_ax, projection=self.plotcrs)
+        #self.map_ax =              self.figure.add_subplot(map_ax)
         self.legend_ax =           self.figure.add_subplot(legend_ax)
         self.ts_ax =               self.figure.add_subplot(ts_ax)
         self.violin_hours_ax =     self.figure.add_subplot(violin_hours_ax)
@@ -1518,11 +1528,14 @@ class MPL_Canvas(FigureCanvas):
         self.cbar_ax = self.figure.add_axes([0.02, 0.525, 0.25, 0.0175])    
 
         #--------------------------------------------------# 
-        #set map extent  
-        self.map_ax.set_global() 
-        #create variable to plot map coastlines on first data read
+        #set map variables 
+        #create variable to create map axis on first data read
         self.map_initialised = False
 
+        #define projections for map plot and actual geographic coordinates 
+        self.datacrs = ccrs.PlateCarree()
+        self.plotcrs = ccrs.Robinson()
+        
         #--------------------------------------------------# 
         #turning off specific spines of time series axis
         self.ts_ax.spines["top"].set_visible(False)      
@@ -1530,16 +1543,15 @@ class MPL_Canvas(FigureCanvas):
 
         #--------------------------------------------------#
         #setup interactive picker/lasso on map
-        self.figure.canvas.mpl_connect('pick_event', self.on_click)
-        self.lasso = LassoSelector(self.map_ax, onselect=self.onlassoselect, useblit=True, lineprops=dict(alpha=0.5, color='hotpink', linewidth=1))
+        #self.figure.canvas.mpl_connect('pick_event', self.on_click)
+        #self.lasso = LassoSelector(self.map_ax, onselect=self.onlassoselect, useblit=True, lineprops=dict(alpha=0.5, color='hotpink', linewidth=1))
         #initialise variable that informs whether to use picker/lasso for updates
-        self.map_already_updated = False
+        #self.map_already_updated = False
         #initialise variable of valid station indices plotted on map as empty list
-        self.active_map_valid_station_inds = np.array([],dtype=np.int)
+        #self.active_map_valid_station_inds = np.array([],dtype=np.int)
 
         #--------------------------------------------------#
         #hide all axes  
-        self.map_ax.axis('off')
         self.cbar_ax.axis('off')
         self.legend_ax.axis('off')
         self.ts_ax.axis('off')
@@ -1580,14 +1592,32 @@ class MPL_Canvas(FigureCanvas):
         self.exp_bias_days_ax.axis('off')
         self.station_metadata_ax.axis('off')
 
-        #turn on map axis and add coastlines if map not yet initialised
-        #also initialise navigation toolbar stack with dictionary containing view of map axis
+        #add map axis if map not yet initialised (i.e. first time loading some data)
         if self.map_initialised == False:
-            self.map_ax.axis('on')
-            #self.map_ax.coastlines()
+    
+            #create map axis
+            map_ax = self.gridspec.new_subplotspec((0, 0),   rowspan=45, colspan=45)
+            self.map_ax = self.figure.add_subplot(map_ax, projection=self.plotcrs)
+            #set map extents
+            self.map_ax.set_global() 
+
+            #add coastlines and
             self.map_ax.add_feature(cfeature.LAND, facecolor='0.85')
             self.map_ax.gridlines(linestyle='-', alpha=0.4)
+            
+            #reset the navigation toolbar stack for the map axis with the current view limits
             self.reset_ax_navigation_toolbar_stack(self.map_ax)
+
+            #setup interactive picker/lasso on map
+            self.figure.canvas.mpl_connect('pick_event', self.on_click)
+            self.lasso = LassoSelector(self.map_ax, onselect=self.onlassoselect, useblit=True, lineprops=dict(alpha=0.5, color='hotpink', linewidth=1))
+            #initialise variable that informs whether to use picker/lasso for updates
+            self.map_already_updated = False
+            
+            #initialise variable of valid station indices plotted on map as empty list
+            self.active_map_valid_station_inds = np.array([],dtype=np.int)
+
+            #update variable to indicate map is now initialised
             self.map_initialised = True
             
         #define all temporal aggregation resolutions that will be used to aggregate data (variable by temporal resolution of data in memory)
@@ -1919,7 +1949,7 @@ class MPL_Canvas(FigureCanvas):
             self.cbar_ax.tick_params(labelsize=8.0)
             #plot colourbar label
             self.cbar_ax.yaxis.set_label_position("right")
-            self.cbar_ax.set_ylabel(self.z_label, fontsize=8.0, weight='light', rotation=0, ha='left', va='top')
+            self.cbar_ax.set_ylabel(self.z_label, fontsize=8.0, rotation=0, ha='left', va='top')
             #turn colourbar axis on
             self.cbar_ax.axis('on')
 
@@ -1938,9 +1968,9 @@ class MPL_Canvas(FigureCanvas):
 
         #update map title
         if len(self.relative_selected_station_inds) == 1:
-            self.map_ax.set_title('%s Selected'%(self.read_instance.station_references[self.relative_selected_station_inds][0]), fontsize=8.5, weight='light', pad=3)
+            self.map_ax.set_title('%s Selected'%(self.read_instance.station_references[self.relative_selected_station_inds][0]), fontsize=8.5, pad=3)
         else:
-            self.map_ax.set_title('%s Stations Selected of %s Available'%(len(self.relative_selected_station_inds), len(self.active_map_valid_station_inds)), fontsize=8.5, weight='light', pad=3)         
+            self.map_ax.set_title('%s Stations Selected of %s Available'%(len(self.relative_selected_station_inds), len(self.active_map_valid_station_inds)), fontsize=8.5, pad=3)         
 
         #reset alphas of all plotted stations 
         self.rgba_tuples[:,-1] = 1.0
@@ -2278,7 +2308,7 @@ class MPL_Canvas(FigureCanvas):
             self.data_array_ts = self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(), color=self.read_instance.data_in_memory_filtered[data_label]['colour'], marker = 'o', markeredgecolor = None, mew = 0, markersize = 1.1, linestyle = 'None', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'])
               
         #set axes labels
-        self.ts_ax.set_ylabel('Concentration (%s)'%(self.read_instance.measurement_units), fontsize=8.0, weight='light')
+        self.ts_ax.set_ylabel('Concentration (%s)'%(self.read_instance.measurement_units), fontsize=8.0)
 
         #plot grid
         self.ts_ax.grid(color='lightgrey',alpha=0.8)
@@ -2316,7 +2346,7 @@ class MPL_Canvas(FigureCanvas):
             #add yaxis grid
             aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.grid(color='lightgrey',alpha=0.8)
             #add axis aggregation resolution label
-            aggregation_dict[temporal_aggregation_resolution]['ax'].annotate(aggregation_dict[temporal_aggregation_resolution]['title'], (0, 1), xytext=(2, -2), xycoords='axes fraction', textcoords='offset points', fontsize=9.0, fontweight='light', ha='left', va='top')
+            aggregation_dict[temporal_aggregation_resolution]['ax'].annotate(aggregation_dict[temporal_aggregation_resolution]['title'], (0, 1), xytext=(2, -2), xycoords='axes fraction', textcoords='offset points', fontsize=9.0, ha='left', va='top')
             #change axis tick labels
             aggregation_dict[temporal_aggregation_resolution]['ax'].tick_params(labelsize=8.0)
 
@@ -2418,10 +2448,10 @@ class MPL_Canvas(FigureCanvas):
             
         #if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis 
         if self.read_instance.active_resolution == 'hourly':
-            self.violin_hours_ax.set_title('Temporal Distributions (%s)'%(self.read_instance.measurement_units), fontsize=8.0, weight='light', loc='left') 
+            self.violin_hours_ax.set_title('Temporal Distributions (%s)'%(self.read_instance.measurement_units), fontsize=8.0, loc='left') 
         #otherwise, plot the units on the monthly aggregation axis
         else:    
-            self.violin_months_ax.set_title('Temporal Distributions (%s)'%(self.read_instance.measurement_units), fontsize=8.0, weight='light', loc='left') 
+            self.violin_months_ax.set_title('Temporal Distributions (%s)'%(self.read_instance.measurement_units), fontsize=8.0, loc='left') 
 
         #------------------------------------------------------------------------------------------------#
         #as are re-plotting on violin plot axes, reset the navigation toolbar stack dictionaries entries associated with each of the axes 
@@ -2461,7 +2491,7 @@ class MPL_Canvas(FigureCanvas):
             #add yaxis grid
             aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.grid(color='lightgrey',alpha=0.8)
             #add axis aggregation resolution label
-            aggregation_dict[temporal_aggregation_resolution]['ax'].annotate(aggregation_dict[temporal_aggregation_resolution]['title'], (0, 1), xytext=(2, -2), xycoords='axes fraction', textcoords='offset points', fontsize=9, fontweight='light', ha='left', va='top')
+            aggregation_dict[temporal_aggregation_resolution]['ax'].annotate(aggregation_dict[temporal_aggregation_resolution]['title'], (0, 1), xytext=(2, -2), xycoords='axes fraction', textcoords='offset points', fontsize=9, ha='left', va='top')
             #change axis tick labels
             aggregation_dict[temporal_aggregation_resolution]['ax'].tick_params(labelsize=8.0)
 
@@ -2482,10 +2512,10 @@ class MPL_Canvas(FigureCanvas):
 
         #if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis 
         if self.read_instance.active_resolution == 'hourly':
-            self.exp_bias_hours_ax.set_title(plot_title, fontsize=8.0, weight='light', loc='left') 
+            self.exp_bias_hours_ax.set_title(plot_title, fontsize=8.0, loc='left') 
         #otherwise, plot the units on the monthly aggregation axis
         else:    
-            self.exp_bias_months_ax.set_title(plot_title, fontsize=8.0, weight='light', loc='left') 
+            self.exp_bias_months_ax.set_title(plot_title, fontsize=8.0, loc='left') 
 
         #get value/s of minimum bias for statistic
         minimum_bias = stats_dict['minimum_bias']
@@ -2654,7 +2684,7 @@ class MPL_Canvas(FigureCanvas):
                 str_to_plot += meta_string
 
         #plot string to axis
-        plot_txt = self.station_metadata_ax.text(0.0, 1.0, str_to_plot, ha='left', va='top', fontsize=8.0, weight='light', transform=self.station_metadata_ax.transAxes, wrap=True, linespacing=1.5)
+        plot_txt = self.station_metadata_ax.text(0.0, 1.0, str_to_plot, ha='left', va='top', fontsize=8.0, transform=self.station_metadata_ax.transAxes, wrap=True, linespacing=1.5)
         #modify limit to wrap text as axis width in pixels  --> hack as matplotlib automatically sets limit as figure width
         plot_txt._get_wrap_line_width = lambda : ax_width_px
 
@@ -2711,10 +2741,10 @@ class MPL_Canvas(FigureCanvas):
         else:
             #if only have selected z1 array, the statistic is 'absolute', so use sequential colourbar
             if have_z2 == False:
-                self.z_colourmap  = 'viridis'  
+                self.z_colourmap  = sequential_colourmap 
             #if have selected z1 and z2 arrays, the statistic is 'difference', so use diverging colourbar
             else:
-                self.z_colourmap  = 'bwr'
+                self.z_colourmap  = diverging_colourmap
     
         #-------------------------------------------------#
 
@@ -3410,19 +3440,19 @@ def calculate_UPA(obs, exp):
     return (exp_max - obs_max) - obs_max
 
 #define dictionary storing experiment bias evaluation statistics that can be plotted
-experiment_bias_stats_dict = {'MAE':  {'function':calculate_MAE,       'order':0,  'label':'MAE',     'arguments':{},                            'minimum_bias':[0.0],   'vmin':0.0,                'colourbar':'Reds'},
-                              'NMAE': {'function':calculate_MAE,       'order':1,  'label':'NMAE',    'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0],   'vmin':0.0,                'colourbar':'Reds'},
+experiment_bias_stats_dict = {'MAE':  {'function':calculate_MAE,       'order':0,  'label':'MAE',     'arguments':{},                            'minimum_bias':[0.0],   'vmin':0.0,                'colourbar':sequential_colourmap_warm},
+                              'NMAE': {'function':calculate_MAE,       'order':1,  'label':'NMAE',    'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0],   'vmin':0.0,                'colourbar':sequential_colourmap_warm},
                               'MBE':  {'function':calculate_MBE,       'order':2,  'label':'MBE',     'arguments':{},                            'minimum_bias':[0.0]},
                               'NMBE': {'function':calculate_MBE,       'order':3,  'label':'NMBE',    'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0]},
                               'RMSE': {'function':calculate_RMSE,      'order':4,  'label':'RMSE',    'arguments':{},                            'minimum_bias':[0.0]},
                               'NRMSE':{'function':calculate_RMSE,      'order':5,  'label':'NRMSE',   'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0]},
-                              'ABPE': {'function':calculate_APBE,      'order':6,  'label':'ABPE',    'arguments':{},                            'minimum_bias':[0.0],   'vmin':0.0,  'vmax':100.0, 'colourbar':'Reds'},
+                              'ABPE': {'function':calculate_APBE,      'order':6,  'label':'ABPE',    'arguments':{},                            'minimum_bias':[0.0],   'vmin':0.0,  'vmax':100.0, 'colourbar':sequential_colourmap_warm},
                               'PBE':  {'function':calculate_PBE,       'order':7,  'label':'PBE',     'arguments':{},                            'minimum_bias':[0.0]},
                               'COE':  {'function':calculate_COE,       'order':8,  'label':'COE',     'arguments':{},                            'minimum_bias':[1.0],                'vmax':1.0},
-                              'FAC2': {'function':calculate_FAC2,      'order':9,  'label':'FAC2',    'arguments':{},                            'minimum_bias':[100.0], 'vmin':0.0,  'vmax':100.0, 'colourbar':'Reds'},
+                              'FAC2': {'function':calculate_FAC2,      'order':9,  'label':'FAC2',    'arguments':{},                            'minimum_bias':[100.0], 'vmin':0.0,  'vmax':100.0, 'colourbar':sequential_colourmap_warm},
                               'IOA':  {'function':calculate_IOA,       'order':10, 'label':'IOA',     'arguments':{},                            'minimum_bias':[1.0],   'vmin':-1.0, 'vmax':1.0},
                               'r':    {'function':calculate_r,         'order':11, 'label':'r',       'arguments':{},                            'minimum_bias':[1.0],   'vmin':-1.0, 'vmax':1.0},
-                              'r2':   {'function':calculate_r_squared, 'order':12, 'label':'r$^{2}$', 'arguments':{},                            'minimum_bias':[1.0],   'vmin':0.0,  'vmax':1.0,   'colourbar':'Reds'},
+                              'r2':   {'function':calculate_r_squared, 'order':12, 'label':'r$^{2}$', 'arguments':{},                            'minimum_bias':[1.0],   'vmin':0.0,  'vmax':1.0,   'colourbar':sequential_colourmap_warm},
                               'UPA':  {'function':calculate_UPA,       'order':13, 'label':'UPA',     'arguments':{},                            'minimum_bias':[0.0]}}
 
 #------------------------------------------------------------------------------------------------------------#
@@ -4504,5 +4534,6 @@ parameter_dictionary = {
 #generate GHOST interactive dashboard
 
 qApp = QtWidgets.QApplication(sys.argv)
+qApp.setStyle("Fusion")
 GHOST_dash = generate_GHOST_interactive_dashboard('parallel')
 sys.exit(qApp.exec_())
