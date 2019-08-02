@@ -640,10 +640,21 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
             #iterate through available networks
             for network in available_networks:
 
+                #check if directory for network exists
+                #if not, continue
+                if not os.path.exists('%s/%s'%(obs_root,network)):       
+                    continue
+    
+                #write empty dictionary for network
                 self.all_observation_data[network] = {}
 
                 #iterate through available resolutions
                 for resolution in available_resolutions:
+
+                    #check if directory for resolution exists
+                    #if not, continue
+                    if not os.path.exists('%s/%s/%s'%(obs_root,network,resolution)):       
+                        continue
 
                     #write nested empty dictionary for resolution
                     self.all_observation_data[network][resolution] = {}
