@@ -3,9 +3,9 @@
 ###------------------------------------------------------------------------------------###
 ###------------------------------------------------------------------------------------###
 
-#GHOST_interactive.py
+#providentia.py
 
-#executable of the GHOST interactive tool
+#executable of the Providentia tool
 
 ###------------------------------------------------------------------------------------###
 ###IMPORT CONFIGURATION FILE VARIABLES
@@ -78,6 +78,14 @@ class NavigationToolbar(NavigationToolbar):
 
 ###------------------------------------------------------------------------------------###
 ###------------------------------------------------------------------------------------###
+
+class ComboBox(QtWidgets.QComboBox):
+
+    '''modify default class of PyQT5 combobox to always dropdown from fixed position box postion, stopping truncation of data'''
+
+    def showPopup(self):
+        QtWidgets.QComboBox.showPopup(self)
+        self.view().parent().move(self.mapToGlobal(QtCore.QPoint()))
 
 class QVLine(QtWidgets.QFrame):
 
@@ -155,7 +163,7 @@ class pop_up_window(QtWidgets.QWidget):
             title_label = QtWidgets.QLabel(self, text = self.window_titles[nested_window_N])
             title_label.setAlignment(QtCore.Qt.AlignCenter)
             myFont=QtGui.QFont()
-            myFont.setPointSize(22)
+            myFont.setPointSize(16)
             title_label.setFont(myFont)
 
             #------------------------------------------------------------------------#
@@ -186,10 +194,11 @@ class pop_up_window(QtWidgets.QWidget):
             #create grid of checkboxes
             checkbox_grid = QtWidgets.QGridLayout()
 
+            print(dir(checkbox_grid.setSizeConstraint))
             #define spacing/margin variables
             checkbox_grid.setHorizontalSpacing(1)
             checkbox_grid.setVerticalSpacing(1)
-            checkbox_grid.setContentsMargins(0,0,0,0)
+            #checkbox_grid.setContentsMargins(0,0,0,0)
     
             #create checkboxes
             #force a new column to be started if the available vertical space for each row in grid goes below a critical value (18.2)
@@ -198,14 +207,17 @@ class pop_up_window(QtWidgets.QWidget):
             column_n = 0
             current_selected_indices = self.selected_indices[self.window_type][nested_window_N]
             for ii, val in enumerate(self.checkbox_labels[nested_window_N]):
+                
+                #checkbox_grid.setMaximumHeight(30)
                 row_available_space = window_height/(row_n+1)
-                if row_available_space < 18.2:
+                if row_available_space < 15:
                     column_n+=2
                     row_n = 0
                 self.checkboxes[nested_window_N].append(QtWidgets.QCheckBox(val))
                 if ii in current_selected_indices: 
                     self.checkboxes[nested_window_N][ii].setCheckState(QtCore.Qt.Checked)
                 checkbox_grid.addWidget(self.checkboxes[nested_window_N][ii], row_n, column_n)
+                #checkbox_grid.addWidget(self.checkboxes[nested_window_N][ii])
                 row_n +=1
 
             #------------------------------------------------------------------------#
@@ -285,12 +297,12 @@ class pop_up_window(QtWidgets.QWidget):
 
 #--------------------------------------------------------------------------------#
 #--------------------------------------------------------------------------------#
-class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
+class generate_Providentia_dashboard(QtWidgets.QWidget):
 
-    '''define class that generates GHOST interactive dashboard'''     
+    '''define class that generates Providentia dashboard'''     
  
     def __init__(self, read_type):
-        super(generate_GHOST_interactive_dashboard, self).__init__()
+        super(generate_Providentia_dashboard, self).__init__()
         
         #put read_type into self
         self.read_type = read_type
@@ -305,7 +317,7 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         '''initialise user interface'''
 
         #set window title
-        self.window_title = "GHOST Interactive"
+        self.window_title = "Providentia"
         self.setWindowTitle(self.window_title)
 
         #create parent layout to pull together a configuration bar, a MPL navigation toolbar, and a MPL canvas of plots
@@ -338,19 +350,24 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.bu_read.setStyleSheet("color: red;")
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.ch_colocate = QtWidgets.QCheckBox("Colocate")
-        self.cb_network = QtWidgets.QComboBox(self)
+        self.ch_colocate.setToolTip('')
+        #self.cb_network = QtWidgets.QComboBox(self)
+        self.cb_network = ComboBox(self)
         self.cb_network.setMinimumWidth(95)
         self.cb_network.setMaximumWidth(95)
         self.cb_network.setToolTip('Select providing observational data network')
-        self.cb_resolution = QtWidgets.QComboBox(self)
+        #self.cb_resolution = QtWidgets.QComboBox(self)
+        self.cb_resolution = ComboBox(self)
         self.cb_resolution.setMinimumWidth(95)
         self.cb_resolution.setMaximumWidth(95)
         self.cb_resolution.setToolTip('Select temporal resolution of data')
-        self.cb_matrix = QtWidgets.QComboBox(self)
+        #self.cb_matrix = QtWidgets.QComboBox(self)
+        self.cb_matrix = ComboBox(self)
         self.cb_matrix.setMinimumWidth(95)
         self.cb_matrix.setMaximumWidth(95)
         self.cb_matrix.setToolTip('Select data matrix')
-        self.cb_species = QtWidgets.QComboBox(self)
+        #self.cb_species = QtWidgets.QComboBox(self)
+        self.cb_species = ComboBox(self)
         self.cb_species.setMinimumWidth(95)
         self.cb_species.setMaximumWidth(95)
         self.cb_species.setToolTip('Select species')
@@ -383,58 +400,81 @@ class generate_GHOST_interactive_dashboard(QtWidgets.QWidget):
         self.lb_data_filter = QtWidgets.QLabel(self, text = "Data Filter")
         self.lb_data_filter.setMinimumWidth(65)
         self.lb_data_filter.setMaximumWidth(65)
+        self.lb_data_filter.setToolTip('Select criteria to filter data by')
         self.lb_data_filter.setFont(title_font)
         self.bu_screen = QtWidgets.QPushButton('FILTER', self)
         self.bu_screen.setMinimumWidth(46)
         self.bu_screen.setMaximumWidth(46)
         self.bu_screen.setStyleSheet("color: blue;")
+        self.bu_screen.setToolTip('')
         self.lb_data_bounds = QtWidgets.QLabel(self, text = "Bounds")
         self.lb_data_bounds.setMinimumWidth(47)
         self.lb_data_bounds.setMaximumWidth(47)
+        self.lb_data_bounds.setToolTip('')
         self.le_minimum_value = QtWidgets.QLineEdit(self)
         self.le_minimum_value.setMinimumWidth(60)
         self.le_minimum_value.setMaximumWidth(60)
+        self.le_minimum_value.setToolTip('')
         self.le_maximum_value = QtWidgets.QLineEdit(self)
         self.le_maximum_value.setMinimumWidth(60)
         self.le_maximum_value.setMaximumWidth(60)
+        self.le_maximum_value.setToolTip('')
         self.lb_minimum_data_availability = QtWidgets.QLabel(self, text = "% Min.")
         self.lb_minimum_data_availability.setMinimumWidth(47)
         self.lb_minimum_data_availability.setMaximumWidth(47)
+        self.lb_minimum_data_availability.setToolTip('')
         self.le_minimum_data_availability = QtWidgets.QLineEdit(self)
         self.le_minimum_data_availability.setMinimumWidth(45)
         self.le_minimum_data_availability.setMaximumWidth(45)
+        self.le_minimum_data_availability.setToolTip('')
         self.bu_methods = QtWidgets.QPushButton('METHOD', self)
         self.bu_methods.setMinimumWidth(60)
         self.bu_methods.setMaximumWidth(60)
+        self.bu_methods.setToolTip('')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
         self.lb_z = QtWidgets.QLabel(self, text = "Map Z")
         self.lb_z.setFont(title_font)
-        self.cb_z_stat = QtWidgets.QComboBox(self)
+        self.lb_z.setToolTip('')
+        #self.cb_z_stat = QtWidgets.QComboBox(self)
+        self.cb_z_stat = ComboBox(self)
         self.cb_z_stat.setMinimumWidth(80)
         self.cb_z_stat.setMaximumWidth(80)
-        self.cb_z1 = QtWidgets.QComboBox(self)
+        self.cb_z_stat.setToolTip('')
+        #self.cb_z1 = QtWidgets.QComboBox(self)
+        self.cb_z1 = ComboBox(self)
         self.cb_z1.setMinimumWidth(125)
         self.cb_z1.setMaximumWidth(125)
-        self.cb_z2 = QtWidgets.QComboBox(self)
+        self.cb_z1.setToolTip('')
+        #self.cb_z2 = QtWidgets.QComboBox(self)
+        self.cb_z2 = ComboBox(self)
         self.cb_z2.setMinimumWidth(125)
         self.cb_z2.setMaximumWidth(125)
+        self.cb_z2.setToolTip('')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
         self.lb_experiment_bias = QtWidgets.QLabel(self, text = "Exp. Bias")
         self.lb_experiment_bias.setFont(title_font)
-        self.cb_experiment_bias_type = QtWidgets.QComboBox(self)
+        self.lb_experiment_bias.setToolTip('')
+        #self.cb_experiment_bias_type = QtWidgets.QComboBox(self)
+        self.cb_experiment_bias_type = ComboBox(self)
         self.cb_experiment_bias_type.setMinimumWidth(100)
         self.cb_experiment_bias_type.setMaximumWidth(100)
-        self.cb_experiment_bias_stat = QtWidgets.QComboBox(self)
+        self.cb_experiment_bias_type.setToolTip('')
+        #self.cb_experiment_bias_stat = QtWidgets.QComboBox(self)
+        self.cb_experiment_bias_stat = ComboBox(self)
         self.cb_experiment_bias_stat.setMinimumWidth(100)
         self.cb_experiment_bias_stat.setMaximumWidth(100)
+        self.cb_experiment_bias_stat.setToolTip('')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
         self.lb_station_selection = QtWidgets.QLabel(self, text = "Site Select")
         self.lb_station_selection.setFont(title_font)
+        self.lb_station_selection.setToolTip('')
         self.ch_select_all = QtWidgets.QCheckBox("All")
+        self.ch_select_all.setToolTip('')
         self.ch_intersect = QtWidgets.QCheckBox("Intersect")
+        self.ch_intersect.setToolTip('')
 
         #position objects on gridded configuration bar
         config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
@@ -4542,9 +4582,9 @@ parameter_dictionary = {
 #------------------------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------------------------#
 
-#generate GHOST interactive dashboard
+#generate Providentia dashboard
 
 qApp = QtWidgets.QApplication(sys.argv)
 qApp.setStyle("Fusion")
-GHOST_dash = generate_GHOST_interactive_dashboard('parallel')
+Providentia_dash = generate_Providentia_dashboard('parallel')
 sys.exit(qApp.exec_())
