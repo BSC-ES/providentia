@@ -1,4 +1,4 @@
-#GHOST Interactive Configuration File 
+#Providentia Configuration File 
 ###------------------------------------------------------------------------------------###
 
 ###------------------------------------------------------------------------------------###
@@ -28,7 +28,7 @@ else:
 
 #set cartopy data directory (needed on CTE-POWER as has no external internet connection)
 if 'power.cte' in hostname:
-    cartopy_data_dir = '/esarchive/scratch/Earth/fbeninca/python/data'
+    cartopy_data_dir = '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
 #on all machines except CTE-POWER, pull from internet
 else:
     cartopy_data_dir = ''
@@ -59,7 +59,7 @@ if obs_root == '':
         obs_root = '/gpfs/projects/bsc32/AC_cache/obs/ghost'
     #can not recognise machine? --> exit with message
     else:
-        sys.exit('GHOST Interactive cannot be executed as observational root directory is empty, and the machine the tool is being run on is not recognised.')
+        sys.exit('Providentia cannot be executed as observational root directory is empty, and the machine the tool is being run on is not recognised.')
     
 #Define experiment root data directory
 exp_root = ''
@@ -73,7 +73,7 @@ if exp_root == '':
         exp_root = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp'
     #can not recognise machine? --> exit with message
     else:
-        sys.exit('GHOST Interactive cannot be executed as experiment root directory is empty, and the machine the tool is being run on is not recognised.')
+        sys.exit('Providentia cannot be executed as experiment root directory is empty, and the machine the tool is being run on is not recognised.')
     
 ###------------------------------------------------------------------------------------###
 ###DEFINE COLOURMAPS (see all options here: https://matplotlib.org/examples/color/colormaps_reference.html)
