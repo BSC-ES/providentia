@@ -1,8 +1,15 @@
 #WRITTEN BY DENE BOWDALO
 
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+
+#GHOST_experiment_interpolation_submission.py
+
+#module which sets up parallel execution of interpolation jobs for defined configuration
+
+###--------------------------------------------------------------------------------------------------###
 ###IMPORT MODULES
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
 
 import glob
 import numpy as np
@@ -11,8 +18,8 @@ import subprocess
 import sys
 import time
 
-###------------------------------------------------------------------------------------###
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
 
 start = time.time()
 
@@ -40,8 +47,12 @@ task_out_names = []
 #iterate through desired experiment IDs
 for experiment_to_process in experiments_to_process:
 
-    #get experiment specific directory 
-    exp_dir = defined_experiments_dictionary[experiment_to_process]
+    #get experiment specific directory (take P9 experiment directory preferentially over esarchive directory) 
+    exp_dict = defined_experiments_dictionary[experiment_to_process]
+    if 'P9' in list(exp_dict.keys()):
+        exp_dir = exp_dict['P9']
+    else:
+        exp_dir = exp_dict['esarchive']
 
     #get all grid type subdirectories for current experiment
     available_grid_types = [name for name in os.listdir("%s/"%(exp_dir)) if os.path.isdir("%s/%s"%(exp_dir,name))]
@@ -74,7 +85,7 @@ for experiment_to_process in experiments_to_process:
                     for temporal_resolution_to_output in temporal_resolutions_to_output:
 
                         #get all GHOST network/species/temporal resolution observational files
-                        obs_files = np.sort(glob.glob('/esarchive/obs/ghost/%s/%s/%s/%s*.nc'%(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process)))
+                        obs_files = np.sort(glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/%s/%s/%s/%s*.nc'%(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process)))
 
                         #get all relevant experiment files
                         exp_files = np.sort(glob.glob('%s/%s/%s/%s/%s*.nc'%(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process)))
