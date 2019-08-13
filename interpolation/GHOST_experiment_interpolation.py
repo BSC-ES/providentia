@@ -1,8 +1,15 @@
 #WRITTEN BY DENE BOWDALO
 
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+
+#GHOST_experiment_interpolation.py
+
+#module which interpolates experiment output to surface observations 
+
+###--------------------------------------------------------------------------------------------------###
 ###IMPORT MODULES
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
 
 from calendar import monthrange
 import cartopy.crs as ccrs
@@ -18,11 +25,12 @@ import sys
 import time
 import unit_converter
 
-###------------------------------------------------------------------------------------###
-###------------------------------------------------------------------------------------###
-#function that processes monthly interpolated netCDF for an experiment with reference to observational points on the surface
+###--------------------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
 
-def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth):
+def process_monthly_interpolated_netCDF(experiment_to_process, exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth):
+
+    '''function that processes monthly interpolated netCDF for an experiment with reference to observational points on the surface'''
 
     print('Interpolating in %s'%(yearmonth))
 
@@ -31,10 +39,10 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
     month = yearmonth[4:]
 
     #get relevant observational file
-    obs_file = glob.glob('/esarchive/obs/ghost/%s/%s/%s/%s_%s*.nc'%(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process, yearmonth))[0]
+    obs_file = glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/%s/%s/%s/%s_%s*.nc'%(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process, yearmonth))[0]
 
     #get relevant model files
-    model_files = np.sort(glob.glob('%s/%s/%s/%s/%s_%s*.nc'%(defined_experiments_dictionary[experiment_to_process], grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process, yearmonth)))
+    model_files = np.sort(glob.glob('%s/%s/%s/%s/%s_%s*.nc'%(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process, yearmonth)))
 
     #get number of days in month processing
     days_in_month = monthrange(int(year),int(month))[1]
@@ -426,7 +434,7 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
     #create observational interpolated monthly model netcdf
     
     #create new netCDF frame
-    output_dir = '/esarchive/recon/ghost_interp/%s/%s/%s/%s/%s'%(experiment_to_process,grid_type_to_process,temporal_resolution_to_output,speci_to_process,GHOST_network_to_interpolate_against)
+    output_dir = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp/%s/%s/%s/%s/%s'%(experiment_to_process,grid_type_to_process,temporal_resolution_to_output,speci_to_process,GHOST_network_to_interpolate_against)
     #if output directory does not exist yet, create it
     try:
         if not os.path.isdir(output_dir):
@@ -559,16 +567,17 @@ def process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_proc
 
     return
 
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
 #define inverse distance weighting interpolation function
-###------------------------------------------------------------------------------------###
-
-#function that calculates N nearest neighbour inverse distance weights (and indices) of model gridcells centres from an array of geographic observational station coordinates   
-#both observational and model geographic longitude/latitude coordinates are first converted to cartesian ECEF (Earth Centred, Earth Fixed) coordinates, before calculating distances.
-#weights returned for obervational stations not contained within model grid extents are all zero.
+###--------------------------------------------------------------------------------------------------###
 
 def n_nearest_neighbour_inverse_distance_weights(obs_lons,obs_lats,mod_lons_centre,mod_lats_centre,model_grid_outline_poly,n_neighbours=1):
    
+    '''function that calculates N nearest neighbour inverse distance weights (and indices) of model gridcells centres from an array of geographic observational station coordinates.
+       both observational and model geographic longitude/latitude coordinates are first converted to cartesian ECEF (Earth Centred, Earth Fixed) coordinates, before calculating distances.
+       weights returned for obervational stations not contained within model grid extents are all zero.
+    '''
+
     #for each pair of observational station geographic coordinates, test if station is inside model grid
     obs_inside_model_grid = np.array([model_grid_outline_poly.contains(Point(obs_lon,obs_lat)) for obs_lon,obs_lat in zip(obs_lons,obs_lats)]) 
 
@@ -607,8 +616,8 @@ def n_nearest_neighbour_inverse_distance_weights(obs_lons,obs_lats,mod_lons_cent
 
     return nearest_neighbour_inds, inverse_dists
 
-###------------------------------------------------------------------------------------###
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
 
 #get command line arguments variables passed upon execution
 experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7]
@@ -616,7 +625,14 @@ experiment_to_process, grid_type_to_process, model_temporal_resolution_to_proces
 #read defined experiments dictionary
 from defined_experiments import defined_experiments_dictionary
 
+#get experiment specific directory (take P9 experiment directory preferentially over esarchive directory)
+exp_dict = defined_experiments_dictionary[experiment_to_process]
+if 'P9' in list(exp_dict.keys()):
+   exp_dir = exp_dict['P9']
+else:
+   exp_dir = exp_dict['esarchive']
+
 #pass variables to interpolation function and do interpolation 
-process_monthly_interpolated_netCDF(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth)
+process_monthly_interpolated_netCDF(experiment_to_process, exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth)
 
 print('DONE')
