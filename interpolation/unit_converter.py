@@ -1,15 +1,22 @@
 #WRITTEN BY DENE BOWDALO
 
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+
+#unit_converter.py
+
+#module which handles conversion of units (SI or non-SI)
+
+###--------------------------------------------------------------------------------------------------###
 ###IMPORT MODULES
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
 
 from collections import Counter
 import numpy as np
 import re
 import sys
 
-###------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
 
 class convert_units(object):
 
@@ -847,3 +854,4 @@ class convert_units(object):
         'number_density':                               ["mole_fraction*((avogadro_constant*pressure)/(molar_gas_constant*temperature))","(mass_density*avogadro_constant)/molar_mass"],
         'mass_density>mole_fraction--conversion_factor':"((molar_gas_constant*temperature)/(molar_mass*pressure))",
         'mole_fraction>mass_density--conversion_factor':"mole_fraction/((molar_gas_constant*temperature)/(molar_mass*pressure))"}
+
