@@ -3,8 +3,9 @@
 #SBATCH --job-name=SubmitG                                         
 #SBATCH --ntasks=1                                                
 #SBATCH −−cpus−per−task=1
-#SBATCH --mem-per-cpu=4G
 #SBATCH --time=48:00:00                                            
+#SBATCH --output=/dev/null
+#SBATCH --error=/dev/null
 
 module load Python/3.7.0-foss-2018b
 module load Cartopy/0.17.0-foss-2018b-Python-3.7.0

@@ -155,9 +155,10 @@ submit_file.write("\n")
 submit_file.write("#SBATCH --job-name=G%s\n"%(unique_ID))
 submit_file.write("#SBATCH --ntasks=1\n")
 submit_file.write("#SBATCH --cpus-per-task=1\n")
-submit_file.write("#SBATCH --mem-per-cpu=2G\n") 
 submit_file.write("#SBATCH --time=01:00:00\n")
-submit_file.write("#SBATCH --array=1-%s%%1000\n"%(N_tasks))
+submit_file.write("#SBATCH --array=1-%s\n"%(N_tasks))
+submit_file.write("#SBATCH --output=/dev/null\n")
+submit_file.write("#SBATCH --error=/dev/null\n")
 submit_file.write("\n")
 submit_file.write("arguments_store=%s/%s.txt\n"%(arguments_dir, unique_ID))
 submit_file.write("argument_a=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $1}')\n")
@@ -190,8 +191,8 @@ while submit_complete == False:
         submit_complete = True
         print('%s INTERPOLATION JOB/S SUBMITTED'%(N_tasks))
 
-#now all interpoaltion tasks have been submitted
-#monitor number of jobs in queue (every 30 seconds) until there are 0 left in the squeue
+#now all interpolation tasks have been submitted
+#monitor number of jobs in queue (every 10 seconds) until there are 0 left in the squeue
 all_tasks_finished = False
 
 while all_tasks_finished == False:
@@ -216,10 +217,6 @@ while all_tasks_finished == False:
     all_tasks_finished = True
 
 end = time.time()
-
-#remove default .out files generated in submit directory (don't know why these are created --> probably to do with calling srun...)
-for f in glob.glob("%s/*.out"%(submit_dir)):
-    os.remove(f)
 
 #remove default .out file generated in working directory (don't know why this is created --> probably to do with calling srun...)
 for f in glob.glob("%s/*.out"%(working_directory)):
