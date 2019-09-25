@@ -799,6 +799,14 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #create dictionary to store available observational data
         self.available_observation_data = {}
 
+        #check end date is > start date, if not, return with no valid obs. files
+        if self.selected_start_date >= self.selected_end_date:
+            return
+
+        #check start date and end date are both within if valid date range (19000101 - 20500101), if not, return with no valid obs. files
+        if (self.selected_start_date < 19000101) or (self.selected_end_date < 19000101) or (self.selected_start_date >= 20500101) or (self.selected_end_date >= 20500101):
+            return 
+        
         #iterate through networks
         for network in list(self.all_observation_data.keys()):
             #iterate through resolutions
@@ -850,20 +858,17 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             #set variable to check if date range changes
             self.date_range_has_changed = False
 
-            #if have start date/end date have changed, make sure both have 8 characters (YYYYMMDD), are both numbers, are between range of 19000101 and 20500101 and that end date is > start_date, before doing update of selection/fields
+            #if have start date/end date have changed, make sure both have 8 characters (YYYYMMDD), and are both numbers, before doing update of selection/fields
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
                 valid_date = False 
                 selected_start_date = self.le_start_date.text()
                 selected_end_date = self.le_end_date.text()
                 if (len(selected_start_date) == 8) & (len(selected_end_date) ==  8):
                     if (selected_start_date.isdigit() == True) & (selected_end_date.isdigit() == True):
-                        selected_start_date = int(selected_start_date)
-                        selected_end_date = int(selected_end_date)
-                        if (selected_start_date >= 19000101) & (selected_end_date >= 19000101) & (selected_start_date < 20500101) & (selected_end_date < 20500101):
-                            self.date_range_has_changed = True
-                            self.selected_start_date = selected_start_date
-                            self.selected_end_date = selected_end_date
-                            self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
+                        self.date_range_has_changed = True
+                        self.selected_start_date = int(selected_start_date)
+                        self.selected_end_date = int(selected_end_date)
+                        self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
                     else:
                         return
                     
