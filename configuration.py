@@ -88,3 +88,19 @@ sequential_colourmap_warm = 'Reds'
 
 #set the diverging colourmap (used to evaluate differences)
 diverging_colourmap = 'bwr'
+
+###------------------------------------------------------------------------------------###
+###DEFINE PLOT MARKER SIZES
+###------------------------------------------------------------------------------------###
+
+#define marker sizes on legend
+legend_marker_size = 11
+
+#define marker sizes on time series plot
+time_series_marker_size = 1.1
+
+#define marker sizes on temporally aggregated plot 
+temporally_aggregated_marker_size = 3
+
+#define marker sizes on temporally aggregated experiment bias plot 
+temporally_aggregated_experiment_bias_marker_size = 3
