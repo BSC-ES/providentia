@@ -194,7 +194,6 @@ class pop_up_window(QtWidgets.QWidget):
             #create grid of checkboxes
             checkbox_grid = QtWidgets.QGridLayout()
 
-            print(dir(checkbox_grid.setSizeConstraint))
             #define spacing/margin variables
             checkbox_grid.setHorizontalSpacing(1)
             checkbox_grid.setVerticalSpacing(1)
@@ -727,7 +726,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #--------------------------------------------------------------------------------------#
         #if date range has changed then update available observational data dictionary 
         if self.date_range_has_changed == True:
-             self.get_valid_obs_files_in_date_range()
+            self.get_valid_obs_files_in_date_range()
 
         #--------------------------------------------------------------------------------------#
         #initialise/update fields - maintain previously selected values wherever possible
@@ -752,7 +751,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.cb_network.addItems(available_networks)
         if self.selected_network in available_networks:
             self.cb_network.setCurrentText(self.selected_network)
-        if self.config_bar_initialisation == True:
+        else:
             self.selected_network = self.cb_network.currentText()
         
         #update resolution field
@@ -763,7 +762,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
             self.cb_resolution.setCurrentText(self.selected_resolution)
-        if self.config_bar_initialisation == True:
+        else:
             self.selected_resolution = self.cb_resolution.currentText()
 
         #update matrix field
@@ -771,7 +770,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.cb_matrix.addItems(available_matrices)
         if self.selected_matrix in available_matrices:
             self.cb_matrix.setCurrentText(self.selected_matrix) 
-        if self.config_bar_initialisation == True:
+        else:
             self.selected_matrix = self.cb_matrix.currentText()
 
         #update species field
@@ -779,7 +778,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.cb_species.addItems(available_species)
         if self.selected_species in available_species:
             self.cb_species.setCurrentText(self.selected_species) 
-        if self.config_bar_initialisation == True:
+        else:   
             self.selected_species = self.cb_species.currentText()  
 
         #update selected indices for QA
@@ -851,17 +850,20 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             #set variable to check if date range changes
             self.date_range_has_changed = False
 
-            #if have start date/end date have changed, make sure both have 8 characters (YYYYMMDD), are both numbers, and that end date is > start_date, before doing update of selection/fields
+            #if have start date/end date have changed, make sure both have 8 characters (YYYYMMDD), are both numbers, are between range of 19000101 and 20500101 and that end date is > start_date, before doing update of selection/fields
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
                 valid_date = False 
                 selected_start_date = self.le_start_date.text()
                 selected_end_date = self.le_end_date.text()
                 if (len(selected_start_date) == 8) & (len(selected_end_date) ==  8):
                     if (selected_start_date.isdigit() == True) & (selected_end_date.isdigit() == True):
-                        self.date_range_has_changed = True
-                        self.selected_start_date = int(selected_start_date)
-                        self.selected_end_date = int(selected_end_date)
-                        self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
+                        selected_start_date = int(selected_start_date)
+                        selected_end_date = int(selected_end_date)
+                        if (selected_start_date >= 19000101) & (selected_end_date >= 19000101) & (selected_start_date < 20500101) & (selected_end_date < 20500101):
+                            self.date_range_has_changed = True
+                            self.selected_start_date = selected_start_date
+                            self.selected_end_date = selected_end_date
+                            self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
                     else:
                         return
                     
