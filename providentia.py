@@ -11,7 +11,7 @@
 ###IMPORT CONFIGURATION FILE VARIABLES
 ###------------------------------------------------------------------------------------###
 
-from configuration import n_CPUs, obs_root, exp_root, sequential_colourmap, sequential_colourmap_warm, diverging_colourmap, cartopy_data_dir
+from configuration import n_CPUs, obs_root, exp_root, sequential_colourmap, sequential_colourmap_warm, diverging_colourmap, legend_marker_size, time_series_marker_size, temporally_aggregated_marker_size, temporally_aggregated_experiment_bias_marker_size, cartopy_data_dir
 
 ###------------------------------------------------------------------------------------###
 ###IMPORT BUILT-IN MODULES
@@ -2158,12 +2158,12 @@ class MPL_Canvas(FigureCanvas):
 
         #create legend elements
         #add observations element
-        legend_elements = [Line2D([0], [0], marker='o', color='white', markerfacecolor=self.read_instance.data_in_memory['observations']['colour'], markersize=11, label='observations')]
+        legend_elements = [Line2D([0], [0], marker='o', color='white', markerfacecolor=self.read_instance.data_in_memory['observations']['colour'], markersize=legend_marker_size, label='observations')]
         #add element for each experiment
         for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.data_in_memory.keys()))):
             if experiment != 'observations':
                 #add experiment element
-                legend_elements.append(Line2D([0], [0], marker='o', color='white', markerfacecolor=self.read_instance.data_in_memory[experiment]['colour'], markersize=11, label=experiment))
+                legend_elements.append(Line2D([0], [0], marker='o', color='white', markerfacecolor=self.read_instance.data_in_memory[experiment]['colour'], markersize=legend_marker_size, label=experiment))
         
         #plot legend
         self.legend_ax.legend(handles=legend_elements, loc='best',mode='expand', ncol=4, fontsize=9.0)
@@ -2382,7 +2382,7 @@ class MPL_Canvas(FigureCanvas):
                         continue
 
             #plot time series data
-            self.data_array_ts = self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(), color=self.read_instance.data_in_memory_filtered[data_label]['colour'], marker = 'o', markeredgecolor = None, mew = 0, markersize = 1.1, linestyle = 'None', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'])
+            self.data_array_ts = self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(), color=self.read_instance.data_in_memory_filtered[data_label]['colour'], marker = 'o', markeredgecolor = None, mew = 0, markersize = time_series_marker_size, linestyle = 'None', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'])
               
         #set axes labels
         self.ts_ax.set_ylabel('Concentration (%s)'%(self.read_instance.measurement_units), fontsize=8.0)
@@ -2511,14 +2511,14 @@ class MPL_Canvas(FigureCanvas):
                 #split arrays if there are any temporal gaps to avoid line drawn being interpolated across missing values
                 inds_to_split = np.where(np.diff(xticks) > 1)[0]
                 if len(inds_to_split) == 0:
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks, medians, marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'], markersize=3, linewidth=0.5, zorder=median_zorder)
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks, medians, marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'], markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder)
                 else:
                     inds_to_split += 1
                     start_ind = 0
                     for end_ind in inds_to_split:
-                        aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks[start_ind:end_ind], medians[start_ind:end_ind], marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'], markersize=3, linewidth=0.5, zorder=median_zorder)
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks[start_ind:end_ind], medians[start_ind:end_ind], marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'], markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder)
                         start_ind = end_ind   
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks[start_ind:], medians[start_ind:], marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'], markersize=3, linewidth=0.5, zorder=median_zorder) 
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks[start_ind:], medians[start_ind:], marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'], markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder) 
 
         #------------------------------------------------------------------------------------------------#
         #plot title (with units)
@@ -2611,7 +2611,7 @@ class MPL_Canvas(FigureCanvas):
                     continue
                 #else, make temporally aggregated plot for currently active experiment bias statistic 
                 else:
-                    aggregation_dict[temporal_aggregation_resolution]['plots'][data_label] = aggregation_dict[temporal_aggregation_resolution]['ax'].plot(aggregation_dict[temporal_aggregation_resolution]['xticks'], self.selected_station_data[data_label][temporal_aggregation_resolution][selected_experiment_bias_stat], color=self.read_instance.data_in_memory_filtered[data_label]['colour'], marker = 'o', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'], markersize=3, linewidth=0.5)            
+                    aggregation_dict[temporal_aggregation_resolution]['plots'][data_label] = aggregation_dict[temporal_aggregation_resolution]['ax'].plot(aggregation_dict[temporal_aggregation_resolution]['xticks'], self.selected_station_data[data_label][temporal_aggregation_resolution][selected_experiment_bias_stat], color=self.read_instance.data_in_memory_filtered[data_label]['colour'], marker = 'o', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'], markersize=temporally_aggregated_experiment_bias_marker_size, linewidth=0.5)            
 
             #set x axis limits
             aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(np.min(aggregation_dict[temporal_aggregation_resolution]['xticks'])-0.5, np.max(aggregation_dict[temporal_aggregation_resolution]['xticks'])+0.5)
