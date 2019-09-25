@@ -11,7 +11,7 @@
 ###IMPORT CONFIGURATION FILE VARIABLES
 ###------------------------------------------------------------------------------------###
 
-from configuration import n_CPUs, obs_root, exp_root, sequential_colourmap, sequential_colourmap_warm, diverging_colourmap, legend_marker_size, time_series_marker_size, temporally_aggregated_marker_size, temporally_aggregated_experiment_bias_marker_size, cartopy_data_dir
+from configuration import n_CPUs, obs_root, exp_root, sequential_colourmap, sequential_colourmap_warm, diverging_colourmap, map_unselected_station_marker_size, map_selected_station_marker_size, legend_marker_size, time_series_marker_size, temporally_aggregated_marker_size, temporally_aggregated_experiment_bias_marker_size, cartopy_data_dir
 
 ###------------------------------------------------------------------------------------###
 ###IMPORT BUILT-IN MODULES
@@ -1665,7 +1665,7 @@ class MPL_Canvas(FigureCanvas):
             #set map extents
             self.map_ax.set_global() 
 
-            #add coastlines and
+            #add coastlines and gridelines
             self.map_ax.add_feature(cfeature.LAND, facecolor='0.85')
             self.map_ax.gridlines(linestyle='-', alpha=0.4)
             
@@ -2006,7 +2006,7 @@ class MPL_Canvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([],dtype=np.int)
 
             #plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=3.0, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)     
+            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=map_unselected_station_marker_size, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)     
             #create 2D numpy array of plotted station coordinates
             self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
 
@@ -2051,7 +2051,7 @@ class MPL_Canvas(FigureCanvas):
         #reset alphas of all plotted stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
             self.rgba_tuples[:,-1] = 1.0
-            marker_sizes = np.full(len(self.z_statistic), 3.0)
+            marker_sizes = np.full(len(self.z_statistic), map_unselected_station_marker_size)
             self.map_points.set_facecolor(self.rgba_tuples)
             #reset marker sizes of all plotted stations
             self.map_points.set_sizes(marker_sizes)                
@@ -2065,8 +2065,8 @@ class MPL_Canvas(FigureCanvas):
                     self.rgba_tuples[absolute_non_selected_stations,-1] = 0.25
                     self.map_points.set_facecolor(self.rgba_tuples)
 
-                #increase marker size of selected stations 
-                marker_sizes[self.absolute_selected_station_inds] = 8.0    
+                #increase marker size of selected stations
+                marker_sizes[self.absolute_selected_station_inds] = map_selected_station_marker_size    
                 self.map_points.set_sizes(marker_sizes)
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------# 
