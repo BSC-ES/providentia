@@ -2030,25 +2030,26 @@ class MPL_Canvas(FigureCanvas):
         else:
             self.map_ax.set_title('%s Stations Selected of %s Available'%(len(self.relative_selected_station_inds), len(self.active_map_valid_station_inds)), fontsize=8.5, pad=3)         
 
-        #reset alphas of all plotted stations 
-        self.rgba_tuples[:,-1] = 1.0
-        marker_sizes = np.full(len(self.z_statistic), 3.0)
-        self.map_points.set_facecolor(self.rgba_tuples)
-        #reset marker sizes of all plotted stations
-        self.map_points.set_sizes(marker_sizes)                
+        #reset alphas of all plotted stations (if have some stations on map)
+        if len(self.active_map_valid_station_inds) > 0:
+            self.rgba_tuples[:,-1] = 1.0
+            marker_sizes = np.full(len(self.z_statistic), 3.0)
+            self.map_points.set_facecolor(self.rgba_tuples)
+            #reset marker sizes of all plotted stations
+            self.map_points.set_sizes(marker_sizes)                
 
-        #if have some selected stations, update map plot with station selection (reducing alpha of non-selected stations, and increasing marker size of selected stations)
-        if len(self.relative_selected_station_inds) > 0:
+            #if have some selected stations, update map plot with station selection (reducing alpha of non-selected stations, and increasing marker size of selected stations)
+            if len(self.relative_selected_station_inds) > 0:
 
-            #decrease alpha of non-selected stations    
-            absolute_non_selected_stations = np.nonzero(~np.in1d(range(self.z_statistic.shape[0]), self.absolute_selected_station_inds))[0]
-            if len(absolute_non_selected_stations) > 0: 
-                self.rgba_tuples[absolute_non_selected_stations,-1] = 0.25
-                self.map_points.set_facecolor(self.rgba_tuples)
+                #decrease alpha of non-selected stations    
+                absolute_non_selected_stations = np.nonzero(~np.in1d(range(self.z_statistic.shape[0]), self.absolute_selected_station_inds))[0]
+                if len(absolute_non_selected_stations) > 0: 
+                    self.rgba_tuples[absolute_non_selected_stations,-1] = 0.25
+                    self.map_points.set_facecolor(self.rgba_tuples)
 
-            #increase marker size of selected stations 
-            marker_sizes[self.absolute_selected_station_inds] = 8.0    
-            self.map_points.set_sizes(marker_sizes)
+                #increase marker size of selected stations 
+                marker_sizes[self.absolute_selected_station_inds] = 8.0    
+                self.map_points.set_sizes(marker_sizes)
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------# 
 
