@@ -93,6 +93,12 @@ diverging_colourmap = 'bwr'
 ###DEFINE PLOT MARKER SIZES
 ###------------------------------------------------------------------------------------###
 
+#define marker sizes for unselected stations on map
+map_unselected_station_marker_size = 3
+
+#define marker sizes for selected stations on map
+map_selected_station_marker_size = 8
+
 #define marker sizes on legend
 legend_marker_size = 11
 
