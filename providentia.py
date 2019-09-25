@@ -781,6 +781,20 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         else:   
             self.selected_species = self.cb_species.currentText()  
 
+        #update available experiment data dictionary 
+        self.get_valid_experiment_files_in_date_range()
+        #update selected indices for experiments -- keeping previously selected experiments if available
+        if len(self.selected_indices['EXPERIMENTS'][0]) > 0:
+            previous_selected_experiments = self.previous_available_experiment_grids[self.selected_indices['EXPERIMENTS'][0]]
+        else:
+            previous_selected_experiments = []
+        #set selected indices as previously selected indices in current available list of experiments
+        selected_experiments = [previous_selected_experiment for previous_selected_experiment in previous_selected_experiments if previous_selected_experiment in self.available_experiment_grids]
+        selected_experiment_inds = np.array([np.where(self.available_experiment_grids == selected_experiment)[0][0] for selected_experiment in selected_experiments], dtype=np.uint8)
+        self.selected_indices['EXPERIMENTS'] = [selected_experiment_inds]   
+        #set previous available experiments variable   
+        self.previous_available_experiment_grids = np.array(self.available_experiment_grids)
+
         #update selected indices for QA
         #if initialising config bar then check default selection
         if self.config_bar_initialisation == True:
@@ -835,6 +849,48 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
 
+    def get_valid_experiment_files_in_date_range(self):
+
+        '''define function which gathers available experiment data for selected network/resolution/species.
+           a dictionary is created storing available experiment-grid names associated with valid files in set date range.
+        '''
+    
+        #create dictionary to store available experiment information
+        self.available_experiment_data = {}
+
+        #get all different experiment names
+        available_experiments = os.listdir('%s'%(exp_root))          
+
+        #iterate through available experiments
+        for experiment in available_experiments:      
+ 
+            #get all available grid types by experiment 
+            available_grids = os.listdir('%s/%s'%(exp_root,experiment))
+
+            #iterate through all available grids
+            for grid in available_grids:
+            
+                #test first if interpolated directory exists before trying to get files from it
+                #if it does not exit, continue
+                if not os.path.exists('%s/%s/%s/%s/%s/%s'%(exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network)):       
+                    continue
+                else:
+                    #get all experiment netCDF files by experiment/grid/selected resolution/selected species/selected network
+                    network_files = os.listdir('%s/%s/%s/%s/%s/%s'%(exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network))
+                    #get start YYYYMM yearmonths of data files
+                    network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files] 
+                    #limit data files to just those within date range
+                    valid_network_files_yearmonths = [ym for ym in network_files_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) & (ym < self.selected_end_date)]
+                    #if have some valid data files for experiment-grid, add experiment grid (with associated yearmonths) to dictionary
+                    if len(valid_network_files_yearmonths) > 0:
+                        self.available_experiment_data['%s-%s'%(experiment,grid)] = valid_network_files_yearmonths
+
+        #get list of available experiment-grid names
+        self.available_experiment_grids = np.array(sorted(list(self.available_experiment_data.keys())))
+
+    #--------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------------#
+
     def config_bar_params_change_handler(self, changed_param):
 
         '''define function which handles interactive updates of combo box fields'''
@@ -880,56 +936,6 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
     #define functions which generate pop up configuration windows for some fields
 
     def handle_pop_up_experiments_window(self):
-
-        #gather available experiment data for selected network/resolution/species
-        #create dictionary storing available experiment-grid names associated with valid files in set date range
-        self.available_experiment_data = {}
-
-        #get all different experiment names
-        available_experiments = os.listdir('%s'%(exp_root))          
-
-        #iterate through available experiments
-        for experiment in available_experiments:      
- 
-            #get all available grid types by experiment 
-            available_grids = os.listdir('%s/%s'%(exp_root,experiment))
-
-            #iterate through all available grids
-            for grid in available_grids:
-            
-                #test first if interpolated directory exists before trying to get files from it
-                #if it does not exit, continue
-                if not os.path.exists('%s/%s/%s/%s/%s/%s'%(exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network)):       
-                    continue
-                else:
-                    #get all experiment netCDF files by experiment/grid/selected resolution/selected species/selected network
-                    network_files = os.listdir('%s/%s/%s/%s/%s/%s'%(exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network))
-                    #get start YYYYMM yearmonths of data files
-                    network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files] 
-                    #limit data files to just those within date range
-                    valid_network_files_yearmonths = [ym for ym in network_files_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) & (ym < self.selected_end_date)]
-                    #if have some valid data files for experiment-grid, add experiment grid (with associated yearmonths) to dictionary
-                    if len(valid_network_files_yearmonths) > 0:
-                        self.available_experiment_data['%s-%s'%(experiment,grid)] = valid_network_files_yearmonths
-
-        #get list of available experiment-grid names
-        self.available_experiment_grids = np.array(sorted(list(self.available_experiment_data.keys())))
-
-        #update selected indices for experiments  
-        #for experiments, keep previously selected values selected if still available
-        #update previously selected experiments variable
-        if len(self.selected_indices['EXPERIMENTS'][0]) > 0:
-            previous_selected_experiments = self.previous_available_experiment_grids[self.selected_indices['EXPERIMENTS'][0]]
-        else:
-            previous_selected_experiments = []
-        #set selected indices as previously selected indices in current available list of experiments
-        selected_experiments = [previous_selected_experiment for previous_selected_experiment in previous_selected_experiments if previous_selected_experiment in self.available_experiment_grids]
-        selected_experiment_inds = np.array([np.where(self.available_experiment_grids == selected_experiment)[0][0] for selected_experiment in selected_experiments], dtype=np.uint8)
-        self.selected_indices['EXPERIMENTS'] = [selected_experiment_inds]   
-
-        #set previous available experiments variable   
-        self.previous_available_experiment_grids = np.array(self.available_experiment_grids)
-
         #setup pop up window
         self.experiments_window = pop_up_window(window_type='EXPERIMENTS', window_titles=['Select Experiment/s'], checkbox_labels=[self.available_experiment_grids], default_checkbox_selection=[[]], selected_indices=self.selected_indices)
 
@@ -1375,7 +1381,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         if first_valid_file_ind == last_valid_file_ind:
             relevant_files = [relevant_files[first_valid_file_ind]]   
         else:
-            relevant_files = relevant_files[first_valid_file_ind:last_valid_file_ind]     
+            relevant_files = relevant_files[first_valid_file_ind:last_valid_file_ind]  
  
         #check if data label in data in memory dictionary
         if data_label not in list(self.data_in_memory.keys()):  
@@ -4606,5 +4612,5 @@ parameter_dictionary = {
 
 qApp = QtWidgets.QApplication(sys.argv)
 qApp.setStyle("Fusion")
-Providentia_dash = generate_Providentia_dashboard('parallel')
+Providentia_dash = generate_Providentia_dashboard('serial')
 sys.exit(qApp.exec_())
