@@ -1789,9 +1789,21 @@ class MPL_Canvas(FigureCanvas):
                 #get unique standard measurement methodologies across stations 
                 self.read_instance.previous_station_unique_methods = copy.deepcopy(self.read_instance.station_unique_methods)
                 self.read_instance.station_unique_methods = np.unique(self.read_instance.station_methods[valid_station_indices_availability])
-                #if are reading new data into memory and unique methods have changed from previous, update all methods to be checked by default
-                if (np.array_equal(self.read_instance.previous_station_unique_methods, self.read_instance.station_unique_methods) == False) & (self.read_instance.block_MPL_canvas_updates == True):
-                    self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
+
+                #if unique methods have changed from previous, update method checkboxes
+                if np.array_equal(self.read_instance.previous_station_unique_methods, self.read_instance.station_unique_methods) == False:
+                    #if are reading new data into memory, update all methods to be checked by default
+                    if self.read_instance.block_MPL_canvas_updates == True:
+                        self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
+                    
+                    #else if all previous methods were ticked then, update all new methods to be ticked also
+                    elif len(self.read_instance.selected_indices['METHODS'][0]) == len(self.read_instance.previous_station_unique_methods):
+                        self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
+                    
+                    #otherwise, update checked methods to be the subset between previously checked methods and current unique methods 
+                    else:
+                        intersect_methods = np.intersect1d(self.read_instance.previous_station_unique_methods[self.read_instance.selected_indices['METHODS'][0]], self.read_instance.station_unique_methods)
+                        self.read_instance.selected_indices['METHODS'] = [[np.where(self.read_instance.station_unique_methods == intersect_method)[0][0] for intersect_method in intersect_methods]] 
 
                 #get indices of subset stations which use checked standard methodologies
                 checked_methods = self.read_instance.station_unique_methods[self.read_instance.selected_indices['METHODS'][0]]
