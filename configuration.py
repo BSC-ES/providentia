@@ -18,7 +18,7 @@ import sys
 #get hostname
 hostname = socket.getfqdn()
 #get available N CPUs
-if 'power.cte' in hostname:
+if ('power.cte' in hostname) or ('bsc.mn' in hostname):
     bash_command = 'squeue -h -o "%C"'
     process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
@@ -27,7 +27,7 @@ else:
     available_CPUs = int(os.cpu_count())
 
 #set cartopy data directory (needed on CTE-POWER as has no external internet connection)
-if 'power.cte' in hostname:
+if ('power.cte' in hostname) or ('bsc.mn' in hostname):
     cartopy_data_dir = '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
 #on all machines except CTE-POWER, pull from internet
 else:
@@ -55,7 +55,7 @@ if obs_root == '':
     if 'bscearth' in hostname:
         obs_root = '/esarchive/obs/ghost'
     #running on CTE-POWER?
-    elif 'power.cte' in hostname:
+    elif ('power.cte' in hostname) or ('bsc.mn' in hostname):
         obs_root = '/gpfs/projects/bsc32/AC_cache/obs/ghost'
     #can not recognise machine? --> exit with message
     else:
@@ -69,7 +69,7 @@ if exp_root == '':
     if 'bscearth' in hostname:
         exp_root = '/esarchive/recon/ghost_interp'
     #running on CTE-POWER?
-    elif 'power.cte' in hostname:
+    elif ('power.cte' in hostname) or ('bsc.mn' in hostname):
         exp_root = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp'
     #can not recognise machine? --> exit with message
     else:
