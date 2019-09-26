@@ -31,6 +31,7 @@ from weakref import WeakKeyDictionary
 ###------------------------------------------------------------------------------------###
 ###IMPORT THIRD-PARTY MODULES
 ###------------------------------------------------------------------------------------###
+from netCDF4 import Dataset, num2date
 import cartopy
 #set cartopy data directory
 cartopy.config['pre_existing_data_dir'] = cartopy_data_dir
@@ -47,7 +48,6 @@ from matplotlib.patches import Polygon
 from matplotlib.path import Path
 from matplotlib.widgets import LassoSelector
 from matplotlib.gridspec import GridSpec
-from netCDF4 import Dataset, num2date
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
@@ -4612,5 +4612,5 @@ parameter_dictionary = {
 
 qApp = QtWidgets.QApplication(sys.argv)
 qApp.setStyle("Fusion")
-Providentia_dash = generate_Providentia_dashboard('serial')
+Providentia_dash = generate_Providentia_dashboard('parallel')
 sys.exit(qApp.exec_())
