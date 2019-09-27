@@ -15,7 +15,11 @@ import sys
 ###------------------------------------------------------------------------------------###
 
 #get machine name
-machine = os.environ['BSC_MACHINE']
+try:
+    machine = os.environ['BSC_MACHINE']
+except:
+    machine = ''
+
 #get available N CPUs
 if (machine == 'power') or (machine == 'mn4'):
     bash_command = 'squeue -h -o "%C"'
@@ -66,7 +70,7 @@ if exp_root == '':
         exp_root = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp'
     #running on workstation?
     else:
-	exp_root = '/esarchive/recon/ghost_interp'    
+        exp_root = '/esarchive/recon/ghost_interp'
 
 ###------------------------------------------------------------------------------------###
 ###DEFINE COLOURMAPS (see all options here: https://matplotlib.org/examples/color/colormaps_reference.html)
