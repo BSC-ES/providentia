@@ -2,7 +2,7 @@
 module purge
 
 #CTE POWER
-if [ $BSC_MACHINE == "" ]; then
+if [ $BSC_MACHINE == "power" ]; then
     module load Python/3.7.0-foss-2018b
     module load Cartopy/0.17.0-foss-2018b-Python-3.7.0
     module load cftime/1.0.3.4-foss-2018b-Python-3.7.0
