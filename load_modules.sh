@@ -1,9 +1,8 @@
 #!/bin/sh
 module purge
 
-machine=$(hostname -a)
 #CTE POWER
-if [[ $machine == *"power.cte"* ]]; then
+if [ $BSC_MACHINE == "" ]; then
     module load Python/3.7.0-foss-2018b
     module load Cartopy/0.17.0-foss-2018b-Python-3.7.0
     module load cftime/1.0.3.4-foss-2018b-Python-3.7.0
@@ -16,7 +15,7 @@ if [[ $machine == *"power.cte"* ]]; then
     #get allocation of resources on CTE-POWER machine
     salloc -t 02:00:00 -n 1 -c 16 --mem=50Gb -J PRV -q debug --x11=first
 #Marenustrum4
-elif [[ $machine == *"bsc.mn"* ]]; then
+elif [ $BSC_MACHINE == "mn4" ]; then
     module load gcc/5.4.0 intel/2018.4 impi/2018.4 mkl/2018.4 python/3.7.4_ES udunits/2.2.25  hdf5/1.10.5  netcdf/4.4.1.1_lf geos/3.6.1 proj/4.9.3 gdal/2.2.3
     #get allocation of resources on MN4 machine
     salloc -t 02:00:00 -n 1 -c 16 -J PRV -q debug --x11=first

@@ -7,7 +7,6 @@
 
 import os
 import re
-import socket
 import subprocess
 import sys
 
@@ -15,10 +14,10 @@ import sys
 ###SETTING SOME NECESSARY DETAILS --> DO NOT MODIFY!
 ###------------------------------------------------------------------------------------###
 
-#get hostname
-hostname = socket.getfqdn()
+#get machine name
+machine = os.environ['BSC_MACHINE']
 #get available N CPUs
-if ('power.cte' in hostname) or ('bsc.mn' in hostname):
+if (machine == 'power') or (machine == 'mn4'):
     bash_command = 'squeue -h -o "%C"'
     process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
@@ -26,10 +25,10 @@ if ('power.cte' in hostname) or ('bsc.mn' in hostname):
 else:
     available_CPUs = int(os.cpu_count())
 
-#set cartopy data directory (needed on CTE-POWER as has no external internet connection)
-if ('power.cte' in hostname) or ('bsc.mn' in hostname):
+#set cartopy data directory (needed on CTE-POWER/MN4 as has no external internet connection)
+if (machine == 'power') or (machine == 'mn4'):
     cartopy_data_dir = '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
-#on all machines except CTE-POWER, pull from internet
+#on all machines except CTE-POWER/MN4, pull from internet
 else:
     cartopy_data_dir = ''
 
@@ -51,30 +50,24 @@ if (n_CPUs == '') or (int(n_CPUs) > available_CPUs):
 obs_root = ''
 #set observational root data directory if left undefined
 if obs_root == '':
-    #running on workstation?
-    if 'bscearth' in hostname:
-        obs_root = '/esarchive/obs/ghost'
-    #running on CTE-POWER?
-    elif ('power.cte' in hostname) or ('bsc.mn' in hostname):
+    #running on CTE-POWER/MN4?
+    if (machine == 'power') or (machine == 'mn4'):
         obs_root = '/gpfs/projects/bsc32/AC_cache/obs/ghost'
-    #can not recognise machine? --> exit with message
+    #running on workstation?
     else:
-        sys.exit('Providentia cannot be executed as observational root directory is empty, and the machine the tool is being run on is not recognised.')
+        obs_root = '/esarchive/obs/ghost'
     
 #Define experiment root data directory
 exp_root = ''
 #set experiment root data directory if left undefined
 if exp_root == '':
-    #running on workstation?
-    if 'bscearth' in hostname:
-        exp_root = '/esarchive/recon/ghost_interp'
     #running on CTE-POWER?
-    elif ('power.cte' in hostname) or ('bsc.mn' in hostname):
+    if (machine == 'power') or (machine == 'mn4'):
         exp_root = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp'
-    #can not recognise machine? --> exit with message
+    #running on workstation?
     else:
-        sys.exit('Providentia cannot be executed as experiment root directory is empty, and the machine the tool is being run on is not recognised.')
-    
+	exp_root = '/esarchive/recon/ghost_interp'    
+
 ###------------------------------------------------------------------------------------###
 ###DEFINE COLOURMAPS (see all options here: https://matplotlib.org/examples/color/colormaps_reference.html)
 ###------------------------------------------------------------------------------------###
