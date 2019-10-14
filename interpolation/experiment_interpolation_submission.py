@@ -21,13 +21,14 @@ import time
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
 
+#start timer
 start = time.time()
 
 #define current working directory and arguments/submit/interpolation log subdirectories
 working_directory = os.getcwd()
-arguments_dir = '%s/arguments'%(working_directory)
-submit_dir = '%s/submit'%(working_directory)
-interpolation_log_dir = '%s/interpolation_logs'%(working_directory)
+arguments_dir = '{}/arguments'.format(working_directory)
+submit_dir = '{}/submit'.format(working_directory)
+interpolation_log_dir = '{}/interpolation_logs'.format(working_directory)
 
 #set SLURM job ID as unique ID for tracking tasks defined to process in the configuration file
 unique_ID = sys.argv[1]
@@ -39,7 +40,7 @@ from configuration import start_date, end_date, experiments_to_process, species_
 from defined_experiments import defined_experiments_dictionary
 
 #create argument text file
-arguments_file= open("%s/%s.txt"%(arguments_dir, unique_ID),"w")
+arguments_file= open("{}/{}.txt".format(arguments_dir, unique_ID),"w")
 
 #create list to hold all .out files generated for each task processed
 task_out_names = []
@@ -47,15 +48,15 @@ task_out_names = []
 #iterate through desired experiment IDs
 for experiment_to_process in experiments_to_process:
 
-    #get experiment specific directory (take P9 experiment directory preferentially over esarchive directory) 
+    #get experiment specific directory (take gpfs directory preferentially over esarchive directory) 
     exp_dict = defined_experiments_dictionary[experiment_to_process]
-    if 'P9' in list(exp_dict.keys()):
-        exp_dir = exp_dict['P9']
+    if 'gpfs' in list(exp_dict.keys()):
+        exp_dir = exp_dict['gpfs']
     else:
         exp_dir = exp_dict['esarchive']
 
     #get all grid type subdirectories for current experiment
-    available_grid_types = [name for name in os.listdir("%s/"%(exp_dir)) if os.path.isdir("%s/%s"%(exp_dir,name))]
+    available_grid_types = [name for name in os.listdir("{}/".format(exp_dir)) if os.path.isdir("{}/{}".format(exp_dir,name))]
     #get intersection between desired grid types to process and grid types available in directory
     available_grid_types = [x for x in available_grid_types if x in grid_types_to_process]
 
@@ -63,7 +64,7 @@ for experiment_to_process in experiments_to_process:
     for grid_type_to_process in available_grid_types:
 
         #get all temporal resolution subdirectories for current experiment/grid_type
-        available_model_temporal_resolutions = [name for name in os.listdir("%s/%s/"%(exp_dir,grid_type_to_process)) if os.path.isdir("%s/%s/%s"%(exp_dir,grid_type_to_process,name))]
+        available_model_temporal_resolutions = [name for name in os.listdir("{}/{}/".format(exp_dir,grid_type_to_process)) if os.path.isdir("{}/{}/{}".format(exp_dir,grid_type_to_process,name))]
         #get intersection between desired temporal resolutions to process and temporal resolutions available in directory
         available_model_temporal_resolutions = [x for x in available_model_temporal_resolutions if x in model_temporal_resolutions_to_process]
         
@@ -71,7 +72,7 @@ for experiment_to_process in experiments_to_process:
         for model_temporal_resolution_to_process in available_model_temporal_resolutions:
 
             #get all species subdirectories for current experiment/grid_type/temporal_resolution
-            available_species = [name for name in os.listdir("%s/%s/%s"%(exp_dir,grid_type_to_process,model_temporal_resolution_to_process)) if os.path.isdir("%s/%s/%s/%s"%(exp_dir,grid_type_to_process,model_temporal_resolution_to_process,name))]
+            available_species = [name for name in os.listdir("{}/{}/{}".format(exp_dir,grid_type_to_process,model_temporal_resolution_to_process)) if os.path.isdir("{}/{}/{}/{}".format(exp_dir,grid_type_to_process,model_temporal_resolution_to_process,name))]
             #get intersection between desired species to process and species available in directory
             available_species = [x for x in available_species if x in species_to_process]
 
@@ -85,24 +86,24 @@ for experiment_to_process in experiments_to_process:
                     for temporal_resolution_to_output in temporal_resolutions_to_output:
 
                         #get all GHOST network/species/temporal resolution observational files
-                        obs_files = np.sort(glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/%s/%s/%s/%s*.nc'%(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process)))
+                        obs_files = np.sort(glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/{}/{}/{}/{}*.nc'.format(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process)))
 
                         #get all relevant experiment files
-                        exp_files = np.sort(glob.glob('%s/%s/%s/%s/%s*.nc'%(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process)))
+                        exp_files = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process)))
                         #remove new type of REDUCE output with member number (will be handled in future)
                         exp_files = np.array([exp_file for exp_file in exp_files if '-000_' not in exp_file]) 
 
                         #get all observational file start dates (year and month)
                         obs_files_dates = []
                         for obs_file in obs_files:
-                            obs_file_date = obs_file.split('%s_'%(speci_to_process))[-1].split('.nc')[0]
+                            obs_file_date = obs_file.split('{}_'.format(speci_to_process))[-1].split('.nc')[0]
                             obs_files_dates.append(obs_file_date[:6])
                         obs_files_dates = np.sort(obs_files_dates)
 
                         #get all experiment file start dates (year and month)
                         exp_files_dates = []   
                         for exp_file in exp_files:
-                            exp_file_date = exp_file.split('%s_'%(speci_to_process))[-1].split('.nc')[0]
+                            exp_file_date = exp_file.split('{}_'.format(speci_to_process))[-1].split('.nc')[0]
                             exp_files_dates.append(exp_file_date[:6])
                         exp_files_dates = np.sort(exp_files_dates) 
 
@@ -126,21 +127,21 @@ for experiment_to_process in experiments_to_process:
                             continue
     
                         #create directories to store slurm output/error logs for interpolation task of specific combination of iterated variables (if does not already exist)
-                        if not os.path.exists('%s/%s/%s/%s/%s/%s/%s'%(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output)):
-                            os.makedirs('%s/%s/%s/%s/%s/%s/%s'%(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output))
+                        if not os.path.exists('{}/{}/{}/{}/{}/{}/{}'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output)):
+                            os.makedirs('{}/{}/{}/{}/{}/{}/{}'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output))
 
                         #iterate through intersecting yearmonths and write all current variable arguments to arguments file
                         for yearmonth in intersect_yearmonths:
 
                             #append current iterative arguments to arguments file
-                            arguments_file.write("%s %s %s %s %s %s %s\n"%(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                         
+                            arguments_file.write("{} {} {} {} {} {} {}\n".format(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                         
 
                             #append location of .out file that will be output for each processed task
-                            task_out_names.append('%s/%s/%s/%s/%s/%s/%s/%s.out'%(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                           
+                            task_out_names.append('{}/{}/{}/{}/{}/{}/{}/{}.out'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                           
 
                             #remove previous output logs
-                            if os.path.exists('%s/%s/%s/%s/%s/%s/%s/%s.out'%(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth)):
-                                os.remove('%s/%s/%s/%s/%s/%s/%s/%s.out'%(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))
+                            if os.path.exists('{}/{}/{}/{}/{}/{}/{}/{}.out'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth)):
+                                os.remove('{}/{}/{}/{}/{}/{}/{}/{}.out'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))
 
 #close arguments file
 arguments_file.close()
@@ -149,18 +150,18 @@ arguments_file.close()
 N_tasks = len(task_out_names)
 
 #create job submit batch script
-submit_file = open("%s/%s.sh"%(submit_dir, unique_ID),"w")
+submit_file = open("{}/{}.sh".format(submit_dir, unique_ID),"w")
 submit_file.write("#!/bin/bash\n")
 submit_file.write("\n")
-submit_file.write("#SBATCH --job-name=G%s\n"%(unique_ID))
-submit_file.write("#SBATCH --ntasks=1\n")
-submit_file.write("#SBATCH --cpus-per-task=1\n")
+submit_file.write("#SBATCH --job-name=PRVI_{}\n".format(unique_ID))
+submit_file.write("#SBATCH --ntasks={}\n".format(N_tasks))
 submit_file.write("#SBATCH --time=01:00:00\n")
-submit_file.write("#SBATCH --array=1-%s\n"%(N_tasks))
+submit_file.write("#SBATCH --array=1-{}\n".format(N_tasks))
+submit_file.write("#SBATCH --qos=bsc_es\n")
 submit_file.write("#SBATCH --output=/dev/null\n")
 submit_file.write("#SBATCH --error=/dev/null\n")
 submit_file.write("\n")
-submit_file.write("arguments_store=%s/%s.txt\n"%(arguments_dir, unique_ID))
+submit_file.write("arguments_store={}/{}.txt\n".format(arguments_dir, unique_ID))
 submit_file.write("argument_a=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $1}')\n")
 submit_file.write("argument_b=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $2}')\n")  
 submit_file.write("argument_c=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $3}')\n")
@@ -168,14 +169,16 @@ submit_file.write("argument_d=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_T
 submit_file.write("argument_e=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $5}')\n")
 submit_file.write("argument_f=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $6}')\n")
 submit_file.write("argument_g=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $7}')\n")
-submit_file.write("\n") 
-submit_file.write("srun --cpu-bind=core --output=%s/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.out --error=%s/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.err python -u %s/GHOST_experiment_interpolation.py $argument_a $argument_b $argument_c $argument_d $argument_e $argument_f $argument_g"%(interpolation_log_dir, interpolation_log_dir, working_directory))
+submit_file.write("\n")
+submit_file.write("source load_modules.sh\n") 
+submit_file.write("\n")
+submit_file.write("srun --cpu-bind=core --mpi=pmi2 --output={}/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.out --error={}/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.err python -u {}/GHOST_experiment_interpolation.py $argument_a $argument_b $argument_c $argument_d $argument_e $argument_f $argument_g"%(interpolation_log_dir, interpolation_log_dir, working_directory))
 
 #close submit file
 submit_file.close()
 
 #submit job (make sure it is submitted successfully)
-cmd = ['sbatch', '%s.sh'%(unique_ID)]
+cmd = ['sbatch', '{}.sh'.format(unique_ID)]
 
 submit_complete = False
 while submit_complete == False: 
@@ -189,14 +192,14 @@ while submit_complete == False:
         continue
     else:
         submit_complete = True
-        print('%s INTERPOLATION JOB/S SUBMITTED'%(N_tasks))
+        print('{} INTERPOLATION JOB/S SUBMITTED'.format(N_tasks))
 
 #now all interpolation tasks have been submitted
 #monitor number of jobs in queue (every 10 seconds) until there are 0 left in the squeue
 all_tasks_finished = False
 
 while all_tasks_finished == False:
-    cmd = ['squeue', '-h', '-n', 'G%s'%(unique_ID)]
+    cmd = ['squeue', '-h', '-n', 'PRVI_{}'.format(unique_ID)]
     squeue_process =  subprocess.Popen(cmd, stdout=subprocess.PIPE, encoding='utf8')
     squeue_status = squeue_process.communicate()[0]
     n_jobs_in_queue = len(squeue_status.split('\n')[:-1])
@@ -216,15 +219,16 @@ while all_tasks_finished == False:
     #break out of while loop     
     all_tasks_finished = True
 
+#stop timer
 end = time.time()
 
 #remove default .out file generated in working directory (don't know why this is created --> probably to do with calling srun...)
-for f in glob.glob("%s/*.out"%(working_directory)):
+for f in glob.glob("{}/*.out".format(working_directory)):
     os.remove(f)
 
 if len(failed_tasks) == 0:
-    print('ALL INTERPOLATIONS COMPLETED SUCCESSFULLY IN %s MINUTES'%((end-start)/60.))
+    print('ALL INTERPOLATIONS COMPLETED SUCCESSFULLY IN {} MINUTES'.format((end-start)/60.))
 else:
-    print('%s INTERPOLATIONS FINISHED SUCCESSFULLY IN %s MINUTES'%(N_tasks-len(failed_tasks),(end-start)/60.))
+    print('{} INTERPOLATIONS FINISHED SUCCESSFULLY IN {} MINUTES'.format(N_tasks-len(failed_tasks),(end-start)/60.))
     print('THE FOLLOWING INTERPOLATIONS FAILED:')
     print(failed_tasks)

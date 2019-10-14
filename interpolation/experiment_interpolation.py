@@ -14,7 +14,7 @@
 from calendar import monthrange
 import cartopy.crs as ccrs
 import glob
-import os
+import mpi4py import MPI
 from netCDF4 import Dataset
 import numpy as np
 import pyproj
@@ -28,21 +28,39 @@ import unit_converter
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
 
-def process_monthly_interpolated_netCDF(experiment_to_process, exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth):
+#set number of N neighbours uses for interpolation
+n_neighbours_to_find = 4
 
-    '''function that processes monthly interpolated netCDF for an experiment with reference to observational points on the surface'''
+#get necessary MPI variables
+comm = MPI.COMM_WORLD
+n_procs = comm.Get_size()
+my_rank = comm.Get_rank()
+my_name = MPI.Get_processor_name()
 
-    print('Interpolating in %s'%(yearmonth))
+if my_rank == 0:
+    experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7]
+
+    #read defined experiments dictionary
+    from defined_experiments import defined_experiments_dictionary
+
+    #get experiment specific directory (take gpfs experiment directory preferentially over esarchive directory)
+    exp_dict = defined_experiments_dictionary[experiment_to_process]
+    if 'gpfs' in list(exp_dict.keys()):
+        exp_dir = exp_dict['gpfs']
+    else:
+        exp_dir = exp_dict['esarchive']
+
+    print('Interpolating in {}'.format(yearmonth))
 
     #get year/month string
     year = yearmonth[:4]
     month = yearmonth[4:]
 
     #get relevant observational file
-    obs_file = glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/%s/%s/%s/%s_%s*.nc'%(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process, yearmonth))[0]
+    obs_file = glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/{}/{}/{}/{}_{}*.nc'.format(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process, yearmonth))[0]
 
     #get relevant model files
-    model_files = np.sort(glob.glob('%s/%s/%s/%s/%s_%s*.nc'%(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process, yearmonth)))
+    model_files = np.sort(glob.glob('{}/{}/{}/{}/{}_{}*.nc'.format(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process, yearmonth)))
 
     #get number of days in month processing
     days_in_month = monthrange(int(year),int(month))[1]
@@ -96,7 +114,7 @@ def process_monthly_interpolated_netCDF(experiment_to_process, exp_dir, grid_typ
         except:
             #if have got to last file of month and that is corrupted, return from function
             if model_file_ii == (len(model_files)-1):
-                print('------ All model files corrupted in %s. Skipping month.'%(yearmonth))
+                print('------ All model files corrupted in {}. Skipping month.'.format(yearmonth))
                 return
             #else, continue to next file in month
             else:
@@ -334,7 +352,7 @@ def process_monthly_interpolated_netCDF(experiment_to_process, exp_dir, grid_typ
 
     #the grid type cannot be handled, therefore terminate process
     else:
-        print('Cannot handle grid of type: %s. Terminating process'%(mod_grid_type))
+        print('Cannot handle grid of type: {}. Terminating process'.format(mod_grid_type))
         sys.exit()
 
     #close model netcdf - now have all neccessary grid information
@@ -354,11 +372,11 @@ def process_monthly_interpolated_netCDF(experiment_to_process, exp_dir, grid_typ
 
             #check if have time dimension in daily file, if do not, do not process file
             if 'time' not in list(mod_nc_root.dimensions.keys()):
-                print('------ File %s is corrupt. Skipping.'%(model_file))
+                print('------ File {} is corrupt. Skipping.'.format(model_file))
                 continue 
 
             #get day of month from filename
-            day = int(model_file.split('_%s'%(yearmonth))[-1][:2])
+            day = int(model_file.split('_{}'.format(yearmonth))[-1][:2])
     
             #get difference from start of current day to start of month (in hours)
             diff_hours_start_day = (day-1)*24
@@ -397,7 +415,7 @@ def process_monthly_interpolated_netCDF(experiment_to_process, exp_dir, grid_typ
             mod_nc_root.close()
 
         except:
-            print('------ File %s is corrupt. Skipping.'%(model_file))
+            print('------ File {} is corrupt. Skipping.'.format(model_file))
 
     #for monthly resolution output case, now take average and set output time array
     if temporal_resolution_to_output == 'monthly':
@@ -425,147 +443,177 @@ def process_monthly_interpolated_netCDF(experiment_to_process, exp_dir, grid_typ
     conversion_factor = conv_obj.conversion_factor
     
     #get interpolation weights of model grid to observational stations (using inverse distance weighting interpolation) 
-    n_neighbours_to_find = 4
     nearest_neighbour_inds, inverse_dists = n_nearest_neighbour_inverse_distance_weights(obs_lons, obs_lats, mod_lons_centre, mod_lats_centre, model_grid_outline_poly, n_neighbours=n_neighbours_to_find)
 
-    #-------------------------------------------------------------------#
-    #-------------------------------------------------------------------#
-
-    #create observational interpolated monthly model netcdf
-    
-    #create new netCDF frame
-    output_dir = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp/%s/%s/%s/%s/%s'%(experiment_to_process,grid_type_to_process,temporal_resolution_to_output,speci_to_process,GHOST_network_to_interpolate_against)
-    #if output directory does not exist yet, create it
-    try:
-        if not os.path.isdir(output_dir):
-            os.makedirs(output_dir) 
-    except OSError as err:
-        pass
-    root_grp = Dataset('%s/%s_%s.nc'%(output_dir,speci_to_process,yearmonth), 'w', format="NETCDF4") 
-    #auto mask arrays
-    root_grp.set_auto_mask(True)	
-
-    #file contents
-    root_grp.title = 'Inverse distance weighting (%s neighbours) interpolated %s experiment data for the component %s with reference to the measurement stations in the %s network in %s-%s.'%(n_neighbours_to_find, experiment_to_process, speci_to_process, GHOST_network_to_interpolate_against, year, month)
-    root_grp.institution = 'Barcelona Supercomputing Center'
-    root_grp.source = 'Experiment %s'%(experiment_to_process)
-    root_grp.creator_name = 'Dene R. Bowdalo'
-    root_grp.creator_email = 'dene.bowdalo@bsc.es'
-    root_grp.conventions = 'CF-1.7'
-    root_grp.data_version= '1.0'
-
-    #netcdf dimensions
-    root_grp.createDimension('time', len(yearmonth_time))
-    root_grp.createDimension('station', len(obs_lons))
-    root_grp.createDimension('model_centre_longitude', x_N)
-    root_grp.createDimension('model_centre_latitude', y_N)
-    root_grp.createDimension('grid_edge', model_grid_outline.shape[0])
-
-    #create and write time variable
-    time_var = root_grp.createVariable('time', 'u4', ('time'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['time'].size])
-    time_var.standard_name = 'time'
-    time_var.long_name = 'time'
-    time_var.units = '%s since %s-%s-01 00:00:00'%(descriptive_temporal_resolution,year,month)
-    time_var.description = 'Time in %s since %s-%s-01 00:00 UTC. Time given refers to the start of the time window the measurement is representative of (temporal resolution).'%(descriptive_temporal_resolution,year,month)
-    time_var.axis = 'T'
-    time_var.calendar = 'standard'
-    time_var.tz = 'UTC'
-    time_var[:] = yearmonth_time
-
-    #create and write observational equivalent station reference variable
-    station_reference_var = root_grp.createVariable('station_reference', str, ('station'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['station'].size])
-    station_reference_var.standard_name = obs_station_reference_obj.standard_name
-    station_reference_var.long_name = obs_station_reference_obj.long_name
-    station_reference_var.units = obs_station_reference_obj.units
-    station_reference_var.description = obs_station_reference_obj.description
-    station_reference_var[:] = obs_station_references
-
-    #create and write observational equivalent longitude/latitude variables
-    longitude_var = root_grp.createVariable('longitude', 'f8', ('station'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['station'].size])
-    longitude_var.standard_name = obs_lon_obj.standard_name
-    longitude_var.long_name = obs_lon_obj.long_name
-    longitude_var.units = obs_lon_obj.units
-    longitude_var.description = obs_lon_obj.description    
-    longitude_var.axis = 'X'
-    longitude_var[:] = obs_lons
-
-    latitude_var = root_grp.createVariable('latitude', 'f8', ('station'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['station'].size])
-    latitude_var.standard_name = obs_lat_obj.standard_name
-    latitude_var.long_name = obs_lat_obj.long_name
-    latitude_var.units = obs_lat_obj.units
-    latitude_var.description = obs_lat_obj.description        
-    latitude_var.axis = 'Y'
-    latitude_var[:] = obs_lats
-
-    #create and write 2D meshed longitude/latitude gridcell centre variables
-    model_centre_longitude_var = root_grp.createVariable('model_centre_longitude', 'f8', ('model_centre_latitude','model_centre_longitude'), zlib=True, complevel=4, chunksizes=[y_N,x_N])
-    model_centre_longitude_var.standard_name = 'model centre longitude'
-    model_centre_longitude_var.long_name = 'model centre longitude'
-    model_centre_longitude_var.units = obs_lon_obj.units
-    model_centre_longitude_var.description = '2D meshed grid centre longitudes with %s longitudes in %s bands of latitude'%(x_N,y_N)
-    model_centre_longitude_var.axis = 'X'
-    model_centre_longitude_var[:] = mod_lons_centre
-    
-    model_centre_latitude_var = root_grp.createVariable('model_centre_latitude', 'f8', ('model_centre_latitude','model_centre_longitude'), zlib=True, complevel=4, chunksizes=[y_N,x_N])
-    model_centre_latitude_var.standard_name = 'model centre latitude'
-    model_centre_latitude_var.long_name = 'model centre latitude'
-    model_centre_latitude_var.units = obs_lat_obj.units
-    model_centre_latitude_var.description = '2D meshed grid centre latitudes with %s latitudes in %s bands of longitude'%(y_N,x_N)
-    model_centre_latitude_var.axis = 'Y'
-    model_centre_latitude_var[:] = mod_lats_centre
-
-    #create and write grid domain edge longitude/latitude variables
-    grid_edge_longitude_var = root_grp.createVariable('grid_edge_longitude', 'f8', ('grid_edge'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['grid_edge'].size])   
-    grid_edge_longitude_var.standard_name = 'grid edge longitude'
-    grid_edge_longitude_var.long_name = 'grid edge longitude'
-    grid_edge_longitude_var.units = obs_lon_obj.units
-    grid_edge_longitude_var.description = 'Longitude coordinate along edge of grid domain (going clockwise around grid boundary from bottom-left corner).'
-    grid_edge_longitude_var.description = 'X'
-    grid_edge_longitude_var[:] = model_grid_outline[:,0]
-
-    grid_edge_latitude_var = root_grp.createVariable('grid_edge_latitude', 'f8', ('grid_edge'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['grid_edge'].size])
-    grid_edge_latitude_var.standard_name = 'grid edge latitude'
-    grid_edge_latitude_var.long_name = 'grid edge latitude'
-    grid_edge_latitude_var.units = obs_lat_obj.units
-    grid_edge_latitude_var.description = 'Latitude coordinate along edge of grid domain (going clockwise around grid boundary from bottom-left corner).'
-    grid_edge_latitude_var.description = 'Y'
-    grid_edge_latitude_var[:] = model_grid_outline[:,1]
-
-    #create measured variable
-    measured_var = root_grp.createVariable(speci_to_process, 'f4', ('time','station'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['time'].size, root_grp.dimensions['station'].size])
-    measured_var.standard_name = obs_measured_var_obj.standard_name
-    measured_var.long_name = obs_measured_var_obj.long_name
-    measured_var.units = obs_measured_var_obj.units
-    measured_var.descrption = 'Interpolated value of %s from the experiment %s with reference to the measurement stations in the %s network'%(obs_measured_var_obj.standard_name, experiment_to_process, GHOST_network_to_interpolate_against)
-
-    #iterate through observational stations
-    #use calculated interpolated weights per station to model grid to produce model reciprocal output
-    for station_ii, (obs_lon, obs_lat) in enumerate(zip(obs_lons, obs_lats)):
-        station_weights = inverse_dists[station_ii,:]
-        #if all station weights are 0, station is outside model grid domain
-        #set all values to be NaN
-        if np.all(station_weights == 0):
-            interp_vals = np.full(len(yearmonth_time), np.NaN, dtype=np.float32)
-        else:
-            #get reciprocal model data at N nearest neighbours to observational station 
-            cut_model_data = monthly_model_data[:,nearest_neighbour_inds[station_ii,:n_neighbours_to_find],nearest_neighbour_inds[station_ii,n_neighbours_to_find:]]
-            #create mask where data == NaN
-            invalid_mask = np.isnan(cut_model_data)
-            #create masked array
-            cut_model_data = np.ma.MaskedArray(cut_model_data, mask=invalid_mask)
-            #interpolate masked array across time dimension using interpolated weights per station
-            interp_vals = np.ma.average(cut_model_data, weights = station_weights, axis=1)
-
-        #write measured variable (multiplying with conversion factor in the process)
-        measured_var[:,station_ii] = interp_vals * conversion_factor
-
-    #close completed netCDF
-    root_grp.close() 
+    #split nearest neighbour indices/inverse dists
+    nearest_neighbour_inds_split = np.array_split(nearest_neighbour_inds, n_procs)
+    inverse_dists_split = np.array_split(inverse_dists, n_procs)
+    station_index_split = np.array_split(range(len(nearest_neighbour_inds)), n_procs)
 
     #close observational netcdf
     obs_nc_root.close()
 
-    return
+else:
+    conversion_factor = None
+    nearest_neighbour_inds_split = None
+    inverse_dists_split = None
+    station_index_split = None     
+
+#-------------------------------------------------------------------#
+#-------------------------------------------------------------------#
+
+#broadcast necessary data
+conversion_factor = comm.bcast(conversion_factor, root=0)
+
+#scatter necessary data
+nearest_neighbour_inds_list = comm.scatter(nearest_neighbour_inds_split, root=0)
+inverse_dists_list = comm.scatter(inverse_dists_split, root=0)
+station_index_list = comm.scatter(station_index_split, root=0)
+
+#create observational interpolated monthly model netcdf
+#create new netCDF frame
+output_dir = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp/{}/{}/{}/{}/{}'.format(experiment_to_process,grid_type_to_process,temporal_resolution_to_output,speci_to_process,GHOST_network_to_interpolate_against)
+#if output directory does not exist yet, create it
+try:
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir) 
+except OSError as err:
+    pass
+root_grp = Dataset('{}/{}_{}.nc'.format(output_dir,speci_to_process,yearmonth), 'w', format="NETCDF4") 
+#auto mask arrays
+root_grp.set_auto_mask(True)	
+
+#file contents
+root_grp.title = 'Inverse distance weighting ({} neighbours) interpolated {} experiment data for the component {} with reference to the measurement stations in the {} network in {}-{}.'.format(n_neighbours_to_find, experiment_to_process, speci_to_process, GHOST_network_to_interpolate_against, year, month)
+root_grp.institution = 'Barcelona Supercomputing Center'
+root_grp.source = 'Experiment {}'.format(experiment_to_process)
+root_grp.creator_name = 'Dene R. Bowdalo'
+root_grp.creator_email = 'dene.bowdalo@bsc.es'
+root_grp.conventions = 'CF-1.7'
+root_grp.data_version= '1.0'
+
+for ii, station_i in enumerate(station_index_list):
+     
+    #get station specific nearest neighbour inds/weights
+    nearest_neighbour_inds = nearest_neighbour_inds_list[ii]
+    station_weights = inverse_dists_list[ii]
+
+    if ii == 0:
+        #netcdf dimensions
+        root_grp.createDimension('time', len(yearmonth_time))
+        root_grp.createDimension('station', len(obs_lons))
+        root_grp.createDimension('model_centre_longitude', x_N)
+        root_grp.createDimension('model_centre_latitude', y_N)
+        root_grp.createDimension('grid_edge', model_grid_outline.shape[0])
+
+        #create and write time variable
+        time_var = root_grp.createVariable('time', 'u4', ('time'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['time'].size])
+        time_var.standard_name = 'time'
+        time_var.long_name = 'time'
+        time_var.units = '{} since {}-{}-01 00:00:00'.format(descriptive_temporal_resolution,year,month)
+        time_var.description = 'Time in {} since {}-{}-01 00:00 UTC. Time given refers to the start of the time window the measurement is representative of (temporal resolution).'.format(descriptive_temporal_resolution,year,month)
+        time_var.axis = 'T'
+        time_var.calendar = 'standard'
+        time_var.tz = 'UTC'
+        if my_rank == 0:
+            time_var[:] = yearmonth_time
+
+        #create and write observational equivalent station reference variable
+        station_reference_var = root_grp.createVariable('station_reference', str, ('station'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['station'].size])
+        station_reference_var.standard_name = obs_station_reference_obj.standard_name
+        station_reference_var.long_name = obs_station_reference_obj.long_name
+        station_reference_var.units = obs_station_reference_obj.units
+        station_reference_var.description = obs_station_reference_obj.description
+        if my_rank == 0:
+            station_reference_var[:] = obs_station_references
+
+        #create and write observational equivalent longitude/latitude variables
+        longitude_var = root_grp.createVariable('longitude', 'f8', ('station'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['station'].size])
+        longitude_var.standard_name = obs_lon_obj.standard_name
+        longitude_var.long_name = obs_lon_obj.long_name
+        longitude_var.units = obs_lon_obj.units
+        longitude_var.description = obs_lon_obj.description    
+        longitude_var.axis = 'X'
+        if my_rank == 0:
+            longitude_var[:] = obs_lons
+
+        latitude_var = root_grp.createVariable('latitude', 'f8', ('station'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['station'].size])
+        latitude_var.standard_name = obs_lat_obj.standard_name
+        latitude_var.long_name = obs_lat_obj.long_name
+        latitude_var.units = obs_lat_obj.units
+        latitude_var.description = obs_lat_obj.description        
+        latitude_var.axis = 'Y'
+        if my_rank == 0:
+            latitude_var[:] = obs_lats
+
+        #create and write 2D meshed longitude/latitude gridcell centre variables
+        model_centre_longitude_var = root_grp.createVariable('model_centre_longitude', 'f8', ('model_centre_latitude','model_centre_longitude'), zlib=True, complevel=4, chunksizes=[y_N,x_N])
+        model_centre_longitude_var.standard_name = 'model centre longitude'
+        model_centre_longitude_var.long_name = 'model centre longitude'
+        model_centre_longitude_var.units = obs_lon_obj.units
+        model_centre_longitude_var.description = '2D meshed grid centre longitudes with {} longitudes in {} bands of latitude'.format(x_N,y_N)
+        model_centre_longitude_var.axis = 'X'
+        if my_rank == 0:
+            model_centre_longitude_var[:] = mod_lons_centre
+    
+        model_centre_latitude_var = root_grp.createVariable('model_centre_latitude', 'f8', ('model_centre_latitude','model_centre_longitude'), zlib=True, complevel=4, chunksizes=[y_N,x_N])
+        model_centre_latitude_var.standard_name = 'model centre latitude'
+        model_centre_latitude_var.long_name = 'model centre latitude'
+        model_centre_latitude_var.units = obs_lat_obj.units
+        model_centre_latitude_var.description = '2D meshed grid centre latitudes with {} latitudes in {} bands of longitude'.format(y_N,x_N)
+        model_centre_latitude_var.axis = 'Y'
+        if my_rank == 0:
+            model_centre_latitude_var[:] = mod_lats_centre
+
+        #create and write grid domain edge longitude/latitude variables
+        grid_edge_longitude_var = root_grp.createVariable('grid_edge_longitude', 'f8', ('grid_edge'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['grid_edge'].size])   
+        grid_edge_longitude_var.standard_name = 'grid edge longitude'
+        grid_edge_longitude_var.long_name = 'grid edge longitude'
+        grid_edge_longitude_var.units = obs_lon_obj.units
+        grid_edge_longitude_var.description = 'Longitude coordinate along edge of grid domain (going clockwise around grid boundary from bottom-left corner).'
+        grid_edge_longitude_var.description = 'X'
+        if my_rank == 0:
+            grid_edge_longitude_var[:] = model_grid_outline[:,0]
+
+        grid_edge_latitude_var = root_grp.createVariable('grid_edge_latitude', 'f8', ('grid_edge'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['grid_edge'].size])
+        grid_edge_latitude_var.standard_name = 'grid edge latitude'
+        grid_edge_latitude_var.long_name = 'grid edge latitude'
+        grid_edge_latitude_var.units = obs_lat_obj.units
+        grid_edge_latitude_var.description = 'Latitude coordinate along edge of grid domain (going clockwise around grid boundary from bottom-left corner).'
+        grid_edge_latitude_var.description = 'Y'
+        if my_rank == 0:
+            grid_edge_latitude_var[:] = model_grid_outline[:,1]
+
+        #create measured variable
+        measured_var = root_grp.createVariable(speci_to_process, 'f4', ('time','station'), zlib=True, complevel=4, chunksizes=[root_grp.dimensions['time'].size, root_grp.dimensions['station'].size])
+        measured_var.standard_name = obs_measured_var_obj.standard_name
+        measured_var.long_name = obs_measured_var_obj.long_name
+        measured_var.units = obs_measured_var_obj.units
+        measured_var.descrption = 'Interpolated value of {} from the experiment {} with reference to the measurement stations in the {} network'.format(obs_measured_var_obj.standard_name, experiment_to_process, GHOST_network_to_interpolate_against)
+
+    #iterate through observational stations
+    #use calculated interpolated weights per station to model grid to produce model reciprocal output
+    #if all station weights are 0, station is outside model grid domain
+    #set all values to be NaN
+    if np.all(station_weights == 0):
+        interp_vals = np.full(len(yearmonth_time), np.NaN, dtype=np.float32)
+    else:
+        #get reciprocal model data at N nearest neighbours to observational station 
+        cut_model_data = monthly_model_data[:,nearest_neighbour_inds[:n_neighbours_to_find],nearest_neighbour_inds[n_neighbours_to_find:]]
+        #create mask where data == NaN
+        invalid_mask = np.isnan(cut_model_data)
+        #create masked array
+        cut_model_data = np.ma.MaskedArray(cut_model_data, mask=invalid_mask)
+        #interpolate masked array across time dimension using interpolated weights per station
+        interp_vals = np.ma.average(cut_model_data, weights = station_weights, axis=1)
+
+    #write measured variable (multiplying with conversion factor in the process)
+    measured_var[:,station_index] = interp_vals * conversion_factor
+
+#close writing to netCDF in parallel
+root_grp.close() 
+
+print('DONE')
 
 ###--------------------------------------------------------------------------------------------------###
 #define inverse distance weighting interpolation function
@@ -615,24 +663,3 @@ def n_nearest_neighbour_inverse_distance_weights(obs_lons,obs_lats,mod_lons_cent
     inverse_dists[~obs_inside_model_grid,:] = 0.0
 
     return nearest_neighbour_inds, inverse_dists
-
-###--------------------------------------------------------------------------------------------------###
-###--------------------------------------------------------------------------------------------------###
-
-#get command line arguments variables passed upon execution
-experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7]
-
-#read defined experiments dictionary
-from defined_experiments import defined_experiments_dictionary
-
-#get experiment specific directory (take P9 experiment directory preferentially over esarchive directory)
-exp_dict = defined_experiments_dictionary[experiment_to_process]
-if 'P9' in list(exp_dict.keys()):
-   exp_dir = exp_dict['P9']
-else:
-   exp_dir = exp_dict['esarchive']
-
-#pass variables to interpolation function and do interpolation 
-process_monthly_interpolated_netCDF(experiment_to_process, exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth)
-
-print('DONE')
