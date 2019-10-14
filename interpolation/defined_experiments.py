@@ -1,4 +1,4 @@
-#define all experiment IDs, with associated file directories on 'esarchive' and optionally on 'P9' machine
+#define all experiment IDs, with associated file directories on 'esarchive' or optionally on 'gpfs'
 defined_experiments_dictionary = {#----------------------------------------------------------------------------#
                                    #MONARCH experiments
                                    #b007 - previous Europe region benchmark
@@ -13,12 +13,12 @@ defined_experiments_dictionary = {#---------------------------------------------
                                    'a1x8':{'esarchive':'/esarchive/exp/monarch/a1x8/'},
                                    #a1xa - 0.1x0.1 degree horizontal resolution
                                    'a1xa':{'esarchive':'/esarchive/exp/monarch/a1xa/'},
-				   #a1xf - CAMS-81 gridded temporal profiles
+				                   #a1xf - CAMS-81 gridded temporal profiles
                                    'a1xf':{'esarchive':'/esarchive/exp/monarch/a1xf/'},
                                    #a21m - CAMS-81 v2.1 gridded temporal profiles	
                                    'a21m':{'esarchive':'/esarchive/exp/monarch/a21m/'},
                                    #a1yq - new SOA Simple scheme, speciation primary emissions HERMES  
-				   'a1yq':{'esarchive':'/esarchive/exp/monarch/a1yq/'},	
+				                   'a1yq':{'esarchive':'/esarchive/exp/monarch/a1yq/'},	
                                    #a1yz - effect of dry deposition on aerosols VDRY=1
                                    'a1yz':{'esarchive':'/esarchive/exp/monarch/a1yz/'},
                                    #a1zc - CO boundary conditions in volume mixing ratio
