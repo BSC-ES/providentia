@@ -3,7 +3,7 @@
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
 
-#GHOST_experiment_interpolation_submission.py
+#experiment_interpolation_submission.py
 
 #module which sets up parallel execution of interpolation jobs for defined configuration
 
@@ -11,7 +11,9 @@
 ###IMPORT MODULES
 ###--------------------------------------------------------------------------------------------------###
 
+import copy
 import glob
+from netCDF4 import Dataset
 import numpy as np
 import os
 import subprocess
@@ -34,13 +36,13 @@ interpolation_log_dir = '{}/interpolation_logs'.format(working_directory)
 unique_ID = sys.argv[1]
 
 #Read configuration file
-from configuration import start_date, end_date, experiments_to_process, species_to_process, grid_types_to_process, model_temporal_resolutions_to_process, GHOST_networks_to_interpolate_against, temporal_resolutions_to_output
+from configuration import start_date, end_date, experiments_to_process, species_to_process, grid_types_to_process, model_temporal_resolutions_to_process, GHOST_networks_to_interpolate_against, temporal_resolutions_to_output, n_neighbours_to_find
 
 #read defined experiments dictionary
 from defined_experiments import defined_experiments_dictionary
 
-#create argument text file
-arguments_file= open("{}/{}.txt".format(arguments_dir, unique_ID),"w")
+#create arguments lost
+arguments_list = []
 
 #create list to hold all .out files generated for each task processed
 task_out_names = []
@@ -133,8 +135,8 @@ for experiment_to_process in experiments_to_process:
                         #iterate through intersecting yearmonths and write all current variable arguments to arguments file
                         for yearmonth in intersect_yearmonths:
 
-                            #append current iterative arguments to arguments file
-                            arguments_file.write("{} {} {} {} {} {} {}\n".format(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                         
+                            #append current iterative arguments to arguments list               
+                            arguments_list.append("{} {} {} {} {} {} {} {}".format(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth, n_neighbours_to_find))                         
 
                             #append location of .out file that will be output for each processed task
                             task_out_names.append('{}/{}/{}/{}/{}/{}/{}/{}.out'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                           
@@ -143,61 +145,84 @@ for experiment_to_process in experiments_to_process:
                             if os.path.exists('{}/{}/{}/{}/{}/{}/{}/{}.out'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth)):
                                 os.remove('{}/{}/{}/{}/{}/{}/{}/{}.out'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))
 
-#close arguments file
-arguments_file.close()
+#initialise variable to store names of submit files created
+submit_fnames = []
 
-#get total number of tasks to submit
-N_tasks = len(task_out_names)
+#split arguments list so that have no more than 999 arguments in each
+arguments_split = np.array_split(arguments_list,int(np.ceil(len(arguments_list)/999)))
 
-#create job submit batch script
-submit_file = open("{}/{}.sh".format(submit_dir, unique_ID),"w")
-submit_file.write("#!/bin/bash\n")
-submit_file.write("\n")
-submit_file.write("#SBATCH --job-name=PRVI_{}\n".format(unique_ID))
-submit_file.write("#SBATCH --ntasks={}\n".format(N_tasks))
-submit_file.write("#SBATCH --time=01:00:00\n")
-submit_file.write("#SBATCH --array=1-{}\n".format(N_tasks))
-submit_file.write("#SBATCH --qos=bsc_es\n")
-submit_file.write("#SBATCH --output=/dev/null\n")
-submit_file.write("#SBATCH --error=/dev/null\n")
-submit_file.write("\n")
-submit_file.write("arguments_store={}/{}.txt\n".format(arguments_dir, unique_ID))
-submit_file.write("argument_a=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $1}')\n")
-submit_file.write("argument_b=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $2}')\n")  
-submit_file.write("argument_c=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $3}')\n")
-submit_file.write("argument_d=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $4}')\n")
-submit_file.write("argument_e=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $5}')\n")
-submit_file.write("argument_f=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $6}')\n")
-submit_file.write("argument_g=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $7}')\n")
-submit_file.write("\n")
-submit_file.write("source load_modules.sh\n") 
-submit_file.write("\n")
-submit_file.write("srun --cpu-bind=core --mpi=pmi2 --output={}/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.out --error={}/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.err python -u {}/GHOST_experiment_interpolation.py $argument_a $argument_b $argument_c $argument_d $argument_e $argument_f $argument_g"%(interpolation_log_dir, interpolation_log_dir, working_directory))
+#loop through split arguments, creating a submit file per group
+for file_ii, grouped_arguments in enumerate(arguments_split):
 
-#close submit file
-submit_file.close()
+    #create arguments file/s
+    arguments_file= open("{}/{}_{}.txt".format(arguments_dir, unique_ID, file_ii),"w")        
 
-#submit job (make sure it is submitted successfully)
-cmd = ['sbatch', '{}.sh'.format(unique_ID)]
+    for argument in grouped_arguments:
+        arguments_file.write("{}\n".format(argument))                         
 
-submit_complete = False
-while submit_complete == False: 
-    submit_process = subprocess.Popen(cmd, cwd=submit_dir, stdout=subprocess.PIPE)
-    submit_status = submit_process.communicate()[0]
-    submit_return_code = submit_process.returncode
+    #close arguments file
+    arguments_file.close()
+                        
+    #create job submit batch script
+    submit_fname = '{}_{}.sh'.format(unique_ID, file_ii)
+    submit_file = open("{}/{}".format(submit_dir, submit_fname),"w")
+    submit_file.write("#!/bin/bash\n")
+    submit_file.write("\n")
+    submit_file.write("#SBATCH --job-name=PRVI_{}\n".format(unique_ID))
+    submit_file.write("#SBATCH --ntasks=1\n")
+    submit_file.write("#SBATCH --time=01:00:00\n")
+    submit_file.write("#SBATCH --array=1-{}\n".format(len(grouped_arguments)))
+    submit_file.write("#SBATCH --qos=bsc_es\n")
+    submit_file.write("#SBATCH --output=/dev/null\n")
+    submit_file.write("#SBATCH --error=/dev/null\n")
+    submit_file.write("\n")
+    submit_file.write("arguments_store={}/{}_{}.txt\n".format(arguments_dir, unique_ID, file_ii))
+    submit_file.write("argument_a=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $1}')\n")
+    submit_file.write("argument_b=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $2}')\n")  
+    submit_file.write("argument_c=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $3}')\n")
+    submit_file.write("argument_d=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $4}')\n")
+    submit_file.write("argument_e=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $5}')\n")
+    submit_file.write("argument_f=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $6}')\n")
+    submit_file.write("argument_g=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $7}')\n")
+    submit_file.write("argument_h=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $8}')\n")
+    submit_file.write("\n")
+    submit_file.write("source {}/load_modules.sh\n".format(working_directory)) 
+    submit_file.write("\n")
+    submit_file.write("srun --cpu-bind=core --output={}/$argument_a/$argument_b/$argument_c/$argument_d/$argument_e/$argument_f/$argument_g.out python -u {}/experiment_interpolation.py $argument_a $argument_b $argument_c $argument_d $argument_e $argument_f $argument_g $argument_h".format(interpolation_log_dir, working_directory))
 
-    #if sbatch fails, time out for 20 seconds and then try again
-    if submit_return_code != 0:
-        time.sleep(20)
-        continue
-    else:
-        submit_complete = True
-        print('{} INTERPOLATION JOB/S SUBMITTED'.format(N_tasks))
+    #close submit file
+    submit_file.close()
 
-#now all interpolation tasks have been submitted
+    #add submit filename to list of submitted files
+    submit_fnames.append(submit_fname)
+    
+#time start of interpolation jobs
+interpolation_start = time.time()
+
+#submit interpolation jobs (make sure they submitted successfully)
+for submit_fname in submit_fnames:
+    cmd = ['sbatch', '-A', 'bsc32', '{}'.format(submit_fname)]
+
+    submit_complete = False
+    while submit_complete == False: 
+        submit_process = subprocess.Popen(cmd, cwd=submit_dir, stdout=subprocess.PIPE)
+        submit_status = submit_process.communicate()[0]
+        submit_return_code = submit_process.returncode
+
+        #if sbatch fails, time out for 60 seconds and then try again
+        if submit_return_code != 0:
+            time.sleep(60)
+            continue
+        else:
+            submit_complete = True
+
+        #take a 1 second pause between submittals (to help slurm scheduler)
+        time.sleep(1)
+
+#now all interpolation jobs have been submitted
 #monitor number of jobs in queue (every 10 seconds) until there are 0 left in the squeue
 all_tasks_finished = False
-
+ 
 while all_tasks_finished == False:
     cmd = ['squeue', '-h', '-n', 'PRVI_{}'.format(unique_ID)]
     squeue_process =  subprocess.Popen(cmd, stdout=subprocess.PIPE, encoding='utf8')
@@ -211,24 +236,33 @@ while all_tasks_finished == False:
     #if no more jobs in the squeue, then now check the outcome of all the jobs  
     #if any jobs have failed, write them out to file
     failed_tasks=[]
+    process_times=[]
     for task_out in task_out_names:
         line = subprocess.check_output(['tail', '-1', task_out], encoding='utf8').strip()
-        if line != 'DONE':
+        if 'DONE' not in line:
             failed_tasks.append(task_out)
+        else:
+            process_times.append(float(line.split('DONE:')[-1]))
 
     #break out of while loop     
     all_tasks_finished = True
 
-#stop timer
-end = time.time()
+#get interpolation time
+interpolation_time = time.time() - interpolation_start
 
 #remove default .out file generated in working directory (don't know why this is created --> probably to do with calling srun...)
 for f in glob.glob("{}/*.out".format(working_directory)):
     os.remove(f)
 
+#stop timer
+total_time = time.time()-start
+
 if len(failed_tasks) == 0:
-    print('ALL INTERPOLATIONS COMPLETED SUCCESSFULLY IN {} MINUTES'.format((end-start)/60.))
+    #get queue time 
+    process_time = np.max(process_times)
+    queue_time = interpolation_time - process_time 
+    overhead_time = total_time - interpolation_time 
+    print('ALL INTERPOLATIONS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES\n({:.2f} MINUTES PROCESING, {:.2f} MINUTES QUEUING, {:.2f} MINUTES ON OVERHEADS)'.format(total_time/60., process_time/60., queue_time/60., overhead_time/60.))
 else:
-    print('{} INTERPOLATIONS FINISHED SUCCESSFULLY IN {} MINUTES'.format(N_tasks-len(failed_tasks),(end-start)/60.))
-    print('THE FOLLOWING INTERPOLATIONS FAILED:')
-    print(failed_tasks)
+    print('{}/{} INTERPOLATIONS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(len(task_out_names)-len(failed_tasks),len(task_out_names),total_time/60.))
+    print('THE FOLLOWING INTERPOLATIONS FAILED: {}'.format(failed_tasks))
