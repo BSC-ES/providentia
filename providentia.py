@@ -536,7 +536,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #define qa flags
         self.qa_names = np.array(sorted(standard_qa_flag_codes, key=standard_qa_flag_codes.get))
         self.qa_codes = np.sort(list(standard_qa_flag_codes.values()))        
-        self.qa_default_codes = np.array([0, 1, 2, 3, 4, 5, 70, 80, 81, 82, 85, 87, 90, 94, 100, 106, 107, 108], dtype=np.uint8)
+        self.qa_default_codes = np.array([0, 1, 2, 3, 4, 70, 80, 81, 82, 85, 87, 90, 94, 100, 106, 107, 108], dtype=np.uint8)
         self.qa_default_inds = np.array([np.where(self.qa_codes == code)[0][0] for code in self.qa_default_codes], dtype=np.uint8)
 
         #define classification flags        
@@ -671,7 +671,8 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             self.all_observation_data = {}
 
             #set all available networks
-            available_networks = ['EBAS','EIONET']
+            #available_networks = ['EBAS','EIONET']
+            available_networks = ['EIONET']
         
             #set all available temporal resolutions
             available_resolutions = ['hourly','daily','monthly']
@@ -1272,7 +1273,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                          'representative_radius':np.float32,
                          'GSFC_coastline_proximity':np.float32,
                          'primary_sampling_type':np.object,
-                         'sample_preparation_types':np.object,
+                         'sample_preparation_methodology_types':np.object,
                          'measurement_methodology':np.object,  
                          'measuring_instrument_name':np.object,    
                          'measuring_instrument_sampling_type':np.object
@@ -2675,7 +2676,7 @@ class MPL_Canvas(FigureCanvas):
                                     'representative_radius':'Representative Radius',
                                     'GSFC_coastline_proximity':'To Coast',
                                     'primary_sampling_type':'Sampling Instrument Type',
-                                    'sample_preparation_types':'Sample Preparation',
+                                    'sample_preparation_methodology_types':'Sample Preparation',
                                     'measurement_methodology':'Measurement Method',
                                     'measuring_instrument_name':'Measuring Instrument',   
                                     'measuring_instrument_sampling_type':'Measuring Instrument Sampling'
@@ -2700,7 +2701,7 @@ class MPL_Canvas(FigureCanvas):
                                      'standardised_network_provided_land_use', 'standardised_network_provided_main_emission_source', 
                                      'standardised_network_provided_measurement_scale', 'representative_radius',
                                      'measurement_methodology', 'measuring_instrument_name', 'measuring_instrument_sampling_type',
-                                     'primary_sampling_type', 'sample_preparation_types']
+                                     'primary_sampling_type', 'sample_preparation_methodology_types']
 
             #iterate through metadata variables
             for meta_var in metadata_vars_to_plot:
@@ -3776,7 +3777,6 @@ standard_data_flag_codes = {
 
 '>= 50% of Measurements in Window Below Detection Limit': 157
 #-----------------------------------------------------
-
 }
 
 #------------------------------------------------------------------------------------------------------------#
@@ -3786,7 +3786,6 @@ standard_data_flag_codes = {
 #can also be forced to return N flag codes rather than a specific flag code, by setting get_N_flags to True
 
 standard_qa_flag_codes = {
-
 
 #Basic QA Flags
 #-----------------------------------------------------
@@ -3806,17 +3805,13 @@ standard_qa_flag_codes = {
 #Have measurement equal to zero.
 'Zero Measurement': 3,
 
-#Preliminary Data
-#Measurement has been flagged bv data provider to be preliminary in nature (i.e. not of the highest possible data quality/level)
-'Preliminary Data': 4,
-
 #Invalid Data Provider Flags - GHOST Decreed
 #Measurements are associated with data quality flags given by the data provider which have been decreed by the GHOST project architects to suggest the measurements are associated with substantial uncertainty/bias
-'Invalid Data Provider Flags - GHOST Decreed': 5,
+'Invalid Data Provider Flags - GHOST Decreed': 4,
 
 #Invalid Data Provider Flags - Network Decreed
 #Measurements are associated with data quality flags given by the data provider which have been decreed by the reporting network to suggest the measurements are associated with substantial uncertainty/bias 
-'Invalid Data Provider Flags - Network Decreed': 6,
+'Invalid Data Provider Flags - Network Decreed': 5,
 #-----------------------------------------------------
 
 
@@ -3860,16 +3855,11 @@ standard_qa_flag_codes = {
 #-----------------------------------------------------
 
 
-#Duplicate Station
+#Duplicate station
 #-----------------------------------------------------
 #Station has been decreed to be a duplicate (i.e. reporting the same data as from another network, but the data from another network has been preferred)   
 'Duplicate Station': 23,
 #-----------------------------------------------------
-
-#Suspect Geographical Position
-#-----------------------------------------------------
-#Station has a longitude/latitude outside valid bounds: -180 <-> +180 for longitude, -90 <-> +90 for latitude; or both longitude/latitude == 0.0 --> in the middle of the ocean  
-'Suspect Geographical Position': 24,
 
 
 #Metadata Assumption Flags
@@ -3880,116 +3870,116 @@ standard_qa_flag_codes = {
 
 #No Latitude Metadata
 #Latitude metadata field is absent, the most recent valid past latitude is assumed to be still valid. 
-'No Latitude Metadata - Took Most Recent Valid Value': 31,
+'No Latitude - Took Most Recent Valid Value': 31,
 
 #Latitude metadata field is absent, the next valid latitude in the time record is assumed to be valid for this period (no available past valid latitudes).  
-'No Latitude Metadata - Took Next Valid Value': 32,
+'No Latitude - Took Next Valid Value': 32,
 
 #Latitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Latitude Metadata - Used Manually Compiled Metadata': 33,
+'No Latitude - Used Manually Compiled Metadata': 33,
 
 #No Longitude Metadata
 #Longitude metadata field is absent, the most recent valid past longitude is assumed to be still valid.  
-'No Longitude Metadata - Took Most Recent Valid Value': 34,
+'No Longitude - Took Most Recent Valid Value': 34,
 
 #Longitude metadata field is absent, the next valid longitude in the time record is assumed to be valid for this period (no available past valid longitudes).  
-'No Longitude Metadata - Took Next Valid Value': 35,
+'No Longitude - Took Next Valid Value': 35,
 
 #Longitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Longitude Metadata - Used Manually Compiled Metadata': 36,
+'No Longitude - Used Manually Compiled Metadata': 36,
 
 #No Altitude Metadata
 #Altitude metadata field is absent, the most recent valid past altitude is assumed to be still valid.  
-'No Altitude Metadata - Took Most Recent Valid Value': 37,
+'No Altitude - Took Most Recent Valid Value': 37,
 
 #Altitude Metadata field is absent, the next valid altitude in the time record is assumed to be valid for this period (no available past valid altitudes).  
-'No Altitude Metadata - Took Next Valid Value': 38,
+'No Altitude - Took Next Valid Value': 38,
 
 #Altitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Altitude Metadata - Used Manually Compiled Metadata': 39,
+'No Altitude - Used Manually Compiled Metadata': 39,
 
 #Altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes to fill altitude for entire time record.
-'No Altitude Metadata - Used ETOPO1 to Estimate Altitude': 40,
+'No Altitude - Used ETOPO1 to Estimate Altitude': 40,
 
 #No Sampling Height Metadata
 #Sampling height metadata field is absent, the most recent valid past sampling height is assumed to be still valid.  
-'No Sampling Height Metadata - Took Most Recent Valid Value': 41,
+'No Sampling Height - Took Most Recent Valid Value': 41,
 
 #Sampling Height metadata field is absent, the next valid sampling height in the time record is assumed to be valid for this period (no available past valid sampling heights).  
-'No Sampling Height Metadata - Took Next Valid Value': 42,
+'No Sampling Height - Took Next Valid Value': 42,
 
 #Sampling Height metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Sampling Height Metadata - Used Manually Compiled Metadata': 43,
+'No Sampling Height - Used Manually Compiled Metadata': 43,
 
 #No Standardised Network Provided Area Classification Metadata
 #Standardised Network Provided Area Classification metadata field is absent, the most recent valid past Standardised Network Provided Area Classification is assumed to be still valid.  
-'No Standardised Network Provided Area Classification Metadata - Took Most Recent Valid Value': 44,
+'No Area Classification - Took Most Recent Valid Value': 44,
 
 #Standardised Network Provided Area Classification metadata field is absent, the next valid Standardised Network Provided Area Classification in the time record is assumed to be valid for this period (no available past Standardised Network Provided Area Classifications).
-'No Standardised Network Provided Area Classification Metadata - Took Next Valid Value': 45,
+'No Area Classification - Took Next Valid Value': 45,
 
 #Standardised Network Provided Area Classification metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Area Classification Metadata - Used Manually Compiled Metadata': 46,
+'No Area Classification - Used Manually Compiled Metadata': 46,
 
 #No Standardised Network Provided Station Classification Metadata
 #Standardised Network Provided Station Classification metadata field is absent, the most recent valid past Standardised Network Provided Station Classification is assumed to be still valid.  
-'No Standardised Network Provided Station Classification Metadata - Took Most Recent Valid Value': 47,
+'No Station Classification - Took Most Recent Valid Value': 47,
 
 #Standardised Network Provided Station Classification metadata field is absent, the next valid Standardised Network Provided Station Classification in the time record is assumed to be valid for this period (no available past Standardised Network Provided Station Classifications).
-'No Standardised Network Provided Station Classification Metadata - Took Next Valid Value': 48,
+'No Station Classification - Took Next Valid Value': 48,
 
 #Standardised Network Provided Station Classification metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Station Classification Metadata - Used Manually Compiled Metadata': 49,
+'No Station Classification - Used Manually Compiled Metadata': 49,
 
 #No Standardised Network Provided Main Emission Source Metadata
 #Standardised Network Provided Main Emission Source metadata field is absent, the most recent valid past Standardised Network Provided Main Emission Source is assumed to be still valid.  
-'No Standardised Network Provided Main Emission Source Metadata - Took Most Recent Valid Value': 50,
+'No Main Emission Source - Took Most Recent Valid Value': 50,
 
 #Standardised Network Provided Main Emission Source metadata field is absent, the next valid Standardised Network Provided Main Emission Source in the time record is assumed to be valid for this period (no available past Standardised Network Provided Main Emission Sources).
-'No Standardised Network Provided Main Emission Source Metadata - Took Next Valid Value': 51,
+'No Main Emission Source - Took Next Valid Value': 51,
 
 #Standardised Network Provided Main Emission Source metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Main Emission Source Metadata - Used Manually Compiled Metadata': 52,
+'No Main Emission Source - Used Manually Compiled Metadata': 52,
 
 #No Standardised Network Provided Land Use Metadata
 #Standardised Network Provided Land Use metadata field is absent, the most recent valid past Standardised Network Provided Land Use is assumed to be still valid.  
-'No Standardised Network Provided Land Use Metadata - Took Most Recent Valid Value': 53,
+'No Land Use - Took Most Recent Valid Value': 53,
 
 #Standardised Network Provided Land Use metadata field is absent, the next valid Standardised Network Provided Land Use in the time record is assumed to be valid for this period (no available past Standardised Network Provided Land Uses).
-'No Standardised Network Provided Land Use Metadata - Took Next Valid Value': 54,
+'No Land Use - Took Next Valid Value': 54,
 
 #Standardised Network Provided Land Use metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Land Use Metadata - Used Manually Compiled Metadata': 55,
+'No Land Use - Used Manually Compiled Metadata': 55,
 
 #No Standardised Network Provided Terrain Metadata
 #Standardised Network Provided Terrain metadata field is absent, the most recent valid past Standardised Network Provided Terrain is assumed to be still valid.  
-'No Standardised Network Provided Terrain Metadata - Took Most Recent Valid Value': 56,
+'No Terrain - Took Most Recent Valid Value': 56,
 
 #Standardised Network Provided Terrain metadata field is absent, the next valid Standardised Network Provided Terrain in the time record is assumed to be valid for this period (no available past Standardised Network Provided Terrains).
-'No Standardised Network Provided Terrain Metadata - Took Next Valid Value': 57,
+'No Terrain - Took Next Valid Value': 57,
 
 #Standardised Network Provided Terrain metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Terrain Metadata - Used Manually Compiled Metadata': 58,
+'No Terrain - Used Manually Compiled Metadata': 58,
 
 #No Standardised Network Provided Measurement Scale Metadata
 #Standardised Network Provided Measurement Scale metadata field is absent, the most recent valid past Standardised Network Provided Measurement Scale is assumed to be still valid.  
-'No Standardised Network Provided Measurement Scale Metadata - Took Most Recent Valid Value': 59,
+'No Measurement Scale - Took Most Recent Valid Value': 59,
 
 #Standardised Network Provided Measurement Scale metadata field is absent, the next valid Standardised Network Provided Measurement Scale in the time record is assumed to be valid for this period (no available past Standardised Network Provided Measurement Scales).
-'No Standardised Network Provided Measurement Scale Metadata - Took Next Valid Value': 60,
+'No Measurement Scale - Took Next Valid Value': 60,
 
 #Standardised Network Provided Measurement Scale metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Measurement Scale Metadata - Used Manually Compiled Metadata': 61,
+'No Measurement Scale - Used Manually Compiled Metadata': 61,
 
 #No Representative Radius Metadata
 #Representative Radius metadata field is absent, the most recent valid past Representative Radius is assumed to be still valid.  
-'No Representative Radius Metadata - Took Most Recent Valid Value': 62,
+'No Representative Radius - Took Most Recent Valid Value': 62,
 
 #Representative Radius metadata field is absent, the next valid Representative Radius in the time record is assumed to be valid for this period (no available past Representative Radii).
-'No Representative Radius Metadata - Took Next Valid Value': 63,
+'No Representative Radius - Took Next Valid Value': 63,
 
 #Representative Radius metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Representative Radius Metadata - Used Manually Compiled Metadata': 64,
+'No Representative Radius - Used Manually Compiled Metadata': 64,
 #-----------------------------------------------------
 
     
@@ -4150,20 +4140,20 @@ standard_qa_flag_codes = {
 #Hourly Window Data Completeness < 25%'
 'Hourly Window Data Completeness < 25%': 154,
 
+#Hourly Window Maximum Data Gap >= 5%'
+'Hourly Window Maximum Data Gap >= 5%': 155,
+
 #Hourly Window Maximum Data Gap >= 10%'
-'Hourly Window Maximum Data Gap >= 10%': 155,
+'Hourly Window Maximum Data Gap >= 10%': 156,
+
+#Hourly Window Maximum Data Gap >= 15%'
+'Hourly Window Maximum Data Gap >= 15%': 157,
+
+#Hourly Window Maximum Data Gap >= 20%'
+'Hourly Window Maximum Data Gap >= 20%': 158,
 
 #Hourly Window Maximum Data Gap >= 25%'
-'Hourly Window Maximum Data Gap >= 25%': 156,
-
-#Hourly Window Maximum Data Gap >= 33%'
-'Hourly Window Maximum Data Gap >= 33%': 157,
-
-#Hourly Window Maximum Data Gap >= 50%'
-'Hourly Window Maximum Data Gap >= 50%': 158,
-
-#Hourly Window Maximum Data Gap >= 75%'
-'Hourly Window Maximum Data Gap >= 75%': 159,
+'Hourly Window Maximum Data Gap >= 25%': 159,
 
 #-----------------------------------------------------
 
@@ -4190,20 +4180,20 @@ standard_qa_flag_codes = {
 #Daily Window Data Completeness < 25%'
 'Daily Window Data Completeness < 25%': 164,
 
+#Daily Window Maximum Data Gap >= 5%'
+'Daily Window Maximum Data Gap >= 5%': 165,
+
 #Daily Window Maximum Data Gap >= 10%'
-'Daily Window Maximum Data Gap >= 10%': 165,
+'Daily Window Maximum Data Gap >= 10%': 166,
+
+#Daily Window Maximum Data Gap >= 15%'
+'Daily Window Maximum Data Gap >= 15%': 167,
+
+#Daily Window Maximum Data Gap >= 20%'
+'Daily Window Maximum Data Gap >= 20%': 168,
 
 #Daily Window Maximum Data Gap >= 25%'
-'Daily Window Maximum Data Gap >= 25%': 166,
-
-#Daily Window Maximum Data Gap >= 33%'
-'Daily Window Maximum Data Gap >= 33%': 167,
-
-#Daily Window Maximum Data Gap >= 50%'
-'Daily Window Maximum Data Gap >= 50%': 168,
-
-#Daily Window Maximum Data Gap >= 75%'
-'Daily Window Maximum Data Gap >= 75%': 169,
+'Daily Window Maximum Data Gap >= 25%': 169,
 
 #-----------------------------------------------------
 
@@ -4230,20 +4220,20 @@ standard_qa_flag_codes = {
 #Weekly Window Data Completeness < 25%'
 'Weekly Window Data Completeness < 25%': 174,
 
+#Weekly Window Maximum Data Gap >= 5%'
+'Weekly Window Maximum Data Gap >= 5%': 175,
+
 #Weekly Window Maximum Data Gap >= 10%'
-'Weekly Window Maximum Data Gap >= 10%': 175,
+'Weekly Window Maximum Data Gap >= 10%': 176,
+
+#Weekly Window Maximum Data Gap >= 15%'
+'Weekly Window Maximum Data Gap >= 15%': 177,
+
+#Weekly Window Maximum Data Gap >= 20%'
+'Weekly Window Maximum Data Gap >= 20%': 178,
 
 #Weekly Window Maximum Data Gap >= 25%'
-'Weekly Window Maximum Data Gap >= 25%': 176,
-
-#Weekly Window Maximum Data Gap >= 33%'
-'Weekly Window Maximum Data Gap >= 33%': 177,
-
-#Weekly Window Maximum Data Gap >= 50%'
-'Weekly Window Maximum Data Gap >= 50%': 178,
-
-#Weekly Window Maximum Data Gap >= 75%'
-'Weekly Window Maximum Data Gap >= 75%': 179,
+'Weekly Window Maximum Data Gap >= 25%': 179,
 
 #-----------------------------------------------------
 
@@ -4270,20 +4260,20 @@ standard_qa_flag_codes = {
 #Monthly Window Data Completeness < 25%'
 'Monthly Window Data Completeness < 25%': 184,
 
+#Monthly Window Maximum Data Gap >= 5%'
+'Monthly Window Maximum Data Gap >= 5%': 185,
+
 #Monthly Window Maximum Data Gap >= 10%'
-'Monthly Window Maximum Data Gap >= 10%': 185,
+'Monthly Window Maximum Data Gap >= 10%': 186,
+
+#Monthly Window Maximum Data Gap >= 15%'
+'Monthly Window Maximum Data Gap >= 15%': 187,
+
+#Monthly Window Maximum Data Gap >= 20%'
+'Monthly Window Maximum Data Gap >= 20%': 188,
 
 #Monthly Window Maximum Data Gap >= 25%'
-'Monthly Window Maximum Data Gap >= 25%': 186,
-
-#Monthly Window Maximum Data Gap >= 33%'
-'Monthly Window Maximum Data Gap >= 33%': 187,
-
-#Monthly Window Maximum Data Gap >= 50%'
-'Monthly Window Maximum Data Gap >= 50%': 188,
-
-#Monthly Window Maximum Data Gap >= 75%'
-'Monthly Window Maximum Data Gap >= 75%': 189,
+'Monthly Window Maximum Data Gap >= 25%': 189,
 
 #-----------------------------------------------------
 
@@ -4310,20 +4300,20 @@ standard_qa_flag_codes = {
 #Annual Window Data Completeness < 25%'
 'Annual Window Data Completeness < 25%': 194,
 
+#Annual Window Maximum Data Gap >= 5%'
+'Annual Window Maximum Data Gap >= 5%': 195,
+
 #Annual Window Maximum Data Gap >= 10%'
-'Annual Window Maximum Data Gap >= 10%': 195,
+'Annual Window Maximum Data Gap >= 10%': 196,
+
+#Annual Window Maximum Data Gap >= 15%'
+'Annual Window Maximum Data Gap >= 15%': 197,
+
+#Annual Window Maximum Data Gap >= 20%'
+'Annual Window Maximum Data Gap >= 20%': 198,
 
 #Annual Window Maximum Data Gap >= 25%'
-'Annual Window Maximum Data Gap >= 25%': 196,
-
-#Annual Window Maximum Data Gap >= 33%'
-'Annual Window Maximum Data Gap >= 33%': 197,
-
-#Annual Window Maximum Data Gap >= 50%'
-'Annual Window Maximum Data Gap >= 50%': 198,
-
-#Annual Window Maximum Data Gap >= 75%'
-'Annual Window Maximum Data Gap >= 75%': 199,
+'Annual Window Maximum Data Gap >= 25%': 199,
 
 #-----------------------------------------------------
 
@@ -4333,8 +4323,7 @@ standard_qa_flag_codes = {
 #After screening by key QA flags, no valid data remains.
 'No Valid Data': 210
 
-#-----------------------------------------------------
-
+#-----------------------------------------------------    
 }
 
 #------------------------------------------------------------------------------------------------------------#
@@ -4351,229 +4340,97 @@ standard_classification_flag_codes = {
 #Station determined to be measuring at an altitude >= 1500 metres relative to mean sea level, from altitudes + sampling heights taken from network provided metadata. 
 'High Altitude - Metadata Altitude': 0,
 
+#High Altitude - Metadata Derived
+#Station determined to be a 'mountain' station, and therefore 'high altitude', derived from standardised 'terrain' network provided metadata.
+'High Altitude - Metadata Derived': 1,
+
 #High Altitude - ETOPO1 
 #Station determined to be measuring at an altitude >= 1500 metres relative to sea level datum, from altitudes taken from ETOPO1 digital elevation model + sampling heights taken from network provided metadata. 
-'High Altitude - ETOPO1': 1,
+'High Altitude - ETOPO1': 2,
 
 #High Altitude - Iwahashi Global Landform Classification 
 #Station determined to be measuring at a high altitude, derived from the European Soil Data Centre Iwahashi Global Landform Classification. 
-'High Altitude - Iwahashi Global Landform Classification': 2,
+'High Altitude - Iwahashi Global Landform Classification': 3,
 
 #High Altitude - Meybeck Global Landform Classification 
 #Station determined to be measuring at a high altitude, derived from the European Soil Data Centre Meybeck Global Landform Classification. 
-'High Altitude - Meybeck Global Landform Classification': 3,
+'High Altitude - Meybeck Global Landform Classification': 4,
+
+#Near Coast - Metadata Derived
+#Station determined to be located near the coast - derived from standardised 'terrain' network provided metadata. 
+'Near Coast - Metadata Derived': 5,
 
 #Near Coast - GSFC
 #Station determined to be located < 50km of the coast (either over land or sea) - using GSFC nearest to coastline dataset (0.01 degree grid).
-'Near Coast - GSFC': 4,
+'Near Coast - GSFC': 6,
 
 #Rural Station - Lenient Metadata Derived
 #Station determined to be 'rural', using standardised network provided metadata, following lenient classifications. 
-'Rural Station - Lenient Metadata Derived': 5,
+'Rural Station - Lenient Metadata Derived': 7,
 
 #Urban Station - Lenient Metadata Derived
 #Station determined to be 'urban', using standardised network provided metadata, following lenient classifications. 
-'Urban Station - Lenient Metadata Derived': 6,
+'Urban Station - Lenient Metadata Derived': 8,
 
 #Unclassified Station - Lenient Metadata Derived
 #Station determined to be 'unclassified', using standardised network provided metadata, following lenient classifications.
-'Unclassified Station - Lenient Metadata Derived': 7,
+'Unclassified Station - Lenient Metadata Derived': 9,
 
 #Rural Station - Strict Metadata Derived
 #Station determined to be 'rural', using standardised network provided metadata, following strict classifications. 
-'Rural Station - Strict Metadata Derived': 8,
+'Rural Station - Strict Metadata Derived': 10,
 
 #Urban Station - Strict Metadata Derived
 #Station determined to be 'urban', using standardised network provided metadata, following strict classifications. 
-'Urban Station - Strict Metadata Derived': 9,
+'Urban Station - Strict Metadata Derived': 11,
 
 #Unclassified Station - Strict Metadata Derived
 #Station determined to be 'unclassified', using standardised network provided metadata, following strict classifications.
-'Unclassified Station - Strict Metadata Derived': 10,
+'Unclassified Station - Strict Metadata Derived': 12,
 
 #Rural Station - Anthrome (Native Resolution)
 #Rural station as defined by using the UMBC Anthrome gridded classification dataset at native resolution (0.0833 degree grid).
-'Rural Station - Anthrome (Native Resolution)': 11,
+'Rural Station - Anthrome (Native Resolution)': 13,
 
 #Urban Station - Anthrome (Native Resolution)
 #Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset at native resolution (0.0833 degree grid).
-'Urban Station - Anthrome (Native Resolution)': 12,
+'Urban Station - Anthrome (Native Resolution)': 14,
 
 #Rural Station - Anthrome (Mode in 5km Perimeter)
 #Rural station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 5km perimeter around the station location. 
-'Rural Station - Anthrome (Mode in 5km Perimeter)': 13,
+'Rural Station - Anthrome (Mode in 5km Perimeter)': 15,
 
 #Urban Station - Anthrome (Mode in 5km Perimeter)
 #Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 5km perimeter around the station location. 
-'Urban Station - Anthrome (Mode in 5km Perimeter)': 14,
+'Urban Station - Anthrome (Mode in 5km Perimeter)': 16,
 
 #Rural Station - Anthrome (Mode in 25km Perimeter)
 #Rural station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 25km perimeter around the station location. 
-'Rural Station - Anthrome (Mode in 25km Perimeter)': 15,
+'Rural Station - Anthrome (Mode in 25km Perimeter)': 17,
 
 #Urban Station - Anthrome (Mode in 25km Perimeter)
 #Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 25km perimeter around the station location. 
-'Urban Station - Anthrome (Mode in 25km Perimeter)': 16,
+'Urban Station - Anthrome (Mode in 25km Perimeter)': 18,
 
 #Rural Station - TOAR
 #Rural station as defined by using a TOAR approach to classification (Tropospheric Ozone Assessment Report).
-'Rural Station - TOAR': 17,
+'Rural Station - TOAR': 19,
 
 #Urban Station - TOAR
 #Urban station as defined by using a TOAR approach to classification (Tropospheric Ozone Assessment Report).
-'Urban Station - TOAR': 18,
+'Urban Station - TOAR': 20,
 
 #Unclassified Station - TOAR
 #Unclassified station as defined using a TOAR approach to classification (Tropospheric Ozone Assessment Report).
-'Unclassified Station - TOAR': 19,
+'Unclassified Station - TOAR': 21,
 
 #Rural Station - Joly-Peuch 
 #Rural station as defined using a Joly-Peuch approach to classification
-'Rural Station - Joly-Peuch': 20,
+'Rural Station - Joly-Peuch': 22,
 
 #Unclassified Station - Joly-Peuch 
 #Unclassified station as defined using a Joly-Peuch approach to classification
-'Unclassified Station - Joly-Peuch': 21,
-
-#Area Classification Metadata = 'urban'
-#Standardised network provided area classification metadata is "urban"
-"Area Classification Metadata = 'urban'": 30,
-
-#Area Classification Metadata = 'urban-centre'
-#Standardised network provided area classification metadata is "urban-centre"
-"Area Classification Metadata = 'urban-centre'": 31,
-
-#Area Classification Metadata = 'urban-suburban'
-#Standardised network provided area classification metadata is "urban-suburban"
-"Area Classification Metadata = 'urban-suburban'": 32,
-
-#Area Classification Metadata = 'rural'
-#Standardised network provided area classification metadata is "rural"
-"Area Classification Metadata = 'rural'": 33,
-
-#Area Classification Metadata = 'rural-near_city'
-#Standardised network provided area classification metadata is "rural-near_city"
-"Area Classification Metadata = 'rural-near_city'": 34,
-
-#Area Classification Metadata = 'rural-regional'
-#Standardised network provided area classification metadata is "rural-regional"
-"Area Classification Metadata = 'rural-regional'": 35,
-
-#Area Classification Metadata = 'rural-remote'
-#Standardised network provided area classification metadata is "rural-remote"
-"Area Classification Metadata = 'rural-remote'": 36,
-
-#Station Classification Metadata = 'background'
-#Standardised network provided station classification metadata is "background"
-"Station Classification Metadata = 'background'": 37,
-
-#Station Classification Metadata = 'point_source'
-#Standardised network provided station classification metadata is "point_source"
-"Station Classification Metadata = 'point_source'": 38,
-
-#Station Classification Metadata = 'point_source-industrial'
-#Standardised network provided station classification metadata is "point_source-industrial"
-"Station Classification Metadata = 'point_source-industrial'": 39,
-
-#Station Classification Metadata = 'point_source-traffic'
-#Standardised network provided station classification metadata is "point_source-traffic"
-"Station Classification Metadata = 'point_source-traffic'": 40,
-
-#Spatial Representativity Metadata = '<0.1km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is <0.1 km
-"Spatial Representativity Metadata = '<0.1km'": 41,
-
-#Spatial Representativity Metadata = '0.1-0.5km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 0.1 km and <0.5 km
-"Spatial Representativity Metadata = '0.1-0.5km'": 42,
-
-#Spatial Representativity Metadata = '0.5-4km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 0.5 km and <4.0 km
-"Spatial Representativity Metadata = '0.5-4km'": 43,
-
-#Spatial Representativity Metadata = '4-50km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 4.0 km and <50.0 km
-"Spatial Representativity Metadata = '4-50km'": 44,
-
-#Spatial Representativity Metadata = '>=50km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 50.0 km
-"Spatial Representativity Metadata = '>=50km'": 45,
-
-#Terrain Metadata = 'coastal'
-#Standardised network provided terrain metadata is "coastal"
-"Terrain Metadata = 'coastal'": 46, 
-
-#Terrain Metadata = 'complex'
-#Standardised network provided terrain metadata is "complex"
-"Terrain Metadata = 'complex'": 47, 
-
-#Terrain Metadata = 'flat'
-#Standardised network provided terrain metadata is "flat"
-"Terrain Metadata = 'flat'": 48, 
-
-#Terrain Metadata = 'mountain'
-#Standardised network provided terrain metadata is "mountain"
-"Terrain Metadata = 'mountain'": 49, 
-
-#Terrain Metadata = 'rolling'
-#Standardised network provided terrain metadata is "rolling"
-"Terrain Metadata = 'rolling'": 50, 
-
-#Land Use Metadata = 'barren'
-#Standardised network provided land use metadata is "barren"
-"Land Use Metadata = 'barren'": 51,
-
-#Land Use Metadata = 'forest'
-#Standardised network provided land use metadata is "forest"
-"Land Use Metadata = 'forest'": 52,
-
-#Land Use Metadata = 'open'
-#Standardised network provided land use metadata is "open"
-"Land Use Metadata = 'open'": 53,
-
-#Land Use Metadata = 'snow'
-#Standardised network provided land use metadata is "snow"
-"Land Use Metadata = 'snow'": 54,
-
-#Land Use Metadata = 'urban'
-#Standardised network provided land use metadata is "urban"
-"Land Use Metadata = 'urban'": 55,
-
-#Land Use Metadata = 'water'
-#Standardised network provided land use metadata is "water"
-"Land Use Metadata = 'water'": 56,
-
-#Land Use Metadata = 'wetland'
-#Standardised network provided land use metadata is "wetland"
-"Land Use Metadata = 'wetland'": 57,
-
-#MODIS MCD12C1 Land Use = 'barren'
-#MODIS MCD12C1 land use is "barren"
-"MODIS MCD12C1 Land Use = 'barren'": 58,
-
-#MODIS MCD12C1 Land Use = 'forest'
-#MODIS MCD12C1 land use is "forest"
-"MODIS MCD12C1 Land Use = 'forest'": 59,
-
-#MODIS MCD12C1 Land Use = 'open'
-#MODIS MCD12C1 land use is "open"
-"MODIS MCD12C1 Land Use = 'open'": 60,
-
-#MODIS MCD12C1 Land Use = 'snow'
-#MODIS MCD12C1 land use is "snow"
-"MODIS MCD12C1 Land Use = 'snow'": 61,
-
-#MODIS MCD12C1 Land Use = 'urban'
-#MODIS MCD12C1 land use is "urban"
-"MODIS MCD12C1 Land Use = 'urban'": 62,
-
-#MODIS MCD12C1 Land Use = 'water'
-#MODIS MCD12C1 land use is "water"
-"MODIS MCD12C1 Land Use = 'water'": 63,
-
-#MODIS MCD12C1 Land Use = 'wetland'
-#MODIS MCD12C1 land use is "wetland"
-"MODIS MCD12C1 Land Use = 'wetland'": 64, 
+'Unclassified Station - Joly-Peuch': 23,
 #-----------------------------------------------------
 
 
@@ -4581,38 +4438,182 @@ standard_classification_flag_codes = {
 #-----------------------------------------------------
 #Daytime
 #Time of measurement is daytime. Done by calculating the solar elevation angle for a latitude/longitude/measurement height at a certain timestamp.
-'Daytime': 100,
+'Daytime': 50,
 
 #Nightime
 #Time of measurement is nighttime. Done by calculating the solar elevation angle for a latitude/longitude/measurement height at a certain timestamp.
-'Nighttime': 101,
+'Nighttime': 51,
 
 #Weekday
 #Time of measurement is weekday (by local time).
-'Weekday': 102,
+'Weekday': 52,
 
 #Weekend
 #Time of measurement is weekend (by local time).
-'Weekend': 103,
+'Weekend': 53,
 
 #winter
 #Time of measurement is northern hemisphere winter (measurement UTC time in months of December, January or February).
-'Winter': 104,    
+'Winter': 54,    
 
 #spring
 #Time of measurement is northern hemisphere spring (measurement UTC time in months of March, April or May).
-'Spring': 105,    
+'Spring': 55,    
 
 #summer
 #Time of measurement is northern hemisphere spring (measurement UTC time in months of June, July or August).
-'Summer': 106,    
+'Summer': 56,    
 
 #autumn
 #Time of measurement is northern hemisphere spring (measurement UTC time in months of September, October or November).
-'Autumn': 107   
+'Autumn': 57   
 #-----------------------------------------------------
-
 }
+
+#------------------------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------------------------#
+
+#define dictionary of all parameters with associated key information 
+
+parameter_dictionary = {
+'sconco3':         {'long_parameter_name':'ozone',                           'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'O3',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcno':         {'long_parameter_name':'nitrogen monoxide',               'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'NO',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcno2':        {'long_parameter_name':'nitrogen dioxide',                'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'NO2',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcco':         {'long_parameter_name':'carbon monoxide',                 'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'CO',      'extreme_lower_limit':0.0, 'extreme_upper_limit':10000.0},
+'sconcisop':       {'long_parameter_name':'isoprene',                        'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'C5H8',    'extreme_lower_limit':0.0, 'extreme_upper_limit':500.0  },
+'sconcso2':        {'long_parameter_name':'sulphur dioxide',                 'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'SO2',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcnh3':        {'long_parameter_name':'ammonia',                         'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'NH3',     'extreme_lower_limit':0.0, 'extreme_upper_limit':500.0  },
+'sconchno3':       {'long_parameter_name':'nitric acid',                     'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'HNO3',    'extreme_lower_limit':0.0, 'extreme_upper_limit':500.0  },
+'sconcpan':        {'long_parameter_name':'peroxyacetyl nitrate',            'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'C2H3NO5', 'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10':            {'long_parameter_name':'PM10 mass',                       'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'',        'extreme_lower_limit':0.0, 'extreme_upper_limit':2000.0 },
+'pm2p5':           {'long_parameter_name':'PM2.5 mass',                      'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'',        'extreme_lower_limit':0.0, 'extreme_upper_limit':2000.0 },
+'pm1':             {'long_parameter_name':'PM1 mass',                        'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'',        'extreme_lower_limit':0.0, 'extreme_upper_limit':2000.0 },
+'sconcal':         {'long_parameter_name':'aluminium',                       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Al',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcas':         {'long_parameter_name':'arsenic',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'As',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcbc':         {'long_parameter_name':'black carbon',                    'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcc':          {'long_parameter_name':'carbon',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconccorrected':  {'long_parameter_name':'carbon: corrected',               'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcca':         {'long_parameter_name':'calcium',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ca',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconccd':         {'long_parameter_name':'cadmium',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cd',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconccl':         {'long_parameter_name':'chloride',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cl',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconccobalt':     {'long_parameter_name':'cobalt',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Co',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconccr':         {'long_parameter_name':'chromium',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cr',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconccu':         {'long_parameter_name':'copper',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cu',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcec':         {'long_parameter_name':'elemental carbon',                'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcfe':         {'long_parameter_name':'iron',                            'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Fe',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconchg':         {'long_parameter_name':'mercury',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Hg',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconck':          {'long_parameter_name':'potassium',                       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'K',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcmg':         {'long_parameter_name':'magnesium',                       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mg',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcmn':         {'long_parameter_name':'manganese',                       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mn',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 }, 
+'sconcna':         {'long_parameter_name':'sodium',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Na',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcnh4':        {'long_parameter_name':'ammonium',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcni':         {'long_parameter_name':'nickel',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ni',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcno3':        {'long_parameter_name':'nitrate',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NO3',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcoc':         {'long_parameter_name':'organic carbon',                  'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcoccorrected':{'long_parameter_name':'organic carbon: corrected',       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcpb':         {'long_parameter_name':'lead',                            'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Pb',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcse':         {'long_parameter_name':'selenium',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Se',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcso4':        {'long_parameter_name':'sulphate',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcso4nss':     {'long_parameter_name':'sulphate: non-sea salt',          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconcv':          {'long_parameter_name':'vanadium',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'V',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'sconczn':         {'long_parameter_name':'zinc',                            'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Zn',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10al':          {'long_parameter_name':'PM10 aluminium',                  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Al',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10as':          {'long_parameter_name':'PM10 arsenic',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'As',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10bc':          {'long_parameter_name':'PM10 black carbon',               'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10c':           {'long_parameter_name':'PM10 carbon',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10ccorrected':  {'long_parameter_name':'PM10 carbon: corrected',          'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10ca':          {'long_parameter_name':'PM10 calcium',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ca',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10cd':          {'long_parameter_name':'PM10 cadmium',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cd',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10cl':          {'long_parameter_name':'PM10 chloride',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cl',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10cobalt':      {'long_parameter_name':'PM10 cobalt',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Co',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10cr':          {'long_parameter_name':'PM10 chromium',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cr',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10cu':          {'long_parameter_name':'PM10 copper',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cu',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10ec':          {'long_parameter_name':'PM10 elemental carbon',           'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10fe':          {'long_parameter_name':'PM10 iron',                       'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Fe',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10hg':          {'long_parameter_name':'PM10 mercury',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Hg',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10k':           {'long_parameter_name':'PM10 potassium',                  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'K',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10mg':          {'long_parameter_name':'PM10 magnesium',                  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mg',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10mn':          {'long_parameter_name':'PM10 manganese',                  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mn',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10na':          {'long_parameter_name':'PM10 sodium',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Na',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10nh4':         {'long_parameter_name':'PM10 ammonium',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10ni':          {'long_parameter_name':'PM10 nickel',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ni',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10no3':         {'long_parameter_name':'PM10 nitrate',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NO3',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10oc':          {'long_parameter_name':'PM10 organic carbon',             'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10occorrected': {'long_parameter_name':'PM10 organic carbon: corrected',  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10pb':          {'long_parameter_name':'PM10 lead',                       'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Pb',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10se':          {'long_parameter_name':'PM10 selenium',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Se',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10so4':         {'long_parameter_name':'PM10 sulphate',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10so4nss':      {'long_parameter_name':'PM10 sulphate : non-sea salt',    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10v':           {'long_parameter_name':'PM10 vanadium',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'V',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm10zn':          {'long_parameter_name':'PM10 zinc',                       'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Zn',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5al':         {'long_parameter_name':'PM2.5 aluminium',                 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Al',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5as':         {'long_parameter_name':'PM2.5 arsenic',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'As',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5bc':         {'long_parameter_name':'PM2.5 black carbon',              'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5c':          {'long_parameter_name':'PM2.5 carbon',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5ccorrected': {'long_parameter_name':'PM2.5 carbon: corrected',         'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5ca':         {'long_parameter_name':'PM2.5 calcium',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ca',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5cd':         {'long_parameter_name':'PM2.5 cadmium',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cd',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },  
+'pm2p5cl':         {'long_parameter_name':'PM2.5 chloride',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cl',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5cobalt':     {'long_parameter_name':'PM2.5 cobalt',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Co',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5cr':         {'long_parameter_name':'PM2.5 chromium',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cr',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5cu':         {'long_parameter_name':'PM2.5 copper',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cu',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5ec':         {'long_parameter_name':'PM2.5 elemental carbon',          'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5fe':         {'long_parameter_name':'PM2.5 iron',                      'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Fe',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5hg':         {'long_parameter_name':'PM2.5 mercury',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Hg',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5k':          {'long_parameter_name':'PM2.5 potassium',                 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'K',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5mg':         {'long_parameter_name':'PM2.5 magnesium',                 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mg',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5mn':         {'long_parameter_name':'PM2.5 manganese',                 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mn',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5na':         {'long_parameter_name':'PM2.5 sodium',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Na',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5nh3':        {'long_parameter_name':'PM2.5 ammonia',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH3',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5nh4':        {'long_parameter_name':'PM2.5 ammonium',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5ni':         {'long_parameter_name':'PM2.5 nickel',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ni',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5no3':        {'long_parameter_name':'PM2.5 nitrate',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NO3',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5oc':         {'long_parameter_name':'PM2.5 organic carbon',            'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5occorrected':{'long_parameter_name':'PM2.5 organic carbon: corrected', 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5pb':         {'long_parameter_name':'PM2.5 lead',                      'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Pb',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5se':         {'long_parameter_name':'PM2.5 selenium',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Se',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5so4':        {'long_parameter_name':'PM2.5 sulphate',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5so4nss':     {'long_parameter_name':'PM2.5 sulphate : non-sea salt',   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5v':          {'long_parameter_name':'PM2.5 vanadium',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'V',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm2p5zn':         {'long_parameter_name':'PM2.5 zinc',                      'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Zn',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1al':           {'long_parameter_name':'PM1 aluminium',                   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Al',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1as':           {'long_parameter_name':'PM1 arsenic',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'As',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1bc':           {'long_parameter_name':'PM1 black carbon',                'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1c':            {'long_parameter_name':'PM1 carbon',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1ccorrected':   {'long_parameter_name':'PM1 carbon: corrected',           'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1ca':           {'long_parameter_name':'PM1 calcium',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ca',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1cd':           {'long_parameter_name':'PM1 cadmium',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cd',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1cl':           {'long_parameter_name':'PM1 chloride',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cl',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1cobalt':       {'long_parameter_name':'PM1 cobalt',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Co',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1cr':           {'long_parameter_name':'PM1 chromium',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cr',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1cu':           {'long_parameter_name':'PM1 copper',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cu',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1ec':           {'long_parameter_name':'PM1 elemental carbon',            'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1fe':           {'long_parameter_name':'PM1 iron',                        'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Fe',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1hg':           {'long_parameter_name':'PM1 mercury',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Hg',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1k':            {'long_parameter_name':'PM1 potassium',                   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'K',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1mg':           {'long_parameter_name':'PM1 magnesium',                   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mg',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1mn':           {'long_parameter_name':'PM1 manganese',                   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mn',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1na':           {'long_parameter_name':'PM1 sodium',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Na',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1nh4':          {'long_parameter_name':'PM1 ammonium',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1ni':           {'long_parameter_name':'PM1 nickel',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ni',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1no3':          {'long_parameter_name':'PM1 nitrate',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NO3',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1oc':           {'long_parameter_name':'PM1 organic carbon',              'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1occorrected':  {'long_parameter_name':'PM1 organic carbon: corrected',   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1pb':           {'long_parameter_name':'PM1 lead',                        'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Pb',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1se':           {'long_parameter_name':'PM1 selenium',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Se',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1so4':          {'long_parameter_name':'PM1 sulphate',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1so4nss':       {'long_parameter_name':'PM1 sulphate : non-sea salt',     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1v':            {'long_parameter_name':'PM1 vanadium',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'V',       'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 },
+'pm1zn':           {'long_parameter_name':'PM10 zinc',                       'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Zn',      'extreme_lower_limit':0.0, 'extreme_upper_limit':1000.0 }
+} 
+
+#------------------------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------------------------#
+
+#defined standardised qa flag code associated with specific data quality assurance checks
+#can also be forced to return N flag codes rather than a specific flag code, by setting get_N_flags to True
+
+
 
 #------------------------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------------------------#
