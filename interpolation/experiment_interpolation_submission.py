@@ -36,7 +36,7 @@ interpolation_log_dir = '{}/interpolation_logs'.format(working_directory)
 unique_ID = sys.argv[1]
 
 #Read configuration file
-from configuration import start_date, end_date, experiments_to_process, species_to_process, grid_types_to_process, model_temporal_resolutions_to_process, GHOST_networks_to_interpolate_against, temporal_resolutions_to_output, n_neighbours_to_find
+from configuration import start_date, end_date, experiments_to_process, species_to_process, grid_types_to_process, model_temporal_resolutions_to_process, GHOST_networks_to_interpolate_against, temporal_resolutions_to_output, n_neighbours_to_find, qos
 
 #read defined experiments dictionary
 from defined_experiments import defined_experiments_dictionary
@@ -172,7 +172,7 @@ for file_ii, grouped_arguments in enumerate(arguments_split):
     submit_file.write("#SBATCH --ntasks=1\n")
     submit_file.write("#SBATCH --time=01:00:00\n")
     submit_file.write("#SBATCH --array=1-{}\n".format(len(grouped_arguments)))
-    submit_file.write("#SBATCH --qos=bsc_es\n")
+    submit_file.write("#SBATCH --qos={}\n".format(qos))
     submit_file.write("#SBATCH --output=/dev/null\n")
     submit_file.write("#SBATCH --error=/dev/null\n")
     submit_file.write("\n")
