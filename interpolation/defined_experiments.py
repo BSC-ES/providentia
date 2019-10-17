@@ -22,7 +22,9 @@ defined_experiments_dictionary = {#---------------------------------------------
                                    #a1yz - effect of dry deposition on aerosols VDRY=1
                                    'a1yz':{'esarchive':'/esarchive/exp/monarch/a1yz/'},
                                    #a1zc - CO boundary conditions in volume mixing ratio
-                                   'a1zc':{'esarchive':'/esarchive/exp/monarch/a1zc/'},			
+                                   'a1zc':{'esarchive':'/esarchive/exp/monarch/a1zc/'},		
+                                   #a28j
+                                   'a28j':{'esarchive':'/esarchive/exp/monarch/a28j/'},	
                                    #----------------------------------------------------------------------------#
                                    #CALIOPE OPERATIONAL experiments
                                    'b012':{'esarchive':'/esarchive/exp/wrf-hermes-cmaq/b012/'},
