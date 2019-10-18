@@ -18,13 +18,15 @@ defined_experiments_dictionary = {#---------------------------------------------
                                    #a21m - CAMS-81 v2.1 gridded temporal profiles	
                                    'a21m':{'esarchive':'/esarchive/exp/monarch/a21m/'},
                                    #a1yq - new SOA Simple scheme, speciation primary emissions HERMES  
-				                   'a1yq':{'esarchive':'/esarchive/exp/monarch/a1yq/'},	
+                                   'a1yq':{'esarchive':'/esarchive/exp/monarch/a1yq/'},	
                                    #a1yz - effect of dry deposition on aerosols VDRY=1
                                    'a1yz':{'esarchive':'/esarchive/exp/monarch/a1yz/'},
                                    #a1zc - CO boundary conditions in volume mixing ratio
                                    'a1zc':{'esarchive':'/esarchive/exp/monarch/a1zc/'},		
                                    #a28j
-                                   'a28j':{'esarchive':'/esarchive/exp/monarch/a28j/'},	
+                                   'a28j':{'esarchive':'/esarchive/exp/monarch/a28j/'},
+                                   #a22r	
+                                   'a22r':{'esarchive':'/esarchive/exp/monarch/a22r/'},
                                    #----------------------------------------------------------------------------#
                                    #CALIOPE OPERATIONAL experiments
                                    'b012':{'esarchive':'/esarchive/exp/wrf-hermes-cmaq/b012/'},
