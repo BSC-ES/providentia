@@ -13,10 +13,11 @@
 
 import numpy as np
 import os
+import sys
 
 ###--------------------------------------------------------------------------------------------------###
 
-def get_model_information(model_files):
+def get_model_information(model_files, speci_to_process):
     
     '''take first valid model file in month and get grid dimension/coordinate information 
        put initial object read in a  try/except to handle reading of corrupted files
@@ -127,11 +128,11 @@ def get_model_information(model_files):
         #break out of for loop, now that have read a valid model file in the month
         break
 
-    return mod_nc_root, mod_grid_type, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N
+    return mod_nc_root, mod_grid_type, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N, x_varname, y_varname, z_index
 
 ###--------------------------------------------------------------------------------------------------###
 
-def create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre, mod_lats_centre):
+def create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre, mod_lats_centre, x_varname, y_varname):
     
     '''create grid domain edge polygon from model netCDF file
        this is handled differtly for regular grids (i.e. following lines of longitude/latitude), and non-regular grids (e.g. lambert-conformal) 
@@ -308,11 +309,12 @@ def create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre,
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
 
-def get_monthly_model_data(yearmonth, temporal_resolution_to_output, model_files, x_N, y_N):
+def get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_output, model_files, x_N, y_N, z_index):
 
     '''read all relevant model data in yearmonth into memory'''
 
     from calendar import monthrange
+    from netCDF4 import Dataset
 
     #create monthly time variable
     #get year/month string
@@ -357,6 +359,8 @@ def get_monthly_model_data(yearmonth, temporal_resolution_to_output, model_files
             #cross compare monthly time with daily file provided time to get indices on where to place data in monthly netCDF
             #if any of hours are >= diff_hours_start_next_day, then these will not be processed onto monthly netcdf, to ensure no overlapping data between days is processed
             adjusted_daily_file_time = diff_hours_start_day + mod_nc_root['time'][:]
+            #round adjusted daily file time to be whole hours
+            adjusted_daily_file_time = np.around(adjusted_daily_file_time, 0)
             valid_daily_file_time_indices = np.where(adjusted_daily_file_time < diff_hours_start_next_day)[0]
 
             #read valid daily chunked data for valid indices
@@ -633,6 +637,9 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
 
     #delete uncompressed netCDF file
     os.remove(netCDF_fname)
+
+    #give 770 perrmissions to file
+    os.chmod(compress_netCDF_fname, 0o770)
 
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###

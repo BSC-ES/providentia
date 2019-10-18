@@ -13,6 +13,7 @@
 
 import experiment_interpolation_functions
 import glob
+from netCDF4 import Dataset
 import numpy as np
 import sys
 import time
@@ -43,13 +44,13 @@ obs_file = glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/{}/{}/{}/{}_{}*.nc
 model_files = np.sort(glob.glob('{}/{}/{}/{}/{}_{}*.nc'.format(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process, yearmonth)))
 
 #read model domain information
-mod_nc_root, mod_grid_type, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N = experiment_interpolation_functions.get_model_information(model_files)
+mod_nc_root, mod_grid_type, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N, x_varname, y_varname, z_index = experiment_interpolation_functions.get_model_information(model_files, speci_to_process)
 
 #create polygon along edge of model domain
-model_grid_outline, model_grid_outline_poly = experiment_interpolation_functions.create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre, mod_lats_centre)
+model_grid_outline, model_grid_outline_poly = experiment_interpolation_functions.create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre, mod_lats_centre, x_varname, y_varname)
 
 #read relevant monthly model data into memory
-yearmonth_time, monthly_model_data = experiment_interpolation_functions.get_monthly_model_data(yearmonth, temporal_resolution_to_output, model_files, x_N, y_N)
+yearmonth_time, monthly_model_data = experiment_interpolation_functions.get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_output, model_files, x_N, y_N, z_index)
 
 #get observational file netCDF root
 obs_nc_root = Dataset(obs_file)
