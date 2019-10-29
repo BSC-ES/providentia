@@ -672,7 +672,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
             #set all available networks
             #available_networks = ['EBAS','EIONET']
-            available_networks = ['EIONET']
+            available_networks = ['EBAS','EIONET']
         
             #set all available temporal resolutions
             available_resolutions = ['hourly','daily','monthly']
@@ -3557,7 +3557,7 @@ standard_data_flag_codes = {
 
 'Preliminary Data': 1,
 
-'Missing Data': 2, 
+'Missing Data': 2,
 
 'Invalid Data - Unspecified': 3,
 
@@ -3565,7 +3565,7 @@ standard_data_flag_codes = {
 #-----------------------------------------------------
 
 
-#Estimated Data Flags 
+#Estimated Data Flags
 #-----------------------------------------------------
 'Estimated Data - Unspecified': 10,
 
@@ -3598,7 +3598,7 @@ standard_data_flag_codes = {
 'Negative Value': 25,
 
 'No Value Detected': 26,
-    
+
 'Reconstructed/Recalculated Data': 27,
 
 'Value Close to Detection Limit': 28,
@@ -3727,7 +3727,7 @@ standard_data_flag_codes = {
 
 'Heavy Rain/Snowfall Shower (Squall)': 122,
 
-'High Winds': 123,    
+'High Winds': 123,
 
 'Seismic Activity': 124,
 
@@ -3739,7 +3739,7 @@ standard_data_flag_codes = {
 
 'Tropical Cyclone (Cyclone/Hurricane/Typhoon)': 128,
 
-'Volcanic Eruptions': 129, 
+'Volcanic Eruptions': 129,
 
 'Wildfire': 130,
 
@@ -3752,7 +3752,7 @@ standard_data_flag_codes = {
 'Demolition': 133,
 
 'Fireworks': 134,
-    
+
 'Infrequent Large Gathering': 135,
 
 'Terrorist Act': 136,
@@ -3787,7 +3787,7 @@ standard_data_flag_codes = {
 
 standard_qa_flag_codes = {
 
-#Basic QA Flags
+  #Basic QA Flags
 #-----------------------------------------------------
 #Missing Measurement
 #Measurement is missing (i.e. NaN).
@@ -3805,13 +3805,17 @@ standard_qa_flag_codes = {
 #Have measurement equal to zero.
 'Zero Measurement': 3,
 
+#Preliminary Data
+#Measurement has been flagged bv data provider to be preliminary in nature (i.e. not of the highest possible data quality/level)
+'Preliminary Data': 4,
+
 #Invalid Data Provider Flags - GHOST Decreed
 #Measurements are associated with data quality flags given by the data provider which have been decreed by the GHOST project architects to suggest the measurements are associated with substantial uncertainty/bias
-'Invalid Data Provider Flags - GHOST Decreed': 4,
+'Invalid Data Provider Flags - GHOST Decreed': 5,
 
 #Invalid Data Provider Flags - Network Decreed
-#Measurements are associated with data quality flags given by the data provider which have been decreed by the reporting network to suggest the measurements are associated with substantial uncertainty/bias 
-'Invalid Data Provider Flags - Network Decreed': 5,
+#Measurements are associated with data quality flags given by the data provider which have been decreed by the reporting network to suggest the measurements are associated with substantial uncertainty/bias
+'Invalid Data Provider Flags - Network Decreed': 6,
 #-----------------------------------------------------
 
 
@@ -3830,7 +3834,7 @@ standard_qa_flag_codes = {
 'Overlapping Time - GHOST Decreed Valid Flagged Values Kept': 12,
 
 #Overlapping Time - Finest Temporal Resolutions Kept
-#Measurements reported with overlapping temporal windows - only windows with a temporal resolution equal to the finest temporal resolution across the overlapping windows are kept 
+#Measurements reported with overlapping temporal windows - only windows with a temporal resolution equal to the finest temporal resolution across the overlapping windows are kept
 'Overlapping Time - Finest Temporal Resolutions Kept': 13,
 
 #Overlapping Time - First Value Kept
@@ -3842,147 +3846,168 @@ standard_qa_flag_codes = {
 #Significantly Shifting Measurement Position Flags
 #-----------------------------------------------------
 #Significant Latitude Shift
-#Latitude shifts by >= 0.0001 degrees from previously reported latitude 
-'Significant Latitude Shift': 20, 
-    
-#Significant Longitude Shift 
-#Longitude shifts by >= 0.0001 degrees from previously reported latitude 
-'Significant Longitude Shift': 21, 
+#Latitude shifts by >= 0.0001 degrees from previously reported latitude
+'Significant Latitude Shift': 20,
 
-#Significant Measurement Altitude Shift   
+#Significant Longitude Shift
+#Longitude shifts by >= 0.0001 degrees from previously reported latitude
+'Significant Longitude Shift': 21,
+
+#Significant Measurement Altitude Shift
 #Measurement Altitude shifts by >= 11m from previously reported measurement altitude
-'Significant Measurement Altitude Shift': 22, 
+'Significant Measurement Altitude Shift': 22,
 #-----------------------------------------------------
 
 
-#Duplicate station
+#Duplicate Station
 #-----------------------------------------------------
-#Station has been decreed to be a duplicate (i.e. reporting the same data as from another network, but the data from another network has been preferred)   
+#Station has been decreed to be a duplicate (i.e. reporting the same data as from another network, but the data from another network has been preferred)
 'Duplicate Station': 23,
 #-----------------------------------------------------
+
+#Suspect Geographical Position
+#-----------------------------------------------------
+#Station has a longitude/latitude outside valid bounds: -180 <-> +180 for longitude, -90 <-> +90 for latitude; or both longitude/latitude == 0.0 --> in the middle of the ocean
+'Suspect Geographical Position': 24,
 
 
 #Metadata Assumption Flags
 #-----------------------------------------------------
 #Assumed Gas Volume
-#Have assumed gas volume when converting between mass density and volume mixing ratio. (Do not have either temperature or pressure, or both).  
+#Have assumed gas volume when converting between mass density and volume mixing ratio. (Do not have either temperature or pressure, or both).
 'Assumed Gas Volume': 30,
 
 #No Latitude Metadata
-#Latitude metadata field is absent, the most recent valid past latitude is assumed to be still valid. 
-'No Latitude - Took Most Recent Valid Value': 31,
+#Latitude metadata field is absent, the most recent valid past latitude is assumed to be still valid.
+'No Latitude Metadata - Took Most Recent Valid Value': 31,
 
-#Latitude metadata field is absent, the next valid latitude in the time record is assumed to be valid for this period (no available past valid latitudes).  
-'No Latitude - Took Next Valid Value': 32,
+#Latitude metadata field is absent, the next valid latitude in the time record is assumed to be valid for this period (no available past valid latitudes).
+'No Latitude Metadata - Took Next Valid Value': 32,
 
 #Latitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Latitude - Used Manually Compiled Metadata': 33,
+'No Latitude Metadata - Used Manually Compiled Metadata': 33,
 
 #No Longitude Metadata
-#Longitude metadata field is absent, the most recent valid past longitude is assumed to be still valid.  
-'No Longitude - Took Most Recent Valid Value': 34,
+#Longitude metadata field is absent, the most recent valid past longitude is assumed to be still valid.
+'No Longitude Metadata - Took Most Recent Valid Value': 34,
 
-#Longitude metadata field is absent, the next valid longitude in the time record is assumed to be valid for this period (no available past valid longitudes).  
-'No Longitude - Took Next Valid Value': 35,
+#Longitude metadata field is absent, the next valid longitude in the time record is assumed to be valid for this period (no available past valid longitudes).
+'No Longitude Metadata - Took Next Valid Value': 35,
 
 #Longitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Longitude - Used Manually Compiled Metadata': 36,
+'No Longitude Metadata - Used Manually Compiled Metadata': 36,
 
 #No Altitude Metadata
-#Altitude metadata field is absent, the most recent valid past altitude is assumed to be still valid.  
-'No Altitude - Took Most Recent Valid Value': 37,
+#Altitude metadata field is absent, the most recent valid past altitude is assumed to be still valid.
+'No Altitude Metadata - Took Most Recent Valid Value': 37,
 
-#Altitude Metadata field is absent, the next valid altitude in the time record is assumed to be valid for this period (no available past valid altitudes).  
-'No Altitude - Took Next Valid Value': 38,
+#Altitude Metadata field is absent, the next valid altitude in the time record is assumed to be valid for this period (no available past valid altitudes).
+'No Altitude Metadata - Took Next Valid Value': 38,
 
 #Altitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Altitude - Used Manually Compiled Metadata': 39,
+'No Altitude Metadata - Used Manually Compiled Metadata': 39,
 
 #Altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes to fill altitude for entire time record.
-'No Altitude - Used ETOPO1 to Estimate Altitude': 40,
+'No Altitude Metadata - Used ETOPO1 to Estimate Altitude': 40,
 
 #No Sampling Height Metadata
-#Sampling height metadata field is absent, the most recent valid past sampling height is assumed to be still valid.  
-'No Sampling Height - Took Most Recent Valid Value': 41,
+#Sampling height metadata field is absent, the most recent valid past sampling height is assumed to be still valid.
+'No Sampling Height Metadata - Took Most Recent Valid Value': 41,
 
-#Sampling Height metadata field is absent, the next valid sampling height in the time record is assumed to be valid for this period (no available past valid sampling heights).  
-'No Sampling Height - Took Next Valid Value': 42,
+#Sampling Height metadata field is absent, the next valid sampling height in the time record is assumed to be valid for this period (no available past valid sampling heights).
+'No Sampling Height Metadata - Took Next Valid Value': 42,
 
 #Sampling Height metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Sampling Height - Used Manually Compiled Metadata': 43,
+'No Sampling Height Metadata - Used Manually Compiled Metadata': 43,
+
+#No Measurement Altitude Metadata
+#Measurement altitude metadata field is absent, the most recent valid past measurement altitude is assumed to be still valid.
+'No Measurement Altitude Metadata - Took Most Recent Valid Value': 44,
+
+#Altitude Metadata field is absent, the next valid measurement altitude in the time record is assumed to be valid for this period (no available past valid measurement altitudes).
+'No Measurement Altitude Metadata - Took Next Valid Value': 45,
+
+#Measurement altitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
+'No Measurement Altitude Metadata - Used Manually Compiled Metadata': 46,
+
+#Measurement altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes to fill measurement altitude for entire time record.
+'No Measurement Altitude Metadata - Used ETOPO1 to Estimate Altitude': 47,
+
+#Measurement altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes + sampling height to fill measurement altitude for entire time record.
+'No Measurement Altitude Metadata - Used ETOPO1 + Sampling Height to Estimate Altitude': 48,
 
 #No Standardised Network Provided Area Classification Metadata
-#Standardised Network Provided Area Classification metadata field is absent, the most recent valid past Standardised Network Provided Area Classification is assumed to be still valid.  
-'No Area Classification - Took Most Recent Valid Value': 44,
+#Standardised Network Provided Area Classification metadata field is absent, the most recent valid past Standardised Network Provided Area Classification is assumed to be still valid.
+'No Standardised Network Provided Area Classification Metadata - Took Most Recent Valid Value': 49,
 
 #Standardised Network Provided Area Classification metadata field is absent, the next valid Standardised Network Provided Area Classification in the time record is assumed to be valid for this period (no available past Standardised Network Provided Area Classifications).
-'No Area Classification - Took Next Valid Value': 45,
+'No Standardised Network Provided Area Classification Metadata - Took Next Valid Value': 50,
 
 #Standardised Network Provided Area Classification metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Area Classification - Used Manually Compiled Metadata': 46,
+'No Standardised Network Provided Area Classification Metadata - Used Manually Compiled Metadata': 51,
 
 #No Standardised Network Provided Station Classification Metadata
-#Standardised Network Provided Station Classification metadata field is absent, the most recent valid past Standardised Network Provided Station Classification is assumed to be still valid.  
-'No Station Classification - Took Most Recent Valid Value': 47,
+#Standardised Network Provided Station Classification metadata field is absent, the most recent valid past Standardised Network Provided Station Classification is assumed to be still valid.
+'No Standardised Network Provided Station Classification Metadata - Took Most Recent Valid Value': 52,
 
 #Standardised Network Provided Station Classification metadata field is absent, the next valid Standardised Network Provided Station Classification in the time record is assumed to be valid for this period (no available past Standardised Network Provided Station Classifications).
-'No Station Classification - Took Next Valid Value': 48,
+'No Standardised Network Provided Station Classification Metadata - Took Next Valid Value': 53,
 
 #Standardised Network Provided Station Classification metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Station Classification - Used Manually Compiled Metadata': 49,
+'No Standardised Network Provided Station Classification Metadata - Used Manually Compiled Metadata': 54,
 
 #No Standardised Network Provided Main Emission Source Metadata
-#Standardised Network Provided Main Emission Source metadata field is absent, the most recent valid past Standardised Network Provided Main Emission Source is assumed to be still valid.  
-'No Main Emission Source - Took Most Recent Valid Value': 50,
+#Standardised Network Provided Main Emission Source metadata field is absent, the most recent valid past Standardised Network Provided Main Emission Source is assumed to be still valid.
+'No Standardised Network Provided Main Emission Source Metadata - Took Most Recent Valid Value': 55,
 
 #Standardised Network Provided Main Emission Source metadata field is absent, the next valid Standardised Network Provided Main Emission Source in the time record is assumed to be valid for this period (no available past Standardised Network Provided Main Emission Sources).
-'No Main Emission Source - Took Next Valid Value': 51,
+'No Standardised Network Provided Main Emission Source Metadata - Took Next Valid Value': 56,
 
 #Standardised Network Provided Main Emission Source metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Main Emission Source - Used Manually Compiled Metadata': 52,
+'No Standardised Network Provided Main Emission Source Metadata - Used Manually Compiled Metadata': 57,
 
 #No Standardised Network Provided Land Use Metadata
-#Standardised Network Provided Land Use metadata field is absent, the most recent valid past Standardised Network Provided Land Use is assumed to be still valid.  
-'No Land Use - Took Most Recent Valid Value': 53,
+#Standardised Network Provided Land Use metadata field is absent, the most recent valid past Standardised Network Provided Land Use is assumed to be still valid.
+'No Standardised Network Provided Land Use Metadata - Took Most Recent Valid Value': 58,
 
 #Standardised Network Provided Land Use metadata field is absent, the next valid Standardised Network Provided Land Use in the time record is assumed to be valid for this period (no available past Standardised Network Provided Land Uses).
-'No Land Use - Took Next Valid Value': 54,
+'No Standardised Network Provided Land Use Metadata - Took Next Valid Value': 59,
 
 #Standardised Network Provided Land Use metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Land Use - Used Manually Compiled Metadata': 55,
+'No Standardised Network Provided Land Use Metadata - Used Manually Compiled Metadata': 60,
 
 #No Standardised Network Provided Terrain Metadata
-#Standardised Network Provided Terrain metadata field is absent, the most recent valid past Standardised Network Provided Terrain is assumed to be still valid.  
-'No Terrain - Took Most Recent Valid Value': 56,
+#Standardised Network Provided Terrain metadata field is absent, the most recent valid past Standardised Network Provided Terrain is assumed to be still valid.
+'No Standardised Network Provided Terrain Metadata - Took Most Recent Valid Value': 61,
 
 #Standardised Network Provided Terrain metadata field is absent, the next valid Standardised Network Provided Terrain in the time record is assumed to be valid for this period (no available past Standardised Network Provided Terrains).
-'No Terrain - Took Next Valid Value': 57,
+'No Standardised Network Provided Terrain Metadata - Took Next Valid Value': 62,
 
 #Standardised Network Provided Terrain metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Terrain - Used Manually Compiled Metadata': 58,
+'No Standardised Network Provided Terrain Metadata - Used Manually Compiled Metadata': 63,
 
 #No Standardised Network Provided Measurement Scale Metadata
-#Standardised Network Provided Measurement Scale metadata field is absent, the most recent valid past Standardised Network Provided Measurement Scale is assumed to be still valid.  
-'No Measurement Scale - Took Most Recent Valid Value': 59,
+#Standardised Network Provided Measurement Scale metadata field is absent, the most recent valid past Standardised Network Provided Measurement Scale is assumed to be still valid.
+'No Standardised Network Provided Measurement Scale Metadata - Took Most Recent Valid Value': 64,
 
 #Standardised Network Provided Measurement Scale metadata field is absent, the next valid Standardised Network Provided Measurement Scale in the time record is assumed to be valid for this period (no available past Standardised Network Provided Measurement Scales).
-'No Measurement Scale - Took Next Valid Value': 60,
+'No Standardised Network Provided Measurement Scale Metadata - Took Next Valid Value': 65,
 
 #Standardised Network Provided Measurement Scale metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Measurement Scale - Used Manually Compiled Metadata': 61,
+'No Standardised Network Provided Measurement Scale Metadata - Used Manually Compiled Metadata': 66,
 
 #No Representative Radius Metadata
-#Representative Radius metadata field is absent, the most recent valid past Representative Radius is assumed to be still valid.  
-'No Representative Radius - Took Most Recent Valid Value': 62,
+#Representative Radius metadata field is absent, the most recent valid past Representative Radius is assumed to be still valid.
+'No Representative Radius Metadata - Took Most Recent Valid Value': 67,
 
 #Representative Radius metadata field is absent, the next valid Representative Radius in the time record is assumed to be valid for this period (no available past Representative Radii).
-'No Representative Radius - Took Next Valid Value': 63,
+'No Representative Radius Metadata - Took Next Valid Value': 68,
 
 #Representative Radius metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Representative Radius - Used Manually Compiled Metadata': 64,
+'No Representative Radius Metadata - Used Manually Compiled Metadata': 69,
 #-----------------------------------------------------
 
-    
+
 #Recurring Value
 #-----------------------------------------------------
 #Do check for persistently recurring values. check is done by using a moving window of 9 measurements. If 7/9 of values in the window are valid.
@@ -4012,7 +4037,7 @@ standard_qa_flag_codes = {
 'Extreme Data - Manually Decreed': 82,
 #-----------------------------------------------------
 
-    
+
 #Insufficient Measurement Resolution Flags
 #-----------------------------------------------------
 #Insufficient Measurement Resolution - Documented
@@ -4028,7 +4053,7 @@ standard_qa_flag_codes = {
 'Insufficient Measurement Resolution - Preferential': 85,
 
 #No Documented/Reported Measurement Resolution Metadata
-#No measurement resolution metadata is available, either reported or documented. 
+#No measurement resolution metadata is available, either reported or documented.
 'No Documented/Reported Measurement Resolution Metadata': 86,
 
 #Insufficient Measurement Resolution - Empirical
@@ -4044,31 +4069,31 @@ standard_qa_flag_codes = {
 'Below Documented Lower Limit of Detection': 88,
 
 #Below Reported Lower Limit of Detection
-#Measurement is below or equal to the network reported lower limit of detection. 
+#Measurement is below or equal to the network reported lower limit of detection.
 'Below Reported Lower Limit of Detection': 89,
 
 #Below Preferential Lower Limit of Detection
-#Measurement is below or equal to the preferential lower limit of detection (reported, and then documented). 
+#Measurement is below or equal to the preferential lower limit of detection (reported, and then documented).
 'Below Preferential Lower Limit of Detection': 90,
 
 #No Documented/Reported Lower Limit of Detection Metadata
-#No lower limit of detection metadata is available, either reported or documented. 
+#No lower limit of detection metadata is available, either reported or documented.
 'No Documented/Reported Lower Limit of Detection Metadata': 91,
 
 #Above Documented Upper Limit of Detection
-#Measurement is above or equal to the instrumental documented upper limit of detection. 
+#Measurement is above or equal to the instrumental documented upper limit of detection.
 'Above Documented Upper Limit of Detection': 92,
 
 #Above Reported Upper Limit of Detection
-#Measurement is above or equal to the network reported upper limit of detection. 
+#Measurement is above or equal to the network reported upper limit of detection.
 'Above Reported Upper Limit of Detection': 93,
 
 #Above Preferential Upper Limit of Detection
-#Measurement is above or equal to the preferential upper limit of detection (reported, and then documented). 
+#Measurement is above or equal to the preferential upper limit of detection (reported, and then documented).
 'Above Preferential Upper Limit of Detection': 94,
 
 #No Documented/Reported Upper Limit of Detection Metadata
-#No upper limit of detection metadata is available, either reported or documented. 
+#No upper limit of detection metadata is available, either reported or documented.
 'No Documented/Reported Upper Limit of Detection Metadata': 95,
 #-----------------------------------------------------
 
@@ -4088,7 +4113,7 @@ standard_qa_flag_codes = {
 'Assumed Sample Preparation': 102,
 
 #Assumed Measurement Methodology
-#A level of assumption has been made in determining the measurement methodology. 
+#A level of assumption has been made in determining the measurement methodology.
 'Assumed Measurement Methodology': 103,
 
 #Unknown Primary Sampling Instrument
@@ -4096,7 +4121,7 @@ standard_qa_flag_codes = {
 'Unknown Primary Sampling Instrument': 104,
 
 #Unknown Measuring Instrument
-#The specific name of measuring instrument is unknown. 
+#The specific name of measuring instrument is unknown.
 'Unknown Measuring Instrument': 105,
 
 #Erroneous Primary Sampling
@@ -4111,7 +4136,7 @@ standard_qa_flag_codes = {
 #The measurement methodology used is not known to be able to measure the specific parameter. Only do check when known (or have assumed method).
 'Erroneous Measurement Methodology': 108,
 
-#Invalid QA Measurement Method 
+#Invalid QA Measurement Method
 #The specific measurement methodology has been decreed not to conform to QA standards as the method is not sufficiently proven/ subject to substantial biases/uncertainty. Only do check when known (or have assumed method).
 'Invalid QA Measurement Methodology': 109,
 #-----------------------------------------------------
@@ -4122,7 +4147,7 @@ standard_qa_flag_codes = {
 #-----------------------------------------------------
 #Two types are checks are done to flag the representativity of hourly data periods (starting and ending at NN:00 UTC).
 #First is Data Completeness, i.e. what percentage across the hourly period is represented by valid data (after screening by key QA flags)?
-#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the hourly period (after screening by key QA flags)? 
+#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the hourly period (after screening by key QA flags)?
 #Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
 
 #Hourly Window Data Completeness < 90%'
@@ -4140,20 +4165,20 @@ standard_qa_flag_codes = {
 #Hourly Window Data Completeness < 25%'
 'Hourly Window Data Completeness < 25%': 154,
 
-#Hourly Window Maximum Data Gap >= 5%'
-'Hourly Window Maximum Data Gap >= 5%': 155,
-
 #Hourly Window Maximum Data Gap >= 10%'
-'Hourly Window Maximum Data Gap >= 10%': 156,
-
-#Hourly Window Maximum Data Gap >= 15%'
-'Hourly Window Maximum Data Gap >= 15%': 157,
-
-#Hourly Window Maximum Data Gap >= 20%'
-'Hourly Window Maximum Data Gap >= 20%': 158,
+'Hourly Window Maximum Data Gap >= 10%': 155,
 
 #Hourly Window Maximum Data Gap >= 25%'
-'Hourly Window Maximum Data Gap >= 25%': 159,
+'Hourly Window Maximum Data Gap >= 25%': 156,
+
+#Hourly Window Maximum Data Gap >= 33%'
+'Hourly Window Maximum Data Gap >= 33%': 157,
+
+#Hourly Window Maximum Data Gap >= 50%'
+'Hourly Window Maximum Data Gap >= 50%': 158,
+
+#Hourly Window Maximum Data Gap >= 75%'
+'Hourly Window Maximum Data Gap >= 75%': 159,
 
 #-----------------------------------------------------
 
@@ -4162,7 +4187,7 @@ standard_qa_flag_codes = {
 #-----------------------------------------------------
 #Two types are checks are done to flag the representativity of daily data periods (starting and ending at NN 00:00 UTC).
 #First is the Data Completeness, i.e. what percentage across the daily period is represented by valid data (after screening by key QA flags)?
-#Second is the Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the daily period (after screening by key QA flags)? 
+#Second is the Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the daily period (after screening by key QA flags)?
 #Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
 
 #Daily Window Data Completeness < 90%'
@@ -4180,20 +4205,20 @@ standard_qa_flag_codes = {
 #Daily Window Data Completeness < 25%'
 'Daily Window Data Completeness < 25%': 164,
 
-#Daily Window Maximum Data Gap >= 5%'
-'Daily Window Maximum Data Gap >= 5%': 165,
-
 #Daily Window Maximum Data Gap >= 10%'
-'Daily Window Maximum Data Gap >= 10%': 166,
-
-#Daily Window Maximum Data Gap >= 15%'
-'Daily Window Maximum Data Gap >= 15%': 167,
-
-#Daily Window Maximum Data Gap >= 20%'
-'Daily Window Maximum Data Gap >= 20%': 168,
+'Daily Window Maximum Data Gap >= 10%': 165,
 
 #Daily Window Maximum Data Gap >= 25%'
-'Daily Window Maximum Data Gap >= 25%': 169,
+'Daily Window Maximum Data Gap >= 25%': 166,
+
+#Daily Window Maximum Data Gap >= 33%'
+'Daily Window Maximum Data Gap >= 33%': 167,
+
+#Daily Window Maximum Data Gap >= 50%'
+'Daily Window Maximum Data Gap >= 50%': 168,
+
+#Daily Window Maximum Data Gap >= 75%'
+'Daily Window Maximum Data Gap >= 75%': 169,
 
 #-----------------------------------------------------
 
@@ -4202,7 +4227,7 @@ standard_qa_flag_codes = {
 #-----------------------------------------------------
 #Two types are checks are done to flag the representativity of weekly data periods (starts and ends defined by UTC isocalendar).
 #First is Data Completeness, i.e. what percentage across the weekly period is represented by valid data (after screening by key QA flags)?
-#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the weekly period (after screening by key QA flags)? 
+#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the weekly period (after screening by key QA flags)?
 #Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
 
 #Weekly Window Data Completeness < 90%'
@@ -4220,20 +4245,20 @@ standard_qa_flag_codes = {
 #Weekly Window Data Completeness < 25%'
 'Weekly Window Data Completeness < 25%': 174,
 
-#Weekly Window Maximum Data Gap >= 5%'
-'Weekly Window Maximum Data Gap >= 5%': 175,
-
 #Weekly Window Maximum Data Gap >= 10%'
-'Weekly Window Maximum Data Gap >= 10%': 176,
-
-#Weekly Window Maximum Data Gap >= 15%'
-'Weekly Window Maximum Data Gap >= 15%': 177,
-
-#Weekly Window Maximum Data Gap >= 20%'
-'Weekly Window Maximum Data Gap >= 20%': 178,
+'Weekly Window Maximum Data Gap >= 10%': 175,
 
 #Weekly Window Maximum Data Gap >= 25%'
-'Weekly Window Maximum Data Gap >= 25%': 179,
+'Weekly Window Maximum Data Gap >= 25%': 176,
+
+#Weekly Window Maximum Data Gap >= 33%'
+'Weekly Window Maximum Data Gap >= 33%': 177,
+
+#Weekly Window Maximum Data Gap >= 50%'
+'Weekly Window Maximum Data Gap >= 50%': 178,
+
+#Weekly Window Maximum Data Gap >= 75%'
+'Weekly Window Maximum Data Gap >= 75%': 179,
 
 #-----------------------------------------------------
 
@@ -4242,7 +4267,7 @@ standard_qa_flag_codes = {
 #-----------------------------------------------------
 #Two types are checks are done to flag the representativity of monthly data periods (starting and ending at NN:01 00:00 UTC).
 #First is Data Completeness, i.e. what percentage across the monthly period is represented by valid data (after screening by key QA flags)?
-#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the monthly period (after screening by key QA flags)? 
+#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the monthly period (after screening by key QA flags)?
 #Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
 
 #Monthly Window Data Completeness < 90%'
@@ -4260,20 +4285,20 @@ standard_qa_flag_codes = {
 #Monthly Window Data Completeness < 25%'
 'Monthly Window Data Completeness < 25%': 184,
 
-#Monthly Window Maximum Data Gap >= 5%'
-'Monthly Window Maximum Data Gap >= 5%': 185,
-
 #Monthly Window Maximum Data Gap >= 10%'
-'Monthly Window Maximum Data Gap >= 10%': 186,
-
-#Monthly Window Maximum Data Gap >= 15%'
-'Monthly Window Maximum Data Gap >= 15%': 187,
-
-#Monthly Window Maximum Data Gap >= 20%'
-'Monthly Window Maximum Data Gap >= 20%': 188,
+'Monthly Window Maximum Data Gap >= 10%': 185,
 
 #Monthly Window Maximum Data Gap >= 25%'
-'Monthly Window Maximum Data Gap >= 25%': 189,
+'Monthly Window Maximum Data Gap >= 25%': 186,
+
+#Monthly Window Maximum Data Gap >= 33%'
+'Monthly Window Maximum Data Gap >= 33%': 187,
+
+#Monthly Window Maximum Data Gap >= 50%'
+'Monthly Window Maximum Data Gap >= 50%': 188,
+
+#Monthly Window Maximum Data Gap >= 75%'
+'Monthly Window Maximum Data Gap >= 75%': 189,
 
 #-----------------------------------------------------
 
@@ -4282,7 +4307,7 @@ standard_qa_flag_codes = {
 #-----------------------------------------------------
 #Two types are checks are done to flag the representativity of annual data periods (starting and ending at NNNN:01:01 00:00 UTC).
 #First is Data Completeness, i.e. what percentage across the annual period is represented by valid data (after screening by key QA flags)?
-#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the annual period (after screening by key QA flags)? 
+#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the annual period (after screening by key QA flags)?
 #Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
 
 #Annual Window Data Completeness < 90%'
@@ -4300,30 +4325,29 @@ standard_qa_flag_codes = {
 #Annual Window Data Completeness < 25%'
 'Annual Window Data Completeness < 25%': 194,
 
-#Annual Window Maximum Data Gap >= 5%'
-'Annual Window Maximum Data Gap >= 5%': 195,
-
 #Annual Window Maximum Data Gap >= 10%'
-'Annual Window Maximum Data Gap >= 10%': 196,
-
-#Annual Window Maximum Data Gap >= 15%'
-'Annual Window Maximum Data Gap >= 15%': 197,
-
-#Annual Window Maximum Data Gap >= 20%'
-'Annual Window Maximum Data Gap >= 20%': 198,
+'Annual Window Maximum Data Gap >= 10%': 195,
 
 #Annual Window Maximum Data Gap >= 25%'
-'Annual Window Maximum Data Gap >= 25%': 199,
+'Annual Window Maximum Data Gap >= 25%': 196,
+
+#Annual Window Maximum Data Gap >= 33%'
+'Annual Window Maximum Data Gap >= 33%': 197,
+
+#Annual Window Maximum Data Gap >= 50%'
+'Annual Window Maximum Data Gap >= 50%': 198,
+
+#Annual Window Maximum Data Gap >= 75%'
+'Annual Window Maximum Data Gap >= 75%': 199,
 
 #-----------------------------------------------------
 
 
-#No Valid Data 
+#No Valid Data
 #-----------------------------------------------------
 #After screening by key QA flags, no valid data remains.
 'No Valid Data': 210
 
-#-----------------------------------------------------    
 }
 
 #------------------------------------------------------------------------------------------------------------#
@@ -4337,100 +4361,232 @@ standard_classification_flag_codes = {
 #Station Classifications
 #-----------------------------------------------------
 #High Altitude - Metadata Altitude
-#Station determined to be measuring at an altitude >= 1500 metres relative to mean sea level, from altitudes + sampling heights taken from network provided metadata. 
+#Station determined to be measuring at an altitude >= 1500 metres relative to mean sea level, from altitudes + sampling heights taken from network provided metadata.
 'High Altitude - Metadata Altitude': 0,
 
-#High Altitude - Metadata Derived
-#Station determined to be a 'mountain' station, and therefore 'high altitude', derived from standardised 'terrain' network provided metadata.
-'High Altitude - Metadata Derived': 1,
+#High Altitude - ETOPO1
+#Station determined to be measuring at an altitude >= 1500 metres relative to sea level datum, from altitudes taken from ETOPO1 digital elevation model + sampling heights taken from network provided metadata.
+'High Altitude - ETOPO1': 1,
 
-#High Altitude - ETOPO1 
-#Station determined to be measuring at an altitude >= 1500 metres relative to sea level datum, from altitudes taken from ETOPO1 digital elevation model + sampling heights taken from network provided metadata. 
-'High Altitude - ETOPO1': 2,
+#High Altitude - Iwahashi Global Landform Classification
+#Station determined to be measuring at a high altitude, derived from the European Soil Data Centre Iwahashi Global Landform Classification.
+'High Altitude - Iwahashi Global Landform Classification': 2,
 
-#High Altitude - Iwahashi Global Landform Classification 
-#Station determined to be measuring at a high altitude, derived from the European Soil Data Centre Iwahashi Global Landform Classification. 
-'High Altitude - Iwahashi Global Landform Classification': 3,
-
-#High Altitude - Meybeck Global Landform Classification 
-#Station determined to be measuring at a high altitude, derived from the European Soil Data Centre Meybeck Global Landform Classification. 
-'High Altitude - Meybeck Global Landform Classification': 4,
-
-#Near Coast - Metadata Derived
-#Station determined to be located near the coast - derived from standardised 'terrain' network provided metadata. 
-'Near Coast - Metadata Derived': 5,
+#High Altitude - Meybeck Global Landform Classification
+#Station determined to be measuring at a high altitude, derived from the European Soil Data Centre Meybeck Global Landform Classification.
+'High Altitude - Meybeck Global Landform Classification': 3,
 
 #Near Coast - GSFC
 #Station determined to be located < 50km of the coast (either over land or sea) - using GSFC nearest to coastline dataset (0.01 degree grid).
-'Near Coast - GSFC': 6,
+'Near Coast - GSFC': 4,
 
 #Rural Station - Lenient Metadata Derived
-#Station determined to be 'rural', using standardised network provided metadata, following lenient classifications. 
-'Rural Station - Lenient Metadata Derived': 7,
+#Station determined to be 'rural', using standardised network provided metadata, following lenient classifications.
+'Rural Station - Lenient Metadata Derived': 5,
 
 #Urban Station - Lenient Metadata Derived
-#Station determined to be 'urban', using standardised network provided metadata, following lenient classifications. 
-'Urban Station - Lenient Metadata Derived': 8,
+#Station determined to be 'urban', using standardised network provided metadata, following lenient classifications.
+'Urban Station - Lenient Metadata Derived': 6,
 
 #Unclassified Station - Lenient Metadata Derived
 #Station determined to be 'unclassified', using standardised network provided metadata, following lenient classifications.
-'Unclassified Station - Lenient Metadata Derived': 9,
+'Unclassified Station - Lenient Metadata Derived': 7,
 
 #Rural Station - Strict Metadata Derived
-#Station determined to be 'rural', using standardised network provided metadata, following strict classifications. 
-'Rural Station - Strict Metadata Derived': 10,
+#Station determined to be 'rural', using standardised network provided metadata, following strict classifications.
+'Rural Station - Strict Metadata Derived': 8,
 
 #Urban Station - Strict Metadata Derived
-#Station determined to be 'urban', using standardised network provided metadata, following strict classifications. 
-'Urban Station - Strict Metadata Derived': 11,
+#Station determined to be 'urban', using standardised network provided metadata, following strict classifications.
+'Urban Station - Strict Metadata Derived': 9,
 
 #Unclassified Station - Strict Metadata Derived
 #Station determined to be 'unclassified', using standardised network provided metadata, following strict classifications.
-'Unclassified Station - Strict Metadata Derived': 12,
+'Unclassified Station - Strict Metadata Derived': 10,
 
 #Rural Station - Anthrome (Native Resolution)
 #Rural station as defined by using the UMBC Anthrome gridded classification dataset at native resolution (0.0833 degree grid).
-'Rural Station - Anthrome (Native Resolution)': 13,
+'Rural Station - Anthrome (Native Resolution)': 11,
 
 #Urban Station - Anthrome (Native Resolution)
 #Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset at native resolution (0.0833 degree grid).
-'Urban Station - Anthrome (Native Resolution)': 14,
+'Urban Station - Anthrome (Native Resolution)': 12,
 
 #Rural Station - Anthrome (Mode in 5km Perimeter)
-#Rural station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 5km perimeter around the station location. 
-'Rural Station - Anthrome (Mode in 5km Perimeter)': 15,
+#Rural station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 5km perimeter around the station location.
+'Rural Station - Anthrome (Mode in 5km Perimeter)': 13,
 
 #Urban Station - Anthrome (Mode in 5km Perimeter)
-#Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 5km perimeter around the station location. 
-'Urban Station - Anthrome (Mode in 5km Perimeter)': 16,
+#Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 5km perimeter around the station location.
+'Urban Station - Anthrome (Mode in 5km Perimeter)': 14,
 
 #Rural Station - Anthrome (Mode in 25km Perimeter)
-#Rural station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 25km perimeter around the station location. 
-'Rural Station - Anthrome (Mode in 25km Perimeter)': 17,
+#Rural station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 25km perimeter around the station location.
+'Rural Station - Anthrome (Mode in 25km Perimeter)': 15,
 
 #Urban Station - Anthrome (Mode in 25km Perimeter)
-#Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 25km perimeter around the station location. 
-'Urban Station - Anthrome (Mode in 25km Perimeter)': 18,
+#Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 25km perimeter around the station location.
+'Urban Station - Anthrome (Mode in 25km Perimeter)': 16,
 
 #Rural Station - TOAR
 #Rural station as defined by using a TOAR approach to classification (Tropospheric Ozone Assessment Report).
-'Rural Station - TOAR': 19,
+'Rural Station - TOAR': 17,
 
 #Urban Station - TOAR
 #Urban station as defined by using a TOAR approach to classification (Tropospheric Ozone Assessment Report).
-'Urban Station - TOAR': 20,
+'Urban Station - TOAR': 18,
 
 #Unclassified Station - TOAR
 #Unclassified station as defined using a TOAR approach to classification (Tropospheric Ozone Assessment Report).
-'Unclassified Station - TOAR': 21,
+'Unclassified Station - TOAR': 19,
 
-#Rural Station - Joly-Peuch 
+#Rural Station - Joly-Peuch
 #Rural station as defined using a Joly-Peuch approach to classification
-'Rural Station - Joly-Peuch': 22,
+'Rural Station - Joly-Peuch': 20,
 
-#Unclassified Station - Joly-Peuch 
+#Unclassified Station - Joly-Peuch
 #Unclassified station as defined using a Joly-Peuch approach to classification
-'Unclassified Station - Joly-Peuch': 23,
+'Unclassified Station - Joly-Peuch': 21,
+
+#Area Classification Metadata = 'urban'
+#Standardised network provided area classification metadata is "urban"
+"Area Classification Metadata = 'urban'": 30,
+
+#Area Classification Metadata = 'urban-centre'
+#Standardised network provided area classification metadata is "urban-centre"
+"Area Classification Metadata = 'urban-centre'": 31,
+
+#Area Classification Metadata = 'urban-suburban'
+#Standardised network provided area classification metadata is "urban-suburban"
+"Area Classification Metadata = 'urban-suburban'": 32,
+
+#Area Classification Metadata = 'rural'
+#Standardised network provided area classification metadata is "rural"
+"Area Classification Metadata = 'rural'": 33,
+
+#Area Classification Metadata = 'rural-near_city'
+#Standardised network provided area classification metadata is "rural-near_city"
+"Area Classification Metadata = 'rural-near_city'": 34,
+
+#Area Classification Metadata = 'rural-regional'
+#Standardised network provided area classification metadata is "rural-regional"
+"Area Classification Metadata = 'rural-regional'": 35,
+
+#Area Classification Metadata = 'rural-remote'
+#Standardised network provided area classification metadata is "rural-remote"
+"Area Classification Metadata = 'rural-remote'": 36,
+
+#Station Classification Metadata = 'background'
+#Standardised network provided station classification metadata is "background"
+"Station Classification Metadata = 'background'": 37,
+
+#Station Classification Metadata = 'point_source'
+#Standardised network provided station classification metadata is "point_source"
+"Station Classification Metadata = 'point_source'": 38,
+
+#Station Classification Metadata = 'point_source-industrial'
+#Standardised network provided station classification metadata is "point_source-industrial"
+"Station Classification Metadata = 'point_source-industrial'": 39,
+
+#Station Classification Metadata = 'point_source-traffic'
+#Standardised network provided station classification metadata is "point_source-traffic"
+"Station Classification Metadata = 'point_source-traffic'": 40,
+
+#Spatial Representativity Metadata = '<0.1km'
+#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is <0.1 km
+"Spatial Representativity Metadata = '<0.1km'": 41,
+
+#Spatial Representativity Metadata = '0.1-0.5km'
+#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 0.1 km and <0.5 km
+"Spatial Representativity Metadata = '0.1-0.5km'": 42,
+
+#Spatial Representativity Metadata = '0.5-4km'
+#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 0.5 km and <4.0 km
+"Spatial Representativity Metadata = '0.5-4km'": 43,
+
+#Spatial Representativity Metadata = '4-50km'
+#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 4.0 km and <50.0 km
+"Spatial Representativity Metadata = '4-50km'": 44,
+
+#Spatial Representativity Metadata = '>=50km'
+#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 50.0 km
+"Spatial Representativity Metadata = '>=50km'": 45,
+
+#Terrain Metadata = 'coastal'
+#Standardised network provided terrain metadata is "coastal"
+"Terrain Metadata = 'coastal'": 46,
+
+#Terrain Metadata = 'complex'
+#Standardised network provided terrain metadata is "complex"
+"Terrain Metadata = 'complex'": 47,
+
+#Terrain Metadata = 'flat'
+#Standardised network provided terrain metadata is "flat"
+"Terrain Metadata = 'flat'": 48,
+
+#Terrain Metadata = 'mountain'
+#Standardised network provided terrain metadata is "mountain"
+"Terrain Metadata = 'mountain'": 49,
+
+#Terrain Metadata = 'rolling'
+#Standardised network provided terrain metadata is "rolling"
+"Terrain Metadata = 'rolling'": 50,
+
+#Land Use Metadata = 'barren'
+#Standardised network provided land use metadata is "barren"
+"Land Use Metadata = 'barren'": 51,
+
+#Land Use Metadata = 'forest'
+#Standardised network provided land use metadata is "forest"
+"Land Use Metadata = 'forest'": 52,
+
+#Land Use Metadata = 'open'
+#Standardised network provided land use metadata is "open"
+"Land Use Metadata = 'open'": 53,
+
+#Land Use Metadata = 'snow'
+#Standardised network provided land use metadata is "snow"
+"Land Use Metadata = 'snow'": 54,
+
+#Land Use Metadata = 'urban'
+#Standardised network provided land use metadata is "urban"
+"Land Use Metadata = 'urban'": 55,
+
+#Land Use Metadata = 'water'
+#Standardised network provided land use metadata is "water"
+"Land Use Metadata = 'water'": 56,
+
+#Land Use Metadata = 'wetland'
+#Standardised network provided land use metadata is "wetland"
+"Land Use Metadata = 'wetland'": 57,
+
+#MODIS MCD12C1 Land Use = 'barren'
+#MODIS MCD12C1 land use is "barren"
+"MODIS MCD12C1 Land Use = 'barren'": 58,
+
+#MODIS MCD12C1 Land Use = 'forest'
+#MODIS MCD12C1 land use is "forest"
+"MODIS MCD12C1 Land Use = 'forest'": 59,
+
+#MODIS MCD12C1 Land Use = 'open'
+#MODIS MCD12C1 land use is "open"
+"MODIS MCD12C1 Land Use = 'open'": 60,
+
+#MODIS MCD12C1 Land Use = 'snow'
+#MODIS MCD12C1 land use is "snow"
+"MODIS MCD12C1 Land Use = 'snow'": 61,
+
+#MODIS MCD12C1 Land Use = 'urban'
+#MODIS MCD12C1 land use is "urban"
+"MODIS MCD12C1 Land Use = 'urban'": 62,
+
+#MODIS MCD12C1 Land Use = 'water'
+#MODIS MCD12C1 land use is "water"
+"MODIS MCD12C1 Land Use = 'water'": 63,
+
+#MODIS MCD12C1 Land Use = 'wetland'
+#MODIS MCD12C1 land use is "wetland"
+"MODIS MCD12C1 Land Use = 'wetland'": 64,
 #-----------------------------------------------------
 
 
@@ -4438,36 +4594,37 @@ standard_classification_flag_codes = {
 #-----------------------------------------------------
 #Daytime
 #Time of measurement is daytime. Done by calculating the solar elevation angle for a latitude/longitude/measurement height at a certain timestamp.
-'Daytime': 50,
+'Daytime': 100,
 
 #Nightime
 #Time of measurement is nighttime. Done by calculating the solar elevation angle for a latitude/longitude/measurement height at a certain timestamp.
-'Nighttime': 51,
+'Nighttime': 101,
 
 #Weekday
 #Time of measurement is weekday (by local time).
-'Weekday': 52,
+'Weekday': 102,
 
 #Weekend
 #Time of measurement is weekend (by local time).
-'Weekend': 53,
+'Weekend': 103,
 
 #winter
 #Time of measurement is northern hemisphere winter (measurement UTC time in months of December, January or February).
-'Winter': 54,    
+'Winter': 104,
 
 #spring
 #Time of measurement is northern hemisphere spring (measurement UTC time in months of March, April or May).
-'Spring': 55,    
+'Spring': 105,
 
 #summer
 #Time of measurement is northern hemisphere spring (measurement UTC time in months of June, July or August).
-'Summer': 56,    
+'Summer': 106,
 
 #autumn
 #Time of measurement is northern hemisphere spring (measurement UTC time in months of September, October or November).
-'Autumn': 57   
+'Autumn': 107
 #-----------------------------------------------------
+
 }
 
 #------------------------------------------------------------------------------------------------------------#
