@@ -536,7 +536,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #define qa flags
         self.qa_names = np.array(sorted(standard_qa_flag_codes, key=standard_qa_flag_codes.get))
         self.qa_codes = np.sort(list(standard_qa_flag_codes.values()))        
-        self.qa_default_codes = np.array([0, 1, 2, 3, 4, 70, 80, 81, 82, 85, 87, 90, 94, 100, 106, 107, 108], dtype=np.uint8)
+        self.qa_default_codes = np.array([0, 1, 2, 3, 4, 5, 70, 80, 81, 82, 85, 87, 90, 94, 100, 106, 107, 108], dtype=np.uint8)
         self.qa_default_inds = np.array([np.where(self.qa_codes == code)[0][0] for code in self.qa_default_codes], dtype=np.uint8)
 
         #define classification flags        
@@ -671,8 +671,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             self.all_observation_data = {}
 
             #set all available networks
-            #available_networks = ['EBAS','EIONET']
-            available_networks = ['EBAS','EIONET']
+            available_networks = ['EBAS','EEA_AQ_eReporting']
         
             #set all available temporal resolutions
             available_resolutions = ['hourly','daily','monthly']
@@ -1273,7 +1272,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                          'representative_radius':np.float32,
                          'GSFC_coastline_proximity':np.float32,
                          'primary_sampling_type':np.object,
-                         'sample_preparation_methodology_types':np.object,
+                         'sample_preparation_types':np.object,
                          'measurement_methodology':np.object,  
                          'measuring_instrument_name':np.object,    
                          'measuring_instrument_sampling_type':np.object
@@ -2676,7 +2675,7 @@ class MPL_Canvas(FigureCanvas):
                                     'representative_radius':'Representative Radius',
                                     'GSFC_coastline_proximity':'To Coast',
                                     'primary_sampling_type':'Sampling Instrument Type',
-                                    'sample_preparation_methodology_types':'Sample Preparation',
+                                    'sample_preparation_types':'Sample Preparation',
                                     'measurement_methodology':'Measurement Method',
                                     'measuring_instrument_name':'Measuring Instrument',   
                                     'measuring_instrument_sampling_type':'Measuring Instrument Sampling'
@@ -2701,7 +2700,7 @@ class MPL_Canvas(FigureCanvas):
                                      'standardised_network_provided_land_use', 'standardised_network_provided_main_emission_source', 
                                      'standardised_network_provided_measurement_scale', 'representative_radius',
                                      'measurement_methodology', 'measuring_instrument_name', 'measuring_instrument_sampling_type',
-                                     'primary_sampling_type', 'sample_preparation_methodology_types']
+                                     'primary_sampling_type', 'sample_preparation_types']
 
             #iterate through metadata variables
             for meta_var in metadata_vars_to_plot:
@@ -3843,32 +3842,11 @@ standard_qa_flag_codes = {
 #-----------------------------------------------------
 
 
-#Significantly Shifting Measurement Position Flags
-#-----------------------------------------------------
-#Significant Latitude Shift
-#Latitude shifts by >= 0.0001 degrees from previously reported latitude
-'Significant Latitude Shift': 20,
-
-#Significant Longitude Shift
-#Longitude shifts by >= 0.0001 degrees from previously reported latitude
-'Significant Longitude Shift': 21,
-
-#Significant Measurement Altitude Shift
-#Measurement Altitude shifts by >= 11m from previously reported measurement altitude
-'Significant Measurement Altitude Shift': 22,
-#-----------------------------------------------------
-
-
 #Duplicate Station
 #-----------------------------------------------------
 #Station has been decreed to be a duplicate (i.e. reporting the same data as from another network, but the data from another network has been preferred)
-'Duplicate Station': 23,
+'Duplicate Station': 20,
 #-----------------------------------------------------
-
-#Suspect Geographical Position
-#-----------------------------------------------------
-#Station has a longitude/latitude outside valid bounds: -180 <-> +180 for longitude, -90 <-> +90 for latitude; or both longitude/latitude == 0.0 --> in the middle of the ocean
-'Suspect Geographical Position': 24,
 
 
 #Metadata Assumption Flags
