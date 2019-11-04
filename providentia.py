@@ -1606,15 +1606,6 @@ class MPL_Canvas(FigureCanvas):
         self.ts_ax.spines["right"].set_visible(False)   
 
         #--------------------------------------------------#
-        #setup interactive picker/lasso on map
-        #self.figure.canvas.mpl_connect('pick_event', self.on_click)
-        #self.lasso = LassoSelector(self.map_ax, onselect=self.onlassoselect, useblit=True, lineprops=dict(alpha=0.5, color='hotpink', linewidth=1))
-        #initialise variable that informs whether to use picker/lasso for updates
-        #self.map_already_updated = False
-        #initialise variable of valid station indices plotted on map as empty list
-        #self.active_map_valid_station_inds = np.array([],dtype=np.int)
-
-        #--------------------------------------------------#
         #hide all axes  
         self.cbar_ax.axis('off')
         self.legend_ax.axis('off')
@@ -2634,12 +2625,6 @@ class MPL_Canvas(FigureCanvas):
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------# 
-    #function which creates a 
-
-    #def update_experiment_bias_taylor_plot(self):
-
-    #--------------------------------------------------------------------------------#
-    #--------------------------------------------------------------------------------# 
 
     def update_selected_station_metadata(self): 
 
@@ -2881,7 +2866,6 @@ class MPL_Canvas(FigureCanvas):
             z1_array_data = drop_NaNs(z1_array_data)
         else:
             z1_array_data.tolist()
-            #z1_array_data = z1_array_data.transpose(1,0).tolist()
 
         #create empty array to store z statistic
         self.z_statistic = np.empty(len(z1_array_data))
@@ -2909,7 +2893,6 @@ class MPL_Canvas(FigureCanvas):
             if z_statistic_name != 'Data %':
                 z2_array_data = drop_NaNs(z2_array_data)
             else:
-                #z2_array_data = z2_array_data.transpose(1,0).tolist()
                 z2_array_data = z2_array_data.tolist()          
             #is the difference statistic basic (i.e. mean)?
             if z_statistic_type == 'basic':
@@ -3295,9 +3278,7 @@ class MPL_Canvas(FigureCanvas):
         lasso_path_vertices = lasso_path.vertices
         #transform lasso coordinates from projected to standard geographic coordinates
         lasso_path.vertices = self.datacrs.transform_points(self.plotcrs, lasso_path_vertices[:,0], lasso_path_vertices[:,1])[:,:2]
-        #xys = self.map_points.get_offsets()
         #get absolute selected indices of stations on map (the station coordinates contained within lasso)
-        #self.absolute_selected_station_inds = np.nonzero(lasso_path.contains_points(xys))[0]
         self.absolute_selected_station_inds = np.nonzero(lasso_path.contains_points(self.map_points_coordinates))[0]
 
         #get selected station indices with respect to all available stations
@@ -3336,7 +3317,6 @@ def drop_NaNs(data):
     '''function that returns numpy object of lists of station data with NaNs removed'''
 
     #reshape numpy array to have lists of data per station
-    #data = data.transpose(1,0).tolist()
     data = data.tolist()
     #iterate through each list of station data and remove NaNs
     for station_ii, station_data in enumerate(data):
