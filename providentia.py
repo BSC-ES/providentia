@@ -1094,8 +1094,8 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                     #iterate through all keys in data in memory dictionary
                     for data_label in list(self.data_in_memory.keys()):
                         #create new data array in shape of current station references array, putting the old data into new array in the correct positions
-                        new_data_array = np.full((len(self.previous_time_array),len(self.station_references)), np.NaN, dtype=np.float32)
-                        new_data_array[:,new_station_inds] = self.data_in_memory[data_label]['data'][:,old_station_inds]
+                        new_data_array = np.full((len(self.station_references),len(self.previous_time_array)), np.NaN, dtype=np.float32)
+                        new_data_array[new_station_inds,:] = self.data_in_memory[data_label]['data'][old_station_inds,:]
                         #overwrite data array with reshaped version
                         self.data_in_memory[data_label]['data'] = new_data_array
                 
@@ -1116,7 +1116,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
                 #iterate through all keys in data in memory dictionary and cut edges of the associated arrays appropriately 
                 for data_label in list(self.data_in_memory.keys()):
-                    self.data_in_memory[data_label]['data'] = self.data_in_memory[data_label]['data'][left_edge_ind:right_edge_ind,:]
+                    self.data_in_memory[data_label]['data'] = self.data_in_memory[data_label]['data'][:,left_edge_ind:right_edge_ind]
 
             #need to read on left edge?
             if read_left == True:
@@ -1125,7 +1125,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                 #iterate through all keys in data in memory dictionary and insert read data on left edge of the associated arrays 
                 for data_label in list(self.data_in_memory.keys()):
                     #add space on left edge to insert new read data
-                    self.data_in_memory[data_label]['data'] = np.insert(self.data_in_memory[data_label]['data'], 0, np.full((n_new_left_inds,len(self.station_references)),np.NaN), axis=0)
+                    self.data_in_memory[data_label]['data'] = np.insert(self.data_in_memory[data_label]['data'], 0, np.full((len(self.station_references),n_new_left_inds),np.NaN), axis=0)
                     self.read_data(data_label, self.active_start_date, self.previous_active_start_date)
 
             #need to read on right edge?
@@ -1134,7 +1134,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                 n_new_right_inds = (len(self.time_array) - 1) - np.where(self.time_array == self.previous_time_array[-1])[0][0]
                 #iterate through all keys in data in memory dictionary and insert read data on right edge of the associated arrays
                 for data_label in list(self.data_in_memory.keys()):
-                    self.data_in_memory[data_label]['data'] = np.append(self.data_in_memory[data_label]['data'], np.full((n_new_right_inds,len(self.station_references)),np.NaN), axis=0)
+                    self.data_in_memory[data_label]['data'] = np.append(self.data_in_memory[data_label]['data'], np.full((len(self.station_references),n_new_right_inds),np.NaN), axis=0)
                     self.read_data(data_label, self.previous_active_end_date, self.active_end_date)
         
         #if have new experiments to read, then read them now
@@ -1386,7 +1386,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #check if data label in data in memory dictionary
         if data_label not in list(self.data_in_memory.keys()):  
             #if not create empty array (filled with NaNs) to store species data and place it in the dictionary
-            self.data_in_memory[data_label] = {'data': np.full((len(self.time_array),len(self.station_references)), np.NaN, dtype=np.float32)}
+            self.data_in_memory[data_label] = {'data': np.full((len(self.station_references),len(self.time_array)), np.NaN, dtype=np.float32)}
         
             #if process_type is experiment, get experiment specific grid edges from first relevant file, and save to data in memory dictionary
             if process_type == 'experiment':
@@ -1406,7 +1406,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                 #read file
                 file_data, time_indices, full_array_station_indices = read_netCDF_data(relevant_file)
                 #place read data into big array as appropriate
-                self.data_in_memory[data_label]['data'][time_indices[:,np.newaxis], full_array_station_indices[np.newaxis,:]] = file_data
+                self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis,:], time_indices[:,np.newaxis]] = file_data
      
         #read in parallel 
         elif self.read_type == 'parallel':
@@ -1423,7 +1423,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
             #iterate through read file data and place data into data array as appropriate
             for file_data in all_file_data:
-                self.data_in_memory[data_label]['data'][file_data[1][:,np.newaxis], file_data[2][np.newaxis,:]] = file_data[0]
+                self.data_in_memory[data_label]['data'][file_data[2][:,np.newaxis], file_data[1][np.newaxis,:]] = file_data[0]
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#    
@@ -1512,7 +1512,7 @@ def read_netCDF_data(relevant_file):
     current_file_station_indices = np.where(np.in1d(file_station_references, station_references))[0]
 
     #read in species data
-    file_data = nCDF_root[active_species][valid_file_time_indices,:]
+    file_data = nCDF_root[active_species][:,valid_file_time_indices]
     #get masked data 
     data_mask = file_data.mask
     #set masked data as NaN
@@ -1523,14 +1523,14 @@ def read_netCDF_data(relevant_file):
         #if some qa flags selected then screen
         if len(selected_qa) > 0:
             #screen out observations which are associated with any of the selected qa flags
-            file_data[np.isin(nCDF_root['qa'][valid_file_time_indices,:,:], selected_qa).any(axis=2)] = np.NaN
+            file_data[np.isin(nCDF_root['qa'][:,valid_file_time_indices,:], selected_qa).any(axis=2)] = np.NaN
         #if some data provider flags selected then screen
         if len(selected_flags) > 0:
             #screen out observations which are associated with any of the selected data provider flags
-            file_data[np.isin(nCDF_root['flag'][valid_file_time_indices,:,:], selected_flags).any(axis=2)] = np.NaN
+            file_data[np.isin(nCDF_root['flag'][:,valid_file_time_indices,:], selected_flags).any(axis=2)] = np.NaN
         #if some classification flags (retain  or remove) selected then screen
         if (len(selected_classifications_to_retain) > 0) or (len(selected_classifications_to_remove) > 0):
-            file_classifications = nCDF_root['classification'][valid_file_time_indices,:,:]
+            file_classifications = nCDF_root['classification'][:,valid_file_time_indices,:]
             #screen out all observations that aren't associated with all of the selected classifications to retain
             if len(selected_classifications_to_retain) > 0:
                 file_data[np.isin(file_classifications, selected_classifications_to_retain, invert=True).all(axis=2)] = np.NaN
@@ -1542,7 +1542,7 @@ def read_netCDF_data(relevant_file):
     nCDF_root.close()
 
     #return valid species data, time indices relative to active full time array, file station indices relative to all unique station references array 
-    return file_data[:,current_file_station_indices], full_array_time_indices, full_array_station_indices   
+    return file_data[current_file_station_indices, :], full_array_time_indices, full_array_station_indices   
 
 ##-----------------------------------------------------------------------------------------------------------------------------------------------------##
 ##-----------------------------------------------------------------------------------------------------------------------------------------------------##
@@ -1683,7 +1683,7 @@ class MPL_Canvas(FigureCanvas):
 
             #update variable to indicate map is now initialised
             self.map_initialised = True
-            
+           
         #define all temporal aggregation resolutions that will be used to aggregate data (variable by temporal resolution of data in memory)
         if self.read_instance.active_resolution == 'hourly':
             self.temporal_aggregation_resolutions = ['hour','dayofweek','month']
@@ -1843,7 +1843,7 @@ class MPL_Canvas(FigureCanvas):
                 #get indices of associated observational data array valid stations (pre-written to experiment data arrays)
                 valid_station_inds = self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds']
                 #get absolute data availability number per station in experiment data array, after subsetting valid observational stations (i.e. number of non-NaN measurements)
-                station_data_availability_number = calculate_data_availability_number(self.read_instance.data_in_memory_filtered[data_label]['data'][:,valid_station_inds])
+                station_data_availability_number = calculate_data_availability_number(self.read_instance.data_in_memory_filtered[data_label]['data'][valid_station_inds,:])
                 #get indices of stations with > 1 available measurements
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
                 #overwrite previous written valid station indices (now at best a subset of those indices)
@@ -2194,13 +2194,13 @@ class MPL_Canvas(FigureCanvas):
             #observational arrays
             if data_label.split('_')[0] == 'observations':
                 #get data for selected stations
-                data_array = self.read_instance.data_in_memory_filtered[data_label]['data'][:,self.relative_selected_station_inds]
+                data_array = self.read_instance.data_in_memory_filtered[data_label]['data'][self.relative_selected_station_inds,:]
             #experiment arrays
             else:          
                 #get intersect between selected station indices and valid available indices for experiment data array
                 valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'])
                 #get data for valid selected stations
-                data_array = self.read_instance.data_in_memory_filtered[data_label]['data'][:,valid_selected_station_indices]
+                data_array = self.read_instance.data_in_memory_filtered[data_label]['data'][valid_selected_station_indices,:]
 
             #if data array has no valid data for selected stations, do not create a pandas dataframe
             #data array has valid data?
@@ -2208,8 +2208,7 @@ class MPL_Canvas(FigureCanvas):
                 #add nested dictionary for data array name to selection station data dictionary
                 self.selected_station_data[data_label] = {}
                 #take cross station median of selected data for data array, and place it in a pandas dataframe -->  add to selected station data dictionary
-                self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=1), index=self.read_instance.time_array, columns=['data'])
-
+                self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), index=self.read_instance.time_array, columns=['data'])
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------# 
 
@@ -2876,13 +2875,14 @@ class MPL_Canvas(FigureCanvas):
         #-------------------------------------------------#
 
         #read z1 data
-        z1_array_data = self.read_instance.data_in_memory_filtered[z1_array_to_read]['data'][:,self.active_map_valid_station_inds]
+        z1_array_data = self.read_instance.data_in_memory_filtered[z1_array_to_read]['data'][self.active_map_valid_station_inds,:]
         #drop NaNs and reshape to object list of station data arrays (if not checking data %)
         if z_statistic_name != 'Data %':
             z1_array_data = drop_NaNs(z1_array_data)
         else:
-            z1_array_data = z1_array_data.transpose(1,0).tolist()
-        
+            z1_array_data.tolist()
+            #z1_array_data = z1_array_data.transpose(1,0).tolist()
+
         #create empty array to store z statistic
         self.z_statistic = np.empty(len(z1_array_data))
         
@@ -2904,13 +2904,13 @@ class MPL_Canvas(FigureCanvas):
         #else, read z2 data then calculate 'difference' statistic
         else:
             #read z2 data 
-            z2_array_data = self.read_instance.data_in_memory_filtered[z2_array_to_read]['data'][:,self.active_map_valid_station_inds]
+            z2_array_data = self.read_instance.data_in_memory_filtered[z2_array_to_read]['data'][self.active_map_valid_station_inds,:]
             #drop NaNs and reshape to object list of station data arrays (if not checking data %)
             if z_statistic_name != 'Data %':
                 z2_array_data = drop_NaNs(z2_array_data)
             else:
-                z2_array_data = z2_array_data.transpose(1,0).tolist()
-            
+                #z2_array_data = z2_array_data.transpose(1,0).tolist()
+                z2_array_data = z2_array_data.tolist()          
             #is the difference statistic basic (i.e. mean)?
             if z_statistic_type == 'basic':
 
@@ -3336,7 +3336,8 @@ def drop_NaNs(data):
     '''function that returns numpy object of lists of station data with NaNs removed'''
 
     #reshape numpy array to have lists of data per station
-    data = data.transpose(1,0).tolist()
+    #data = data.transpose(1,0).tolist()
+    data = data.tolist()
     #iterate through each list of station data and remove NaNs
     for station_ii, station_data in enumerate(data):
         data[station_ii] = np.array(station_data)[~np.isnan(station_data)]
@@ -3371,11 +3372,11 @@ def calculate_variance(data):
 
 def calculate_data_availability_fraction(data):
     '''calculate data availability fraction (i.e. fraction of total data array not equal to NaN)'''
-    return (100./len(data)) * (np.count_nonzero(~np.isnan(data),axis=0))
+    return (100./len(data)) * (np.count_nonzero(~np.isnan(data),axis=-1))
 
 def calculate_data_availability_number(data):
     '''calculate data availability absolute number (i.e. number of total data measurements not equal to NaN)'''
-    return np.count_nonzero(~np.isnan(data),axis=0)
+    return np.count_nonzero(~np.isnan(data),axis=-1)
 
 #define dictionary storing basic statistics that can be plotted
 basic_stats_dict = {'Mean':  {'function':calculate_mean,                       'order':0,  'label':'Mean',                'arguments':{},                  'minimum_bias':[0.0]},
