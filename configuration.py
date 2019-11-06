@@ -67,7 +67,7 @@ exp_root = ''
 if exp_root == '':
     #running on CTE-POWER?
     if (machine == 'power') or (machine == 'mn4'):
-        exp_root = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp'
+        exp_root = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp_new'
     #running on workstation?
     else:
         exp_root = '/esarchive/recon/ghost_interp'
