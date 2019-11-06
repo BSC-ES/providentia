@@ -1,3 +1,25 @@
+#Providentia interpolation configuration file
+
+###--------------------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+
+#define the QOS (Quality of Service) used to manage jobs on the SLURM system
+#OPTIONS: bsc_es (max walltime of 2 days), prace (max walltime of 3 days), debug (max walltime of 2 hours)
+qos = 'debug'
+
+#define the chunk size to process tasks (i.e. the size of CPU chunks used to process tasks)
+#this should not exceed the number of CPUs per node on machine (160 virtual cores/40 physical cores on power9, 48 physical cores on marenostrum4)
+chunk_size = 20
+
+#define job array limit to process tasks (i.e. the number of CPU chunks allowed to be submitted simultaneously)
+job_array_limit = 100
+
+#define if multithreading should be used when processing tasks (i.e. use all threads per physical CPU)
+multithreading = False
+
+###--------------------------------------------------------------------------------------------------###
+###--------------------------------------------------------------------------------------------------###
+
 #define date range to process
 start_date = '197001' #YYYYMM   START FROM THIS POINT 
 end_date =   '201901' #YYYYMM   GO UP TO THIS POINT    
@@ -20,14 +42,10 @@ grid_types_to_process = ['regional','eu','ip','cat','mad','can']
 model_temporal_resolutions_to_process = ['hourly']
 
 #define complete list of GHOST observational networks to interpolate against
-#GHOST_networks_to_interpolate_against  = ['EBAS','EIONET']
-GHOST_networks_to_interpolate_against  = ['EIONET']
+GHOST_networks_to_interpolate_against  = ['EBAS','EEA_AQ_eReporting']
 
 #define complete lost of interpolated model temporal resolutions to output (interpolating against equivalent temporal resolution observational files)
 temporal_resolutions_to_output = ['hourly', 'daily', 'monthly']
 
 #define N nearest neighbours to use for interpolation
 n_neighbours_to_find = 4
-
-#define qos (quality of service): bsc_es, debug
-qos = 'debug'
