@@ -17,7 +17,7 @@ import sys
 
 ###--------------------------------------------------------------------------------------------------###
 
-def get_model_information(model_files, speci_to_process):
+def get_model_information(model_files, speci_to_process, log_file_str, output_logfile_dir):
     
     '''take first valid model file in month and get grid dimension/coordinate information 
        put initial object read in a  try/except to handle reading of corrupted files
@@ -50,7 +50,8 @@ def get_model_information(model_files, speci_to_process):
         except:
             #if have got to last file of month and that is corrupted, return from function
             if model_file_ii == (len(model_files)-1):
-                sys.exit('------ All model files corrupted in {}. Skipping month.'.format(yearmonth))
+                log_file_str += '------ All model files corrupted in {}. Skipping month.'.format(yearmonth)
+                create_output_logfile(1,log_file_str,output_logfile_dir)
             #else, continue to next file in month
             else:
                 continue 
@@ -76,24 +77,24 @@ def get_model_information(model_files, speci_to_process):
                 z_index = -1
             #if cannot determine a surface index, terminate process
             else: 
-                print('Cannot determine surface index in vertical dimension. Terminating process.')
-                sys.exit()
+                log_file_str += 'Cannot determine surface index in vertical dimension. Terminating process.'
+                create_output_logfile(1,log_file_str,output_logfile_dir)
 
         #check if species grid dimensions are named correctly, and in correct BSC standard order, if not terminate process
         #this is done by checking the variable names of the x, y (and z if required) dimensions
         #X dimension is valid if 'lon' is contained within name, or is == 'x'
         if ('lon' not in x_varname) & (x_varname != 'x'):
-           print('X dimension incorrectly named. Terminating process.')
-           sys.exit()
+            log_file_str += 'X dimension incorrectly named. Terminating process.'
+            create_output_logfile(1,log_file_str,output_logfile_dir)
         #Y dimension is valid if 'lat' is contained within name, or is == 'y'
         if ('lat' not in y_varname) & (y_varname != 'y'):
-           print('Y dimension incorrectly named. Terminating process.')
-           sys.exit()
+            log_file_str += 'Y dimension incorrectly named. Terminating process.'
+            create_output_logfile(1,log_file_str,output_logfile_dir)
         #Z dimension is valid if == 'z' or 'lev' or 'alt'
         if len(mod_speci_obj.shape) == 4:
             if (z_varname != 'lev') & (z_varname != 'z') & (z_varname != 'alt'):
-                print('Z dimension incorrectly named. Terminating process.')
-                sys.exit()
+                log_file_str += 'Z dimension incorrectly named. Terminating process.'
+                create_output_logfile(1,log_file_str,output_logfile_dir)
 
         #get instances of x/y grid dimension variables
         mod_lon_obj = mod_nc_root[x_varname]
@@ -110,12 +111,12 @@ def get_model_information(model_files, speci_to_process):
         #check if species grid centre coordinate are named correctly, and in correct BSC standard order, if not terminate process
         #longitude coordinate is valid if 'lon' is contained within name
         if ('lon' not in lon_centre_varname):
-            print('Longitude grid centre coordinate incorrectly named. Terminating process.')
-            sys.exit()
+            log_file_str += 'Longitude grid centre coordinate incorrectly named. Terminating process.'
+            create_output_logfile(1,log_file_str,output_logfile_dir)
         #latitude coordinate is valid if 'lat' is contained within name
         if ('lat' not in lat_centre_varname):
-            print('Latitude grid centre coordinate incorrectly named. Terminating process.')
-            sys.exit()
+            log_file_str += 'Latitude grid centre coordinate incorrectly named. Terminating process.'
+            create_output_logfile(1,log_file_str,output_logfile_dir)
 
         #get longitude and latitude grid centre values
         mod_lons_centre = np.float32(mod_nc_root[lon_centre_varname][:])
@@ -132,7 +133,7 @@ def get_model_information(model_files, speci_to_process):
 
 ###--------------------------------------------------------------------------------------------------###
 
-def create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre, mod_lats_centre, x_varname, y_varname):
+def create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre, mod_lats_centre, x_varname, y_varname, log_file_str, output_logfile_dir):
     
     '''create grid domain edge polygon from model netCDF file
        this is handled differtly for regular grids (i.e. following lines of longitude/latitude), and non-regular grids (e.g. lambert-conformal) 
@@ -297,8 +298,8 @@ def create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre,
 
     #the grid type cannot be handled, therefore terminate process
     else:
-        print('Cannot handle grid of type: {}. Terminating process'.format(mod_grid_type))
-        sys.exit()
+        log_file_str += 'Cannot handle grid of type: {}. Terminating process'.format(mod_grid_type)
+        create_output_logfile(1,log_file_str,output_logfile_dir)
 
     #close model netCDF root - now have all neccessary grid information
     mod_nc_root.close()
@@ -309,7 +310,7 @@ def create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre,
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
 
-def get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_output, model_files, x_N, y_N, z_index):
+def get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_output, model_files, x_N, y_N, z_index, log_file_str):
 
     '''read all relevant model data in yearmonth into memory'''
 
@@ -344,7 +345,7 @@ def get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_o
 
             #check if have time dimension in daily file, if do not, do not process file
             if 'time' not in list(mod_nc_root.dimensions.keys()):
-                print('------ File {} is corrupt. Skipping.'.format(model_file))
+                log_file_str += '------ File {} is corrupt. Skipping.\n'.format(model_file)
                 continue 
 
             #get day of month from filename
@@ -389,7 +390,7 @@ def get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_o
             mod_nc_root.close()
 
         except:
-            print('------ File {} is corrupt. Skipping.'.format(model_file))
+            log_file_str += '------ File {} is corrupt. Skipping.\n'.format(model_file)
 
     #for monthly resolution output case, now take average and set output time array
     if temporal_resolution_to_output == 'monthly':
@@ -397,7 +398,7 @@ def get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_o
         monthly_model_data = np.nanmean(monthly_model_data, axis=0).reshape((1, y_N, x_N))
 
     #return monthly time/data
-    return yearmonth_time, monthly_model_data
+    return yearmonth_time, monthly_model_data, log_file_str
 
 ###--------------------------------------------------------------------------------------------------###
 #inverse distance weighting interpolation function
@@ -491,15 +492,14 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
 
     #create observational interpolated monthly model netcdf
     #create new netCDF frame
-    output_dir = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp/{}/{}/{}/{}/{}'.format(experiment_to_process,grid_type_to_process,temporal_resolution_to_output,speci_to_process,GHOST_network_to_interpolate_against)
+    output_dir = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp_new/{}/{}/{}/{}/{}'.format(experiment_to_process,grid_type_to_process,temporal_resolution_to_output,speci_to_process,GHOST_network_to_interpolate_against)
     #if output directory does not exist yet, create it
     try:
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir) 
     except OSError as err:
         pass
-    netCDF_fname = '{}/{}_{}_orig.nc'.format(output_dir,speci_to_process,yearmonth)
-    compress_netCDF_fname = '{}/{}_{}.nc'.format(output_dir,speci_to_process,yearmonth)
+    netCDF_fname = '{}/{}_{}.nc'.format(output_dir,speci_to_process,yearmonth)
     root_grp = Dataset(netCDF_fname, 'w', format="NETCDF4") 
 
     #auto mask arrays
@@ -519,14 +519,14 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
 
         if ii == 0:
             #netcdf dimensions
-            root_grp.createDimension('time', len(yearmonth_time))
             root_grp.createDimension('station', len(obs_lon_obj[:]))
+            root_grp.createDimension('time', len(yearmonth_time))
             root_grp.createDimension('model_longitude', x_N)
             root_grp.createDimension('model_latitude', y_N)
             root_grp.createDimension('grid_edge', model_grid_outline.shape[0])
 
             #create time variable
-            time_var = root_grp.createVariable('time', 'u4', ('time'), chunksizes=[root_grp.dimensions['time'].size])
+            time_var = root_grp.createVariable('time', 'u4', ('time'))
             time_var.standard_name = 'time'
             time_var.long_name = 'time'
             time_var.units = '{} since {}-{}-01 00:00:00'.format(descriptive_temporal_resolution,year,month)
@@ -536,21 +536,21 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
             time_var.tz = 'UTC'
 
             #create observational equivalent station reference variable
-            station_reference_var = root_grp.createVariable('station_reference', str, ('station'), chunksizes=[root_grp.dimensions['station'].size])
+            station_reference_var = root_grp.createVariable('station_reference', str, ('station'))
             station_reference_var.standard_name = obs_station_reference_obj.standard_name
             station_reference_var.long_name = obs_station_reference_obj.long_name
             station_reference_var.units = obs_station_reference_obj.units
             station_reference_var.description = obs_station_reference_obj.description
 
             #create observational equivalent longitude/latitude variables
-            longitude_var = root_grp.createVariable('longitude', 'f8', ('station'), chunksizes=[root_grp.dimensions['station'].size])
+            longitude_var = root_grp.createVariable('longitude', 'f8', ('station'))
             longitude_var.standard_name = obs_lon_obj.standard_name
             longitude_var.long_name = obs_lon_obj.long_name
             longitude_var.units = obs_lon_obj.units
             longitude_var.description = obs_lon_obj.description  
             longitude_var.axis = 'X'
 
-            latitude_var = root_grp.createVariable('latitude', 'f8', ('station'), chunksizes=[root_grp.dimensions['station'].size])
+            latitude_var = root_grp.createVariable('latitude', 'f8', ('station'))
             latitude_var.standard_name = obs_lat_obj.standard_name
             latitude_var.long_name = obs_lat_obj.long_name
             latitude_var.units = obs_lat_obj.units
@@ -558,14 +558,14 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
             latitude_var.axis = 'Y'
 
             #create 2D meshed longitude/latitude gridcell centre variables
-            model_centre_longitude_var = root_grp.createVariable('model_centre_longitude', 'f8', ('model_latitude','model_longitude'), chunksizes=[y_N,x_N])
+            model_centre_longitude_var = root_grp.createVariable('model_centre_longitude', 'f8', ('model_latitude','model_longitude'))
             model_centre_longitude_var.standard_name = 'model centre longitude'
             model_centre_longitude_var.long_name = 'model centre longitude'
             model_centre_longitude_var.units = obs_lon_obj.units
             model_centre_longitude_var.description = '2D meshed grid centre longitudes with {} longitudes in {} bands of latitude'.format(x_N,y_N)
             model_centre_longitude_var.axis = 'X'            
     
-            model_centre_latitude_var = root_grp.createVariable('model_centre_latitude', 'f8', ('model_latitude','model_longitude'), chunksizes=[y_N,x_N])
+            model_centre_latitude_var = root_grp.createVariable('model_centre_latitude', 'f8', ('model_latitude','model_longitude'))
             model_centre_latitude_var.standard_name = 'model centre latitude'
             model_centre_latitude_var.long_name = 'model centre latitude'
             model_centre_latitude_var.units = obs_lat_obj.units
@@ -573,14 +573,14 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
             model_centre_latitude_var.axis = 'Y'
 
             #create grid domain edge longitude/latitude variables
-            grid_edge_longitude_var = root_grp.createVariable('grid_edge_longitude', 'f8', ('grid_edge'), chunksizes=[root_grp.dimensions['grid_edge'].size])   
+            grid_edge_longitude_var = root_grp.createVariable('grid_edge_longitude', 'f8', ('grid_edge'))   
             grid_edge_longitude_var.standard_name = 'grid edge longitude'
             grid_edge_longitude_var.long_name = 'grid edge longitude'
             grid_edge_longitude_var.units = obs_lon_obj.units
             grid_edge_longitude_var.description = 'Longitude coordinate along edge of grid domain (going clockwise around grid boundary from bottom-left corner).'
             grid_edge_longitude_var.description = 'X'            
 
-            grid_edge_latitude_var = root_grp.createVariable('grid_edge_latitude', 'f8', ('grid_edge'), chunksizes=[root_grp.dimensions['grid_edge'].size])
+            grid_edge_latitude_var = root_grp.createVariable('grid_edge_latitude', 'f8', ('grid_edge'))
             grid_edge_latitude_var.standard_name = 'grid edge latitude'
             grid_edge_latitude_var.long_name = 'grid edge latitude'
             grid_edge_latitude_var.units = obs_lat_obj.units
@@ -588,7 +588,7 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
             grid_edge_latitude_var.description = 'Y'
 
             #create measured variable
-            measured_var = root_grp.createVariable(speci_to_process, 'f4', ('time','station'), chunksizes=[root_grp.dimensions['time'].size, root_grp.dimensions['station'].size])
+            measured_var = root_grp.createVariable(speci_to_process, 'f4', ('station','time'))
             measured_var.standard_name = obs_measured_var_obj.standard_name
             measured_var.long_name = obs_measured_var_obj.long_name
             measured_var.units = obs_measured_var_obj.units
@@ -622,7 +622,7 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
             interp_vals = np.ma.average(cut_model_data, weights = station_weights, axis=1)
 
         #write measured variable (multiplying with conversion factor in the process)
-        measured_var[:,ii] = interp_vals * conversion_factor
+        measured_var[ii,:] = interp_vals * conversion_factor
 
     #close writing to netCDF
     root_grp.close() 
@@ -631,15 +631,30 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
     obs_nc_root.close()
 
     #compress netCDF file
-    compress_process =  subprocess.Popen(['nccopy', '-d1', netCDF_fname, compress_netCDF_fname], stdout=subprocess.PIPE)
+    #compress_process =  subprocess.Popen(['nccopy', '-O', '-d1', netCDF_fname, netCDF_fname], stdout=subprocess.PIPE)
+    compress_process =  subprocess.Popen(['ncks', '-O', '--dfl_lvl', '1', netCDF_fname, netCDF_fname], stdout=subprocess.PIPE)
     compress_status = compress_process.communicate()[0]
     compress_return_code = compress_process.returncode
 
-    #delete uncompressed netCDF file
-    os.remove(netCDF_fname)
-
     #give 770 perrmissions to file
-    os.chmod(compress_netCDF_fname, 0o770)
+    os.chmod(netCDF_fname, 0o770)
 
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
+
+def create_output_logfile(process_code, message, output_logfile_dir):
+
+    '''function which creates a logfile for stating outcome of interpolation job'
+       the filename is prefixed with a code referencing the job outcome
+       the process codes are:
+       0: Process completed without issue
+       1: Caught error in process
+       2: Uncaught error in process
+    '''
+
+    f=open('{}_{}.out'.format(output_logfile_dir,process_code),"w")
+    f.write(str(message))
+    f.close() 
+
+    #exit from current process after writing logfile
+    sys.exit()
