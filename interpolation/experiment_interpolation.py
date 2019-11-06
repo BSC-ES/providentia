@@ -14,54 +14,77 @@
 import experiment_interpolation_functions
 import glob
 from netCDF4 import Dataset
+import inspect
 import numpy as np
+import os
 import sys
 import time
+import traceback
 
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
 
-#time start of yearmonth interpolation
-interpolation_start = time.time()
+#initialise log file string
+log_file_str = 'STARTING INTERPOLATION\n'
 
-#get arguments passed from submittal script
-experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth, n_neighbours_to_find = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], int(sys.argv[8])
+try:
 
-#read defined experiments dictionary
-from defined_experiments import defined_experiments_dictionary
+    #time start of yearmonth interpolation
+    interpolation_start = time.time()
 
-#get experiment specific directory (take gpfs experiment directory preferentially over esarchive directory)
-exp_dict = defined_experiments_dictionary[experiment_to_process]
-if 'gpfs' in list(exp_dict.keys()):
-    exp_dir = exp_dict['gpfs']
-else:
-    exp_dir = exp_dict['esarchive']
+    #get arguments passed from submittal script
+    experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth, n_neighbours_to_find = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], int(sys.argv[8])
 
-#get relevant observational file
-obs_file = glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/{}/{}/{}/{}_{}*.nc'.format(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process, yearmonth))[0]
+    #create output logfile directory
+    working_directory = os.getcwd().split('/submit')[0]
+    output_logfile_dir = '{}/interpolation_logs/{}/{}/{}/{}/{}/{}/{}'.format(working_directory, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth)
 
-#get relevant model files
-model_files = np.sort(glob.glob('{}/{}/{}/{}/{}_{}*.nc'.format(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process, yearmonth)))
+    #read defined experiments dictionary
+    from defined_experiments import defined_experiments_dictionary
 
-#read model domain information
-mod_nc_root, mod_grid_type, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N, x_varname, y_varname, z_index = experiment_interpolation_functions.get_model_information(model_files, speci_to_process)
+    #get experiment specific directory (take gpfs experiment directory preferentially over esarchive directory)
+    exp_dict = defined_experiments_dictionary[experiment_to_process]
+    if 'gpfs' in list(exp_dict.keys()):
+        exp_dir = exp_dict['gpfs']
+    else:
+        exp_dir = exp_dict['esarchive']
 
-#create polygon along edge of model domain
-model_grid_outline, model_grid_outline_poly = experiment_interpolation_functions.create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre, mod_lats_centre, x_varname, y_varname)
+    #get relevant observational file
+    obs_file = glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/{}/{}/{}/{}_{}*.nc'.format(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process, yearmonth))[0]
 
-#read relevant monthly model data into memory
-yearmonth_time, monthly_model_data = experiment_interpolation_functions.get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_output, model_files, x_N, y_N, z_index)
+    #get relevant model files
+    model_files = np.sort(glob.glob('{}/{}/{}/{}/{}_{}*.nc'.format(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process, yearmonth)))
 
-#get observational file netCDF root
-obs_nc_root = Dataset(obs_file)
+    #read model domain information
+    mod_nc_root, mod_grid_type, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N, x_varname, y_varname, z_index = experiment_interpolation_functions.get_model_information(model_files, speci_to_process, log_file_str, output_logfile_dir)
 
-#get interpolation weights of model grid to observational stations (using inverse distance weighting interpolation) 
-nearest_neighbour_inds, inverse_dists = experiment_interpolation_functions.n_nearest_neighbour_inverse_distance_weights(obs_nc_root['longitude'][:], obs_nc_root['latitude'][:], mod_lons_centre, mod_lats_centre, model_grid_outline_poly, n_neighbours=n_neighbours_to_find)
+    #create polygon along edge of model domain
+    model_grid_outline, model_grid_outline_poly = experiment_interpolation_functions.create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre, mod_lats_centre, x_varname, y_varname, log_file_str, output_logfile_dir)
 
-#write out yearmonth netCDF, interpolating model data to surface observational stations
-experiment_interpolation_functions.write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth, n_neighbours_to_find, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N, model_grid_outline, yearmonth_time, monthly_model_data, nearest_neighbour_inds, inverse_dists)
+    #read relevant monthly model data into memory
+    yearmonth_time, monthly_model_data, log_file_str = experiment_interpolation_functions.get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_output, model_files, x_N, y_N, z_index, log_file_str)
 
-#get total time of interpolation
-interpolation_time = time.time() - interpolation_start
+    #get observational file netCDF root
+    obs_nc_root = Dataset(obs_file)
 
-print('DONE:{}'.format(interpolation_time))
+    #get interpolation weights of model grid to observational stations (using inverse distance weighting interpolation) 
+    nearest_neighbour_inds, inverse_dists = experiment_interpolation_functions.n_nearest_neighbour_inverse_distance_weights(obs_nc_root['longitude'][:], obs_nc_root['latitude'][:], mod_lons_centre, mod_lats_centre, model_grid_outline_poly, n_neighbours=n_neighbours_to_find)
+
+    #write out yearmonth netCDF, interpolating model data to surface observational stations
+    experiment_interpolation_functions.write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth, n_neighbours_to_find, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N, model_grid_outline, yearmonth_time, monthly_model_data, nearest_neighbour_inds, inverse_dists)
+
+    #get total time of interpolation
+    interpolation_time = time.time() - interpolation_start
+
+    #return valid process logfile (0)
+    log_file_str += str((time.time() - interpolation_start)/60.)
+    experiment_interpolation_functions.create_output_logfile(0,log_file_str,output_logfile_dir)
+
+#write error log file if have uncaught internal error
+except Exception as e:
+    try:
+        log_file_str = inspect.trace()[-1][0].f_locals['log_file_str']
+        log_file_str += str(traceback.format_exc())
+    except:
+        pass
+    experiment_interpolation_functions.create_output_logfile(2,log_file_str,output_logfile_dir)

@@ -10,4 +10,4 @@
 #load modules
 source load_modules.sh
 
-srun --cpu-bind=core --output=management_logs/$SLURM_JOB_ID.out python -u experiment_interpolation_submission.py $SLURM_JOB_ID
+srun --output=management_logs/$SLURM_JOB_ID.out python -u experiment_interpolation_submission.py $SLURM_JOB_ID

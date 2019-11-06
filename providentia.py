@@ -542,8 +542,8 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #define classification flags        
         self.classification_names = np.array(sorted(standard_classification_flag_codes, key=standard_classification_flag_codes.get))
         self.classification_codes = np.sort(list(standard_classification_flag_codes.values()))
-        self.classification_default_codes_to_retain = np.array([7], dtype=np.uint8)
-        self.classification_default_codes_to_remove = np.array([0, 1, 5, 6], dtype=np.uint8)
+        self.classification_default_codes_to_retain = np.array([5], dtype=np.uint8)
+        self.classification_default_codes_to_remove = np.array([0, 1, 4, 46], dtype=np.uint8)
         self.classification_default_inds_to_retain = np.array([np.where(self.classification_codes == code)[0][0] for code in self.classification_default_codes_to_retain], dtype=np.uint8)
         self.classification_default_inds_to_remove = np.array([np.where(self.classification_codes == code)[0][0] for code in self.classification_default_codes_to_remove], dtype=np.uint8)
 
