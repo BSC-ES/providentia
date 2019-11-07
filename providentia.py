@@ -11,7 +11,7 @@
 ###IMPORT CONFIGURATION FILE VARIABLES
 ###------------------------------------------------------------------------------------###
 
-from configuration import n_CPUs, obs_root, exp_root, sequential_colourmap, sequential_colourmap_warm, diverging_colourmap, map_unselected_station_marker_size, map_selected_station_marker_size, legend_marker_size, time_series_marker_size, temporally_aggregated_marker_size, temporally_aggregated_experiment_bias_marker_size, cartopy_data_dir
+from configuration import *
 
 ###------------------------------------------------------------------------------------###
 ###IMPORT BUILT-IN MODULES
@@ -543,7 +543,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.classification_names = np.array(sorted(standard_classification_flag_codes, key=standard_classification_flag_codes.get))
         self.classification_codes = np.sort(list(standard_classification_flag_codes.values()))
         self.classification_default_codes_to_retain = np.array([5], dtype=np.uint8)
-        self.classification_default_codes_to_remove = np.array([0, 1, 4, 46], dtype=np.uint8)
+        self.classification_default_codes_to_remove = np.array([0, 4, 46, 49], dtype=np.uint8)
         self.classification_default_inds_to_retain = np.array([np.where(self.classification_codes == code)[0][0] for code in self.classification_default_codes_to_retain], dtype=np.uint8)
         self.classification_default_inds_to_remove = np.array([np.where(self.classification_codes == code)[0][0] for code in self.classification_default_codes_to_remove], dtype=np.uint8)
 
@@ -681,7 +681,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
                 #check if directory for network exists
                 #if not, continue
-                if not os.path.exists('%s/%s'%(obs_root,network)):       
+                if not os.path.exists('%s/%s/%s'%(obs_root,network,GHOST_version)):       
                     continue
     
                 #write empty dictionary for network
@@ -692,20 +692,20 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
                     #check if directory for resolution exists
                     #if not, continue
-                    if not os.path.exists('%s/%s/%s'%(obs_root,network,resolution)):       
+                    if not os.path.exists('%s/%s/%s/%s'%(obs_root,network,GHOST_version,resolution)):       
                         continue
 
                     #write nested empty dictionary for resolution
                     self.all_observation_data[network][resolution] = {}
 
                     #get available species for network/resolution
-                    available_species = os.listdir('%s/%s/%s'%(obs_root, network, resolution))
+                    available_species = os.listdir('%s/%s/%s/%s'%(obs_root, network, GHOST_version, resolution))
 
                     #iterate through available files per species
                     for species in available_species:   
 
                         #get all netCDF monthly files per species
-                        species_files = os.listdir('%s/%s/%s/%s'%(obs_root, network, resolution, species))
+                        species_files = os.listdir('%s/%s/%s/%s/%s'%(obs_root, network, GHOST_version, resolution, species))
 
                         #get monthly start date (YYYYMM) of all species files
                         species_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in species_files if f != 'temporary'] 
@@ -859,24 +859,24 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.available_experiment_data = {}
 
         #get all different experiment names
-        available_experiments = os.listdir('%s'%(exp_root))          
+        available_experiments = os.listdir('%s/%s'%(exp_root,GHOST_version))          
 
         #iterate through available experiments
         for experiment in available_experiments:      
  
             #get all available grid types by experiment 
-            available_grids = os.listdir('%s/%s'%(exp_root,experiment))
+            available_grids = os.listdir('%s/%s/%s'%(exp_root,GHOST_version,experiment))
 
             #iterate through all available grids
             for grid in available_grids:
             
                 #test first if interpolated directory exists before trying to get files from it
                 #if it does not exit, continue
-                if not os.path.exists('%s/%s/%s/%s/%s/%s'%(exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network)):       
+                if not os.path.exists('%s/%s/%s/%s/%s/%s/%s'%(exp_root,GHOST_version,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network)):       
                     continue
                 else:
                     #get all experiment netCDF files by experiment/grid/selected resolution/selected species/selected network
-                    network_files = os.listdir('%s/%s/%s/%s/%s/%s'%(exp_root,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network))
+                    network_files = os.listdir('%s/%s/%s/%s/%s/%s/%s'%(exp_root,GHOST_version,experiment,grid,self.selected_resolution,self.selected_species,self.selected_network))
                     #get start YYYYMM yearmonths of data files
                     network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files] 
                     #limit data files to just those within date range
@@ -1237,7 +1237,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.time_array = pd.date_range(start = datetime.datetime(int(str_active_start_date[:4]), int(str_active_start_date[4:6]), int(str_active_start_date[6:8])),end = datetime.datetime(int(str_active_end_date[:4]), int(str_active_end_date[4:6]), int(str_active_end_date[6:8])), freq = self.active_frequency_code)[:-1]
 
         #get all relevant observational files
-        file_root = '%s/%s/%s/%s/%s_'%(obs_root, self.active_network, self.active_resolution, self.active_species, self.active_species)
+        file_root = '%s/%s/%s/%s/%s/%s_'%(obs_root, self.active_network, GHOST_version, self.active_resolution, self.active_species, self.active_species)
         relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species]])       
 
         #redefine some key variables globally (for access by parallel netCDF reading functions)
@@ -1321,7 +1321,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.station_references = station_references  
 
         #get standard measurement methodology per station
-        self.station_methods = np.array([ref.split('_')[-1] for ref in self.station_references]) 
+        self.station_methods = np.array([ref.split('_')[-1].split('--')[0] for ref in self.station_references]) 
 
         #for latitude/longitude/measurement altitude/GSFC coastline proximity variables, set static metadata variables (taking the first available value per station in the given time window)
         self.station_longitudes = all_read_metadata['longitude'][unique_indices]
@@ -1359,7 +1359,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         global process_type
         if data_label == 'observations':
             process_type = 'observations'
-            file_root = '%s/%s/%s/%s/%s_'%(obs_root, self.active_network, self.active_resolution, self.active_species, self.active_species)
+            file_root = '%s/%s/%s/%s/%s/%s_'%(obs_root, self.active_network, GHOST_version, self.active_resolution, self.active_species, self.active_species)
             relevant_file_start_dates = sorted(self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species])  
 
         else:
@@ -1367,7 +1367,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             experiment_grid_split = data_label.split('-')
             active_experiment = experiment_grid_split[0]
             active_grid = experiment_grid_split[1]  
-            file_root = '%s/%s/%s/%s/%s/%s/%s_'%(exp_root, active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network, self.active_species)
+            file_root = '%s/%s/%s/%s/%s/%s/%s/%s_'%(exp_root, GHOST_version, active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network, self.active_species)
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 
         #create list of relevant files to read
@@ -2757,8 +2757,14 @@ class MPL_Canvas(FigureCanvas):
 
         '''function that calculates selected z statistic for map'''
         
+        #get relevant observational array (dependent on colocation)
+        if self.colocate_active == False:
+            obs_array = self.read_instance.data_in_memory_filtered['observations']['valid_station_inds']
+        else:
+            obs_array = self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments']['valid_station_inds']
+
         #before doing anything check if have any valid station data for observations, if not update active map valid station indices to be empty list and return
-        if len(self.read_instance.data_in_memory_filtered['observations']['valid_station_inds']) == 0:
+        if len(obs_array) == 0:
             self.active_map_valid_station_inds = np.array([],dtype=np.int)
             return 
 
@@ -3352,7 +3358,7 @@ def calculate_variance(data):
 
 def calculate_data_availability_fraction(data):
     '''calculate data availability fraction (i.e. fraction of total data array not equal to NaN)'''
-    return (100./len(data)) * (np.count_nonzero(~np.isnan(data),axis=-1))
+    return (100./data.shape[-1]) * (np.count_nonzero(~np.isnan(data),axis=-1))
 
 def calculate_data_availability_number(data):
     '''calculate data availability absolute number (i.e. number of total data measurements not equal to NaN)'''
@@ -3767,7 +3773,7 @@ standard_data_flag_codes = {
 
 standard_qa_flag_codes = {
 
-  #Basic QA Flags
+#Basic QA Flags
 #-----------------------------------------------------
 #Missing Measurement
 #Measurement is missing (i.e. NaN).
@@ -3838,132 +3844,132 @@ standard_qa_flag_codes = {
 
 #No Latitude Metadata
 #Latitude metadata field is absent, the most recent valid past latitude is assumed to be still valid.
-'No Latitude Metadata - Took Most Recent Valid Value': 31,
+'No Latitude - Took Most Recent Valid Value': 31,
 
 #Latitude metadata field is absent, the next valid latitude in the time record is assumed to be valid for this period (no available past valid latitudes).
-'No Latitude Metadata - Took Next Valid Value': 32,
+'No Latitude - Took Next Valid Value': 32,
 
 #Latitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Latitude Metadata - Used Manually Compiled Metadata': 33,
+'No Latitude - Used Manually Compiled Metadata': 33,
 
 #No Longitude Metadata
 #Longitude metadata field is absent, the most recent valid past longitude is assumed to be still valid.
-'No Longitude Metadata - Took Most Recent Valid Value': 34,
+'No Longitude - Took Most Recent Valid Value': 34,
 
 #Longitude metadata field is absent, the next valid longitude in the time record is assumed to be valid for this period (no available past valid longitudes).
-'No Longitude Metadata - Took Next Valid Value': 35,
+'No Longitude - Took Next Valid Value': 35,
 
 #Longitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Longitude Metadata - Used Manually Compiled Metadata': 36,
+'No Longitude - Used Manually Compiled Metadata': 36,
 
 #No Altitude Metadata
 #Altitude metadata field is absent, the most recent valid past altitude is assumed to be still valid.
-'No Altitude Metadata - Took Most Recent Valid Value': 37,
+'No Altitude - Took Most Recent Valid Value': 37,
 
 #Altitude Metadata field is absent, the next valid altitude in the time record is assumed to be valid for this period (no available past valid altitudes).
-'No Altitude Metadata - Took Next Valid Value': 38,
+'No Altitude - Took Next Valid Value': 38,
 
 #Altitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Altitude Metadata - Used Manually Compiled Metadata': 39,
+'No Altitude - Used Manually Compiled Metadata': 39,
 
 #Altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes to fill altitude for entire time record.
-'No Altitude Metadata - Used ETOPO1 to Estimate Altitude': 40,
+'No Altitude - Used ETOPO1 to Estimate Altitude': 40,
 
 #No Sampling Height Metadata
 #Sampling height metadata field is absent, the most recent valid past sampling height is assumed to be still valid.
-'No Sampling Height Metadata - Took Most Recent Valid Value': 41,
+'No Sampling Height - Took Most Recent Valid Value': 41,
 
 #Sampling Height metadata field is absent, the next valid sampling height in the time record is assumed to be valid for this period (no available past valid sampling heights).
-'No Sampling Height Metadata - Took Next Valid Value': 42,
+'No Sampling Height - Took Next Valid Value': 42,
 
 #Sampling Height metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Sampling Height Metadata - Used Manually Compiled Metadata': 43,
+'No Sampling Height - Used Manually Compiled Metadata': 43,
 
 #No Measurement Altitude Metadata
 #Measurement altitude metadata field is absent, the most recent valid past measurement altitude is assumed to be still valid.
-'No Measurement Altitude Metadata - Took Most Recent Valid Value': 44,
+'No Measurement Altitude - Took Most Recent Valid Value': 44,
 
 #Altitude Metadata field is absent, the next valid measurement altitude in the time record is assumed to be valid for this period (no available past valid measurement altitudes).
-'No Measurement Altitude Metadata - Took Next Valid Value': 45,
+'No Measurement Altitude - Took Next Valid Value': 45,
 
 #Measurement altitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Measurement Altitude Metadata - Used Manually Compiled Metadata': 46,
+'No Measurement Altitude - Used Manually Compiled Metadata': 46,
 
 #Measurement altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes to fill measurement altitude for entire time record.
-'No Measurement Altitude Metadata - Used ETOPO1 to Estimate Altitude': 47,
+'No Measurement Altitude - Used ETOPO1': 47,
 
 #Measurement altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes + sampling height to fill measurement altitude for entire time record.
-'No Measurement Altitude Metadata - Used ETOPO1 + Sampling Height to Estimate Altitude': 48,
+'No Measurement Altitude - Used ETOPO1 + Sampling Height': 48,
 
 #No Standardised Network Provided Area Classification Metadata
 #Standardised Network Provided Area Classification metadata field is absent, the most recent valid past Standardised Network Provided Area Classification is assumed to be still valid.
-'No Standardised Network Provided Area Classification Metadata - Took Most Recent Valid Value': 49,
+'No Area Classification - Took Most Recent Valid Value': 49,
 
 #Standardised Network Provided Area Classification metadata field is absent, the next valid Standardised Network Provided Area Classification in the time record is assumed to be valid for this period (no available past Standardised Network Provided Area Classifications).
-'No Standardised Network Provided Area Classification Metadata - Took Next Valid Value': 50,
+'No Area Classification - Took Next Valid Value': 50,
 
 #Standardised Network Provided Area Classification metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Area Classification Metadata - Used Manually Compiled Metadata': 51,
+'No Area Classification - Used Manually Compiled Metadata': 51,
 
 #No Standardised Network Provided Station Classification Metadata
 #Standardised Network Provided Station Classification metadata field is absent, the most recent valid past Standardised Network Provided Station Classification is assumed to be still valid.
-'No Standardised Network Provided Station Classification Metadata - Took Most Recent Valid Value': 52,
+'No Station Classification - Took Most Recent Valid Value': 52,
 
 #Standardised Network Provided Station Classification metadata field is absent, the next valid Standardised Network Provided Station Classification in the time record is assumed to be valid for this period (no available past Standardised Network Provided Station Classifications).
-'No Standardised Network Provided Station Classification Metadata - Took Next Valid Value': 53,
+'No Station Classification - Took Next Valid Value': 53,
 
 #Standardised Network Provided Station Classification metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Station Classification Metadata - Used Manually Compiled Metadata': 54,
+'No Station Classification - Used Manually Compiled Metadata': 54,
 
 #No Standardised Network Provided Main Emission Source Metadata
 #Standardised Network Provided Main Emission Source metadata field is absent, the most recent valid past Standardised Network Provided Main Emission Source is assumed to be still valid.
-'No Standardised Network Provided Main Emission Source Metadata - Took Most Recent Valid Value': 55,
+'No Main Emission Source - Took Most Recent Valid Value': 55,
 
 #Standardised Network Provided Main Emission Source metadata field is absent, the next valid Standardised Network Provided Main Emission Source in the time record is assumed to be valid for this period (no available past Standardised Network Provided Main Emission Sources).
-'No Standardised Network Provided Main Emission Source Metadata - Took Next Valid Value': 56,
+'No Main Emission Source - Took Next Valid Value': 56,
 
 #Standardised Network Provided Main Emission Source metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Main Emission Source Metadata - Used Manually Compiled Metadata': 57,
+'No Main Emission Source - Used Manually Compiled Metadata': 57,
 
 #No Standardised Network Provided Land Use Metadata
 #Standardised Network Provided Land Use metadata field is absent, the most recent valid past Standardised Network Provided Land Use is assumed to be still valid.
-'No Standardised Network Provided Land Use Metadata - Took Most Recent Valid Value': 58,
+'No Land Use - Took Most Recent Valid Value': 58,
 
 #Standardised Network Provided Land Use metadata field is absent, the next valid Standardised Network Provided Land Use in the time record is assumed to be valid for this period (no available past Standardised Network Provided Land Uses).
-'No Standardised Network Provided Land Use Metadata - Took Next Valid Value': 59,
+'No Land Use - Took Next Valid Value': 59,
 
 #Standardised Network Provided Land Use metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Land Use Metadata - Used Manually Compiled Metadata': 60,
+'No Land Use - Used Manually Compiled Metadata': 60,
 
 #No Standardised Network Provided Terrain Metadata
 #Standardised Network Provided Terrain metadata field is absent, the most recent valid past Standardised Network Provided Terrain is assumed to be still valid.
-'No Standardised Network Provided Terrain Metadata - Took Most Recent Valid Value': 61,
+'No Terrain - Took Most Recent Valid Value': 61,
 
 #Standardised Network Provided Terrain metadata field is absent, the next valid Standardised Network Provided Terrain in the time record is assumed to be valid for this period (no available past Standardised Network Provided Terrains).
-'No Standardised Network Provided Terrain Metadata - Took Next Valid Value': 62,
+'No Terrain - Took Next Valid Value': 62,
 
 #Standardised Network Provided Terrain metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Terrain Metadata - Used Manually Compiled Metadata': 63,
+'No Terrain - Used Manually Compiled Metadata': 63,
 
 #No Standardised Network Provided Measurement Scale Metadata
 #Standardised Network Provided Measurement Scale metadata field is absent, the most recent valid past Standardised Network Provided Measurement Scale is assumed to be still valid.
-'No Standardised Network Provided Measurement Scale Metadata - Took Most Recent Valid Value': 64,
+'No Measurement Scale - Took Most Recent Valid Value': 64,
 
 #Standardised Network Provided Measurement Scale metadata field is absent, the next valid Standardised Network Provided Measurement Scale in the time record is assumed to be valid for this period (no available past Standardised Network Provided Measurement Scales).
-'No Standardised Network Provided Measurement Scale Metadata - Took Next Valid Value': 65,
+'No Measurement Scale - Took Next Valid Value': 65,
 
 #Standardised Network Provided Measurement Scale metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Standardised Network Provided Measurement Scale Metadata - Used Manually Compiled Metadata': 66,
+'No Measurement Scale - Used Manually Compiled Metadata': 66,
 
 #No Representative Radius Metadata
 #Representative Radius metadata field is absent, the most recent valid past Representative Radius is assumed to be still valid.
-'No Representative Radius Metadata - Took Most Recent Valid Value': 67,
+'No Representative Radius - Took Most Recent Valid Value': 67,
 
 #Representative Radius metadata field is absent, the next valid Representative Radius in the time record is assumed to be valid for this period (no available past Representative Radii).
-'No Representative Radius Metadata - Took Next Valid Value': 68,
+'No Representative Radius - Took Next Valid Value': 68,
 
 #Representative Radius metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Representative Radius Metadata - Used Manually Compiled Metadata': 69,
+'No Representative Radius - Used Manually Compiled Metadata': 69,
 #-----------------------------------------------------
 
 
@@ -4608,7 +4614,7 @@ parameter_dictionary = {
 'sconcas':         {'long_parameter_name':'arsenic',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'As',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
 'sconcbc':         {'long_parameter_name':'black carbon',                    'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
 'sconcc':          {'long_parameter_name':'carbon',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconccorrected':  {'long_parameter_name':'carbon: corrected',               'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
+'sconcccorrected': {'long_parameter_name':'carbon: corrected',               'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C' ,      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
 'sconcca':         {'long_parameter_name':'calcium',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ca',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
 'sconccd':         {'long_parameter_name':'cadmium',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cd',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
 'sconccl':         {'long_parameter_name':'chloride',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cl',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
@@ -4721,47 +4727,34 @@ parameter_dictionary = {
 'pm1so4nss':       {'long_parameter_name':'PM1 sulphate : non-sea salt',     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
 'pm1v':            {'long_parameter_name':'PM1 vanadium',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'V',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
 'pm1zn':           {'long_parameter_name':'PM10 zinc',                       'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Zn',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcccorrected': {'long_parameter_name':'carbon: corrected',               'matrix':'aerosol', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C' ,      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'acprec':          {'long_parameter_name':'precipitation accumulation',      'matrix':'meteo',   'standard_units':'mm',              'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':9998.0 },
-'dir':             {'long_parameter_name':'wind direction',                  'matrix':'meteo',   'standard_units':'angular degrees', 'chemical_formula':'' ,       'extreme_lower_limit':1.0,     'extreme_upper_limit':360.0 },
-'dir10':           {'long_parameter_name':'10m wind direction',              'matrix':'meteo',   'standard_units':'angular degrees', 'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':360.0 },
-'spd':             {'long_parameter_name':'wind speed',                      'matrix':'meteo',   'standard_units':'m s-1',           'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':900.0 },
-'spd10':           {'long_parameter_name':'10m wind speed',                  'matrix':'meteo',   'standard_units':'m s-1',           'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':900.0 },
-'cldbot':          {'long_parameter_name':'ceiling height',                  'matrix':'meteo',   'standard_units':'m',               'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':22000.0 },
-'vdist':           {'long_parameter_name':'visibility distance',             'matrix':'meteo',   'standard_units':'m',               'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':160000.0 },
-'t':               {'long_parameter_name':'air temperature',                 'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-685.85, 'extreme_upper_limit':891.15 },
-'t2':              {'long_parameter_name':'2m air temperature',              'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-685.85, 'extreme_upper_limit':891.15 },
-'td':              {'long_parameter_name':'dew point',                       'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-708.85, 'extreme_upper_limit':641.15 },
-'td2':             {'long_parameter_name':'2m dew point',                    'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-708.85, 'extreme_upper_limit':641.15 },
-'slp':             {'long_parameter_name':'sea level pressure',              'matrix':'meteo',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':8600.0,  'extreme_upper_limit':10900.0 },
-'acsnow':          {'long_parameter_name':'snow accumulation',               'matrix':'meteo',   'standard_units':'cm',              'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':1200.0 },
-'si':              {'long_parameter_name':'snow depth',                      'matrix':'meteo',   'standard_units':'cm',              'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':1200.0 },
-'p':               {'long_parameter_name':'atmospheric pressure',            'matrix':'meteo',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':450.0,   'extreme_upper_limit':10900.0 },
-'pshltr':          {'long_parameter_name':'2m atmospheric pressure',         'matrix':'meteo',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':450.0,   'extreme_upper_limit':10900.0 },
-'p10':             {'long_parameter_name':'10m atmospheric pressure',        'matrix':'meteo',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':450.0,   'extreme_upper_limit':10900.0 },
-'sst':             {'long_parameter_name':'sea surface temperature',         'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':223.15,  'extreme_upper_limit':723.15 },
-'stc':             {'long_parameter_name':'soil temperature',                'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'stc10':           {'long_parameter_name':'10cm soil temperature',           'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'stc40':           {'long_parameter_name':'40cm soil temperature',           'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'stc100':          {'long_parameter_name':'100cm soil temperature',          'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'stc200':          {'long_parameter_name':'200cm soil temperature',          'matrix':'meteo',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'ccovmean':        {'long_parameter_name':'cloud coverage',                  'matrix':'meteo',   'standard_units':'oktas',           'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':8.0 },
-'cfracmean':       {'long_parameter_name':'cloud coverage fraction',         'matrix':'meteo',   'standard_units':'untiless',        'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':100.0 },
-'avgrh':           {'long_parameter_name':'average relative humidity',       'matrix':'meteo',   'standard_units':'unitless',        'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':100.0 }
+'acprec':          {'long_parameter_name':'precipitation accumulation',      'matrix':'METEO',   'standard_units':'mm',              'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':9998.0 },
+'dir':             {'long_parameter_name':'wind direction',                  'matrix':'METEO',   'standard_units':'angular degrees', 'chemical_formula':'' ,       'extreme_lower_limit':1.0,     'extreme_upper_limit':360.0 },
+'dir10':           {'long_parameter_name':'10m wind direction',              'matrix':'METEO',   'standard_units':'angular degrees', 'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':360.0 },
+'spd':             {'long_parameter_name':'wind speed',                      'matrix':'METEO',   'standard_units':'m s-1',           'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':900.0 },
+'spd10':           {'long_parameter_name':'10m wind speed',                  'matrix':'METEO',   'standard_units':'m s-1',           'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':900.0 },
+'cldbot':          {'long_parameter_name':'ceiling height',                  'matrix':'METEO',   'standard_units':'m',               'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':22000.0 },
+'vdist':           {'long_parameter_name':'visibility distance',             'matrix':'METEO',   'standard_units':'m',               'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':160000.0 },
+'t':               {'long_parameter_name':'air temperature',                 'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-685.85, 'extreme_upper_limit':891.15 },
+'t2':              {'long_parameter_name':'2m air temperature',              'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-685.85, 'extreme_upper_limit':891.15 },
+'td':              {'long_parameter_name':'dew point',                       'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-708.85, 'extreme_upper_limit':641.15 },
+'td2':             {'long_parameter_name':'2m dew point',                    'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-708.85, 'extreme_upper_limit':641.15 },
+'slp':             {'long_parameter_name':'sea level pressure',              'matrix':'METEO',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':8600.0,  'extreme_upper_limit':10900.0 },
+'acsnow':          {'long_parameter_name':'snow accumulation',               'matrix':'METEO',   'standard_units':'cm',              'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':1200.0 },
+'si':              {'long_parameter_name':'snow depth',                      'matrix':'METEO',   'standard_units':'cm',              'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':1200.0 },
+'p':               {'long_parameter_name':'atmospheric pressure',            'matrix':'METEO',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':450.0,   'extreme_upper_limit':10900.0 },
+'pshltr':          {'long_parameter_name':'2m atmospheric pressure',         'matrix':'METEO',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':450.0,   'extreme_upper_limit':10900.0 },
+'p10':             {'long_parameter_name':'10m atmospheric pressure',        'matrix':'METEO',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':450.0,   'extreme_upper_limit':10900.0 },
+'sst':             {'long_parameter_name':'sea surface temperature',         'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':223.15,  'extreme_upper_limit':723.15 },
+'stc':             {'long_parameter_name':'soil temperature',                'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
+'stc10':           {'long_parameter_name':'10cm soil temperature',           'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
+'stc40':           {'long_parameter_name':'40cm soil temperature',           'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
+'stc100':          {'long_parameter_name':'100cm soil temperature',          'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
+'stc200':          {'long_parameter_name':'200cm soil temperature',          'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
+'ccovmean':        {'long_parameter_name':'cloud coverage',                  'matrix':'METEO',   'standard_units':'oktas',           'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':8.0 },
+'cfracmean':       {'long_parameter_name':'cloud coverage fraction',         'matrix':'METEO',   'standard_units':'untiless',        'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':100.0 },
+'avgrh':           {'long_parameter_name':'average relative humidity',       'matrix':'METEO',   'standard_units':'unitless',        'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':100.0 }
 }
 
-#------------------------------------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------------------------------------#
-
-#defined standardised qa flag code associated with specific data quality assurance checks
-#can also be forced to return N flag codes rather than a specific flag code, by setting get_N_flags to True
-
-
-
-#------------------------------------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------------------------------------#
-
-#define dictionary of all parameters with associated key information
 #------------------------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------------------------#
 
