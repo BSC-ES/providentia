@@ -1,5 +1,4 @@
 #Providentia Configuration File 
-###------------------------------------------------------------------------------------###
 
 ###------------------------------------------------------------------------------------###
 ###IMPORT BUILT-IN MODULES
@@ -13,6 +12,9 @@ import sys
 ###------------------------------------------------------------------------------------###
 ###SETTING SOME NECESSARY DETAILS --> DO NOT MODIFY!
 ###------------------------------------------------------------------------------------###
+
+#set GHOST version data to work with
+GHOST_version = '1.1'
 
 #get machine name
 try:
@@ -70,7 +72,7 @@ if exp_root == '':
         exp_root = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp_new'
     #running on workstation?
     else:
-        exp_root = '/esarchive/recon/ghost_interp'
+        exp_root = '/esarchive/recon/ghost_interp_new'
 
 ###------------------------------------------------------------------------------------###
 ###DEFINE COLOURMAPS (see all options here: https://matplotlib.org/examples/color/colormaps_reference.html)

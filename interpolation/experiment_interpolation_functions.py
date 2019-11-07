@@ -17,7 +17,7 @@ import sys
 
 ###--------------------------------------------------------------------------------------------------###
 
-def get_model_information(model_files, speci_to_process, log_file_str, output_logfile_dir):
+def get_model_information(model_files, speci_to_process, yearmonth, log_file_str, output_logfile_dir):
     
     '''take first valid model file in month and get grid dimension/coordinate information 
        put initial object read in a  try/except to handle reading of corrupted files
@@ -305,7 +305,7 @@ def create_grid_domain_edge_polygon(mod_nc_root, mod_grid_type, mod_lons_centre,
     mod_nc_root.close()
 
     #return model grid outline array/polygon
-    return model_grid_outline, model_grid_outline_poly
+    return model_grid_outline, model_grid_outline_poly, mod_lons_centre, mod_lats_centre
 
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
@@ -458,7 +458,7 @@ def n_nearest_neighbour_inverse_distance_weights(obs_lons,obs_lats,mod_lons_cent
 #netCDF write out function
 ###--------------------------------------------------------------------------------------------------###
 
-def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth, n_neighbours_to_find, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N, model_grid_outline, yearmonth_time, monthly_model_data, nearest_neighbour_inds, inverse_dists):
+def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth, n_neighbours_to_find, mod_speci_units, mod_lons_centre, mod_lats_centre, x_N, y_N, model_grid_outline, yearmonth_time, monthly_model_data, nearest_neighbour_inds, inverse_dists, GHOST_version):
 
     '''write yearmonth netCDF, returning interpolated model data to observational surface stations'''
 
@@ -492,7 +492,7 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
 
     #create observational interpolated monthly model netcdf
     #create new netCDF frame
-    output_dir = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp_new/{}/{}/{}/{}/{}'.format(experiment_to_process,grid_type_to_process,temporal_resolution_to_output,speci_to_process,GHOST_network_to_interpolate_against)
+    output_dir = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp_new/{}/{}/{}/{}/{}/{}'.format(GHOST_version,experiment_to_process,grid_type_to_process,temporal_resolution_to_output,speci_to_process,GHOST_network_to_interpolate_against)
     #if output directory does not exist yet, create it
     try:
         if not os.path.isdir(output_dir):
