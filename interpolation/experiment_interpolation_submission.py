@@ -80,7 +80,7 @@ def gather_arguments(interpolation_log_dir):
                         for temporal_resolution_to_output in temporal_resolutions_to_output:
 
                             #get all GHOST network/species/temporal resolution observational files
-                            obs_files = np.sort(glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/{}/{}/{}/{}*.nc'.format(GHOST_network_to_interpolate_against, temporal_resolution_to_output, speci_to_process, speci_to_process)))
+                            obs_files = np.sort(glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/{}/{}/{}/{}/{}*.nc'.format(GHOST_network_to_interpolate_against, GHOST_version, temporal_resolution_to_output, speci_to_process, speci_to_process)))
 
                             #get all relevant experiment files
                             exp_files = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process)))
@@ -128,7 +128,7 @@ def gather_arguments(interpolation_log_dir):
                             for yearmonth in intersect_yearmonths:
 
                                 #append current iterative arguments to arguments list               
-                                arguments_list.append("{} {} {} {} {} {} {} {}".format(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth, n_neighbours_to_find))                         
+                                arguments_list.append("{} {} {} {} {} {} {}".format(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                         
 
                                 #append root name of .out file that will be output for each processed task
                                 output_log_roots.append('{}/{}/{}/{}/{}/{}/{}/{}'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                           
@@ -276,7 +276,6 @@ def create_slurm_submission_script(unique_ID, working_directory, arguments_dir, 
     submit_file.write("#SBATCH --output=/dev/null\n")
     submit_file.write("#SBATCH --error=/dev/null\n")
     submit_file.write("\n")
-    submit_file.write("\n")
     submit_file.write("source {}/load_modules.sh\n".format(working_directory))
     submit_file.write("export GREASY_NWORKERS=$SLURM_NPROCS\n") 
     submit_file.write("export GREASY_LOGFILE={}/{}_$SLURM_ARRAY_TASK_ID.log\n".format(submit_dir,unique_ID))
@@ -352,20 +351,26 @@ if __name__ == "__main__":
             continue  
 
         #if no more jobs in the squeue, then now check the outcome of all the jobs  
-        #if any jobs have failed, write them out to file
+        #if any jobs have failed/not finished, write them out to file
         failed_tasks=[]
+        not_finished_tasks=[]
         process_times=[]
         for output_log_root in output_log_roots:
-            output_log_file = glob.glob('{}_*'.format(output_log_root))[0]
-            process_code = int(output_log_file.split('_')[-1].split('.out')[0])
-
-            #if process code == 0, job completed successfully
-            if process_code == 0:
-                #append interpolation job process time
-                process_times.append(float(subprocess.check_output(['tail', '-1', output_log_file], encoding='utf8').strip()))
-            #otherwise, job failed --> append failed log file
+            output_log_file = glob.glob('{}_*'.format(output_log_root))
+            #have an output log file? (i.e. job has finished)
+            if len(output_log_file) > 0:
+                output_log_file = output_log_file[0]
+                process_code = int(output_log_file.split('_')[-1].split('.out')[0])
+                #if process code == 0, job completed successfully
+                if process_code == 0:
+                    #append interpolation job process time
+                    process_times.append(float(subprocess.check_output(['tail', '-1', output_log_file], encoding='utf8').strip()))
+                #otherwise, job failed --> append failed log file
+                else:
+                    failed_tasks.append(output_log_file)
+            #no output log file, therefore append to not finished list
             else:
-                failed_tasks.append(output_log_file)
+                not_finished_tasks.append(output_log_root)
 
         #break out of while loop     
         all_tasks_finished = True
@@ -376,12 +381,16 @@ if __name__ == "__main__":
     #stop timer
     total_time = (time.time()-start)/60.
 
-    if len(failed_tasks) == 0:
+    #have 0 failed/non-finished tasks?
+    if (len(failed_tasks) == 0) & (len(not_finished_tasks) == 0):
         #get queue time 
         process_time = np.max(process_times)
         queue_time = interpolation_time - process_time 
         overhead_time = total_time - interpolation_time 
         print('ALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES\n({:.2f} MINUTES PROCESING, {:.2f} MINUTES QUEUING, {:.2f} MINUTES ON OVERHEADS)'.format(len(output_log_roots), total_time, process_time, queue_time, overhead_time))
     else:
-        print('{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(len(output_log_roots)-len(failed_tasks),len(output_log_roots),total_time))
-        print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
+        print('{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(len(output_log_roots)-(len(not_finished_tasks)+len(failed_tasks)),len(output_log_roots),total_time))
+        if len(failed_tasks) > 0:
+            print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
+        if len(not_finished_tasks) > 0:
+            print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
