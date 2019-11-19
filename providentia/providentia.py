@@ -11,7 +11,7 @@
 ###IMPORT CONFIGURATION FILE VARIABLES
 ###------------------------------------------------------------------------------------###
 
-from configuration import *
+from .configuration import *
 
 ###------------------------------------------------------------------------------------###
 ###IMPORT BUILT-IN MODULES
@@ -4759,8 +4759,8 @@ parameter_dictionary = {
 #------------------------------------------------------------------------------------------------------------#
 
 #generate Providentia dashboard
-
-qApp = QtWidgets.QApplication(sys.argv)
-qApp.setStyle("Fusion")
-Providentia_dash = generate_Providentia_dashboard('parallel')
-sys.exit(qApp.exec_())
+def main():
+    qApp = QtWidgets.QApplication(sys.argv)
+    qApp.setStyle("Fusion")
+    Providentia_dash = generate_Providentia_dashboard('parallel')
+    sys.exit(qApp.exec_())

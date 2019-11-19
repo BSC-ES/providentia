@@ -1,0 +1,21 @@
+#!/bin/bash
+
+srun_command="salloc -t 02:00:00 -n 1 -c 4 -J PRV --x11=first"
+python_command="python3 -c 'from providentia import providentia; providentia.main()'"
+
+#CTE POWER
+if [ "${BSC_MACHINE}" == "power" ]; then
+    #get allocation of resources on CTE-POWER machine
+    eval "${srun_command} -q debug --mem=50Gb ${python_command}"
+#Marenustrum4
+elif [ "${BSC_MACHINE}" == "mn4" ]; then
+    #get allocation of resources on MN4 machine
+    eval "${srun_command} -q debug ${python_command}"
+#Workstations
+elif [ "${HOST}" == "bsceslogin01" ]; then
+    echo "Warning: running in Fat Nodes may make Providentia slower ..."
+    eval "${srun_command} ${python_command}"
+else
+    echo "Warning: running in your workstation/laptop may make Providentia slower ..."
+    eval "${python_command}"
+fi
