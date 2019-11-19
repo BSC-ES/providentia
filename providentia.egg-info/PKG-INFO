@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: providentia
+Version: 1.0.0
+Summary: Providentia is designed to allow on-the-fly analysis of experiment outputs, with respect to processed observational data.
+Home-page: https://earth.bsc.es/gitlab/ac/Providentia
+Author: Dene Bowdalo, Amalia Vradi
+Author-email: dene.bowdalo@bsc.es, amalia.vradi@bsc.es
+License: GNU GPL v3
+Description: UNKNOWN
+Keywords: earth sciences,evaluation,verification,observations,NWP models,air quality
+Platform: UNKNOWN
