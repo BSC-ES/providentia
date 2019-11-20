@@ -1,6 +1,6 @@
 #!/bin/bash
 
-srun_command="salloc -t 02:00:00 -n 1 -c 4 -J PRV --x11=first"
+srun_command="srun -t 02:00:00 -n 1 -c 4 -J PRV --x11=first"
 python_command="python3 -c 'from providentia import providentia; providentia.main()'"
 
 #CTE POWER
