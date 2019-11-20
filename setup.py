@@ -34,7 +34,7 @@ REQUIREMENTS = {
         'pytest-metadata>=1.5.1',
     ],
     'setup': [
-        'pytest-runner',
+#        'pytest-runner',
         'setuptools_scm',
     ],
 }
