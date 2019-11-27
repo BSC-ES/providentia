@@ -109,3 +109,14 @@ temporally_aggregated_marker_size = 3
 
 #define marker sizes on temporally aggregated experiment bias plot 
 temporally_aggregated_experiment_bias_marker_size = 3
+
+###------------------------------------------------------------------------------------###
+###DEFINE MAP COASTLINES RESOLUTION
+###------------------------------------------------------------------------------------###
+
+#define map resolution of coastlines
+#3 options: 
+#low:    Corresponding to 1:110,000,000 scale
+#medium: Corresponding to 1:50,000,000 scale
+#high:   Corresponding to 1:10,000,000 scale
+map_coastline_resolution = 'low'
