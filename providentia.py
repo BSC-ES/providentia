@@ -813,6 +813,17 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #create dictionary to store available observational data
         self.available_observation_data = {}
 
+        #check if start/end date are valid values, if not, return with no valid obs. files
+        selected_start_date = self.le_start_date.text()
+        selected_end_date = self.le_end_date.text()
+        if (self.valid_date(selected_start_date)) & (self.valid_date(selected_end_date)):
+            self.date_range_has_changed = True
+            self.selected_start_date = int(selected_start_date)
+            self.selected_end_date = int(selected_end_date)
+            self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
+        else:
+            return
+
         #check end date is > start date, if not, return with no valid obs. files
         if self.selected_start_date >= self.selected_end_date:
             return
@@ -914,22 +925,25 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             #set variable to check if date range changes
             self.date_range_has_changed = False
 
-            #if have start date/end date have changed, make sure both have 8 characters (YYYYMMDD), and are both numbers, before doing update of selection/fields
+            #check if start date/end date have changed
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
-                valid_date = False 
-                selected_start_date = self.le_start_date.text()
-                selected_end_date = self.le_end_date.text()
-                if (len(selected_start_date) == 8) & (len(selected_end_date) ==  8):
-                    if (selected_start_date.isdigit() == True) & (selected_end_date.isdigit() == True):
-                        self.date_range_has_changed = True
-                        self.selected_start_date = int(selected_start_date)
-                        self.selected_end_date = int(selected_end_date)
-                        self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
-                    else:
-                        return
+                self.date_range_has_changed = True
                     
             #update configuration bar fields
             self.update_configuration_bar_fields()  
+
+    #--------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------------#
+
+    def valid_date(self, date_text):
+ 
+        '''define function that determines if a date string is in the correct format'''
+
+        try:
+            datetime.datetime.strptime(date_text, '%Y%m%d')
+            return True
+        except:
+            return False
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
@@ -1656,8 +1670,10 @@ class MPL_Canvas(FigureCanvas):
             #set map extents
             self.map_ax.set_global() 
 
-            #add coastlines and gridelines
-            self.map_ax.add_feature(cfeature.LAND, facecolor='0.85')
+            #add coastlines and gridlines
+            land_polygon_resolutions = {'low':'110m', 'medium':'50m', 'high':'10m'}
+            feature = cfeature.NaturalEarthFeature('physical', 'land', land_polygon_resolutions[map_coastline_resolution], facecolor='0.85')
+            self.map_ax.add_feature(feature)
             self.map_ax.gridlines(linestyle='-', alpha=0.4)
             
             #reset the navigation toolbar stack for the map axis with the current view limits
