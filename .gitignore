@@ -1,5 +1,5 @@
 *.pyc
-.vscode
+.idea
 *.png
 test-reports
 providentia.egg-info
@@ -7,4 +7,4 @@ providentia.egg-info
 .pytest_cache
 .eggs
 .coverage
-/__pycache__/
+__pycache__
