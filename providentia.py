@@ -57,6 +57,17 @@ import scipy.stats
 import seaborn as sns
 
 ###------------------------------------------------------------------------------------###
+###IMPORT PARAMETER/QA/FLAG GHOST STANDARDS 
+###------------------------------------------------------------------------------------###
+sys.path.insert(1, '{}/GHOST_standards/{}'.format(obs_root,GHOST_version))
+from GHOST_standards import standard_parameters, standard_data_flag_name_to_data_flag_code, standard_QA_name_to_QA_code
+#modify standard parameter dictionary to have BSC standard parameter names as keys (rather than GHOST)
+parameter_dictionary = {}
+for param, param_dict in standard_parameters.items():
+    parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict  
+del standard_parameters
+
+###------------------------------------------------------------------------------------###
 ###------------------------------------------------------------------------------------###
 
 class NavigationToolbar(NavigationToolbar):
@@ -96,15 +107,6 @@ class QVLine(QtWidgets.QFrame):
         self.setFrameShape(QtWidgets.QFrame.VLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
-class QHLine(QtWidgets.QFrame):
-
-    '''define class that generates horizontal separator line'''
-
-    def __init__(self):
-        super(QHLine, self).__init__()
-        self.setFrameShape(QtWidgets.QFrame.HLine)
-        self.setFrameShadow(QtWidgets.QFrame.Sunken)
-
 #--------------------------------------------------------------------------------#
 #--------------------------------------------------------------------------------#
 
@@ -112,15 +114,11 @@ class pop_up_window(QtWidgets.QWidget):
 
     '''define class that generates generalised pop-up window'''
 
-    def __init__(self, window_type = '', window_titles=[], checkbox_labels=[], default_checkbox_selection=[], selected_indices={}):
+    def __init__(self, menu_level):
         super(pop_up_window, self).__init__()
         
         #add input arguments to self
-        self.window_type = window_type
-        self.window_titles = window_titles
-        self.checkbox_labels = checkbox_labels
-        self.default_checkbox_selection = default_checkbox_selection
-        self.selected_indices = selected_indices        
+        self.menu_level = menu_level  
 
         #create UI
         self.initUI()
@@ -130,115 +128,178 @@ class pop_up_window(QtWidgets.QWidget):
         '''initialise user interface'''
         
         #set window title
-        self.setWindowTitle(self.window_type)
+        self.setWindowTitle(self.menu_level['window_title'])
 
         #get pop up window dimensions
         window_width = self.width()
         window_height = self.height()
 
         #create parent layout to hold N horizontally laid out windows
-        parent_layout = QtWidgets.QHBoxLayout()
+        parent_layout = QtWidgets.QVBoxLayout()
         parent_layout.setAlignment(QtCore.Qt.AlignTop) 
+
+        #define spacing/margin variables
+        parent_layout.setSpacing(10)
+        parent_layout.setContentsMargins(0,0,0,0)
+
+        #set page title 
+        title_label = QtWidgets.QLabel(self, text = self.menu_level['page_title'])
+        title_label.setAlignment(QtCore.Qt.AlignCenter)
+        myFont=QtGui.QFont()
+        myFont.setPointSize(16)
+        title_label.setFont(myFont)
+        #add title to parent frame
+        parent_layout.addWidget(title_label)
         
-        #get N of nested windows from length of window_titles list
-        n_nested_windows = len(self.window_titles)
+        #get menu level keys
+        menu_level_keys = list(self.menu_level.keys())
 
-        #create frame to hold checkboxes
-        self.checkboxes = [[] for x in range(len(self.checkbox_labels))]
+        #check if need to create select buttons
+        if 'select_buttons' in menu_level_keys:
 
-        #iterate through N nested windows, creating each one and placing in parent frame accordingly
-        for nested_window_N in range(n_nested_windows):
-
-            #------------------------------------------------------------------------#
-            #create nested parent layout to pull together a title, button row, and grid of checkboxes
-            nested_parent_layout = QtWidgets.QVBoxLayout() 
-            nested_parent_layout.setAlignment(QtCore.Qt.AlignTop) 
-
-            #define spacing/margin variables
-            nested_parent_layout.setSpacing(10)
-            nested_parent_layout.setContentsMargins(0,0,0,0)
-
-            #------------------------------------------------------------------------#
-            #create title label
-            title_label = QtWidgets.QLabel(self, text = self.window_titles[nested_window_N])
-            title_label.setAlignment(QtCore.Qt.AlignCenter)
-            myFont=QtGui.QFont()
-            myFont.setPointSize(16)
-            title_label.setFont(myFont)
-
-            #------------------------------------------------------------------------#
-            #create row of buttons
             button_row = QtWidgets.QHBoxLayout()
             button_row.setAlignment(QtCore.Qt.AlignLeft)
-            select_all_button = QtWidgets.QPushButton("Select All")
-            select_all_button.setMinimumWidth(100)
-            select_all_button.setMaximumWidth(100)
-            clear_all_button = QtWidgets.QPushButton("Clear All")
-            clear_all_button.setMinimumWidth(100)
-            clear_all_button.setMaximumWidth(100)
-            select_default_button = QtWidgets.QPushButton("Select Default")
-            select_default_button.setMinimumWidth(120)
-            select_default_button.setMaximumWidth(120)
-            
-            #order buttons in grid layout
-            button_row.addWidget(select_all_button)
-            button_row.addWidget(clear_all_button)
-            button_row.addWidget(select_default_button)
-            
-            #add connectivity to buttons
-            select_all_button.clicked.connect(partial(self.select_all, nested_window_N))
-            clear_all_button.clicked.connect(partial(self.clear_all, nested_window_N))        
-            select_default_button.clicked.connect(partial(self.select_all_default, nested_window_N))
         
-            #------------------------------------------------------------------------#
+            #need to create "Select All" button 
+            if 'all' in self.menu_level['select_buttons']:
+                select_all_button = QtWidgets.QPushButton("Select All")
+                select_all_button.setMinimumWidth(100)
+                select_all_button.setMaximumWidth(100)
+                button_row.addWidget(select_all_button)
+                select_all_button.clicked.connect(self.select_all)
+            #need to create "Clear All" button 
+            if 'clear' in self.menu_level['select_buttons']:
+                clear_all_button = QtWidgets.QPushButton("Clear All")
+                clear_all_button.setMinimumWidth(100)
+                clear_all_button.setMaximumWidth(100)
+                button_row.addWidget(clear_all_button)
+                clear_all_button.clicked.connect(self.clear_all)  
+            #need to create "Select Default" button 
+            if 'default' in self.menu_level['select_buttons']:
+                select_default_button = QtWidgets.QPushButton("Select Default")
+                select_default_button.setMinimumWidth(120)
+                select_default_button.setMaximumWidth(120)
+                button_row.addWidget(select_default_button)
+                select_default_button.clicked.connect(self.select_all_default)
+
+            #add button row to parent frame
+            parent_layout.addLayout(button_row)
+
+        #check if 'checkboxes' variable in current menu level
+        if 'checkboxes' in menu_level_keys:
+            
+            #get checkboxes dict keys
+            checkboxes_keys = list(self.menu_level['checkboxes'].keys())
+
+            #check if need to create keep checkboxes 
+            if 'keep_selected' in checkboxes_keys:
+                #create frame to hold states of keep checkboxes
+                self.keep_checkboxes = []
+
+            #check if need to create remove checkboxes 
+            if 'remove_selected' in checkboxes_keys:
+                #create frame to hold states of remove checkboxes
+                self.remove_checkboxes = []
+            
             #create grid of checkboxes
             checkbox_grid = QtWidgets.QGridLayout()
+            checkbox_grid.setAlignment(QtCore.Qt.AlignLeft) 
 
             #define spacing/margin variables
             checkbox_grid.setHorizontalSpacing(1)
             checkbox_grid.setVerticalSpacing(1)
-            #checkbox_grid.setContentsMargins(0,0,0,0)
     
-            #create checkboxes
-            #force a new column to be started if the available vertical space for each row in grid goes below a critical value (18.2)
+            #create checkbox grid
+            #force a new column to be started if the available vertical space for each row in grid goes below a critical value 
             #if checkbox has been previously selected (without updating network/resolution/species), then reselect it again
             row_n = 0
             column_n = 0
-            current_selected_indices = self.selected_indices[self.window_type][nested_window_N]
-            for ii, val in enumerate(self.checkbox_labels[nested_window_N]):
+            #iterate through all checkbox labels
+            for ii, val in enumerate(self.menu_level['checkboxes']['labels']):
                 
-                #checkbox_grid.setMaximumHeight(30)
+                #evaluate if all available vertical space has been consumed
                 row_available_space = window_height/(row_n+1)
+                #if below a critical value, force a new column to be started
                 if row_available_space < 15:
-                    column_n+=2
+                    #make sure there is an extra column accounted for if creating both keep/remove checkboxes
+                    if ('keep_selected' in checkboxes_keys) & ('remove_selected' in checkboxes_keys): 
+                        column_n+=3
+                    else:
+                        column_n+=2
                     row_n = 0
-                self.checkboxes[nested_window_N].append(QtWidgets.QCheckBox(val))
-                if ii in current_selected_indices: 
-                    self.checkboxes[nested_window_N][ii].setCheckState(QtCore.Qt.Checked)
-                checkbox_grid.addWidget(self.checkboxes[nested_window_N][ii], row_n, column_n)
-                #checkbox_grid.addWidget(self.checkboxes[nested_window_N][ii])
-                row_n +=1
-
-            #------------------------------------------------------------------------#
-            #position title, button row and checkbox grid in nested parent layout 
-
-            #add title to nested parent frame
-            nested_parent_layout.addWidget(title_label)
-
-            #add button row to nested parent frame
-            nested_parent_layout.addLayout(button_row)
         
-            #add checkbox grid to nested parent frame
-            nested_parent_layout.addLayout(checkbox_grid)
+                #create both keep/remove checkboxes per label
+                if ('keep_selected' in checkboxes_keys) & ('remove_selected' in checkboxes_keys):
+                    #create keep checkbox
+                    self.keep_checkboxes.append(QtWidgets.QCheckBox(val))    
+                    #create remove checkbox
+                    self.remove_checkboxes.append(QtWidgets.QCheckBox('')) 
 
-            #------------------------------------------------------------------------#
-            #add nested parent layout to parent frame
-            parent_layout.addLayout(nested_parent_layout)
+                    #put text label to left of keep checkbox
+                    self.keep_checkboxes[ii].setLayoutDirection(QtCore.Qt.RightToLeft)
+                        
+                    #check if keep/remove checkboxes are currently selected, if so tick checkbox
+                    #map positional index to value if necessary
+                    if 'map_vars' in checkboxes_keys:
+                        keep_var = self.menu_level['checkboxes']['map_vars'][ii]
+                        remove_var = copy.deepcopy(keep_var)
+                    else:
+                        keep_var = copy.deepcopy(ii)
+                        remove_var = copy.deepcopy(ii)
+                    if keep_var in self.menu_level['checkboxes']['keep_selected']:
+                        self.keep_checkboxes[ii].setCheckState(QtCore.Qt.Checked)        
+                    if remove_var in self.menu_level['checkboxes']['remove_selected']:
+                        self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Checked)   
 
-            #------------------------------------------------------------------------#
-            #add vertical separation line (if not last nested window that is being iterated through)            
-            if (nested_window_N+1) != n_nested_windows:
-                parent_layout.addWidget(QVLine())
+                    #add checkboxes to grid
+                    checkbox_grid.addWidget(self.keep_checkboxes[ii], row_n, column_n)
+                    checkbox_grid.addWidget(self.remove_checkboxes[ii], row_n, column_n+1)
+
+                #create keep checkbox per label
+                elif 'keep_selected' in checkboxes_keys:
+                    #create keep checkbox
+                    self.keep_checkboxes.append(QtWidgets.QCheckBox(val))     
+
+                    #put text label to left of keep checkbox
+                    self.keep_checkboxes[ii].setLayoutDirection(QtCore.Qt.RightToLeft)
+                        
+                    #check if keep checkbox is currently selected, if so tick checkbox
+                    #map positional index to value if necessary
+                    if 'map_vars' in checkboxes_keys:
+                        keep_var = self.menu_level['checkboxes']['map_vars'][ii]
+                    else:
+                        keep_var = copy.deepcopy(ii)
+                    if keep_var in self.menu_level['checkboxes']['keep_selected']:
+                        self.keep_checkboxes[ii].setCheckState(QtCore.Qt.Checked)       
+
+                    #add checkbox to grid
+                    checkbox_grid.addWidget(self.keep_checkboxes[ii], row_n, column_n)
+
+                #create remove checkbox per label
+                elif 'remove_selected' in checkboxes_keys:
+                    #create remove checkbox
+                    self.remove_checkboxes.append(QtWidgets.QCheckBox(val)) 
+
+                    #put text label to left of remove checkbox
+                    self.remove_checkboxes[ii].setLayoutDirection(QtCore.Qt.RightToLeft)   
+
+                    #check if remove checkbox is currently selected, if so tick checkbox
+                    #map positional index to value if necessary
+                    if 'map_vars' in checkboxes_keys:
+                        remove_var = self.menu_level['checkboxes']['map_vars'][ii]
+                    else:
+                        remove_var = copy.deepcopy(ii)
+                    if remove_var in self.menu_level['checkboxes']['remove_selected']:
+                        self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Checked)      
+
+                    #add checkbox to grid
+                    checkbox_grid.addWidget(self.remove_checkboxes[ii], row_n, column_n)
+                                    
+                #iterate row_n
+                row_n +=1
+        
+            #add checkbox grid to parent frame
+            parent_layout.addLayout(checkbox_grid)
             
         #------------------------------------------------------------------------#
         #set finalised layout
@@ -256,43 +317,76 @@ class pop_up_window(QtWidgets.QWidget):
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
 
-    def select_all(self, nested_window_N):
+    def select_all(self):
         '''function to select all checkboxes'''
-        for ii, val in enumerate(self.checkboxes[nested_window_N]):
-            self.checkboxes[nested_window_N][ii].setCheckState(QtCore.Qt.Checked)
+        for ii, val in enumerate(self.remove_checkboxes):
+            self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Checked)
     
-    def clear_all(self, nested_window_N):
+    def clear_all(self):
         '''function to clear all checkboxes'''
-        for ii, val in enumerate(self.checkboxes[nested_window_N]):
-            self.checkboxes[nested_window_N][ii].setCheckState(QtCore.Qt.Unchecked)
+        for ii, val in enumerate(self.remove_checkboxes):
+            self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Unchecked)
                 
-    def select_all_default(self, nested_window_N):
+    def select_all_default(self):
         '''function to select all default selected checkboxes'''
         #unselect all checkboxes first 
-        for ii, val in enumerate(self.checkboxes[nested_window_N]):
-            self.checkboxes[nested_window_N][ii].setCheckState(QtCore.Qt.Unchecked)
+        for ii, val in enumerate(self.remove_checkboxes):
+            self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Unchecked)
         
+        #if map_vars variable exists, need to map default values to positional indices 
+        if 'map_vars' in list(self.menu_level['checkboxes'].keys()):
+            default_inds = [np.where(self.menu_level['checkboxes']['map_vars'] == default_var)[0][0] for default_var in self.menu_level['checkboxes']['remove_default']]
+        else:
+            default_inds = copy.deepcopy(self.menu_level['checkboxes']['remove_default'])
+
         #now select only desired default checkboxes
-        for ii in self.default_checkbox_selection[nested_window_N]:
-            self.checkboxes[nested_window_N][ii].setCheckState(QtCore.Qt.Checked)
+        for ii in default_inds:
+            self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Checked)
         
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
 
     def closeEvent(self, event):
 
-        '''function to get indices of selected checkboxes upon closing of pop-up window'''
+        '''function to get values of selected checkboxes upon closing of pop-up window (if any)'''
 
-        selected_indices = []
+        #have checkboxes on current page?
+        if 'checkboxes' in list(self.menu_level.keys()):
+            
+            #get checkboxes dict keys
+            checkboxes_keys = list(self.menu_level['checkboxes'].keys())
 
-        for ii in range(len(self.checkboxes)): 
-            checked_indices = np.array([], dtype=np.uint8)
-            for jj in range(len(self.checkboxes[ii])):
-                if self.checkboxes[ii][jj].checkState() == QtCore.Qt.Checked:
-                    checked_indices = np.append(checked_indices, jj)
-            selected_indices.append(checked_indices)   
+            #have keep checkboxes on current page? 
+            if 'keep_selected' in checkboxes_keys:  
+                selected_inds = []
+                #iterate through keep checkboxes
+                for ii, val in enumerate(self.keep_checkboxes):
+                    #check if selected (if so append index)
+                    if self.keep_checkboxes[ii].checkState() == QtCore.Qt.Checked:
+                        selected_inds.append(ii)
+                
+                #if map_vars variable exists, need to map selected positional indices to values
+                if 'map_vars' in checkboxes_keys:
+                    selected_inds = [self.menu_level['checkboxes']['map_vars'][ind] for ind in selected_inds]
+            
+                #update keep selected variable
+                self.menu_level['checkboxes']['keep_selected'] = selected_inds
 
-        self.selected_indices[self.window_type] = selected_indices
+            #have remove checkboxes on current page? 
+            if 'remove_selected' in checkboxes_keys:
+                selected_inds = []
+                #iterate through remove checkboxes
+                for ii, val in enumerate(self.remove_checkboxes):
+                    #check if selected (if so append index)
+                    if self.remove_checkboxes[ii].checkState() == QtCore.Qt.Checked:
+                        selected_inds.append(ii)
+                
+                #if map_vars variable exists, need to map selected positional indices to values
+                if 'map_vars' in checkboxes_keys:
+                    selected_inds = [self.menu_level['checkboxes']['map_vars'][ind] for ind in selected_inds]
+            
+                #update remove selected variable
+                self.menu_level['checkboxes']['remove_selected'] = selected_inds
 
 #--------------------------------------------------------------------------------#
 #--------------------------------------------------------------------------------#
@@ -349,31 +443,23 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.bu_read.setStyleSheet("color: red;")
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.ch_colocate = QtWidgets.QCheckBox("Colocate")
-        self.ch_colocate.setToolTip('')
-        #self.cb_network = QtWidgets.QComboBox(self)
+        self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
         self.cb_network = ComboBox(self)
         self.cb_network.setMinimumWidth(95)
         self.cb_network.setMaximumWidth(95)
         self.cb_network.setToolTip('Select providing observational data network')
-        #self.cb_resolution = QtWidgets.QComboBox(self)
         self.cb_resolution = ComboBox(self)
         self.cb_resolution.setMinimumWidth(95)
         self.cb_resolution.setMaximumWidth(95)
         self.cb_resolution.setToolTip('Select temporal resolution of data')
-        #self.cb_matrix = QtWidgets.QComboBox(self)
         self.cb_matrix = ComboBox(self)
         self.cb_matrix.setMinimumWidth(95)
         self.cb_matrix.setMaximumWidth(95)
         self.cb_matrix.setToolTip('Select data matrix')
-        #self.cb_species = QtWidgets.QComboBox(self)
         self.cb_species = ComboBox(self)
         self.cb_species.setMinimumWidth(95)
         self.cb_species.setMaximumWidth(95)
         self.cb_species.setToolTip('Select species')
-        self.bu_experiments = QtWidgets.QPushButton('EXPS', self)
-        self.bu_experiments.setMinimumWidth(44)
-        self.bu_experiments.setMaximumWidth(44)
-        self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.le_start_date = QtWidgets.QLineEdit(self)
         self.le_start_date.setMinimumWidth(70)
         self.le_start_date.setMaximumWidth(70)
@@ -383,17 +469,17 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.le_end_date.setMaximumWidth(70)
         self.le_end_date.setToolTip('Set data end date: YYYYMMDD')
         self.bu_QA = QtWidgets.QPushButton('QA', self)
-        self.bu_QA.setMinimumWidth(45)
-        self.bu_QA.setMaximumWidth(45)
+        self.bu_QA.setMinimumWidth(46)
+        self.bu_QA.setMaximumWidth(46)
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
         self.bu_flags = QtWidgets.QPushButton('FLAGS', self)
-        self.bu_flags.setMinimumWidth(44)
-        self.bu_flags.setMaximumWidth(44)
+        self.bu_flags.setMinimumWidth(46)
+        self.bu_flags.setMaximumWidth(46)
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
-        self.bu_classifications = QtWidgets.QPushButton('CLASS', self)
-        self.bu_classifications.setMinimumWidth(44)
-        self.bu_classifications.setMaximumWidth(44)
-        self.bu_classifications.setToolTip('Select standardised classifications to filter by')
+        self.bu_experiments = QtWidgets.QPushButton('EXPS', self)
+        self.bu_experiments.setMinimumWidth(46)
+        self.bu_experiments.setMaximumWidth(46)
+        self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
         self.lb_data_filter = QtWidgets.QLabel(self, text = "Data Filter")
@@ -401,103 +487,97 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.lb_data_filter.setMaximumWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
         self.lb_data_filter.setFont(title_font)
+        self.bu_pc_min = QtWidgets.QPushButton('% MIN', self)
+        self.bu_pc_min.setMinimumWidth(46)
+        self.bu_pc_min.setMaximumWidth(46)
+        self.bu_pc_min.setToolTip('Select minimum % desired representativity in data across whole record and specific temporal periods')
+        self.bu_meta = QtWidgets.QPushButton('META', self)
+        self.bu_meta.setMinimumWidth(46)
+        self.bu_meta.setMaximumWidth(46)
+        self.bu_meta.setToolTip('Select metadata to filter by')
+        self.bu_period = QtWidgets.QPushButton('PERIOD', self)
+        self.bu_period.setMinimumWidth(50)
+        self.bu_period.setMaximumWidth(50)
+        self.bu_period.setToolTip('Select data in specific periods')
         self.bu_screen = QtWidgets.QPushButton('FILTER', self)
-        self.bu_screen.setMinimumWidth(46)
-        self.bu_screen.setMaximumWidth(46)
+        self.bu_screen.setMinimumWidth(50)
+        self.bu_screen.setMaximumWidth(50)
         self.bu_screen.setStyleSheet("color: blue;")
-        self.bu_screen.setToolTip('')
+        self.bu_screen.setToolTip('Filter data')
         self.lb_data_bounds = QtWidgets.QLabel(self, text = "Bounds")
         self.lb_data_bounds.setMinimumWidth(47)
         self.lb_data_bounds.setMaximumWidth(47)
-        self.lb_data_bounds.setToolTip('')
+        self.lb_data_bounds.setToolTip('Set lower/upper bounds of data')
         self.le_minimum_value = QtWidgets.QLineEdit(self)
         self.le_minimum_value.setMinimumWidth(60)
         self.le_minimum_value.setMaximumWidth(60)
-        self.le_minimum_value.setToolTip('')
+        self.le_minimum_value.setToolTip('Set lower bound of data')
         self.le_maximum_value = QtWidgets.QLineEdit(self)
         self.le_maximum_value.setMinimumWidth(60)
         self.le_maximum_value.setMaximumWidth(60)
-        self.le_maximum_value.setToolTip('')
-        self.lb_minimum_data_availability = QtWidgets.QLabel(self, text = "% Min.")
-        self.lb_minimum_data_availability.setMinimumWidth(47)
-        self.lb_minimum_data_availability.setMaximumWidth(47)
-        self.lb_minimum_data_availability.setToolTip('')
-        self.le_minimum_data_availability = QtWidgets.QLineEdit(self)
-        self.le_minimum_data_availability.setMinimumWidth(45)
-        self.le_minimum_data_availability.setMaximumWidth(45)
-        self.le_minimum_data_availability.setToolTip('')
-        self.bu_methods = QtWidgets.QPushButton('METHOD', self)
-        self.bu_methods.setMinimumWidth(60)
-        self.bu_methods.setMaximumWidth(60)
-        self.bu_methods.setToolTip('')
+        self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
         self.lb_z = QtWidgets.QLabel(self, text = "Map Z")
         self.lb_z.setFont(title_font)
-        self.lb_z.setToolTip('')
-        #self.cb_z_stat = QtWidgets.QComboBox(self)
+        self.lb_z.setToolTip('Set map Z statistic')
         self.cb_z_stat = ComboBox(self)
         self.cb_z_stat.setMinimumWidth(80)
         self.cb_z_stat.setMaximumWidth(80)
-        self.cb_z_stat.setToolTip('')
-        #self.cb_z1 = QtWidgets.QComboBox(self)
+        self.cb_z_stat.setToolTip('Select map Z statistic')
         self.cb_z1 = ComboBox(self)
         self.cb_z1.setMinimumWidth(125)
         self.cb_z1.setMaximumWidth(125)
-        self.cb_z1.setToolTip('')
-        #self.cb_z2 = QtWidgets.QComboBox(self)
+        self.cb_z1.setToolTip('Select Z1 dataset')
         self.cb_z2 = ComboBox(self)
         self.cb_z2.setMinimumWidth(125)
         self.cb_z2.setMaximumWidth(125)
-        self.cb_z2.setToolTip('')
+        self.cb_z2.setToolTip('Select Z2 dataset')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
         self.lb_experiment_bias = QtWidgets.QLabel(self, text = "Exp. Bias")
         self.lb_experiment_bias.setFont(title_font)
-        self.lb_experiment_bias.setToolTip('')
-        #self.cb_experiment_bias_type = QtWidgets.QComboBox(self)
+        self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
         self.cb_experiment_bias_type = ComboBox(self)
         self.cb_experiment_bias_type.setMinimumWidth(100)
         self.cb_experiment_bias_type.setMaximumWidth(100)
-        self.cb_experiment_bias_type.setToolTip('')
-        #self.cb_experiment_bias_stat = QtWidgets.QComboBox(self)
+        self.cb_experiment_bias_type.setToolTip('Select experiment bias type')
         self.cb_experiment_bias_stat = ComboBox(self)
         self.cb_experiment_bias_stat.setMinimumWidth(100)
         self.cb_experiment_bias_stat.setMaximumWidth(100)
-        self.cb_experiment_bias_stat.setToolTip('')
+        self.cb_experiment_bias_stat.setToolTip('Select experiment bias statistic')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
         self.lb_station_selection = QtWidgets.QLabel(self, text = "Site Select")
         self.lb_station_selection.setFont(title_font)
-        self.lb_station_selection.setToolTip('')
+        self.lb_station_selection.setToolTip('Select stations')
         self.ch_select_all = QtWidgets.QCheckBox("All")
-        self.ch_select_all.setToolTip('')
+        self.ch_select_all.setToolTip('Select all stations')
         self.ch_intersect = QtWidgets.QCheckBox("Intersect")
-        self.ch_intersect.setToolTip('')
+        self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
 
         #position objects on gridded configuration bar
         config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_read, 0, 1, 1, 1, QtCore.Qt.AlignCenter)  
-        config_bar.addWidget(self.ch_colocate, 0, 3, 1, 2, QtCore.Qt.AlignCenter)
+        config_bar.addWidget(self.ch_colocate, 0, 1, QtCore.Qt.AlignCenter)
+        config_bar.addWidget(self.bu_read, 0, 2, QtCore.Qt.AlignCenter)  
         config_bar.addWidget(self.cb_network, 1, 0)
         config_bar.addWidget(self.cb_resolution, 2, 0)
         config_bar.addWidget(self.cb_matrix, 1, 1)
         config_bar.addWidget(self.cb_species, 2, 1)
         config_bar.addWidget(self.le_start_date, 1, 2)
         config_bar.addWidget(self.le_end_date, 2, 2) 
-        config_bar.addWidget(self.bu_QA, 1, 3) 
-        config_bar.addWidget(self.bu_flags, 2, 3) 
-        config_bar.addWidget(self.bu_classifications, 1, 4)
-        config_bar.addWidget(self.bu_experiments, 2, 4)
+        config_bar.addWidget(self.bu_QA, 0, 3) 
+        config_bar.addWidget(self.bu_flags, 1, 3) 
+        config_bar.addWidget(self.bu_experiments, 2, 3)
         config_bar.addWidget(self.vertical_splitter_1, 0, 5, 3, 1)
         config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_screen, 0, 7, 1, 2, QtCore.Qt.AlignCenter) 
-        config_bar.addWidget(self.lb_data_bounds, 1, 6)
-        config_bar.addWidget(self.le_minimum_value, 1, 7)
-        config_bar.addWidget(self.le_maximum_value, 1, 8)
-        config_bar.addWidget(self.lb_minimum_data_availability, 2, 6)
-        config_bar.addWidget(self.le_minimum_data_availability, 2, 7)
-        config_bar.addWidget(self.bu_methods, 2, 7, 1, 2, QtCore.Qt.AlignRight)
+        config_bar.addWidget(self.bu_pc_min, 1, 6)
+        config_bar.addWidget(self.bu_meta, 2, 6)
+        config_bar.addWidget(self.bu_period, 1, 7)
+        config_bar.addWidget(self.bu_screen, 2, 7) 
+        config_bar.addWidget(self.lb_data_bounds, 0, 8)
+        config_bar.addWidget(self.le_minimum_value, 1, 8)
+        config_bar.addWidget(self.le_maximum_value, 2, 8)
         config_bar.addWidget(self.vertical_splitter_2, 0, 9, 3, 1)
         config_bar.addWidget(self.lb_z, 0, 10, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_z_stat, 0, 10, QtCore.Qt.AlignRight)
@@ -520,35 +600,43 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.le_start_date.textChanged.connect(self.config_bar_params_change_handler)
         self.le_end_date.textChanged.connect(self.config_bar_params_change_handler)
 
+        #setup pop-up window menu tree for flags
+        self.flag_menu = {}
+        self.flag_menu['window_title'] = 'FLAGS'
+        self.flag_menu['page_title'] = 'Select standardised data reporter provided flags to filter by'
+        self.flag_menu['checkboxes'] = {}
+        self.flag_menu['checkboxes']['labels'] = np.array(sorted(standard_data_flag_name_to_data_flag_code, key=standard_data_flag_name_to_data_flag_code.get))
+        self.flag_menu['checkboxes']['remove_default'] = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20, 21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 90, 150, 154, 155, 156, 157], dtype=np.uint8)
+        self.flag_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
+        self.flag_menu['checkboxes']['map_vars'] = np.sort(list(standard_data_flag_name_to_data_flag_code.values()))
+        self.flag_menu['select_buttons'] = ['all','clear','default']
+
+        #setup pop-up window menu tree for qa
+        self.qa_menu = {}
+        self.qa_menu['window_title'] = 'QA'
+        self.qa_menu['page_title'] = 'Select standardised data reporter provided flags to filter by'
+        self.qa_menu['checkboxes'] = {}
+        self.qa_menu['checkboxes']['labels'] = np.array(sorted(standard_QA_name_to_QA_code, key=standard_QA_name_to_QA_code.get))
+        self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 4, 5, 7, 8, 10, 12, 13, 14, 17, 18, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
+        self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
+        self.qa_menu['checkboxes']['map_vars'] = np.sort(list(standard_QA_name_to_QA_code.values()))
+        self.qa_menu['select_buttons'] = ['all','clear','default'] 
+
+        #setup pop-up window menu tree for experiments
+        self.experiments_menu = {}
+        self.experiments_menu['window_title'] = 'EXPERIMENTS'
+        self.experiments_menu['page_title'] = 'Select Experiment/s'
+        self.experiments_menu['checkboxes'] = {}
+        self.experiments_menu['checkboxes']['labels'] = []
+        self.experiments_menu['checkboxes']['keep_default'] = []
+        self.experiments_menu['checkboxes']['keep_selected'] = []
+        self.experiments_menu['checkboxes']['map_vars'] = []
+        self.experiments_menu['select_buttons'] = ['all','clear','default']   
+
         #enable pop up configuration windows
-        self.bu_experiments.clicked.connect(self.handle_pop_up_experiments_window)
-        self.bu_flags.clicked.connect(self.handle_pop_up_flags_window)
-        self.bu_QA.clicked.connect(self.handle_pop_up_qa_window)
-        self.bu_classifications.clicked.connect(self.handle_pop_up_classifications_window)
-        self.bu_methods.clicked.connect(self.handle_pop_up_methods_window)
-
-        #define data provider flags
-        self.flag_names = np.array(sorted(standard_data_flag_codes, key=standard_data_flag_codes.get))
-        self.flag_codes = np.sort(list(standard_data_flag_codes.values())) 
-        self.flag_default_codes = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20, 21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 90, 150, 154, 155, 156, 157], dtype=np.uint8)
-        self.flag_default_inds = np.array([np.where(self.flag_codes == code)[0][0] for code in self.flag_default_codes], dtype=np.uint8)
-
-        #define qa flags
-        self.qa_names = np.array(sorted(standard_qa_flag_codes, key=standard_qa_flag_codes.get))
-        self.qa_codes = np.sort(list(standard_qa_flag_codes.values()))        
-        self.qa_default_codes = np.array([0, 1, 2, 3, 4, 5, 70, 80, 81, 82, 85, 87, 90, 94, 100, 106, 107, 108], dtype=np.uint8)
-        self.qa_default_inds = np.array([np.where(self.qa_codes == code)[0][0] for code in self.qa_default_codes], dtype=np.uint8)
-
-        #define classification flags        
-        self.classification_names = np.array(sorted(standard_classification_flag_codes, key=standard_classification_flag_codes.get))
-        self.classification_codes = np.sort(list(standard_classification_flag_codes.values()))
-        self.classification_default_codes_to_retain = np.array([5], dtype=np.uint8)
-        self.classification_default_codes_to_remove = np.array([0, 4, 46, 49], dtype=np.uint8)
-        self.classification_default_inds_to_retain = np.array([np.where(self.classification_codes == code)[0][0] for code in self.classification_default_codes_to_retain], dtype=np.uint8)
-        self.classification_default_inds_to_remove = np.array([np.where(self.classification_codes == code)[0][0] for code in self.classification_default_codes_to_remove], dtype=np.uint8)
-
-        #create dictionary to hold indices of selected values in pop-up windows
-        self.selected_indices = {'EXPERIMENTS':[[]], 'FLAGS':[[]], 'QA':[[]], 'CLASSIFICATIONS':[[],[]], 'METHODS':[[]]}
+        self.bu_flags.clicked.connect(partial(self.generate_pop_up_window,self.flag_menu))
+        self.bu_QA.clicked.connect(partial(self.generate_pop_up_window,self.qa_menu))
+        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window,self.experiments_menu)) 
         
         #initialise configuration bar fields
         self.config_bar_initialisation = True
@@ -616,6 +704,15 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
+
+    def generate_pop_up_window(self, menu_level):
+
+        '''generate pop up window'''
+        
+        self.pop_up_window = pop_up_window(menu_level)
+
+    #--------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------------#
     
     def update_configuration_bar_fields(self):
 
@@ -636,9 +733,6 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             self.active_end_date = int(self.le_end_date.text())
             self.date_range_has_changed = False
 
-            #set initially selected minimum data availability % to 0.0
-            self.le_minimum_data_availability.setText('0.0')
-
             #set selected/active values of other fields to be initially None
             self.selected_network = None
             self.active_network = None
@@ -647,14 +741,12 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             self.selected_matrix = None
             self.active_matrix = None
             self.selected_species = None
-            self.active_species = None
+            self.active_species = None    
 
-            #set selected/active values of variables associated with pop up windows to be empty lists
+            #set active values of variables associated with pop up windows to be empty lists
             self.active_experiment_grids = []  
-            self.active_qa_inds = []
-            self.active_flag_inds = []  
-            self.active_classifications_to_retain_inds = []
-            self.active_classifications_to_remove_inds = []      
+            self.active_qa = []
+            self.active_flags = []  
 
             #set initial time array to be None
             self.time_array = None      
@@ -671,10 +763,10 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             self.all_observation_data = {}
 
             #set all available networks
-            available_networks = ['EBAS','EEA_AQ_eReporting']
+            available_networks = ['EBAS','EEA_AQ_eReporting','NCDC_ISD']
         
             #set all available temporal resolutions
-            available_resolutions = ['hourly','daily','monthly']
+            available_resolutions = ['hourly','hourly_instantaneous','daily','monthly']
 
             #iterate through available networks
             for network in available_networks:
@@ -757,7 +849,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #update resolution field
         available_resolutions = list(self.available_observation_data[self.cb_network.currentText()].keys())
         #manually force order of available resolutions
-        resolution_order_dict = {'hourly':1, 'daily':2, 'monthly':3}
+        resolution_order_dict = {'hourly':1, 'hourly_instantaneous':2, 'daily':3, 'monthly':4}
         available_resolutions = sorted(available_resolutions, key=resolution_order_dict.__getitem__) 
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
@@ -783,22 +875,13 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
         #update available experiment data dictionary 
         self.get_valid_experiment_files_in_date_range()
-        #update selected indices for experiments -- keeping previously selected experiments if available
-        if len(self.selected_indices['EXPERIMENTS'][0]) > 0:
-            previous_selected_experiments = self.previous_available_experiment_grids[self.selected_indices['EXPERIMENTS'][0]]
-        else:
-            previous_selected_experiments = []
+        #update selected experiments -- keeping previously selected experiments if available
         #set selected indices as previously selected indices in current available list of experiments
-        selected_experiments = [previous_selected_experiment for previous_selected_experiment in previous_selected_experiments if previous_selected_experiment in self.available_experiment_grids]
-        selected_experiment_inds = np.array([np.where(self.available_experiment_grids == selected_experiment)[0][0] for selected_experiment in selected_experiments], dtype=np.uint8)
-        self.selected_indices['EXPERIMENTS'] = [selected_experiment_inds]   
-        #set previous available experiments variable   
-        self.previous_available_experiment_grids = np.array(self.available_experiment_grids)
+        self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for previous_selected_experiment in self.experiments_menu['checkboxes']['keep_selected'] if previous_selected_experiment in self.experiments_menu['checkboxes']['map_vars']]
 
-        #update selected indices for QA
-        #if initialising config bar then check default selection
+        #if initialising config bar then check default selection of QA checkboxes
         if self.config_bar_initialisation == True:
-            self.selected_indices['QA'] = [self.qa_default_inds]
+            self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa_menu['checkboxes']['remove_default'])
 
         #unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -897,7 +980,8 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                         self.available_experiment_data['%s-%s'%(experiment,grid)] = valid_network_files_yearmonths
 
         #get list of available experiment-grid names
-        self.available_experiment_grids = np.array(sorted(list(self.available_experiment_data.keys())))
+        self.experiments_menu['checkboxes']['labels'] = np.array(sorted(list(self.available_experiment_data.keys())))
+        self.experiments_menu['checkboxes']['map_vars'] = copy.deepcopy(self.experiments_menu['checkboxes']['labels'])
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
@@ -947,32 +1031,6 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
-    #define functions which generate pop up configuration windows for some fields
-
-    def handle_pop_up_experiments_window(self):
-        #setup pop up window
-        self.experiments_window = pop_up_window(window_type='EXPERIMENTS', window_titles=['Select Experiment/s'], checkbox_labels=[self.available_experiment_grids], default_checkbox_selection=[[]], selected_indices=self.selected_indices)
-
-    def handle_pop_up_flags_window(self):
-        #setup pop up window
-        self.qa_window = pop_up_window(window_type='FLAGS', window_titles=['Select standardised data reporter provided flags to filter by'], checkbox_labels=[self.flag_names], default_checkbox_selection=[self.flag_default_inds], selected_indices=self.selected_indices)
-
-    def handle_pop_up_qa_window(self):
-        #setup pop up window
-        self.qa_window = pop_up_window(window_type='QA', window_titles=['Select standardised QA flags to filter by'], checkbox_labels=[self.qa_names], default_checkbox_selection=[self.qa_default_inds], selected_indices=self.selected_indices)
-
-    def handle_pop_up_classifications_window(self):
-        #setup pop up window
-        self.qa_window = pop_up_window(window_type='CLASSIFICATIONS', window_titles=['Select standardised classifications to retain','Select standardised classifications to remove'], checkbox_labels=[self.classification_names,self.classification_names], default_checkbox_selection=[self.classification_default_inds_to_retain,self.classification_default_inds_to_remove], selected_indices=self.selected_indices)
-
-    def handle_pop_up_methods_window(self):
-        #only proceed if have some valid stations in memory
-        if len(self.station_references) > 0:
-            #setup pop up window
-            self.qa_window = pop_up_window(window_type='METHODS', window_titles=['Select standardised measurement methodologies to retain'], checkbox_labels=[self.station_unique_methods], default_checkbox_selection=[np.arange(len(self.station_unique_methods), dtype=np.int)], selected_indices=self.selected_indices)
-
-    #--------------------------------------------------------------------------------#
-    #--------------------------------------------------------------------------------#
     def handle_data_selection_update(self):
 
         '''define function which handles update of data selection and MPL canvas upon pressing of READ button'''
@@ -995,10 +1053,8 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.previous_active_start_date = self.active_start_date
         self.previous_active_end_date = self.active_end_date
         self.previous_active_experiment_grids = self.active_experiment_grids
-        self.previous_active_qa_inds = self.active_qa_inds
-        self.previous_active_flag_inds = self.active_flag_inds
-        self.previous_active_classifications_to_retain_inds = self.active_classifications_to_retain_inds
-        self.previous_active_classifications_to_remove_inds = self.active_classifications_to_remove_inds
+        self.previous_active_qa = self.active_qa
+        self.previous_active_flags = self.active_flags
         
         #set all currently selected variables as active variables
         self.active_network = self.selected_network
@@ -1007,14 +1063,9 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.active_species = self.selected_species
         self.active_start_date = self.selected_start_date
         self.active_end_date = self.selected_end_date
-        if len(self.selected_indices['EXPERIMENTS'][0]) > 0:
-            self.active_experiment_grids = self.available_experiment_grids[self.selected_indices['EXPERIMENTS'][0]]
-        else:
-            self.active_experiment_grids = []
-        self.active_qa_inds = self.selected_indices['QA'][0]
-        self.active_flag_inds = self.selected_indices['FLAGS'][0]
-        self.active_classifications_to_retain_inds = self.selected_indices['CLASSIFICATIONS'][0]
-        self.active_classifications_to_remove_inds = self.selected_indices['CLASSIFICATIONS'][1]
+        self.active_experiment_grids = copy.deepcopy(self.experiments_menu['checkboxes']['keep_selected'])
+        self.active_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
+        self.active_flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
         
         #--------------------------------------------------------------------#
         #determine what data (if any) needs to be read
@@ -1027,9 +1078,9 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         cut_right = False
         
         #determine if any of the key variables have changed 
-        #(network, resolution, species, qa, flags, classifications_to_retain, classifications_to_remove)
+        #(network, resolution, species, qa, flags)
         #if any have changed, observations and any selected experiments have to be re-read entirely
-        if (self.active_network != self.previous_active_network) or (self.active_resolution != self.previous_active_resolution) or (self.active_species != self.previous_active_species) or (np.array_equal(self.active_qa_inds,self.previous_active_qa_inds) == False) or (np.array_equal(self.active_flag_inds,self.previous_active_flag_inds) == False) or (np.array_equal(self.active_classifications_to_retain_inds,self.previous_active_classifications_to_retain_inds) == False) or (np.array_equal(self.active_classifications_to_remove_inds,self.previous_active_classifications_to_remove_inds) == False):
+        if (self.active_network != self.previous_active_network) or (self.active_resolution != self.previous_active_resolution) or (self.active_species != self.previous_active_species) or (np.array_equal(self.active_qa,self.previous_active_qa) == False) or (np.array_equal(self.active_flags,self.previous_active_flags) == False):
             read_all = True
         #key variables have not changed, has start/end date?
         else:
@@ -1240,7 +1291,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.previous_station_references = self.station_references
 
         #get N time chunks between desired start date and end date to set time array
-        if self.active_resolution == 'hourly':
+        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
             self.active_frequency_code = 'H'
         elif self.active_resolution == 'daily':
             self.active_frequency_code = 'D'
@@ -1255,13 +1306,11 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species]])       
 
         #redefine some key variables globally (for access by parallel netCDF reading functions)
-        global time_array, active_species, selected_qa, selected_flags, selected_classifications_to_retain, selected_classifications_to_remove
+        global time_array, active_species, selected_qa, selected_flags
         time_array = self.time_array
-        active_species = self.active_species
-        selected_qa = self.qa_codes[self.active_qa_inds]
-        selected_flags = self.flag_codes[self.active_flag_inds]        
-        selected_classifications_to_retain = self.classification_codes[self.active_classifications_to_retain_inds]    
-        selected_classifications_to_remove = self.classification_codes[self.active_classifications_to_remove_inds]  
+        active_species = self.active_species   
+        selected_qa = copy.deepcopy(self.active_qa)
+        selected_flags = copy.deepcopy(self.active_flags)
 
         #------------------------------------------------------------------------------------#
         #iterate through all relevant observational files and read station references/longitudes/latitudes (either in serial/parallel)
@@ -1467,6 +1516,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                 self.data_in_memory[experiment]['zorder'] = self.data_in_memory['observations']['zorder'] + experiment_ind
                 #update count of experiments
                 experiment_ind +=1
+
 #--------------------------------------------------------------------------------#
 #--------------------------------------------------------------------------------#
 
@@ -1493,7 +1543,7 @@ def read_netCDF_station_information(relevant_file):
 def read_netCDF_data(relevant_file):
 
     '''function that handles reading of observational/experiment netCDF data
-       also handles filtering of observational data based on selected qa/flag/classification flags
+       also handles filtering of observational data based on selected qa/data provider flags
     '''
 
     #read netCDF frame
@@ -1532,7 +1582,7 @@ def read_netCDF_data(relevant_file):
     #set masked data as NaN
     file_data[data_mask] = np.NaN    
 
-    #for observations, set species data based on selected qa flags/standard data provider flags/classifications to retain or remove as NaN
+    #for observations, set species data based on selected qa flags/standard data provider flags to retain or remove as NaN
     if process_type == 'observations':
         #if some qa flags selected then screen
         if len(selected_qa) > 0:
@@ -1542,15 +1592,6 @@ def read_netCDF_data(relevant_file):
         if len(selected_flags) > 0:
             #screen out observations which are associated with any of the selected data provider flags
             file_data[np.isin(nCDF_root['flag'][:,valid_file_time_indices,:], selected_flags).any(axis=2)] = np.NaN
-        #if some classification flags (retain  or remove) selected then screen
-        if (len(selected_classifications_to_retain) > 0) or (len(selected_classifications_to_remove) > 0):
-            file_classifications = nCDF_root['classification'][:,valid_file_time_indices,:]
-            #screen out all observations that aren't associated with all of the selected classifications to retain
-            if len(selected_classifications_to_retain) > 0:
-                file_data[np.isin(file_classifications, selected_classifications_to_retain, invert=True).all(axis=2)] = np.NaN
-            #screen out all observations that are associated with any of the selected classifications to remove 
-            if len(selected_classifications_to_remove) > 0:
-                file_data[np.isin(file_classifications, selected_classifications_to_remove).any(axis=2)] = np.NaN
 
     #close netCDF
     nCDF_root.close()
@@ -1692,7 +1733,7 @@ class MPL_Canvas(FigureCanvas):
             self.map_initialised = True
            
         #define all temporal aggregation resolutions that will be used to aggregate data (variable by temporal resolution of data in memory)
-        if self.read_instance.active_resolution == 'hourly':
+        if (self.read_instance.active_resolution == 'hourly') or (self.read_instance.active_resolution == 'hourly_instantaneous'):
             self.temporal_aggregation_resolutions = ['hour','dayofweek','month']
         elif self.read_instance.active_resolution == 'daily':
             self.temporal_aggregation_resolutions = ['dayofweek','month']
@@ -1748,7 +1789,8 @@ class MPL_Canvas(FigureCanvas):
         '''function which handles updates data filtering by selected lower/upper limit bounds, selected measurement methods and selected minimum data availability %'''
 
         #get selected variables for minimum data availability, lower/upper limits and measurement methods
-        selected_minimum_data_availability_percent = self.read_instance.le_minimum_data_availability.text()
+        #selected_minimum_data_availability_percent = self.read_instance.le_minimum_data_availability.text()
+        selected_minimum_data_availability_percent = 0.0
         selected_lower_limit = self.read_instance.le_minimum_value.text()
         selected_upper_limit = self.read_instance.le_maximum_value.text()
 
@@ -1801,30 +1843,30 @@ class MPL_Canvas(FigureCanvas):
                 valid_station_indices_availability = np.intersect1d(valid_station_indices_percent, valid_station_indices_absolute)
 
                 #get unique standard measurement methodologies across stations 
-                self.read_instance.previous_station_unique_methods = copy.deepcopy(self.read_instance.station_unique_methods)
-                self.read_instance.station_unique_methods = np.unique(self.read_instance.station_methods[valid_station_indices_availability])
+                #self.read_instance.previous_station_unique_methods = copy.deepcopy(self.read_instance.station_unique_methods)
+                #self.read_instance.station_unique_methods = np.unique(self.read_instance.station_methods[valid_station_indices_availability])
 
                 #if unique methods have changed from previous, update method checkboxes
-                if np.array_equal(self.read_instance.previous_station_unique_methods, self.read_instance.station_unique_methods) == False:
+                #if np.array_equal(self.read_instance.previous_station_unique_methods, self.read_instance.station_unique_methods) == False:
                     #if are reading new data into memory, update all methods to be checked by default
-                    if self.read_instance.block_MPL_canvas_updates == True:
-                        self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
+                #    if self.read_instance.block_MPL_canvas_updates == True:
+                #        self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
                     
                     #else if all previous methods were ticked then, update all new methods to be ticked also
-                    elif len(self.read_instance.selected_indices['METHODS'][0]) == len(self.read_instance.previous_station_unique_methods):
-                        self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
+                #    elif len(self.read_instance.selected_indices['METHODS'][0]) == len(self.read_instance.previous_station_unique_methods):
+                #        self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
                     
                     #otherwise, update checked methods to be the subset between previously checked methods and current unique methods 
-                    else:
-                        intersect_methods = np.intersect1d(self.read_instance.previous_station_unique_methods[self.read_instance.selected_indices['METHODS'][0]], self.read_instance.station_unique_methods)
-                        self.read_instance.selected_indices['METHODS'] = [[np.where(self.read_instance.station_unique_methods == intersect_method)[0][0] for intersect_method in intersect_methods]] 
+                #    else:
+                #        intersect_methods = np.intersect1d(self.read_instance.previous_station_unique_methods[self.read_instance.selected_indices['METHODS'][0]], self.read_instance.station_unique_methods)
+                #        self.read_instance.selected_indices['METHODS'] = [[np.where(self.read_instance.station_unique_methods == intersect_method)[0][0] for intersect_method in intersect_methods]] 
 
                 #get indices of subset stations which use checked standard methodologies
-                checked_methods = self.read_instance.station_unique_methods[self.read_instance.selected_indices['METHODS'][0]]
-                valid_station_indices = valid_station_indices_availability[np.isin(self.read_instance.station_methods[valid_station_indices_availability], checked_methods)]
+                #checked_methods = self.read_instance.station_unique_methods[self.read_instance.selected_indices['METHODS'][0]]
+                #valid_station_indices = valid_station_indices_availability[np.isin(self.read_instance.station_methods[valid_station_indices_availability], checked_methods)]
 
                 #save valid station indices with data array
-                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_indices
+                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_indices_availability
 
         #write valid station indices calculated for observations across to associated experimental data arrays
         #iterate through all data arrays
@@ -2014,7 +2056,7 @@ class MPL_Canvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([],dtype=np.int)
 
             #plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=map_unselected_station_marker_size, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)     
+            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=map_unselected_station_marker_size, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=3, transform=self.datacrs, linewidth=0.0, alpha=None)     
             #create 2D numpy array of plotted station coordinates
             self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
 
@@ -2153,7 +2195,7 @@ class MPL_Canvas(FigureCanvas):
                 #compute map projection coordinates for each pair of longitude/latitude experiment grid edge coordinates
                 #exp_x,exp_y = self.bm(self.read_instance.data_in_memory[experiment]['grid_edge_longitude'], self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])
                 #create matplotlib polygon object from experiment grid edge map projection coordinates 
-                grid_edge_outline_poly = Polygon(np.vstack((self.read_instance.data_in_memory[experiment]['grid_edge_longitude'], self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])).T, edgecolor=self.read_instance.data_in_memory[experiment]['colour'], linewidth=1, linestyle='--', fill=False, zorder=1, transform=self.datacrs)
+                grid_edge_outline_poly = Polygon(np.vstack((self.read_instance.data_in_memory[experiment]['grid_edge_longitude'], self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])).T, edgecolor=self.read_instance.data_in_memory[experiment]['colour'], linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
                 #plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
 
@@ -2416,7 +2458,7 @@ class MPL_Canvas(FigureCanvas):
         month_aggregation_dict =     {'ax':self.violin_months_ax, 'title':'M',   'xticks':np.arange(1, 13, dtype=np.int), 'plots':{}}
 
         #based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries  
-        if self.read_instance.active_resolution == 'hourly':
+        if (self.read_instance.active_resolution == 'hourly') or (self.read_instance.active_resolution == 'hourly_instantaneous'):
             aggregation_dict = {'hour':hour_aggregation_dict, 'dayofweek':dayofweek_aggregation_dict, 'month':month_aggregation_dict}
         elif self.read_instance.active_resolution == 'daily':
             aggregation_dict = {'dayofweek':dayofweek_aggregation_dict, 'month':month_aggregation_dict}
@@ -2531,7 +2573,7 @@ class MPL_Canvas(FigureCanvas):
         #plot title (with units)
             
         #if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis 
-        if self.read_instance.active_resolution == 'hourly':
+        if (self.read_instance.active_resolution == 'hourly') or (self.read_instance.active_resolution == 'hourly_instantaneous'):
             self.violin_hours_ax.set_title('Temporal Distributions (%s)'%(self.read_instance.measurement_units), fontsize=8.0, loc='left') 
         #otherwise, plot the units on the monthly aggregation axis
         else:    
@@ -2561,7 +2603,7 @@ class MPL_Canvas(FigureCanvas):
         month_aggregation_dict =     {'ax':self.exp_bias_months_ax, 'title':'M',   'xticks':np.arange(1, 13, dtype=np.int), 'plots':{}}
 
         #based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries  
-        if self.read_instance.active_resolution == 'hourly':
+        if (self.read_instance.active_resolution == 'hourly') or (self.read_instance.active_resolution == 'hourly_instantaneous'):
             aggregation_dict = {'hour':hour_aggregation_dict, 'dayofweek':dayofweek_aggregation_dict, 'month':month_aggregation_dict}
         elif self.read_instance.active_resolution == 'daily':
             aggregation_dict = {'dayofweek':dayofweek_aggregation_dict, 'month':month_aggregation_dict}
@@ -2595,7 +2637,7 @@ class MPL_Canvas(FigureCanvas):
             plot_title = 'Experiment %s bias%s'%(stats_dict['label'], title_units)
 
         #if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis 
-        if self.read_instance.active_resolution == 'hourly':
+        if (self.read_instance.active_resolution == 'hourly') or (self.read_instance.active_resolution == 'hourly_instantaneous'):
             self.exp_bias_hours_ax.set_title(plot_title, fontsize=8.0, loc='left') 
         #otherwise, plot the units on the monthly aggregation axis
         else:    
@@ -3543,1233 +3585,6 @@ experiment_bias_stats_dict = {'MAE':  {'function':calculate_MAE,       'order':0
 temporal_axis_mapping_dict = {'dayofweek':{0:'M', 1:'T', 2:'W', 3:'T', 4:'F', 5:'S', 6:'S'},
                               'month':    {1:'J', 2:'F', 3:'M', 4:'A', 5:'M', 6:'J', 7:'J', 8:'A', 9:'S', 10:'O', 11:'N', 12:'D'}}
 
-#------------------------------------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------------------------------------#
-
-#return defined standardised data flag code associated with a specific standardised data flag name
-
-#**Note: These standardised data flags refer specifically to information/or lack of information provided by the data provider 
-#and not to post-processing/quality control of observations (given separately by the 'qa' field).
-
-standard_data_flag_codes = {
-
-#Basic Data Flags
-#-----------------------------------------------------
-'Valid Data': 0,
-
-'Preliminary Data': 1,
-
-'Missing Data': 2,
-
-'Invalid Data - Unspecified': 3,
-
-'Un-Flagged Data': 4,
-#-----------------------------------------------------
-
-
-#Estimated Data Flags
-#-----------------------------------------------------
-'Estimated Data - Unspecified': 10,
-
-'Estimated Data - Negative Value Detected': 11,
-
-'Estimated Data - No Value Detected': 12,
-
-'Estimated Data - Value Below Detection Limit': 13,
-
-'Estimated Data - Value Above Detection Limit': 14,
-
-'Estimated Data - Value Substituted from Secondary Monitor': 15,
-
-'Estimated Data - Multiple Parameters Aggregated': 16,
-#-----------------------------------------------------
-
-
-#Extreme/Irregular Data Flags
-#-----------------------------------------------------
-'Extreme/Irregular Data - Unspecified': 20,
-
-'Data Does Not Meet Internal Network Quality Control Criteria': 21,
-
-'High Variability of Data': 22,
-
-'Irregular Data Manually Screened and Accepted': 23,
-
-'Irregular Data Manually Screened and Rejected': 24,
-
-'Negative Value': 25,
-
-'No Value Detected': 26,
-
-'Reconstructed/Recalculated Data': 27,
-
-'Value Close to Detection Limit': 28,
-
-'Value Below Acceptable Range': 29,
-
-'Value Above Acceptable Range': 30,
-
-'Value Below Detection Limit': 31,
-
-'Value Above Detection Limit': 32,
-#-----------------------------------------------------
-
-
-#Measurement Issue Data Flags
-#-----------------------------------------------------
-'Measurement Issue - Unspecified': 40,
-
-'Chemical Issue': 41,
-
-'Erroneous Sampling Operation': 42,
-
-'Extreme Internal Instrument Meteorological Conditions': 43,
-
-'Extreme Ambient Laboratory Meteorological Conditions': 44,
-
-'Extreme External Meteorological Conditions': 45,
-
-'Extreme Sample Transport Conditions': 46,
-
-'Invalid Flow Rate': 47,
-
-'Human Error': 48,
-
-'Low Data Capture': 49,
-
-'Matrix Effect': 50,
-
-'Mechanical Issue/Non-Operational Equipment': 51,
-
-'No Technician': 52,
-
-'Operational Maintenance Check Issue': 53,
-
-'Physical Issue With Filter': 54,
-
-'Power Failure': 55,
-
-'Sample Diluted for Analysis': 56,
-
-'Unmeasured Key Meteorological Parameter': 57,
-#-----------------------------------------------------
-
-
-#Operational Maintenance Data Flags
-#-----------------------------------------------------
-'Operational Maintenance - Unspecified': 70,
-
-'Calibration': 71,
-
-'Accuracy Check': 72,
-
-'Blank Check': 73,
-
-'Detection Limits Check': 74,
-
-'Precision Check': 75,
-
-'Retention Time Check': 76,
-
-'Span Check': 77,
-
-'Zero Check': 78,
-
-'Instrumental Inspection': 79,
-
-'Instrumental Repair': 80,
-
-'Quality Control Audit': 81,
-#-----------------------------------------------------
-
-
-#Data Formatting/Processing Issue Data Flags
-#-----------------------------------------------------
-'Data Formatting/Processing Issue': 90,
-
-'Corrected Data Formatting/Processing Issue': 91,
-#-----------------------------------------------------
-
-
-#Local Contamination Data Flags
-#-----------------------------------------------------
-'Local Contamination - Unspecified': 100,
-
-'Agricultural Contamination': 101,
-
-'Bird-Dropping Contamination': 102,
-
-'Construction Contamination': 103,
-
-'Dust Contamination': 104,
-
-'Fire/Wood Burning Contamination': 105,
-
-'Industrial Contamination': 106,
-
-'Internal Laboratory/Instrument Contamination': 107,
-
-'Insect Contamination': 108,
-
-'Pollen/Leaf Contamination': 109,
-
-'Sea-Salt Contamination': 110,
-
-'Traffic Contamination': 111,
-#-----------------------------------------------------
-
-
-#Exceptional Event Data Flags
-#-----------------------------------------------------
-'Exceptional Event - Unspecified': 120,
-
-#Natural Events
-#---------------------------
-'Dust Event': 121,
-
-'Heavy Rain/Snowfall Shower (Squall)': 122,
-
-'High Winds': 123,
-
-'Seismic Activity': 124,
-
-'Station Inside Cloud': 125,
-
-'Storm': 126,
-
-'Stratospheric Ozone Intrusion': 127,
-
-'Tropical Cyclone (Cyclone/Hurricane/Typhoon)': 128,
-
-'Volcanic Eruptions': 129,
-
-'Wildfire': 130,
-
-#Anthropogenically Induced Events
-#---------------------------
-'Chemical Spill/Industrial Accident': 131,
-
-'Cleanup After a Major Disaster': 132,
-
-'Demolition': 133,
-
-'Fireworks': 134,
-
-'Infrequent Large Gathering': 135,
-
-'Terrorist Act': 136,
-#-----------------------------------------------------
-
-
-#Aggregation/Representation Flags
-#-----------------------------------------------------
-'Aggregation/Representation Issue - Unspecified': 150,
-
-'Data Window Completeness < 90%': 151,
-
-'Data Window Completeness < 75%': 152,
-
-'Data Window Completeness < 66%': 153,
-
-'Data Window Completeness < 50%': 154,
-
-'Data Window Completeness < 25%': 155,
-
-'>= 75% of Measurements in Window Below Detection Limit': 156,
-
-'>= 50% of Measurements in Window Below Detection Limit': 157
-#-----------------------------------------------------
-}
-
-#------------------------------------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------------------------------------#
-
-#defined standardised qa flag code associated with specific data quality assurance checks
-#can also be forced to return N flag codes rather than a specific flag code, by setting get_N_flags to True
-
-standard_qa_flag_codes = {
-
-#Basic QA Flags
-#-----------------------------------------------------
-#Missing Measurement
-#Measurement is missing (i.e. NaN).
-'Missing Measurement': 0,
-
-#Infinite Value
-#Value is infinite -- happens when data values are outside of the range that the float32 data type can handle (-3.4E+38 to +3.4E+38).
-'Infinite Value': 1,
-
-#Negative Measurement
-#Measurement is negative in absolute terms.
-'Negative Measurement': 2,
-
-#Zero Measurement
-#Have measurement equal to zero.
-'Zero Measurement': 3,
-
-#Preliminary Data
-#Measurement has been flagged bv data provider to be preliminary in nature (i.e. not of the highest possible data quality/level)
-'Preliminary Data': 4,
-
-#Invalid Data Provider Flags - GHOST Decreed
-#Measurements are associated with data quality flags given by the data provider which have been decreed by the GHOST project architects to suggest the measurements are associated with substantial uncertainty/bias
-'Invalid Data Provider Flags - GHOST Decreed': 5,
-
-#Invalid Data Provider Flags - Network Decreed
-#Measurements are associated with data quality flags given by the data provider which have been decreed by the reporting network to suggest the measurements are associated with substantial uncertainty/bias
-'Invalid Data Provider Flags - Network Decreed': 6,
-#-----------------------------------------------------
-
-
-#Duplicate / Overlapping Time Flags
-#-----------------------------------------------------
-#Duplicate Time - GHOST Decreed Valid Flagged Values Kept
-#Multiple measurements reported for the same temporal window - all windows with GHOST decreed flagged invalid data are dropped
-'Duplicate Time - GHOST Decreed Valid Flagged Values Kept': 10,
-
-#Duplicate Time - First Value Kept
-#Multiple measurements reported for the same temporal window - the first time window is kept preferentially
-'Duplicate Time - First Value Kept': 11,
-
-#Overlapping Time - GHOST Decreed Valid Flagged Values Kept
-#Multiple measurements with overlapping temporal windows - all windows with GHOST decreed flagged invalid data are dropped
-'Overlapping Time - GHOST Decreed Valid Flagged Values Kept': 12,
-
-#Overlapping Time - Finest Temporal Resolutions Kept
-#Measurements reported with overlapping temporal windows - only windows with a temporal resolution equal to the finest temporal resolution across the overlapping windows are kept
-'Overlapping Time - Finest Temporal Resolutions Kept': 13,
-
-#Overlapping Time - First Value Kept
-#Measurements reported with overlapping temporal windows - the first time window is kept preferentially.
-'Overlapping Time - First Value Kept': 14,
-#-----------------------------------------------------
-
-
-#Duplicate Station
-#-----------------------------------------------------
-#Station has been decreed to be a duplicate (i.e. reporting the same data as from another network, but the data from another network has been preferred)
-'Duplicate Station': 20,
-#-----------------------------------------------------
-
-
-#Metadata Assumption Flags
-#-----------------------------------------------------
-#Assumed Gas Volume
-#Have assumed gas volume when converting between mass density and volume mixing ratio. (Do not have either temperature or pressure, or both).
-'Assumed Gas Volume': 30,
-
-#No Latitude Metadata
-#Latitude metadata field is absent, the most recent valid past latitude is assumed to be still valid.
-'No Latitude - Took Most Recent Valid Value': 31,
-
-#Latitude metadata field is absent, the next valid latitude in the time record is assumed to be valid for this period (no available past valid latitudes).
-'No Latitude - Took Next Valid Value': 32,
-
-#Latitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Latitude - Used Manually Compiled Metadata': 33,
-
-#No Longitude Metadata
-#Longitude metadata field is absent, the most recent valid past longitude is assumed to be still valid.
-'No Longitude - Took Most Recent Valid Value': 34,
-
-#Longitude metadata field is absent, the next valid longitude in the time record is assumed to be valid for this period (no available past valid longitudes).
-'No Longitude - Took Next Valid Value': 35,
-
-#Longitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Longitude - Used Manually Compiled Metadata': 36,
-
-#No Altitude Metadata
-#Altitude metadata field is absent, the most recent valid past altitude is assumed to be still valid.
-'No Altitude - Took Most Recent Valid Value': 37,
-
-#Altitude Metadata field is absent, the next valid altitude in the time record is assumed to be valid for this period (no available past valid altitudes).
-'No Altitude - Took Next Valid Value': 38,
-
-#Altitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Altitude - Used Manually Compiled Metadata': 39,
-
-#Altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes to fill altitude for entire time record.
-'No Altitude - Used ETOPO1 to Estimate Altitude': 40,
-
-#No Sampling Height Metadata
-#Sampling height metadata field is absent, the most recent valid past sampling height is assumed to be still valid.
-'No Sampling Height - Took Most Recent Valid Value': 41,
-
-#Sampling Height metadata field is absent, the next valid sampling height in the time record is assumed to be valid for this period (no available past valid sampling heights).
-'No Sampling Height - Took Next Valid Value': 42,
-
-#Sampling Height metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Sampling Height - Used Manually Compiled Metadata': 43,
-
-#No Measurement Altitude Metadata
-#Measurement altitude metadata field is absent, the most recent valid past measurement altitude is assumed to be still valid.
-'No Measurement Altitude - Took Most Recent Valid Value': 44,
-
-#Altitude Metadata field is absent, the next valid measurement altitude in the time record is assumed to be valid for this period (no available past valid measurement altitudes).
-'No Measurement Altitude - Took Next Valid Value': 45,
-
-#Measurement altitude metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Measurement Altitude - Used Manually Compiled Metadata': 46,
-
-#Measurement altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes to fill measurement altitude for entire time record.
-'No Measurement Altitude - Used ETOPO1': 47,
-
-#Measurement altitude metadata field is absent through entire time record, used ETOPO1 globally gridded altitudes + sampling height to fill measurement altitude for entire time record.
-'No Measurement Altitude - Used ETOPO1 + Sampling Height': 48,
-
-#No Standardised Network Provided Area Classification Metadata
-#Standardised Network Provided Area Classification metadata field is absent, the most recent valid past Standardised Network Provided Area Classification is assumed to be still valid.
-'No Area Classification - Took Most Recent Valid Value': 49,
-
-#Standardised Network Provided Area Classification metadata field is absent, the next valid Standardised Network Provided Area Classification in the time record is assumed to be valid for this period (no available past Standardised Network Provided Area Classifications).
-'No Area Classification - Took Next Valid Value': 50,
-
-#Standardised Network Provided Area Classification metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Area Classification - Used Manually Compiled Metadata': 51,
-
-#No Standardised Network Provided Station Classification Metadata
-#Standardised Network Provided Station Classification metadata field is absent, the most recent valid past Standardised Network Provided Station Classification is assumed to be still valid.
-'No Station Classification - Took Most Recent Valid Value': 52,
-
-#Standardised Network Provided Station Classification metadata field is absent, the next valid Standardised Network Provided Station Classification in the time record is assumed to be valid for this period (no available past Standardised Network Provided Station Classifications).
-'No Station Classification - Took Next Valid Value': 53,
-
-#Standardised Network Provided Station Classification metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Station Classification - Used Manually Compiled Metadata': 54,
-
-#No Standardised Network Provided Main Emission Source Metadata
-#Standardised Network Provided Main Emission Source metadata field is absent, the most recent valid past Standardised Network Provided Main Emission Source is assumed to be still valid.
-'No Main Emission Source - Took Most Recent Valid Value': 55,
-
-#Standardised Network Provided Main Emission Source metadata field is absent, the next valid Standardised Network Provided Main Emission Source in the time record is assumed to be valid for this period (no available past Standardised Network Provided Main Emission Sources).
-'No Main Emission Source - Took Next Valid Value': 56,
-
-#Standardised Network Provided Main Emission Source metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Main Emission Source - Used Manually Compiled Metadata': 57,
-
-#No Standardised Network Provided Land Use Metadata
-#Standardised Network Provided Land Use metadata field is absent, the most recent valid past Standardised Network Provided Land Use is assumed to be still valid.
-'No Land Use - Took Most Recent Valid Value': 58,
-
-#Standardised Network Provided Land Use metadata field is absent, the next valid Standardised Network Provided Land Use in the time record is assumed to be valid for this period (no available past Standardised Network Provided Land Uses).
-'No Land Use - Took Next Valid Value': 59,
-
-#Standardised Network Provided Land Use metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Land Use - Used Manually Compiled Metadata': 60,
-
-#No Standardised Network Provided Terrain Metadata
-#Standardised Network Provided Terrain metadata field is absent, the most recent valid past Standardised Network Provided Terrain is assumed to be still valid.
-'No Terrain - Took Most Recent Valid Value': 61,
-
-#Standardised Network Provided Terrain metadata field is absent, the next valid Standardised Network Provided Terrain in the time record is assumed to be valid for this period (no available past Standardised Network Provided Terrains).
-'No Terrain - Took Next Valid Value': 62,
-
-#Standardised Network Provided Terrain metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Terrain - Used Manually Compiled Metadata': 63,
-
-#No Standardised Network Provided Measurement Scale Metadata
-#Standardised Network Provided Measurement Scale metadata field is absent, the most recent valid past Standardised Network Provided Measurement Scale is assumed to be still valid.
-'No Measurement Scale - Took Most Recent Valid Value': 64,
-
-#Standardised Network Provided Measurement Scale metadata field is absent, the next valid Standardised Network Provided Measurement Scale in the time record is assumed to be valid for this period (no available past Standardised Network Provided Measurement Scales).
-'No Measurement Scale - Took Next Valid Value': 65,
-
-#Standardised Network Provided Measurement Scale metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Measurement Scale - Used Manually Compiled Metadata': 66,
-
-#No Representative Radius Metadata
-#Representative Radius metadata field is absent, the most recent valid past Representative Radius is assumed to be still valid.
-'No Representative Radius - Took Most Recent Valid Value': 67,
-
-#Representative Radius metadata field is absent, the next valid Representative Radius in the time record is assumed to be valid for this period (no available past Representative Radii).
-'No Representative Radius - Took Next Valid Value': 68,
-
-#Representative Radius metadata field is absent through entire time record, used manually compiled metadata to fill field through entire time record.
-'No Representative Radius - Used Manually Compiled Metadata': 69,
-#-----------------------------------------------------
-
-
-#Recurring Value
-#-----------------------------------------------------
-#Do check for persistently recurring values. check is done by using a moving window of 9 measurements. If 7/9 of values in the window are valid.
-'Recurring Value': 70,
-#-----------------------------------------------------
-
-
-#Non-Integer Local Timezone (relative to UTC)
-#-----------------------------------------------------
-#Local timezone has been determined to be non-integer for time of measurement, relative to UTC.
-'Non-Integer Local Timezone (relative to UTC)': 71,
-#-----------------------------------------------------
-
-
-#Extreme Data Flags
-#-----------------------------------------------------
-#Extreme Data - Scientifically Non-Feasible
-#Data is greater than a scientifically feasible limit (variable by parameter).
-'Extreme Data - Scientifically Non-Feasible': 80,
-
-#Extreme Data - Distributional Outlier
-#Data is screened through adjusted boxplot to determine distributional outliers
-'Extreme Data - Distributional Outlier': 81,
-
-#Extreme Data - Manually Decreed
-#Data has been found and decreed manually to be extreme, a select section of data is flagged
-'Extreme Data - Manually Decreed': 82,
-#-----------------------------------------------------
-
-
-#Insufficient Measurement Resolution Flags
-#-----------------------------------------------------
-#Insufficient Measurement Resolution - Documented
-#The documented resolution of measurement is coarser than a set limit (variable by measured parameter).
-'Insufficient Measurement Resolution - Documented': 83,
-
-#Insufficient Measurement Resolution - Reported
-#The reported resolution of measurement is coarser than a set limit (variable by measured parameter).
-'Insufficient Measurement Resolution - Reported': 84,
-
-#Insufficient Measurement Resolution - Preferential
-#The preferential resolution of measurement (reported, and then documented) is coarser than a set limit (variable by measured parameter).
-'Insufficient Measurement Resolution - Preferential': 85,
-
-#No Documented/Reported Measurement Resolution Metadata
-#No measurement resolution metadata is available, either reported or documented.
-'No Documented/Reported Measurement Resolution Metadata': 86,
-
-#Insufficient Measurement Resolution - Empirical
-#The resolution of measurement is analysed month by month. If the minimum difference between observations is coarser than a set limit (variable by measured parameter), measurements are flagged.
-'Insufficient Measurement Resolution - Empirical': 87,
-#-----------------------------------------------------
-
-
-#Limit of Detection Flags
-#-----------------------------------------------------
-#Below Documented Lower Limit of Detection
-#Measurement is below or equal to the instrumental documented lower limit of detection.
-'Below Documented Lower Limit of Detection': 88,
-
-#Below Reported Lower Limit of Detection
-#Measurement is below or equal to the network reported lower limit of detection.
-'Below Reported Lower Limit of Detection': 89,
-
-#Below Preferential Lower Limit of Detection
-#Measurement is below or equal to the preferential lower limit of detection (reported, and then documented).
-'Below Preferential Lower Limit of Detection': 90,
-
-#No Documented/Reported Lower Limit of Detection Metadata
-#No lower limit of detection metadata is available, either reported or documented.
-'No Documented/Reported Lower Limit of Detection Metadata': 91,
-
-#Above Documented Upper Limit of Detection
-#Measurement is above or equal to the instrumental documented upper limit of detection.
-'Above Documented Upper Limit of Detection': 92,
-
-#Above Reported Upper Limit of Detection
-#Measurement is above or equal to the network reported upper limit of detection.
-'Above Reported Upper Limit of Detection': 93,
-
-#Above Preferential Upper Limit of Detection
-#Measurement is above or equal to the preferential upper limit of detection (reported, and then documented).
-'Above Preferential Upper Limit of Detection': 94,
-
-#No Documented/Reported Upper Limit of Detection Metadata
-#No upper limit of detection metadata is available, either reported or documented.
-'No Documented/Reported Upper Limit of Detection Metadata': 95,
-#-----------------------------------------------------
-
-
-#Measurement Methodology Flags
-#-----------------------------------------------------
-#Methodology Not Mapped
-#The measurement methodology used has not yet been mapped to standardised dictionaries of measurement methodologies.
-'Methodology Not Mapped': 100,
-
-#Assumed Primary Sampling
-#A level of assumption has been made in determining the primary sampling type.
-'Assumed Primary Sampling': 101,
-
-#Assumed Sample Preparation
-#A level of assumption has been made in determining the sample preparation.
-'Assumed Sample Preparation': 102,
-
-#Assumed Measurement Methodology
-#A level of assumption has been made in determining the measurement methodology.
-'Assumed Measurement Methodology': 103,
-
-#Unknown Primary Sampling Instrument
-#The specific name of the primary sampling instrument is unknown.
-'Unknown Primary Sampling Instrument': 104,
-
-#Unknown Measuring Instrument
-#The specific name of measuring instrument is unknown.
-'Unknown Measuring Instrument': 105,
-
-#Erroneous Primary Sampling
-#The primary sampling is not appropriate to prepare the specific parameter for subsequent measurement.
-'Erroneous Primary Sampling': 106,
-
-#Erroneous Sample Preparation
-#The sample preparation is not appropriate to prepare the specific parameter for subsequent measurement.
-'Erroneous Sample Preparation': 107,
-
-#Erroneous Measurement Method
-#The measurement methodology used is not known to be able to measure the specific parameter. Only do check when known (or have assumed method).
-'Erroneous Measurement Methodology': 108,
-
-#Invalid QA Measurement Method
-#The specific measurement methodology has been decreed not to conform to QA standards as the method is not sufficiently proven/ subject to substantial biases/uncertainty. Only do check when known (or have assumed method).
-'Invalid QA Measurement Methodology': 109,
-#-----------------------------------------------------
-
-
-
-#Hourly Temporal Representation Flags
-#-----------------------------------------------------
-#Two types are checks are done to flag the representativity of hourly data periods (starting and ending at NN:00 UTC).
-#First is Data Completeness, i.e. what percentage across the hourly period is represented by valid data (after screening by key QA flags)?
-#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the hourly period (after screening by key QA flags)?
-#Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
-
-#Hourly Window Data Completeness < 90%'
-'Hourly Window Data Completeness < 90%': 150,
-
-#Hourly Window Data Completeness < 75%'
-'Hourly Window Data Completeness < 75%': 151,
-
-#Hourly Window Data Completeness < 66%'
-'Hourly Window Data Completeness < 66%': 152,
-
-#Hourly Window Data Completeness < 50%'
-'Hourly Window Data Completeness < 50%': 153,
-
-#Hourly Window Data Completeness < 25%'
-'Hourly Window Data Completeness < 25%': 154,
-
-#Hourly Window Maximum Data Gap >= 10%'
-'Hourly Window Maximum Data Gap >= 10%': 155,
-
-#Hourly Window Maximum Data Gap >= 25%'
-'Hourly Window Maximum Data Gap >= 25%': 156,
-
-#Hourly Window Maximum Data Gap >= 33%'
-'Hourly Window Maximum Data Gap >= 33%': 157,
-
-#Hourly Window Maximum Data Gap >= 50%'
-'Hourly Window Maximum Data Gap >= 50%': 158,
-
-#Hourly Window Maximum Data Gap >= 75%'
-'Hourly Window Maximum Data Gap >= 75%': 159,
-
-#-----------------------------------------------------
-
-
-#Daily Temporal Representation Flags
-#-----------------------------------------------------
-#Two types are checks are done to flag the representativity of daily data periods (starting and ending at NN 00:00 UTC).
-#First is the Data Completeness, i.e. what percentage across the daily period is represented by valid data (after screening by key QA flags)?
-#Second is the Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the daily period (after screening by key QA flags)?
-#Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
-
-#Daily Window Data Completeness < 90%'
-'Daily Window Data Completeness < 90%': 160,
-
-#Daily Window Data Completeness < 75%'
-'Daily Window Data Completeness < 75%': 161,
-
-#Daily Window Data Completeness < 66%'
-'Daily Window Data Completeness < 66%': 162,
-
-#Daily Window Data Completeness < 50%'
-'Daily Window Data Completeness < 50%': 163,
-
-#Daily Window Data Completeness < 25%'
-'Daily Window Data Completeness < 25%': 164,
-
-#Daily Window Maximum Data Gap >= 10%'
-'Daily Window Maximum Data Gap >= 10%': 165,
-
-#Daily Window Maximum Data Gap >= 25%'
-'Daily Window Maximum Data Gap >= 25%': 166,
-
-#Daily Window Maximum Data Gap >= 33%'
-'Daily Window Maximum Data Gap >= 33%': 167,
-
-#Daily Window Maximum Data Gap >= 50%'
-'Daily Window Maximum Data Gap >= 50%': 168,
-
-#Daily Window Maximum Data Gap >= 75%'
-'Daily Window Maximum Data Gap >= 75%': 169,
-
-#-----------------------------------------------------
-
-
-#Weekly Temporal Representation Flags
-#-----------------------------------------------------
-#Two types are checks are done to flag the representativity of weekly data periods (starts and ends defined by UTC isocalendar).
-#First is Data Completeness, i.e. what percentage across the weekly period is represented by valid data (after screening by key QA flags)?
-#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the weekly period (after screening by key QA flags)?
-#Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
-
-#Weekly Window Data Completeness < 90%'
-'Weekly Window Data Completeness < 90%': 170,
-
-#Weekly Window Data Completeness < 75%'
-'Weekly Window Data Completeness < 75%': 171,
-
-#Weekly Window Data Completeness < 66%'
-'Weekly Window Data Completeness < 66%': 172,
-
-#Weekly Window Data Completeness < 50%'
-'Weekly Window Data Completeness < 50%': 173,
-
-#Weekly Window Data Completeness < 25%'
-'Weekly Window Data Completeness < 25%': 174,
-
-#Weekly Window Maximum Data Gap >= 10%'
-'Weekly Window Maximum Data Gap >= 10%': 175,
-
-#Weekly Window Maximum Data Gap >= 25%'
-'Weekly Window Maximum Data Gap >= 25%': 176,
-
-#Weekly Window Maximum Data Gap >= 33%'
-'Weekly Window Maximum Data Gap >= 33%': 177,
-
-#Weekly Window Maximum Data Gap >= 50%'
-'Weekly Window Maximum Data Gap >= 50%': 178,
-
-#Weekly Window Maximum Data Gap >= 75%'
-'Weekly Window Maximum Data Gap >= 75%': 179,
-
-#-----------------------------------------------------
-
-
-#Monthly Temporal Representation Flags
-#-----------------------------------------------------
-#Two types are checks are done to flag the representativity of monthly data periods (starting and ending at NN:01 00:00 UTC).
-#First is Data Completeness, i.e. what percentage across the monthly period is represented by valid data (after screening by key QA flags)?
-#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the monthly period (after screening by key QA flags)?
-#Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
-
-#Monthly Window Data Completeness < 90%'
-'Monthly Window Data Completeness < 90%': 180,
-
-#Monthly Window Data Completeness < 75%'
-'Monthly Window Data Completeness < 75%': 181,
-
-#Monthly Window Data Completeness < 66%'
-'Monthly Window Data Completeness < 66%': 182,
-
-#Monthly Window Data Completeness < 50%'
-'Monthly Window Data Completeness < 50%': 183,
-
-#Monthly Window Data Completeness < 25%'
-'Monthly Window Data Completeness < 25%': 184,
-
-#Monthly Window Maximum Data Gap >= 10%'
-'Monthly Window Maximum Data Gap >= 10%': 185,
-
-#Monthly Window Maximum Data Gap >= 25%'
-'Monthly Window Maximum Data Gap >= 25%': 186,
-
-#Monthly Window Maximum Data Gap >= 33%'
-'Monthly Window Maximum Data Gap >= 33%': 187,
-
-#Monthly Window Maximum Data Gap >= 50%'
-'Monthly Window Maximum Data Gap >= 50%': 188,
-
-#Monthly Window Maximum Data Gap >= 75%'
-'Monthly Window Maximum Data Gap >= 75%': 189,
-
-#-----------------------------------------------------
-
-
-#Annual Temporal Representation Flags
-#-----------------------------------------------------
-#Two types are checks are done to flag the representativity of annual data periods (starting and ending at NNNN:01:01 00:00 UTC).
-#First is Data Completeness, i.e. what percentage across the annual period is represented by valid data (after screening by key QA flags)?
-#Second is Maximum Data Gap, i.e. what is the maximum data gap percentage in the provided valid data across the annual period (after screening by key QA flags)?
-#Multiple separate limits are evaluated by, for each of the checks, to give flexibility in the definitions of temporal representativity.
-
-#Annual Window Data Completeness < 90%'
-'Annual Window Data Completeness < 90%': 190,
-
-#Annual Window Data Completeness < 75%'
-'Annual Window Data Completeness < 75%': 191,
-
-#Annual Window Data Completeness < 66%'
-'Annual Window Data Completeness < 66%': 192,
-
-#Annual Window Data Completeness < 50%'
-'Annual Window Data Completeness < 50%': 193,
-
-#Annual Window Data Completeness < 25%'
-'Annual Window Data Completeness < 25%': 194,
-
-#Annual Window Maximum Data Gap >= 10%'
-'Annual Window Maximum Data Gap >= 10%': 195,
-
-#Annual Window Maximum Data Gap >= 25%'
-'Annual Window Maximum Data Gap >= 25%': 196,
-
-#Annual Window Maximum Data Gap >= 33%'
-'Annual Window Maximum Data Gap >= 33%': 197,
-
-#Annual Window Maximum Data Gap >= 50%'
-'Annual Window Maximum Data Gap >= 50%': 198,
-
-#Annual Window Maximum Data Gap >= 75%'
-'Annual Window Maximum Data Gap >= 75%': 199,
-
-#-----------------------------------------------------
-
-
-#No Valid Data
-#-----------------------------------------------------
-#After screening by key QA flags, no valid data remains.
-'No Valid Data': 210
-
-}
-
-#------------------------------------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------------------------------------#
-
-#return defined standardised classification flag code associated with specific classification algorithms
-#can also be forced to return N flag codes rather than a specific flag code, by setting get_N_flags to True
- 
-standard_classification_flag_codes = {
-
-#Station Classifications
-#-----------------------------------------------------
-#High Altitude - Metadata Altitude
-#Station determined to be measuring at an altitude >= 1500 metres relative to mean sea level, from altitudes + sampling heights taken from network provided metadata.
-'High Altitude - Metadata Altitude': 0,
-
-#High Altitude - ETOPO1
-#Station determined to be measuring at an altitude >= 1500 metres relative to sea level datum, from altitudes taken from ETOPO1 digital elevation model + sampling heights taken from network provided metadata.
-'High Altitude - ETOPO1': 1,
-
-#High Altitude - Iwahashi Global Landform Classification
-#Station determined to be measuring at a high altitude, derived from the European Soil Data Centre Iwahashi Global Landform Classification.
-'High Altitude - Iwahashi Global Landform Classification': 2,
-
-#High Altitude - Meybeck Global Landform Classification
-#Station determined to be measuring at a high altitude, derived from the European Soil Data Centre Meybeck Global Landform Classification.
-'High Altitude - Meybeck Global Landform Classification': 3,
-
-#Near Coast - GSFC
-#Station determined to be located < 50km of the coast (either over land or sea) - using GSFC nearest to coastline dataset (0.01 degree grid).
-'Near Coast - GSFC': 4,
-
-#Rural Station - Lenient Metadata Derived
-#Station determined to be 'rural', using standardised network provided metadata, following lenient classifications.
-'Rural Station - Lenient Metadata Derived': 5,
-
-#Urban Station - Lenient Metadata Derived
-#Station determined to be 'urban', using standardised network provided metadata, following lenient classifications.
-'Urban Station - Lenient Metadata Derived': 6,
-
-#Unclassified Station - Lenient Metadata Derived
-#Station determined to be 'unclassified', using standardised network provided metadata, following lenient classifications.
-'Unclassified Station - Lenient Metadata Derived': 7,
-
-#Rural Station - Strict Metadata Derived
-#Station determined to be 'rural', using standardised network provided metadata, following strict classifications.
-'Rural Station - Strict Metadata Derived': 8,
-
-#Urban Station - Strict Metadata Derived
-#Station determined to be 'urban', using standardised network provided metadata, following strict classifications.
-'Urban Station - Strict Metadata Derived': 9,
-
-#Unclassified Station - Strict Metadata Derived
-#Station determined to be 'unclassified', using standardised network provided metadata, following strict classifications.
-'Unclassified Station - Strict Metadata Derived': 10,
-
-#Rural Station - Anthrome (Native Resolution)
-#Rural station as defined by using the UMBC Anthrome gridded classification dataset at native resolution (0.0833 degree grid).
-'Rural Station - Anthrome (Native Resolution)': 11,
-
-#Urban Station - Anthrome (Native Resolution)
-#Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset at native resolution (0.0833 degree grid).
-'Urban Station - Anthrome (Native Resolution)': 12,
-
-#Rural Station - Anthrome (Mode in 5km Perimeter)
-#Rural station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 5km perimeter around the station location.
-'Rural Station - Anthrome (Mode in 5km Perimeter)': 13,
-
-#Urban Station - Anthrome (Mode in 5km Perimeter)
-#Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 5km perimeter around the station location.
-'Urban Station - Anthrome (Mode in 5km Perimeter)': 14,
-
-#Rural Station - Anthrome (Mode in 25km Perimeter)
-#Rural station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 25km perimeter around the station location.
-'Rural Station - Anthrome (Mode in 25km Perimeter)': 15,
-
-#Urban Station - Anthrome (Mode in 25km Perimeter)
-#Urban station as defined by using the modal classification from the UMBC Anthrome gridded classification dataset in a 25km perimeter around the station location.
-'Urban Station - Anthrome (Mode in 25km Perimeter)': 16,
-
-#Rural Station - TOAR
-#Rural station as defined by using a TOAR approach to classification (Tropospheric Ozone Assessment Report).
-'Rural Station - TOAR': 17,
-
-#Urban Station - TOAR
-#Urban station as defined by using a TOAR approach to classification (Tropospheric Ozone Assessment Report).
-'Urban Station - TOAR': 18,
-
-#Unclassified Station - TOAR
-#Unclassified station as defined using a TOAR approach to classification (Tropospheric Ozone Assessment Report).
-'Unclassified Station - TOAR': 19,
-
-#Rural Station - Joly-Peuch
-#Rural station as defined using a Joly-Peuch approach to classification
-'Rural Station - Joly-Peuch': 20,
-
-#Unclassified Station - Joly-Peuch
-#Unclassified station as defined using a Joly-Peuch approach to classification
-'Unclassified Station - Joly-Peuch': 21,
-
-#Area Classification Metadata = 'urban'
-#Standardised network provided area classification metadata is "urban"
-"Area Classification Metadata = 'urban'": 30,
-
-#Area Classification Metadata = 'urban-centre'
-#Standardised network provided area classification metadata is "urban-centre"
-"Area Classification Metadata = 'urban-centre'": 31,
-
-#Area Classification Metadata = 'urban-suburban'
-#Standardised network provided area classification metadata is "urban-suburban"
-"Area Classification Metadata = 'urban-suburban'": 32,
-
-#Area Classification Metadata = 'rural'
-#Standardised network provided area classification metadata is "rural"
-"Area Classification Metadata = 'rural'": 33,
-
-#Area Classification Metadata = 'rural-near_city'
-#Standardised network provided area classification metadata is "rural-near_city"
-"Area Classification Metadata = 'rural-near_city'": 34,
-
-#Area Classification Metadata = 'rural-regional'
-#Standardised network provided area classification metadata is "rural-regional"
-"Area Classification Metadata = 'rural-regional'": 35,
-
-#Area Classification Metadata = 'rural-remote'
-#Standardised network provided area classification metadata is "rural-remote"
-"Area Classification Metadata = 'rural-remote'": 36,
-
-#Station Classification Metadata = 'background'
-#Standardised network provided station classification metadata is "background"
-"Station Classification Metadata = 'background'": 37,
-
-#Station Classification Metadata = 'point_source'
-#Standardised network provided station classification metadata is "point_source"
-"Station Classification Metadata = 'point_source'": 38,
-
-#Station Classification Metadata = 'point_source-industrial'
-#Standardised network provided station classification metadata is "point_source-industrial"
-"Station Classification Metadata = 'point_source-industrial'": 39,
-
-#Station Classification Metadata = 'point_source-traffic'
-#Standardised network provided station classification metadata is "point_source-traffic"
-"Station Classification Metadata = 'point_source-traffic'": 40,
-
-#Spatial Representativity Metadata = '<0.1km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is <0.1 km
-"Spatial Representativity Metadata = '<0.1km'": 41,
-
-#Spatial Representativity Metadata = '0.1-0.5km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 0.1 km and <0.5 km
-"Spatial Representativity Metadata = '0.1-0.5km'": 42,
-
-#Spatial Representativity Metadata = '0.5-4km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 0.5 km and <4.0 km
-"Spatial Representativity Metadata = '0.5-4km'": 43,
-
-#Spatial Representativity Metadata = '4-50km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 4.0 km and <50.0 km
-"Spatial Representativity Metadata = '4-50km'": 44,
-
-#Spatial Representativity Metadata = '>=50km'
-#Standardised network provided spatial representativity metadata (representative radius + measurement scale) is >= 50.0 km
-"Spatial Representativity Metadata = '>=50km'": 45,
-
-#Terrain Metadata = 'coastal'
-#Standardised network provided terrain metadata is "coastal"
-"Terrain Metadata = 'coastal'": 46,
-
-#Terrain Metadata = 'complex'
-#Standardised network provided terrain metadata is "complex"
-"Terrain Metadata = 'complex'": 47,
-
-#Terrain Metadata = 'flat'
-#Standardised network provided terrain metadata is "flat"
-"Terrain Metadata = 'flat'": 48,
-
-#Terrain Metadata = 'mountain'
-#Standardised network provided terrain metadata is "mountain"
-"Terrain Metadata = 'mountain'": 49,
-
-#Terrain Metadata = 'rolling'
-#Standardised network provided terrain metadata is "rolling"
-"Terrain Metadata = 'rolling'": 50,
-
-#Land Use Metadata = 'barren'
-#Standardised network provided land use metadata is "barren"
-"Land Use Metadata = 'barren'": 51,
-
-#Land Use Metadata = 'forest'
-#Standardised network provided land use metadata is "forest"
-"Land Use Metadata = 'forest'": 52,
-
-#Land Use Metadata = 'open'
-#Standardised network provided land use metadata is "open"
-"Land Use Metadata = 'open'": 53,
-
-#Land Use Metadata = 'snow'
-#Standardised network provided land use metadata is "snow"
-"Land Use Metadata = 'snow'": 54,
-
-#Land Use Metadata = 'urban'
-#Standardised network provided land use metadata is "urban"
-"Land Use Metadata = 'urban'": 55,
-
-#Land Use Metadata = 'water'
-#Standardised network provided land use metadata is "water"
-"Land Use Metadata = 'water'": 56,
-
-#Land Use Metadata = 'wetland'
-#Standardised network provided land use metadata is "wetland"
-"Land Use Metadata = 'wetland'": 57,
-
-#MODIS MCD12C1 Land Use = 'barren'
-#MODIS MCD12C1 land use is "barren"
-"MODIS MCD12C1 Land Use = 'barren'": 58,
-
-#MODIS MCD12C1 Land Use = 'forest'
-#MODIS MCD12C1 land use is "forest"
-"MODIS MCD12C1 Land Use = 'forest'": 59,
-
-#MODIS MCD12C1 Land Use = 'open'
-#MODIS MCD12C1 land use is "open"
-"MODIS MCD12C1 Land Use = 'open'": 60,
-
-#MODIS MCD12C1 Land Use = 'snow'
-#MODIS MCD12C1 land use is "snow"
-"MODIS MCD12C1 Land Use = 'snow'": 61,
-
-#MODIS MCD12C1 Land Use = 'urban'
-#MODIS MCD12C1 land use is "urban"
-"MODIS MCD12C1 Land Use = 'urban'": 62,
-
-#MODIS MCD12C1 Land Use = 'water'
-#MODIS MCD12C1 land use is "water"
-"MODIS MCD12C1 Land Use = 'water'": 63,
-
-#MODIS MCD12C1 Land Use = 'wetland'
-#MODIS MCD12C1 land use is "wetland"
-"MODIS MCD12C1 Land Use = 'wetland'": 64,
-#-----------------------------------------------------
-
-
-#Temporal Period Flags - for classifying periods of time measurements are made within
-#-----------------------------------------------------
-#Daytime
-#Time of measurement is daytime. Done by calculating the solar elevation angle for a latitude/longitude/measurement height at a certain timestamp.
-'Daytime': 100,
-
-#Nightime
-#Time of measurement is nighttime. Done by calculating the solar elevation angle for a latitude/longitude/measurement height at a certain timestamp.
-'Nighttime': 101,
-
-#Weekday
-#Time of measurement is weekday (by local time).
-'Weekday': 102,
-
-#Weekend
-#Time of measurement is weekend (by local time).
-'Weekend': 103,
-
-#winter
-#Time of measurement is northern hemisphere winter (measurement UTC time in months of December, January or February).
-'Winter': 104,
-
-#spring
-#Time of measurement is northern hemisphere spring (measurement UTC time in months of March, April or May).
-'Spring': 105,
-
-#summer
-#Time of measurement is northern hemisphere spring (measurement UTC time in months of June, July or August).
-'Summer': 106,
-
-#autumn
-#Time of measurement is northern hemisphere spring (measurement UTC time in months of September, October or November).
-'Autumn': 107
-#-----------------------------------------------------
-
-}
-
-#------------------------------------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------------------------------------#
-
-#define dictionary of all parameters with associated key information 
-
-parameter_dictionary = {
-'sconco3':         {'long_parameter_name':'ozone',                           'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'O3',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcno':         {'long_parameter_name':'nitrogen monoxide',               'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'NO',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcno2':        {'long_parameter_name':'nitrogen dioxide',                'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'NO2',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcco':         {'long_parameter_name':'carbon monoxide',                 'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'CO',      'extreme_lower_limit':0.0,     'extreme_upper_limit':10000.0},
-'sconcisop':       {'long_parameter_name':'isoprene',                        'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'C5H8',    'extreme_lower_limit':0.0,     'extreme_upper_limit':500.0  },
-'sconcso2':        {'long_parameter_name':'sulphur dioxide',                 'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'SO2',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcnh3':        {'long_parameter_name':'ammonia',                         'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'NH3',     'extreme_lower_limit':0.0,     'extreme_upper_limit':500.0  },
-'sconchno3':       {'long_parameter_name':'nitric acid',                     'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'HNO3',    'extreme_lower_limit':0.0,     'extreme_upper_limit':500.0  },
-'sconcpan':        {'long_parameter_name':'peroxyacetyl nitrate',            'matrix':'GAS',     'standard_units':'nmol mol$^{-1}$', 'chemical_formula':'C2H3NO5', 'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10':            {'long_parameter_name':'PM10 mass',                       'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'',        'extreme_lower_limit':0.0,     'extreme_upper_limit':2000.0 },
-'pm2p5':           {'long_parameter_name':'PM2.5 mass',                      'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'',        'extreme_lower_limit':0.0,     'extreme_upper_limit':2000.0 },
-'pm1':             {'long_parameter_name':'PM1 mass',                        'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'',        'extreme_lower_limit':0.0,     'extreme_upper_limit':2000.0 },
-'sconcal':         {'long_parameter_name':'aluminium',                       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Al',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcas':         {'long_parameter_name':'arsenic',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'As',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcbc':         {'long_parameter_name':'black carbon',                    'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcc':          {'long_parameter_name':'carbon',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcccorrected': {'long_parameter_name':'carbon: corrected',               'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C' ,      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcca':         {'long_parameter_name':'calcium',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ca',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconccd':         {'long_parameter_name':'cadmium',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cd',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconccl':         {'long_parameter_name':'chloride',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cl',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconccobalt':     {'long_parameter_name':'cobalt',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Co',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconccr':         {'long_parameter_name':'chromium',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cr',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconccu':         {'long_parameter_name':'copper',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cu',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcec':         {'long_parameter_name':'elemental carbon',                'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcfe':         {'long_parameter_name':'iron',                            'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Fe',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconchg':         {'long_parameter_name':'mercury',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Hg',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconck':          {'long_parameter_name':'potassium',                       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'K',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcmg':         {'long_parameter_name':'magnesium',                       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mg',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcmn':         {'long_parameter_name':'manganese',                       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mn',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcna':         {'long_parameter_name':'sodium',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Na',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcnh4':        {'long_parameter_name':'ammonium',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcni':         {'long_parameter_name':'nickel',                          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ni',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcno3':        {'long_parameter_name':'nitrate',                         'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NO3',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcoc':         {'long_parameter_name':'organic carbon',                  'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcoccorrected':{'long_parameter_name':'organic carbon: corrected',       'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcpb':         {'long_parameter_name':'lead',                            'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Pb',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcse':         {'long_parameter_name':'selenium',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Se',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcso4':        {'long_parameter_name':'sulphate',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcso4nss':     {'long_parameter_name':'sulphate: non-sea salt',          'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconcv':          {'long_parameter_name':'vanadium',                        'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'V',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'sconczn':         {'long_parameter_name':'zinc',                            'matrix':'AEROSOL', 'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Zn',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10al':          {'long_parameter_name':'PM10 aluminium',                  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Al',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10as':          {'long_parameter_name':'PM10 arsenic',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'As',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10bc':          {'long_parameter_name':'PM10 black carbon',               'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10c':           {'long_parameter_name':'PM10 carbon',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10ccorrected':  {'long_parameter_name':'PM10 carbon: corrected',          'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10ca':          {'long_parameter_name':'PM10 calcium',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ca',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10cd':          {'long_parameter_name':'PM10 cadmium',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cd',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10cl':          {'long_parameter_name':'PM10 chloride',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cl',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10cobalt':      {'long_parameter_name':'PM10 cobalt',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Co',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10cr':          {'long_parameter_name':'PM10 chromium',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cr',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10cu':          {'long_parameter_name':'PM10 copper',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cu',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10ec':          {'long_parameter_name':'PM10 elemental carbon',           'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10fe':          {'long_parameter_name':'PM10 iron',                       'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Fe',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10hg':          {'long_parameter_name':'PM10 mercury',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Hg',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10k':           {'long_parameter_name':'PM10 potassium',                  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'K',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10mg':          {'long_parameter_name':'PM10 magnesium',                  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mg',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10mn':          {'long_parameter_name':'PM10 manganese',                  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mn',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10na':          {'long_parameter_name':'PM10 sodium',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Na',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10nh4':         {'long_parameter_name':'PM10 ammonium',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10ni':          {'long_parameter_name':'PM10 nickel',                     'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ni',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10no3':         {'long_parameter_name':'PM10 nitrate',                    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NO3',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10oc':          {'long_parameter_name':'PM10 organic carbon',             'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10occorrected': {'long_parameter_name':'PM10 organic carbon: corrected',  'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10pb':          {'long_parameter_name':'PM10 lead',                       'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Pb',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10se':          {'long_parameter_name':'PM10 selenium',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Se',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10so4':         {'long_parameter_name':'PM10 sulphate',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10so4nss':      {'long_parameter_name':'PM10 sulphate : non-sea salt',    'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10v':           {'long_parameter_name':'PM10 vanadium',                   'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'V',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm10zn':          {'long_parameter_name':'PM10 zinc',                       'matrix':'PM10',    'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Zn',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5al':         {'long_parameter_name':'PM2.5 aluminium',                 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Al',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5as':         {'long_parameter_name':'PM2.5 arsenic',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'As',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5bc':         {'long_parameter_name':'PM2.5 black carbon',              'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5c':          {'long_parameter_name':'PM2.5 carbon',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5ccorrected': {'long_parameter_name':'PM2.5 carbon: corrected',         'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5ca':         {'long_parameter_name':'PM2.5 calcium',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ca',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5cd':         {'long_parameter_name':'PM2.5 cadmium',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cd',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5cl':         {'long_parameter_name':'PM2.5 chloride',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cl',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5cobalt':     {'long_parameter_name':'PM2.5 cobalt',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Co',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5cr':         {'long_parameter_name':'PM2.5 chromium',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cr',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5cu':         {'long_parameter_name':'PM2.5 copper',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cu',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5ec':         {'long_parameter_name':'PM2.5 elemental carbon',          'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5fe':         {'long_parameter_name':'PM2.5 iron',                      'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Fe',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5hg':         {'long_parameter_name':'PM2.5 mercury',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Hg',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5k':          {'long_parameter_name':'PM2.5 potassium',                 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'K',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5mg':         {'long_parameter_name':'PM2.5 magnesium',                 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mg',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5mn':         {'long_parameter_name':'PM2.5 manganese',                 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mn',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5na':         {'long_parameter_name':'PM2.5 sodium',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Na',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5nh3':        {'long_parameter_name':'PM2.5 ammonia',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH3',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5nh4':        {'long_parameter_name':'PM2.5 ammonium',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5ni':         {'long_parameter_name':'PM2.5 nickel',                    'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ni',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5no3':        {'long_parameter_name':'PM2.5 nitrate',                   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NO3',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5oc':         {'long_parameter_name':'PM2.5 organic carbon',            'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5occorrected':{'long_parameter_name':'PM2.5 organic carbon: corrected', 'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5pb':         {'long_parameter_name':'PM2.5 lead',                      'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Pb',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5se':         {'long_parameter_name':'PM2.5 selenium',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Se',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5so4':        {'long_parameter_name':'PM2.5 sulphate',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5so4nss':     {'long_parameter_name':'PM2.5 sulphate : non-sea salt',   'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5v':          {'long_parameter_name':'PM2.5 vanadium',                  'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'V',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm2p5zn':         {'long_parameter_name':'PM2.5 zinc',                      'matrix':'PM2.5',   'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Zn',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1al':           {'long_parameter_name':'PM1 aluminium',                   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Al',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1as':           {'long_parameter_name':'PM1 arsenic',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'As',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1bc':           {'long_parameter_name':'PM1 black carbon',                'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1c':            {'long_parameter_name':'PM1 carbon',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1ccorrected':   {'long_parameter_name':'PM1 carbon: corrected',           'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1ca':           {'long_parameter_name':'PM1 calcium',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ca',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1cd':           {'long_parameter_name':'PM1 cadmium',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cd',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1cl':           {'long_parameter_name':'PM1 chloride',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cl',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1cobalt':       {'long_parameter_name':'PM1 cobalt',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Co',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1cr':           {'long_parameter_name':'PM1 chromium',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cr',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1cu':           {'long_parameter_name':'PM1 copper',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Cu',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1ec':           {'long_parameter_name':'PM1 elemental carbon',            'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1fe':           {'long_parameter_name':'PM1 iron',                        'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Fe',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1hg':           {'long_parameter_name':'PM1 mercury',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Hg',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1k':            {'long_parameter_name':'PM1 potassium',                   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'K',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1mg':           {'long_parameter_name':'PM1 magnesium',                   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mg',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1mn':           {'long_parameter_name':'PM1 manganese',                   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Mn',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1na':           {'long_parameter_name':'PM1 sodium',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Na',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1nh4':          {'long_parameter_name':'PM1 ammonium',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NH4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1ni':           {'long_parameter_name':'PM1 nickel',                      'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Ni',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1no3':          {'long_parameter_name':'PM1 nitrate',                     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'NO3',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1oc':           {'long_parameter_name':'PM1 organic carbon',              'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1occorrected':  {'long_parameter_name':'PM1 organic carbon: corrected',   'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'C',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1pb':           {'long_parameter_name':'PM1 lead',                        'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Pb',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1se':           {'long_parameter_name':'PM1 selenium',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Se',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1so4':          {'long_parameter_name':'PM1 sulphate',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1so4nss':       {'long_parameter_name':'PM1 sulphate : non-sea salt',     'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'SO4',     'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1v':            {'long_parameter_name':'PM1 vanadium',                    'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'V',       'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'pm1zn':           {'long_parameter_name':'PM10 zinc',                       'matrix':'PM1',     'standard_units':'$\mu$g m$^{-3}$', 'chemical_formula':'Zn',      'extreme_lower_limit':0.0,     'extreme_upper_limit':1000.0 },
-'acprec':          {'long_parameter_name':'precipitation accumulation',      'matrix':'METEO',   'standard_units':'mm',              'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':9998.0 },
-'dir':             {'long_parameter_name':'wind direction',                  'matrix':'METEO',   'standard_units':'angular degrees', 'chemical_formula':'' ,       'extreme_lower_limit':1.0,     'extreme_upper_limit':360.0 },
-'dir10':           {'long_parameter_name':'10m wind direction',              'matrix':'METEO',   'standard_units':'angular degrees', 'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':360.0 },
-'spd':             {'long_parameter_name':'wind speed',                      'matrix':'METEO',   'standard_units':'m s-1',           'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':900.0 },
-'spd10':           {'long_parameter_name':'10m wind speed',                  'matrix':'METEO',   'standard_units':'m s-1',           'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':900.0 },
-'cldbot':          {'long_parameter_name':'ceiling height',                  'matrix':'METEO',   'standard_units':'m',               'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':22000.0 },
-'vdist':           {'long_parameter_name':'visibility distance',             'matrix':'METEO',   'standard_units':'m',               'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':160000.0 },
-'t':               {'long_parameter_name':'air temperature',                 'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-685.85, 'extreme_upper_limit':891.15 },
-'t2':              {'long_parameter_name':'2m air temperature',              'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-685.85, 'extreme_upper_limit':891.15 },
-'td':              {'long_parameter_name':'dew point',                       'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-708.85, 'extreme_upper_limit':641.15 },
-'td2':             {'long_parameter_name':'2m dew point',                    'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-708.85, 'extreme_upper_limit':641.15 },
-'slp':             {'long_parameter_name':'sea level pressure',              'matrix':'METEO',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':8600.0,  'extreme_upper_limit':10900.0 },
-'acsnow':          {'long_parameter_name':'snow accumulation',               'matrix':'METEO',   'standard_units':'cm',              'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':1200.0 },
-'si':              {'long_parameter_name':'snow depth',                      'matrix':'METEO',   'standard_units':'cm',              'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':1200.0 },
-'p':               {'long_parameter_name':'atmospheric pressure',            'matrix':'METEO',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':450.0,   'extreme_upper_limit':10900.0 },
-'pshltr':          {'long_parameter_name':'2m atmospheric pressure',         'matrix':'METEO',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':450.0,   'extreme_upper_limit':10900.0 },
-'p10':             {'long_parameter_name':'10m atmospheric pressure',        'matrix':'METEO',   'standard_units':'hPa',             'chemical_formula':'' ,       'extreme_lower_limit':450.0,   'extreme_upper_limit':10900.0 },
-'sst':             {'long_parameter_name':'sea surface temperature',         'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':223.15,  'extreme_upper_limit':723.15 },
-'stc':             {'long_parameter_name':'soil temperature',                'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'stc10':           {'long_parameter_name':'10cm soil temperature',           'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'stc40':           {'long_parameter_name':'40cm soil temperature',           'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'stc100':          {'long_parameter_name':'100cm soil temperature',          'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'stc200':          {'long_parameter_name':'200cm soil temperature',          'matrix':'METEO',   'standard_units':'k',               'chemical_formula':'' ,       'extreme_lower_limit':-826.85, 'extreme_upper_limit':903.15 },
-'ccovmean':        {'long_parameter_name':'cloud coverage',                  'matrix':'METEO',   'standard_units':'oktas',           'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':8.0 },
-'cfracmean':       {'long_parameter_name':'cloud coverage fraction',         'matrix':'METEO',   'standard_units':'untiless',        'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':100.0 },
-'avgrh':           {'long_parameter_name':'average relative humidity',       'matrix':'METEO',   'standard_units':'unitless',        'chemical_formula':'' ,       'extreme_lower_limit':0.0,     'extreme_upper_limit':100.0 }
-}
 
 #------------------------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------------------------#
