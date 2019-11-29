@@ -323,7 +323,7 @@ def get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_o
     month = yearmonth[4:]
     #get number of days in month processing
     days_in_month = monthrange(int(year),int(month))[1]
-    if temporal_resolution_to_output == 'hourly':
+    if (temporal_resolution_to_output == 'hourly') or (temporal_resolution_to_output == 'hourly_instantaneous'):
         yearmonth_time = np.arange(0,days_in_month*24.0)
     elif temporal_resolution_to_output == 'daily':
         yearmonth_time = np.arange(0,days_in_month)
@@ -377,7 +377,7 @@ def get_monthly_model_data(speci_to_process, yearmonth, temporal_resolution_to_o
 
             #put daily chunked data in monthly chunked array 
             #doing data averaging where necessary
-            if (temporal_resolution_to_output == 'hourly') or (temporal_resolution_to_output == 'monthly'): 
+            if (temporal_resolution_to_output == 'hourly') or (temporal_resolution_to_output == 'hourly_instantaneous') or (temporal_resolution_to_output == 'monthly'): 
                 adjusted_daily_file_time = adjusted_daily_file_time[valid_daily_file_time_indices]
                 monthly_time_indices = np.arange(len(yearmonth_time))[np.in1d(yearmonth_time,adjusted_daily_file_time)]
                 monthly_model_data[monthly_time_indices,:,:] = daily_chunked_data
@@ -471,7 +471,7 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
     month = yearmonth[4:]
 
     #create descriptive temporal resolution variable
-    if temporal_resolution_to_output == 'hourly':
+    if (temporal_resolution_to_output == 'hourly') or (temporal_resolution_to_output == 'hourly_instantaneous'):
         descriptive_temporal_resolution = 'hours'
     elif temporal_resolution_to_output == 'daily':
         descriptive_temporal_resolution = 'days'
@@ -486,9 +486,13 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
 
     #get units conversion factor between model and observations (go from model to observational units)    
     obs_speci_units = obs_measured_var_obj.units
-    conv_obj = unit_converter.convert_units(mod_speci_units, obs_speci_units, 1.0)
-    conv_obj.do_conversion()  
-    conversion_factor = conv_obj.conversion_factor
+    #unit converter module does not produce conversion factor for temperature, but both observational and model units should be Kelvin (i.e. conversion factor = 1.0) 
+    if (obs_speci_units == 'K') & (mod_speci_units == 'K'):
+        conversion_factor = 1.0
+    else:
+        conv_obj = unit_converter.convert_units(mod_speci_units, obs_speci_units, 1.0)
+        conv_obj.do_conversion()  
+        conversion_factor = conv_obj.conversion_factor
 
     #create observational interpolated monthly model netcdf
     #create new netCDF frame
@@ -631,7 +635,6 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
     obs_nc_root.close()
 
     #compress netCDF file
-    #compress_process =  subprocess.Popen(['nccopy', '-O', '-d1', netCDF_fname, netCDF_fname], stdout=subprocess.PIPE)
     compress_process =  subprocess.Popen(['ncks', '-O', '--dfl_lvl', '1', netCDF_fname, netCDF_fname], stdout=subprocess.PIPE)
     compress_status = compress_process.communicate()[0]
     compress_return_code = compress_process.returncode
