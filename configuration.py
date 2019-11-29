@@ -14,7 +14,7 @@ import sys
 ###------------------------------------------------------------------------------------###
 
 #set GHOST version data to work with
-GHOST_version = '1.1'
+GHOST_version = '1.2'
 
 #get machine name
 try:
