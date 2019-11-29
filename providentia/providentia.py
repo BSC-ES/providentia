@@ -1,47 +1,27 @@
-#WRITTEN BY DENE BOWDALO
+# WRITTEN BY DENE BOWDALO
 
-###------------------------------------------------------------------------------------###
-###------------------------------------------------------------------------------------###
+from .configuration import *
 
-#providentia.py
-
-#executable of the Providentia tool
-
-###------------------------------------------------------------------------------------###
-###IMPORT CONFIGURATION FILE VARIABLES
-###------------------------------------------------------------------------------------###
-
-from configuration import *
-
-###------------------------------------------------------------------------------------###
-###IMPORT BUILT-IN MODULES
-###------------------------------------------------------------------------------------###
 import bisect
 from collections import OrderedDict
 import copy
 import datetime
 from functools import partial
 import gc
-import glob
 import multiprocessing
 import os
 import sys
 from weakref import WeakKeyDictionary
 
-###------------------------------------------------------------------------------------###
-###IMPORT THIRD-PARTY MODULES
-###------------------------------------------------------------------------------------###
 from netCDF4 import Dataset, num2date
 import cartopy
-#set cartopy data directory
-cartopy.config['pre_existing_data_dir'] = cartopy_data_dir
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib
-# Make sure that we are using Qt5 backend with matplotlib
-matplotlib.use('Qt5Agg')
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
+        as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT \
+        as NavigationToolbar
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
@@ -51,19 +31,22 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
-register_matplotlib_converters()
 from PyQt5 import QtCore, QtWidgets, QtGui
 import scipy.stats
 import seaborn as sns
 
-###------------------------------------------------------------------------------------###
-###------------------------------------------------------------------------------------###
+# Make sure that we are using Qt5 backend with matplotlib
+matplotlib.use('Qt5Agg')
+register_matplotlib_converters()
+# set cartopy data directory
+cartopy.config['pre_existing_data_dir'] = cartopy_data_dir
+
 
 class NavigationToolbar(NavigationToolbar):
 
     '''define class that updates available buttons on matplotlib toolbar'''
 
-    #only display wanted buttons
+    # only display wanted buttons
     NavigationToolbar.toolitems = (
         ('Home', 'Reset original view', 'home', 'home'),
         ('Back', 'Back to previous view', 'back', 'back'),
@@ -76,16 +59,16 @@ class NavigationToolbar(NavigationToolbar):
         (None, None, None, None)
     )
 
-###------------------------------------------------------------------------------------###
-###------------------------------------------------------------------------------------###
 
 class ComboBox(QtWidgets.QComboBox):
 
-    '''modify default class of PyQT5 combobox to always dropdown from fixed position box postion, stopping truncation of data'''
+    '''modify default class of PyQT5 combobox to always dropdown from fixed
+    position box postion, stopping truncation of data'''
 
     def show_popup(self):
         QtWidgets.QComboBox.show_popup(self)
         self.view().parent().move(self.mapToGlobal(QtCore.QPoint()))
+
 
 class QVLine(QtWidgets.QFrame):
 
@@ -96,6 +79,7 @@ class QVLine(QtWidgets.QFrame):
         self.setFrameShape(QtWidgets.QFrame.VLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
+
 class QHLine(QtWidgets.QFrame):
 
     '''define class that generates horizontal separator line'''
@@ -105,69 +89,69 @@ class QHLine(QtWidgets.QFrame):
         self.setFrameShape(QtWidgets.QFrame.HLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
-#--------------------------------------------------------------------------------#
-#--------------------------------------------------------------------------------#
 
 class PopUpWindow(QtWidgets.QWidget):
 
     '''define class that generates generalised pop-up window'''
 
-    def __init__(self, window_type = '', window_titles=[], checkbox_labels=[], default_checkbox_selection=[], selected_indices={}):
-        super(pop_up_window, self).__init__()
+    def __init__(self, window_type='', window_titles=[], checkbox_labels=[],
+                 default_checkbox_selection=[], selected_indices={}):
+        super(PopUpWindow, self).__init__()
 
-        #add input arguments to self
+        # add input arguments to self
         self.window_type = window_type
         self.window_titles = window_titles
         self.checkbox_labels = checkbox_labels
         self.default_checkbox_selection = default_checkbox_selection
         self.selected_indices = selected_indices
 
-        #create UI
+        # create UI
         self.init_ui()
 
     def init_ui(self):
 
         '''initialise user interface'''
 
-        #set window title
+        # set window title
         self.setWindowTitle(self.window_type)
 
-        #get pop up window dimensions
-        window_width = self.width()
+        # get pop up window dimensions
+        # window_width = self.width()
         window_height = self.height()
 
-        #create parent layout to hold N horizontally laid out windows
+        # create parent layout to hold N horizontally laid out windows
         parent_layout = QtWidgets.QHBoxLayout()
         parent_layout.setAlignment(QtCore.Qt.AlignTop)
 
-        #get N of nested windows from length of window_titles list
+        # get N of nested windows from length of window_titles list
         n_nested_windows = len(self.window_titles)
 
-        #create frame to hold checkboxes
+        # create frame to hold checkboxes
         self.checkboxes = [[] for x in range(len(self.checkbox_labels))]
 
-        #iterate through N nested windows, creating each one and placing in parent frame accordingly
+        # iterate through N nested windows, creating each one and placing in
+        # parent frame accordingly
         for nested_window_N in range(n_nested_windows):
 
-            #------------------------------------------------------------------------#
-            #create nested parent layout to pull together a title, button row, and grid of checkboxes
+            # create nested parent layout to pull together a title, button
+            # row, and grid of checkboxes
             nested_parent_layout = QtWidgets.QVBoxLayout()
             nested_parent_layout.setAlignment(QtCore.Qt.AlignTop)
 
-            #define spacing/margin variables
+            # define spacing/margin variables
             nested_parent_layout.setSpacing(10)
-            nested_parent_layout.setContentsMargins(0,0,0,0)
+            nested_parent_layout.setContentsMargins(0, 0, 0, 0)
 
-            #------------------------------------------------------------------------#
-            #create title label
-            title_label = QtWidgets.QLabel(self, text = self.window_titles[nested_window_N])
+            # create title label
+            title_label = \
+                QtWidgets.QLabel(self,
+                                 text=self.window_titles[nested_window_N])
             title_label.setAlignment(QtCore.Qt.AlignCenter)
-            myFont=QtGui.QFont()
+            myFont = QtGui.QFont()
             myFont.setPointSize(16)
             title_label.setFont(myFont)
 
-            #------------------------------------------------------------------------#
-            #create row of buttons
+            # create row of buttons
             button_row = QtWidgets.QHBoxLayout()
             button_row.setAlignment(QtCore.Qt.AlignLeft)
             select_all_button = QtWidgets.QPushButton("Select All")
@@ -180,86 +164,88 @@ class PopUpWindow(QtWidgets.QWidget):
             select_default_button.setMinimumWidth(120)
             select_default_button.setMaximumWidth(120)
 
-            #order buttons in grid layout
+            # order buttons in grid layout
             button_row.addWidget(select_all_button)
             button_row.addWidget(clear_all_button)
             button_row.addWidget(select_default_button)
 
-            #add connectivity to buttons
-            select_all_button.clicked.connect(partial(self.select_all, nested_window_N))
-            clear_all_button.clicked.connect(partial(self.clear_all, nested_window_N))
-            select_default_button.clicked.connect(partial(self.select_all_default, nested_window_N))
+            # add connectivity to buttons
+            select_all_button.clicked.connect(partial(self.select_all,
+                                                      nested_window_N))
+            clear_all_button.clicked.connect(partial(self.clear_all,
+                                                     nested_window_N))
+            select_default_button.clicked.connect(
+                partial(self.select_all_default, nested_window_N))
 
-            #------------------------------------------------------------------------#
-            #create grid of checkboxes
+            # create grid of checkboxes
             checkbox_grid = QtWidgets.QGridLayout()
 
-            #define spacing/margin variables
+            # define spacing/margin variables
             checkbox_grid.setHorizontalSpacing(1)
             checkbox_grid.setVerticalSpacing(1)
-            #checkbox_grid.setContentsMargins(0,0,0,0)
+            # checkbox_grid.setContentsMargins(0,0,0,0)
 
-            #create checkboxes
-            #force a new column to be started if the available vertical space for each row in grid goes below a critical value (18.2)
-            #if checkbox has been previously selected (without updating network/resolution/species), then reselect it again
+            # create checkboxes
+            # force a new column to be started if the available vertical space
+            # for each row in grid goes below a critical value (18.2) if
+            # checkbox has been previously selected (without updating
+            # network/resolution/species), then reselect it again
             row_n = 0
             column_n = 0
-            current_selected_indices = self.selected_indices[self.window_type][nested_window_N]
-            for ii, val in enumerate(self.checkbox_labels[nested_window_N]):
+            current_selected_indices = \
+                self.selected_indices[self.window_type][nested_window_N]
 
-                #checkbox_grid.setMaximumHeight(30)
+            for ii, val in enumerate(self.checkbox_labels[nested_window_N]):
+                # checkbox_grid.setMaximumHeight(30)
                 row_available_space = window_height/(row_n+1)
                 if row_available_space < 15:
-                    column_n+=2
+                    column_n += 2
                     row_n = 0
-                self.checkboxes[nested_window_N].append(QtWidgets.QCheckBox(val))
+                self.checkboxes[nested_window_N].append(
+                    QtWidgets.QCheckBox(val))
                 if ii in current_selected_indices:
-                    self.checkboxes[nested_window_N][ii].setCheckState(QtCore.Qt.Checked)
-                checkbox_grid.addWidget(self.checkboxes[nested_window_N][ii], row_n, column_n)
-                #checkbox_grid.addWidget(self.checkboxes[nested_window_N][ii])
-                row_n +=1
+                    self.checkboxes[nested_window_N][ii].setCheckState(
+                        QtCore.Qt.Checked)
+                checkbox_grid.addWidget(self.checkboxes[nested_window_N][ii],
+                                        row_n, column_n)
+                # checkbox_grid.addWidget(self.checkboxes[nested_window_N][ii])
+                row_n += 1
 
-            #------------------------------------------------------------------------#
-            #position title, button row and checkbox grid in nested parent layout
+            # position title, button row and checkbox grid in nested parent layout
 
-            #add title to nested parent frame
+            # add title to nested parent frame
             nested_parent_layout.addWidget(title_label)
 
-            #add button row to nested parent frame
+            # add button row to nested parent frame
             nested_parent_layout.addLayout(button_row)
 
-            #add checkbox grid to nested parent frame
+            # add checkbox grid to nested parent frame
             nested_parent_layout.addLayout(checkbox_grid)
 
-            #------------------------------------------------------------------------#
-            #add nested parent layout to parent frame
+            # add nested parent layout to parent frame
             parent_layout.addLayout(nested_parent_layout)
 
-            #------------------------------------------------------------------------#
-            #add vertical separation line (if not last nested window that is being iterated through)
+            # add vertical separation line (if not last nested window that is
+            # being iterated through)
             if (nested_window_N+1) != n_nested_windows:
                 parent_layout.addWidget(QVLine())
 
-        #------------------------------------------------------------------------#
-        #set finalised layout
+        # set finalised layout
         self.setLayout(parent_layout)
 
-        #maximise window to fit screen
+        # maximise window to fit screen
         self.showMaximized()
 
-        #------------------------------------------------------------------------#
-
-        #setup event to get selected checkbox indices when closing window
+        # setup event to get selected checkbox indices when closing window
         quit = QtWidgets.QAction("Quit", self)
         quit.triggered.connect(self.close_event)
 
-    #------------------------------------------------------------------------#
-    #------------------------------------------------------------------------#
 
     def select_all(self, nested_window_N):
         '''function to select all checkboxes'''
         for ii, val in enumerate(self.checkboxes[nested_window_N]):
-            self.checkboxes[nested_window_N][ii].setCheckState(QtCore.Qt.Checked)
+            self.checkboxes[nested_window_N][ii].setCheckState(
+                QtCore.Qt.Checked)
 
     def clear_all(self, nested_window_N):
         '''function to clear all checkboxes'''
