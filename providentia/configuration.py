@@ -7,7 +7,6 @@
 import os
 import re
 import subprocess
-import sys
 
 ###------------------------------------------------------------------------------------###
 ###SETTING SOME NECESSARY DETAILS --> DO NOT MODIFY!
