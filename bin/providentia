@@ -72,7 +72,7 @@ echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem
 
 srun_command="srun -t 02:00:00 -n 1 -c $cores -J $jobname --x11=first"
 python_command="python3 -c 'from providentia import providentia; providentia.main()'"
-queue_option="-q $queue"
+queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 
 #CTE POWER
