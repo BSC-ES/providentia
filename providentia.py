@@ -193,6 +193,9 @@ class pop_up_window(QtWidgets.QWidget):
         #check if need to create selection buttons
         if 'select_buttons' in menu_level_keys:
 
+            #set fixed height for button
+            self.fixed_button_height = 22  
+
             button_row = QtWidgets.QHBoxLayout()
             button_row.setAlignment(QtCore.Qt.AlignLeft)
         
@@ -744,6 +747,11 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
         #maximise window to fit screen
         self.showMaximized()  
+
+        #save screen max height/width variables to self
+        sizeObject = QtWidgets.QDesktopWidget().screenGeometry(-1)
+        self.max_height = sizeObject.height()
+        self.max_width = sizeObject.width()
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
