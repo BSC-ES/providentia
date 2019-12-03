@@ -52,7 +52,9 @@ import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui, Qt
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 import scipy.stats
 import seaborn as sns
 
@@ -107,207 +109,146 @@ class QVLine(QtWidgets.QFrame):
         self.setFrameShape(QtWidgets.QFrame.VLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
-#--------------------------------------------------------------------------------#
-#--------------------------------------------------------------------------------#
+###------------------------------------------------------------------------------------###
+###------------------------------------------------------------------------------------###
+
+def set_formatting(PyQt5_obj, formats):
+
+    '''function that takes a PyQt5 object and applies some defined formatting'''
+
+    #first get defined font for object
+    defined_font = formats['font']
+
+    #iterate through formats dictionary and apply defined font modifiers/object formatting values
+    for format_name, format_val in formats.items():
+        if format_name == 'bold':
+            defined_font.setBold(format_val) 
+       
+        if format_name == 'italic':
+            defined_font.setItalic(format_val)
+
+        elif format_name == 'underline':
+            defined_font.setUnderline(format_val)
+
+        elif format_name == 'height':
+            PyQt5_obj.setFixedHeight(format_val)
+
+        elif format_name == 'colour':
+            PyQt5_obj.setStyleSheet("color: {};".format(format_val))
+
+    #now apply font to object
+    PyQt5_obj.setFont(defined_font)
+        
+    #return modified PyQt5 object
+    return PyQt5_obj
+
+###------------------------------------------------------------------------------------###
+###------------------------------------------------------------------------------------###
 
 class pop_up_window(QtWidgets.QWidget):
 
-    '''define class that generates generalised pop-up window'''
+    '''define class that generates generalised pop-up window menu'''
 
-    def __init__(self, menu_level):
+    def __init__(self, menu_level, main_window_geometry, formatting_dict):
         super(pop_up_window, self).__init__()
         
         #add input arguments to self
         self.menu_level = menu_level  
+        self.main_window_geometry = main_window_geometry
+        self.formatting_dict = formatting_dict
 
-        #create UI
-        self.initUI()
+        #generate GUI window for root page in menu
+        self.generate_window(menu_level)
 
-    def initUI(self):
+    def generate_window(self, menu_level):
 
-        '''initialise user interface'''
+        '''generate GUI window for current menu level'''
         
+        #get menu level keys
+        menu_level_keys = list(menu_level.keys())
+
         #set window title
-        self.setWindowTitle(self.menu_level['window_title'])
+        self.setWindowTitle(menu_level['window_title'])
 
-        #get pop up window dimensions
-        window_width = self.width()
-        window_height = self.height()
-
-        #create parent layout to hold N horizontally laid out windows
+        #create parent layout 
         parent_layout = QtWidgets.QVBoxLayout()
         parent_layout.setAlignment(QtCore.Qt.AlignTop) 
 
         #define spacing/margin variables
-        parent_layout.setSpacing(10)
-        parent_layout.setContentsMargins(0,0,0,0)
+        self.layout_spacing = 10
+        parent_layout.setSpacing(self.layout_spacing)
+        self.page_margin = 5
+        parent_layout.setContentsMargins(self.page_margin,self.page_margin,self.page_margin,self.page_margin)
 
         #set page title 
-        title_label = QtWidgets.QLabel(self, text = self.menu_level['page_title'])
-        title_label.setAlignment(QtCore.Qt.AlignCenter)
-        myFont=QtGui.QFont()
-        myFont.setPointSize(16)
-        title_label.setFont(myFont)
+        title_label = set_formatting(QtWidgets.QLabel(self, text = menu_level['page_title']), self.formatting_dict['title_popup'])
+        title_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
+
         #add title to parent frame
         parent_layout.addWidget(title_label)
-        
-        #get menu level keys
-        menu_level_keys = list(self.menu_level.keys())
 
-        #check if need to create select buttons
+        #create dictionary to store current page status
+        self.page_memory = {}
+
+        #check if need to create selection buttons
         if 'select_buttons' in menu_level_keys:
 
             button_row = QtWidgets.QHBoxLayout()
             button_row.setAlignment(QtCore.Qt.AlignLeft)
         
             #need to create "Select All" button 
-            if 'all' in self.menu_level['select_buttons']:
-                select_all_button = QtWidgets.QPushButton("Select All")
-                select_all_button.setMinimumWidth(100)
-                select_all_button.setMaximumWidth(100)
+            if 'all' in menu_level['select_buttons']:
+                select_all_button = set_formatting(QtWidgets.QPushButton("Select All"), self.formatting_dict['selection_button_popup'])
+                select_all_button.setFixedWidth(80)
                 button_row.addWidget(select_all_button)
                 select_all_button.clicked.connect(self.select_all)
             #need to create "Clear All" button 
-            if 'clear' in self.menu_level['select_buttons']:
-                clear_all_button = QtWidgets.QPushButton("Clear All")
-                clear_all_button.setMinimumWidth(100)
-                clear_all_button.setMaximumWidth(100)
+            if 'clear' in menu_level['select_buttons']:
+                clear_all_button = set_formatting(QtWidgets.QPushButton("Clear All"), self.formatting_dict['selection_button_popup'])
+                clear_all_button.setFixedWidth(80)
                 button_row.addWidget(clear_all_button)
                 clear_all_button.clicked.connect(self.clear_all)  
             #need to create "Select Default" button 
-            if 'default' in self.menu_level['select_buttons']:
-                select_default_button = QtWidgets.QPushButton("Select Default")
-                select_default_button.setMinimumWidth(120)
-                select_default_button.setMaximumWidth(120)
+            if 'default' in menu_level['select_buttons']:
+                select_default_button = set_formatting(QtWidgets.QPushButton("Select Default"), self.formatting_dict['selection_button_popup'])
+                select_default_button.setFixedWidth(100)
                 button_row.addWidget(select_default_button)
                 select_default_button.clicked.connect(self.select_all_default)
 
             #add button row to parent frame
             parent_layout.addLayout(button_row)
 
-        #check if 'checkboxes' variable in current menu level
+        #check if 'navigation_buttons' in current menu level
+        if 'navigation_buttons' in menu_level_keys:
+            #create grid to store all navigation buttons
+            grid = self.create_grid('navigation_buttons', menu_level['navigation_buttons'])     
+            #add grid to parent frame
+            parent_layout.addLayout(grid)
+            
+        #check if 'rangeboxes' in current menu level
+        if 'rangeboxes' in menu_level_keys:
+            #create grid to store all rangeboxes
+            grid = self.create_grid('rangeboxes', menu_level['rangeboxes'])     
+            #add grid to parent frame
+            parent_layout.addLayout(grid)
+
+        #check if 'checkboxes' in current menu level
         if 'checkboxes' in menu_level_keys:
-            
-            #get checkboxes dict keys
-            checkboxes_keys = list(self.menu_level['checkboxes'].keys())
+            #create grid to store all checkboxes
+            grid = self.create_grid('checkboxes', menu_level['checkboxes'])     
+            #add grid to parent frame
+            parent_layout.addLayout(grid)
 
-            #check if need to create keep checkboxes 
-            if 'keep_selected' in checkboxes_keys:
-                #create frame to hold states of keep checkboxes
-                self.keep_checkboxes = []
-
-            #check if need to create remove checkboxes 
-            if 'remove_selected' in checkboxes_keys:
-                #create frame to hold states of remove checkboxes
-                self.remove_checkboxes = []
-            
-            #create grid of checkboxes
-            checkbox_grid = QtWidgets.QGridLayout()
-            checkbox_grid.setAlignment(QtCore.Qt.AlignLeft) 
-
-            #define spacing/margin variables
-            checkbox_grid.setHorizontalSpacing(1)
-            checkbox_grid.setVerticalSpacing(1)
-    
-            #create checkbox grid
-            #force a new column to be started if the available vertical space for each row in grid goes below a critical value 
-            #if checkbox has been previously selected (without updating network/resolution/species), then reselect it again
-            row_n = 0
-            column_n = 0
-            #iterate through all checkbox labels
-            for ii, val in enumerate(self.menu_level['checkboxes']['labels']):
-                
-                #evaluate if all available vertical space has been consumed
-                row_available_space = window_height/(row_n+1)
-                #if below a critical value, force a new column to be started
-                if row_available_space < 15:
-                    #make sure there is an extra column accounted for if creating both keep/remove checkboxes
-                    if ('keep_selected' in checkboxes_keys) & ('remove_selected' in checkboxes_keys): 
-                        column_n+=3
-                    else:
-                        column_n+=2
-                    row_n = 0
-        
-                #create both keep/remove checkboxes per label
-                if ('keep_selected' in checkboxes_keys) & ('remove_selected' in checkboxes_keys):
-                    #create keep checkbox
-                    self.keep_checkboxes.append(QtWidgets.QCheckBox(val))    
-                    #create remove checkbox
-                    self.remove_checkboxes.append(QtWidgets.QCheckBox('')) 
-
-                    #put text label to left of keep checkbox
-                    self.keep_checkboxes[ii].setLayoutDirection(QtCore.Qt.RightToLeft)
-                        
-                    #check if keep/remove checkboxes are currently selected, if so tick checkbox
-                    #map positional index to value if necessary
-                    if 'map_vars' in checkboxes_keys:
-                        keep_var = self.menu_level['checkboxes']['map_vars'][ii]
-                        remove_var = copy.deepcopy(keep_var)
-                    else:
-                        keep_var = copy.deepcopy(ii)
-                        remove_var = copy.deepcopy(ii)
-                    if keep_var in self.menu_level['checkboxes']['keep_selected']:
-                        self.keep_checkboxes[ii].setCheckState(QtCore.Qt.Checked)        
-                    if remove_var in self.menu_level['checkboxes']['remove_selected']:
-                        self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Checked)   
-
-                    #add checkboxes to grid
-                    checkbox_grid.addWidget(self.keep_checkboxes[ii], row_n, column_n)
-                    checkbox_grid.addWidget(self.remove_checkboxes[ii], row_n, column_n+1)
-
-                #create keep checkbox per label
-                elif 'keep_selected' in checkboxes_keys:
-                    #create keep checkbox
-                    self.keep_checkboxes.append(QtWidgets.QCheckBox(val))     
-
-                    #put text label to left of keep checkbox
-                    self.keep_checkboxes[ii].setLayoutDirection(QtCore.Qt.RightToLeft)
-                        
-                    #check if keep checkbox is currently selected, if so tick checkbox
-                    #map positional index to value if necessary
-                    if 'map_vars' in checkboxes_keys:
-                        keep_var = self.menu_level['checkboxes']['map_vars'][ii]
-                    else:
-                        keep_var = copy.deepcopy(ii)
-                    if keep_var in self.menu_level['checkboxes']['keep_selected']:
-                        self.keep_checkboxes[ii].setCheckState(QtCore.Qt.Checked)       
-
-                    #add checkbox to grid
-                    checkbox_grid.addWidget(self.keep_checkboxes[ii], row_n, column_n)
-
-                #create remove checkbox per label
-                elif 'remove_selected' in checkboxes_keys:
-                    #create remove checkbox
-                    self.remove_checkboxes.append(QtWidgets.QCheckBox(val)) 
-
-                    #put text label to left of remove checkbox
-                    self.remove_checkboxes[ii].setLayoutDirection(QtCore.Qt.RightToLeft)   
-
-                    #check if remove checkbox is currently selected, if so tick checkbox
-                    #map positional index to value if necessary
-                    if 'map_vars' in checkboxes_keys:
-                        remove_var = self.menu_level['checkboxes']['map_vars'][ii]
-                    else:
-                        remove_var = copy.deepcopy(ii)
-                    if remove_var in self.menu_level['checkboxes']['remove_selected']:
-                        self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Checked)      
-
-                    #add checkbox to grid
-                    checkbox_grid.addWidget(self.remove_checkboxes[ii], row_n, column_n)
-                                    
-                #iterate row_n
-                row_n +=1
-        
-            #add checkbox grid to parent frame
-            parent_layout.addLayout(checkbox_grid)
-            
         #------------------------------------------------------------------------#
         #set finalised layout
-        self.setLayout(parent_layout)
+        self.setLayout(parent_layout) 
 
-        #maximise window to fit screen
-        self.showMaximized()  
-        
+        #set geometry to match that of main window
+        self.setGeometry(self.main_window_geometry)
+
+        #show pop-up window
+        self.show()
+
         #------------------------------------------------------------------------#
 
         #setup event to get selected checkbox indices when closing window
@@ -317,82 +258,171 @@ class pop_up_window(QtWidgets.QWidget):
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
 
+    def create_grid(self, grid_type, grid_dict):
+        
+        '''create grid of checkboxes/rangeboxes/button, that wraps vertically'''
+
+        #get grid dict keys
+        grid_keys = list(grid_dict.keys())
+
+        #create dictionary to store variables that save page status per grid type (also set formatting dict for each row in grid)
+        if grid_type == 'checkboxes':
+            row_format_dict = self.formatting_dict['checkbox_popup']
+            if ('keep_selected' in grid_keys) & ('remove_selected' in grid_keys):
+                self.page_memory['checkboxes'] = {'keep_selected':[],'remove_selected':[], 'n_column_consumed':3, 'ordered_elements':['keep_selected','remove_selected'], 'widget':QtWidgets.QCheckBox}
+            elif 'keep_selected' in grid_keys:
+                self.page_memory['checkboxes'] = {'keep_selected':[],'n_column_consumed':2, 'ordered_elements':['keep_selected'], 'widget':QtWidgets.QCheckBox}
+            elif 'remove_selected' in grid_keys:
+                self.page_memory['checkboxes'] = {'remove_selected':[],'n_column_consumed':2, 'ordered_elements':['remove_selected'], 'widget':QtWidgets.QCheckBox}
+        elif grid_type == 'rangeboxes':
+            row_format_dict = self.formatting_dict['rangebox_popup']
+            if ('current_lower' in grid_keys) & ('current_upper' in grid_keys):
+                self.page_memory['rangeboxes'] = {'current_lower':[],'current_upper':[], 'n_column_consumed':3, 'ordered_elements':['current_lower','current_upper'], 'widget':QtWidgets.QLineEdit}
+            elif 'current_lower' in grid_keys:
+                self.page_memory['rangeboxes'] = {'current_lower':[],'n_column_consumed':2, 'ordered_elements':['current_lower'], 'widget':QtWidgets.QLineEdit}
+            elif 'current_upper' in grid_keys:
+                self.page_memory['rangeboxes'] = {'current_upper':[],'n_column_consumed':2, 'ordered_elements':['current_upper'], 'widget':QtWidgets.QLineEdit}
+        elif grid_type == 'navigation_buttons':
+            row_format_dict = self.formatting_dict['navigation_button_popup']
+            self.page_memory['navigation_buttons'] = {'buttons':[], 'n_column_consumed':1, 'ordered_elements':['buttons'], 'widget':QtWidgets.QPushButton}
+        
+        #create grid
+        grid = QtWidgets.QGridLayout()
+        grid.setAlignment(QtCore.Qt.AlignCenter) 
+
+        #set vertical/horizontal grid spacing (by grid type)
+        if grid_type == 'checkboxes':
+            self.grid_vertical_spacing = 0
+        else:
+            self.grid_vertical_spacing = 5
+        grid.setHorizontalSpacing(3)
+        grid.setVerticalSpacing(self.grid_vertical_spacing)
+
+        #calculate currently occupied vertical space
+        if grid_type == 'checkboxes':
+            occupied_vertical_space_before_grid = self.page_margin + self.formatting_dict['title_popup']['height'] + self.layout_spacing + self.formatting_dict['selection_button_popup']['height'] + self.layout_spacing + self.page_margin
+        else:
+            occupied_vertical_space_before_grid = self.page_margin + self.formatting_dict['title_popup']['height'] + self.layout_spacing + self.page_margin
+        #initialise variable for tracking available vertical space when appending rows of grid
+        currently_occupied_vertical_space = copy.deepcopy(occupied_vertical_space_before_grid)
+
+        #create grid
+        #force a new column to be started if no more available vertical space
+        row_n = 0
+        column_n = 0
+        #iterate through all grid labels
+        for label_ii, label in enumerate(grid_dict['labels']):
+
+            #evaluate if all available vertical space has been consumed
+            row_available_space = self.main_window_geometry.height() - currently_occupied_vertical_space
+            #if available space <= than row height, force a new column to be started
+            if row_available_space <= (row_format_dict['height']):
+                column_n+=self.page_memory[grid_type]['n_column_consumed']
+                row_n = 0
+                currently_occupied_vertical_space = copy.deepcopy(occupied_vertical_space_before_grid)
+
+            #create all elements in column, per row
+            for element_ii, element in enumerate(self.page_memory[grid_type]['ordered_elements']):
+                if element_ii == 0:
+                    element_label = label
+                else:
+                    element_label = ''
+                #append widget to page memory dictionary (formatting at same time
+                self.page_memory[grid_type][element].append(set_formatting(self.page_memory[grid_type]['widget'](element_label), row_format_dict))  
+                #put text label to left of keep checkbox/rangebox if required
+                if grid_type in ['checkboxes','rangeboxes']:
+                    self.page_memory[grid_type][element][label_ii].setLayoutDirection(QtCore.Qt.RightToLeft)
+                    #check if checkbox is currently selected, if so select it again
+                    #map checkbox value first if necessary
+                    if grid_type == 'checkboxes':                   
+                        if 'map_vars' in grid_keys:
+                            var_to_check = grid_dict['map_vars'][label_ii]
+                        else:
+                            var_to_check = copy.deepcopy(label)   
+                        if var_to_check in grid_dict[element]: 
+                            self.page_memory[grid_type][element][label_ii].setCheckState(QtCore.Qt.Checked)
+
+                #add element to grid
+                grid.addWidget(self.page_memory[grid_type][element][label_ii], row_n, column_n+element_ii)
+                                
+            #iterate row_n
+            row_n +=1
+
+            #add row vertical space to total occupied space
+            currently_occupied_vertical_space += (row_format_dict['height'] + self.grid_vertical_spacing)
+
+        #return grid
+        return grid
+
+    #------------------------------------------------------------------------#
+    #------------------------------------------------------------------------#
+    #functions that handle callbacks upon clicking on selection buttons on pages with checkboxes
+
     def select_all(self):
         '''function to select all checkboxes'''
-        for ii, val in enumerate(self.remove_checkboxes):
-            self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Checked)
+        for element in self.page_memory['checkboxes']['ordered_elements']:
+            for checkbox_ii, checkbox in enumerate(self.page_memory['checkboxes'][element]):
+                self.page_memory['checkboxes'][element][checkbox_ii].setCheckState(QtCore.Qt.Checked) 
     
     def clear_all(self):
         '''function to clear all checkboxes'''
-        for ii, val in enumerate(self.remove_checkboxes):
-            self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Unchecked)
+        for element in self.page_memory['checkboxes']['ordered_elements']:
+            for checkbox_ii, checkbox in enumerate(self.page_memory['checkboxes'][element]):
+                self.page_memory['checkboxes'][element][checkbox_ii].setCheckState(QtCore.Qt.Unchecked) 
                 
     def select_all_default(self):
         '''function to select all default selected checkboxes'''
         #unselect all checkboxes first 
-        for ii, val in enumerate(self.remove_checkboxes):
-            self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Unchecked)
+        for element in self.page_memory['checkboxes']['ordered_elements']:
+            for checkbox_ii, checkbox in enumerate(self.page_memory['checkboxes'][element]):
+                self.page_memory['checkboxes'][element][checkbox_ii].setCheckState(QtCore.Qt.Unchecked) 
         
-        #if map_vars variable exists, need to map default values to positional indices 
+        #map default variables to positional indices
         if 'map_vars' in list(self.menu_level['checkboxes'].keys()):
             default_inds = [np.where(self.menu_level['checkboxes']['map_vars'] == default_var)[0][0] for default_var in self.menu_level['checkboxes']['remove_default']]
         else:
-            default_inds = copy.deepcopy(self.menu_level['checkboxes']['remove_default'])
+            default_inds = [np.where(self.menu_level['checkboxes']['labels'] == default_var)[0][0] for default_var in self.menu_level['checkboxes']['remove_default']]
 
         #now select only desired default checkboxes
-        for ii in default_inds:
-            self.remove_checkboxes[ii].setCheckState(QtCore.Qt.Checked)
+        for element in self.page_memory['checkboxes']['ordered_elements']:
+            for default_ind in default_inds:
+                self.page_memory['checkboxes'][element][default_ind].setCheckState(QtCore.Qt.Checked)
         
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
 
     def closeEvent(self, event):
 
-        '''function to get values of selected checkboxes upon closing of pop-up window (if any)'''
+        '''function to get status of current page upon closing of pop-up window'''
 
-        #have checkboxes on current page?
-        if 'checkboxes' in list(self.menu_level.keys()):
-            
-            #get checkboxes dict keys
-            checkboxes_keys = list(self.menu_level['checkboxes'].keys())
-
-            #have keep checkboxes on current page? 
-            if 'keep_selected' in checkboxes_keys:  
-                selected_inds = []
-                #iterate through keep checkboxes
-                for ii, val in enumerate(self.keep_checkboxes):
-                    #check if selected (if so append index)
-                    if self.keep_checkboxes[ii].checkState() == QtCore.Qt.Checked:
-                        selected_inds.append(ii)
-                
-                #if map_vars variable exists, need to map selected positional indices to values
-                if 'map_vars' in checkboxes_keys:
-                    selected_inds = [self.menu_level['checkboxes']['map_vars'][ind] for ind in selected_inds]
-            
-                #update keep selected variable
-                self.menu_level['checkboxes']['keep_selected'] = selected_inds
-
-            #have remove checkboxes on current page? 
-            if 'remove_selected' in checkboxes_keys:
-                selected_inds = []
-                #iterate through remove checkboxes
-                for ii, val in enumerate(self.remove_checkboxes):
-                    #check if selected (if so append index)
-                    if self.remove_checkboxes[ii].checkState() == QtCore.Qt.Checked:
-                        selected_inds.append(ii)
-                
-                #if map_vars variable exists, need to map selected positional indices to values
-                if 'map_vars' in checkboxes_keys:
-                    selected_inds = [self.menu_level['checkboxes']['map_vars'][ind] for ind in selected_inds]
-            
-                #update remove selected variable
-                self.menu_level['checkboxes']['remove_selected'] = selected_inds
-
+        #take everything from page memory dictionary and put it back into menu level object 
+        
+        #iterate through grid type
+        for grid_type in list(self.page_memory.keys()):
+            for element in self.page_memory[grid_type]['ordered_elements']:
+                #if grid type == 'checkboxes', get variable names of all checkboxes ticked
+                if grid_type == 'checkboxes':
+                    selected_vars = []
+                    for checkbox_ii, checkbox in enumerate(self.page_memory[grid_type][element]):
+                        if checkbox.checkState() == QtCore.Qt.Checked:
+                            #map selected position index to variable name
+                            if 'map_vars' in list(self.menu_level[grid_type].keys()):
+                                selected_vars.append(self.menu_level[grid_type]['map_vars'][checkbox_ii])       
+                            else:
+                                selected_vars.append(self.menu_level[grid_type]['labels'][checkbox_ii])
+                    self.menu_level[grid_type][element] = selected_vars 
+                #if grid type == 'rangeboxes', get current values of all rangeboxes
+                #if grid_type == 'rangeboxes':
+                    
 #--------------------------------------------------------------------------------#
 #--------------------------------------------------------------------------------#
 class generate_Providentia_dashboard(QtWidgets.QWidget):
 
     '''define class that generates Providentia dashboard'''     
+ 
+    #create signals that are fired upon resizing/moving of main Providentia window
+    resized = QtCore.pyqtSignal()
+    move = QtCore.pyqtSignal()   
  
     def __init__(self, read_type):
         super(generate_Providentia_dashboard, self).__init__()
@@ -402,12 +432,29 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
         #create UI
         self.initUI()
-
+    
+        #setup callback events upon resizing/moving of Providentia window 
+        self.resized.connect(self.get_geometry)
+        self.move.connect(self.get_geometry)
     #------------------------------------------------------------------------#
 
+    def resizeEvent(self, event):
+        '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
+        self.resized.emit()
+        return super(generate_Providentia_dashboard, self).resizeEvent(event)
+
+    def moveEvent(self, event):
+        '''Function to overwrite default PyQt5 moveEvent function --> for calling get_geometry'''
+        self.move.emit()
+        return super(generate_Providentia_dashboard, self).moveEvent(event)
+
+    def get_geometry(self):
+        '''Get current geometry of main Providentia window'''
+        self.main_window_geometry = copy.deepcopy(self.geometry())
+ 
     def initUI(self):
 
-        '''initialise user interface'''
+        '''initialise Providentia main window user interface'''
 
         #set window title
         self.window_title = "Providentia"
@@ -419,7 +466,20 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #define spacing/margin variables
         parent_layout.setSpacing(0)
         parent_layout.setContentsMargins(0,0,0,0)
-        
+
+        #setup dictionary charactesing formats of different titles/buttons etc.
+        self.formatting_dict = {'title_menu':             {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20, 'underline':True},
+                                'label_menu':             {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
+                                'button_menu':            {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
+                                'checkbox_menu':          {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
+                                'combobox_menu':          {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
+                                'lineedit_menu':          {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
+                                'title_popup':            {'font':QtGui.QFont("Freesans", 14), 'colour':'black', 'height':25, 'underline':True},
+                                'selection_button_popup': {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
+                                'navigation_button_popup':{'font':QtGui.QFont("Freesans", 11), 'colour':'black', 'height':24},
+                                'checkbox_popup':         {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':18},
+                                'rangebox_popup':         {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20}
+                               }
         #------------------------------------------------------------------------#
         #setup configuration bar with combo boxes, input boxes and buttons
         #use a gridded layout to place objects
@@ -432,128 +492,98 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         config_bar.setAlignment(QtCore.Qt.AlignLeft) 
 
         #define all configuration box objects (labels, comboboxes etc.)
-        title_font=QtGui.QFont()
-        title_font.setUnderline(True)
-        self.lb_data_selection = QtWidgets.QLabel(self, text = "Data Selection")
-        self.lb_data_selection.setFont(title_font)
+        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text = "Data Selection"), self.formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
-        self.bu_read = QtWidgets.QPushButton('READ', self)
-        self.bu_read.setMinimumWidth(40)
-        self.bu_read.setMaximumWidth(40)
+        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), self.formatting_dict['button_menu'])
+        self.bu_read.setFixedWidth(40)
         self.bu_read.setStyleSheet("color: red;")
         self.bu_read.setToolTip('Read selected configuration of data into memory')
-        self.ch_colocate = QtWidgets.QCheckBox("Colocate")
+        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), self.formatting_dict['checkbox_menu'])
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
-        self.cb_network = ComboBox(self)
-        self.cb_network.setMinimumWidth(95)
-        self.cb_network.setMaximumWidth(95)
+        self.cb_network = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_network.setFixedWidth(95)
         self.cb_network.setToolTip('Select providing observational data network')
-        self.cb_resolution = ComboBox(self)
-        self.cb_resolution.setMinimumWidth(95)
-        self.cb_resolution.setMaximumWidth(95)
+        self.cb_resolution = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_resolution.setFixedWidth(95)
         self.cb_resolution.setToolTip('Select temporal resolution of data')
-        self.cb_matrix = ComboBox(self)
-        self.cb_matrix.setMinimumWidth(95)
-        self.cb_matrix.setMaximumWidth(95)
+        self.cb_matrix = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_matrix.setFixedWidth(95)
         self.cb_matrix.setToolTip('Select data matrix')
-        self.cb_species = ComboBox(self)
-        self.cb_species.setMinimumWidth(95)
-        self.cb_species.setMaximumWidth(95)
+        self.cb_species = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_species.setFixedWidth(95)
         self.cb_species.setToolTip('Select species')
-        self.le_start_date = QtWidgets.QLineEdit(self)
-        self.le_start_date.setMinimumWidth(70)
-        self.le_start_date.setMaximumWidth(70)
+        self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_start_date.setFixedWidth(70)
         self.le_start_date.setToolTip('Set data start date: YYYYMMDD')
-        self.le_end_date = QtWidgets.QLineEdit(self)
-        self.le_end_date.setMinimumWidth(70)
-        self.le_end_date.setMaximumWidth(70)
+        self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_end_date.setFixedWidth(70)
         self.le_end_date.setToolTip('Set data end date: YYYYMMDD')
-        self.bu_QA = QtWidgets.QPushButton('QA', self)
-        self.bu_QA.setMinimumWidth(46)
-        self.bu_QA.setMaximumWidth(46)
+        self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), self.formatting_dict['button_menu'])
+        self.bu_QA.setFixedWidth(46)
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
-        self.bu_flags = QtWidgets.QPushButton('FLAGS', self)
-        self.bu_flags.setMinimumWidth(46)
-        self.bu_flags.setMaximumWidth(46)
+        self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), self.formatting_dict['button_menu'])
+        self.bu_flags.setFixedWidth(46)
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
-        self.bu_experiments = QtWidgets.QPushButton('EXPS', self)
-        self.bu_experiments.setMinimumWidth(46)
-        self.bu_experiments.setMaximumWidth(46)
+        self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), self.formatting_dict['button_menu'])
+        self.bu_experiments.setFixedWidth(46)
         self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
-        self.lb_data_filter = QtWidgets.QLabel(self, text = "Data Filter")
-        self.lb_data_filter.setMinimumWidth(65)
-        self.lb_data_filter.setMaximumWidth(65)
+        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text = "Data Filter"), self.formatting_dict['title_menu'])
+        self.lb_data_filter.setFixedWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
-        self.lb_data_filter.setFont(title_font)
-        self.bu_pc_min = QtWidgets.QPushButton('% MIN', self)
-        self.bu_pc_min.setMinimumWidth(46)
-        self.bu_pc_min.setMaximumWidth(46)
+        self.bu_pc_min = set_formatting(QtWidgets.QPushButton('% MIN', self), self.formatting_dict['button_menu'])
+        self.bu_pc_min.setFixedWidth(46)
         self.bu_pc_min.setToolTip('Select minimum % desired representativity in data across whole record and specific temporal periods')
-        self.bu_meta = QtWidgets.QPushButton('META', self)
-        self.bu_meta.setMinimumWidth(46)
-        self.bu_meta.setMaximumWidth(46)
+        self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), self.formatting_dict['button_menu'])
+        self.bu_meta.setFixedWidth(46)
         self.bu_meta.setToolTip('Select metadata to filter by')
-        self.bu_period = QtWidgets.QPushButton('PERIOD', self)
-        self.bu_period.setMinimumWidth(50)
-        self.bu_period.setMaximumWidth(50)
+        self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), self.formatting_dict['button_menu'])
+        self.bu_period.setFixedWidth(50)
         self.bu_period.setToolTip('Select data in specific periods')
-        self.bu_screen = QtWidgets.QPushButton('FILTER', self)
-        self.bu_screen.setMinimumWidth(50)
-        self.bu_screen.setMaximumWidth(50)
+        self.bu_screen = set_formatting(QtWidgets.QPushButton('FILTER', self), self.formatting_dict['button_menu'])
+        self.bu_screen.setFixedWidth(50)
         self.bu_screen.setStyleSheet("color: blue;")
         self.bu_screen.setToolTip('Filter data')
-        self.lb_data_bounds = QtWidgets.QLabel(self, text = "Bounds")
-        self.lb_data_bounds.setMinimumWidth(47)
-        self.lb_data_bounds.setMaximumWidth(47)
+        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text = "Bounds"), self.formatting_dict['label_menu'])
+        self.lb_data_bounds.setFixedWidth(47)
         self.lb_data_bounds.setToolTip('Set lower/upper bounds of data')
-        self.le_minimum_value = QtWidgets.QLineEdit(self)
-        self.le_minimum_value.setMinimumWidth(60)
-        self.le_minimum_value.setMaximumWidth(60)
+        self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_minimum_value.setFixedWidth(60)
         self.le_minimum_value.setToolTip('Set lower bound of data')
-        self.le_maximum_value = QtWidgets.QLineEdit(self)
-        self.le_maximum_value.setMinimumWidth(60)
-        self.le_maximum_value.setMaximumWidth(60)
+        self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_maximum_value.setFixedWidth(60)
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
-        self.lb_z = QtWidgets.QLabel(self, text = "Map Z")
-        self.lb_z.setFont(title_font)
+        self.lb_z = set_formatting(QtWidgets.QLabel(self, text = "Map Z"), self.formatting_dict['title_menu'])
         self.lb_z.setToolTip('Set map Z statistic')
-        self.cb_z_stat = ComboBox(self)
-        self.cb_z_stat.setMinimumWidth(80)
-        self.cb_z_stat.setMaximumWidth(80)
+        self.cb_z_stat = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_z_stat.setFixedWidth(80)
         self.cb_z_stat.setToolTip('Select map Z statistic')
-        self.cb_z1 = ComboBox(self)
-        self.cb_z1.setMinimumWidth(125)
-        self.cb_z1.setMaximumWidth(125)
+        self.cb_z1 = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_z1.setFixedWidth(125)
         self.cb_z1.setToolTip('Select Z1 dataset')
-        self.cb_z2 = ComboBox(self)
-        self.cb_z2.setMinimumWidth(125)
-        self.cb_z2.setMaximumWidth(125)
+        self.cb_z2 = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_z2.setFixedWidth(125)
         self.cb_z2.setToolTip('Select Z2 dataset')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
-        self.lb_experiment_bias = QtWidgets.QLabel(self, text = "Exp. Bias")
-        self.lb_experiment_bias.setFont(title_font)
+        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text = "Exp. Bias"), self.formatting_dict['title_menu'])
         self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
-        self.cb_experiment_bias_type = ComboBox(self)
-        self.cb_experiment_bias_type.setMinimumWidth(100)
-        self.cb_experiment_bias_type.setMaximumWidth(100)
+        self.cb_experiment_bias_type = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_experiment_bias_type.setFixedWidth(100)
         self.cb_experiment_bias_type.setToolTip('Select experiment bias type')
-        self.cb_experiment_bias_stat = ComboBox(self)
-        self.cb_experiment_bias_stat.setMinimumWidth(100)
-        self.cb_experiment_bias_stat.setMaximumWidth(100)
+        self.cb_experiment_bias_stat = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_experiment_bias_stat.setFixedWidth(100)
         self.cb_experiment_bias_stat.setToolTip('Select experiment bias statistic')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
-        self.lb_station_selection = QtWidgets.QLabel(self, text = "Site Select")
-        self.lb_station_selection.setFont(title_font)
+        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text = "Site Select"), self.formatting_dict['title_menu'])
         self.lb_station_selection.setToolTip('Select stations')
-        self.ch_select_all = QtWidgets.QCheckBox("All")
+        self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), self.formatting_dict['checkbox_menu'])
         self.ch_select_all.setToolTip('Select all stations')
-        self.ch_intersect = QtWidgets.QCheckBox("Intersect")
+        self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), self.formatting_dict['checkbox_menu'])
         self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
 
         #position objects on gridded configuration bar
@@ -575,7 +605,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         config_bar.addWidget(self.bu_meta, 2, 6)
         config_bar.addWidget(self.bu_period, 1, 7)
         config_bar.addWidget(self.bu_screen, 2, 7) 
-        config_bar.addWidget(self.lb_data_bounds, 0, 8)
+        config_bar.addWidget(self.lb_data_bounds, 0, 8, QtCore.Qt.AlignCenter)
         config_bar.addWidget(self.le_minimum_value, 1, 8)
         config_bar.addWidget(self.le_maximum_value, 2, 8)
         config_bar.addWidget(self.vertical_splitter_2, 0, 9, 3, 1)
@@ -633,10 +663,23 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.experiments_menu['checkboxes']['map_vars'] = []
         self.experiments_menu['select_buttons'] = ['all','clear','default']   
 
+        #setup pop-up window menu tree for metadata
+        self.metadata_menu = {}
+        self.metadata_menu['window_title'] = 'METADATA'
+        self.metadata_menu['page_title'] = 'Select metadata type to filter stations by'
+        self.metadata_menu['navigation_buttons'] = {}
+        self.metadata_menu['navigation_buttons']['keys'] = ['stn_pos', 'stn_class', 'globally_gridded', 'measurement']
+        self.metadata_menu['navigation_buttons']['labels'] = ['STATION POSITION', 'STATION CLASSIFICATIONS', 'GLOBALLY GRIDDED CLASSIFICATIONS', 'MEASUREMENT PROCESS INFORMATION']
+        self.metadata_menu['stn_pos'] = {'page_title':'Filter stations by position', 'rangeboxes':{}}
+        self.metadata_menu['stn_pos']['rangeboxes']['labels'] = ['latitude','longitude','altitude', 'sampling_height', 'measurement_altitude']
+        self.metadata_menu['stn_pos']['rangeboxes']['current_lower'] = [''] * len(self.metadata_menu['stn_pos']['rangeboxes']['labels']) 
+        self.metadata_menu['stn_pos']['rangeboxes']['current_upper'] = [''] * len(self.metadata_menu['stn_pos']['rangeboxes']['labels']) 
+
         #enable pop up configuration windows
         self.bu_flags.clicked.connect(partial(self.generate_pop_up_window,self.flag_menu))
         self.bu_QA.clicked.connect(partial(self.generate_pop_up_window,self.qa_menu))
         self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window,self.experiments_menu)) 
+        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window,self.metadata_menu)) 
         
         #initialise configuration bar fields
         self.config_bar_initialisation = True
@@ -709,7 +752,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
         '''generate pop up window'''
         
-        self.pop_up_window = pop_up_window(menu_level)
+        self.pop_up_window = pop_up_window(menu_level, self.main_window_geometry, self.formatting_dict)
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
@@ -3591,7 +3634,10 @@ temporal_axis_mapping_dict = {'dayofweek':{0:'M', 1:'T', 2:'W', 3:'T', 4:'F', 5:
 
 #generate Providentia dashboard
 
+#print(qApp.screens()[0].availableVirtualGeometry())
+
 qApp = QtWidgets.QApplication(sys.argv)
 qApp.setStyle("Fusion")
 Providentia_dash = generate_Providentia_dashboard('parallel')
 sys.exit(qApp.exec_())
+
