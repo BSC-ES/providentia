@@ -62,7 +62,7 @@ if obs_root == '':
     # running on workstation?
     else:
         obs_root = '/esarchive/obs/ghost'
-    
+
 # Define experiment root data directory
 exp_root = ''
 # set experiment root data directory if left undefined
