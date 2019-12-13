@@ -1,21 +1,22 @@
 # WRITTEN BY DENE BOWDALO
 
 from .configuration import *
-import .reading
+import providentia.reading as pread
 
 import bisect
-from collections import OrderedDict
 import copy
 import datetime
-import functools
 import gc
 import multiprocessing
 import os
 import sys
 import json
 from weakref import WeakKeyDictionary
+from collections import OrderedDict
+from functools import partial
 
-from netCDF4 import Dataset, num2date
+from netCDF4 import Dataset
+from netCDF4 import num2date
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -33,7 +34,9 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtWidgets
+from PyQt5 import QtGui
 import scipy.stats
 import seaborn as sns
 
@@ -172,12 +175,9 @@ class PopUpWindow(QtWidgets.QWidget):
             button_row.addWidget(select_default_button)
 
             # add connectivity to buttons
-            select_all_button.clicked.connect(functools.partial(self.select_all,
-                                                      nested_window_N))
-            clear_all_button.clicked.connect(functools.partial(self.clear_all,
-                                                     nested_window_N))
-            select_default_button.clicked.connect(
-                functools.partial(self.select_all_default, nested_window_N))
+            select_all_button.clicked.connect(partial(self.select_all, nested_window_N))
+            clear_all_button.clicked.connect(partial(self.clear_all, nested_window_N))
+            select_default_button.clicked.connect(partial(self.select_all_default, nested_window_N))
 
             # create grid of checkboxes
             checkbox_grid = QtWidgets.QGridLayout()
@@ -240,7 +240,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # setup event to get selected checkbox indices when closing window
         quit = QtWidgets.QAction("Quit", self)
-        quit.triggered.connect(self.close_event)
+        quit.triggered.connect(self.closeEvent)
 
     def select_all(self, nested_window_N):
         """function to select all checkboxes"""
@@ -266,7 +266,7 @@ class PopUpWindow(QtWidgets.QWidget):
     # ------------------------------------------------------------------------# 
     # ------------------------------------------------------------------------# 
 
-    def close_event(self, event):
+    def closeEvent(self, event):
 
         """function to get indices of selected checkboxes upon closing of pop-up window"""
 
@@ -317,7 +317,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         # define spacing/margin variables
         config_bar.setHorizontalSpacing(3)
         config_bar.setVerticalSpacing(1)
-        config_bar.setContentsMargins(5,0,0,0)
+        config_bar.setContentsMargins(5, 0, 0, 0)
         config_bar.setAlignment(QtCore.Qt.AlignLeft)
 
         # define all configuration box objects (labels, comboboxes etc.)
@@ -520,8 +520,13 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         self.flag_names = np.array(sorted(self.standard_data_flag_codes,
                                           key=self.standard_data_flag_codes.get))
         self.flag_codes = np.sort(list(self.standard_data_flag_codes.values()))
-        self.flag_default_codes = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20, 21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 90, 150, 154, 155, 156, 157], dtype=np.uint8)
-        self.flag_default_inds = np.array([np.where(self.flag_codes == code)[0][0] for code in self.flag_default_codes], dtype=np.uint8)
+        self.flag_default_codes = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20,
+                                            21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42,
+                                            43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54,
+                                            55, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+                                            80, 81, 90, 150, 154, 155, 156, 157], dtype=np.uint8)
+        self.flag_default_inds = np.array([np.where(self.flag_codes == code)[0][0] for code in self.flag_default_codes],
+                                          dtype=np.uint8)
 
         # define qa flags
         self.standard_qa_flag_codes = json.load(open('providentia/conf/standard_qa_flag_codes.json'))
@@ -529,8 +534,10 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         self.qa_names = np.array(sorted(
             self.standard_qa_flag_codes, key=self.standard_qa_flag_codes.get))
         self.qa_codes = np.sort(list(self.standard_qa_flag_codes.values()))
-        self.qa_default_codes = np.array([0, 1, 2, 3, 4, 5, 70, 80, 81, 82, 85, 87, 90, 94, 100, 106, 107, 108], dtype=np.uint8)
-        self.qa_default_inds = np.array([np.where(self.qa_codes == code)[0][0] for code in self.qa_default_codes], dtype=np.uint8)
+        self.qa_default_codes = np.array([0, 1, 2, 3, 4, 5, 70, 80, 81, 82, 85, 87, 90, 94, 100, 106, 107, 108],
+                                         dtype=np.uint8)
+        self.qa_default_inds = np.array([np.where(self.qa_codes == code)[0][0] for code in self.qa_default_codes],
+                                        dtype=np.uint8)
 
         # define classification flags
         self.standard_classification_flag_codes = \
@@ -542,8 +549,12 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         self.classification_codes = np.sort(list(self.standard_classification_flag_codes.values()))
         self.classification_default_codes_to_retain = np.array([5], dtype=np.uint8)
         self.classification_default_codes_to_remove = np.array([0, 4, 46, 49], dtype=np.uint8)
-        self.classification_default_inds_to_retain = np.array([np.where(self.classification_codes == code)[0][0] for code in self.classification_default_codes_to_retain], dtype=np.uint8)
-        self.classification_default_inds_to_remove = np.array([np.where(self.classification_codes == code)[0][0] for code in self.classification_default_codes_to_remove], dtype=np.uint8)
+        self.classification_default_inds_to_retain = np.array([np.where(self.classification_codes == code)[0][0]
+                                                               for code in self.classification_default_codes_to_retain],
+                                                              dtype=np.uint8)
+        self.classification_default_inds_to_remove = np.array([np.where(self.classification_codes == code)[0][0]
+                                                               for code in self.classification_default_codes_to_remove],
+                                                              dtype=np.uint8)
 
         # create dictionary to hold indices of selected values in pop-up windows
         self.selected_indices = {
@@ -624,7 +635,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         self.block_config_bar_handling_updates = True
 
         # set some default configuration values when initialising config bar
-        if self.config_bar_initialisation:
+        if self.config_bar_initialisation == True:
             # set initially selected/active start-end date as default 201601-201701
             self.le_start_date.setText('20160101')
             self.le_end_date.setText('20170101')
@@ -671,17 +682,17 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             self.all_observation_data = {}
 
             # set all available networks
-            available_networks = ['EBAS','EEA_AQ_eReporting']
+            available_networks = ['EBAS', 'EEA_AQ_eReporting']
 
             # set all available temporal resolutions
-            available_resolutions = ['hourly','daily','monthly']
+            available_resolutions = ['hourly', 'daily', 'monthly']
 
             # iterate through available networks
             for network in available_networks:
 
                 # check if directory for network exists
                 # if not, continue
-                if not os.path.exists('%s/%s/%s'%(obs_root,network,GHOST_version)):
+                if not os.path.exists('%s/%s/%s' % (obs_root, network, GHOST_version)):
                     continue
 
                 # write empty dictionary for network
@@ -692,7 +703,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
 
                     # check if directory for resolution exists
                     # if not, continue
-                    if not os.path.exists('%s/%s/%s/%s'%(obs_root,network,GHOST_version,resolution)):
+                    if not os.path.exists('%s/%s/%s/%s' % (obs_root, network, GHOST_version, resolution)):
                         continue
 
                     # write nested empty dictionary for resolution
@@ -705,7 +716,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                     for species in available_species:
 
                         # get all netCDF monthly files per species
-                        species_files = os.listdir('%s/%s/%s/%s/%s'%(obs_root, network, GHOST_version, resolution, species))
+                        species_files = os.listdir('%s/%s/%s/%s/%s' % (obs_root, network, GHOST_version, resolution, species))
 
                         # get monthly start date (YYYYMM) of all species files
                         species_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in species_files if f != 'temporary']
@@ -724,7 +735,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             self.get_valid_obs_files_in_date_range()
 
         # if date range has changed then update available observational data dictionary
-        if self.date_range_has_changed:
+        if self.date_range_has_changed == True:
             self.get_valid_obs_files_in_date_range()
 
         # initialise/update fields - maintain previously selected values wherever possible
@@ -773,9 +784,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             self.selected_matrix = self.cb_matrix.currentText()
 
         # update species field
-        available_species = sorted(
-            self.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()][
-                self.cb_matrix.currentText()])
+        available_species = sorted(self.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()][self.cb_matrix.currentText()])
         self.cb_species.addItems(available_species)
         if self.selected_species in available_species:
             self.cb_species.setCurrentText(self.selected_species)
@@ -786,23 +795,19 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         self.get_valid_experiment_files_in_date_range()
         # update selected indices for experiments -- keeping previously selected experiments if available
         if len(self.selected_indices['EXPERIMENTS'][0]) > 0:
-            previous_selected_experiments = \
-                self.previous_available_experiment_grids[self.selected_indices['EXPERIMENTS'][0]]
+            previous_selected_experiments = self.previous_available_experiment_grids[self.selected_indices['EXPERIMENTS'][0]]
         else:
             previous_selected_experiments = []
         # set selected indices as previously selected indices in current available list of experiments
-        selected_experiments = [previous_selected_experiment for previous_selected_experiment
-                                in previous_selected_experiments if previous_selected_experiment
-                                in self.available_experiment_grids]
-        selected_experiment_inds = np.array([np.where(self.available_experiment_grids == selected_experiment)[0][0]
-                                             for selected_experiment in selected_experiments], dtype=np.uint8)
+        selected_experiments = [previous_selected_experiment for previous_selected_experiment in previous_selected_experiments if previous_selected_experiment in self.available_experiment_grids]
+        selected_experiment_inds = np.array([np.where(self.available_experiment_grids == selected_experiment)[0][0] for selected_experiment in selected_experiments], dtype=np.uint8)
         self.selected_indices['EXPERIMENTS'] = [selected_experiment_inds]
         # set previous available experiments variable
         self.previous_available_experiment_grids = np.array(self.available_experiment_grids)
 
         # update selected indices for QA
         # if initialising config bar then check default selection
-        if self.config_bar_initialisation:
+        if self.config_bar_initialisation ==  True:
             self.selected_indices['QA'] = [self.qa_default_inds]
 
         # unset variable to allow interactive handling from now
@@ -843,9 +848,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                         # get all file yearmonths associated with species
                         species_file_yearmonths = self.all_observation_data[network][resolution][matrix][species]
                         # get file yearmonths within date range
-                        valid_species_files_yearmonths = [ym for ym in species_file_yearmonths
-                                                          if (ym >= self.selected_start_date_firstdayofmonth) &
-                                                          (ym < self.selected_end_date)]
+                        valid_species_files_yearmonths = [ym for ym in species_file_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) & (ym < self.selected_end_date)]
                         if len(valid_species_files_yearmonths) > 0:
                             # if network not in dictionary yet, add it
                             if network not in list(self.available_observation_data.keys()):
@@ -874,7 +877,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         self.available_experiment_data = {}
 
         # get all different experiment names
-        available_experiments = os.listdir('%s/%s'%(exp_root,GHOST_version))
+        available_experiments = os.listdir('%s/%s' % (exp_root, GHOST_version))
 
         # iterate through available experiments
         for experiment in available_experiments:
@@ -901,13 +904,11 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                     # get start YYYYMM yearmonths of data files
                     network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files]
                     # limit data files to just those within date range
-                    valid_network_files_yearmonths = [ym for ym in network_files_yearmonths
-                                                      if (ym >= self.selected_start_date_firstdayofmonth) &
-                                                      (ym < self.selected_end_date)]
+                    valid_network_files_yearmonths = [ym for ym in network_files_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) & (ym < self.selected_end_date)]
                     # if have some valid data files for experiment-grid, add experiment grid
                     # (with associated yearmonths) to dictionary
                     if len(valid_network_files_yearmonths) > 0:
-                        self.available_experiment_data['%s-%s'%(experiment, grid)] = valid_network_files_yearmonths
+                        self.available_experiment_data['%s-%s' % (experiment, grid)] = valid_network_files_yearmonths
 
         # get list of available experiment-grid names
         self.available_experiment_grids = np.array(sorted(list(self.available_experiment_data.keys())))
@@ -946,7 +947,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                 selected_start_date = self.le_start_date.text()
                 selected_end_date = self.le_end_date.text()
                 if (len(selected_start_date) == 8) & (len(selected_end_date) == 8):
-                    if (selected_start_date.isdigit() == True) & (selected_end_date.isdigit() == True):
+                    if (selected_start_date.isdigit() is True) & (selected_end_date.isdigit() is True):
                         self.date_range_has_changed = True
                         self.selected_start_date = int(selected_start_date)
                         self.selected_end_date = int(selected_end_date)
@@ -989,7 +990,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             PopUpWindow(window_type='CLASSIFICATIONS',
                         window_titles=['Select standardised classifications to retain',
                                        'Select standardised classifications to remove'],
-                        checkbox_labels=[self.classification_names,self.classification_names],
+                        checkbox_labels=[self.classification_names, self.classification_names],
                         default_checkbox_selection=[self.classification_default_inds_to_retain,
                                                     self.classification_default_inds_to_remove],
                         selected_indices=self.selected_indices)
@@ -1012,7 +1013,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         """define function which handles update of data selection and MPL canvas upon pressing of READ button"""
 
         # if have no data to read, then do not read any data
-        if self.no_data_to_read:
+        if self.no_data_to_read == True:
             return
 
         # Update mouse cursor to a waiting cursor
@@ -1121,16 +1122,14 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
 
         # determine if any of the active experiments have changed
         # remove experiments that are no longer selected from data_in_memory dictionary
-        experiments_to_remove = [experiment for experiment in self.previous_active_experiment_grids if
-                                 experiment not in self.active_experiment_grids]
+        experiments_to_remove = [experiment for experiment in self.previous_active_experiment_grids if experiment not in self.active_experiment_grids]
         for experiment in experiments_to_remove:
             del self.data_in_memory[experiment]
         # any new experiments will need completely re-reading
-        experiments_to_read = [experiment for experiment in self.active_experiment_grids if
-                               experiment not in self.previous_active_experiment_grids]
+        experiments_to_read = [experiment for experiment in self.active_experiment_grids if experiment not in self.previous_active_experiment_grids]
 
         # has date range changed?
-        if read_all or read_left or read_right or cut_left or cut_right:
+        if (read_all == True) or (read_left == True) or (read_right == True) or (cut_left == True) or (cut_right == True):
             # set new active time array/unique station references/longitudes/latitudes
             # adjust data arrays to account for potential changing number of stations
             self.read_setup()
@@ -1150,7 +1149,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             else:
                 # if station references array has changed then as cutting/appending to existing data
                 # need to rearrange existing data arrays accordingly
-                if not np.array_equal(self.previous_station_references, self.station_references):
+                if np.array_equal(self.previous_station_references, self.station_references) == False:
                     # get indices of stations in previous station references array in current station references array
                     old_station_inds = np.where(np.in1d(self.previous_station_references, self.station_references))[0]
                     # get indices of stations in current station references array
@@ -1161,24 +1160,24 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                     for data_label in list(self.data_in_memory.keys()):
                         # create new data array in shape of current station references array,
                         # putting the old data into new array in the correct positions
-                        new_data_array = np.full((len(self.station_references),len(self.previous_time_array)), np.NaN, dtype=np.float32)
-                        new_data_array[new_station_inds,:] = self.data_in_memory[data_label]['data'][old_station_inds,:]
+                        new_data_array = np.full((len(self.station_references), len(self.previous_time_array)), np.NaN, dtype=np.float32)
+                        new_data_array[new_station_inds, :] = self.data_in_memory[data_label]['data'][old_station_inds, :]
                         # overwrite data array with reshaped version
                         self.data_in_memory[data_label]['data'] = new_data_array
 
             # need to cut edges?
-            if cut_left or cut_right:
+            if (cut_left == True) or (cut_right == True):
 
                 # set default edge limits as current edges
                 left_edge_ind = 0
                 right_edge_ind = len(self.previous_time_array)
 
                 # need to cut on left data edge?
-                if cut_left:
+                if cut_left == True:
                     left_edge_ind = np.where(self.previous_time_array == self.time_array[0])[0][0]
 
                 # need to cut on right data edge?
-                if cut_right:
+                if cut_right == True:
                     right_edge_ind = np.where(self.previous_time_array == self.time_array[-1])[0][0]+1
 
                 # iterate through all keys in data in memory dictionary
@@ -1188,24 +1187,27 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                         self.data_in_memory[data_label]['data'][:, left_edge_ind:right_edge_ind]
 
             # need to read on left edge?
-            if read_left:
+            if read_left == True:
                 # get n number of new elements on left edge
                 n_new_left_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
                 # iterate through all keys in data in memory dictionary and insert read data on
                 # left edge of the associated arrays
                 for data_label in list(self.data_in_memory.keys()):
                     # add space on left edge to insert new read data
-                    self.data_in_memory[data_label]['data'] = np.insert(self.data_in_memory[data_label]['data'], 0, np.full((len(self.station_references),n_new_left_inds),np.NaN), axis=0)
+                    self.data_in_memory[data_label]['data'] = np.insert(
+                        self.data_in_memory[data_label]['data'], 0, np.full((len(self.station_references), n_new_left_inds), np.NaN), axis=0)
                     self.read_data(data_label, self.active_start_date, self.previous_active_start_date)
 
             # need to read on right edge?
-            if read_right:
+            if read_right == True:
                 # get n number of new elements on right edge
-                n_new_right_inds = (len(self.time_array) - 1) - np.where(self.time_array == self.previous_time_array[-1])[0][0]
+                n_new_right_inds = \
+                    (len(self.time_array) - 1) - np.where(self.time_array == self.previous_time_array[-1])[0][0]
                 # iterate through all keys in data in memory dictionary
                 # and insert read data on right edge of the associated arrays
                 for data_label in list(self.data_in_memory.keys()):
-                    self.data_in_memory[data_label]['data'] = np.append(self.data_in_memory[data_label]['data'], np.full((len(self.station_references),n_new_right_inds),np.NaN), axis=0)
+                    self.data_in_memory[data_label]['data'] = \
+                        np.append(self.data_in_memory[data_label]['data'], np.full((len(self.station_references), n_new_right_inds), np.NaN), axis=0)
                     self.read_data(data_label, self.previous_active_end_date, self.active_end_date)
 
         # if have new experiments to read, then read them now
@@ -1376,7 +1378,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         if self.read_type == 'serial':
             # iterate through relevant files
             for relevant_file_ii, relevant_file in enumerate(relevant_files):
-                file_metadata = read_netCDF_station_information(relevant_file)
+                file_metadata = pread.read_netcdf_station_information((relevant_file, metadata_vars_to_read))
                 for meta_var in metadata_vars_to_read:
                     all_read_metadata[meta_var] = np.append(all_read_metadata[meta_var], file_metadata[meta_var])
 
@@ -1387,7 +1389,8 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             pool = multiprocessing.Pool(n_CPUs)
 
             # read netCDF files in parallel
-            all_file_metadata = pool.map(read_netCDF_station_information, relevant_files)
+            tuples_list = [(file, metadata_vars_to_read) for file in relevant_files]
+            all_file_metadata = pool.map(pread.read_netcdf_station_information, tuples_list)
             # will not submit more files to pool, so close access to it
             pool.close()
             # wait for worker processes to terminate before continuing
@@ -1426,7 +1429,8 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                 # get all unique metadata for variable, by station
                 unique_metadata = np.unique(all_read_metadata[meta_var][station_inds])
                 # append all and unique metadata by station
-                self.station_metadata[station_reference][meta_var] = {'all':all_read_metadata[meta_var][station_inds],'unique':unique_metadata}
+                self.station_metadata[station_reference][meta_var] = \
+                    {'all': all_read_metadata[meta_var][station_inds], 'unique': unique_metadata}
 
         # update measurement units for species (take standard units from parameter dictionary)
         self.measurement_units = self.parameter_dictionary[self.active_species]['standard_units']
@@ -1446,7 +1450,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         global process_type
         if data_label == 'observations':
             process_type = 'observations'
-            file_root = '%s/%s/%s/%s/%s/%s_'%(obs_root, self.active_network, GHOST_version, self.active_resolution, self.active_species, self.active_species)
+            file_root = '%s/%s/%s/%s/%s/%s_' % (obs_root, self.active_network, GHOST_version, self.active_resolution, self.active_species, self.active_species)
             relevant_file_start_dates = sorted(self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species])
 
         else:
@@ -1454,7 +1458,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             experiment_grid_split = data_label.split('-')
             active_experiment = experiment_grid_split[0]
             active_grid = experiment_grid_split[1]
-            file_root = '%s/%s/%s/%s/%s/%s/%s/%s_'%(exp_root, GHOST_version, active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network, self.active_species)
+            file_root = '%s/%s/%s/%s/%s/%s/%s/%s_' % (exp_root, GHOST_version, active_experiment, active_grid, self.active_resolution, self.active_species, self.active_network, self.active_species)
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 
         # create list of relevant files to read
@@ -1495,7 +1499,8 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                 # read file
                 file_data, time_indices, full_array_station_indices = read_netCDF_data(relevant_file)
                 # place read data into big array as appropriate
-                self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis,:], time_indices[:,np.newaxis]] = file_data
+                self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis, :],
+                                                        time_indices[:, np.newaxis]] = file_data
 
         # read in parallel
         elif self.read_type == 'parallel':
@@ -1548,24 +1553,24 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
 # --------------------------------------------------------------------------------#
 
 
-def read_netCDF_station_information(relevant_file):
-
-    """ Function that handles reading of observational
-    desired station metadata in a netCDF file,
-    returning a dictionary with read metadata. """
-
-    # read netCDF frame
-    nCDF_root = Dataset(relevant_file)
-
-    # read all desired metadata, placing it within a dictionary by variable name
-    read_metadata = {}
-    for meta_var in metadata_vars_to_read:
-        read_metadata[meta_var] = nCDF_root[meta_var][:]
-
-    # close netCDF
-    nCDF_root.close()
-
-    return read_metadata
+# def read_netCDF_station_information(relevant_file):
+#
+#     """ Function that handles reading of observational
+#     desired station metadata in a netCDF file,
+#     returning a dictionary with read metadata. """
+#
+#     # read netCDF frame
+#     nCDF_root = Dataset(relevant_file)
+#
+#     # read all desired metadata, placing it within a dictionary by variable name
+#     read_metadata = {}
+#     for meta_var in metadata_vars_to_read:
+#         read_metadata[meta_var] = nCDF_root[meta_var][:]
+#
+#     # close netCDF
+#     nCDF_root.close()
+#
+#     return read_metadata
 
 
 def read_netCDF_data(relevant_file):
@@ -1711,6 +1716,11 @@ class MPLCanvas(FigureCanvas):
         self.exp_bias_days_ax.axis('off')
         self.station_metadata_ax.axis('off')
 
+        # define dictionary for mapping days of week/months as integers to equivalent strings for writing on axes
+        self.temporal_axis_mapping_dict = {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
+                                           'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
+                                                     7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}}
+
     # --------------------------------------------------------------------------------# 
     # --------------------------------------------------------------------------------# 
 
@@ -1741,10 +1751,10 @@ class MPLCanvas(FigureCanvas):
         self.station_metadata_ax.axis('off')
 
         # add map axis if map not yet initialised (i.e. first time loading some data)
-        if self.map_initialised == False:
+        if self.map_initialised is False:
 
             # create map axis
-            map_ax = self.gridspec.new_subplotspec((0, 0),   rowspan=45, colspan=45)
+            map_ax = self.gridspec.new_subplotspec((0, 0), rowspan=45, colspan=45)
             self.map_ax = self.figure.add_subplot(map_ax, projection=self.plotcrs)
             # set map extents
             self.map_ax.set_global()
@@ -1819,7 +1829,8 @@ class MPLCanvas(FigureCanvas):
                     axes_dict.pop(ax)
 
             # now add axis to first dictionary in stack, with the current view limits
-            self.read_instance.navi_toolbar._nav_stack[0][ax] = (ax._get_view(), (ax.get_position(True).frozen(),ax.get_position().frozen()))
+            self.read_instance.navi_toolbar._nav_stack[0][ax] = \
+                (ax._get_view(), (ax.get_position(True).frozen(),ax.get_position().frozen()))
 
     # --------------------------------------------------------------------------------# 
     # --------------------------------------------------------------------------------# 
@@ -1951,7 +1962,7 @@ class MPLCanvas(FigureCanvas):
                 self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_inds
 
         # update plotted map z statistic (if necessary)
-        if self.read_instance.block_MPL_canvas_updates == False:
+        if self.read_instance.block_MPL_canvas_updates is False:
             # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
             self.calculate_z_statistic()
 
@@ -2103,7 +2114,7 @@ class MPLCanvas(FigureCanvas):
             # if any of the currently selected stations are not in the current active map
             # valid station indices --> unselect selected stations (and associated plots)
             # also uncheck select all/intersect checkboxes
-            if np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)) == False:
+            if np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)) is False:
                 # unselect all/intersect checkboxes
                 self.read_instance.block_MPL_canvas_updates = True
                 self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
@@ -2111,8 +2122,8 @@ class MPLCanvas(FigureCanvas):
                 self.read_instance.block_MPL_canvas_updates = False
                 # reset relative/absolute selected station indices to be empty lists
                 self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-                self.relative_selected_station_inds = np.array([],dtype=np.int)
-                self.absolute_selected_station_inds = np.array([],dtype=np.int)
+                self.relative_selected_station_inds = np.array([], dtype=np.int)
+                self.absolute_selected_station_inds = np.array([], dtype=np.int)
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
             self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=map_unselected_station_marker_size, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)
@@ -2266,12 +2277,7 @@ class MPLCanvas(FigureCanvas):
                 # exp_x,exp_y = self.bm(self.read_instance.data_in_memory[experiment]['grid_edge_longitude'],
                 # self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])
                 # create matplotlib polygon object from experiment grid edge map projection coordinates
-                grid_edge_outline_poly = Polygon(np.vstack((
-                    self.read_instance.data_in_memory[experiment]['grid_edge_longitude'],
-                    self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])).T,
-                                                 edgecolor=self.read_instance.data_in_memory[experiment]['colour'],
-                                                 linewidth=1, linestyle='--', fill=False, zorder=1,
-                                                 transform=self.datacrs)
+                grid_edge_outline_poly = Polygon(np.vstack((self.read_instance.data_in_memory[experiment]['grid_edge_longitude'],self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])).T,edgecolor=self.read_instance.data_in_memory[experiment]['colour'],linewidth=1, linestyle='--', fill=False, zorder=1,transform=self.datacrs)
                 # plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
 
@@ -2312,11 +2318,11 @@ class MPLCanvas(FigureCanvas):
         for data_label in list(self.read_instance.data_in_memory_filtered.keys()):
 
             # if colocation is not active, do not convert colocated data arrays to pandas data frames
-            if self.colocate_active == False:
+            if self.colocate_active is False:
                 if 'colocated' in data_label:
                     continue
             # else, if colocation is active, do not convert non-colocated data arrays to pandas data frames
-            elif self.colocate_active == True:
+            elif self.colocate_active is True:
                 if 'colocated' not in data_label:
                     continue
 
@@ -2561,9 +2567,6 @@ class MPLCanvas(FigureCanvas):
 
         """function that updates violin plots of temporally aggregated data upon selection of station/s"""
 
-        # load corresponding json from conf
-        # temporal_axis_mapping_dict = json.load(open('providentia/conf/temporal_axis_mapping_dict.json'))
-
         # define dictionaries defining the relevant axis, axis titles, x axis ticks
         # (and an empty nested dictionary for storing plot objects) for different temporal aggregation resolutions
         hour_aggregation_dict = {
@@ -2644,7 +2647,7 @@ class MPLCanvas(FigureCanvas):
                 aggregation_dict[temporal_aggregation_resolution]['ax'].\
                     set_xticks(aggregation_dict[temporal_aggregation_resolution]['xticks'])
                 aggregation_dict[temporal_aggregation_resolution]['ax'].\
-                    set_xticklabels([temporal_axis_mapping_dict[temporal_aggregation_resolution][xtick]
+                    set_xticklabels([self.temporal_axis_mapping_dict[temporal_aggregation_resolution][xtick]
                                      for xtick in aggregation_dict[temporal_aggregation_resolution]['xticks']])
 
         # ------------------------------------------------------------------------------------------------# 
@@ -2836,7 +2839,7 @@ class MPLCanvas(FigureCanvas):
                 aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticks(
                     aggregation_dict[temporal_aggregation_resolution]['xticks'])
                 aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticklabels(
-                    [temporal_axis_mapping_dict[temporal_aggregation_resolution][xtick] for xtick
+                    [self.temporal_axis_mapping_dict[temporal_aggregation_resolution][xtick] for xtick
                      in aggregation_dict[temporal_aggregation_resolution]['xticks']])
 
             # plot horizontal line/s across x axis at value/s of minimum experiment bias
@@ -3060,10 +3063,10 @@ class MPLCanvas(FigureCanvas):
         else:
             # if only have selected z1 array, the statistic is 'absolute', so use sequential colourbar
             if have_z2 == False:
-                self.z_colourmap  = sequential_colourmap
+                self.z_colourmap = sequential_colourmap
             # if have selected z1 and z2 arrays, the statistic is 'difference', so use diverging colourbar
             else:
-                self.z_colourmap  = diverging_colourmap
+                self.z_colourmap = diverging_colourmap
 
         # -------------------------------------------------# 
 
@@ -3126,7 +3129,7 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.data_in_memory_filtered[z1_array_to_read]['data'][self.active_map_valid_station_inds,:]
         # drop NaNs and reshape to object list of station data arrays (if not checking data %)
         if z_statistic_name != 'Data %':
-            z1_array_data = drop_nans(z1_array_data)
+            z1_array_data = pread.drop_nans(z1_array_data)
         else:
             z1_array_data.tolist()
 
@@ -3154,7 +3157,7 @@ class MPLCanvas(FigureCanvas):
             z2_array_data = self.read_instance.data_in_memory_filtered[z2_array_to_read]['data'][self.active_map_valid_station_inds,:]
             # drop NaNs and reshape to object list of station data arrays (if not checking data %)
             if z_statistic_name != 'Data %':
-                z2_array_data = drop_nans(z2_array_data)
+                z2_array_data = pread.drop_nans(z2_array_data)
             else:
                 z2_array_data = z2_array_data.tolist()
             # is the difference statistic basic (i.e. mean)?
@@ -3401,7 +3404,7 @@ class MPLCanvas(FigureCanvas):
         """define function that selects/unselects all plotted stations
         (and associated plots) upon ticking of checkbox"""
 
-        if self.read_instance.block_MPL_canvas_updates == False:
+        if not self.read_instance.block_MPL_canvas_updates:
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -3590,29 +3593,6 @@ class MPLCanvas(FigureCanvas):
         # all available stations), with the absolute indices of the subset of plotted selected stations
         return self.active_map_valid_station_inds[selected_map_inds]
 
-# ------------------------------------------------------------------------------------------------------------# 
-# ------------------------------------------------------------------------------------------------------------# 
-
-# define statistical calculation functions
-
-# ---------------------------------------------------------# 
-# ---------------------------------------------------------# 
-
-
-def drop_nans(data):
-
-    """function that returns numpy object of lists of station data with NaNs removed"""
-
-    # reshape numpy array to have lists of data per station
-    data = data.tolist()
-    # iterate through each list of station data and remove NaNs
-    for station_ii, station_data in enumerate(data):
-        data[station_ii] = np.array(station_data)[~np.isnan(station_data)]
-    # return numpy object of lists of station data with NaNs removed
-    return np.array(data)
-
-# ---------------------------------------------------------# 
-# ---------------------------------------------------------# 
 # Define basic statistic calculation functions:
 
 # Mean
@@ -3817,7 +3797,7 @@ experiment_bias_stats_dict = {'MAE':  {'function':calculate_mae,       'order':0
                               'MBE':  {'function':calculate_mbe,       'order':2,  'label':'MBE',     'arguments':{},                            'minimum_bias':[0.0]},
                               'NMBE': {'function':calculate_mbe,       'order':3,  'label':'NMBE',    'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0]},
                               'RMSE': {'function':calculate_rmse,      'order':4,  'label':'RMSE',    'arguments':{},                            'minimum_bias':[0.0]},
-                              'NRMSE':{'function':calculate_rmse,      'order':5,  'label':'NRMSE',   'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0]},
+                              'NRMSE': {'function':calculate_rmse,      'order':5,  'label':'NRMSE',   'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0]},
                               'ABPE': {'function':calculate_apbe,      'order':6,  'label':'ABPE',    'arguments':{},                            'minimum_bias':[0.0],   'vmin':0.0,  'vmax':100.0, 'colourbar':sequential_colourmap_warm},
                               'PBE':  {'function':calculate_pbe,       'order':7,  'label':'PBE',     'arguments':{},                            'minimum_bias':[0.0]},
                               'COE':  {'function':calculate_coe,       'order':8,  'label':'COE',     'arguments':{},                            'minimum_bias':[1.0],                'vmax':1.0},
@@ -3827,14 +3807,10 @@ experiment_bias_stats_dict = {'MAE':  {'function':calculate_mae,       'order':0
                               'r2':   {'function':calculate_r_squared, 'order':12, 'label':'r$^{2}$', 'arguments':{},                            'minimum_bias':[1.0],   'vmin':0.0,  'vmax':1.0,   'colourbar':sequential_colourmap_warm},
                               'UPA':  {'function':calculate_upa,       'order':13, 'label':'UPA',     'arguments':{},                            'minimum_bias':[0.0]}}
 
-# define dictionary for mapping days of week/months as integers to equivalent strings for writing on axes
-temporal_axis_mapping_dict = {'dayofweek':{0:'M', 1:'T', 2:'W', 3:'T', 4:'F', 5:'S', 6:'S'},
-                              'month':    {1:'J', 2:'F', 3:'M', 4:'A', 5:'M', 6:'J', 7:'J', 8:'A', 9:'S', 10:'O', 11:'N', 12:'D'}}
-
 
 # generate Providentia dashboard
 def main():
-    qApp = QtWidgets.QApplication(sys.argv)
-    qApp.setStyle("Fusion")
-    Providentia_dash = GenerateProvidentiaDashboard('parallel')
-    sys.exit(qApp.exec_())
+    qapp = QtWidgets.QApplication(sys.argv)
+    qapp.setStyle("Fusion")
+    GenerateProvidentiaDashboard('parallel')
+    sys.exit(qapp.exec_())
