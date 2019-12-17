@@ -1327,14 +1327,11 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.available_observation_data[
                 self.active_network][self.active_resolution][self.active_matrix][self.active_species]])
 
-        # redefine some key variables globally (for access by parallel netCDF reading functions)
-        global time_array, active_species, selected_qa, selected_flags, selected_classifications_to_retain, selected_classifications_to_remove
-        time_array = self.time_array
-        active_species = self.active_species
-        selected_qa = self.qa_codes[self.active_qa_inds]
-        selected_flags = self.flag_codes[self.active_flag_inds]
-        selected_classifications_to_retain = self.classification_codes[self.active_classifications_to_retain_inds]
-        selected_classifications_to_remove = self.classification_codes[self.active_classifications_to_remove_inds]
+        # redefine some key variables used by parallel netCDF reading functions
+        self.selected_qa = self.qa_codes[self.active_qa_inds]
+        self.selected_flags = self.flag_codes[self.active_flag_inds]
+        self.selected_classifications_to_retain = self.classification_codes[self.active_classifications_to_retain_inds]
+        self.selected_classifications_to_remove = self.classification_codes[self.active_classifications_to_remove_inds]
 
         # Iterate through all relevant observational files
         # and read station references/longitudes/latitudes
@@ -1404,9 +1401,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         self.station_metadata = {}
 
         # get unique sorted station references across all files (make global, and also add to self)
-        global station_references
-        station_references, unique_indices = np.unique(all_read_metadata['station_reference'], return_index=True)
-        self.station_references = station_references
+        self.station_references, unique_indices = np.unique(all_read_metadata['station_reference'], return_index=True)
 
         # get standard measurement methodology per station
         self.station_methods = np.array([ref.split('_')[-1].split('--')[0] for ref in self.station_references])
@@ -1442,17 +1437,18 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         # force garbage collection (to avoid memory issues)
         gc.collect()
 
-        # set global process_type variable (for access by parallel read function)
+        # set process_type variable to self (for access by parallel read function)
         # also get relevant file start dates
-        global process_type
         if data_label == 'observations':
-            process_type = 'observations'
+            self.process_type = 'observations'
             file_root = '%s/%s/%s/%s/%s/%s_' % (obs_root, self.active_network, GHOST_version,
                                                 self.active_resolution, self.active_species, self.active_species)
-            relevant_file_start_dates = sorted(self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species])
+            relevant_file_start_dates = \
+                sorted(self.available_observation_data[self.active_network]
+                       [self.active_resolution][self.active_matrix][self.active_species])
 
         else:
-            process_type = 'experiment'
+            self.process_type = 'experiment'
             experiment_grid_split = data_label.split('-')
             active_experiment = experiment_grid_split[0]
             active_grid = experiment_grid_split[1]
@@ -1483,7 +1479,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
 
             # if process_type is experiment, get experiment specific grid edges from first relevant file,
             # and save to data in memory dictionary
-            if process_type == 'experiment':
+            if self.process_type == 'experiment':
                 exp_nc_root = Dataset(relevant_files[0])
                 self.data_in_memory[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
                 self.data_in_memory[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
@@ -1498,9 +1494,11 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             # iterate through relevant netCDF files
             for relevant_file in relevant_files:
                 # create argument tuple of function
-                tuple_arguments = relevant_file, time_array, station_references, active_species, process_type,\
-                                  selected_qa, selected_flags, selected_classifications_to_retain,\
-                                  selected_classifications_to_remove
+                tuple_arguments = relevant_file, self.time_array, self.station_references, \
+                                  self.active_species, self.process_type,\
+                                  self.selected_qa, self.selected_flags, \
+                                  self.selected_classifications_to_retain,\
+                                  self.selected_classifications_to_remove
                 # read file
                 file_data, time_indices, full_array_station_indices = pread.read_netcdf_data(tuple_arguments)
                 # place read data into big array as appropriate
@@ -1514,9 +1512,10 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             pool = multiprocessing.Pool(n_CPUs)
 
             # read netCDF files in parallel
-            tuple_arguments = [(file, time_array, station_references, active_species,
-                                process_type, selected_qa, selected_flags, selected_classifications_to_retain,
-                                selected_classifications_to_remove) for file in relevant_files]
+            tuple_arguments = [(file, self.time_array, self.station_references, self.active_species,
+                                self.process_type, self.selected_qa, self.selected_flags,
+                                self.selected_classifications_to_retain,
+                                self.selected_classifications_to_remove) for file in relevant_files]
             all_file_data = pool.map(pread.read_netcdf_data, tuple_arguments)
             # will not submit more files to pool, so close access to it
             pool.close()
