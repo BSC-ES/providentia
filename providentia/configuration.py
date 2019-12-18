@@ -1,111 +1,103 @@
-# Providentia Configuration File
-
-# ##------------------------------------------------------------------------------------###
-# ##IMPORT BUILT-IN MODULES
-# ##------------------------------------------------------------------------------------###
+""" Providentia Configuration File """
 
 import os
 import re
 import subprocess
 
-# ##------------------------------------------------------------------------------------###
-# ## SETTING SOME NECESSARY DETAILS --> DO NOT MODIFY!
-# ##------------------------------------------------------------------------------------###
 
-# set GHOST version data to work with
-GHOST_version = '1.1'
+class ProvConfiguration(object):
+    """ Configuration parameters definitions """
 
-# get machine name
-try:
-    machine = os.environ['BSC_MACHINE']
-except:
-    machine = ''
+    def __init__(self, **kwargs):
+        self.ghost_version = kwargs.get('ghost_version', '1.1')
+        self.machine = kwargs.get('machine', '')
+        self.cartopy_data_dir = kwargs.get('cartopy_data_dir', '')
+        self.available_cpus = kwargs.get('available_cpus', '')
+        self.n_cpus = kwargs.get('n_cpus', '')
+        self.obs_root = kwargs.get('obs_root', '')
+        self.exp_root = kwargs.get('exp_root', '')
+        self.sequential_colourmap = kwargs.get('sequential_colourmap',
+                                               'viridis')
+        self.sequential_colourmap_warm = \
+                kwargs.get('sequential_colourmap_warm', 'Reds')
 
-# get available N CPUs
-if (machine == 'power') or (machine == 'mn4'):
-    bash_command = 'squeue -h -o "%C"'
-    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-    available_CPUs = int(re.findall(r'\d+', str(output))[0])
-else:
-    available_CPUs = int(os.cpu_count())
+        self.diverging_colourmap = kwargs.get('diverging_colourmap', 'bwr')
+        self.unsel_station_markersize = \
+                                   kwargs.get('unsel_station_markersize',
+                                              3)
+        self.sel_station_markersize = \
+                                   kwargs.get('sel_station_markersize',
+                                              8)
+        self.legend_markersize = kwargs.get('legend_markersize', 11)
+        self.time_series_markersize = \
+                                   kwargs.get('time_series_markersize', 1.1)
+        self.temp_agg_markersize = \
+                                   kwargs.get('temp_aggregated_markersize',
+                                              3)
+        self.temp_agg_expbias_markersize = \
+                kwargs.get('temp_agg_expbias_markersize',
+                           3)
 
-# set cartopy data directory (needed on CTE-POWER/MN4 as has no external internet connection)
-if (machine == 'power') or (machine == 'mn4'):
-    cartopy_data_dir = '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
-# on all machines except CTE-POWER/MN4, pull from internet
-else:
-    cartopy_data_dir = ''
+    def __setattr__(self, key, value):
+        super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
 
-# ##------------------------------------------------------------------------------------###
-# ##DEFINE NUMBER OF CPUs TO UTILISE
-# ##------------------------------------------------------------------------------------###
 
-# Define number of CPUs to process on (leave empty to automatically utilise all available CPUs)
-# NOTE: if this value is set higher than the actual number of CPUs available, then the max number of CPUs is used.
-n_CPUs = ''
-if (n_CPUs == '') or (int(n_CPUs) > available_CPUs):
-    n_CPUs = available_CPUs
+    def parse_parameter(self, key, value):
+        """ parse parameters """
 
-# ##------------------------------------------------------------------------------------###
-# ##DEFINE OBSERVATIONAL/EXPERIMENT ROOT DATA DIRECTORIES
-# ##------------------------------------------------------------------------------------###
+        # get machine variable
+        if key == 'machine':
+            if 'BSC_MACHINE' in os.environ:
+                return os.environ['BSC_MACHINE']
 
-# Define observational root data directory
-# (if undefined it is automatically taken from the BSC machine the tool is ran on)
-obs_root = ''
-# set observational root data directory if left undefined
-if obs_root == '':
-    # running on CTE-POWER/MN4?
-    if (machine == 'power') or (machine == 'mn4'):
-        obs_root = '/gpfs/projects/bsc32/AC_cache/obs/ghost'
-    # running on workstation?
-    else:
-        obs_root = '/esarchive/obs/ghost'
+        # get available N CPUs
+        elif key == 'available_cpus':
+            if (self.machine == 'power') or (self.machine == 'mn4'):
+                bash_command = 'squeue -h -o "%C"'
+                process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+                output, _ = process.communicate()
+                return int(re.findall(r'\d+', str(output))[0])
 
-# Define experiment root data directory
-exp_root = ''
-# set experiment root data directory if left undefined
-if exp_root == '':
-    # running on CTE-POWER?
-    if (machine == 'power') or (machine == 'mn4'):
-        exp_root = '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp_new'
-    # running on workstation?
-    else:
-        exp_root = '/esarchive/recon/ghost_interp_new'
+            value = int(os.cpu_count())
 
-# ##------------------------------------------------------------------------------------###
-# ##DEFINE COLOURMAPS (see all options here: https://matplotlib.org/examples/color/colormaps_reference.html)
-# ##------------------------------------------------------------------------------------###
+        elif key == 'cartopy_data_dir':
+            # set cartopy data directory (needed on CTE-POWER/MN4 as has no external
+            # internet connection)
 
-# set the sequential colourmap (used to view absolute values)
-# one of the perceptually uniform sequential colourmaps is recommended here: viridis, plasma, inferno, magma
-sequential_colourmap = 'viridis'
+            if (self.machine == 'power') or (self.machine == 'mn4'):
+                return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
+            # on all machines except CTE-POWER/MN4, pull from internet
 
-# set the warm sequential colourmap (used to view absolute biases going from zero bias to a maximum bias)
-sequential_colourmap_warm = 'Reds'
+        elif key == 'n_cpus':
+            # Define number of CPUs to process on (leave empty to automatically
+            # utilise all available CPUs) NOTE: if this value is set higher than the
+            # actual number of CPUs available, then the max number of CPUs is used.
 
-# set the diverging colourmap (used to evaluate differences)
-diverging_colourmap = 'bwr'
+            if (value == '') or (int(value) > self.available_cpus):
+                return self.available_cpus
 
-# ##------------------------------------------------------------------------------------###
-# ##DEFINE PLOT MARKER SIZES
-# ##------------------------------------------------------------------------------------###
+        elif key == 'obs_root':
+            # Define observational root data directory (if undefined it is
+            # automatically taken from the BSC machine the tool is ran on)
 
-# define marker sizes for unselected stations on map
-map_unselected_station_marker_size = 3
+            # set observational root data directory if left undefined
+            if value == '':
+                # running on CTE-POWER/MN4?
+                if (self.machine == 'power') or (self.machine == 'mn4'):
+                    return '/gpfs/projects/bsc32/AC_cache/obs/ghost'
 
-# define marker sizes for selected stations on map
-map_selected_station_marker_size = 8
+                # running on workstation?
+                value = '/esarchive/obs/ghost'
 
-# define marker sizes on legend
-legend_marker_size = 11
+        elif key == 'exp_root':
+            # Define experiment root data directory
+            # set experiment root data directory if left undefined
+            if value == '':
+                # running on CTE-POWER?
+                if (self.machine == 'power') or (self.machine == 'mn4'):
+                    return '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp_new'
 
-# define marker sizes on time series plot
-time_series_marker_size = 1.1
+                # running on workstation?
+                value = '/esarchive/recon/ghost_interp_new'
 
-# define marker sizes on temporally aggregated plot
-temporally_aggregated_marker_size = 3
-
-# define marker sizes on temporally aggregated experiment bias plot
-temporally_aggregated_experiment_bias_marker_size = 3
+        return value
