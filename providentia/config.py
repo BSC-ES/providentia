@@ -44,13 +44,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--ghost_version",
                                      dest="ghost_version",
                                      help="set GHOST version data to work with")
-            self.parser.add_argument("--machine",
-                                     dest="machine",
-                                     help="machine name")
             self.parser.add_argument("--cartopy_data_dir",
                                      dest="cartopy_data_dir",
                                      help="set cartopy data directory")
-            #
             self.parser.add_argument("--n_cpus",
                                      dest="n_cpus",
                                      help="Define number of CPUs to process on")

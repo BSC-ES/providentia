@@ -1,6 +1,6 @@
 # WRITTEN BY DENE BOWDALO
 
-from .configuration import *
+from .configuration import ProvConfiguration
 
 import bisect
 from collections import OrderedDict
@@ -14,7 +14,8 @@ import sys
 import json
 from weakref import WeakKeyDictionary
 
-from netCDF4 import Dataset, num2date
+from netCDF4 import Dataset
+from netCDF4 import num2date
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -281,15 +282,18 @@ class PopUpWindow(QtWidgets.QWidget):
         self.selected_indices[self.window_type] = selected_indices
 
 
-class GenerateProvidentiaDashboard(QtWidgets.QWidget):
+class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
 
     """define class that generates Providentia dashboard"""
 
-    def __init__(self, read_type):
+    def __init__(self, read_type, **kwargs):
         super(GenerateProvidentiaDashboard, self).__init__()
+        ProvConfiguration.__init__(self, **kwargs)
 
         # put read_type into self
         self.read_type = read_type
+
+        # 
 
         # create UI
         self.init_ui()
@@ -3631,8 +3635,8 @@ temporal_axis_mapping_dict = {'dayofweek':{0:'M', 1:'T', 2:'W', 3:'T', 4:'F', 5:
 
 
 # generate Providentia dashboard
-def main():
+def main(**kwargs):
     qApp = QtWidgets.QApplication(sys.argv)
     qApp.setStyle("Fusion")
-    Providentia_dash = GenerateProvidentiaDashboard('parallel')
+    GenerateProvidentiaDashboard('parallel', **kwargs)
     sys.exit(qApp.exec_())
