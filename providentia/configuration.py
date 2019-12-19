@@ -1,8 +1,11 @@
-""" Providentia Configuration File """
+""" Providentia Configuration Module """
 
 import os
 import re
 import subprocess
+
+
+MACHINE = getattr(os.environment['BSC_MACHINE'], '')
 
 
 class ProvConfiguration(object):
@@ -10,7 +13,6 @@ class ProvConfiguration(object):
 
     def __init__(self, **kwargs):
         self.ghost_version = kwargs.get('ghost_version', '1.1')
-        self.machine = kwargs.get('machine', '')
         self.cartopy_data_dir = kwargs.get('cartopy_data_dir', '')
         self.available_cpus = kwargs.get('available_cpus', '')
         self.n_cpus = kwargs.get('n_cpus', '')
@@ -23,36 +25,26 @@ class ProvConfiguration(object):
 
         self.diverging_colourmap = kwargs.get('diverging_colourmap', 'bwr')
         self.unsel_station_markersize = \
-                                   kwargs.get('unsel_station_markersize',
-                                              3)
+                                   kwargs.get('unsel_station_markersize', 3)
         self.sel_station_markersize = \
-                                   kwargs.get('sel_station_markersize',
-                                              8)
+                                   kwargs.get('sel_station_markersize', 8)
         self.legend_markersize = kwargs.get('legend_markersize', 11)
         self.time_series_markersize = \
                                    kwargs.get('time_series_markersize', 1.1)
         self.temp_agg_markersize = \
-                                   kwargs.get('temp_aggregated_markersize',
-                                              3)
+                                   kwargs.get('temp_aggregated_markersize', 3)
         self.temp_agg_expbias_markersize = \
-                kwargs.get('temp_agg_expbias_markersize',
-                           3)
+                kwargs.get('temp_agg_expbias_markersize', 3)
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
 
-
     def parse_parameter(self, key, value):
         """ parse parameters """
 
-        # get machine variable
-        if key == 'machine':
-            if 'BSC_MACHINE' in os.environ:
-                return os.environ['BSC_MACHINE']
-
         # get available N CPUs
-        elif key == 'available_cpus':
-            if (self.machine == 'power') or (self.machine == 'mn4'):
+        if key == 'available_cpus':
+            if (MACHINE == 'power') or (MACHINE == 'mn4'):
                 bash_command = 'squeue -h -o "%C"'
                 process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
                 output, _ = process.communicate()
@@ -64,7 +56,7 @@ class ProvConfiguration(object):
             # set cartopy data directory (needed on CTE-POWER/MN4 as has no external
             # internet connection)
 
-            if (self.machine == 'power') or (self.machine == 'mn4'):
+            if (MACHINE == 'power') or (MACHINE == 'mn4'):
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all machines except CTE-POWER/MN4, pull from internet
 
@@ -83,7 +75,7 @@ class ProvConfiguration(object):
             # set observational root data directory if left undefined
             if value == '':
                 # running on CTE-POWER/MN4?
-                if (self.machine == 'power') or (self.machine == 'mn4'):
+                if (MACHINE == 'power') or (MACHINE == 'mn4'):
                     return '/gpfs/projects/bsc32/AC_cache/obs/ghost'
 
                 # running on workstation?
@@ -94,7 +86,7 @@ class ProvConfiguration(object):
             # set experiment root data directory if left undefined
             if value == '':
                 # running on CTE-POWER?
-                if (self.machine == 'power') or (self.machine == 'mn4'):
+                if (MACHINE == 'power') or (MACHINE == 'mn4'):
                     return '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp_new'
 
                 # running on workstation?
