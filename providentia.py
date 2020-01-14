@@ -20,12 +20,15 @@ import bisect
 from collections import OrderedDict
 import copy
 import datetime
+from dateutil.relativedelta import relativedelta
 from functools import partial
 import gc
 import glob
 import multiprocessing
 import os
 import sys
+from textwrap import wrap
+import time
 from weakref import WeakKeyDictionary
 
 ###------------------------------------------------------------------------------------###
@@ -59,18 +62,114 @@ import scipy.stats
 import seaborn as sns
 
 ###------------------------------------------------------------------------------------###
-###IMPORT PARAMETER/QA/FLAG GHOST STANDARDS 
+###IMPORT GHOST STANDARDS 
 ###------------------------------------------------------------------------------------###
 sys.path.insert(1, '{}/GHOST_standards/{}'.format(obs_root,GHOST_version))
-from GHOST_standards import standard_parameters, standard_data_flag_name_to_data_flag_code, standard_QA_name_to_QA_code
+from GHOST_standards import standard_parameters, get_standard_metadata, standard_data_flag_name_to_data_flag_code, standard_QA_name_to_QA_code
 #modify standard parameter dictionary to have BSC standard parameter names as keys (rather than GHOST)
 parameter_dictionary = {}
 for param, param_dict in standard_parameters.items():
     parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict  
-del standard_parameters
+#get standard metadata dictionary
+standard_metadata = get_standard_metadata({'standard_units':''})
+#create list of metadata variables to read (make global)
+metadata_vars_to_read = [key for key in standard_metadata.keys() if pd.isnull(standard_metadata[key]['metadata_type']) == False]
+metadata_dtype = [(key,standard_metadata[key]['data_type']) for key in metadata_vars_to_read]
 
 ###------------------------------------------------------------------------------------###
 ###------------------------------------------------------------------------------------###
+
+#setup dictionary characterising formats for all GUI window objects (i.e. buttons, titles etc.)
+
+formatting_dict = {'title_menu':               {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20, 'underline':True},
+                   'label_menu':               {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
+                   'button_menu':              {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
+                   'checkbox_menu':            {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
+                   'combobox_menu':            {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
+                   'lineedit_menu':            {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
+                   'title_popup':              {'font':QtGui.QFont("SansSerif", 13),  'colour':'black', 'height':23, 'underline':True},
+                   'button_popup':             {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
+                   'navigation_button_popup':  {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
+                   'checkbox_popup':           {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18},
+                   'rangebox_label_popup':     {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18},
+                   'rangebox_popup':           {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18, 'max_width':90},
+                   'column_header_label_popup':{'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18, 'italic':True},
+                   'tooltip':                  {'font':QtGui.QFont("SansSerif", 8)}            
+                   }
+
+###------------------------------------------------------------------------------------###
+###------------------------------------------------------------------------------------###
+
+def set_formatting(PyQt5_obj, formats):
+
+    '''function that takes a PyQt5 object and applies some defined formatting'''
+
+    #first get defined font for object
+    defined_font = formats['font']
+
+    #iterate through formats dictionary and apply defined font modifiers/object formatting values
+    for format_name, format_val in formats.items():
+        if format_name == 'bold':
+            defined_font.setBold(format_val) 
+       
+        if format_name == 'italic':
+            defined_font.setItalic(format_val)
+
+        elif format_name == 'underline':
+            defined_font.setUnderline(format_val)
+
+        elif format_name == 'height':
+            PyQt5_obj.setFixedHeight(format_val)
+
+        elif format_name == 'width':
+            PyQt5_obj.setFixedWidth(format_val)
+
+        elif format_name == 'min_height':
+            PyQt5_obj.setMinimumHeight(format_val)
+
+        elif format_name == 'min_width':
+            PyQt5_obj.setMinimumWidth(format_val)
+
+        elif format_name == 'max_height':
+            PyQt5_obj.setMaximumHeight(format_val)
+
+        elif format_name == 'max_width':
+            PyQt5_obj.setMaximumWidth(format_val)
+
+        elif format_name == 'colour':
+            PyQt5_obj.setStyleSheet("color: {};".format(format_val))
+
+
+    #now apply font to object
+    PyQt5_obj.setFont(defined_font)
+        
+    #return modified PyQt5 object
+    return PyQt5_obj
+
+###------------------------------------------------------------------------------------###
+###------------------------------------------------------------------------------------###
+
+def wrap_tooltip_text(tooltip_text, max_width):
+
+    '''function which takes the text for a tooltip and wraps it by the screen pixel width.
+       It does this by estimating the pixel width of the tooltip text (as formatted),
+       and then gets the ratio exceedance over the screen pixel width.
+       If there is an exceedance (i.e. > 1), the text is then broken into n max_char pieces 
+       based on the position of the first exceedance in the text 
+       (i.e. the part of the text which first exceeds the screen pixel width)
+    ''' 
+
+    tooltip_label = set_formatting(QtWidgets.QLabel(text = tooltip_text), formatting_dict['tooltip'])    
+    tooltip_width = tooltip_label.fontMetrics().boundingRect(tooltip_label.text()).width()
+    if tooltip_width > max_width:
+        ratio = tooltip_width/max_width
+        max_char = int(np.floor((len(tooltip_text)/ratio)*1.0))
+        tooltip_text = '\n'.join(wrap(tooltip_text, max_char))
+
+    return tooltip_text
+
+###------------------------------------------------------------------------------------###
+###------------------------------------------------------------------------------------###                             }
 
 class NavigationToolbar(NavigationToolbar):
 
@@ -112,63 +211,37 @@ class QVLine(QtWidgets.QFrame):
 ###------------------------------------------------------------------------------------###
 ###------------------------------------------------------------------------------------###
 
-def set_formatting(PyQt5_obj, formats):
-
-    '''function that takes a PyQt5 object and applies some defined formatting'''
-
-    #first get defined font for object
-    defined_font = formats['font']
-
-    #iterate through formats dictionary and apply defined font modifiers/object formatting values
-    for format_name, format_val in formats.items():
-        if format_name == 'bold':
-            defined_font.setBold(format_val) 
-       
-        if format_name == 'italic':
-            defined_font.setItalic(format_val)
-
-        elif format_name == 'underline':
-            defined_font.setUnderline(format_val)
-
-        elif format_name == 'height':
-            PyQt5_obj.setFixedHeight(format_val)
-
-        elif format_name == 'colour':
-            PyQt5_obj.setStyleSheet("color: {};".format(format_val))
-
-    #now apply font to object
-    PyQt5_obj.setFont(defined_font)
-        
-    #return modified PyQt5 object
-    return PyQt5_obj
-
-###------------------------------------------------------------------------------------###
-###------------------------------------------------------------------------------------###
-
 class pop_up_window(QtWidgets.QWidget):
 
     '''define class that generates generalised pop-up window menu'''
 
-    def __init__(self, menu_level, main_window_geometry, formatting_dict):
+    def __init__(self, menu_root, menu_levels, main_window_geometry):
         super(pop_up_window, self).__init__()
         
         #add input arguments to self
-        self.menu_level = menu_level  
+        self.menu_root = menu_root
+        self.menu_levels = menu_levels        
         self.main_window_geometry = main_window_geometry
-        self.formatting_dict = formatting_dict
-
+        self.menu_current = menu_root
+        for menu_level_ii, menu_level in enumerate(menu_levels):
+            self.menu_current = self.menu_current[menu_level]  
+        
         #generate GUI window for root page in menu
-        self.generate_window(menu_level)
+        self.generate_window()
 
-    def generate_window(self, menu_level):
+        #define stylesheet for tooltips
+        self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family())) 
+
+
+    def generate_window(self):
 
         '''generate GUI window for current menu level'''
         
-        #get menu level keys
-        menu_level_keys = list(menu_level.keys())
+        #get current menu level keys
+        menu_current_keys = list(self.menu_current.keys())
 
         #set window title
-        self.setWindowTitle(menu_level['window_title'])
+        self.setWindowTitle(self.menu_current['window_title'])
 
         #create parent layout 
         parent_layout = QtWidgets.QVBoxLayout()
@@ -181,65 +254,78 @@ class pop_up_window(QtWidgets.QWidget):
         parent_layout.setContentsMargins(self.page_margin,self.page_margin,self.page_margin,self.page_margin)
 
         #set page title 
-        title_label = set_formatting(QtWidgets.QLabel(self, text = menu_level['page_title']), self.formatting_dict['title_popup'])
+        title_label = set_formatting(QtWidgets.QLabel(self, text = self.menu_current['page_title']), formatting_dict['title_popup'])
         title_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
 
         #add title to parent frame
         parent_layout.addWidget(title_label)
 
-        #create dictionary to store current page status
-        self.page_memory = {}
+        #create layout for placing buttons horizontally (aligned left)
+        button_row = QtWidgets.QHBoxLayout()
+        button_row.setAlignment(QtCore.Qt.AlignLeft)
+        #initialise variable to update if have any buttons in button row
+        self.have_buttons = False
 
-        #check if need to create selection buttons
-        if 'select_buttons' in menu_level_keys:
+        #check if need to create home/previous button
+        if len(self.menu_levels) >= 1:
+            self.have_buttons = True
+            #create home button
+            root_button = set_formatting(QtWidgets.QPushButton("HOME"), formatting_dict['button_popup']) 
+            root_button.setStyleSheet("color: blue;")
+            root_button.setToolTip('Return to home menu page')
+            root_button.setFixedWidth(80)
+            button_row.addWidget(root_button)
+            root_button.clicked.connect(self.root_page)
+            #create previous button
+            previous_button = set_formatting(QtWidgets.QPushButton("PREVIOUS"), formatting_dict['button_popup']) 
+            previous_button.setStyleSheet("color: green;")
+            previous_button.setToolTip('Return to previous menu page')
+            previous_button.setFixedWidth(80)
+            button_row.addWidget(previous_button)
+            previous_button.clicked.connect(self.previous_page)
 
-            #set fixed height for button
-            self.fixed_button_height = 22  
-
-            button_row = QtWidgets.QHBoxLayout()
-            button_row.setAlignment(QtCore.Qt.AlignLeft)
-        
-            #need to create "Select All" button 
-            if 'all' in menu_level['select_buttons']:
-                select_all_button = set_formatting(QtWidgets.QPushButton("Select All"), self.formatting_dict['selection_button_popup'])
-                select_all_button.setFixedWidth(80)
+        #check if need to create checkbox selection buttons
+        if 'select_buttons' in menu_current_keys:
+            self.have_buttons = True
+            #need to create "Select All" button?
+            if 'all' in self.menu_current['select_buttons']:
+                select_all_button = set_formatting(QtWidgets.QPushButton("Select All"), formatting_dict['button_popup'])
+                select_all_button.setFixedWidth(100)
                 button_row.addWidget(select_all_button)
                 select_all_button.clicked.connect(self.select_all)
-            #need to create "Clear All" button 
-            if 'clear' in menu_level['select_buttons']:
-                clear_all_button = set_formatting(QtWidgets.QPushButton("Clear All"), self.formatting_dict['selection_button_popup'])
-                clear_all_button.setFixedWidth(80)
+            #need to create "Clear All" button? 
+            if 'clear' in self.menu_current['select_buttons']:
+                clear_all_button = set_formatting(QtWidgets.QPushButton("Clear All"), formatting_dict['button_popup'])
+                clear_all_button.setFixedWidth(100)
                 button_row.addWidget(clear_all_button)
                 clear_all_button.clicked.connect(self.clear_all)  
-            #need to create "Select Default" button 
-            if 'default' in menu_level['select_buttons']:
-                select_default_button = set_formatting(QtWidgets.QPushButton("Select Default"), self.formatting_dict['selection_button_popup'])
+            #need to create "Select Default" button? 
+            if 'default' in self.menu_current['select_buttons']:
+                select_default_button = set_formatting(QtWidgets.QPushButton("Select Default"), formatting_dict['button_popup'])
                 select_default_button.setFixedWidth(100)
                 button_row.addWidget(select_default_button)
                 select_default_button.clicked.connect(self.select_all_default)
 
-            #add button row to parent frame
+        #add button row to parent layout (if have some buttons)
+        if self.have_buttons == True:
             parent_layout.addLayout(button_row)
 
-        #check if 'navigation_buttons' in current menu level
-        if 'navigation_buttons' in menu_level_keys:
-            #create grid to store all navigation buttons
-            grid = self.create_grid('navigation_buttons', menu_level['navigation_buttons'])     
-            #add grid to parent frame
-            parent_layout.addLayout(grid)
-            
-        #check if 'rangeboxes' in current menu level
-        if 'rangeboxes' in menu_level_keys:
-            #create grid to store all rangeboxes
-            grid = self.create_grid('rangeboxes', menu_level['rangeboxes'])     
-            #add grid to parent frame
-            parent_layout.addLayout(grid)
+        #create dictionary to store current page status
+        self.page_memory = {}
 
-        #check if 'checkboxes' in current menu level
-        if 'checkboxes' in menu_level_keys:
-            #create grid to store all checkboxes
-            grid = self.create_grid('checkboxes', menu_level['checkboxes'])     
-            #add grid to parent frame
+        #gather list of all different menu types that need to be plotted
+        menu_types = []
+        if 'navigation_buttons' in menu_current_keys:
+            menu_types.append('navigation_buttons')
+        if 'rangeboxes' in menu_current_keys:
+            menu_types.append('rangeboxes')
+        if 'checkboxes' in menu_current_keys:
+            menu_types.append('checkboxes')
+        #have at least1 menu type?
+        if len(menu_types) > 0:
+            #create grid of menu types (horizontally concatenating different menu type grids)
+            grid = self.create_grid(menu_types)     
+            #add grid to parent layout
             parent_layout.addLayout(grid)
 
         #------------------------------------------------------------------------#
@@ -261,105 +347,205 @@ class pop_up_window(QtWidgets.QWidget):
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
 
-    def create_grid(self, grid_type, grid_dict):
+    def create_grid(self, menu_types):
         
-        '''create grid of checkboxes/rangeboxes/button, that wraps vertically'''
-
-        #get grid dict keys
-        grid_keys = list(grid_dict.keys())
-
-        #create dictionary to store variables that save page status per grid type (also set formatting dict for each row in grid)
-        if grid_type == 'checkboxes':
-            row_format_dict = self.formatting_dict['checkbox_popup']
-            if ('keep_selected' in grid_keys) & ('remove_selected' in grid_keys):
-                self.page_memory['checkboxes'] = {'keep_selected':[],'remove_selected':[], 'n_column_consumed':3, 'ordered_elements':['keep_selected','remove_selected'], 'widget':QtWidgets.QCheckBox}
-            elif 'keep_selected' in grid_keys:
-                self.page_memory['checkboxes'] = {'keep_selected':[],'n_column_consumed':2, 'ordered_elements':['keep_selected'], 'widget':QtWidgets.QCheckBox}
-            elif 'remove_selected' in grid_keys:
-                self.page_memory['checkboxes'] = {'remove_selected':[],'n_column_consumed':2, 'ordered_elements':['remove_selected'], 'widget':QtWidgets.QCheckBox}
-        elif grid_type == 'rangeboxes':
-            row_format_dict = self.formatting_dict['rangebox_popup']
-            if ('current_lower' in grid_keys) & ('current_upper' in grid_keys):
-                self.page_memory['rangeboxes'] = {'current_lower':[],'current_upper':[], 'n_column_consumed':3, 'ordered_elements':['current_lower','current_upper'], 'widget':QtWidgets.QLineEdit}
-            elif 'current_lower' in grid_keys:
-                self.page_memory['rangeboxes'] = {'current_lower':[],'n_column_consumed':2, 'ordered_elements':['current_lower'], 'widget':QtWidgets.QLineEdit}
-            elif 'current_upper' in grid_keys:
-                self.page_memory['rangeboxes'] = {'current_upper':[],'n_column_consumed':2, 'ordered_elements':['current_upper'], 'widget':QtWidgets.QLineEdit}
-        elif grid_type == 'navigation_buttons':
-            row_format_dict = self.formatting_dict['navigation_button_popup']
-            self.page_memory['navigation_buttons'] = {'buttons':[], 'n_column_consumed':1, 'ordered_elements':['buttons'], 'widget':QtWidgets.QPushButton}
+        '''create grid for each needed checkbox/rangebox/navigation button menu types, that wrap vertically
+           and concatenate them horizontally together 
+        '''
+    
+        #create horizontal layout to place all menu types within 
+        horizontal_parent = QtWidgets.QHBoxLayout()
+        #set spacing between different menu type grids
+        horizontal_parent.setSpacing(25)
+        #align grids to centre and top
+        horizontal_parent.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
         
-        #create grid
-        grid = QtWidgets.QGridLayout()
-        grid.setAlignment(QtCore.Qt.AlignCenter) 
+        #order appearance of menu types grids in menu (from left to right)
+        menu_type_order_dict = {'navigation_buttons':1, 'rangeboxes':2, 'checkboxes':3}
+        menu_types = sorted(menu_types, key=menu_type_order_dict.__getitem__) 
 
-        #set vertical/horizontal grid spacing (by grid type)
-        if grid_type == 'checkboxes':
-            self.grid_vertical_spacing = 0
-        else:
-            self.grid_vertical_spacing = 5
-        grid.setHorizontalSpacing(3)
-        grid.setVerticalSpacing(self.grid_vertical_spacing)
+        #iterate through passed menu types
+        for menu_type in menu_types:
 
-        #calculate currently occupied vertical space
-        if grid_type == 'checkboxes':
-            occupied_vertical_space_before_grid = self.page_margin + self.formatting_dict['title_popup']['height'] + self.layout_spacing + self.formatting_dict['selection_button_popup']['height'] + self.layout_spacing + self.page_margin
-        else:
-            occupied_vertical_space_before_grid = self.page_margin + self.formatting_dict['title_popup']['height'] + self.layout_spacing + self.page_margin
-        #initialise variable for tracking available vertical space when appending rows of grid
-        currently_occupied_vertical_space = copy.deepcopy(occupied_vertical_space_before_grid)
+            #create empty grid
+            grid = QtWidgets.QGridLayout()
+            #align grid to top
+            grid.setAlignment(QtCore.Qt.AlignTop)
 
-        #create grid
-        #force a new column to be started if no more available vertical space
-        row_n = 0
-        column_n = 0
-        #iterate through all grid labels
-        for label_ii, label in enumerate(grid_dict['labels']):
+            #initialise indices used for indexing objects in grid
+            start_row_n = 0
+            row_n = 0
+            column_n = 0
 
-            #evaluate if all available vertical space has been consumed
-            row_available_space = self.main_window_geometry.height() - currently_occupied_vertical_space
-            #if available space <= than row height, force a new column to be started
-            if row_available_space <= (row_format_dict['height']):
-                column_n+=self.page_memory[grid_type]['n_column_consumed']
-                row_n = 0
-                currently_occupied_vertical_space = copy.deepcopy(occupied_vertical_space_before_grid)
+            #get dictionary nested inside current menu for menu type
+            menu_current_type = self.menu_current[menu_type]
 
-            #create all elements in column, per row
-            for element_ii, element in enumerate(self.page_memory[grid_type]['ordered_elements']):
-                if element_ii == 0:
-                    element_label = label
-                else:
-                    element_label = ''
-                #append widget to page memory dictionary (formatting at same time
-                self.page_memory[grid_type][element].append(set_formatting(self.page_memory[grid_type]['widget'](element_label), row_format_dict))  
-                #put text label to left of keep checkbox/rangebox if required
-                if grid_type in ['checkboxes','rangeboxes']:
-                    self.page_memory[grid_type][element][label_ii].setLayoutDirection(QtCore.Qt.RightToLeft)
-                    #check if checkbox is currently selected, if so select it again
-                    #map checkbox value first if necessary
-                    if grid_type == 'checkboxes':                   
-                        if 'map_vars' in grid_keys:
-                            var_to_check = grid_dict['map_vars'][label_ii]
-                        else:
-                            var_to_check = copy.deepcopy(label)   
-                        if var_to_check in grid_dict[element]: 
-                            self.page_memory[grid_type][element][label_ii].setCheckState(QtCore.Qt.Checked)
+            #if have no labels for current menu type, continue to next menu type
+            if len(menu_current_type['labels']) == 0:
+                continue
 
-                #add element to grid
-                grid.addWidget(self.page_memory[grid_type][element][label_ii], row_n, column_n+element_ii)
-                                
-            #iterate row_n
-            row_n +=1
+            #get keys associated with current menu type in current menu level
+            current_menu_keys = list(menu_current_type.keys())
 
-            #add row vertical space to total occupied space
-            currently_occupied_vertical_space += (row_format_dict['height'] + self.grid_vertical_spacing)
+            #create dictionary to store variables that save page status per menu type (also set formatting dict for each row in grid, and vertical spacing)
+            if menu_type == 'checkboxes':
+                row_format_dict = formatting_dict['checkbox_popup']
+                grid_vertical_spacing = 0
+                if ('keep_selected' in current_menu_keys) & ('remove_selected' in current_menu_keys):
+                    self.page_memory['checkboxes'] = {'keep_selected':[],'remove_selected':[], 'n_column_consumed':3, 'ordered_elements':['keep_selected','remove_selected'], 'widget':QtWidgets.QCheckBox}
+                elif 'keep_selected' in current_menu_keys:
+                    self.page_memory['checkboxes'] = {'keep_selected':[],'n_column_consumed':2, 'ordered_elements':['keep_selected'], 'widget':QtWidgets.QCheckBox}
+                elif 'remove_selected' in current_menu_keys:
+                    self.page_memory['checkboxes'] = {'remove_selected':[],'n_column_consumed':2, 'ordered_elements':['remove_selected'], 'widget':QtWidgets.QCheckBox}
+            elif menu_type == 'rangeboxes':
+                row_format_dict = formatting_dict['rangebox_popup']
+                grid_vertical_spacing = 3
+                if ('current_lower' in current_menu_keys) & ('current_upper' in current_menu_keys):
+                    self.page_memory['rangeboxes'] = {'current_lower':[],'current_upper':[], 'n_column_consumed':3, 'ordered_elements':['current_lower','current_upper'], 'widget':QtWidgets.QLineEdit}
+                elif 'current_lower' in current_menu_keys:
+                    self.page_memory['rangeboxes'] = {'current_lower':[],'n_column_consumed':2, 'ordered_elements':['current_lower'], 'widget':QtWidgets.QLineEdit}
+                elif 'current_upper' in current_menu_keys:
+                    self.page_memory['rangeboxes'] = {'current_upper':[],'n_column_consumed':2, 'ordered_elements':['current_upper'], 'widget':QtWidgets.QLineEdit}
+            elif menu_type == 'navigation_buttons':
+                row_format_dict = formatting_dict['navigation_button_popup']
+                grid_vertical_spacing = 3
+                self.page_memory['navigation_buttons'] = {'buttons':[], 'n_column_consumed':1, 'ordered_elements':['buttons'], 'widget':QtWidgets.QPushButton}
+        
+            #if have more than 1 column per label, need column headers
+            if len(self.page_memory[menu_type]['ordered_elements']) > 1: 
+                have_column_headers = True
+                start_row_n = 1
+            else:
+                have_column_headers = False
 
-        #return grid
-        return grid
+            #set vertical/horizontal grid spacing
+            grid.setHorizontalSpacing(3)
+            grid.setVerticalSpacing(grid_vertical_spacing)
+
+            #calculate currently occupied vertical space
+            occupied_vertical_space_before_grid = self.page_margin + formatting_dict['title_popup']['height'] + self.layout_spacing + self.page_margin
+            if self.have_buttons == True:
+                occupied_vertical_space_before_grid += (formatting_dict['button_popup']['height'] + self.layout_spacing)
+            if have_column_headers == True:
+                occupied_vertical_space_before_grid += (formatting_dict['column_header_label_popup']['height'] + grid_vertical_spacing)
+
+            #initialise variable for tracking available vertical space when appending rows of grid
+            currently_occupied_vertical_space = copy.deepcopy(occupied_vertical_space_before_grid)
+
+            #iterate through all grid labels
+            for label_ii, label in enumerate(menu_current_type['labels']):
+
+                #evaluate if all available vertical space has been consumed
+                row_available_space = self.main_window_geometry.height() - currently_occupied_vertical_space
+                #if available space <= than row height, force a new column to be started
+                if row_available_space <= (row_format_dict['height']):
+                    column_n+=self.page_memory[menu_type]['n_column_consumed']
+                    row_n = 0
+                    currently_occupied_vertical_space = copy.deepcopy(occupied_vertical_space_before_grid)
+
+                #if menu type == 'rangeboxes', then need to add label to left of rangeboxes, also add a tooltip (if exist)
+                if (menu_type == 'checkboxes') or (menu_type == 'rangeboxes'):
+                    rangebox_label = set_formatting(QtWidgets.QLabel(self, text = label), formatting_dict['rangebox_label_popup']) 
+                    if menu_type == 'rangeboxes':
+                        if len(menu_current_type['tooltips']) > 0:
+                            rangebox_label.setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], self.main_window_geometry.width()))
+                    grid.addWidget(rangebox_label, start_row_n+row_n, column_n, QtCore.Qt.AlignLeft) 
+
+                #create all elements in column, per row
+                for element_ii, element in enumerate(self.page_memory[menu_type]['ordered_elements']):
+                    #if menu type == 'rangeboxes' then add 1 to element ii, because placed a label in first column
+                    if (menu_type == 'checkboxes') or (menu_type == 'rangeboxes'):
+                        element_label = ''
+                        element_ii+=1
+                    else:
+                        element_label = label
+
+                    #append widget to page memory dictionary 
+                    self.page_memory[menu_type][element].append(set_formatting(self.page_memory[menu_type]['widget'](element_label), row_format_dict))  
+                    
+                    #put text label to left of keep checkbox/rangebox (rather than to right)
+                    if menu_type in ['checkboxes','rangeboxes']:
+                        #check if checkbox is currently selected, if so select it again
+                        #map checkbox value first if necessary
+                        if menu_type == 'checkboxes':                   
+                            if 'map_vars' in current_menu_keys:
+                                var_to_check = menu_current_type['map_vars'][label_ii]
+                            else:
+                                var_to_check = copy.deepcopy(label)   
+                            if var_to_check in menu_current_type[element]: 
+                                self.page_memory[menu_type][element][label_ii].setCheckState(QtCore.Qt.Checked)
+                        #set rangeboxes to previous set value (if any)
+                        elif menu_type == 'rangeboxes':
+                            self.page_memory[menu_type][element][label_ii].setText(menu_current_type[element][label_ii])
+
+                    #if menu type == navigation_buttons, add connectivity to buttons, and also add tooltip
+                    elif menu_type == 'navigation_buttons':
+                        if len(menu_current_type['tooltips']) > 0:
+                            self.page_memory[menu_type][element][label_ii].setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], self.main_window_geometry.width()))
+                        self.page_memory[menu_type][element][label_ii].clicked.connect(self.open_new_page)
+
+                    #add element to grid (aligned left)
+                    grid.addWidget(self.page_memory[menu_type][element][label_ii], start_row_n+row_n, column_n+element_ii, QtCore.Qt.AlignLeft)                               
+
+                #iterate row_n
+                row_n +=1
+
+                #add row vertical space to total occupied space
+                currently_occupied_vertical_space += (row_format_dict['height'] + grid_vertical_spacing)
+
+            #add column headers to menu type grid if needed
+            if have_column_headers == True:
+                for column_number in np.arange(0, column_n+1, self.page_memory[menu_type]['n_column_consumed']):
+                    if menu_type == 'checkboxes':
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text = 'K'), formatting_dict['column_header_label_popup']), 0, column_number+1, QtCore.Qt.AlignCenter) 
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text = 'R'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)
+                    elif menu_type == 'rangeboxes':
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text = 'Lower Bound'), formatting_dict['column_header_label_popup']), 0, column_number+1, QtCore.Qt.AlignCenter) 
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text = 'Upper Bound'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)  
+
+            #add menu type grid to horizontal layout
+            horizontal_parent.addLayout(grid)
+
+        #return horizontally concatenated menu type grids
+        return horizontal_parent
 
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
-    #functions that handle callbacks upon clicking on selection buttons on pages with checkboxes
+    #functions that handle callbacks upon clicking on buttons 
+
+    def open_new_page(self):
+        '''function to open new page in pop-up window'''
+        
+        #get selected navigation button text
+        selected_navigation_button = self.sender().text()
+        #add selected navigation button text to menu levels list
+        self.menu_levels.append(selected_navigation_button)
+        #create new pop-up page for selected navigation button
+        self.new_window = pop_up_window(self.menu_root, self.menu_levels, self.main_window_geometry)
+        #sleep briefly to allow new page to be generated
+        time.sleep(0.1)
+        #close current pop-up page
+        self.close()
+
+    def root_page(self):
+        '''function that returns pop-up window to root menu level page'''
+
+        #create new pop-up page for root menu level
+        self.new_window = pop_up_window(self.menu_root, [], self.main_window_geometry)
+        #sleep briefly to allow new page to be generated
+        time.sleep(0.1)
+        #close current pop-up page
+        self.close()
+
+    def previous_page(self):
+        '''function that returns pop-up window to previous menu level page'''
+
+        #create new pop-up page for previous menu level
+        self.new_window = pop_up_window(self.menu_root, self.menu_levels[:-1], self.main_window_geometry)
+        #sleep briefly to allow new page to be generated
+        time.sleep(0.1)
+        #close current pop-up page
+        self.close()
 
     def select_all(self):
         '''function to select all checkboxes'''
@@ -381,16 +567,16 @@ class pop_up_window(QtWidgets.QWidget):
                 self.page_memory['checkboxes'][element][checkbox_ii].setCheckState(QtCore.Qt.Unchecked) 
         
         #map default variables to positional indices
-        if 'map_vars' in list(self.menu_level['checkboxes'].keys()):
-            default_inds = [np.where(self.menu_level['checkboxes']['map_vars'] == default_var)[0][0] for default_var in self.menu_level['checkboxes']['remove_default']]
+        if 'map_vars' in list(self.menu_current['checkboxes'].keys()):
+            default_inds = [np.where(self.menu_current['checkboxes']['map_vars'] == default_var)[0][0] for default_var in self.menu_current['checkboxes']['remove_default']]
         else:
-            default_inds = [np.where(self.menu_level['checkboxes']['labels'] == default_var)[0][0] for default_var in self.menu_level['checkboxes']['remove_default']]
+            default_inds = [np.where(self.menu_current['checkboxes']['labels'] == default_var)[0][0] for default_var in self.menu_current['checkboxes']['remove_default']]
 
         #now select only desired default checkboxes
         for element in self.page_memory['checkboxes']['ordered_elements']:
             for default_ind in default_inds:
                 self.page_memory['checkboxes'][element][default_ind].setCheckState(QtCore.Qt.Checked)
-        
+
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
 
@@ -400,35 +586,51 @@ class pop_up_window(QtWidgets.QWidget):
 
         #take everything from page memory dictionary and put it back into menu level object 
         
-        #iterate through grid type
-        for grid_type in list(self.page_memory.keys()):
-            for element in self.page_memory[grid_type]['ordered_elements']:
-                #if grid type == 'checkboxes', get variable names of all checkboxes ticked
-                if grid_type == 'checkboxes':
+        #iterate through menu types
+        for menu_type in list(self.page_memory.keys()):
+            for element in self.page_memory[menu_type]['ordered_elements']:
+                #if menu type == 'checkboxes', get variable names of all checkboxes ticked
+                if menu_type == 'checkboxes':
                     selected_vars = []
-                    for checkbox_ii, checkbox in enumerate(self.page_memory[grid_type][element]):
+                    for checkbox_ii, checkbox in enumerate(self.page_memory[menu_type][element]):
                         if checkbox.checkState() == QtCore.Qt.Checked:
                             #map selected position index to variable name
-                            if 'map_vars' in list(self.menu_level[grid_type].keys()):
-                                selected_vars.append(self.menu_level[grid_type]['map_vars'][checkbox_ii])       
+                            if 'map_vars' in list(self.menu_current[menu_type].keys()):
+                                selected_vars.append(self.menu_current[menu_type]['map_vars'][checkbox_ii])       
                             else:
-                                selected_vars.append(self.menu_level[grid_type]['labels'][checkbox_ii])
-                    self.menu_level[grid_type][element] = selected_vars 
-                #if grid type == 'rangeboxes', get current values of all rangeboxes
-                #if grid_type == 'rangeboxes':
-                    
-#--------------------------------------------------------------------------------#
-#--------------------------------------------------------------------------------#
-class generate_Providentia_dashboard(QtWidgets.QWidget):
+                                selected_vars.append(self.menu_current[menu_type]['labels'][checkbox_ii])
+                    #update previous selected variable
+                    if element == 'keep_selected':
+                        self.menu_current[menu_type]['previous_keep_selected'] = copy.deepcopy(self.menu_current[menu_type]['keep_selected'])
+                    elif element == 'remove_selected':
+                        self.menu_current[menu_type]['previous_keep_selected'] = copy.deepcopy(self.menu_current[menu_type]['remove_selected'])
+                    #update selected variable
+                    self.menu_current[menu_type][element] = selected_vars 
+                #if menu type == 'rangeboxes', get current values of all rangeboxes
+                if menu_type == 'rangeboxes':
+                    set_vals = []
+                    for rangebox in self.page_memory[menu_type][element]:
+                        set_vals.append(rangebox.text())
+                    #update previous set variable
+                    if element == 'current_lower':
+                        self.menu_current[menu_type]['previous_lower'] = copy.deepcopy(self.menu_current[menu_type]['current_lower'])
+                    elif element == 'current_upper':
+                        self.menu_current[menu_type]['previous_upper'] = copy.deepcopy(self.menu_current[menu_type]['current_upper'])
+                    #update set value
+                    self.menu_current[menu_type][element] = set_vals
 
-    '''define class that generates Providentia dashboard'''     
+#--------------------------------------------------------------------------------#
+#--------------------------------------------------------------------------------#
+class Providentia_main_window(QtWidgets.QWidget):
+
+    '''define class that generates Providentia main window'''     
  
     #create signals that are fired upon resizing/moving of main Providentia window
     resized = QtCore.pyqtSignal()
     move = QtCore.pyqtSignal()   
  
     def __init__(self, read_type):
-        super(generate_Providentia_dashboard, self).__init__()
+        super(Providentia_main_window, self).__init__()
         
         #put read_type into self
         self.read_type = read_type
@@ -439,17 +641,18 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #setup callback events upon resizing/moving of Providentia window 
         self.resized.connect(self.get_geometry)
         self.move.connect(self.get_geometry)
+
     #------------------------------------------------------------------------#
 
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
         self.resized.emit()
-        return super(generate_Providentia_dashboard, self).resizeEvent(event)
+        return super(Providentia_main_window, self).resizeEvent(event)
 
     def moveEvent(self, event):
         '''Function to overwrite default PyQt5 moveEvent function --> for calling get_geometry'''
         self.move.emit()
-        return super(generate_Providentia_dashboard, self).moveEvent(event)
+        return super(Providentia_main_window, self).moveEvent(event)
 
     def get_geometry(self):
         '''Get current geometry of main Providentia window'''
@@ -470,19 +673,9 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         parent_layout.setSpacing(0)
         parent_layout.setContentsMargins(0,0,0,0)
 
-        #setup dictionary charactesing formats of different titles/buttons etc.
-        self.formatting_dict = {'title_menu':             {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20, 'underline':True},
-                                'label_menu':             {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
-                                'button_menu':            {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
-                                'checkbox_menu':          {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
-                                'combobox_menu':          {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
-                                'lineedit_menu':          {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
-                                'title_popup':            {'font':QtGui.QFont("Freesans", 14), 'colour':'black', 'height':25, 'underline':True},
-                                'selection_button_popup': {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20},
-                                'navigation_button_popup':{'font':QtGui.QFont("Freesans", 11), 'colour':'black', 'height':24},
-                                'checkbox_popup':         {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':18},
-                                'rangebox_popup':         {'font':QtGui.QFont("Freesans", 10), 'colour':'black', 'height':20}
-                               }
+        #define stylesheet for tooltips
+        self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family())) 
+
         #------------------------------------------------------------------------#
         #setup configuration bar with combo boxes, input boxes and buttons
         #use a gridded layout to place objects
@@ -495,98 +688,98 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         config_bar.setAlignment(QtCore.Qt.AlignLeft) 
 
         #define all configuration box objects (labels, comboboxes etc.)
-        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text = "Data Selection"), self.formatting_dict['title_menu'])
+        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text = "Data Selection"), formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
-        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), self.formatting_dict['button_menu'])
+        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
         self.bu_read.setFixedWidth(40)
         self.bu_read.setStyleSheet("color: red;")
         self.bu_read.setToolTip('Read selected configuration of data into memory')
-        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), self.formatting_dict['checkbox_menu'])
+        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), formatting_dict['checkbox_menu'])
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
-        self.cb_network = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_network.setFixedWidth(95)
         self.cb_network.setToolTip('Select providing observational data network')
-        self.cb_resolution = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_resolution.setFixedWidth(95)
         self.cb_resolution.setToolTip('Select temporal resolution of data')
-        self.cb_matrix = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_matrix = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_matrix.setFixedWidth(95)
         self.cb_matrix.setToolTip('Select data matrix')
-        self.cb_species = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_species = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_species.setFixedWidth(95)
         self.cb_species.setToolTip('Select species')
-        self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
         self.le_start_date.setFixedWidth(70)
         self.le_start_date.setToolTip('Set data start date: YYYYMMDD')
-        self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
         self.le_end_date.setFixedWidth(70)
         self.le_end_date.setToolTip('Set data end date: YYYYMMDD')
-        self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), self.formatting_dict['button_menu'])
+        self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), formatting_dict['button_menu'])
         self.bu_QA.setFixedWidth(46)
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
-        self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), self.formatting_dict['button_menu'])
+        self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), formatting_dict['button_menu'])
         self.bu_flags.setFixedWidth(46)
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
-        self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), self.formatting_dict['button_menu'])
+        self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), formatting_dict['button_menu'])
         self.bu_experiments.setFixedWidth(46)
         self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
-        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text = "Data Filter"), self.formatting_dict['title_menu'])
+        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text = "Data Filter"), formatting_dict['title_menu'])
         self.lb_data_filter.setFixedWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
-        self.bu_pc_min = set_formatting(QtWidgets.QPushButton('% MIN', self), self.formatting_dict['button_menu'])
-        self.bu_pc_min.setFixedWidth(46)
-        self.bu_pc_min.setToolTip('Select minimum % desired representativity in data across whole record and specific temporal periods')
-        self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), self.formatting_dict['button_menu'])
+        self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), formatting_dict['button_menu'])
+        self.bu_rep.setFixedWidth(46)
+        self.bu_rep.setToolTip('Select % desired representativity in data across whole record and for specific temporal periods')
+        self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), formatting_dict['button_menu'])
         self.bu_meta.setFixedWidth(46)
         self.bu_meta.setToolTip('Select metadata to filter by')
-        self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), self.formatting_dict['button_menu'])
+        self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), formatting_dict['button_menu'])
         self.bu_period.setFixedWidth(50)
         self.bu_period.setToolTip('Select data in specific periods')
-        self.bu_screen = set_formatting(QtWidgets.QPushButton('FILTER', self), self.formatting_dict['button_menu'])
+        self.bu_screen = set_formatting(QtWidgets.QPushButton('FILTER', self), formatting_dict['button_menu'])
         self.bu_screen.setFixedWidth(50)
         self.bu_screen.setStyleSheet("color: blue;")
         self.bu_screen.setToolTip('Filter data')
-        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text = "Bounds"), self.formatting_dict['label_menu'])
+        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text = "Bounds"), formatting_dict['label_menu'])
         self.lb_data_bounds.setFixedWidth(47)
         self.lb_data_bounds.setToolTip('Set lower/upper bounds of data')
-        self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
         self.le_minimum_value.setFixedWidth(60)
         self.le_minimum_value.setToolTip('Set lower bound of data')
-        self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
         self.le_maximum_value.setFixedWidth(60)
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
-        self.lb_z = set_formatting(QtWidgets.QLabel(self, text = "Map Z"), self.formatting_dict['title_menu'])
+        self.lb_z = set_formatting(QtWidgets.QLabel(self, text = "Map Z"), formatting_dict['title_menu'])
         self.lb_z.setToolTip('Set map Z statistic')
-        self.cb_z_stat = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_z_stat.setFixedWidth(80)
         self.cb_z_stat.setToolTip('Select map Z statistic')
-        self.cb_z1 = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_z1.setFixedWidth(125)
         self.cb_z1.setToolTip('Select Z1 dataset')
-        self.cb_z2 = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_z2.setFixedWidth(125)
         self.cb_z2.setToolTip('Select Z2 dataset')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
-        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text = "Exp. Bias"), self.formatting_dict['title_menu'])
+        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text = "Exp. Bias"), formatting_dict['title_menu'])
         self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
-        self.cb_experiment_bias_type = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_experiment_bias_type = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_experiment_bias_type.setFixedWidth(100)
         self.cb_experiment_bias_type.setToolTip('Select experiment bias type')
-        self.cb_experiment_bias_stat = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_experiment_bias_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_experiment_bias_stat.setFixedWidth(100)
         self.cb_experiment_bias_stat.setToolTip('Select experiment bias statistic')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
-        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text = "Site Select"), self.formatting_dict['title_menu'])
+        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text = "Site Select"), formatting_dict['title_menu'])
         self.lb_station_selection.setToolTip('Select stations')
-        self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), self.formatting_dict['checkbox_menu'])
+        self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), formatting_dict['checkbox_menu'])
         self.ch_select_all.setToolTip('Select all stations')
-        self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), self.formatting_dict['checkbox_menu'])
+        self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), formatting_dict['checkbox_menu'])
         self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
 
         #position objects on gridded configuration bar
@@ -604,7 +797,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         config_bar.addWidget(self.bu_experiments, 2, 3)
         config_bar.addWidget(self.vertical_splitter_1, 0, 5, 3, 1)
         config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_pc_min, 1, 6)
+        config_bar.addWidget(self.bu_rep, 1, 6)
         config_bar.addWidget(self.bu_meta, 2, 6)
         config_bar.addWidget(self.bu_period, 1, 7)
         config_bar.addWidget(self.bu_screen, 2, 7) 
@@ -634,10 +827,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.le_end_date.textChanged.connect(self.config_bar_params_change_handler)
 
         #setup pop-up window menu tree for flags
-        self.flag_menu = {}
-        self.flag_menu['window_title'] = 'FLAGS'
-        self.flag_menu['page_title'] = 'Select standardised data reporter provided flags to filter by'
-        self.flag_menu['checkboxes'] = {}
+        self.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
         self.flag_menu['checkboxes']['labels'] = np.array(sorted(standard_data_flag_name_to_data_flag_code, key=standard_data_flag_name_to_data_flag_code.get))
         self.flag_menu['checkboxes']['remove_default'] = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20, 21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 90, 150, 154, 155, 156, 157], dtype=np.uint8)
         self.flag_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
@@ -645,10 +835,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.flag_menu['select_buttons'] = ['all','clear','default']
 
         #setup pop-up window menu tree for qa
-        self.qa_menu = {}
-        self.qa_menu['window_title'] = 'QA'
-        self.qa_menu['page_title'] = 'Select standardised data reporter provided flags to filter by'
-        self.qa_menu['checkboxes'] = {}
+        self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
         self.qa_menu['checkboxes']['labels'] = np.array(sorted(standard_QA_name_to_QA_code, key=standard_QA_name_to_QA_code.get))
         self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 4, 5, 7, 8, 10, 12, 13, 14, 17, 18, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
         self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
@@ -656,10 +843,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.qa_menu['select_buttons'] = ['all','clear','default'] 
 
         #setup pop-up window menu tree for experiments
-        self.experiments_menu = {}
-        self.experiments_menu['window_title'] = 'EXPERIMENTS'
-        self.experiments_menu['page_title'] = 'Select Experiment/s'
-        self.experiments_menu['checkboxes'] = {}
+        self.experiments_menu = {'window_title':'EXPERIMENTS', 'page_title':'Select Experiment/s', 'checkboxes':{}}
         self.experiments_menu['checkboxes']['labels'] = []
         self.experiments_menu['checkboxes']['keep_default'] = []
         self.experiments_menu['checkboxes']['keep_selected'] = []
@@ -667,22 +851,58 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         self.experiments_menu['select_buttons'] = ['all','clear','default']   
 
         #setup pop-up window menu tree for metadata
-        self.metadata_menu = {}
-        self.metadata_menu['window_title'] = 'METADATA'
-        self.metadata_menu['page_title'] = 'Select metadata type to filter stations by'
-        self.metadata_menu['navigation_buttons'] = {}
-        self.metadata_menu['navigation_buttons']['keys'] = ['stn_pos', 'stn_class', 'globally_gridded', 'measurement']
-        self.metadata_menu['navigation_buttons']['labels'] = ['STATION POSITION', 'STATION CLASSIFICATIONS', 'GLOBALLY GRIDDED CLASSIFICATIONS', 'MEASUREMENT PROCESS INFORMATION']
-        self.metadata_menu['stn_pos'] = {'page_title':'Filter stations by position', 'rangeboxes':{}}
-        self.metadata_menu['stn_pos']['rangeboxes']['labels'] = ['latitude','longitude','altitude', 'sampling_height', 'measurement_altitude']
-        self.metadata_menu['stn_pos']['rangeboxes']['current_lower'] = [''] * len(self.metadata_menu['stn_pos']['rangeboxes']['labels']) 
-        self.metadata_menu['stn_pos']['rangeboxes']['current_upper'] = [''] * len(self.metadata_menu['stn_pos']['rangeboxes']['labels']) 
+        self.metadata_types =  {'STATION POSITION':'Filter stations by measurement position', 
+                                'STATION CLASSIFICATIONS':'Filter stations by station provided classifications', 
+                                'STATION MISCELLANEOUS':'Filter stations by miscellaneous station provided metadata', 
+                                'GLOBALLY GRIDDED CLASSIFICATIONS':'Filter stations by globally gridded classifications', 
+                                'MEASUREMENT PROCESS INFORMATION':'Filter stations by measurement process information'}
+        self.metadata_menu = {'window_title':'METADATA', 'page_title':'Select metadata type to filter stations by', 'navigation_buttons':{}}
+        self.metadata_menu['navigation_buttons']['labels'] = list(self.metadata_types.keys())
+        self.metadata_menu['navigation_buttons']['tooltips'] = [self.metadata_types[key] for key in self.metadata_menu['navigation_buttons']['labels']]       
+        for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
+            self.metadata_menu[metadata_type] = {'window_title':metadata_type,'page_title':self.metadata_menu['navigation_buttons']['tooltips'][metadata_type_ii], 'navigation_buttons':{}, 'rangeboxes':{}}
+            self.metadata_menu[metadata_type]['navigation_buttons']['labels'] = [metadata_name for metadata_name in standard_metadata.keys() if (standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (standard_metadata[metadata_name]['data_type'] == np.object)]
+            self.metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = [standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['navigation_buttons']['labels']]
+            for label in self.metadata_menu[metadata_type]['navigation_buttons']['labels']:
+                self.metadata_menu[metadata_type][label] = {'window_title':label,'page_title':'Filter stations by unique {} metadata'.format(label), 'checkboxes':{}}  
+                self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['previous_keep_selected'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['previous_remove_selected'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['keep_default'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['remove_default'] = []
+            #self.metadata_menu[metadata_type]['rangeboxes']['previous_labels'] = []
+            self.metadata_menu[metadata_type]['rangeboxes']['labels'] = [metadata_name for metadata_name in standard_metadata.keys() if (standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (standard_metadata[metadata_name]['data_type'] != np.object)]
+            self.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = [standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['rangeboxes']['labels']]
+            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
+            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
+            self.metadata_menu[metadata_type]['rangeboxes']['previous_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
+            self.metadata_menu[metadata_type]['rangeboxes']['previous_upper'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
+            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
+            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
 
+        #setup pop-up window menu tree for % data representativity 
+        self.representativity_menu = {'window_title':'% DATA REPRESENTATIVITY', 'page_title':'Select % Data Representativity Bounds', 'rangeboxes':{}}
+        #self.representativity_menu['rangeboxes']['previous_labels'] = [] 
+        self.representativity_menu['rangeboxes']['labels'] = [] 
+        self.representativity_menu['rangeboxes']['tooltips'] = [] 
+        self.representativity_menu['rangeboxes']['current_lower'] = []   
+        #self.representativity_menu['rangeboxes']['current_upper'] = [] 
+
+        #setup pop-up window menu tree for data periods
+        self.period_menu = {'window_title':'DATA PERIOD', 'page_title':'Select Data Periods', 'checkboxes':{}}
+        self.period_menu['checkboxes']['labels'] = []
+        self.period_menu['checkboxes']['keep_selected'] = []
+        self.period_menu['checkboxes']['remove_selected'] = []
+        
         #enable pop up configuration windows
         self.bu_flags.clicked.connect(partial(self.generate_pop_up_window,self.flag_menu))
         self.bu_QA.clicked.connect(partial(self.generate_pop_up_window,self.qa_menu))
         self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window,self.experiments_menu)) 
         self.bu_meta.clicked.connect(partial(self.generate_pop_up_window,self.metadata_menu)) 
+        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window,self.representativity_menu)) 
+        self.bu_period.clicked.connect(partial(self.generate_pop_up_window,self.period_menu)) 
         
         #initialise configuration bar fields
         self.config_bar_initialisation = True
@@ -748,19 +968,14 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #maximise window to fit screen
         self.showMaximized()  
 
-        #save screen max height/width variables to self
-        sizeObject = QtWidgets.QDesktopWidget().screenGeometry(-1)
-        self.max_height = sizeObject.height()
-        self.max_width = sizeObject.width()
-
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
 
-    def generate_pop_up_window(self, menu_level):
+    def generate_pop_up_window(self, menu_root):
 
         '''generate pop up window'''
         
-        self.pop_up_window = pop_up_window(menu_level, self.main_window_geometry, self.formatting_dict)
+        self.pop_up_window = pop_up_window(menu_root, [], self.main_window_geometry)
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
@@ -802,10 +1017,10 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             #set initial time array to be None
             self.time_array = None      
 
+            self.relevant_yearmonths = None
+
             #set initial station references to be empty list
             self.station_references = []
-            #set initial unique station methods to be empty list
-            self.station_unique_methods = [] 
         
             #--------------------------------------------------------------------------------------#
             #gather all observational data
@@ -1183,14 +1398,20 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #has date range changed? 
         if (read_all == True) or (read_left == True) or (read_right == True) or (cut_left == True) or (cut_right == True):         
 
+            st = time.time()
+
             #set new active time array/unique station references/longitudes/latitudes
             #adjust data arrays to account for potential changing number of stations 
             self.read_setup()
+
+            print(1, time.time()-st)
 
             #need to re-read all observations/experiments?
             if read_all == True:
                 #reset data in memory dictionary
                 self.data_in_memory = {}
+                self.plotting_params = {}
+                self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))  
                 #read observations
                 self.read_data('observations', self.active_start_date, self.active_end_date)    
                 #read selected experiments (iterate through)
@@ -1206,53 +1427,94 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                     old_station_inds = np.where(np.in1d(self.previous_station_references, self.station_references))[0]
                     #get indices of stations in current station references array that were in previous station references array
                     new_station_inds = np.where(np.in1d(self.station_references, self.previous_station_references))[0]
-                    
+
+                    new_metadata_array = np.full((len(self.station_references), len(self.previous_relevant_yearmonths)), np.NaN, dtype=metadata_dtype) 
+                    new_metadata_array[new_station_inds,:] = self.metadata_in_memory[old_station_inds,:]
+                    self.metadata_in_memory = new_metadata_array
+
                     #iterate through all keys in data in memory dictionary
                     for data_label in list(self.data_in_memory.keys()):
-                        #create new data array in shape of current station references array, putting the old data into new array in the correct positions
-                        new_data_array = np.full((len(self.station_references),len(self.previous_time_array)), np.NaN, dtype=np.float32)
-                        new_data_array[new_station_inds,:] = self.data_in_memory[data_label]['data'][old_station_inds,:]
+                        #create new data array in shape of current station references array
+                        if data_label == 'observations':
+                            new_data_array = np.full((len(self.station_references),len(self.previous_time_array)), np.NaN, dtype=data_dtype)                        
+                        else:
+                            new_data_array = np.full((len(self.station_references),len(self.previous_time_array)), np.NaN, dtype=data_dtype[:1])
+                        #put the old data into new array in the correct positions
+                        new_data_array[new_station_inds,:] = self.data_in_memory[data_label][old_station_inds,:]
                         #overwrite data array with reshaped version
-                        self.data_in_memory[data_label]['data'] = new_data_array
-                
+                        self.data_in_memory[data_label] = new_data_array
+
             #need to cut edges?
             if (cut_left == True) or (cut_right == True):
 
                 #set default edge limits as current edges
-                left_edge_ind = 0
-                right_edge_ind = len(self.previous_time_array)
+                data_left_edge_ind = 0
+                data_right_edge_ind = len(self.previous_time_array)
+
+                metadata_left_edge_ind = 0
+                metadata_right_edge_ind = len(self.previous_relevant_yearmonths)
 
                 #need to cut on left data edge?                                                                                      
                 if cut_left == True:
-                    left_edge_ind = np.where(self.previous_time_array == self.time_array[0])[0][0]
-                
+                    data_left_edge_ind = np.where(self.previous_time_array == self.time_array[0])[0][0]
+                    new_relative_delta = relativedelta(datetime.datetime(int(self.relevant_yearmonths[0][:4]), int(self.relevant_yearmonths[0][4:6]), 1, 0, 0), datetime.datetime(int(self.previous_relevant_yearmonths[0][:4]), int(self.previous_relevant_yearmonths[0][4:6]), 1, 0, 0))
+                    metadata_left_edge_ind = (new_relative_delta.years*12)+new_relative_delta.months               
+
                 #need to cut on right data edge?
                 if cut_right == True:
-                    right_edge_ind = np.where(self.previous_time_array == self.time_array[-1])[0][0]+1
+                    data_right_edge_ind = np.where(self.previous_time_array == self.time_array[-1])[0][0]+1
+                    new_relative_delta = relativedelta(datetime.datetime(int(self.relevant_yearmonths[-1][:4]), int(self.relevant_yearmonths[-1][4:6]), 1, 0, 0), datetime.datetime(int(self.previous_relevant_yearmonths[-1][:4]), int(self.previous_relevant_yearmonths[-1][4:6]), 1, 0, 0))
+                    metadata_right_edge_ind = (new_relative_delta.years*12)+new_relative_delta.months                 
 
                 #iterate through all keys in data in memory dictionary and cut edges of the associated arrays appropriately 
                 for data_label in list(self.data_in_memory.keys()):
-                    self.data_in_memory[data_label]['data'] = self.data_in_memory[data_label]['data'][:,left_edge_ind:right_edge_ind]
+                    self.data_in_memory[data_label] = self.data_in_memory[data_label][:,data_left_edge_ind:data_right_edge_ind]
+                    self.metadata_in_memory = self.metadata_in_memory[:,metadata_left_edge_ind:metadata_right_edge_ind]
 
             #need to read on left edge?
             if read_left == True:
                 #get n number of new elements on left edge
-                n_new_left_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
+                n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
+                new_relative_delta = relativedelta(datetime.datetime(int(self.previous_relevant_yearmonths[0][:4]), int(self.previous_relevant_yearmonths[0][4:6]), 1, 0, 0), datetime.datetime(int(self.relevant_yearmonths[0][:4]), int(self.relevant_yearmonths[0][4:6]), 1, 0, 0))
+                n_new_left_metadata_inds = (new_relative_delta.years*12)+new_relative_delta.months
+                self.metadata_inds_to_fill = np.arange(0, n_new_left_metadata_inds)   
+                self.metadata_in_memory = np.concatenate((np.full((len(self.station_references),n_new_left_metadata_inds),np.NaN, dtype=metadata_dtype), self.metadata_in_memory), axis=1)
+
                 #iterate through all keys in data in memory dictionary and insert read data on left edge of the associated arrays 
                 for data_label in list(self.data_in_memory.keys()):
                     #add space on left edge to insert new read data
-                    self.data_in_memory[data_label]['data'] = np.insert(self.data_in_memory[data_label]['data'], 0, np.full((len(self.station_references),n_new_left_inds),np.NaN), axis=0)
+                    if data_label == 'observations':
+                        self.data_in_memory[data_label] = np.concatenate((np.full((len(self.station_references),n_new_left_data_inds),np.NaN, dtype=data_dtype), self.data_in_memory[data_label]), axis=1)
+                    else:
+                        self.data_in_memory[data_label] = np.concatenate((np.full((len(self.station_references),n_new_left_data_inds),np.NaN, dtype=data_dtype[:1]), self.data_in_memory[data_label]), axis=1)
                     self.read_data(data_label, self.active_start_date, self.previous_active_start_date)
 
             #need to read on right edge?
             if read_right == True:
                 #get n number of new elements on right edge
-                n_new_right_inds = (len(self.time_array) - 1) - np.where(self.time_array == self.previous_time_array[-1])[0][0]
+                n_new_right_data_inds = (len(self.time_array) - 1) - np.where(self.time_array == self.previous_time_array[-1])[0][0]
+                new_relative_delta = relativedelta(datetime.datetime(int(self.relevant_yearmonths[-1][:4]), int(self.relevant_yearmonths[-1][4:6]), 1, 0, 0), datetime.datetime(int(self.previous_relevant_yearmonths[-1][:4]), int(self.previous_relevant_yearmonths[-1][4:6]), 1, 0, 0))
+                n_new_right_metadata_inds = (new_relative_delta.years*12)+new_relative_delta.months
+                self.metadata_inds_to_fill = np.arange(-n_new_right_metadata_inds, 0)                 
+                self.metadata_in_memory = np.concatenate((self.metadata_in_memory,np.full((len(self.station_references),n_new_right_metadata_inds),np.NaN, dtype=metadata_dtype)), axis=1)
+
                 #iterate through all keys in data in memory dictionary and insert read data on right edge of the associated arrays
                 for data_label in list(self.data_in_memory.keys()):
-                    self.data_in_memory[data_label]['data'] = np.append(self.data_in_memory[data_label]['data'], np.full((len(self.station_references),n_new_right_inds),np.NaN), axis=0)
+                    if data_label == 'observations':
+                        self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full((len(self.station_references),n_new_right_data_inds),np.NaN, dtype=data_dtype)), axis=1)
+                    else:
+                        self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full((len(self.station_references),n_new_right_data_inds),np.NaN, dtype=data_dtype[:1])), axis=1)
                     self.read_data(data_label, self.previous_active_end_date, self.active_end_date)
         
+            print(2, time.time()-st)
+
+            #update menu object fields
+            self.update_metadata_fields()
+            self.update_representativity_fields()
+            self.update_period_fields()
+
+            print(3, time.time()-st)
+
         #if have new experiments to read, then read them now
         if len(experiments_to_read) > 0:
             for data_label in experiments_to_read:
@@ -1330,6 +1592,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
         '''function that setups key variables for new read of observational/experiment data
            a time array and arrays of unique station references/longitudes/latitudes are created.
+           also, all station metadata is read.
         '''        
 
         #force garbage collection (to avoid memory issues)
@@ -1340,6 +1603,8 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
         #set current station references, as previous station references 
         self.previous_station_references = self.station_references
+
+        self.previous_relevant_yearmonths = self.relevant_yearmonths
 
         #get N time chunks between desired start date and end date to set time array
         if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
@@ -1354,110 +1619,50 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
 
         #get all relevant observational files
         file_root = '%s/%s/%s/%s/%s/%s_'%(obs_root, self.active_network, GHOST_version, self.active_resolution, self.active_species, self.active_species)
-        relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species]])       
+        self.relevant_yearmonths = sorted([str(yyyymm) for yyyymm in self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species]])
+        relevant_files = sorted([file_root+yyyymm[:6]+'.nc' for yyyymm in self.relevant_yearmonths])       
+        #self.monthly_inds = np.array([np.arange(len(self.time_array))[np.all([self.time_array >= datetime.datetime.strptime(start_yyyymm, '%Y%m%d'), self.time_array < datetime.datetime.strptime(self.relevant_yearmonths[month_ii+1], '%Y%m%d')], axis=0)] if month_ii != (len(self.relevant_yearmonths)-1) else np.arange(len(self.time_array))[self.time_array >= datetime.datetime.strptime(start_yyyymm, '%Y%m%d')] for month_ii, start_yyyymm in enumerate(self.relevant_yearmonths)])
+        self.N_inds_per_month = np.array([np.count_nonzero(np.all([self.time_array >= datetime.datetime.strptime(start_yyyymm, '%Y%m%d'), self.time_array < datetime.datetime.strptime(self.relevant_yearmonths[month_ii+1], '%Y%m%d')], axis=0)) if month_ii != (len(self.relevant_yearmonths)-1) else np.count_nonzero(self.time_array >= datetime.datetime.strptime(start_yyyymm, '%Y%m%d')) for month_ii, start_yyyymm in enumerate(self.relevant_yearmonths)])
 
         #redefine some key variables globally (for access by parallel netCDF reading functions)
         global time_array, active_species, selected_qa, selected_flags
         time_array = self.time_array
         active_species = self.active_species   
-        selected_qa = copy.deepcopy(self.active_qa)
-        selected_flags = copy.deepcopy(self.active_flags)
-
-        #------------------------------------------------------------------------------------#
-        #iterate through all relevant observational files and read station references/longitudes/latitudes (either in serial/parallel)
-
-        #define dictionary to store all read metadata (i.e. per file)
-        all_read_metadata = {}    
-
-        #define dictionary with metadata variables to read, with associated data types
-        metadata_dict = {'station_reference':np.object,
-                         'station_name':np.object,
-                         'latitude':np.float32, 
-                         'longitude':np.float32,
-                         'measurement_altitude':np.float32,
-                         'country':np.object,
-                         'network':np.object,
-                         'standardised_network_provided_area_classification':np.object,
-                         'standardised_network_provided_station_classification':np.object,
-                         'standardised_network_provided_main_emission_source':np.object,
-                         'standardised_network_provided_land_use':np.object,
-                         'standardised_network_provided_terrain':np.object,
-                         'standardised_network_provided_measurement_scale':np.object,
-                         'representative_radius':np.float32,
-                         'GSFC_coastline_proximity':np.float32,
-                         'primary_sampling_type':np.object,
-                         'sample_preparation_types':np.object,
-                         'measurement_methodology':np.object,  
-                         'measuring_instrument_name':np.object,    
-                         'measuring_instrument_sampling_type':np.object
-                        }
-
-        #create list of metadata variables to read (make global)
-        global metadata_vars_to_read
-        metadata_vars_to_read = list(metadata_dict.keys())
+        selected_qa = self.active_qa
+        selected_flags = self.active_flags
 
         #add all metadata variables to read to station metadata dictionary with associated empty numpy arrays of the appropriate type
-        for meta_var in metadata_vars_to_read:
-            all_read_metadata[meta_var] = np.array([], dtype=metadata_dict[meta_var])
-
-        #read serially
-        if self.read_type == 'serial':
-            #iterate through relevant files
-            for relevant_file_ii, relevant_file in enumerate(relevant_files):
-                file_metadata = read_netCDF_station_information(relevant_file)
-                for meta_var in metadata_vars_to_read:
-                    all_read_metadata[meta_var] = np.append(all_read_metadata[meta_var], file_metadata[meta_var])
-                    
-        #read in parallel
-        elif self.read_type == 'parallel':
-
-            #setup pool of N workers on N CPUs
-            pool = multiprocessing.Pool(n_CPUs)
-
-            #read netCDF files in parallel
-            all_file_metadata = pool.map(read_netCDF_station_information, relevant_files)
-            #will not submit more files to pool, so close access to it
-            pool.close()
-            #wait for worker processes to terminate before continuing
-            pool.join()
-
-            #iterate through relevant file data
-            for file_metadata in all_file_metadata:
-                for meta_var in metadata_vars_to_read:
-                    all_read_metadata[meta_var] = np.append(all_read_metadata[meta_var], file_metadata[meta_var])
-
-        #define dictionary to store read metadata, by station, by metadata variable
-        self.station_metadata = {}
-
-        #get unique sorted station references across all files (make global, and also add to self)
         global station_references
-        station_references, unique_indices = np.unique(all_read_metadata['station_reference'], return_index=True)
-        self.station_references = station_references  
+        station_references = []
+        self.station_longitudes = []
+        self.station_latitudes = []
+        for relevant_file in relevant_files:
+            nCDF_root = Dataset(relevant_file) 
+            station_references=np.append(station_references, nCDF_root['station_reference'][:])
+            self.station_longitudes=np.append(self.station_longitudes, nCDF_root['longitude'][:])
+            self.station_latitudes=np.append(self.station_latitudes, nCDF_root['latitude'][:])
+            nCDF_root.close()
+        station_references, station_unique_indices = np.unique(station_references, return_index=True)
+        self.station_references = station_references
+        self.station_longitudes = self.station_longitudes[station_unique_indices]
+        self.station_latitudes = self.station_latitudes[station_unique_indices]
 
-        #get standard measurement methodology per station
-        self.station_methods = np.array([ref.split('_')[-1].split('--')[0] for ref in self.station_references]) 
-
-        #for latitude/longitude/measurement altitude/GSFC coastline proximity variables, set static metadata variables (taking the first available value per station in the given time window)
-        self.station_longitudes = all_read_metadata['longitude'][unique_indices]
-        self.station_latitudes = all_read_metadata['latitude'][unique_indices]
-        self.station_measurement_altitudes = all_read_metadata['measurement_altitude'][unique_indices] 
-        self.station_GSFC_coastline_proximities = all_read_metadata['GSFC_coastline_proximity'][unique_indices] 
-
-        #iterate through each unique station
-        for station_reference in self.station_references:
-            station_inds = np.where(all_read_metadata['station_reference'] == station_reference)[0]
-            #create empty dictionary ro store station specific metadata
-            self.station_metadata[station_reference] = {}
-            #iterate through read metadata variables    
-            for meta_var in metadata_vars_to_read:        
-                #get all unique metadata for variable, by station
-                unique_metadata = np.unique(all_read_metadata[meta_var][station_inds])
-                #append all and unique metadata by station
-                self.station_metadata[station_reference][meta_var] = {'all':all_read_metadata[meta_var][station_inds],'unique':unique_metadata}
-                
         #update measurement units for species (take standard units from parameter dictionary)
         self.measurement_units = parameter_dictionary[self.active_species]['standard_units']
 
+        #set data variables to read (dependent on active data resolution)
+        global data_vars_to_read, data_dtype
+        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
+            data_vars_to_read = [self.active_species, 'hourly_native_representativity_percent' ,'daily_native_representativity_percent' ,'monthly_native_representativity_percent', 'annual_native_representativity_percent', 'hourly_native_max_gap_percent', 'daily_native_max_gap_percent', 'monthly_native_max_gap_percent', 'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code', 'season_code']
+        elif self.active_resolution == 'daily':
+            data_vars_to_read = [self.active_species, 'daily_native_representativity_percent' ,'monthly_native_representativity_percent', 'annual_native_representativity_percent', 'daily_native_max_gap_percent', 'monthly_native_max_gap_percent', 'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code']
+        elif self.active_resolution == 'monthly':
+            data_vars_to_read = [self.active_species, 'monthly_native_representativity_percent', 'annual_native_representativity_percent', 'monthly_native_max_gap_percent', 'annual_native_max_gap_percent', 'season_code']
+  
+        #set data dtype
+        #data_dtype = [(key,np.float32) if key == active_species else (key,np.uint8) for key in data_vars_to_read]
+        data_dtype = [(key,np.float32) for key in data_vars_to_read]
+    
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------# 
 
@@ -1475,7 +1680,6 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             process_type = 'observations'
             file_root = '%s/%s/%s/%s/%s/%s_'%(obs_root, self.active_network, GHOST_version, self.active_resolution, self.active_species, self.active_species)
             relevant_file_start_dates = sorted(self.available_observation_data[self.active_network][self.active_resolution][self.active_matrix][self.active_species])  
-
         else:
             process_type = 'experiment'
             experiment_grid_split = data_label.split('-')
@@ -1500,13 +1704,19 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         #check if data label in data in memory dictionary
         if data_label not in list(self.data_in_memory.keys()):  
             #if not create empty array (filled with NaNs) to store species data and place it in the dictionary
-            self.data_in_memory[data_label] = {'data': np.full((len(self.station_references),len(self.time_array)), np.NaN, dtype=np.float32)}
-        
+            
+            if process_type == 'observations':
+                self.plotting_params['observations'] = {}
+                self.data_in_memory[data_label] = np.full((len(self.station_references),len(self.time_array)), np.NaN, dtype=data_dtype)
+                self.metadata_in_memory = np.full((len(self.station_references), len(self.relevant_yearmonths)), np.NaN, dtype=metadata_dtype)
+
             #if process_type is experiment, get experiment specific grid edges from first relevant file, and save to data in memory dictionary
             if process_type == 'experiment':
+                self.data_in_memory[data_label] = np.full((len(self.station_references),len(self.time_array)), np.NaN, dtype=data_dtype[:1])
+                self.plotting_params[data_label] = {}
                 exp_nc_root = Dataset(relevant_files[0])
-                self.data_in_memory[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
-                self.data_in_memory[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
+                self.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
+                self.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
                 exp_nc_root.close()
 
         #------------------------------------------------------------------------------------#
@@ -1520,7 +1730,7 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
                 #read file
                 file_data, time_indices, full_array_station_indices = read_netCDF_data(relevant_file)
                 #place read data into big array as appropriate
-                self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis,:], time_indices[:,np.newaxis]] = file_data
+                self.data_in_memory[data_label][self.read_instance.active_species][full_array_station_indices[np.newaxis,:], time_indices[:,np.newaxis]] = file_data
      
         #read in parallel 
         elif self.read_type == 'parallel':
@@ -1536,8 +1746,112 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
             pool.join()
 
             #iterate through read file data and place data into data array as appropriate
-            for file_data in all_file_data:
-                self.data_in_memory[data_label]['data'][file_data[2][:,np.newaxis], file_data[1][np.newaxis,:]] = file_data[0]
+            for file_data_ii, file_data in enumerate(all_file_data):
+                self.data_in_memory[data_label][file_data[2][:,np.newaxis], file_data[1][np.newaxis,:]] = file_data[0]
+                if process_type == 'observations':
+                    self.metadata_in_memory[file_data[2][:,np.newaxis], self.metadata_inds_to_fill[file_data_ii]] = file_data[3] 
+
+    #--------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------------# 
+
+    def update_metadata_fields(self):
+
+        '''update the metadata menu object with metadata associated with newly read data
+           for non-numeric metadata gets all the unique fields per metadata variable, and sets the available fields as such,
+           and for numeric gets the minimum and maximum boundaries of each metadata variable, and sets initial boundaries as such
+        '''
+
+        #iterate through metadata variables
+        for meta_var in metadata_vars_to_read:
+
+            meta_var_field = self.metadata_in_memory[meta_var]
+
+            #get metadata variable type/data type
+            metadata_type = standard_metadata[meta_var]['metadata_type']
+            metadata_data_type = standard_metadata[meta_var]['data_type']
+            
+            #remove NaNs from field
+            meta_var_field_nan_removed = meta_var_field[~pd.isnull(meta_var_field)]
+            
+            #update pop-up metadata menu object with read metadata values
+            #for non-numeric metadata gets all the unique fields per metadata variable, and sets the available fields as such
+            if metadata_data_type == np.object:
+                self.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'] = np.unique(meta_var_field_nan_removed)  
+                self.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
+                self.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []   
+            #for numeric fields get the minimum and maximum boundaries of each metadata variable, and sets initial boundaries as such
+            else:
+                meta_var_index = self.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
+                if len(meta_var_field_nan_removed) > 0:
+                    min_val = str(np.min(meta_var_field_nan_removed))
+                    max_val = str(np.max(meta_var_field_nan_removed))
+                    self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = min_val
+                    self.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
+                    self.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = max_val
+                    self.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = max_val
+                else:
+                    self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = 'nan'
+                    self.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
+                    self.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = 'nan'
+                    self.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
+
+    #--------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------------# 
+    
+    def update_representativity_fields(self):
+
+        '''update the data representativity menu -> 1D list of rangebox values
+           dependent on the temporal resolution, some fields will appear or not
+        '''
+
+        #get previous set labels
+        previous_labels = copy.deepcopy(self.representativity_menu['rangeboxes']['labels'])
+
+        #get previously set rangebox values
+        previous_lower = copy.deepcopy(self.representativity_menu['rangeboxes']['current_lower'])
+
+        #hourly temporal resolution?
+        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
+            self.representativity_menu['rangeboxes']['labels'] = ['hourly_native_representativity_percent', 'hourly_native_max_gap_percent', 'daily_native_representativity_percent', 'daily_representativity_percent', 'daily_native_max_gap_percent', 'daily_max_gap_percent', 'monthly_native_representativity_percent', 'monthly_representativity_percent', 'monthly_native_max_gap_percent', 'monthly_max_gap_percent', 'all_representativity_percent', 'all_max_gap_percent']
+        #daily temporal resolution?
+        elif self.active_resolution == 'daily':
+            self.representativity_menu['rangeboxes']['labels'] = ['daily_native_representativity_percent', 'daily_native_max_gap_percent', 'monthly_native_representativity_percent', 'monthly_representativity_percent', 'monthly_native_max_gap_percent', 'monthly_max_gap_percent', 'all_representativity_percent', 'all_max_gap_percent']
+        #monthly temporal resolution?
+        elif self.active_resolution == 'monthly':
+            self.representativity_menu['rangeboxes']['labels'] = ['monthly_native_representativity_percent', 'monthly_native_max_gap_percent', 'all_representativity_percent', 'all_max_gap_percent']
+        
+        #initialise rangebox values --> for data representativity fields the default is 0%, for max gap fields % the default is 100%
+        self.representativity_menu['rangeboxes']['current_lower'] = []
+        for label_ii, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
+            if 'max_gap' in label:
+                self.representativity_menu['rangeboxes']['current_lower'].append('100')
+            else:
+                self.representativity_menu['rangeboxes']['current_lower'].append('0') 
+
+        #set new rangebox values (using previous values where possible)
+        for label_ii, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
+            #label previously existed?
+            if label in previous_labels:
+                self.representativity_menu['rangeboxes']['current_lower'][label_ii] = previous_lower[previous_labels.index(label)]
+
+    #--------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------------# 
+
+    def update_period_fields(self):
+
+        '''update the data period menu -> list of checkboxes
+           dependent on the temporal resolution, some fields will appear or not
+        '''
+
+        #hourly temporal resolution?
+        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
+            self.period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
+        #daily temporal resolution?
+        elif self.active_resolution == 'daily':
+            self.period_menu['checkboxes']['labels'] = ['Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
+        #monthly temporal resolution?
+        elif self.active_resolution == 'monthly':
+            self.period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#    
@@ -1545,13 +1859,12 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
     def update_plotting_parameters(self):
 
         '''function that updates plotting parameters (colour and zorder) for each selected data array'''
-    
-        #assign a colour/zorder to all selected data arrays 
 
+        #assign a colour/zorder to all selected data arrays
         #define observations colour to be 'black'
-        self.data_in_memory['observations']['colour'] = 'black'
+        self.plotting_params['observations']['colour'] = 'black'
         #define zorder of observations to be 5
-        self.data_in_memory['observations']['zorder'] = 5
+        self.plotting_params['observations']['zorder'] = 5
         
         #generate a list of RGB tuples for number of experiments there are
         sns.reset_orig()
@@ -1562,31 +1875,11 @@ class generate_Providentia_dashboard(QtWidgets.QWidget):
         for experiment in sorted(list(self.data_in_memory.keys())):
             if experiment != 'observations':
                 #define colour for experiment
-                self.data_in_memory[experiment]['colour'] = clrs[experiment_ind-1]
+                self.plotting_params[experiment]['colour'] = clrs[experiment_ind-1]
                 #define zorder for experiment (obs zorder + experiment_ind)
-                self.data_in_memory[experiment]['zorder'] = self.data_in_memory['observations']['zorder'] + experiment_ind
+                self.plotting_params[experiment]['zorder'] = self.plotting_params['observations']['zorder'] + experiment_ind
                 #update count of experiments
                 experiment_ind +=1
-
-#--------------------------------------------------------------------------------#
-#--------------------------------------------------------------------------------#
-
-def read_netCDF_station_information(relevant_file):
-
-    '''function that handles reading of observational desired station metadata in a netCDF file, returning a dictionary with read metadata'''
-
-    #read netCDF frame
-    nCDF_root = Dataset(relevant_file) 
-
-    #read all desired metadata, placing it within a dictionary by variable name
-    read_metadata = {}
-    for meta_var in metadata_vars_to_read:
-        read_metadata[meta_var] = nCDF_root[meta_var][:]
-
-    #close netCDF
-    nCDF_root.close()
-
-    return read_metadata
 
 #--------------------------------------------------------------------------------#
 #--------------------------------------------------------------------------------#
@@ -1626,29 +1919,47 @@ def read_netCDF_data(relevant_file):
     #get indices of file station station references that are contained in all unique station references array
     current_file_station_indices = np.where(np.in1d(file_station_references, station_references))[0]
 
-    #read in species data
-    file_data = nCDF_root[active_species][:,valid_file_time_indices]
-    #get masked data 
-    data_mask = file_data.mask
-    #set masked data as NaN
-    file_data[data_mask] = np.NaN    
+    
+    #file_data = np.full((len(current_file_station_indices), len(valid_file_time_indices)), np.NaN, data_dtype)
+    #for data_var in data_vars_to_read:
+    #    read_data = nCDF_root[data_var][current_file_station_indices,valid_file_time_indices]
+        #get masked data 
+        #data_mask = read_data.mask
+        #set masked data as NaN
+        #read_data[data_mask] = np.NaN    
 
     #for observations, set species data based on selected qa flags/standard data provider flags to retain or remove as NaN
     if process_type == 'observations':
+        file_data = np.full((len(current_file_station_indices), len(valid_file_time_indices)), np.NaN, dtype=data_dtype)
+        for data_var in data_vars_to_read:
+            file_data[data_var][:,:] = nCDF_root[data_var][current_file_station_indices,valid_file_time_indices]
+
         #if some qa flags selected then screen
         if len(selected_qa) > 0:
             #screen out observations which are associated with any of the selected qa flags
-            file_data[np.isin(nCDF_root['qa'][:,valid_file_time_indices,:], selected_qa).any(axis=2)] = np.NaN
+            file_data[active_species][np.isin(nCDF_root['qa'][:,valid_file_time_indices,:], selected_qa).any(axis=2)] = np.NaN
         #if some data provider flags selected then screen
         if len(selected_flags) > 0:
             #screen out observations which are associated with any of the selected data provider flags
-            file_data[np.isin(nCDF_root['flag'][:,valid_file_time_indices,:], selected_flags).any(axis=2)] = np.NaN
+            file_data[active_species][np.isin(nCDF_root['flag'][:,valid_file_time_indices,:], selected_flags).any(axis=2)] = np.NaN
+        
+        #get file metadata
+        file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
+        for meta_var in metadata_vars_to_read:
+            file_metadata[meta_var][current_file_station_indices,0] = nCDF_root[meta_var][:]
 
+    else:
+        file_data = np.full((len(current_file_station_indices), len(valid_file_time_indices)), np.NaN, dtype=data_dtype[:1])
+        file_data[data_vars_to_read[0]][:,:] = nCDF_root[data_vars_to_read[0]][current_file_station_indices,valid_file_time_indices]    
+    
     #close netCDF
     nCDF_root.close()
-
+    
     #return valid species data, time indices relative to active full time array, file station indices relative to all unique station references array 
-    return file_data[current_file_station_indices, :], full_array_time_indices, full_array_station_indices   
+    if process_type == 'observations':
+        return file_data, full_array_time_indices, full_array_station_indices, file_metadata
+    else:
+        return file_data, full_array_time_indices, full_array_station_indices   
 
 ##-----------------------------------------------------------------------------------------------------------------------------------------------------##
 ##-----------------------------------------------------------------------------------------------------------------------------------------------------##
@@ -1658,7 +1969,7 @@ class MPL_Canvas(FigureCanvas):
     '''class that handles the creation and updates of a matplotlib canvas, and associated subplots'''
 
     def __init__(self, read_instance, parent=None):
-
+        
         '''initialise the MPL canvas'''
 
         self.figure = Figure(dpi=100)
@@ -1671,7 +1982,7 @@ class MPL_Canvas(FigureCanvas):
         self.gridspec = GridSpec(100, 100)
         self.gridspec.update(left=0.01,right=0.99,top=0.96,bottom=0.04, wspace=0.00, hspace=0.00)
         
-        #map_ax =              gridspec.new_subplotspec((0, 0),   rowspan=45, colspan=45)
+        #map_ax =              self.gridspec.new_subplotspec((0, 0),   rowspan=45, colspan=45)
         legend_ax =           self.gridspec.new_subplotspec((0, 46),  rowspan=8,  colspan=54)
         ts_ax =               self.gridspec.new_subplotspec((12, 54), rowspan=34, colspan=46)
         violin_hours_ax =     self.gridspec.new_subplotspec((57, 70), rowspan=19, colspan=30)    
@@ -1704,8 +2015,8 @@ class MPL_Canvas(FigureCanvas):
 
         #define projections for map plot and actual geographic coordinates 
         self.datacrs = ccrs.PlateCarree()
-        self.plotcrs = ccrs.Robinson()
-        
+        self.plotcrs = ccrs.Robinson()     
+
         #--------------------------------------------------# 
         #turning off specific spines of time series axis
         self.ts_ax.spines["top"].set_visible(False)      
@@ -1713,6 +2024,7 @@ class MPL_Canvas(FigureCanvas):
 
         #--------------------------------------------------#
         #hide all axes  
+        #self.map_ax.axis('off')
         self.cbar_ax.axis('off')
         self.legend_ax.axis('off')
         self.ts_ax.axis('off')
@@ -1723,7 +2035,7 @@ class MPL_Canvas(FigureCanvas):
         self.exp_bias_months_ax.axis('off')
         self.exp_bias_days_ax.axis('off')
         self.station_metadata_ax.axis('off')
-            
+
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------#
 
@@ -1759,6 +2071,7 @@ class MPL_Canvas(FigureCanvas):
             #create map axis
             map_ax = self.gridspec.new_subplotspec((0, 0),   rowspan=45, colspan=45)
             self.map_ax = self.figure.add_subplot(map_ax, projection=self.plotcrs)
+        
             #set map extents
             self.map_ax.set_global() 
 
@@ -1767,7 +2080,7 @@ class MPL_Canvas(FigureCanvas):
             feature = cfeature.NaturalEarthFeature('physical', 'land', land_polygon_resolutions[map_coastline_resolution], facecolor='0.85')
             self.map_ax.add_feature(feature)
             self.map_ax.gridlines(linestyle='-', alpha=0.4)
-            
+        
             #reset the navigation toolbar stack for the map axis with the current view limits
             self.reset_ax_navigation_toolbar_stack(self.map_ax)
 
@@ -1776,7 +2089,7 @@ class MPL_Canvas(FigureCanvas):
             self.lasso = LassoSelector(self.map_ax, onselect=self.onlassoselect, useblit=True, lineprops=dict(alpha=0.5, color='hotpink', linewidth=1))
             #initialise variable that informs whether to use picker/lasso for updates
             self.map_already_updated = False
-            
+        
             #initialise variable of valid station indices plotted on map as empty list
             self.active_map_valid_station_inds = np.array([],dtype=np.int)
 
@@ -1837,87 +2150,170 @@ class MPL_Canvas(FigureCanvas):
 
     def handle_data_filter_update(self):
 
-        '''function which handles updates data filtering by selected lower/upper limit bounds, selected measurement methods and selected minimum data availability %'''
+        '''function which handles updates data filtering by selected lower/upper limit bounds, selected metadata and selected minimum data availability %'''
 
-        #get selected variables for minimum data availability, lower/upper limits and measurement methods
-        #selected_minimum_data_availability_percent = self.read_instance.le_minimum_data_availability.text()
-        selected_minimum_data_availability_percent = 0.0
-        selected_lower_limit = self.read_instance.le_minimum_value.text()
-        selected_upper_limit = self.read_instance.le_maximum_value.text()
+        #get set variables names representing percentage data availability (native and non-native)
+        active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['labels']
+        
+        #get set lower/upper data bounds
+        selected_lower_bound = self.read_instance.le_minimum_value.text()
+        selected_upper_bound = self.read_instance.le_maximum_value.text()
 
-        #check selected minimum data availability percent, selected lower limit, selected upper limits are numbers
+        #check set data availability percent variable bounds and selected lower/upper bounds are numbers
         try:
-            selected_minimum_data_availability_percent = np.float32(selected_minimum_data_availability_percent)
-            selected_lower_limit = np.float32(selected_lower_limit)
-            selected_upper_limit = np.float32(selected_upper_limit)
+            data_availability_lower_bounds = []
+            data_availability_upper_bounds = []
+            for var_ii, var in enumerate(active_data_availablity_vars):
+                data_availability_lower_bounds.append(np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
+                #data_availability_upper_bounds.append(np.float32(self.read_instance.representativity_menu['rangeboxes']['current_upper'][var_ii]))
+            selected_lower_bound = np.float32(selected_lower_bound)
+            selected_upper_bound = np.float32(selected_upper_bound)
         #if any of the fields are not numbers, return from function
         except ValueError:
             return
-
-        #if selected minimum data availability percent is < 0.0%, force it to be 0.0%
-        if selected_minimum_data_availability_percent < 0.0:
-            selected_minimum_data_availability_percent = 0.0
-        #if selected minimum data availability percent is > 100.0%, force it to be 100.0%
-        elif selected_minimum_data_availability_percent > 100.0:
-            selected_minimum_data_availability_percent = 100.0 
 
         #reset data arrays to be un-filtered
         self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
 
         #filter all observational data out of bounds of lower/upper limits
-        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations']['data']<selected_lower_limit, self.read_instance.data_in_memory_filtered['observations']['data']>selected_upper_limit)
-        self.read_instance.data_in_memory_filtered['observations']['data'][inds_out_of_bounds] = np.NaN  
+        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species]<selected_lower_bound, self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species]>selected_upper_bound)
+        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][inds_out_of_bounds] = np.NaN  
+
+        #filter/limit data for periods selected
+        if len(self.read_instance.period_menu['checkboxes']['keep_selected']) > 0:
+            if 'Daytime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['day_night_code'] != 0] = np.NaN
+            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['day_night_code'] != 1] = np.NaN
+            if 'Weekday' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] != 0] = np.NaN
+            if 'Weekend' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] != 1] = np.NaN
+            if 'Spring' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['season_code'] != 0] = np.NaN
+            if 'Summer' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['season_code'] != 1] = np.NaN
+            if 'Autumn' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['season_code'] != 2] = np.NaN
+            if 'Winter' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['season_code'] != 3] = np.NaN
+
+        if len(self.read_instance.period_menu['checkboxes']['remove_selected']) > 0:
+            if 'Daytime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['day_night_code'] == 0] = np.NaN
+            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['day_night_code'] == 1] = np.NaN
+            if 'Weekday' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] == 0] = np.NaN
+            if 'Weekend' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] == 1] = np.NaN
+            if 'Spring' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['season_code'] == 0] = np.NaN
+            if 'Summer' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['season_code'] == 1] = np.NaN
+            if 'Autumn' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['season_code'] == 2] = np.NaN
+            if 'Winter' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations']['season_code'] == 3] = np.NaN
+
+        #filter all obersvational data out of set bounds of native percentage data availability variables
+        for var_ii, var in enumerate(active_data_availablity_vars):
+            if 'native' in var:
+                #max gap variable?
+                if 'max_gap' in var:
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations'][var] > data_availability_lower_bounds[var_ii]] = np.NaN
+                #data representativity variable?
+                else:
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][self.read_instance.data_in_memory_filtered['observations'][var] < data_availability_lower_bounds[var_ii]] = np.NaN
+
+        #filter all obersvational data out of set bounds of non-native percentage data availability variables
+        for var_ii, var in enumerate(active_data_availablity_vars):
+            if 'native' not in var:
+                #get period associate with variable
+                period = var.split('_')[0]
+                period_inds = np.arange(self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species].shape[1])
+                #daily variable?
+                if period == 'daily':
+                    period_inds_split = np.array_split(period_inds, [24*i for i in range(1, int(np.ceil(len(period_inds)/24)))])
+                #monthly variable?
+                elif period == 'monthly':
+                    period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.N_inds_per_month))
+                #whole record variable?
+                else:
+                    period_inds_split = [period_inds]
+
+                #iterate through indices associated with periodic chunks for current period
+                for period_inds in period_inds_split:
+                    if len(period_inds) > 0:
+                        #max gap variable?
+                        if 'max_gap' in var:
+                            max_gap_percent = max_repeated_NaNs(self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
+                        #data representativity variable?
+                        else:
+                            data_availability_percent = calculate_data_availability_fraction(self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
+
+        #fiter all observational data by selected metadata
+        #iterate through all metadata
+        for meta_var in metadata_vars_to_read:
+            metadata_type = standard_metadata[meta_var]['metadata_type']
+            metadata_data_type = standard_metadata[meta_var]['data_type']
+
+            #handle non-numeric metadata
+            if metadata_data_type == np.object:
+                #if any of the keep checkboxes have been selected, and some checkboxes have been changed from previous update, filter out data by fields that have not been selected
+                current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
+                previous_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['previous_keep_selected']
+                if (len(current_keep) > 0) & (set(previous_keep) != set(current_keep)):
+                    invalid_keep = np.repeat(np.isin(self.read_instance.metadata_in_memory[meta_var][:,:], current_keep, invert=True), self.read_instance.N_inds_per_month, axis=1)
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][invalid_keep] = np.NaN
+                #if any of the remove checkboxes have been selected, and some checkboxes have been changed from previous update, filter out data by these selected fields
+                current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected']
+                previous_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['previous_remove_selected']
+                if (len(current_remove) > 0) & (set(previous_remove) != set(current_remove)):
+                    invalid_remove = np.repeat(np.isin(self.read_instance.metadata_in_memory[meta_var][:,:], current_remove), self.read_instance.N_inds_per_month, axis=1)
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][invalid_remove] = np.NaN 
+            #handle numeric metadata
+            else:
+                meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
+                #filter out data with metadata < current lower value (if this is numeric)
+                try:
+                    current_lower = np.float32(self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
+                    previous_lower = np.float32(self.read_instance.metadata_menu[metadata_type]['rangeboxes']['previous_lower'][meta_var_index])
+                    #if current lower value is non-NaN, and different from previous value, then filter out data with metadata < current lower value
+                    if (pd.isnull(current_lower) == False) & (current_lower != previous_lower):
+                        invalid_below = np.repeat(self.read_instance.metadata_in_memory[meta_var][:,:] < current_lower, self.read_instance.N_inds_per_month, axis=1)  
+                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][invalid_below] = np.NaN
+                except:
+                    pass
+                #filter out data with metadata > current upper value (if this is numeric)
+                try:
+                    current_upper = np.float32(self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
+                    previous_upper = np.float32(self.read_instance.metadata_menu[metadata_type]['rangeboxes']['previous_upper'][meta_var_index])
+                    #if current upper value is non-NaN, and different from previous value, then filter out data with metadata > current upper value
+                    if (pd.isnull(current_upper) == False) & (current_upper != previous_upper):
+                        invalid_above = np.repeat(self.read_instance.metadata_in_memory[meta_var][:,:] > current_upper, self.read_instance.N_inds_per_month, axis=1)  
+                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][invalid_above] = np.NaN
+                except:
+                    pass
 
         #colocate data (if necessary) 
         self.colocate_data()
 
-        #get intersect of indices of stations with >= % minimum data availability percent, and with > 1 valid measurements ,in all observational data arrays (colocated and non-colocated)
-        #then subset these indices with standard methods == selected methods, 
+        #get indices of stations with > 1 valid measurements ,in all observational data arrays (colocated and non-colocated)
         #iterate through all data arrays
         for data_label in list(self.read_instance.data_in_memory_filtered.keys()): 
 
             #check if data array is an observational data array
             if data_label.split('_')[0] == 'observations':
-        
-                #calculate data availability fraction per station in observational data array
-                station_data_availability_percent = calculate_data_availability_fraction(self.read_instance.data_in_memory_filtered[data_label]['data'])
-                #get indices of stations with >= selected_minimum_data_availability
-                valid_station_indices_percent = np.arange(len(self.read_instance.station_references), dtype=np.int)[station_data_availability_percent >= selected_minimum_data_availability_percent]
-
+                            
                 #get absolute data availability number per station in observational data array
-                station_data_availability_number = calculate_data_availability_number(self.read_instance.data_in_memory_filtered[data_label]['data'])                
+                station_data_availability_number = calculate_data_availability_number(self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])                
                 
-                #get indices of stations with > 1 available measurements
-                valid_station_indices_absolute = np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
-
-                #get indices of valid stations in intersect of valid_station_indices_percent and valid_station_indices_absolute
-                valid_station_indices_availability = np.intersect1d(valid_station_indices_percent, valid_station_indices_absolute)
-
-                #get unique standard measurement methodologies across stations 
-                #self.read_instance.previous_station_unique_methods = copy.deepcopy(self.read_instance.station_unique_methods)
-                #self.read_instance.station_unique_methods = np.unique(self.read_instance.station_methods[valid_station_indices_availability])
-
-                #if unique methods have changed from previous, update method checkboxes
-                #if np.array_equal(self.read_instance.previous_station_unique_methods, self.read_instance.station_unique_methods) == False:
-                    #if are reading new data into memory, update all methods to be checked by default
-                #    if self.read_instance.block_MPL_canvas_updates == True:
-                #        self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
-                    
-                    #else if all previous methods were ticked then, update all new methods to be ticked also
-                #    elif len(self.read_instance.selected_indices['METHODS'][0]) == len(self.read_instance.previous_station_unique_methods):
-                #        self.read_instance.selected_indices['METHODS'] = [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
-                    
-                    #otherwise, update checked methods to be the subset between previously checked methods and current unique methods 
-                #    else:
-                #        intersect_methods = np.intersect1d(self.read_instance.previous_station_unique_methods[self.read_instance.selected_indices['METHODS'][0]], self.read_instance.station_unique_methods)
-                #        self.read_instance.selected_indices['METHODS'] = [[np.where(self.read_instance.station_unique_methods == intersect_method)[0][0] for intersect_method in intersect_methods]] 
-
-                #get indices of subset stations which use checked standard methodologies
-                #checked_methods = self.read_instance.station_unique_methods[self.read_instance.selected_indices['METHODS'][0]]
-                #valid_station_indices = valid_station_indices_availability[np.isin(self.read_instance.station_methods[valid_station_indices_availability], checked_methods)]
-
+                #get indices of stations with > 1 available measurements    
                 #save valid station indices with data array
-                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_indices_availability
+                self.read_instance.plotting_params[data_label]['valid_station_inds'] = np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
 
         #write valid station indices calculated for observations across to associated experimental data arrays
         #iterate through all data arrays
@@ -1929,10 +2325,10 @@ class MPL_Canvas(FigureCanvas):
                 #handle colocated experimental arrays
                 if '_colocatedto_' in data_label:
                     exp_name = data_label.split('_colocatedto_')[0]
-                    self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations_colocatedto_%s'%(exp_name)]['valid_station_inds'])
+                    self.read_instance.plotting_params[data_label]['valid_station_inds'] = copy.deepcopy(self.read_instance.plotting_params['observations_colocatedto_%s'%(exp_name)]['valid_station_inds'])
                 #handle non-located experimental arrays
                 else:
-                    self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations']['valid_station_inds'])
+                    self.read_instance.plotting_params[data_label]['valid_station_inds'] = copy.deepcopy(self.read_instance.plotting_params['observations']['valid_station_inds'])
 
         #after subsetting by pre-written associated observational valid stations, get indices of stations with > 1 valid measurements in all experiment data arrays (colocated and non-colocated)
         #iterate through all data arrays
@@ -1941,13 +2337,13 @@ class MPL_Canvas(FigureCanvas):
             #check if data array is not an observational data array
             if data_label.split('_')[0] != 'observations':
                 #get indices of associated observational data array valid stations (pre-written to experiment data arrays)
-                valid_station_inds = self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds']
+                valid_station_inds = self.read_instance.plotting_params[data_label]['valid_station_inds']
                 #get absolute data availability number per station in experiment data array, after subsetting valid observational stations (i.e. number of non-NaN measurements)
-                station_data_availability_number = calculate_data_availability_number(self.read_instance.data_in_memory_filtered[data_label]['data'][valid_station_inds,:])
+                station_data_availability_number = calculate_data_availability_number(self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][valid_station_inds,:])
                 #get indices of stations with > 1 available measurements
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
                 #overwrite previous written valid station indices (now at best a subset of those indices)
-                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_inds       
+                self.read_instance.plotting_params[data_label]['valid_station_inds'] = valid_station_inds       
             
         #update plotted map z statistic (if necessary)
         if self.read_instance.block_MPL_canvas_updates == False:
@@ -1990,7 +2386,7 @@ class MPL_Canvas(FigureCanvas):
             #wherever there is a NaN at one time in one of the observations/experiment arrays, the other array value is also made NaN             
 
             #get all instances observations are NaN
-            nan_obs = np.isnan(self.read_instance.data_in_memory_filtered['observations']['data'])
+            nan_obs = np.isnan(self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species])
 
             #create array for finding instances where have 0 valid values across all experiments
             #initialise as being all True, set as False on the occasion there is a valid value in an experiment 
@@ -2000,25 +2396,28 @@ class MPL_Canvas(FigureCanvas):
             for data_label in list(self.read_instance.data_in_memory.keys()):
                 if data_label != 'observations':
                     #get all instances experiment are NaN
-                    nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[data_label]['data'])
+                    nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])
                     #get all instances where either the observational array or experiment array are NaN at a given time
                     nan_instances = np.any([nan_obs,nan_exp],axis=0)
                     #create new observational array colocated to experiment
-                    obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations']['data'])
+                    obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
                     obs_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['observations_colocatedto_%s'%(data_label)] = {'data':obs_data, 'colour':self.read_instance.data_in_memory_filtered['observations']['colour'], 'zorder':self.read_instance.data_in_memory_filtered['observations']['zorder']} 
+                    self.read_instance.data_in_memory_filtered['observations_colocatedto_%s'%(data_label)] = obs_data
+                    self.read_instance.plotting_params['observations_colocatedto_%s'%(data_label)] = {'colour':self.read_instance.plotting_params['observations']['colour'], 'zorder':self.read_instance.plotting_params['observations']['zorder']} 
                     #create new experiment array colocated to observations
-                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[data_label]['data'])
+                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[data_label])
                     exp_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['%s_colocatedto_observations'%(data_label)] = {'data':exp_data, 'colour':self.read_instance.data_in_memory_filtered[data_label]['colour'], 'zorder':self.read_instance.data_in_memory_filtered[data_label]['zorder']}
+                    self.read_instance.data_in_memory_filtered['%s_colocatedto_observations'%(data_label)] = exp_data 
+                    self.read_instance.plotting_params['%s_colocatedto_observations'%(data_label)] = {'colour':self.read_instance.plotting_params[data_label]['colour'], 'zorder':self.read_instance.plotting_params[data_label]['zorder']}
                     #update exps_all_nan array, making False all instances where have valid experiment data
                     exps_all_nan = np.all([exps_all_nan, nan_exp], axis=0) 
                     
             #create observational data array colocated to be non-NaN whenever there is a valid data in at least 1 experiment
             exps_all_nan = np.any([nan_obs,exps_all_nan],axis=0)
-            obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations']['data'])
+            obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
             obs_data[exps_all_nan] = np.NaN
-            self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments'] = {'data':obs_data, 'colour':self.read_instance.data_in_memory_filtered['observations']['colour'], 'zorder':self.read_instance.data_in_memory_filtered['observations']['zorder']}   
+            self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments'] = obs_data
+            self.read_instance.plotting_params['observations_colocatedto_experiments'] = {'colour':self.read_instance.plotting_params['observations']['colour'], 'zorder':self.read_instance.plotting_params['observations']['zorder']}   
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------# 
@@ -2221,7 +2620,7 @@ class MPL_Canvas(FigureCanvas):
                 self.update_experiment_bias_aggregated_plots()
 
             #update plotted station selected metadata
-            self.update_selected_station_metadata()
+            #self.update_selected_station_metadata()
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------# 
@@ -2246,7 +2645,7 @@ class MPL_Canvas(FigureCanvas):
                 #compute map projection coordinates for each pair of longitude/latitude experiment grid edge coordinates
                 #exp_x,exp_y = self.bm(self.read_instance.data_in_memory[experiment]['grid_edge_longitude'], self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])
                 #create matplotlib polygon object from experiment grid edge map projection coordinates 
-                grid_edge_outline_poly = Polygon(np.vstack((self.read_instance.data_in_memory[experiment]['grid_edge_longitude'], self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])).T, edgecolor=self.read_instance.data_in_memory[experiment]['colour'], linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
+                grid_edge_outline_poly = Polygon(np.vstack((self.read_instance.plotting_params[experiment]['grid_edge_longitude'], self.read_instance.plotting_params[experiment]['grid_edge_latitude'])).T, edgecolor=self.read_instance.plotting_params[experiment]['colour'], linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
                 #plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
 
@@ -2259,12 +2658,12 @@ class MPL_Canvas(FigureCanvas):
 
         #create legend elements
         #add observations element
-        legend_elements = [Line2D([0], [0], marker='o', color='white', markerfacecolor=self.read_instance.data_in_memory['observations']['colour'], markersize=legend_marker_size, label='observations')]
+        legend_elements = [Line2D([0], [0], marker='o', color='white', markerfacecolor=self.read_instance.plotting_params['observations']['colour'], markersize=legend_marker_size, label='observations')]
         #add element for each experiment
         for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.data_in_memory.keys()))):
             if experiment != 'observations':
                 #add experiment element
-                legend_elements.append(Line2D([0], [0], marker='o', color='white', markerfacecolor=self.read_instance.data_in_memory[experiment]['colour'], markersize=legend_marker_size, label=experiment))
+                legend_elements.append(Line2D([0], [0], marker='o', color='white', markerfacecolor=self.read_instance.plotting_params[experiment]['colour'], markersize=legend_marker_size, label=experiment))
         
         #plot legend
         self.legend_ax.legend(handles=legend_elements, loc='best',mode='expand', ncol=4, fontsize=9.0)
@@ -2294,13 +2693,13 @@ class MPL_Canvas(FigureCanvas):
             #observational arrays
             if data_label.split('_')[0] == 'observations':
                 #get data for selected stations
-                data_array = self.read_instance.data_in_memory_filtered[data_label]['data'][self.relative_selected_station_inds,:]
+                data_array = self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][self.relative_selected_station_inds,:]
             #experiment arrays
             else:          
                 #get intersect between selected station indices and valid available indices for experiment data array
-                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'])
+                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.plotting_params[data_label]['valid_station_inds'])
                 #get data for valid selected stations
-                data_array = self.read_instance.data_in_memory_filtered[data_label]['data'][valid_selected_station_indices,:]
+                data_array = self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][valid_selected_station_indices,:]
 
             #if data array has no valid data for selected stations, do not create a pandas dataframe
             #data array has valid data?
@@ -2308,7 +2707,7 @@ class MPL_Canvas(FigureCanvas):
                 #add nested dictionary for data array name to selection station data dictionary
                 self.selected_station_data[data_label] = {}
                 #take cross station median of selected data for data array, and place it in a pandas dataframe -->  add to selected station data dictionary
-                self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), index=self.read_instance.time_array, columns=['data'])
+                self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), index=self.read_instance.time_array, columns=[self.read_instance.active_species])
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------# 
 
@@ -2339,7 +2738,7 @@ class MPL_Canvas(FigureCanvas):
                 self.selected_station_data[data_label][temporal_aggregation_resolution] = {}
 
                 #aggregate data array into desired temporal groups (dropping NaNs)
-                grouped_data = [g['data'].dropna() for n, g in self.selected_station_data[data_label]['pandas_df'].groupby(getattr(self.selected_station_data[data_label]['pandas_df'].index, temporal_aggregation_resolution))]
+                grouped_data = [g[self.read_instance.active_species].dropna() for n, g in self.selected_station_data[data_label]['pandas_df'].groupby(getattr(self.selected_station_data[data_label]['pandas_df'].index, temporal_aggregation_resolution))]
                 #drop groups which have no data
                 grouped_data = [group for group in grouped_data if len(group) > 0]              
                 #get xticks for groups which have valid data (i.e. which hours/days/months have valid data)
@@ -2482,7 +2881,7 @@ class MPL_Canvas(FigureCanvas):
                         continue
 
             #plot time series data
-            self.data_array_ts = self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(), color=self.read_instance.data_in_memory_filtered[data_label]['colour'], marker = 'o', markeredgecolor = None, mew = 0, markersize = time_series_marker_size, linestyle = 'None', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'])
+            self.data_array_ts = self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(), color=self.read_instance.plotting_params[data_label]['colour'], marker = 'o', markeredgecolor = None, mew = 0, markersize = time_series_marker_size, linestyle = 'None', zorder=self.read_instance.plotting_params[data_label]['zorder'])
               
         #set axes labels
         self.ts_ax.set_ylabel('Concentration (%s)'%(self.read_instance.measurement_units), fontsize=8.0)
@@ -2583,8 +2982,8 @@ class MPL_Canvas(FigureCanvas):
                 
                 #update plotted objects with necessary colour, zorder and alpha
                 for patch in violin_plot['bodies']:
-                    patch.set_facecolor(self.read_instance.data_in_memory_filtered[data_label]['colour'])
-                    patch.set_zorder(self.read_instance.data_in_memory_filtered[data_label]['zorder'])
+                    patch.set_facecolor(self.read_instance.plotting_params[data_label]['colour'])
+                    patch.set_zorder(self.read_instance.plotting_params[data_label]['zorder'])
                     if data_label.split('_')[0] == 'observations':                  
                         patch.set_alpha(0.7)
                     else:
@@ -2603,7 +3002,7 @@ class MPL_Canvas(FigureCanvas):
                 #overplot time series of medians over boxes in necessary color
 
                 #generate zorder to overplot medians in same order as violin plots are ordered, but on top of them
-                median_zorder = (self.read_instance.data_in_memory_filtered['observations']['zorder']+len(list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys())) - 1) + self.read_instance.data_in_memory_filtered[data_label]['zorder']
+                median_zorder = (self.read_instance.plotting_params['observations']['zorder']+len(list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys())) - 1) + self.read_instance.plotting_params[data_label]['zorder']
 
                 #get xticks (all valid aggregated time indexes) and medians to plot
                 xticks = aggregation_dict[temporal_aggregation_resolution]['xticks']
@@ -2611,14 +3010,14 @@ class MPL_Canvas(FigureCanvas):
                 #split arrays if there are any temporal gaps to avoid line drawn being interpolated across missing values
                 inds_to_split = np.where(np.diff(xticks) > 1)[0]
                 if len(inds_to_split) == 0:
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks, medians, marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'], markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder)
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks, medians, marker='o', color=self.read_instance.plotting_params[data_label]['colour'], markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder)
                 else:
                     inds_to_split += 1
                     start_ind = 0
                     for end_ind in inds_to_split:
-                        aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks[start_ind:end_ind], medians[start_ind:end_ind], marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'], markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder)
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks[start_ind:end_ind], medians[start_ind:end_ind], marker='o', color=self.read_instance.plotting_params[data_label]['colour'], markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder)
                         start_ind = end_ind   
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks[start_ind:], medians[start_ind:], marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'], markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder) 
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].plot(xticks[start_ind:], medians[start_ind:], marker='o', color=self.read_instance.plotting_params[data_label]['colour'], markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder) 
 
         #------------------------------------------------------------------------------------------------#
         #plot title (with units)
@@ -2711,7 +3110,7 @@ class MPL_Canvas(FigureCanvas):
                     continue
                 #else, make temporally aggregated plot for currently active experiment bias statistic 
                 else:
-                    aggregation_dict[temporal_aggregation_resolution]['plots'][data_label] = aggregation_dict[temporal_aggregation_resolution]['ax'].plot(aggregation_dict[temporal_aggregation_resolution]['xticks'], self.selected_station_data[data_label][temporal_aggregation_resolution][selected_experiment_bias_stat], color=self.read_instance.data_in_memory_filtered[data_label]['colour'], marker = 'o', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'], markersize=temporally_aggregated_experiment_bias_marker_size, linewidth=0.5)            
+                    aggregation_dict[temporal_aggregation_resolution]['plots'][data_label] = aggregation_dict[temporal_aggregation_resolution]['ax'].plot(aggregation_dict[temporal_aggregation_resolution]['xticks'], self.selected_station_data[data_label][temporal_aggregation_resolution][selected_experiment_bias_stat], color=self.read_instance.plotting_params[data_label]['colour'], marker = 'o', zorder=self.read_instance.plotting_params[data_label]['zorder'], markersize=temporally_aggregated_experiment_bias_marker_size, linewidth=0.5)            
 
             #set x axis limits
             aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(np.min(aggregation_dict[temporal_aggregation_resolution]['xticks'])-0.5, np.max(aggregation_dict[temporal_aggregation_resolution]['xticks'])+0.5)
@@ -2868,9 +3267,9 @@ class MPL_Canvas(FigureCanvas):
         
         #get relevant observational array (dependent on colocation)
         if self.colocate_active == False:
-            obs_array = self.read_instance.data_in_memory_filtered['observations']['valid_station_inds']
+            obs_array = self.read_instance.plotting_params['observations']['valid_station_inds']
         else:
-            obs_array = self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments']['valid_station_inds']
+            obs_array = self.read_instance.plotting_params['observations_colocatedto_experiments']['valid_station_inds']
 
         #before doing anything check if have any valid station data for observations, if not update active map valid station indices to be empty list and return
         if len(obs_array) == 0:
@@ -2964,10 +3363,10 @@ class MPL_Canvas(FigureCanvas):
         #get active map valid station indices (i.e. the indices of the stations data to plot on the map)
         #if only have z1, valid map indices are those simply for the z1 array
         if have_z2 == False:
-            self.active_map_valid_station_inds = self.read_instance.data_in_memory_filtered[z1_array_to_read]['valid_station_inds']
+            self.active_map_valid_station_inds = self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds']
         else:
             #if have z2 array, get intersection of z1 and z2 valid station indices
-            self.active_map_valid_station_inds = np.intersect1d(self.read_instance.data_in_memory_filtered[z1_array_to_read]['valid_station_inds'], self.read_instance.data_in_memory_filtered[z2_array_to_read]['valid_station_inds'])
+            self.active_map_valid_station_inds = np.intersect1d(self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds'], self.read_instance.plotting_params[z2_array_to_read]['valid_station_inds'])
 
         #update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind in self.relative_selected_station_inds if selected_ind in self.active_map_valid_station_inds], dtype=np.int)
@@ -2975,7 +3374,7 @@ class MPL_Canvas(FigureCanvas):
         #-------------------------------------------------#
 
         #read z1 data
-        z1_array_data = self.read_instance.data_in_memory_filtered[z1_array_to_read]['data'][self.active_map_valid_station_inds,:]
+        z1_array_data = self.read_instance.data_in_memory_filtered[z1_array_to_read][self.read_instance.active_species][self.active_map_valid_station_inds,:]
         #drop NaNs and reshape to object list of station data arrays (if not checking data %)
         if z_statistic_name != 'Data %':
             z1_array_data = drop_NaNs(z1_array_data)
@@ -3003,7 +3402,7 @@ class MPL_Canvas(FigureCanvas):
         #else, read z2 data then calculate 'difference' statistic
         else:
             #read z2 data 
-            z2_array_data = self.read_instance.data_in_memory_filtered[z2_array_to_read]['data'][self.active_map_valid_station_inds,:]
+            z2_array_data = self.read_instance.data_in_memory_filtered[z2_array_to_read][self.read_instance.active_species][self.active_map_valid_station_inds,:]
             #drop NaNs and reshape to object list of station data arrays (if not checking data %)
             if z_statistic_name != 'Data %':
                 z2_array_data = drop_NaNs(z2_array_data)
@@ -3020,8 +3419,8 @@ class MPL_Canvas(FigureCanvas):
                 for z_ii in range(len(self.z_statistic)):
 
                     #set station z1/z2 arrays as arguments in argument dictionaries
-                    function_arguments_z1['data'] = z1_array_data[z_ii] 
-                    function_arguments_z2['data'] = z2_array_data[z_ii]
+                    function_arguments_z1[self.read_instance.active_species] = z1_array_data[z_ii] 
+                    function_arguments_z2[self.read_instance.active_species] = z2_array_data[z_ii]
 
                     #calculate statistics for z1/z2 arrays and subtract z2-z1
                     self.z_statistic[z_ii] = stats_dict['function'](**function_arguments_z2) - stats_dict['function'](**function_arguments_z1)
@@ -3310,7 +3709,7 @@ class MPL_Canvas(FigureCanvas):
                     intersect_lists = [self.active_map_valid_station_inds]
                     for data_label in list(self.read_instance.data_in_memory.keys()):
                         if data_label != 'observations':
-                            intersect_lists.append(self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'])
+                            intersect_lists.append(self.read_instance.plotting_params[data_label]['valid_station_inds'])
                     #get intersect between active map valid station indices and valid station indices associated with each loaded experiment array --> relative selected station indcies
                     self.relative_selected_station_inds = np.sort(list(set.intersection(*map(set,intersect_lists))))
                     #get absolute selected station indices (indices relative to plotted stations on map)
@@ -3339,21 +3738,45 @@ class MPL_Canvas(FigureCanvas):
 
     def on_click(self, event):  
 
-        '''function that handles single station selection upon mouse click'''
-            
+        '''function that handles single station selection/de-selection upon mouse click'''
+        
         #update variable to inform lasso handler that map as already been updated (to not redraw map)
         #the on_click function is only called when a station index has been selected  
         #the variable will be reset by lasso handler (which is always called after on_click)
         self.map_already_updated = True
 
-        #make copy of current full array relative selected stations indices, before selecting new ones
+        #if the mouse click is not recognised as left(1)/right(3) then return from function
+        if event.mouseevent.button not in [1,3]:
+            return
+
+        #make copy of current full array relative/absolute selected stations indices, before selecting new ones
         self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+        self.previous_absolute_selected_station_inds = copy.deepcopy(self.absolute_selected_station_inds)
 
-        #get absolute selected index of station on map 
-        self.absolute_selected_station_inds = np.array([event.ind[0]], dtype=np.int)
+        #get new absolute selected index of station on map 
+        absolute_selected_station_inds = np.array([event.ind[0]], dtype=np.int)
 
-        #get selected station indices with respect to all available stations
-        self.relative_selected_station_inds = self.map_selected_station_inds_to_all_available_inds(self.absolute_selected_station_inds)
+        #get new relative selected index with respect to all available stations
+        relative_selected_station_inds = self.map_selected_station_inds_to_all_available_inds(absolute_selected_station_inds)
+
+        #if left click (code of 1) --> select station 
+        if event.mouseevent.button == 1:
+            self.absolute_selected_station_inds = absolute_selected_station_inds
+            self.relative_selected_station_inds = relative_selected_station_inds
+        #if right click (code of 3) --> unselect station (if currently selected), select station (if currently unselected)  
+        elif event.mouseevent.button == 3:
+            #if len(self.previous_relative_selected_station_inds) > 0:
+            relative_index = np.where(self.previous_relative_selected_station_inds == relative_selected_station_inds)[0]
+            if len(relative_index) > 0:
+                self.relative_selected_station_inds = np.delete(self.relative_selected_station_inds, relative_index)
+            else:
+                self.relative_selected_station_inds = np.append(self.relative_selected_station_inds, relative_selected_station_inds)
+
+            absolute_index = np.where(self.previous_absolute_selected_station_inds == absolute_selected_station_inds)[0]
+            if len(absolute_index) > 0:
+                self.absolute_selected_station_inds = np.delete(self.absolute_selected_station_inds, absolute_index)
+            else:
+                self.absolute_selected_station_inds = np.append(self.absolute_selected_station_inds, absolute_selected_station_inds)    
 
         #update map station selection
         self.update_map_station_selection()
@@ -3473,6 +3896,20 @@ def calculate_data_availability_number(data):
     '''calculate data availability absolute number (i.e. number of total data measurements not equal to NaN)'''
     return np.count_nonzero(~np.isnan(data),axis=-1)
 
+def max_repeated_NaNs(data):
+    '''get maximum number of consecutive NaNs in array'''
+    max_gap_pc = []
+
+    for station_data in data:
+        mask = np.concatenate(([False],np.isnan(station_data),[False]))
+        if ~mask.any():
+            max_gap_pc.append(0)
+        else:
+            idx = np.nonzero(mask[1:] != mask[:-1])[0]
+            max_gap_pc.append((idx[1::2] - idx[::2]).max())
+        
+    return np.array(max_gap_pc)*(100./data.shape[1])
+
 #define dictionary storing basic statistics that can be plotted
 basic_stats_dict = {'Mean':  {'function':calculate_mean,                       'order':0,  'label':'Mean',                'arguments':{},                  'minimum_bias':[0.0]},
                     'StdDev':{'function':calculate_standard_deviation,         'order':1,  'label':'StdDev',              'arguments':{},                  'minimum_bias':[0.0]},
@@ -3525,7 +3962,7 @@ def calculate_COE(obs, exp):
        References:
        Legates DR, McCabe GJ. (1999). Evaluating the use of goodness-of-fit measures in hydrologic and hydroclimatic model validation. Water Resources Research 35(1): 233-241.
        Legates DR, McCabe GJ. (2012). A refined index of model performance: a rejoinder, International Journal of Climatology.
-    å'''
+    '''
     return 1.0 - (np.mean(np.abs(exp-obs)) / np.mean(np.abs(obs-np.mean(obs)))) 
 
 
@@ -3640,12 +4077,8 @@ temporal_axis_mapping_dict = {'dayofweek':{0:'M', 1:'T', 2:'W', 3:'T', 4:'F', 5:
 #------------------------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------------------------#
 
-#generate Providentia dashboard
-
-#print(qApp.screens()[0].availableVirtualGeometry())
-
+#initialise Providentia main window
 qApp = QtWidgets.QApplication(sys.argv)
 qApp.setStyle("Fusion")
-Providentia_dash = generate_Providentia_dashboard('parallel')
+Providentia_dash = Providentia_main_window('parallel')
 sys.exit(qApp.exec_())
-
