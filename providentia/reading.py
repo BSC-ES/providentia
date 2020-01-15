@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-def read_netcdf_station_information(tuple_to_read):
+def read_netcdf_station(tuple_to_read):
     """Function that handles reading of observational
     desired station metadata in a netCDF file,
     returning a dictionary with read metadata.
@@ -15,7 +15,8 @@ def read_netcdf_station_information(tuple_to_read):
     # read netCDF frame
     ncdf_root = Dataset(relevant_file)
 
-    # read all desired metadata, placing it within a dictionary by variable name
+    # read all desired metadata, placing it within
+    # a dictionary by variable name
     read_metadata = {}
     for meta_var in metadata_vars:
         read_metadata[meta_var] = ncdf_root[meta_var][:]
@@ -79,10 +80,14 @@ def read_netcdf_data(tuple_arguments):
 
     # get all station references in file
     file_station_references = ncdf_root['station_reference'][:]
-    # get indices of all unique station references that are contained within file station references array
-    full_array_station_indices = np.where(np.in1d(station_references, file_station_references))[0]
-    # get indices of file station station references that are contained in all unique station references array
-    current_file_station_indices = np.where(np.in1d(file_station_references, station_references))[0]
+    # get indices of all unique station references that are contained
+    # within file station references array
+    full_array_station_indices = \
+        np.where(np.in1d(station_references, file_station_references))[0]
+    # get indices of file station station references that are
+    # contained in all unique station references array
+    current_file_station_indices = \
+        np.where(np.in1d(file_station_references, station_references))[0]
 
     # read in species data
     file_data = ncdf_root[active_species][:, valid_file_time_indices]
@@ -113,7 +118,8 @@ def read_netcdf_data(tuple_arguments):
                                   selected_classifications_to_retain, 
                                   invert=True).all(axis=2)] = np.NaN
             
-            # screen out all observations that are associated with any of the selected classifications to remove
+            # screen out all observations that are associated with any
+            # of the selected classifications to remove
             if len(selected_classifications_to_remove) > 0:
                 file_data[np.isin(file_classifications, 
                                   selected_classifications_to_remove).any(axis=2)] = np.NaN
