@@ -102,17 +102,19 @@ def read_netcdf_data(tuple_arguments):
         # if some qa flags selected then screen
         if len(selected_qa) > 0:
             # screen out observations which are associated with any of the selected qa flags
-            file_data[np.isin(ncdf_root['qa'][:, valid_file_time_indices, :], selected_qa).any(axis=2)] = np.NaN
-        
+            file_data[np.isin(ncdf_root['qa'][:, valid_file_time_indices, :],
+                              selected_qa).any(axis=2)] = np.NaN
+
         # if some data provider flags selected then screen
         if len(selected_flags) > 0:
             # screen out observations which are associated with any of the selected data provider flags
             file_data[np.isin(ncdf_root['flag'][:, valid_file_time_indices, :], selected_flags).any(axis=2)] = np.NaN
-        
+
         # if some classification flags (retain  or remove) selected then screen
         if (len(selected_classifications_to_retain) > 0) or (len(selected_classifications_to_remove) > 0):
             file_classifications = ncdf_root['classification'][:, valid_file_time_indices, :]
-            # screen out all observations that aren't associated with all of the selected classifications to retain
+            # screen out all observations that aren't associated with all of
+            # the selected classifications to retain
             if len(selected_classifications_to_retain) > 0:
                 file_data[np.isin(file_classifications, 
                                   selected_classifications_to_retain, 
@@ -129,4 +131,6 @@ def read_netcdf_data(tuple_arguments):
 
     # return valid species data, time indices relative to active full time array,
     # file station indices relative to all unique station references array
-    return file_data[current_file_station_indices, :], full_array_time_indices, full_array_station_indices
+    return file_data[current_file_station_indices, :], \
+           full_array_time_indices, \
+           full_array_station_indices
