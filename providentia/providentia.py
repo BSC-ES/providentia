@@ -1374,7 +1374,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         if self.read_type == 'serial':
             # iterate through relevant files
             for relevant_file_ii, relevant_file in enumerate(relevant_files):
-                file_metadata = pread.read_netcdf_station_information((relevant_file, metadata_vars_to_read))
+                file_metadata = pread.read_netcdf_station((relevant_file, metadata_vars_to_read))
                 for meta_var in metadata_vars_to_read:
                     all_read_metadata[meta_var] = np.append(all_read_metadata[meta_var], file_metadata[meta_var])
 
@@ -1386,7 +1386,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
 
             # read netCDF files in parallel
             tuples_list = [(file, metadata_vars_to_read) for file in relevant_files]
-            all_file_metadata = pool.map(pread.read_netcdf_station_information, tuples_list)
+            all_file_metadata = pool.map(pread.read_netcdf_station, tuples_list)
             # will not submit more files to pool, so close access to it
             pool.close()
             # wait for worker processes to terminate before continuing
