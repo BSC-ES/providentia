@@ -32,14 +32,14 @@ def calculate_variance(data):
     return np.var(data)
 
 
-def calculate_data_availability_fraction(data):
+def calculate_data_avail_fraction(data):
     """Calculate data availability fraction
     (i.e. fraction of total data array not equal to NaN)
     """
     return (100./data.shape[-1]) * (np.count_nonzero(~np.isnan(data), axis=-1))
 
 
-def calculate_data_availability_number(data):
+def calculate_data_avail_number(data):
     """Calculate data availability absolute number
     (i.e. number of total data measurements not equal to NaN)
     """
@@ -166,7 +166,8 @@ def calculate_ioa(obs, exp):
        Willmott, C.J., Robeson, S.M., Matsuura, K., 2011. A refined index of model performance. International
        Journal of Climatology.
     """
-    return 1.0 - (np.sum((obs-exp)**2))/(np.sum((np.abs(exp-np.mean(obs))+np.abs(obs-np.mean(obs)))**2))
+    return 1.0 - (np.sum((obs-exp)**2))/(np.sum((np.abs(exp-np.mean(obs)) +
+                                                 np.abs(obs-np.mean(obs)))**2))
 
 
 def calculate_mae(obs, exp, normalisation_type='none'):
