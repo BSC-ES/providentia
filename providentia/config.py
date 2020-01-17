@@ -99,7 +99,6 @@ class ProvArgumentParser(object):
         :param args:
         """
         try:
-            #return self.parser.parse_args(args)
             return self.parser.parse_args(args)
         except Exception as error:
             print(error)
