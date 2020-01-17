@@ -29,7 +29,7 @@ from . import dashboard
 import sys
 import logging
 logging.basicConfig(level=logging.WARNING)
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class Providentia(object):
@@ -39,27 +39,35 @@ class Providentia(object):
     def __init__(self, parser):
         self.parser = parser
 
+    def getargs(self, args):
+        """ Returns arguments to be passed to the dashboard """
+        req = vars(args)
+        # print help if no args
+        if req.values() == [None for _ in range(len(req.values()))]:
+            self.parser.parser.print_help()
+            return False
+        # pass only valid values and cast boolean strings to boolean
+        res = {k: eval(v) if v in ('True', 'False') else v for k, v in req.items() if v}
+        return res
+
     def main(self):
         """
         Main functionality of the tool
         """
         try:
             args = self.parser.parse_args()
-            log.info(args)
-            req = vars(args)
-            # print help if no args
-            if req.values() == [None for i in range(len(req.values()))]:
-                self.parser.parser.print_help()
-                return False
-            # pass only valid values and cast boolean strings to boolean
-            res = {k: eval(v) if v in ('True', 'False') else v for k, v in req.items() if v}
-            log.info(res)
+            LOG.info(args)
+            res = self.getargs(args)
+            if res is False:
+                return res
+
+            LOG.info(res)
 
             # call dashboard
             dashboard.main(**res)
 
         except Exception as err:
-            log.error('Unhandled exception on Providentia: %s' % err, exc_info=True)
+            LOG.error('Unhandled exception on Providentia: %s' % err, exc_info=True)
             return False
 
 

@@ -293,8 +293,6 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
         # put read_type into self
         self.read_type = read_type
 
-        # 
-
         # create UI
         self.init_ui()
 
