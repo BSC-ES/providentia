@@ -50,7 +50,7 @@ def calculate_data_avail_number(data):
 basic_stats_dict = {'Mean':  {'function':calculate_mean,                       'order':0,  'label':'Mean',                'arguments':{},                  'minimum_bias':[0.0]},
                     'StdDev':{'function':calculate_standard_deviation,         'order':1,  'label':'StdDev',              'arguments':{},                  'minimum_bias':[0.0]},
                     'Var':   {'function':calculate_variance,                   'order':2,  'label':'Variance',            'arguments':{},                  'minimum_bias':[0.0]},
-                    'Data %':{'function':calculate_data_availability_fraction, 'order':3,  'label':'Data Availability %', 'arguments':{},                  'minimum_bias':[0.0],  'vmin':0.0, 'vmax':100.0},
+                    'Data %':{'function':calculate_data_avail_fraction,        'order':3,  'label':'Data Availability %', 'arguments':{},                  'minimum_bias':[0.0],  'vmin':0.0, 'vmax':100.0},
                     'p1'  :  {'function':calculate_percentile,                 'order':4,  'label':'p1',                  'arguments':{'percentile':1.0},  'minimum_bias':[0.0]},
                     'p5'  :  {'function':calculate_percentile,                 'order':5,  'label':'p5',                  'arguments':{'percentile':5.0},  'minimum_bias':[0.0]},
                     'p10' :  {'function':calculate_percentile,                 'order':6,  'label':'p10',                 'arguments':{'percentile':10.0}, 'minimum_bias':[0.0]},
