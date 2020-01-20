@@ -45,23 +45,6 @@ def calculate_data_avail_number(data):
     """
     return np.count_nonzero(~np.isnan(data), axis=-1)
 
-
-# define dictionary storing basic statistics that can be plotted
-basic_stats_dict = {'Mean':  {'function':calculate_mean,                       'order':0,  'label':'Mean',                'arguments':{},                  'minimum_bias':[0.0]},
-                    'StdDev':{'function':calculate_standard_deviation,         'order':1,  'label':'StdDev',              'arguments':{},                  'minimum_bias':[0.0]},
-                    'Var':   {'function':calculate_variance,                   'order':2,  'label':'Variance',            'arguments':{},                  'minimum_bias':[0.0]},
-                    'Data %':{'function':calculate_data_avail_fraction,        'order':3,  'label':'Data Availability %', 'arguments':{},                  'minimum_bias':[0.0],  'vmin':0.0, 'vmax':100.0},
-                    'p1'  :  {'function':calculate_percentile,                 'order':4,  'label':'p1',                  'arguments':{'percentile':1.0},  'minimum_bias':[0.0]},
-                    'p5'  :  {'function':calculate_percentile,                 'order':5,  'label':'p5',                  'arguments':{'percentile':5.0},  'minimum_bias':[0.0]},
-                    'p10' :  {'function':calculate_percentile,                 'order':6,  'label':'p10',                 'arguments':{'percentile':10.0}, 'minimum_bias':[0.0]},
-                    'p25' :  {'function':calculate_percentile,                 'order':7,  'label':'p25',                 'arguments':{'percentile':25.0}, 'minimum_bias':[0.0]},
-                    'p50' :  {'function':calculate_percentile,                 'order':8,  'label':'p50',                 'arguments':{'percentile':50.0}, 'minimum_bias':[0.0]},
-                    'p75' :  {'function':calculate_percentile,                 'order':9,  'label':'p75',                 'arguments':{'percentile':75.0}, 'minimum_bias':[0.0]},
-                    'p90' :  {'function':calculate_percentile,                 'order':10, 'label':'p90',                 'arguments':{'percentile':90.0}, 'minimum_bias':[0.0]},
-                    'p95' :  {'function':calculate_percentile,                 'order':11, 'label':'p95',                 'arguments':{'percentile':95.0}, 'minimum_bias':[0.0]},
-                    'p99' :  {'function':calculate_percentile,                 'order':12, 'label':'p99',                 'arguments':{'percentile':99.0}, 'minimum_bias':[0.0]}}
-
-
 def calculate_apbe(obs, exp):
     """Calculate absolute percent bias error (APBE)
     between observations and experiment
@@ -203,19 +186,3 @@ def calculate_upa(obs, exp):
     obs_max = np.max(obs)
     exp_max = np.max(exp)
     return (exp_max - obs_max) - obs_max
-
-# define dictionary storing experiment bias evaluation statistics that can be plotted
-experiment_bias_stats_dict = {'MAE': {'function':calculate_mae,       'order':0,  'label':'MAE',     'arguments':{},                            'minimum_bias':[0.0],   'vmin':0.0,                'colourbar':sequential_colourmap_warm},
-                              'NMAE': {'function':calculate_mae,       'order':1,  'label':'NMAE',    'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0],   'vmin':0.0,                'colourbar':sequential_colourmap_warm},
-                              'MBE':  {'function':calculate_mbe,       'order':2,  'label':'MBE',     'arguments':{},                            'minimum_bias':[0.0]},
-                              'NMBE': {'function':calculate_mbe,       'order':3,  'label':'NMBE',    'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0]},
-                              'RMSE': {'function':calculate_rmse,      'order':4,  'label':'RMSE',    'arguments':{},                            'minimum_bias':[0.0]},
-                              'NRMSE': {'function':calculate_rmse,      'order':5,  'label':'NRMSE',   'arguments':{'normalisation_type':'mean'}, 'minimum_bias':[0.0]},
-                              'ABPE': {'function':calculate_apbe,      'order':6,  'label':'ABPE',    'arguments':{},                            'minimum_bias':[0.0],   'vmin':0.0,  'vmax':100.0, 'colourbar':sequential_colourmap_warm},
-                              'PBE':  {'function':calculate_pbe,       'order':7,  'label':'PBE',     'arguments':{},                            'minimum_bias':[0.0]},
-                              'COE':  {'function':calculate_coe,       'order':8,  'label':'COE',     'arguments':{},                            'minimum_bias':[1.0],                'vmax':1.0},
-                              'FAC2': {'function':calculate_fac2,      'order':9,  'label':'FAC2',    'arguments':{},                            'minimum_bias':[100.0], 'vmin':0.0,  'vmax':100.0, 'colourbar':sequential_colourmap_warm},
-                              'IOA':  {'function':calculate_ioa,       'order':10, 'label':'IOA',     'arguments':{},                            'minimum_bias':[1.0],   'vmin':-1.0, 'vmax':1.0},
-                              'r':    {'function':calculate_r,         'order':11, 'label':'r',       'arguments':{},                            'minimum_bias':[1.0],   'vmin':-1.0, 'vmax':1.0},
-                              'r2':   {'function':calculate_r_squared, 'order':12, 'label':'r$^{2}$', 'arguments':{},                            'minimum_bias':[1.0],   'vmin':0.0,  'vmax':1.0,   'colourbar':sequential_colourmap_warm},
-                              'UPA':  {'function':calculate_upa,       'order':13, 'label':'UPA',     'arguments':{},                            'minimum_bias':[0.0]}}

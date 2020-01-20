@@ -1572,7 +1572,7 @@ class MPLCanvas(FigureCanvas):
         self.setParent(parent)
         self.read_instance = read_instance
 
-        # --------------------------------------------------# 
+        # --------------------------------------------------#
         # setup gridding of canvas
         self.gridspec = GridSpec(100, 100)
         self.gridspec.update(left=0.01, right=0.99, top=0.96, bottom=0.04, wspace=0.00, hspace=0.00)
@@ -1626,6 +1626,12 @@ class MPLCanvas(FigureCanvas):
         self.exp_bias_months_ax.axis('off')
         self.exp_bias_days_ax.axis('off')
         self.station_metadata_ax.axis('off')
+
+        # load basic statistics dictionary from conf, set in self
+        # for rest of functions to see
+        self.bstats_dict = json.load(open('providentia/conf/basic_stats_dict.json'))
+        # same for experiment bias statistics
+        self.expbias_dict = json.load(open('providentia/conf/experiment_bias_stats_dict.json'))
 
         # Define dictionary for mapping days of week/months as integers to equivalent strings for writing on axes
         self.temporal_axis_mapping_dict = {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
@@ -2344,17 +2350,12 @@ class MPLCanvas(FigureCanvas):
         data arrays
         """
 
-        # load basic statistics dictionary from conf
-        bstats_dict = json.load(open('providentia/conf/basic_stats_dict.json'))
-        # same for experiment bias statistics
-        expbias_dict = json.load(open('providentia/conf/experiment_bias_stats_dict.json'))
-
         # define all basic statistics that will be subtracted
         # (each experiment - observations) for each temporal aggregation
-        basic_statistics = list(bstats_dict.keys())
+        basic_statistics = list(self.bstats_dict.keys())
         # define all experiment bias statistics that will be calculated
         # between each experiment and observations for each temporal aggregation
-        bias_statistics = list(expbias_dict.keys())
+        bias_statistics = list(self.expbias_dict.keys())
 
         # iterate through all defined temporal aggregation resolutions
         for temporal_aggregation_resolution in self.temporal_aggregation_resolutions:
@@ -2413,7 +2414,7 @@ class MPLCanvas(FigureCanvas):
 
                             # get specific statistic dictionary (containing necessary information
                             # for calculation of selected statistic)
-                            stats_dict = expbias_dict[bias_stat]
+                            stats_dict = self.expbias_dict[bias_stat]
                             # load default statistic arguments for passing to statistical function
                             function_arguments = stats_dict['arguments']
                             # create empty array for storing calculated statistic by group
@@ -2697,10 +2698,10 @@ class MPLCanvas(FigureCanvas):
 
         # create title string to plot (based on type of statistic plotting)
         if selected_stat not in self.read_instance.basic_z_stats:
-            stats_dict = getattr(calcs, 'experiment_bias_stats_dict')[selected_stat]
+            stats_dict = self.expbias_dict[selected_stat]
             plot_title = 'Experiment %s' % (stats_dict['label'])
         else:
-            stats_dict = getattr(calcs, 'basic_stats_dict')[selected_stat]
+            stats_dict = self.bstats_dict[selected_stat]
             if selected_stat != 'Data %':
                 title_units = ' (%s)' % self.read_instance.measurement_units
             else:
@@ -2940,9 +2941,9 @@ class MPLCanvas(FigureCanvas):
         # get dictionary containing necessary information for calculation of selected statistic
         # check if the chosen statistic is a basic statistic
         z_statistic_name = self.read_instance.cb_z_stat.currentText()
-        if z_statistic_name in list(getattr(calcs, 'basic_stats_dict').keys()):
+        if z_statistic_name in list(self.bstats_dict.keys()):
             z_statistic_type = 'basic'
-            stats_dict = getattr(calcs, 'basic_stats_dict')[z_statistic_name]
+            stats_dict = self.bstats_dict[z_statistic_name]
             # set label units for statistic
             if z_statistic_name != 'Data %':
                 label_units = ' (%s)' % self.read_instance.measurement_units
@@ -2951,7 +2952,7 @@ class MPLCanvas(FigureCanvas):
         # if not a basic statistic, it must be an experiment bias statistic
         else:
             z_statistic_type = 'bias'
-            stats_dict = getattr(calcs, 'experiment_bias_stats_dict')[z_statistic_name]
+            stats_dict = self.expbias_dict[z_statistic_name]
             label_units = ''
 
         # -------------------------------------------------#
@@ -3047,7 +3048,7 @@ class MPLCanvas(FigureCanvas):
                 function_arguments['data'] = z1_array_data[z_ii]
 
                 # calculate statistic
-                self.z_statistic[z_ii] = stats_dict['function'](**function_arguments)
+                self.z_statistic[z_ii] = getattr(calcs, stats_dict['function'])(**function_arguments)
 
         # else, read z2 data then calculate 'difference' statistic
         else:
@@ -3075,8 +3076,8 @@ class MPLCanvas(FigureCanvas):
 
                     # calculate statistics for z1/z2 arrays and subtract z2-z1
                     self.z_statistic[z_ii] = \
-                        stats_dict['function'](**function_arguments_z2) - \
-                        stats_dict['function'](**function_arguments_z1)
+                        getattr(calcs, stats_dict['function'])(**function_arguments_z2) - \
+                        getattr(calcs, stats_dict['function'])(**function_arguments_z1)
 
             # else, is the difference statistic an experiment bias statistic (i.e. r)?
             elif z_statistic_type == 'bias':
@@ -3092,7 +3093,7 @@ class MPLCanvas(FigureCanvas):
                     function_arguments['exp'] = z2_array_data[z_ii]
 
                     # calculate statistic
-                    self.z_statistic[z_ii] = stats_dict['function'](**function_arguments)
+                    self.z_statistic[z_ii] = getattr(calcs, stats_dict['function'])(**function_arguments)
 
         # if any station z statistics come out as NaN, remove respective
         # stations from active map valid station indices
