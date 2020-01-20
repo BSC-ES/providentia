@@ -3,6 +3,7 @@
 from .configuration import *
 import providentia.reading as pread
 import providentia.calculate as calcs
+# import providentia.test_calc as calcs
 
 import bisect
 import copy
@@ -1237,12 +1238,14 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         # update map z combobox fields based on data in memory
 
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
-        self.basic_z_stats = np.array(
-            list(OrderedDict(sorted(getattr(calcs, 'basic_stats_dict').items(),
-                                    key=lambda x: x[1]['order'])).keys()))
+        basic_stats_dict = json.load(open('providentia/conf/basic_stats_dict.json'))
+        self.basic_z_stats = np.array(list(
+            OrderedDict(sorted(basic_stats_dict.items(), key=lambda x: x[1]['order'])).keys()))
+
+        # load experiment bias dictionary from configuration
+        expbias_dict = json.load(open('providentia/conf/experiment_bias_stats_dict.json'))
         self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-            OrderedDict(sorted(getattr(calcs, 'experiment_bias_stats_dict').items(),
-                               key=lambda x: x[1]['order'])).keys()))
+            OrderedDict(sorted(expbias_dict.items(), key=lambda x: x[1]['order'])).keys()))
 
         # generate list of sorted z1/z2 data arrays names in memory,
         # putting observations before experiments and
@@ -1786,7 +1789,7 @@ class MPLCanvas(FigureCanvas):
 
                 # calculate data availability fraction per station in observational data array
                 station_data_availability_percent = \
-                    calcs.calculate_data_availability_fraction(
+                    calcs.calculate_data_avail_fraction(
                         self.read_instance.data_in_memory_filtered[data_label]['data'])
 
                 # get indices of stations with >= selected_minimum_data_availability
@@ -1797,7 +1800,7 @@ class MPLCanvas(FigureCanvas):
 
                 # get absolute data availability number per station in observational data array
                 station_data_availability_number = \
-                    calcs.calculate_data_availability_number(
+                    calcs.calculate_data_avail_number(
                         self.read_instance.data_in_memory_filtered[data_label]['data'])
 
                 # get indices of stations with > 1 available measurements
@@ -1877,7 +1880,7 @@ class MPLCanvas(FigureCanvas):
                 valid_station_inds = self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds']
                 # get absolute data availability number per station in experiment data array
                 # after subsetting valid observational stations (i.e. number of non-NaN measurements)
-                station_data_availability_number = calcs.calculate_data_availability_number(self.read_instance.data_in_memory_filtered[data_label]['data'][valid_station_inds,:])
+                station_data_availability_number = calcs.calculate_data_avail_number(self.read_instance.data_in_memory_filtered[data_label]['data'][valid_station_inds,:])
                 # get indices of stations with > 1 available measurements
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
                 # overwrite previous written valid station indices (now at best a subset of those indices)
@@ -2264,8 +2267,8 @@ class MPLCanvas(FigureCanvas):
         into desired temporal groupings also calculates all defined basic
         statistics for each individual temporal grouping
         """
-        # get basic statistics dictionary from calculate.py
-        bstats_dict = getattr(calcs, 'basic_stats_dict')
+        # load basic statistics dictionary from conf
+        bstats_dict = json.load(open('providentia/conf/basic_stats_dict.json'))
 
         # define statistics to calculate (all basic statistics)
         statistics_to_calculate = list(bstats_dict.keys())
@@ -2325,8 +2328,8 @@ class MPLCanvas(FigureCanvas):
                             # add aggregated group data as argument to pass to statistical function
                             function_arguments['data'] = group
                             # calculate statistic (appending to all group statistic output array)
-                            stat_output_by_group = np.append(stat_output_by_group,
-                                                             stats_dict['function'](**function_arguments))
+                            stat_output_by_group = np.append(
+                                stat_output_by_group, getattr(calcs, stats_dict['function'])(**function_arguments))
                         # if no valid data in group, append NaN
                         else:
                             stat_output_by_group = np.append(stat_output_by_group, np.NaN)
@@ -2341,9 +2344,10 @@ class MPLCanvas(FigureCanvas):
         data arrays
         """
 
-        # get basic statistics dictionary from calculate.py
-        bstats_dict = getattr(calcs, 'basic_stats_dict')
-        expbias_dict = getattr(calcs, 'experiment_bias_stats_dict')
+        # load basic statistics dictionary from conf
+        bstats_dict = json.load(open('providentia/conf/basic_stats_dict.json'))
+        # same for experiment bias statistics
+        expbias_dict = json.load(open('providentia/conf/experiment_bias_stats_dict.json'))
 
         # define all basic statistics that will be subtracted
         # (each experiment - observations) for each temporal aggregation
@@ -2428,7 +2432,7 @@ class MPLCanvas(FigureCanvas):
                                 if (len(function_arguments['obs']) > 0) & (len(function_arguments['exp']) > 0):
                                     # calculate experiment bias statistic
                                     stat_output_by_group = \
-                                        np.append(stat_output_by_group, stats_dict['function'](**function_arguments))
+                                        np.append(stat_output_by_group, getattr(calcs, stats_dict['function'])(**function_arguments))
                                 # if no valid data in one (or both) of observations/experiment groups, append NaN
                                 else:
                                     stat_output_by_group = np.append(stat_output_by_group, np.NaN)
