@@ -47,7 +47,7 @@ class Providentia(object):
             self.parser.parser.print_help()
             return False
         # pass only valid values and cast boolean strings to boolean
-        res = {k: eval(v) if v in ('True', 'False') else v for k, v in req.items() if v}
+        res = {k: bool(v) if v in ('True', 'False') else v for k, v in req.items() if v}
         return res
 
     def main(self):
