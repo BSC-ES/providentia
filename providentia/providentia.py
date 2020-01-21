@@ -24,7 +24,7 @@ functionality implemented on Providentia.
 
 from __future__ import print_function
 from .config import ArgumentParser
-from . import dashboard
+from . import prov_dashboard as dashboard
 
 import sys
 import logging
