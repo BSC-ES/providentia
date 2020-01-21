@@ -1794,17 +1794,19 @@ class MPLCanvas(FigureCanvas):
             if data_label.split('_')[0] == 'observations':
 
                 # calculate data availability fraction per station in observational data array
+                # initialize Stats object from calcs module
                 stats_obj = Stats(self.read_instance.data_in_memory_filtered[data_label]['data'])
+                # and call function on object to calculate data avail
                 station_data_availability_percent = stats_obj.calculate_data_avail_fraction()
+
+                # get absolute data availability number per station in observational data array
+                station_data_availability_number = stats_obj.calculate_data_avail_number()
 
                 # get indices of stations with >= selected_minimum_data_availability
                 valid_station_indices_percent = \
                     np.arange(len(self.read_instance.station_references),
                               dtype=np.int)[station_data_availability_percent >=
                                             selected_minimum_data_availability_percent]
-
-                # get absolute data availability number per station in observational data array
-                station_data_availability_number = stats_obj.calculate_data_avail_number()
 
                 # get indices of stations with > 1 available measurements
                 valid_station_indices_absolute = \
@@ -1883,7 +1885,8 @@ class MPLCanvas(FigureCanvas):
                 valid_station_inds = self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds']
                 # get absolute data availability number per station in experiment data array
                 # after subsetting valid observational stations (i.e. number of non-NaN measurements)
-                stats_obj = Stats(self.read_instance.data_in_memory_filtered[data_label]['data'][valid_station_inds,:])
+                # update stats object data and call data availability function
+                stats_obj = Stats(self.read_instance.data_in_memory_filtered[data_label]['data'][valid_station_inds, :])
                 station_data_availability_number = stats_obj.calculate_data_avail_number()
                 # get indices of stations with > 1 available measurements
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
@@ -2329,7 +2332,7 @@ class MPLCanvas(FigureCanvas):
                     for group in full_grouped_data:
                         # only calculate statistic if have valid data in group
                         if len(group) > 0:
-                            # add aggregated group data as argument to pass to statistical function
+                            # create Stats obj with aggregated group data to call stats functions
                             group_stats = Stats(group)
                             # calculate statistic (appending to all group statistic output array)
                             stat_output_by_group = np.append(
@@ -2420,16 +2423,18 @@ class MPLCanvas(FigureCanvas):
                             # iterate through experimental grouped data
                             for group_ii, exp_group in enumerate(self.selected_station_data[data_label]
                                                                  [temporal_aggregation_resolution]['grouped_data']):
-                                # add aggregated observational and experiment group data as arguments
-                                # to pass to statistical function
-                                bstats_obj = ExpBias(relevant_aggregated_observations_dict['grouped_data'][group_ii],exp_group)
+                                # create expvias obj with aggregated observational and experiment group data
+                                # to call on them the statistical function
+                                bstats_obj = \
+                                    ExpBias(relevant_aggregated_observations_dict['grouped_data'][group_ii],exp_group)
 
                                 # calculate experiment bias statistic between observations and
                                 # experiment group data (if have valid data in both groups)
                                 if (len(bstats_obj.obs) > 0) & (len(bstats_obj.exp) > 0):
                                     # calculate experiment bias statistic
                                     stat_output_by_group = \
-                                        np.append(stat_output_by_group, getattr(bstats_obj, stats_dict['function'])(**function_arguments))
+                                        np.append(stat_output_by_group,
+                                                  getattr(bstats_obj, stats_dict['function'])(**function_arguments))
                                 # if no valid data in one (or both) of observations/experiment groups, append NaN
                                 else:
                                     stat_output_by_group = np.append(stat_output_by_group, np.NaN)
@@ -3040,10 +3045,10 @@ class MPLCanvas(FigureCanvas):
             # iterate through stations calculating statistic
             for z_ii in range(len(self.z_statistic)):
 
-                # set station z1 array as argument in argument dictionary
+                # create stats object with z1 array
                 station_stats = Stats(z1_array_data[z_ii])
 
-                # calculate statistic
+                # and calculate its statistics
                 self.z_statistic[z_ii] = getattr(station_stats, stats_dict['function'])(**function_arguments)
 
         # else, read z2 data then calculate 'difference' statistic
@@ -3066,7 +3071,7 @@ class MPLCanvas(FigureCanvas):
                 # iterate through stations calculating statistic
                 for z_ii in range(len(self.z_statistic)):
 
-                    # set station z1/z2 arrays as arguments in argument dictionaries
+                    # create stats objects for station z1/z2
                     station_z1 = Stats(z1_array_data[z_ii])
                     station_z2 = Stats(z2_array_data[z_ii])
 
@@ -3084,7 +3089,7 @@ class MPLCanvas(FigureCanvas):
                 # iterate through stations calculating statistic
                 for z_ii in range(len(self.z_statistic)):
 
-                    # set station z1/z2 arrays as arguments in argument dictionary
+                    # create expbias obj for station z1/z2 arrays
                     bias_stat = ExpBias(z1_array_data[z_ii], z2_array_data[z_ii])
 
                     # calculate statistic
