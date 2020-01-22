@@ -1112,7 +1112,7 @@ class MPLCanvas(FigureCanvas):
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks, medians, marker='o',
                         color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                        markersize=self.read_instance.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
+                        markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                 else:
                     inds_to_split += 1
                     start_ind = 0
@@ -1120,16 +1120,14 @@ class MPLCanvas(FigureCanvas):
                         aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                             xticks[start_ind:end_ind], medians[start_ind:end_ind],
                             marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                            markersize=self.read_instance.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
+                            markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                         start_ind = end_ind
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks[start_ind:], medians[start_ind:], marker='o',
                         color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                        markersize=self.read_instance.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
+                        markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
 
-        # ------------------------------------------------------------------------------------------------# 
         # plot title (with units)
-
         # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
         if self.read_instance.active_resolution == 'hourly':
             self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
@@ -1139,14 +1137,11 @@ class MPLCanvas(FigureCanvas):
             self.violin_months_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
                                             fontsize=8.0, loc='left')
 
-        # ------------------------------------------------------------------------------------------------# 
         # as are re-plotting on violin plot axes, reset the navigation toolbar stack
         # dictionaries entries associated with each of the axes
-
         for temporal_aggregation_resolution in list(aggregation_dict.keys()):
             self.reset_ax_navigation_toolbar_stack(aggregation_dict[temporal_aggregation_resolution]['ax'])
 
-    # --------------------------------------------------------------------------------# 
 
     def update_experiment_bias_aggregated_plots(self):
         """Function that updates the temporally aggregated experiment bias statistic plots"""
@@ -1187,9 +1182,7 @@ class MPLCanvas(FigureCanvas):
             # change axis tick labels
             aggregation_dict[temporal_aggregation_resolution]['ax'].tick_params(labelsize=8.0)
 
-        # ------------------------------------------------------------------------------------------------# 
         # plot title (with units)
-
         # create title string to plot (based on type of statistic plotting)
         if selected_stat not in self.read_instance.basic_z_stats:
             stats_dict = self.expbias_dict[selected_stat]
@@ -1448,7 +1441,6 @@ class MPLCanvas(FigureCanvas):
             stats_dict = self.expbias_dict[z_statistic_name]
             label_units = ''
 
-        # -------------------------------------------------#
         # set colourbar for z statistic
         # first check if have defined colourbar for z statistic, if so use that
         if 'colourbar' in list(stats_dict.keys()):
@@ -1467,8 +1459,6 @@ class MPLCanvas(FigureCanvas):
             self.z_label = '%s\n%s %s' % (z1_selected_name, stats_dict['label'], label_units)
         else:
             self.z_label = '%s - %s\n%s %s' % (z2_selected_name, z1_selected_name, stats_dict['label'], label_units)
-
-        # -------------------------------------------------# 
 
         # if colocation is active, set appropriate z1/z2 arrays to read to get colocated data arrays
         if self.colocate_active:
@@ -1513,8 +1503,6 @@ class MPLCanvas(FigureCanvas):
             [np.where(self.active_map_valid_station_inds == selected_ind)[0][0]
              for selected_ind in self.relative_selected_station_inds if selected_ind
              in self.active_map_valid_station_inds], dtype=np.int)
-
-        # -------------------------------------------------# 
 
         # read z1 data
         z1_array_data = \
@@ -1693,7 +1681,6 @@ class MPLCanvas(FigureCanvas):
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
-            # -------------------------------------------# 
             if not self.read_instance.block_MPL_canvas_updates:
 
                 # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
@@ -1713,7 +1700,6 @@ class MPLCanvas(FigureCanvas):
             # if no experiment data loaded, do not update
             if len(self.read_instance.experiment_bias_types) > 0:
 
-                # -------------------------------------------# 
                 # update experiment bias comboboxes
 
                 # set variable that blocks configuration bar handling updates until all changes
