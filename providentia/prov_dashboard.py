@@ -1149,7 +1149,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
         elif self.read_type == 'parallel':
 
             # setup pool of N workers on N CPUs
-            pool = multiprocessing.Pool(n_CPUs)
+            pool = multiprocessing.Pool(n_cpuS)
 
             # read netCDF files in parallel
             tuples_list = [(file_name, metadata_vars_to_read) for file_name in relevant_files]
@@ -1275,7 +1275,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
         elif self.read_type == 'parallel':
 
             # setup pool of N workers on N CPUs
-            pool = multiprocessing.Pool(n_CPUs)
+            pool = multiprocessing.Pool(self.n_cpus)
 
             # read netCDF files in parallel
             tuple_arguments = [(file_name, self.time_array, self.station_references, self.active_species,
