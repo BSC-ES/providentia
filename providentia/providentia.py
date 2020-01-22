@@ -1,3 +1,4 @@
+""" Main Providentia module """
 # Providentia is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -12,7 +13,7 @@
 # along with Providentia. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-from .config import ArgumentParser
+from .config import ProvArgumentParser
 from . import prov_dashboard as dashboard
 
 import sys
@@ -62,12 +63,12 @@ class Providentia(object):
 
 def main():
     """ Main function """
-    if Providentia(ArgumentParser()).main() is False:
+    if Providentia(ProvArgumentParser()).main() is False:
         sys.exit(1)
     sys.exit(0)
 
 
 if __name__ == "__main__":
-    if Providentia(ArgumentParser()).main() is False:
+    if Providentia(ProvArgumentParser()).main() is False:
         sys.exit(1)
     sys.exit(0)
