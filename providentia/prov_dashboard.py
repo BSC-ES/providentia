@@ -43,7 +43,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
         if ('config' in kwargs) and ('section' in kwargs):
             self.load_conf(kwargs['section'], kwargs['config'])
         # update from command line
-        vars(self).update({(k, self.parse_parameter(val)) for k, val in kwargs.items()})
+        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
         # arguments are only local
 
         # create UI
@@ -1339,7 +1339,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
         if section is None:
             return opts
 
-        vars(self).update({(k, self.parse_parameter(val)) for k, val in opts.items()})
+        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
 
 
 # generate Providentia dashboard
