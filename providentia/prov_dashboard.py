@@ -648,7 +648,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
                     # get all experiment netCDF files by experiment/grid/selected
                     # resolution/selected species/selected network
                     network_files = os.listdir(
-                        '%s/%s/%s/%s/%s/%s/%s' % (exp_root, ghost_version, experiment, grid, self.selected_resolution,
+                        '%s/%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version, experiment, grid, self.selected_resolution,
                                                   self.selected_species, self.selected_network))
                     # get start YYYYMM yearmonths of data files
                     network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files]
@@ -1087,7 +1087,8 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
                                         freq=self.active_frequency_code)[:-1]
 
         # get all relevant observational files
-        file_root = '%s/%s/%s/%s/%s/%s_' % (obs_root, self.active_network, ghost_version,
+        file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
+                                            self.active_network, self.ghost_version,
                                             self.active_resolution, self.active_species, self.active_species)
         relevant_files = \
             sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.available_observation_data[
@@ -1206,7 +1207,8 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
         # also get relevant file start dates
         if data_label == 'observations':
             self.process_type = 'observations'
-            file_root = '%s/%s/%s/%s/%s/%s_' % (obs_root, self.active_network, ghost_version,
+            file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
+                                                self.active_network, self.ghost_version,
                                                 self.active_resolution, self.active_species, self.active_species)
             relevant_file_start_dates = \
                 sorted(self.available_observation_data[self.active_network]
@@ -1218,7 +1220,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
             active_experiment = experiment_grid_split[0]
             active_grid = experiment_grid_split[1]
             file_root = \
-                '%s/%s/%s/%s/%s/%s/%s/%s_' % (exp_root, ghost_version, active_experiment,
+                '%s/%s/%s/%s/%s/%s/%s/%s_' % (self.exp_root, self.ghost_version, active_experiment,
                                               active_grid, self.active_resolution, self.active_species,
                                               self.active_network, self.active_species)
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
