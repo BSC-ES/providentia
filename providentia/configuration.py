@@ -42,7 +42,7 @@ class ProvConfiguration(object):
         self.time_series_markersize = \
                                    kwargs.get('time_series_markersize', 1.1)
         self.temp_agg_markersize = \
-                                   kwargs.get('temp_aggregated_markersize', 3)
+                                   kwargs.get('temp_agg_markersize', 3)
         self.temp_agg_expbias_markersize = \
                 kwargs.get('temp_agg_expbias_markersize', 3)
 
