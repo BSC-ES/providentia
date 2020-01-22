@@ -11,12 +11,10 @@ import logging
 
 from configargparse import ArgumentParser
 import providentia
-from providentia import prov_exceptions
-
+from . import prov_exceptions
 
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
-
 
 
 class ProvArgumentParser(object):
@@ -36,7 +34,10 @@ class ProvArgumentParser(object):
                                      dest="config",
                                      help='specifies the config file to read'
                                      ) #required=False)
-
+            self.parser.add_argument('--config_dir', #is_config_file=True,
+                                     dest="config_dir",
+                                     help='specifies the configuration directory where config files are'
+                                     ) #required=False)
             self.parser.add_argument("--section",
                                      dest="section",
                                      help="config file section to read")
