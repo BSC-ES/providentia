@@ -1,5 +1,5 @@
 from .configuration import ProvConfiguration
-from .configuration.ProvConfiguration import parse_path
+from .configuration import parse_path
 from .reading import read_netcdf_station
 from .reading import read_netcdf_data
 from .prov_canvas import MPLCanvas
