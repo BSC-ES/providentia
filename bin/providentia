@@ -30,7 +30,7 @@ IFS=$'\n\t'
 # optional.
 # See `man getopt'.
 SHORT=hc:J:q:m:
-LONG=help,cores:,jobname:,queue:,mem:
+LONG=help,cores:,jobname:,queue:,mem:,sequential_colourmap::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,obs_root::,exp_root::,sequential_colourmap::,sequential_colourmap_warm::,diverging_colourmap::,unsel_station_markersize::,sel_station_markersize::,legend_markersize::,time_series_markersize::,temp_agg_markersize::,temp_agg_expbias_markersize::
 
 # - Temporarily store output to be able to check for errors.
 # - Activate advanced mode getopt quoting e.g. via "--options".
@@ -47,6 +47,7 @@ if [[ $? -ne 0 ]]; then
     #  then getopt has complained about wrong arguments to stdout
     exit 2
 fi
+
 
 while [[ $# -gt 0 ]]; do
 #    echo "parsing arg: $1"
@@ -73,7 +74,8 @@ echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 srun_command="srun -t 02:00:00 -n 1 -c $cores -J $jobname --x11=first"
-python_command="python3 -c 'from providentia import providentia; providentia.main()'"
+python_command="python3 -c 'from providentia import providentia;providentia.main()' $@"
+
 
 #CTE POWER
 if [ "${BSC_MACHINE}" == "power" ]; then
