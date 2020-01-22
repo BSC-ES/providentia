@@ -14,13 +14,14 @@ import matplotlib
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
         as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
+from matplotlib.path import Path
 from matplotlib.widgets import LassoSelector
 from matplotlib.gridspec import GridSpec
 from pandas.plotting import register_matplotlib_converters
+from PyQt5 import QtCore
 
 import numpy as np
 import pandas as pd
@@ -29,8 +30,6 @@ import json
 # Make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
 register_matplotlib_converters()
-# set cartopy data directory
-cartopy.config['pre_existing_data_dir'] = cartopy_data_dir
 
 
 class NavigationToolbar(NavigationToolbar2QT):
@@ -63,7 +62,9 @@ class MPLCanvas(FigureCanvas):
         self.setParent(parent)
         self.read_instance = read_instance
 
-        # --------------------------------------------------#
+        # set cartopy data directory
+        cartopy.config['pre_existing_data_dir'] = self.read_instance.cartopy_data_dir
+
         # setup gridding of canvas
         self.gridspec = GridSpec(100, 100)
         self.gridspec.update(left=0.01, right=0.99, top=0.96, bottom=0.04, wspace=0.00, hspace=0.00)
@@ -545,7 +546,7 @@ class MPLCanvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=self.unsel_station_markersize, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)
+            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=self.read_instance.unsel_station_markersize, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)
             # create 2D numpy array of plotted station coordinates
             self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
 
@@ -592,7 +593,7 @@ class MPLCanvas(FigureCanvas):
         # reset alphas of all plotted stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
             self.rgba_tuples[:, -1] = 1.0
-            marker_sizes = np.full(len(self.z_statistic), self.unsel_station_markersize)
+            marker_sizes = np.full(len(self.z_statistic), self.read_instance.unsel_station_markersize)
             self.map_points.set_facecolor(self.rgba_tuples)
             # reset marker sizes of all plotted stations
             self.map_points.set_sizes(marker_sizes)
@@ -609,7 +610,7 @@ class MPLCanvas(FigureCanvas):
                     self.map_points.set_facecolor(self.rgba_tuples)
 
                 # increase marker size of selected stations
-                marker_sizes[self.absolute_selected_station_inds] = self.sel_station_markersize
+                marker_sizes[self.absolute_selected_station_inds] = self.read_instance.sel_station_markersize
                 self.map_points.set_sizes(marker_sizes)
     # --------------------------------------------------------------------------------# 
     # --------------------------------------------------------------------------------# 
@@ -704,14 +705,14 @@ class MPLCanvas(FigureCanvas):
         # add observations element
         legend_elements = [Line2D([0], [0], marker='o', color='white',
                                   markerfacecolor=self.read_instance.data_in_memory['observations']['colour'],
-                                  markersize=self.legend_markersize, label='observations')]
+                                  markersize=self.read_instance.legend_markersize, label='observations')]
         # add element for each experiment
         for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.data_in_memory.keys()))):
             if experiment != 'observations':
                 # add experiment element
                 legend_elements.append(Line2D([0], [0], marker='o', color='white',
                                               markerfacecolor=self.read_instance.data_in_memory[experiment]['colour'],
-                                              markersize=self.legend_markersize, label=experiment))
+                                              markersize=self.read_instance.legend_markersize, label=experiment))
 
         # plot legend
         self.legend_ax.legend(handles=legend_elements, loc='best', mode='expand', ncol=4, fontsize=9.0)
@@ -954,7 +955,7 @@ class MPLCanvas(FigureCanvas):
                 self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
                                 color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
                                 marker='o', markeredgecolor=None, mew=0,
-                                markersize=self.time_series_markersize,
+                                markersize=self.read_instance.time_series_markersize,
                                 linestyle='None',
                                 zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'])
 
@@ -1111,7 +1112,7 @@ class MPLCanvas(FigureCanvas):
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks, medians, marker='o',
                         color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                        markersize=self.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
+                        markersize=self.read_instance.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
                 else:
                     inds_to_split += 1
                     start_ind = 0
@@ -1119,12 +1120,12 @@ class MPLCanvas(FigureCanvas):
                         aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                             xticks[start_ind:end_ind], medians[start_ind:end_ind],
                             marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                            markersize=self.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
+                            markersize=self.read_instance.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
                         start_ind = end_ind
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks[start_ind:], medians[start_ind:], marker='o',
                         color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                        markersize=self.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
+                        markersize=self.read_instance.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
 
         # ------------------------------------------------------------------------------------------------# 
         # plot title (with units)
@@ -1232,7 +1233,7 @@ class MPLCanvas(FigureCanvas):
                             [selected_experiment_bias_stat],
                             color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
                             marker='o', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'],
-                            markersize=self.temp_agg_expbias_markersize, linewidth=0.5)
+                            markersize=self.read_instance.temp_agg_expbias_markersize, linewidth=0.5)
 
             # set x axis limits
             aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(
@@ -1451,15 +1452,15 @@ class MPLCanvas(FigureCanvas):
         # set colourbar for z statistic
         # first check if have defined colourbar for z statistic, if so use that
         if 'colourbar' in list(stats_dict.keys()):
-            self.z_colourmap = getattr(self, stats_dict['colourbar'])
+            self.z_colourmap = getattr(self.read_instance, stats_dict['colourbar'])
         # else, set appropriate colourmap for the type of statistic
         else:
             # if only have selected z1 array, the statistic is 'absolute', so use sequential colourbar
             if have_z2 is False:
-                self.z_colourmap = self.sequential_colourmap
+                self.z_colourmap = self.read_instance.sequential_colourmap
             # if have selected z1 and z2 arrays, the statistic is 'difference', so use diverging colourbar
             else:
-                self.z_colourmap = self.diverging_colourmap
+                self.z_colourmap = self.read_instance.diverging_colourmap
 
         # generate z colourbar label
         if have_z2 is False:
@@ -1674,3 +1675,296 @@ class MPLCanvas(FigureCanvas):
                 z1_items = self.read_instance.z1_arrays
             z2_items = np.delete(self.read_instance.z2_arrays,
                                  np.where(self.read_instance.z2_arrays == selected_z1_array)[0])
+
+            # update all comboboxes (clear, then add items)
+            self.read_instance.cb_z_stat.clear()
+            self.read_instance.cb_z1.clear()
+            self.read_instance.cb_z2.clear()
+            self.read_instance.cb_z_stat.addItems(z_stat_items)
+            self.read_instance.cb_z1.addItems(z1_items)
+            self.read_instance.cb_z2.addItems(z2_items)
+            # maintain currently selected z statistic (if exists in new item list)
+            if selected_z_stat in z_stat_items:
+                self.read_instance.cb_z_stat.setCurrentText(selected_z_stat)
+            # maintain currently selected z1/z2 arrays
+            self.read_instance.cb_z1.setCurrentText(selected_z1_array)
+            self.read_instance.cb_z2.setCurrentText(selected_z2_array)
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # -------------------------------------------# 
+            if not self.read_instance.block_MPL_canvas_updates:
+
+                # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
+                self.calculate_z_statistic()
+
+                # update plotted map z statistic
+                self.update_map_z_statisitic()
+
+                # draw changes
+                self.draw()
+
+    def handle_experiment_bias_update(self):
+        """Define function that handles update of plotted experiment bias statistics"""
+
+        if not self.read_instance.block_config_bar_handling_updates:
+
+            # if no experiment data loaded, do not update
+            if len(self.read_instance.experiment_bias_types) > 0:
+
+                # -------------------------------------------# 
+                # update experiment bias comboboxes
+
+                # set variable that blocks configuration bar handling updates until all changes
+                # to the experiment bias comboboxes are made
+                self.read_instance.block_config_bar_handling_updates = True
+
+                # get currently selected items
+                selected_experiment_bias_type = self.read_instance.cb_experiment_bias_type.currentText()
+                selected_experiment_bias_stat = self.read_instance.cb_experiment_bias_stat.currentText()
+
+                # update experiment bias statistics (used for Aggregated field), to all basic stats
+                # if colocation not-active, and basic+bias stats if colocation active
+                if not self.colocate_active:
+                    available_experiment_bias_stats = copy.deepcopy(self.read_instance.basic_z_stats)
+                else:
+                    available_experiment_bias_stats = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
+
+                # if selected bias type is empty string, it is because fields are being initialised for the first time
+                if selected_experiment_bias_type == '':
+                    # set experiment bias type to be first available type
+                    selected_experiment_bias_type = self.read_instance.experiment_bias_types[0]
+                    # set experiment bias stat to be first available stat
+                    selected_experiment_bias_stat = available_experiment_bias_stats[0]
+
+                # if selected bias type is 'Rank', then there are no stat options so force the
+                # available items and selected stat to be empty
+                if selected_experiment_bias_type == 'Rank':
+                    available_experiment_bias_stats = []
+                    selected_experiment_bias_stat = ''
+
+                # update all comboboxes (clear, then add items)
+                self.read_instance.cb_experiment_bias_type.clear()
+                self.read_instance.cb_experiment_bias_stat.clear()
+                self.read_instance.cb_experiment_bias_type.addItems(self.read_instance.experiment_bias_types)
+                self.read_instance.cb_experiment_bias_stat.addItems(available_experiment_bias_stats)
+
+                # update selected values
+                self.read_instance.cb_experiment_bias_type.setCurrentText(selected_experiment_bias_type)
+                # maintain currently selected bias statistic (if exists in new item list)
+                if selected_experiment_bias_stat in available_experiment_bias_stats:
+                    self.read_instance.cb_experiment_bias_stat.setCurrentText(selected_experiment_bias_stat)
+
+                # allow handling updates to the configuration bar again
+                self.read_instance.block_config_bar_handling_updates = False
+
+                if not self.read_instance.block_MPL_canvas_updates:
+
+                    # update experiment bias plot/s if have some stations selected on map
+                    if len(self.relative_selected_station_inds) > 0:
+
+                        # clear and turn off all relevant axes before updating
+                        self.exp_bias_hours_ax.cla()
+                        self.exp_bias_months_ax.cla()
+                        self.exp_bias_days_ax.cla()
+                        self.exp_bias_hours_ax.axis('off')
+                        self.exp_bias_months_ax.axis('off')
+                        self.exp_bias_days_ax.axis('off')
+
+                        # if experiment bias type == 'Aggregated' --> update plotted experiment bias plots
+                        if selected_experiment_bias_type == 'Aggregated':
+                            self.update_experiment_bias_aggregated_plots()
+
+                        # draw changes
+                        self.draw()
+
+    def select_all_stations(self):
+        """Define function that selects/unselects all plotted stations
+        (and associated plots) upon ticking of checkbox"""
+
+        if not self.read_instance.block_MPL_canvas_updates:
+
+            # make copy of current full array relative selected stations indices, before selecting new ones
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+
+            # check if checkbox to select all stations is checked or unchecked
+            check_state = self.read_instance.ch_select_all.checkState()
+
+            # if checkbox is checked, select all plotted stations
+            if check_state == QtCore.Qt.Checked:
+                self.relative_selected_station_inds = copy.deepcopy(self.active_map_valid_station_inds)
+
+                # if select intersect stations checkbox is checked then uncheck it (without updating canvas)
+                if self.read_instance.ch_intersect.checkState() == QtCore.Qt.Checked:
+                    self.read_instance.block_MPL_canvas_updates = True
+                    self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
+                    self.read_instance.block_MPL_canvas_updates = False
+
+            # if checkbox is unchecked then unselect all plotted stations
+            elif check_state == QtCore.Qt.Unchecked:
+                self.relative_selected_station_inds = np.array([], dtype=np.int)
+
+            # update absolute selected station indices (indices relative to plotted stations on map)
+            self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds), dtype=np.int)
+
+            # update map station selection
+            self.update_map_station_selection()
+
+            # if selected stations have changed from previous selected, update associated plots
+            if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+                self.update_associated_selected_station_plots()
+
+            # draw changes
+            self.draw()
+
+    def select_intersect_stations(self):
+
+        """Define function that selects/unselects intersection of
+        stations and all experiment domains (and associated plots)
+        upon ticking of checkbox
+        """
+
+        if not self.read_instance.block_MPL_canvas_updates:
+
+            # make copy of current full array relative selected stations indices, before selecting new ones
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+
+            # check if checkbox to select intersection of stations is checked or unchecked
+            check_state = self.read_instance.ch_intersect.checkState()
+
+            # if checkbox is unchecked then unselect all plotted stations
+            if check_state == QtCore.Qt.Unchecked:
+                self.relative_selected_station_inds = np.array([], dtype=np.int)
+                self.absolute_selected_station_inds = np.array([], dtype=np.int)
+
+            # else, if checkbox is checked then select all stations which intersect with all loaded experiment domains
+            elif check_state == QtCore.Qt.Checked:
+
+                # if have only observations loaded into memory, select all plotted stations
+                if len(list(self.read_instance.data_in_memory.keys())) == 1:
+                    self.relative_selected_station_inds = copy.deepcopy(self.active_map_valid_station_inds)
+                    self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
+                                                                    dtype=np.int)
+                # else, define list of lists to get intersection between (active_map_
+                # valid_station_inds, and valid station indices associated with each loaded experiment array)
+                else:
+                    intersect_lists = [self.active_map_valid_station_inds]
+                    for data_label in list(self.read_instance.data_in_memory.keys()):
+                        if data_label != 'observations':
+                            intersect_lists.append(
+                                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'])
+                    # get intersect between active map valid station indices and valid station indices
+                    # associated with each loaded experiment array --> relative selected station indcies
+                    self.relative_selected_station_inds = np.sort(list(set.intersection(*map(set, intersect_lists))))
+                    # get absolute selected station indices (indices relative to plotted stations on map)
+                    self.absolute_selected_station_inds = \
+                        np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind
+                                  in self.relative_selected_station_inds], dtype=np.int)
+
+                # if select all stations checkbox is checked then uncheck it (without updating canvas)
+                if self.read_instance.ch_select_all.checkState() == QtCore.Qt.Checked:
+                    self.read_instance.block_MPL_canvas_updates = True
+                    self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
+                    self.read_instance.block_MPL_canvas_updates = False
+
+            # update map station selection
+            self.update_map_station_selection()
+
+            # if selected stations have changed from previous selected, update associated plots
+            if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+                self.update_associated_selected_station_plots()
+
+            # draw changes
+            self.draw()
+
+    # define functions that handle interactive station selection on map
+    # the selection methods are individual station selection, or multiple selection with lasso
+
+    def on_click(self, event):
+        """Function that handles single station selection upon mouse click"""
+
+        # update variable to inform lasso handler that map as already been updated (to not redraw map)
+        # the on_click function is only called when a station index has been selected
+        # the variable will be reset by lasso handler (which is always called after on_click)
+        self.map_already_updated = True
+
+        # make copy of current full array relative selected stations indices, before selecting new ones
+        self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+
+        # get absolute selected index of station on map
+        self.absolute_selected_station_inds = np.array([event.ind[0]], dtype=np.int)
+
+        # get selected station indices with respect to all available stations
+        self.relative_selected_station_inds = \
+            self.map_selected_station_inds_to_all_available_inds(self.absolute_selected_station_inds)
+
+        # update map station selection
+        self.update_map_station_selection()
+
+        # if selected stations have changed from previous selected, update associated plots
+        if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+            self.update_associated_selected_station_plots()
+
+        # draw changes
+        self.draw()
+
+    def onlassoselect(self, verts):
+        """Function that handles multiple
+        station selection upon lasso drawing
+        """
+
+        # unselect all/intersect checkboxes
+        self.read_instance.block_MPL_canvas_updates = True
+        self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
+        self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
+        self.read_instance.block_MPL_canvas_updates = False
+
+        # check if have any plotted stations on map, if not, return
+        if len(self.active_map_valid_station_inds) == 0:
+            return
+
+        # check if map as already been processed by on_click mouse click handling function, if so, return
+        # the on_click function will always be called before lasso handler
+        if self.map_already_updated:
+            self.map_already_updated = False
+            return
+
+        # make copy of current full array relative selected stations indices, before selecting new ones
+        self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+
+        # get coordinates of drawn lasso
+        lasso_path = Path(verts)
+        lasso_path_vertices = lasso_path.vertices
+        # transform lasso coordinates from projected to standard geographic coordinates
+        lasso_path.vertices = \
+            self.datacrs.transform_points(self.plotcrs, lasso_path_vertices[:, 0], lasso_path_vertices[:, 1])[:, :2]
+        # get absolute selected indices of stations on map (the station coordinates contained within lasso)
+        self.absolute_selected_station_inds = np.nonzero(lasso_path.contains_points(self.map_points_coordinates))[0]
+
+        # get selected station indices with respect to all available stations
+        self.relative_selected_station_inds = \
+            self.map_selected_station_inds_to_all_available_inds(self.absolute_selected_station_inds)
+
+        # update map station selection
+        self.update_map_station_selection()
+
+        # hide lasso after selection
+        self.lasso.set_visible(False)
+
+        # if selected stations have changed from previous selected, update associated plots
+        if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+            self.update_associated_selected_station_plots()
+
+        # draw changes
+        self.draw()
+
+    def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
+        """Function that takes the indices of selected stations on the map
+        (potentially a subset of all available stations), and returns the indices
+        of the stations inside the full loaded data arrays
+        """
+
+        # index the array of indices of stations plotted on the map (indexed with respect to
+        # all available stations), with the absolute indices of the subset of plotted selected stations
+        return self.active_map_valid_station_inds[selected_map_inds]
