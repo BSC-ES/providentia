@@ -20,6 +20,7 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
 #Workstations/fatnodes
 else
     module load Python/3.7.3-foss-2015a \
+     ConfigArgParse/0.14.0-foss-2015a-Python-3.7.3 \
      Cartopy/0.17.0-foss-2015a-Python-3.7.3 \
      matplotlib/3.1.1-foss-2015a-Python-3.7.3 \
      netcdf4-python/1.5.1.2-foss-2015a-Python-3.7.3 \

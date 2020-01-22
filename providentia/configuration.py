@@ -5,13 +5,23 @@ import re
 import subprocess
 
 
-MACHINE = getattr(os.environment['BSC_MACHINE'], '')
+MACHINE = os.environ.get('BSC_MACHINE', '')
+
+def parse_path(dir, f):
+    #print "Opening data file", f
+    if os.path.isabs(f):
+        return f
+    else:
+        #log.info("Input: %s", f)
+        return os.path.join(dir, f)
 
 
 class ProvConfiguration(object):
     """ Configuration parameters definitions """
 
     def __init__(self, **kwargs):
+        self.config_dir = kwargs.get('config_dir', \
+             os.path.join(os.environ['HOME'], '.providentia'))
         self.ghost_version = kwargs.get('ghost_version', '1.1')
         self.cartopy_data_dir = kwargs.get('cartopy_data_dir', '')
         self.available_cpus = kwargs.get('available_cpus', '')
@@ -57,7 +67,7 @@ class ProvConfiguration(object):
             # internet connection)
 
             if (MACHINE == 'power') or (MACHINE == 'mn4'):
-                return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
+                value = '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all machines except CTE-POWER/MN4, pull from internet
 
         elif key == 'n_cpus':
@@ -66,7 +76,7 @@ class ProvConfiguration(object):
             # actual number of CPUs available, then the max number of CPUs is used.
 
             if (value == '') or (int(value) > self.available_cpus):
-                return self.available_cpus
+                value = self.available_cpus
 
         elif key == 'obs_root':
             # Define observational root data directory (if undefined it is
@@ -76,10 +86,10 @@ class ProvConfiguration(object):
             if value == '':
                 # running on CTE-POWER/MN4?
                 if (MACHINE == 'power') or (MACHINE == 'mn4'):
-                    return '/gpfs/projects/bsc32/AC_cache/obs/ghost'
-
-                # running on workstation?
-                value = '/esarchive/obs/ghost'
+                    value = '/gpfs/projects/bsc32/AC_cache/obs/ghost'
+                else:
+                    # running on workstation?
+                    value = '/esarchive/obs/ghost'
 
         elif key == 'exp_root':
             # Define experiment root data directory
