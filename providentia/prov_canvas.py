@@ -1,7 +1,8 @@
-
-from providentia.calculate import Stats
-from providentia.calculate import ExpBias
-import providentia.configuration as pconfig
+""" MPL Canvas module """
+from .calculate import Stats
+from .calculate import ExpBias
+from . import configuration as pconfig
+from .reading import drop_nans
 
 import copy
 from weakref import WeakKeyDictionary
@@ -23,6 +24,7 @@ from pandas.plotting import register_matplotlib_converters
 
 import numpy as np
 import pandas as pd
+import json
 
 # Make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
@@ -543,7 +545,7 @@ class MPLCanvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=map_unselected_station_marker_size, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)
+            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=self.unsel_station_markersize, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)
             # create 2D numpy array of plotted station coordinates
             self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
 
@@ -590,7 +592,7 @@ class MPLCanvas(FigureCanvas):
         # reset alphas of all plotted stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
             self.rgba_tuples[:, -1] = 1.0
-            marker_sizes = np.full(len(self.z_statistic), map_unselected_station_marker_size)
+            marker_sizes = np.full(len(self.z_statistic), self.unsel_station_markersize)
             self.map_points.set_facecolor(self.rgba_tuples)
             # reset marker sizes of all plotted stations
             self.map_points.set_sizes(marker_sizes)
@@ -607,7 +609,7 @@ class MPLCanvas(FigureCanvas):
                     self.map_points.set_facecolor(self.rgba_tuples)
 
                 # increase marker size of selected stations
-                marker_sizes[self.absolute_selected_station_inds] = map_selected_station_marker_size
+                marker_sizes[self.absolute_selected_station_inds] = self.sel_station_markersize
                 self.map_points.set_sizes(marker_sizes)
     # --------------------------------------------------------------------------------# 
     # --------------------------------------------------------------------------------# 
@@ -702,14 +704,14 @@ class MPLCanvas(FigureCanvas):
         # add observations element
         legend_elements = [Line2D([0], [0], marker='o', color='white',
                                   markerfacecolor=self.read_instance.data_in_memory['observations']['colour'],
-                                  markersize=legend_marker_size, label='observations')]
+                                  markersize=self.legend_markersize, label='observations')]
         # add element for each experiment
         for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.data_in_memory.keys()))):
             if experiment != 'observations':
                 # add experiment element
                 legend_elements.append(Line2D([0], [0], marker='o', color='white',
                                               markerfacecolor=self.read_instance.data_in_memory[experiment]['colour'],
-                                              markersize=legend_marker_size, label=experiment))
+                                              markersize=self.legend_markersize, label=experiment))
 
         # plot legend
         self.legend_ax.legend(handles=legend_elements, loc='best', mode='expand', ncol=4, fontsize=9.0)
@@ -951,7 +953,8 @@ class MPLCanvas(FigureCanvas):
             self.data_array_ts = \
                 self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
                                 color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                                marker='o', markeredgecolor=None, mew=0, markersize=time_series_marker_size,
+                                marker='o', markeredgecolor=None, mew=0,
+                                markersize=self.time_series_markersize,
                                 linestyle='None',
                                 zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'])
 
@@ -1108,7 +1111,7 @@ class MPLCanvas(FigureCanvas):
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks, medians, marker='o',
                         color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                        markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder)
+                        markersize=self.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
                 else:
                     inds_to_split += 1
                     start_ind = 0
@@ -1116,12 +1119,12 @@ class MPLCanvas(FigureCanvas):
                         aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                             xticks[start_ind:end_ind], medians[start_ind:end_ind],
                             marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                            markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder)
+                            markersize=self.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
                         start_ind = end_ind
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks[start_ind:], medians[start_ind:], marker='o',
                         color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                        markersize=temporally_aggregated_marker_size, linewidth=0.5, zorder=median_zorder)
+                        markersize=self.temp_aggregated_markersize, linewidth=0.5, zorder=median_zorder)
 
         # ------------------------------------------------------------------------------------------------# 
         # plot title (with units)
@@ -1229,7 +1232,7 @@ class MPLCanvas(FigureCanvas):
                             [selected_experiment_bias_stat],
                             color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
                             marker='o', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'],
-                            markersize=temporally_aggregated_experiment_bias_marker_size, linewidth=0.5)
+                            markersize=self.temp_agg_expbias_markersize, linewidth=0.5)
 
             # set x axis limits
             aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(
@@ -1448,15 +1451,15 @@ class MPLCanvas(FigureCanvas):
         # set colourbar for z statistic
         # first check if have defined colourbar for z statistic, if so use that
         if 'colourbar' in list(stats_dict.keys()):
-            self.z_colourmap = getattr(pconfig, stats_dict['colourbar'])
+            self.z_colourmap = getattr(self, stats_dict['colourbar'])
         # else, set appropriate colourmap for the type of statistic
         else:
             # if only have selected z1 array, the statistic is 'absolute', so use sequential colourbar
             if have_z2 is False:
-                self.z_colourmap = sequential_colourmap
+                self.z_colourmap = self.sequential_colourmap
             # if have selected z1 and z2 arrays, the statistic is 'difference', so use diverging colourbar
             else:
-                self.z_colourmap = diverging_colourmap
+                self.z_colourmap = self.diverging_colourmap
 
         # generate z colourbar label
         if have_z2 is False:
@@ -1517,7 +1520,7 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.data_in_memory_filtered[z1_array_to_read]['data'][self.active_map_valid_station_inds,:]
         # drop NaNs and reshape to object list of station data arrays (if not checking data %)
         if z_statistic_name != 'Data %':
-            z1_array_data = pread.drop_nans(z1_array_data)
+            z1_array_data = drop_nans(z1_array_data)
         else:
             z1_array_data.tolist()
 
@@ -1545,7 +1548,7 @@ class MPLCanvas(FigureCanvas):
             z2_array_data = self.read_instance.data_in_memory_filtered[z2_array_to_read]['data'][self.active_map_valid_station_inds,:]
             # drop NaNs and reshape to object list of station data arrays (if not checking data %)
             if z_statistic_name != 'Data %':
-                z2_array_data = pread.drop_nans(z2_array_data)
+                z2_array_data = drop_nans(z2_array_data)
             else:
                 z2_array_data = z2_array_data.tolist()
             # is the difference statistic basic (i.e. mean)?

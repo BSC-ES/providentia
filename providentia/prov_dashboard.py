@@ -1,11 +1,12 @@
-from .configuration import *
+from .configuration import ProvConfiguration
+from .configuration.ProvConfiguration import parse_path
 from .reading import read_netcdf_station
 from .reading import read_netcdf_data
 from .prov_canvas import MPLCanvas
 from .prov_canvas import NavigationToolbar
 from .prov_dashboard_aux import ComboBox
 from .prov_dashboard_aux import QVLine
-from .prov_dashboard_aux import QHLine
+# from .prov_dashboard_aux import QHLine
 from .prov_dashboard_aux import PopUpWindow
 
 import bisect
@@ -15,7 +16,6 @@ import multiprocessing
 import os
 import json
 from collections import OrderedDict
-from functools import partial
 import sys
 
 from netCDF4 import Dataset
@@ -27,17 +27,30 @@ from PyQt5 import QtGui
 import seaborn as sns
 
 
-class GenerateProvidentiaDashboard(QtWidgets.QWidget):
+class GenerateProvidentiaDashboard(QtWidgets.QWidget, ProvConfiguration):
     """Define class that generates Providentia dashboard"""
 
-    def __init__(self, read_type):
+    def __init__(self, read_type='parallel', **kwargs):
         super(GenerateProvidentiaDashboard, self).__init__()
+        ProvConfiguration.__init__(self, **kwargs)
 
         # put read_type into self
         self.read_type = read_type
 
+        # store options to be restored at the end
+        # self.localvars = copy.deepcopy(vars(self))
+        # update from config file
+        if ('config' in kwargs) and ('section' in kwargs):
+            self.load_conf(kwargs['section'], kwargs['config'])
+        # update from command line
+        vars(self).update({(k, self.parse_parameter(val)) for k, val in kwargs.items()})
+        # arguments are only local
+
         # create UI
         self.init_ui()
+
+#    def __setattr__(self, key, value):
+#        super(GenerateProvidentiaDashboard, self).__setattr__(key, parse_parameter(key, value))
 
     def init_ui(self):
         """Initialise user interface"""
@@ -426,7 +439,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
 
                 # check if directory for network exists
                 # if not, continue
-                if not os.path.exists('%s/%s/%s' % (obs_root, network, GHOST_version)):
+                if not os.path.exists('%s/%s/%s' % (self.obs_root, network, self.ghost_version)):
                     continue
 
                 # write empty dictionary for network
@@ -437,21 +450,21 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
 
                     # check if directory for resolution exists
                     # if not, continue
-                    if not os.path.exists('%s/%s/%s/%s' % (obs_root, network, GHOST_version, resolution)):
+                    if not os.path.exists('%s/%s/%s/%s' % (self.obs_root, network, self.ghost_version, resolution)):
                         continue
 
                     # write nested empty dictionary for resolution
                     self.all_observation_data[network][resolution] = {}
 
                     # get available species for network/resolution
-                    available_species = os.listdir('%s/%s/%s/%s' % (obs_root, network, GHOST_version, resolution))
+                    available_species = os.listdir('%s/%s/%s/%s' % (self.obs_root, network, self.ghost_version, resolution))
 
                     # iterate through available files per species
                     for species in available_species:
 
                         # get all netCDF monthly files per species
                         species_files = os.listdir(
-                            '%s/%s/%s/%s/%s' % (obs_root, network, GHOST_version, resolution, species))
+                            '%s/%s/%s/%s/%s' % (self.obs_root, network, self.ghost_version, resolution, species))
 
                         # get monthly start date (YYYYMM) of all species files
                         species_files_yearmonths = \
@@ -613,13 +626,13 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         self.available_experiment_data = {}
 
         # get all different experiment names
-        available_experiments = os.listdir('%s/%s' % (exp_root, GHOST_version))
+        available_experiments = os.listdir('%s/%s' % (self.exp_root, self.ghost_version))
 
         # iterate through available experiments
         for experiment in available_experiments:
 
             # get all available grid types by experiment
-            available_grids = os.listdir('%s/%s/%s' % (exp_root, GHOST_version, experiment))
+            available_grids = os.listdir('%s/%s/%s' % (self.exp_root, self.ghost_version, experiment))
 
             # iterate through all available grids
             for grid in available_grids:
@@ -627,7 +640,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                 # test first if interpolated directory exists before trying to get files from it
                 # if it does not exit, continue
                 if not os.path.exists(
-                        '%s/%s/%s/%s/%s/%s/%s' % (exp_root, GHOST_version, experiment, grid,
+                        '%s/%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version, experiment, grid,
                                                   self.selected_resolution, self.selected_species,
                                                   self.selected_network)):
                     continue
@@ -635,7 +648,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                     # get all experiment netCDF files by experiment/grid/selected
                     # resolution/selected species/selected network
                     network_files = os.listdir(
-                        '%s/%s/%s/%s/%s/%s/%s' % (exp_root, GHOST_version, experiment, grid, self.selected_resolution,
+                        '%s/%s/%s/%s/%s/%s/%s' % (exp_root, ghost_version, experiment, grid, self.selected_resolution,
                                                   self.selected_species, self.selected_network))
                     # get start YYYYMM yearmonths of data files
                     network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files]
@@ -1074,7 +1087,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                                         freq=self.active_frequency_code)[:-1]
 
         # get all relevant observational files
-        file_root = '%s/%s/%s/%s/%s/%s_' % (obs_root, self.active_network, GHOST_version,
+        file_root = '%s/%s/%s/%s/%s/%s_' % (obs_root, self.active_network, ghost_version,
                                             self.active_resolution, self.active_species, self.active_species)
         relevant_files = \
             sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.available_observation_data[
@@ -1193,7 +1206,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
         # also get relevant file start dates
         if data_label == 'observations':
             self.process_type = 'observations'
-            file_root = '%s/%s/%s/%s/%s/%s_' % (obs_root, self.active_network, GHOST_version,
+            file_root = '%s/%s/%s/%s/%s/%s_' % (obs_root, self.active_network, ghost_version,
                                                 self.active_resolution, self.active_species, self.active_species)
             relevant_file_start_dates = \
                 sorted(self.available_observation_data[self.active_network]
@@ -1205,7 +1218,7 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
             active_experiment = experiment_grid_split[0]
             active_grid = experiment_grid_split[1]
             file_root = \
-                '%s/%s/%s/%s/%s/%s/%s/%s_' % (exp_root, GHOST_version, active_experiment,
+                '%s/%s/%s/%s/%s/%s/%s/%s_' % (exp_root, ghost_version, active_experiment,
                                               active_grid, self.active_resolution, self.active_species,
                                               self.active_network, self.active_species)
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
@@ -1308,10 +1321,29 @@ class GenerateProvidentiaDashboard(QtWidgets.QWidget):
                 experiment_ind += 1
 
 
+    def load_conf(self, section=None, fpath=None):
+        """ Load existing configurations from file. """
+
+        from .config import read_conf
+
+        if fpath is None:
+            fpath = parse_path(self.config_dir, self.config_file)
+
+        if not os.path.isfile(fpath):
+            print(("Error %s" % fpath))
+            return
+
+        opts = read_conf(section, fpath)
+        if section is None:
+            return opts
+
+        vars(self).update({(k, self.parse_parameter(val)) for k, val in opts.items()})
+
+
 # generate Providentia dashboard
 def main(**kwargs):
     """Main function"""
     q_app = QtWidgets.QApplication(sys.argv)
     q_app.setStyle("Fusion")
-    GenerateProvidentiaDashboard('parallel', **kwargs)
+    GenerateProvidentiaDashboard(**kwargs)
     sys.exit(q_app.exec_())
