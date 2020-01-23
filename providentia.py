@@ -1600,10 +1600,9 @@ class Providentia_main_window(QtWidgets.QWidget):
 
         #set current time array, as previous time array
         self.previous_time_array = self.time_array    
-
         #set current station references, as previous station references 
         self.previous_station_references = self.station_references
-
+        #set current relevant yearmonths, as previous relevant yearmonths
         self.previous_relevant_yearmonths = self.relevant_yearmonths
 
         #get N time chunks between desired start date and end date to set time array
@@ -2247,7 +2246,7 @@ class MPL_Canvas(FigureCanvas):
                     if len(period_inds) > 0:
                         #max gap variable?
                         if 'max_gap' in var:
-                            max_gap_percent = max_repeated_NaNs(self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][:, period_inds])
+                            max_gap_percent = max_repeated_NaNs_fraction(self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][:, period_inds])
                             self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
                         #data representativity variable?
                         else:
@@ -2620,7 +2619,7 @@ class MPL_Canvas(FigureCanvas):
                 self.update_experiment_bias_aggregated_plots()
 
             #update plotted station selected metadata
-            #self.update_selected_station_metadata()
+            self.update_selected_station_metadata()
 
     #--------------------------------------------------------------------------------#
     #--------------------------------------------------------------------------------# 
@@ -2884,7 +2883,10 @@ class MPL_Canvas(FigureCanvas):
             self.data_array_ts = self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(), color=self.read_instance.plotting_params[data_label]['colour'], marker = 'o', markeredgecolor = None, mew = 0, markersize = time_series_marker_size, linestyle = 'None', zorder=self.read_instance.plotting_params[data_label]['zorder'])
               
         #set axes labels
-        self.ts_ax.set_ylabel('Concentration (%s)'%(self.read_instance.measurement_units), fontsize=8.0)
+        if self.read_instance.measurement_units == 'unitless':
+            self.ts_ax.set_ylabel('{}'.format(self.read_instance.measurement_units), fontsize=8.0)
+        else:
+            self.ts_ax.set_ylabel('{} ({})'.format(parameter_dictionary[self.read_instance.active_species]['axis_label'],self.read_instance.measurement_units), fontsize=8.0)
 
         #plot grid
         self.ts_ax.grid(color='lightgrey',alpha=0.8)
@@ -3165,6 +3167,16 @@ class MPL_Canvas(FigureCanvas):
                                     'standardised_network_provided_terrain':'Terrain',
                                     'standardised_network_provided_measurement_scale':'Measurement Scale',
                                     'representative_radius':'Representative Radius',
+                                    'ESDAC_Iwahashi_landform_classification':'Iwahashi Landform',
+                                    'ESDAC_Meybeck_landform_classification':'Meybeck Landform',
+                                    'Joly-Peuch_classification_code':'Joly-Peuch Class',
+                                    'Koppen-Geiger_classification':'Koppen-Geiger Class',
+                                    'MODIS_MCD12C1_v6_IGBP_land_use':'MODIS Land Use',
+                                    'WMO_region':'WMO Region',
+                                    'WWF_TEOW_terrestrial_ecoregion':'WWF TEOW Terrestrial Ecoregion',
+                                    'WWF_TEOW_biogeographical_realm':'WWF TEOW Biogeographical Realm',
+                                    'WWF_TEOW_biome':'WWF TEOW Biome',
+                                    'UMBC_anthrome_classification':'UMBC Anthrome Class',
                                     'GSFC_coastline_proximity':'To Coast',
                                     'primary_sampling_type':'Sampling Instrument Type',
                                     'sample_preparation_types':'Sample Preparation',
@@ -3179,31 +3191,45 @@ class MPL_Canvas(FigureCanvas):
             #get station reference of selected station
             selected_station_reference = self.read_instance.station_references[self.relative_selected_station_inds][0]
 
-            #add station reference, latitude, longitude and measurement altitude and GSFC coastline proximity to string (have 1 unique associated metadata value per station)
+            #add station reference, latitude, longitude, measurement altitude, GSFC coastline proximity, GPW population density and NOAA-DMSP-OLS nighttime stable lights
             str_to_plot += "%s   "%(selected_station_reference)
-            str_to_plot += "Latitude: %s   "%(str(round(self.read_instance.station_latitudes[self.relative_selected_station_inds][0],4)))
-            str_to_plot += "Longitude: %s\n"%(str(round(self.read_instance.station_longitudes[self.relative_selected_station_inds][0],4)))
-            str_to_plot += "Measurement Altitude: %sm   "%(str(round(self.read_instance.station_measurement_altitudes[self.relative_selected_station_inds][0],2)))
-            str_to_plot += "To Coast: %skm\n"%(str(round(self.read_instance.station_GSFC_coastline_proximities[self.relative_selected_station_inds][0],2)))
-            
+            str_to_plot += "Latitude: {:.4f}   ".format(self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+            str_to_plot += "Longitude: {:.4f}\n".format(self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
+            str_to_plot += "Measurement Altitude: {:.2f}m   ".format(np.nanmedian(self.read_instance.metadata_in_memory['measurement_altitude'][self.relative_selected_station_inds].astype(np.float32)))
+            str_to_plot += "To Coast: {:.2f}km\n".format(np.nanmedian(self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][self.relative_selected_station_inds].astype(np.float32)))
+            str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(self.read_instance.metadata_in_memory['GPW_population_density'][self.relative_selected_station_inds].astype(np.float32)))
+            str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][self.relative_selected_station_inds].astype(np.float32)))
+         
             #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
-            metadata_vars_to_plot = ['network', 'station_name', 'country', 'standardised_network_provided_area_classification', 
+            metadata_vars_to_plot = ['station_name', 'country', 'standardised_network_provided_area_classification', 
                                      'standardised_network_provided_station_classification', 'standardised_network_provided_terrain', 
-                                     'standardised_network_provided_land_use', 'standardised_network_provided_main_emission_source', 
-                                     'standardised_network_provided_measurement_scale', 'representative_radius',
-                                     'measurement_methodology', 'measuring_instrument_name', 'measuring_instrument_sampling_type',
-                                     'primary_sampling_type', 'sample_preparation_types']
+                                     'standardised_network_provided_land_use', 
+                                     'MODIS_MCD12C1_v6_IGBP_land_use', 'UMBC_anthrome_classification',
+                                     'measurement_methodology', 'measuring_instrument_name']
 
             #iterate through metadata variables
             for meta_var in metadata_vars_to_plot:
 
-                #get unique metadata values for selected station
-                unique_station_meta = self.read_instance.station_metadata[selected_station_reference][meta_var]['unique']
+                #gather all selected station metadata for current meta variable         
+                all_current_meta = self.read_instance.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
 
-                #is there just 1 unique value in the metadata array?   
-                if len(unique_station_meta) == 1:
-                    #set meta string as just the meta_var:unique value 
-                    meta_string = '%s: %s\n'%(metadata_variable_naming[meta_var], unique_station_meta[0])
+                #get counts of all unique metadata elements for selected station
+                unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
+                #get number of unique metadata elements across selected stations
+                n_unique_meta = len(unique_meta)
+            
+                #1 unique metadata element?
+                if n_unique_meta == 1:
+                    meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], unique_meta[0])
+                #elif have > 2 unique metadata elements, just return count of the elements for the selected station
+                elif n_unique_meta > 2:
+                    meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
+                #otherwise, get percentage of unique metadata elements across selected stations
+                else:
+                    meta_pc = (100./len(all_current_meta))*meta_counts
+                    meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
+                    #create string for variable to plot
+                    meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], ', '.join([':'.join([str(var),pc]) for var, pc in zip(unique_meta, meta_pc)]))
 
                 #add meta string to str_to_plot
                 str_to_plot += meta_string
@@ -3217,38 +3243,41 @@ class MPL_Canvas(FigureCanvas):
             #add N stations selected, in N countries
             str_to_plot += "%s Stations Selected\n"%(len(self.relative_selected_station_inds))
             #add median measurement altitude
-            str_to_plot += "Median Measurement Altitude: %sm   "%(round(np.nanmedian(self.read_instance.station_measurement_altitudes[self.relative_selected_station_inds]),2))
+            str_to_plot += "Median Measurement Altitude: {:.2f}m   ".format(np.nanmedian(self.read_instance.metadata_in_memory['measurement_altitude'][self.relative_selected_station_inds].astype(np.float32)))
             #add median GSFC coastline proximity
-            str_to_plot += "Median To Coast: %skm\n"%(round(np.nanmedian(self.read_instance.station_GSFC_coastline_proximities[self.relative_selected_station_inds]),2))
+            str_to_plot += "Median To Coast: {:.2f}km\n".format(np.nanmedian(self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][self.relative_selected_station_inds].astype(np.float32)))
+            #add median GPW population density
+            str_to_plot += "Median Population Density: {:.1f} people/km–2\n".format(np.nanmedian(self.read_instance.metadata_in_memory['GPW_population_density'][self.relative_selected_station_inds].astype(np.float32)))
+            #add median NOAA-DMSP-OLS nighttime lights
+            str_to_plot += "Median Nighttime Lights: {:.1f}\n".format(np.nanmedian(self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][self.relative_selected_station_inds].astype(np.float32)))
 
             #get percentage of element occurrences across selected stations, for certain metadata variables
-            metadata_vars_get_pc = ['network', 'country', 'standardised_network_provided_area_classification', 
+            metadata_vars_get_pc = ['country', 'standardised_network_provided_area_classification', 
                                     'standardised_network_provided_station_classification', 'standardised_network_provided_terrain', 
-                                    'standardised_network_provided_land_use', 'standardised_network_provided_main_emission_source', 
-                                    'standardised_network_provided_measurement_scale', 
-                                    'measurement_methodology', 'measuring_instrument_name', 'measuring_instrument_sampling_type']
+                                    'standardised_network_provided_land_use', 
+                                    'MODIS_MCD12C1_v6_IGBP_land_use', 'UMBC_anthrome_classification',
+                                    'measurement_methodology', 'measuring_instrument_name']
+
             #iterate through metadata variables
             for meta_var in metadata_vars_get_pc:
 
-                #iterate through selected references, gathering all metadata across time        
-                all_current_meta = []
-                for selected_station_reference in selected_station_references:
-                    all_current_meta = np.append(all_current_meta, self.read_instance.station_metadata[selected_station_reference][meta_var]['all'])
+                #gather all selected station metadata for current meta variable         
+                all_current_meta = self.read_instance.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
 
                 #get counts of all unique metadata elements across selected stations 
                 unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
                 #get number of unique metadata elements across selected stations
                 n_unique_meta = len(unique_meta)
             
-                #if have > 8 unique metadata elements, just return count of the elements across the selected stations
-                if n_unique_meta > 8:
-                    meta_string = '%s: %s unique elements\n'%(metadata_variable_naming[meta_var], n_unique_meta)
+                #if have > 4 unique metadata elements, just return count of the elements across the selected stations
+                if n_unique_meta > 4:
+                    meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
                 #otherwise, get percentage of unique metadata elements across selected stations
                 else:
                     meta_pc = (100./len(all_current_meta))*meta_counts
-                    meta_pc = [str(round(meta,1))+'%' for meta in meta_pc]
+                    meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
                     #create string for variable to plot
-                    meta_string = '%s: %s\n'%(metadata_variable_naming[meta_var], ', '.join([':'.join([str(var),pc]) for var, pc in zip(unique_meta, meta_pc)]))
+                    meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], ', '.join([':'.join([str(var),pc]) for var, pc in zip(unique_meta, meta_pc)]))
 
                 #add meta string to str_to_plot
                 str_to_plot += meta_string
@@ -3896,8 +3925,8 @@ def calculate_data_availability_number(data):
     '''calculate data availability absolute number (i.e. number of total data measurements not equal to NaN)'''
     return np.count_nonzero(~np.isnan(data),axis=-1)
 
-def max_repeated_NaNs(data):
-    '''get maximum number of consecutive NaNs in array'''
+def max_repeated_NaNs_fraction(data):
+    '''get % of total period of the maximum run of consecutive NaNs in array'''
     max_gap_pc = []
 
     for station_data in data:
