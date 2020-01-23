@@ -1,0 +1,8 @@
+matplotlib
+pandas
+Cartopy
+numpy
+netCDF4
+seaborn
+PyQt5
+scipy
