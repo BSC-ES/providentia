@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+# init
+cores=16
+jobname="PRV"
+queue="debug"
+mem="50Gb"
+
+function usage () {
+echo "Usage: providentia [-h|--help] [-c|--cores NUM_CORES (default=16)]"
+echo "    [-J|--jobname JOB_NAME (default=PRV)] [-q|--queue QUEUE_NAME (default=debug)]"
+echo "    [-m|--mem MEMORY (only valid in P9, default=50Gb)]"
+}
+
+getopt --test 2> /dev/null
+if [[ $? -ne 4 ]]; then
+    echo "GNU's enhanced getopt is required to run this script"
+    echo "You can usually find this in the util-linux package"
+    echo "On MacOS/OS X see homebrew's package: http://brewformulas.org/Gnu-getopt"
+    echo "For anyone else, build from source: http://frodo.looijaard.name/project/getopt"
+    exit 1
+fi
+
+#bash strict mode: see http://redsymbol.net/articles/unofficial-bash-strict-mode/ for info
+set -euo pipefail
+IFS=$'\n\t'
+
+# An option followed by a single colon ':' means that it *needs* an argument.
+# An option followed by double colons '::' means that its argument is
+# optional.
+# See `man getopt'.
+SHORT=hc:J:q:m:
+LONG=help,cores:,jobname:,queue:,mem:,sequential_colourmap::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,obs_root::,exp_root::,sequential_colourmap::,sequential_colourmap_warm::,diverging_colourmap::,unsel_station_markersize::,sel_station_markersize::,legend_markersize::,time_series_markersize::,temp_agg_markersize::,temp_agg_expbias_markersize::
+
+# - Temporarily store output to be able to check for errors.
+# - Activate advanced mode getopt quoting e.g. via "--options".
+# - Pass arguments only via   -- "$@"   to separate them correctly.
+# - getopt auto-adds "--" at the end of ${PARSED}, which is then later set to
+#   "$@" using the set command.
+PARSED=$(getopt --options ${SHORT} \
+                --longoptions ${LONG} \
+                --name "$0" \
+                -- "$@")         #Pass all the args to this script to getopt
+
+if [[ $? -ne 0 ]]; then
+    # e.g. $? == 1
+    #  then getopt has complained about wrong arguments to stdout
+    exit 2
+fi
+
+
+while [[ $# -gt 0 ]]; do
+#    echo "parsing arg: $1"
+    case "$1" in
+        -h|--help) shift
+                    usage 
+                    exit 0
+                    ;;
+        -c|--cores) shift
+                    cores="$1";;
+        -J|--jobname) shift
+                    jobname="$1";;
+        -q|--queue) shift
+                    queue="$1";;
+        -m|--mem) shift
+                    mem="$1";;
+        *) break ;;
+    esac
+    shift  # Expose the next argument
+done
+
+echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+
+queue_option="--qos=$queue"
+memory_option="--mem=$mem"
+srun_command="srun -t 02:00:00 -n 1 -c $cores -J $jobname --x11=first"
+python_command="python3 -c 'from providentia import providentia;providentia.main()' $@"
+
+
+#CTE POWER
+if [ "${BSC_MACHINE}" == "power" ]; then
+    #get allocation of resources on CTE-POWER machine
+    eval "${srun_command} --threads-per-cpu=4 ${queue_option} ${memory_option} ${python_command}"
+#Marenustrum4
+elif [ "${BSC_MACHINE}" == "mn4" ]; then
+    #get allocation of resources on MN4 machine
+    eval "${srun_command} ${queue_option} ${python_command}"
+#Workstations
+elif [ "${HOST}" == "bsceslogin01" ]; then
+    echo "Warning: running in Fat Nodes may make Providentia slower ..."
+    eval "${srun_command} ${python_command}"
+else
+    echo "Warning: running in your workstation/laptop may make Providentia slower ..."
+    eval "${python_command}"
+fi

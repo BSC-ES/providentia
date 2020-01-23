@@ -21,7 +21,7 @@ import sys
 import time
 
 #Read configuration file
-from configuration import *
+from .configuration import *
 
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
@@ -31,7 +31,7 @@ def gather_arguments(interpolation_log_dir):
     '''gather list of arguments for all unique tasks to process, as defined in the configuration file'''
 
     #read defined experiments dictionary
-    from defined_experiments import defined_experiments_dictionary
+    from .defined_experiments import defined_experiments_dictionary
 
     #create arguments list
     arguments_list = []
