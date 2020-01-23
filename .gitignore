@@ -1,0 +1,10 @@
+*.pyc
+.idea
+*.png
+test-reports
+providentia.egg-info
+.vscode
+.pytest_cache
+.eggs
+.coverage
+__pycache__

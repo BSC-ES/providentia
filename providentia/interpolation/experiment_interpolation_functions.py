@@ -464,7 +464,7 @@ def write_yearmonth_netCDF(obs_nc_root, experiment_to_process, grid_type_to_proc
 
     from netCDF4 import Dataset
     import subprocess
-    import unit_converter
+    import .unit_converter
 
     #get year/month string
     year = yearmonth[:4]
