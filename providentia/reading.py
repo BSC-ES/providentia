@@ -1,4 +1,6 @@
-from netCDF4 import Dataset, num2date
+""" Module storing reading functions """
+from netCDF4 import num2date
+from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
 
@@ -89,48 +91,48 @@ def read_netcdf_data(tuple_arguments):
     current_file_station_indices = \
         np.where(np.in1d(file_station_references, station_references))[0]
 
-    # read in species data
-    file_data = ncdf_root[active_species][:, valid_file_time_indices]
-    # get masked data
-    data_mask = file_data.mask
-    # set masked data as NaN
-    file_data[data_mask] = np.NaN
+#    # read in species data
+#    file_data = ncdf_root[active_species][:, valid_file_time_indices]
+#    # get masked data
+#    data_mask = file_data.mask
+#    # set masked data as NaN
+#    file_data[data_mask] = np.NaN
 
     # for observations, set species data based on selected qa flags/standard data provider
     # flags/classifications to retain or remove as NaN
     if process_type == 'observations':
+
+        file_data = np.full((len(current_file_station_indices), len(valid_file_time_indices)), np.NaN, dtype=data_dtype)
+        for data_var in data_vars_to_read:
+            file_data[data_var][:, :] = ncdf_root[data_var][current_file_station_indices, valid_file_time_indices]
+
         # if some qa flags selected then screen
         if len(selected_qa) > 0:
             # screen out observations which are associated with any of the selected qa flags
-            file_data[np.isin(ncdf_root['qa'][:, valid_file_time_indices, :],
-                              selected_qa).any(axis=2)] = np.NaN
+            file_data[active_species][np.isin(ncdf_root['qa'][:, valid_file_time_indices, :], selected_qa).any(axis=2)] = np.NaN
 
         # if some data provider flags selected then screen
         if len(selected_flags) > 0:
             # screen out observations which are associated with any of the selected data provider flags
-            file_data[np.isin(ncdf_root['flag'][:, valid_file_time_indices, :], selected_flags).any(axis=2)] = np.NaN
+            file_data[active_species][np.isin(ncdf_root['flag'][:, valid_file_time_indices, :], selected_flags).any(axis=2)] = np.NaN
 
-        # if some classification flags (retain  or remove) selected then screen
-        if (len(selected_classifications_to_retain) > 0) or (len(selected_classifications_to_remove) > 0):
-            file_classifications = ncdf_root['classification'][:, valid_file_time_indices, :]
-            # screen out all observations that aren't associated with all of
-            # the selected classifications to retain
-            if len(selected_classifications_to_retain) > 0:
-                file_data[np.isin(file_classifications, 
-                                  selected_classifications_to_retain, 
-                                  invert=True).all(axis=2)] = np.NaN
-            
-            # screen out all observations that are associated with any
-            # of the selected classifications to remove
-            if len(selected_classifications_to_remove) > 0:
-                file_data[np.isin(file_classifications, 
-                                  selected_classifications_to_remove).any(axis=2)] = np.NaN
+
+        #get file metadata
+        file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
+        for meta_var in metadata_vars_to_read:
+            file_metadata[meta_var][current_file_station_indices,0] = ncdf_root[meta_var][:]
+
+    else:
+        file_data = np.full((len(current_file_station_indices), len(valid_file_time_indices)), np.NaN, dtype=data_dtype[:1])
+        file_data[data_vars_to_read[0]][:, :] = ncdf_root[data_vars_to_read[0]][current_file_station_indices, valid_file_time_indices]
+
 
     # close netCDF
     ncdf_root.close()
 
     # return valid species data, time indices relative to active full time array,
     # file station indices relative to all unique station references array
-    return file_data[current_file_station_indices, :], \
-           full_array_time_indices, \
-           full_array_station_indices
+    if process_type == 'observations':
+        return file_data, full_array_time_indices, full_array_station_indices, file_metadata
+    else:
+        return file_data, full_array_time_indices, full_array_station_indices

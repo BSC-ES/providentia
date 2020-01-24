@@ -82,7 +82,7 @@ def wrap_tooltip_text(tooltip_text, max_width):
        (i.e. the part of the text which first exceeds the screen pixel width)
     '''
 
-    tooltip_label = set_formatting(QtWidgets.QLabel(text = tooltip_text), formatting_dict['tooltip'])
+    tooltip_label = set_formatting(QtWidgets.QLabel(text=tooltip_text), formatting_dict['tooltip'])
     tooltip_width = tooltip_label.fontMetrics().boundingRect(tooltip_label.text()).width()
     if tooltip_width > max_width:
         ratio = tooltip_width/max_width
@@ -236,7 +236,6 @@ class PopUpWindow(QtWidgets.QWidget):
             #add grid to parent layout
             parent_layout.addLayout(grid)
 
-        #------------------------------------------------------------------------#
         #set finalised layout
         self.setLayout(parent_layout)
 
@@ -246,14 +245,10 @@ class PopUpWindow(QtWidgets.QWidget):
         #show pop-up window
         self.show()
 
-        #------------------------------------------------------------------------#
-
         #setup event to get selected checkbox indices when closing window
         quit_event = QtWidgets.QAction("Quit", self)
         quit_event.triggered.connect(self.closeEvent)
 
-    #------------------------------------------------------------------------#
-    #------------------------------------------------------------------------#
 
     def create_grid(self, menu_types):
         '''create grid for each needed checkbox/rangebox/navigation button menu types, that wrap vertically
@@ -299,20 +294,20 @@ class PopUpWindow(QtWidgets.QWidget):
                 row_format_dict = formatting_dict['checkbox_popup']
                 grid_vertical_spacing = 0
                 if ('keep_selected' in current_menu_keys) & ('remove_selected' in current_menu_keys):
-                    self.page_memory['checkboxes'] = {'keep_selected':[],'remove_selected':[], 'n_column_consumed':3, 'ordered_elements':['keep_selected','remove_selected'], 'widget':QtWidgets.QCheckBox}
+                    self.page_memory['checkboxes'] = {'keep_selected':[], 'remove_selected':[], 'n_column_consumed':3, 'ordered_elements':['keep_selected','remove_selected'], 'widget':QtWidgets.QCheckBox}
                 elif 'keep_selected' in current_menu_keys:
-                    self.page_memory['checkboxes'] = {'keep_selected':[],'n_column_consumed':2, 'ordered_elements':['keep_selected'], 'widget':QtWidgets.QCheckBox}
+                    self.page_memory['checkboxes'] = {'keep_selected':[], 'n_column_consumed':2, 'ordered_elements':['keep_selected'], 'widget':QtWidgets.QCheckBox}
                 elif 'remove_selected' in current_menu_keys:
-                    self.page_memory['checkboxes'] = {'remove_selected':[],'n_column_consumed':2, 'ordered_elements':['remove_selected'], 'widget':QtWidgets.QCheckBox}
+                    self.page_memory['checkboxes'] = {'remove_selected':[], 'n_column_consumed':2, 'ordered_elements':['remove_selected'], 'widget':QtWidgets.QCheckBox}
             elif menu_type == 'rangeboxes':
                 row_format_dict = formatting_dict['rangebox_popup']
                 grid_vertical_spacing = 3
                 if ('current_lower' in current_menu_keys) & ('current_upper' in current_menu_keys):
-                    self.page_memory['rangeboxes'] = {'current_lower':[],'current_upper':[], 'n_column_consumed':3, 'ordered_elements':['current_lower','current_upper'], 'widget':QtWidgets.QLineEdit}
+                    self.page_memory['rangeboxes'] = {'current_lower':[], 'current_upper':[], 'n_column_consumed':3, 'ordered_elements':['current_lower','current_upper'], 'widget':QtWidgets.QLineEdit}
                 elif 'current_lower' in current_menu_keys:
-                    self.page_memory['rangeboxes'] = {'current_lower':[],'n_column_consumed':2, 'ordered_elements':['current_lower'], 'widget':QtWidgets.QLineEdit}
+                    self.page_memory['rangeboxes'] = {'current_lower':[], 'n_column_consumed':2, 'ordered_elements':['current_lower'], 'widget':QtWidgets.QLineEdit}
                 elif 'current_upper' in current_menu_keys:
-                    self.page_memory['rangeboxes'] = {'current_upper':[],'n_column_consumed':2, 'ordered_elements':['current_upper'], 'widget':QtWidgets.QLineEdit}
+                    self.page_memory['rangeboxes'] = {'current_upper':[], 'n_column_consumed':2, 'ordered_elements':['current_upper'], 'widget':QtWidgets.QLineEdit}
             elif menu_type == 'navigation_buttons':
                 row_format_dict = formatting_dict['navigation_button_popup']
                 grid_vertical_spacing = 3
@@ -404,11 +399,11 @@ class PopUpWindow(QtWidgets.QWidget):
             if have_column_headers == True:
                 for column_number in np.arange(0, column_n+1, self.page_memory[menu_type]['n_column_consumed']):
                     if menu_type == 'checkboxes':
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text = 'K'), formatting_dict['column_header_label_popup']), 0, column_number+1, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text = 'R'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='K'), formatting_dict['column_header_label_popup']), 0, column_number+1, QtCore.Qt.AlignCenter)
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='R'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)
                     elif menu_type == 'rangeboxes':
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text = 'Lower Bound'), formatting_dict['column_header_label_popup']), 0, column_number+1, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text = 'Upper Bound'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Lower Bound'), formatting_dict['column_header_label_popup']), 0, column_number+1, QtCore.Qt.AlignCenter)
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Upper Bound'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)
 
             #add menu type grid to horizontal layout
             horizontal_parent.addLayout(grid)

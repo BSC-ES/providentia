@@ -9,6 +9,7 @@ from .prov_dashboard_aux import QVLine
 # from .prov_dashboard_aux import QHLine
 from .prov_dashboard_aux import PopUpWindow
 from .prov_dashboard_aux import formatting_dict
+from .prov_dashboard_aux import set_formatting
 
 import copy
 import bisect
@@ -17,8 +18,9 @@ import gc
 import multiprocessing
 import os
 import json
-from collections import OrderedDict
 import sys
+from functools import partial
+from collections import OrderedDict
 
 from netCDF4 import Dataset
 import numpy as np
@@ -27,6 +29,28 @@ from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 import seaborn as sns
+
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
+
+###------------------------------------------------------------------------------------###
+###IMPORT GHOST STANDARDS
+###------------------------------------------------------------------------------------###
+sys.path.insert(1, '{}/GHOST_standards/{}'.format(obs_root,GHOST_version))
+from GHOST_standards import standard_parameters, get_standard_metadata, standard_data_flag_name_to_data_flag_code, standard_QA_name_to_QA_code
+# modify standard parameter dictionary to have BSC standard parameter names as
+# keys (rather than GHOST)
+parameter_dictionary = {}
+for param, param_dict in standard_parameters.items():
+    parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
+#get standard metadata dictionary
+standard_metadata = get_standard_metadata({'standard_units':''})
+#create list of metadata variables to read (make global)
+metadata_vars_to_read = [key for key in standard_metadata.keys()
+                             if pd.isnull(standard_metadata[key]['metadata_type']) == False]
+metadata_dtype = [(key,standard_metadata[key]['data_type']) for key in
+                  metadata_vars_to_read]
 
 
 class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
@@ -57,7 +81,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # create UI
         self.init_ui()
 
-        #setup callback events upon resizing/moving of Providentia window 
+        #setup callback events upon resizing/moving of Providentia window
         self.resized.connect(self.get_geometry)
         self.move.connect(self.get_geometry)
 
@@ -141,7 +165,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
-        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text = "Data Filter"), formatting_dict['title_menu'])
+        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Data Filter"), formatting_dict['title_menu'])
         self.lb_data_filter.setFixedWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
         self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), formatting_dict['button_menu'])
@@ -157,7 +181,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.bu_screen.setFixedWidth(50)
         self.bu_screen.setStyleSheet("color: blue;")
         self.bu_screen.setToolTip('Filter data')
-        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text = "Bounds"), formatting_dict['label_menu'])
+        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text="Bounds"), formatting_dict['label_menu'])
         self.lb_data_bounds.setFixedWidth(47)
         self.lb_data_bounds.setToolTip('Set lower/upper bounds of data')
         self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
@@ -168,7 +192,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
-        self.lb_z = set_formatting(QtWidgets.QLabel(self, text = "Map Z"), formatting_dict['title_menu'])
+        self.lb_z = set_formatting(QtWidgets.QLabel(self, text="Map Z"), formatting_dict['title_menu'])
         self.lb_z.setToolTip('Set map Z statistic')
         self.cb_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_z_stat.setFixedWidth(80)
@@ -181,7 +205,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.cb_z2.setToolTip('Select Z2 dataset')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
-        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text = "Exp. Bias"), formatting_dict['title_menu'])
+        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp. Bias"), formatting_dict['title_menu'])
         self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
         self.cb_experiment_bias_type = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_experiment_bias_type.setFixedWidth(100)
@@ -191,7 +215,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.cb_experiment_bias_stat.setToolTip('Select experiment bias statistic')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
-        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text = "Site Select"), formatting_dict['title_menu'])
+        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Select"), formatting_dict['title_menu'])
         self.lb_station_selection.setToolTip('Select stations')
         self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), formatting_dict['checkbox_menu'])
         self.ch_select_all.setToolTip('Select all stations')
@@ -201,22 +225,22 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         #position objects on gridded configuration bar
         config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_colocate, 0, 1, QtCore.Qt.AlignCenter)
-        config_bar.addWidget(self.bu_read, 0, 2, QtCore.Qt.AlignCenter)  
+        config_bar.addWidget(self.bu_read, 0, 2, QtCore.Qt.AlignCenter)
         config_bar.addWidget(self.cb_network, 1, 0)
         config_bar.addWidget(self.cb_resolution, 2, 0)
         config_bar.addWidget(self.cb_matrix, 1, 1)
         config_bar.addWidget(self.cb_species, 2, 1)
         config_bar.addWidget(self.le_start_date, 1, 2)
-        config_bar.addWidget(self.le_end_date, 2, 2) 
-        config_bar.addWidget(self.bu_QA, 0, 3) 
-        config_bar.addWidget(self.bu_flags, 1, 3) 
+        config_bar.addWidget(self.le_end_date, 2, 2)
+        config_bar.addWidget(self.bu_QA, 0, 3)
+        config_bar.addWidget(self.bu_flags, 1, 3)
         config_bar.addWidget(self.bu_experiments, 2, 3)
         config_bar.addWidget(self.vertical_splitter_1, 0, 5, 3, 1)
         config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_rep, 1, 6)
         config_bar.addWidget(self.bu_meta, 2, 6)
         config_bar.addWidget(self.bu_period, 1, 7)
-        config_bar.addWidget(self.bu_screen, 2, 7) 
+        config_bar.addWidget(self.bu_screen, 2, 7)
         config_bar.addWidget(self.lb_data_bounds, 0, 8, QtCore.Qt.AlignCenter)
         config_bar.addWidget(self.le_minimum_value, 1, 8)
         config_bar.addWidget(self.le_maximum_value, 2, 8)
@@ -225,7 +249,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         config_bar.addWidget(self.cb_z_stat, 0, 10, QtCore.Qt.AlignRight)
         config_bar.addWidget(self.cb_z1, 1, 10)
         config_bar.addWidget(self.cb_z2, 2, 10)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 11, 3, 1)        
+        config_bar.addWidget(self.vertical_splitter_3, 0, 11, 3, 1)
         config_bar.addWidget(self.lb_experiment_bias, 0, 12, QtCore.Qt.AlignCenter)
         config_bar.addWidget(self.cb_experiment_bias_type, 1, 12)
         config_bar.addWidget(self.cb_experiment_bias_stat, 2, 12)
@@ -248,7 +272,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.flag_menu['checkboxes']['remove_default'] = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20, 21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 90, 150, 154, 155, 156, 157], dtype=np.uint8)
         self.flag_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
         self.flag_menu['checkboxes']['map_vars'] = np.sort(list(standard_data_flag_name_to_data_flag_code.values()))
-        self.flag_menu['select_buttons'] = ['all','clear','default']
+        self.flag_menu['select_buttons'] = ['all', 'clear', 'default']
 
         #setup pop-up window menu tree for qa
         self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
@@ -256,7 +280,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 4, 5, 7, 8, 10, 12, 13, 14, 17, 18, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
         self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
         self.qa_menu['checkboxes']['map_vars'] = np.sort(list(standard_QA_name_to_QA_code.values()))
-        self.qa_menu['select_buttons'] = ['all','clear','default'] 
+        self.qa_menu['select_buttons'] = ['all', 'clear', 'default']
 
         #setup pop-up window menu tree for experiments
         self.experiments_menu = {'window_title':'EXPERIMENTS', 'page_title':'Select Experiment/s', 'checkboxes':{}}
@@ -264,23 +288,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.experiments_menu['checkboxes']['keep_default'] = []
         self.experiments_menu['checkboxes']['keep_selected'] = []
         self.experiments_menu['checkboxes']['map_vars'] = []
-        self.experiments_menu['select_buttons'] = ['all','clear','default']   
+        self.experiments_menu['select_buttons'] = ['all', 'clear', 'default']
 
         #setup pop-up window menu tree for metadata
-        self.metadata_types =  {'STATION POSITION':'Filter stations by measurement position', 
-                                'STATION CLASSIFICATIONS':'Filter stations by station provided classifications', 
-                                'STATION MISCELLANEOUS':'Filter stations by miscellaneous station provided metadata', 
-                                'GLOBALLY GRIDDED CLASSIFICATIONS':'Filter stations by globally gridded classifications', 
+        self.metadata_types =  {'STATION POSITION':'Filter stations by measurement position',
+                                'STATION CLASSIFICATIONS':'Filter stations by station provided classifications',
+                                'STATION MISCELLANEOUS':'Filter stations by miscellaneous station provided metadata',
+                                'GLOBALLY GRIDDED CLASSIFICATIONS':'Filter stations by globally gridded classifications',
                                 'MEASUREMENT PROCESS INFORMATION':'Filter stations by measurement process information'}
         self.metadata_menu = {'window_title':'METADATA', 'page_title':'Select metadata type to filter stations by', 'navigation_buttons':{}}
         self.metadata_menu['navigation_buttons']['labels'] = list(self.metadata_types.keys())
-        self.metadata_menu['navigation_buttons']['tooltips'] = [self.metadata_types[key] for key in self.metadata_menu['navigation_buttons']['labels']]       
+        self.metadata_menu['navigation_buttons']['tooltips'] = [self.metadata_types[key] for key in self.metadata_menu['navigation_buttons']['labels']]
         for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
-            self.metadata_menu[metadata_type] = {'window_title':metadata_type,'page_title':self.metadata_menu['navigation_buttons']['tooltips'][metadata_type_ii], 'navigation_buttons':{}, 'rangeboxes':{}}
+            self.metadata_menu[metadata_type] = {'window_title':metadata_type, 'page_title':self.metadata_menu['navigation_buttons']['tooltips'][metadata_type_ii], 'navigation_buttons':{}, 'rangeboxes':{}}
             self.metadata_menu[metadata_type]['navigation_buttons']['labels'] = [metadata_name for metadata_name in standard_metadata.keys() if (standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (standard_metadata[metadata_name]['data_type'] == np.object)]
             self.metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = [standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['navigation_buttons']['labels']]
             for label in self.metadata_menu[metadata_type]['navigation_buttons']['labels']:
-                self.metadata_menu[metadata_type][label] = {'window_title':label,'page_title':'Filter stations by unique {} metadata'.format(label), 'checkboxes':{}}  
+                self.metadata_menu[metadata_type][label] = {'window_title':label, 'page_title':'Filter stations by unique {} metadata'.format(label), 'checkboxes':{}}
                 self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
@@ -291,38 +315,38 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             #self.metadata_menu[metadata_type]['rangeboxes']['previous_labels'] = []
             self.metadata_menu[metadata_type]['rangeboxes']['labels'] = [metadata_name for metadata_name in standard_metadata.keys() if (standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (standard_metadata[metadata_name]['data_type'] != np.object)]
             self.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = [standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['rangeboxes']['labels']]
-            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
-            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
-            self.metadata_menu[metadata_type]['rangeboxes']['previous_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
-            self.metadata_menu[metadata_type]['rangeboxes']['previous_upper'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
-            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
-            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels']) 
+            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['previous_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['previous_upper'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
 
-        #setup pop-up window menu tree for % data representativity 
+        #setup pop-up window menu tree for % data representativity
         self.representativity_menu = {'window_title':'% DATA REPRESENTATIVITY', 'page_title':'Select % Data Representativity Bounds', 'rangeboxes':{}}
-        #self.representativity_menu['rangeboxes']['previous_labels'] = [] 
-        self.representativity_menu['rangeboxes']['labels'] = [] 
-        self.representativity_menu['rangeboxes']['tooltips'] = [] 
-        self.representativity_menu['rangeboxes']['current_lower'] = []   
-        #self.representativity_menu['rangeboxes']['current_upper'] = [] 
+        #self.representativity_menu['rangeboxes']['previous_labels'] = []
+        self.representativity_menu['rangeboxes']['labels'] = []
+        self.representativity_menu['rangeboxes']['tooltips'] = []
+        self.representativity_menu['rangeboxes']['current_lower'] = []
+        #self.representativity_menu['rangeboxes']['current_upper'] = []
 
         #setup pop-up window menu tree for data periods
         self.period_menu = {'window_title':'DATA PERIOD', 'page_title':'Select Data Periods', 'checkboxes':{}}
         self.period_menu['checkboxes']['labels'] = []
         self.period_menu['checkboxes']['keep_selected'] = []
         self.period_menu['checkboxes']['remove_selected'] = []
-        
+
         #enable pop up configuration windows
         self.bu_flags.clicked.connect(partial(self.generate_pop_up_window,self.flag_menu))
         self.bu_QA.clicked.connect(partial(self.generate_pop_up_window,self.qa_menu))
-        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window,self.experiments_menu)) 
-        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window,self.metadata_menu)) 
-        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window,self.representativity_menu)) 
-        self.bu_period.clicked.connect(partial(self.generate_pop_up_window,self.period_menu)) 
-        
+        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window,self.experiments_menu))
+        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window,self.metadata_menu))
+        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window,self.representativity_menu))
+        self.bu_period.clicked.connect(partial(self.generate_pop_up_window,self.period_menu))
+
         #initialise configuration bar fields
         self.config_bar_initialisation = True
-        self.update_configuration_bar_fields()  
+        self.update_configuration_bar_fields()
         self.config_bar_initialisation = False
 
 #############################
@@ -752,8 +776,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # update configuration bar fields
             self.update_configuration_bar_fields()
 
-    # --------------------------------------------------------------------------------# 
-    # --------------------------------------------------------------------------------# 
+    # --------------------------------------------------------------------------------#
+    # --------------------------------------------------------------------------------#
     # define functions which generate pop up configuration windows for some fields
 
     def handle_pop_up_experiments_window(self):
@@ -800,8 +824,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                             default_checkbox_selection=[np.arange(len(self.station_unique_methods), dtype=np.int)],
                             selected_indices=self.selected_indices)
 
-    # --------------------------------------------------------------------------------# 
-    # --------------------------------------------------------------------------------# 
     def handle_data_selection_update(self):
         """Define function which handles update of data selection
         and MPL canvas upon pressing of READ button
@@ -846,7 +868,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.active_classifications_to_retain_inds = self.selected_indices['CLASSIFICATIONS'][0]
         self.active_classifications_to_remove_inds = self.selected_indices['CLASSIFICATIONS'][1]
 
-        # --------------------------------------------------------------------# 
+        # --------------------------------------------------------------------#
         # determine what data (if any) needs to be read
 
         # set variables that inform what data needs to be read (set all initially as False)
@@ -915,7 +937,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 elif self.active_end_date < self.previous_active_end_date:
                     cut_right = True
 
-        # ---------------------------------------# 
+        # ---------------------------------------#
 
         # determine if any of the active experiments have changed
         # remove experiments that are no longer selected from data_in_memory dictionary
@@ -1023,7 +1045,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             for data_label in experiments_to_read:
                 self.read_data(data_label, self.active_start_date, self.active_end_date)
 
-        # --------------------------------------------------------------------# 
+        # --------------------------------------------------------------------#
         # if species has changed, update default species specific lower/upper limits
         if self.active_species != self.previous_active_species:
             # update default lower/upper species specific limits and filter data outside limits
@@ -1033,16 +1055,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
 
-        # --------------------------------------------------------------------# 
+        # --------------------------------------------------------------------#
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         self.update_plotting_parameters()
 
-        # --------------------------------------------------------------------# 
+        # --------------------------------------------------------------------#
         # run function to filter data outside lower/upper limits, not using desired measurement methods
         # and < desired minimum data availability
         self.mpl_canvas.handle_data_filter_update()
 
-        # --------------------------------------------------------------------# 
+        # --------------------------------------------------------------------#
         # update map z combobox fields based on data in memory
 
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
@@ -1070,7 +1092,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # initialise map z statistic comboboxes
         self.mpl_canvas.handle_map_z_statistic_update()
 
-        # --------------------------------------------------------------------# 
+        # --------------------------------------------------------------------#
         # update experiment bias combobox fields based on data in memory
 
         # if have no experiment data, all fields are empty
@@ -1084,11 +1106,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # initialise experiment bias comboboxes
             self.mpl_canvas.handle_experiment_bias_update()
 
-        # --------------------------------------------------------------------# 
+        # --------------------------------------------------------------------#
         # reset station select checkboxes to be unchecked
         self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-        # --------------------------------------------------------------------# 
+        # --------------------------------------------------------------------#
 
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
@@ -1393,4 +1415,3 @@ def main(**kwargs):
     q_app = QtWidgets.QApplication(sys.argv)
     q_app.setStyle("Fusion")
     ProvidentiaMainWindow(**kwargs)
-    sys.exit(q_app.exec_())
