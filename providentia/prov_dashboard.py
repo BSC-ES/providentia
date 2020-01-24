@@ -1,3 +1,4 @@
+""" Module which provides main window """
 from .configuration import ProvConfiguration
 from .configuration import parse_path
 from .reading import read_netcdf_station
@@ -6,7 +7,6 @@ from .prov_canvas import MPLCanvas
 from .prov_canvas import NavigationToolbar
 from .prov_dashboard_aux import ComboBox
 from .prov_dashboard_aux import QVLine
-# from .prov_dashboard_aux import QHLine
 from .prov_dashboard_aux import PopUpWindow
 from .prov_dashboard_aux import formatting_dict
 from .prov_dashboard_aux import set_formatting
@@ -337,12 +337,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.period_menu['checkboxes']['remove_selected'] = []
 
         #enable pop up configuration windows
-        self.bu_flags.clicked.connect(partial(self.generate_pop_up_window,self.flag_menu))
-        self.bu_QA.clicked.connect(partial(self.generate_pop_up_window,self.qa_menu))
-        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window,self.experiments_menu))
-        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window,self.metadata_menu))
-        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window,self.representativity_menu))
-        self.bu_period.clicked.connect(partial(self.generate_pop_up_window,self.period_menu))
+        self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
+        self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
+        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window, self.experiments_menu))
+        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window, self.metadata_menu))
+        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
+        self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
 
         #initialise configuration bar fields
         self.config_bar_initialisation = True
@@ -1045,7 +1045,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             for data_label in experiments_to_read:
                 self.read_data(data_label, self.active_start_date, self.active_end_date)
 
-        # --------------------------------------------------------------------#
         # if species has changed, update default species specific lower/upper limits
         if self.active_species != self.previous_active_species:
             # update default lower/upper species specific limits and filter data outside limits
@@ -1055,16 +1054,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
 
-        # --------------------------------------------------------------------#
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         self.update_plotting_parameters()
 
-        # --------------------------------------------------------------------#
         # run function to filter data outside lower/upper limits, not using desired measurement methods
         # and < desired minimum data availability
         self.mpl_canvas.handle_data_filter_update()
 
-        # --------------------------------------------------------------------#
         # update map z combobox fields based on data in memory
 
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
@@ -1330,8 +1326,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 tuple_arguments = relevant_file, self.time_array, self.station_references, \
                                   self.active_species, self.process_type,\
                                   self.selected_qa, self.selected_flags, \
-                                  self.selected_classifications_to_retain,\
-                                  self.selected_classifications_to_remove
+                                  data_dtype, data_vars_to_read, \
+                                  metadata_dtype, metadata_vars_to_read
                 # read file
                 file_data, time_indices, full_array_station_indices = read_netcdf_data(tuple_arguments)
                 # place read data into big array as appropriate
@@ -1347,8 +1343,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # read netCDF files in parallel
             tuple_arguments = [(file_name, self.time_array, self.station_references, self.active_species,
                                 self.process_type, self.selected_qa, self.selected_flags,
-                                self.selected_classifications_to_retain,
-                                self.selected_classifications_to_remove) for
+                                data_dtype, data_vars_to_read,
+                                metadata_dtype, metadata_vars_to_read) for
                                file_name in relevant_files]
             all_file_data = pool.map(read_netcdf_data, tuple_arguments)
             # will not submit more files to pool, so close access to it
