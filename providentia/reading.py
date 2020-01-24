@@ -51,8 +51,8 @@ def read_netcdf_data(tuple_arguments):
 
     # assign arguments from tuple to variables
     relevant_file, time_array, station_references, active_species, process_type, \
-    selected_qa, selected_flags, selected_classifications_to_retain, \
-    selected_classifications_to_remove = tuple_arguments
+            selected_qa, selected_flags, data_dtype, data_vars_to_read, \
+            metadata_dtype, metadata_vars_to_read = tuple_arguments
 
     # read netCDF frame
     ncdf_root = Dataset(relevant_file)
@@ -102,29 +102,42 @@ def read_netcdf_data(tuple_arguments):
     # flags/classifications to retain or remove as NaN
     if process_type == 'observations':
 
-        file_data = np.full((len(current_file_station_indices), len(valid_file_time_indices)), np.NaN, dtype=data_dtype)
+        file_data = np.full((len(current_file_station_indices),
+                             len(valid_file_time_indices)), np.NaN,
+                            dtype=data_dtype)
         for data_var in data_vars_to_read:
-            file_data[data_var][:, :] = ncdf_root[data_var][current_file_station_indices, valid_file_time_indices]
+            file_data[data_var][:, :] = \
+                    ncdf_root[data_var][current_file_station_indices,
+                                        valid_file_time_indices]
 
         # if some qa flags selected then screen
         if len(selected_qa) > 0:
             # screen out observations which are associated with any of the selected qa flags
-            file_data[active_species][np.isin(ncdf_root['qa'][:, valid_file_time_indices, :], selected_qa).any(axis=2)] = np.NaN
+            file_data[active_species]\
+                    [np.isin(ncdf_root['qa'][:, valid_file_time_indices, :],
+                             selected_qa).any(axis=2)] = np.NaN
 
         # if some data provider flags selected then screen
         if len(selected_flags) > 0:
-            # screen out observations which are associated with any of the selected data provider flags
-            file_data[active_species][np.isin(ncdf_root['flag'][:, valid_file_time_indices, :], selected_flags).any(axis=2)] = np.NaN
+            # screen out observations which are associated with any of the
+            # selected data provider flags
+            file_data[active_species]\
+                    [np.isin(ncdf_root['flag'][:, valid_file_time_indices, :],
+                             selected_flags).any(axis=2)] = np.NaN
 
 
         #get file metadata
         file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
         for meta_var in metadata_vars_to_read:
-            file_metadata[meta_var][current_file_station_indices,0] = ncdf_root[meta_var][:]
+            file_metadata[meta_var][current_file_station_indices, 0] = ncdf_root[meta_var][:]
 
     else:
-        file_data = np.full((len(current_file_station_indices), len(valid_file_time_indices)), np.NaN, dtype=data_dtype[:1])
-        file_data[data_vars_to_read[0]][:, :] = ncdf_root[data_vars_to_read[0]][current_file_station_indices, valid_file_time_indices]
+        file_data = np.full((len(current_file_station_indices),
+                             len(valid_file_time_indices)), np.NaN,
+                            dtype=data_dtype[:1])
+        file_data[data_vars_to_read[0]][:, :] = \
+                    ncdf_root[data_vars_to_read[0]]\
+                        [current_file_station_indices, valid_file_time_indices]
 
 
     # close netCDF
