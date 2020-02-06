@@ -167,7 +167,11 @@ class MPLCanvas(FigureCanvas):
             self.map_ax.set_global()
 
             # add coastlines and gridelines
-            self.map_ax.add_feature(cfeature.LAND, facecolor='0.85')
+            land_polygon_resolutions = {'low': '110m', 'medium': '50m', 'high': '10m'}
+            feature = cfeature.NaturalEarthFeature('physical', 'land',
+                                                   land_polygon_resolutions[map_coastline_resolution],
+                                                   facecolor='0.85')
+            self.map_ax.add_feature(feature)
             self.map_ax.gridlines(linestyle='-', alpha=0.4)
 
             # reset the navigation toolbar stack for the map axis with the current view limits
@@ -188,7 +192,8 @@ class MPLCanvas(FigureCanvas):
 
         # define all temporal aggregation resolutions that will be used to aggregate data
         # (variable by temporal resolution of data in memory)
-        if self.read_instance.active_resolution == 'hourly':
+        if (self.read_instance.active_resolution == 'hourly') or (
+                self.read_instance.active_resolution == 'hourly_instantaneous'):
             self.temporal_aggregation_resolutions = ['hour', 'dayofweek', 'month']
         elif self.read_instance.active_resolution == 'daily':
             self.temporal_aggregation_resolutions = ['dayofweek', 'month']
@@ -242,36 +247,207 @@ class MPLCanvas(FigureCanvas):
         selected lower/upper limit bounds, selected measurement
         methods and selected minimum data availability %"""
 
-        # get selected variables for minimum data availability, lower/upper limits and measurement methods
-        selected_minimum_data_availability_percent = self.read_instance.le_minimum_data_availability.text()
-        selected_lower_limit = self.read_instance.le_minimum_value.text()
-        selected_upper_limit = self.read_instance.le_maximum_value.text()
+        # get set variables names representing percentage data availability (native and non-native)
+        active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['labels']
 
-        # check selected minimum data availability percent,
-        # selected lower limit, selected upper limits are numbers
+        # get set lower/upper data bounds
+        selected_lower_bound = self.read_instance.le_minimum_value.text()
+        selected_upper_bound = self.read_instance.le_maximum_value.text()
+
+        # check set data availability percent variable bounds and selected lower/upper bounds are numbers
         try:
-            selected_minimum_data_availability_percent = np.float32(selected_minimum_data_availability_percent)
-            selected_lower_limit = np.float32(selected_lower_limit)
-            selected_upper_limit = np.float32(selected_upper_limit)
+            data_availability_lower_bounds = []
+            data_availability_upper_bounds = []
+            for var_ii, var in enumerate(active_data_availablity_vars):
+                data_availability_lower_bounds.append(
+                    np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
+            selected_lower_bound = np.float32(selected_lower_bound)
+            selected_upper_bound = np.float32(selected_upper_bound)
         # if any of the fields are not numbers, return from function
         except ValueError:
             return
-
-        # if selected minimum data availability percent is < 0.0%, force it to be 0.0%
-        if selected_minimum_data_availability_percent < 0.0:
-            selected_minimum_data_availability_percent = 0.0
-        # if selected minimum data availability percent is > 100.0%, force it to be 100.0%
-        elif selected_minimum_data_availability_percent > 100.0:
-            selected_minimum_data_availability_percent = 100.0
 
         # reset data arrays to be un-filtered
         self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
 
         # filter all observational data out of bounds of lower/upper limits
-        inds_out_of_bounds = np.logical_or(
-            self.read_instance.data_in_memory_filtered['observations']['data'] < selected_lower_limit,
-            self.read_instance.data_in_memory_filtered['observations']['data'] > selected_upper_limit)
-        self.read_instance.data_in_memory_filtered['observations']['data'][inds_out_of_bounds] = np.NaN
+        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations'][
+                                               self.read_instance.active_species] < selected_lower_bound,
+                                           self.read_instance.data_in_memory_filtered['observations'][
+                                               self.read_instance.active_species] > selected_upper_bound)
+        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+            inds_out_of_bounds] = np.NaN
+
+        # filter/limit data for periods selected
+        if len(self.read_instance.period_menu['checkboxes']['keep_selected']) > 0:
+            if 'Daytime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['day_night_code'] != 0] = np.NaN
+            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['day_night_code'] != 1] = np.NaN
+            if 'Weekday' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] != 0] = np.NaN
+            if 'Weekend' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] != 1] = np.NaN
+            if 'Spring' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['season_code'] != 0] = np.NaN
+            if 'Summer' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['season_code'] != 1] = np.NaN
+            if 'Autumn' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['season_code'] != 2] = np.NaN
+            if 'Winter' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['season_code'] != 3] = np.NaN
+
+        if len(self.read_instance.period_menu['checkboxes']['remove_selected']) > 0:
+            if 'Daytime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['day_night_code'] == 0] = np.NaN
+            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['day_night_code'] == 1] = np.NaN
+            if 'Weekday' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] == 0] = np.NaN
+            if 'Weekend' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] == 1] = np.NaN
+            if 'Spring' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['season_code'] == 0] = np.NaN
+            if 'Summer' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['season_code'] == 1] = np.NaN
+            if 'Autumn' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['season_code'] == 2] = np.NaN
+            if 'Winter' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations']['season_code'] == 3] = np.NaN
+
+        # filter all obersvational data out of set bounds of native percentage data availability variables
+        for var_ii, var in enumerate(active_data_availablity_vars):
+            if 'native' in var:
+                # max gap variable?
+                if 'max_gap' in var:
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        self.read_instance.data_in_memory_filtered['observations'][var] >
+                        data_availability_lower_bounds[var_ii]] = np.NaN
+                # data representativity variable?
+                else:
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        self.read_instance.data_in_memory_filtered['observations'][var] <
+                        data_availability_lower_bounds[var_ii]] = np.NaN
+
+        # filter all obersvational data out of set bounds of non-native percentage data availability variables
+        for var_ii, var in enumerate(active_data_availablity_vars):
+            if 'native' not in var:
+                # get period associate with variable
+                period = var.split('_')[0]
+                period_inds = np.arange(
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species].shape[
+                        1])
+                # daily variable?
+                if period == 'daily':
+                    period_inds_split = np.array_split(period_inds,
+                                                       [24 * i for i in range(1, int(np.ceil(len(period_inds) / 24)))])
+                # monthly variable?
+                elif period == 'monthly':
+                    period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.N_inds_per_month))
+                # whole record variable?
+                else:
+                    period_inds_split = [period_inds]
+
+                # iterate through indices associated with periodic chunks for current period
+                for period_inds in period_inds_split:
+                    if len(period_inds) > 0:
+                        # max gap variable?
+                        if 'max_gap' in var:
+                            max_gap_percent = max_repeated_NaNs_fraction(
+                                self.read_instance.data_in_memory_filtered['observations'][
+                                    self.read_instance.active_species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][
+                                self.read_instance.active_species][
+                                max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
+                        # data representativity variable?
+                        else:
+                            data_availability_percent = calculate_data_availability_fraction(
+                                self.read_instance.data_in_memory_filtered['observations'][
+                                    self.read_instance.active_species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][
+                                self.read_instance.active_species][
+                                data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
+
+        # fiter all observational data by selected metadata
+        # iterate through all metadata
+        for meta_var in metadata_vars_to_read:
+            metadata_type = standard_metadata[meta_var]['metadata_type']
+            metadata_data_type = standard_metadata[meta_var]['data_type']
+
+            # handle non-numeric metadata
+            if metadata_data_type == np.object:
+                # if any of the keep checkboxes have been selected, and some checkboxes have
+                # been changed from previous update, filter out data by fields that have not been selected
+                current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
+                previous_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
+                    'previous_keep_selected']
+                if (len(current_keep) > 0) & (set(previous_keep) != set(current_keep)):
+                    invalid_keep = np.repeat(
+                        np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_keep, invert=True),
+                        self.read_instance.N_inds_per_month, axis=1)
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        invalid_keep] = np.NaN
+                # if any of the remove checkboxes have been selected, and some checkboxes have been
+                # changed from previous update, filter out data by these selected fields
+                current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
+                    'remove_selected']
+                previous_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
+                    'previous_remove_selected']
+                if (len(current_remove) > 0) & (set(previous_remove) != set(current_remove)):
+                    invalid_remove = np.repeat(
+                        np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_remove),
+                        self.read_instance.N_inds_per_month, axis=1)
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        invalid_remove] = np.NaN
+                    # handle numeric metadata
+            else:
+                meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
+                # filter out data with metadata < current lower value (if this is numeric)
+                try:
+                    current_lower = np.float32(
+                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
+                    previous_lower = np.float32(
+                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['previous_lower'][meta_var_index])
+                    # if current lower value is non-NaN, and different from previous value,
+                    # then filter out data with metadata < current lower value
+                    if (pd.isnull(current_lower) is False) & (current_lower != previous_lower):
+                        invalid_below = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] < current_lower,
+                                                  self.read_instance.N_inds_per_month, axis=1)
+                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            invalid_below] = np.NaN
+                except:
+                    pass
+                # filter out data with metadata > current upper value (if this is numeric)
+                try:
+                    current_upper = np.float32(
+                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
+                    previous_upper = np.float32(
+                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['previous_upper'][meta_var_index])
+                    # if current upper value is non-NaN, and different from previous value,
+                    # then filter out data with metadata > current upper value
+                    if (pd.isnull(current_upper) is False) & (current_upper != previous_upper):
+                        invalid_above = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] > current_upper,
+                                                  self.read_instance.N_inds_per_month, axis=1)
+                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            invalid_above] = np.NaN
+                except:
+                    pass
 
         # colocate data (if necessary)
         self.colocate_data()
@@ -287,28 +463,16 @@ class MPLCanvas(FigureCanvas):
 
                 # calculate data availability fraction per station in observational data array
                 # initialize Stats object from calcs module
-                stats_obj = Stats(self.read_instance.data_in_memory_filtered[data_label]['data'])
-                # and call function on object to calculate data avail
-                station_data_availability_percent = stats_obj.calculate_data_avail_fraction()
-
+                # TODO: check if self.read_instance.active_species is correct or if it should be data
+                stats_obj = \
+                    Stats(self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])
                 # get absolute data availability number per station in observational data array
                 station_data_availability_number = stats_obj.calculate_data_avail_number()
 
-                # get indices of stations with >= selected_minimum_data_availability
-                valid_station_indices_percent = \
-                    np.arange(len(self.read_instance.station_references),
-                              dtype=np.int)[station_data_availability_percent >=
-                                            selected_minimum_data_availability_percent]
-
                 # get indices of stations with > 1 available measurements
-                valid_station_indices_absolute = \
-                    np.arange(len(station_data_availability_number),
-                              dtype=np.int)[station_data_availability_number > 1]
-
-                # get indices of valid stations in intersect of valid_station_indices_percent and
-                # valid_station_indices_absolute
-                valid_station_indices_availability = \
-                    np.intersect1d(valid_station_indices_percent, valid_station_indices_absolute)
+                # save valid station indices with data array
+                self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
+                np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
 
                 # get unique standard measurement methodologies across stations
                 self.read_instance.previous_station_unique_methods = \
