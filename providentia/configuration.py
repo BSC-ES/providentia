@@ -45,6 +45,8 @@ class ProvConfiguration(object):
                                    kwargs.get('temp_agg_markersize', 3)
         self.temp_agg_expbias_markersize = \
                 kwargs.get('temp_agg_expbias_markersize', 3)
+        self.map_coastline_resolution = \
+                kwargs.get('map_coastline_resolution', 'low')
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))

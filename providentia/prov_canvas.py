@@ -169,7 +169,7 @@ class MPLCanvas(FigureCanvas):
             # add coastlines and gridelines
             land_polygon_resolutions = {'low': '110m', 'medium': '50m', 'high': '10m'}
             feature = cfeature.NaturalEarthFeature('physical', 'land',
-                                                   land_polygon_resolutions[map_coastline_resolution],
+                                                   land_polygon_resolutions[self.read_instance.map_coastline_resolution],
                                                    facecolor='0.85')
             self.map_ax.add_feature(feature)
             self.map_ax.gridlines(linestyle='-', alpha=0.4)
@@ -257,7 +257,7 @@ class MPLCanvas(FigureCanvas):
         # check set data availability percent variable bounds and selected lower/upper bounds are numbers
         try:
             data_availability_lower_bounds = []
-            data_availability_upper_bounds = []
+            # data_availability_upper_bounds = []
             for var_ii, var in enumerate(active_data_availablity_vars):
                 data_availability_lower_bounds.append(
                     np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
@@ -474,42 +474,42 @@ class MPLCanvas(FigureCanvas):
                 self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
                 np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
 
-                # get unique standard measurement methodologies across stations
-                self.read_instance.previous_station_unique_methods = \
-                    copy.deepcopy(self.read_instance.station_unique_methods)
-                self.read_instance.station_unique_methods = \
-                    np.unique(self.read_instance.station_methods[valid_station_indices_availability])
-
-                # if unique methods have changed from previous, update method checkboxes
-                if np.array_equal(self.read_instance.previous_station_unique_methods,
-                                  self.read_instance.station_unique_methods) is False:
-
-                    # if are reading new data into memory, update all methods to be checked by default
-                    if self.read_instance.block_MPL_canvas_updates is True:
-                        self.read_instance.selected_indices['METHODS'] = \
-                            [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
-
-                    # else if all previous methods were ticked then, update all new methods to be ticked also
-                    elif len(self.read_instance.selected_indices['METHODS'][0]) == \
-                            len(self.read_instance.previous_station_unique_methods):
-                        self.read_instance.selected_indices['METHODS'] = \
-                            [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
-
-                    # otherwise, update checked methods to be the subset between previously
-                    # checked methods and current unique methods
-                    else:
-                        intersect_methods = np.intersect1d(self.read_instance.previous_station_unique_methods[self.read_instance.selected_indices['METHODS'][0]], self.read_instance.station_unique_methods)
-                        self.read_instance.selected_indices['METHODS'] = [[np.where(self.read_instance.station_unique_methods == intersect_method)[0][0] for intersect_method in intersect_methods]]
-
-                # get indices of subset stations which use checked standard methodologies
-                checked_methods = \
-                    self.read_instance.station_unique_methods[self.read_instance.selected_indices['METHODS'][0]]
-                valid_station_indices = \
-                    valid_station_indices_availability[np.isin(
-                        self.read_instance.station_methods[valid_station_indices_availability], checked_methods)]
-
-                # save valid station indices with data array
-                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_indices
+#                # get unique standard measurement methodologies across stations
+#                self.read_instance.previous_station_unique_methods = \
+#                    copy.deepcopy(self.read_instance.station_unique_methods)
+#                self.read_instance.station_unique_methods = \
+#                    np.unique(self.read_instance.station_methods[valid_station_indices_availability])
+#
+#                # if unique methods have changed from previous, update method checkboxes
+#                if np.array_equal(self.read_instance.previous_station_unique_methods,
+#                                  self.read_instance.station_unique_methods) is False:
+#
+#                    # if are reading new data into memory, update all methods to be checked by default
+#                    if self.read_instance.block_MPL_canvas_updates is True:
+#                        self.read_instance.selected_indices['METHODS'] = \
+#                            [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
+#
+#                    # else if all previous methods were ticked then, update all new methods to be ticked also
+#                    elif len(self.read_instance.selected_indices['METHODS'][0]) == \
+#                            len(self.read_instance.previous_station_unique_methods):
+#                        self.read_instance.selected_indices['METHODS'] = \
+#                            [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
+#
+#                    # otherwise, update checked methods to be the subset between previously
+#                    # checked methods and current unique methods
+#                    else:
+#                        intersect_methods = np.intersect1d(self.read_instance.previous_station_unique_methods[self.read_instance.selected_indices['METHODS'][0]], self.read_instance.station_unique_methods)
+#                        self.read_instance.selected_indices['METHODS'] = [[np.where(self.read_instance.station_unique_methods == intersect_method)[0][0] for intersect_method in intersect_methods]]
+#
+#                # get indices of subset stations which use checked standard methodologies
+#                checked_methods = \
+#                    self.read_instance.station_unique_methods[self.read_instance.selected_indices['METHODS'][0]]
+#                valid_station_indices = \
+#                    valid_station_indices_availability[np.isin(
+#                        self.read_instance.station_methods[valid_station_indices_availability], checked_methods)]
+#
+#                # save valid station indices with data array
+#                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_indices
 
         # write valid station indices calculated for observations across to associated experimental data arrays
         # iterate through all data arrays
@@ -521,13 +521,13 @@ class MPLCanvas(FigureCanvas):
                 # handle colocated experimental arrays
                 if '_colocatedto_' in data_label:
                     exp_name = data_label.split('_colocatedto_')[0]
-                    self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = \
-                        copy.deepcopy(self.read_instance.data_in_memory_filtered['observations_colocatedto_%s' %
+                    self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
+                        copy.deepcopy(self.read_instance.plotting_params['observations_colocatedto_%s' %
                                                                                  exp_name]['valid_station_inds'])
                 # handle non-located experimental arrays
                 else:
-                    self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = \
-                        copy.deepcopy(self.read_instance.data_in_memory_filtered['observations']['valid_station_inds'])
+                    self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
+                        copy.deepcopy(self.read_instance.plotting_params['observations']['valid_station_inds'])
 
         # after subsetting by pre-written associated observational valid stations, get
         # indices of stations with > 1 valid measurements in all experiment data arrays (colocated and non-colocated)
@@ -547,7 +547,7 @@ class MPLCanvas(FigureCanvas):
                 # get indices of stations with > 1 available measurements
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
                 # overwrite previous written valid station indices (now at best a subset of those indices)
-                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_inds
+                self.read_instance.plotting_params[data_label]['valid_station_inds'] = valid_station_inds
 
         # update plotted map z statistic (if necessary)
         if self.read_instance.block_MPL_canvas_updates is False:
@@ -563,8 +563,6 @@ class MPLCanvas(FigureCanvas):
 
             # draw changes
             self.draw()
-
-    # --------------------------------------------------------------------------------# 
 
     def colocate_data(self):
         """Define function which colocates observational and experiment data"""
@@ -620,9 +618,9 @@ class MPLCanvas(FigureCanvas):
             exps_all_nan = np.any([nan_obs, exps_all_nan], axis=0)
             obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations']['data'])
             obs_data[exps_all_nan] = np.NaN
-            self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments'] = {'data': obs_data, 'colour':self.read_instance.data_in_memory_filtered['observations']['colour'], 'zorder':self.read_instance.data_in_memory_filtered['observations']['zorder']}
+            self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments'] = obs_data
+            self.read_instance.plotting_params['observations_colocatedto_experiments'] = {'colour':self.read_instance.plotting_params['observations']['colour'], 'zorder':self.read_instance.plotting_params['observations']['zorder']}
 
-    # --------------------------------------------------------------------------------# 
 
     def handle_colocate_update(self):
         """Function that handles the update of the MPL canvas
@@ -663,8 +661,6 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.draw()
 
-    # --------------------------------------------------------------------------------# 
-    # --------------------------------------------------------------------------------# 
 
     def update_map_z_statisitic(self):
         """Function that updates plotted z statistic on map, with colourbar"""
@@ -710,9 +706,9 @@ class MPLCanvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=self.read_instance.unsel_station_markersize, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker = 1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)
+            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=self.read_instance.unsel_station_markersize, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker=1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)
             # create 2D numpy array of plotted station coordinates
-            self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
+            self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds], self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
 
             # create colour normalisation instance
             colour_norm = matplotlib.colors.Normalize(vmin=self.z_vmin, vmax=self.z_vmax)
@@ -741,7 +737,6 @@ class MPLCanvas(FigureCanvas):
         # update map selection appropriately for z statistic
         self.update_map_station_selection()
 
-    # --------------------------------------------------------------------------------# 
 
     def update_map_station_selection(self):
         """Function that updates the visual selection of stations on map"""
@@ -776,8 +771,7 @@ class MPLCanvas(FigureCanvas):
                 # increase marker size of selected stations
                 marker_sizes[self.absolute_selected_station_inds] = self.read_instance.sel_station_markersize
                 self.map_points.set_sizes(marker_sizes)
-    # --------------------------------------------------------------------------------# 
-    # --------------------------------------------------------------------------------# 
+
 
     def update_associated_selected_station_plots(self):
         """Function that updates all plots associated with selected stations on map"""
@@ -833,7 +827,6 @@ class MPLCanvas(FigureCanvas):
             # update plotted station selected metadata
             self.update_selected_station_metadata()
 
-    # --------------------------------------------------------------------------------# 
 
     def update_experiment_grid_domain_edges(self):
         """Function that plots grid domain edges of experiments in memory"""
@@ -860,7 +853,6 @@ class MPLCanvas(FigureCanvas):
                 # plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
 
-    # --------------------------------------------------------------------------------# 
 
     def update_legend(self):
         """Function that updates legend"""
@@ -881,7 +873,6 @@ class MPLCanvas(FigureCanvas):
         # plot legend
         self.legend_ax.legend(handles=legend_elements, loc='best', mode='expand', ncol=4, fontsize=9.0)
 
-    # --------------------------------------------------------------------------------# 
 
     def to_pandas_dataframe(self):
         """Function that takes selected station data within data arrays and puts it into a pandas dataframe"""
@@ -923,7 +914,7 @@ class MPLCanvas(FigureCanvas):
                 self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0),
                                                                                    index=self.read_instance.time_array,
                                                                                    columns=['data'])
-    # --------------------------------------------------------------------------------# 
+
 
     def pandas_temporal_aggregation(self):
         """Function that aggregates pandas dataframe data, for all data arrays,
@@ -999,7 +990,7 @@ class MPLCanvas(FigureCanvas):
                     # save statistical output by group to selected station data dictionary
                     self.selected_station_data[data_label][temporal_aggregation_resolution][stat] = stat_output_by_group
 
-    # --------------------------------------------------------------------------------# 
+
 
     def calculate_temporally_aggregated_experiment_bias_statistics(self):
         """Function that calculates temporally aggregated basic statistic
@@ -1033,7 +1024,6 @@ class MPLCanvas(FigureCanvas):
                             self.selected_station_data[
                                 'observations_colocatedto_%s' % exp][temporal_aggregation_resolution]
 
-                    # -----------------------------------------------------# 
                     # calculate temporally aggregated basic statistic differences between experiment and observations
 
                     # iterate through basic statistics
@@ -1060,7 +1050,6 @@ class MPLCanvas(FigureCanvas):
                         # save statistical difference output by group to selected station data dictionary
                         self.selected_station_data[data_label][temporal_aggregation_resolution]['%s_bias' % (basic_stat)] = stat_diff_by_group
 
-                    # -----------------------------------------------------# 
                     # if colocation is active, calculate temporally aggregated experiment bias
                     # statistical differences between experiment and observations
 
@@ -1097,7 +1086,6 @@ class MPLCanvas(FigureCanvas):
                             # save experiment bias statistic by group to selected station data dictionary
                             self.selected_station_data[data_label][temporal_aggregation_resolution]['%s_bias' % (bias_stat)] = stat_output_by_group
 
-    # --------------------------------------------------------------------------------# 
 
     def update_time_series_plot(self):
         """Function that updates time series plot upon selection of station/s"""
@@ -1124,7 +1112,10 @@ class MPLCanvas(FigureCanvas):
                                 zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'])
 
         # set axes labels
-        self.ts_ax.set_ylabel('Concentration (%s)' % (self.read_instance.measurement_units), fontsize=8.0)
+        if self.read_instance.measurement_units == 'unitless':
+            self.ts_ax.set_ylabel('{}'.format(self.read_instance.measurement_units), fontsize=8.0)
+        else:
+            self.ts_ax.set_ylabel('{} ({})'.format(self.read_instance.parameter_dictionary[self.read_instance.active_species]['axis_label'],self.read_instance.measurement_units), fontsize=8.0)
 
         # plot grid
         self.ts_ax.grid(color='lightgrey', alpha=0.8)
@@ -1136,10 +1127,8 @@ class MPLCanvas(FigureCanvas):
         # toolbar stack dictionaries entries associated with time series axis
         self.reset_ax_navigation_toolbar_stack(self.ts_ax)
 
-    # --------------------------------------------------------------------------------# 
 
     def update_violin_plots(self):
-
         """function that updates violin plots of temporally aggregated data upon selection of station/s"""
 
         # define dictionaries defining the relevant axis, axis titles, x axis ticks
@@ -1174,7 +1163,6 @@ class MPLCanvas(FigureCanvas):
             # change axis tick labels
             aggregation_dict[temporal_aggregation_resolution]['ax'].tick_params(labelsize=8.0)
 
-        # ------------------------------------------------------------------------------------------------# 
         # now, make violin plots for each temporally aggregated data array,
         # for all relevant temporal aggregation resolutions
 
@@ -1225,9 +1213,7 @@ class MPLCanvas(FigureCanvas):
                     set_xticklabels([self.temporal_axis_mapping_dict[temporal_aggregation_resolution][xtick]
                                      for xtick in aggregation_dict[temporal_aggregation_resolution]['xticks']])
 
-        # ------------------------------------------------------------------------------------------------#
         # format violin plots
-
         # iterate through all defined temporal aggregation resolutions
         for temporal_aggregation_resolution in self.temporal_aggregation_resolutions:
 
@@ -1258,7 +1244,6 @@ class MPLCanvas(FigureCanvas):
                             patch.get_paths()[0].vertices[:, 0] = np.clip(
                                 patch.get_paths()[0].vertices[:, 0], m, np.inf)
 
-                # -------------------------# 
                 # overplot time series of medians over boxes in necessary color
 
                 # generate zorder to overplot medians in same order as violin plots are ordered, but on top of them
@@ -1293,7 +1278,8 @@ class MPLCanvas(FigureCanvas):
 
         # plot title (with units)
         # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
-        if self.read_instance.active_resolution == 'hourly':
+        if (self.read_instance.active_resolution == 'hourly') or \
+                (self.read_instance.active_resolution == 'hourly_instantaneous'):
             self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
                                            fontsize=8.0, loc='left')
         # otherwise, plot the units on the monthly aggregation axis
@@ -1325,7 +1311,7 @@ class MPLCanvas(FigureCanvas):
             'ax': self.exp_bias_months_ax, 'title': 'M',   'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
 
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
-        if self.read_instance.active_resolution == 'hourly':
+        if (self.read_instance.active_resolution == 'hourly') or (self.read_instance.active_resolution == 'hourly_instantaneous'):
             aggregation_dict = {
                 'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
         elif self.read_instance.active_resolution == 'daily':
@@ -1412,7 +1398,6 @@ class MPLCanvas(FigureCanvas):
                 aggregation_dict[temporal_aggregation_resolution]['ax'].axhline(y=mb, linestyle='--', linewidth=1.0,
                                                                                 color='black', zorder=0)
 
-        # ------------------------------------------------------------------------------------------------# 
         # as are re-plotting on experiment bias axes,
         # reset the navigation toolbar stack dictionaries entries associated with each of the axes
 
@@ -1474,32 +1459,44 @@ class MPLCanvas(FigureCanvas):
                 round(self.read_instance.station_measurement_altitudes[self.relative_selected_station_inds][0], 2)))
             str_to_plot += "To Coast: %skm\n" % (str(round(
                 self.read_instance.station_GSFC_coastline_proximities[self.relative_selected_station_inds][0], 2)))
+            str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(self.read_instance.metadata_in_memory['GPW_population_density'][self.relative_selected_station_inds].astype(np.float32)))
+            str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][self.relative_selected_station_inds].astype(np.float32)))
 
-            # define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
-            metadata_vars_to_plot = ['network', 'station_name', 'country',
+            #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
+            metadata_vars_to_plot = ['station_name', 'country',
                                      'standardised_network_provided_area_classification',
                                      'standardised_network_provided_station_classification',
                                      'standardised_network_provided_terrain',
                                      'standardised_network_provided_land_use',
-                                     'standardised_network_provided_main_emission_source',
-                                     'standardised_network_provided_measurement_scale', 'representative_radius',
-                                     'measurement_methodology', 'measuring_instrument_name',
-                                     'measuring_instrument_sampling_type',
-                                     'primary_sampling_type', 'sample_preparation_types']
+                                     'MODIS_MCD12C1_v6_IGBP_land_use',
+                                     'UMBC_anthrome_classification',
+                                     'measurement_methodology', 'measuring_instrument_name']
 
             # iterate through metadata variables
             for meta_var in metadata_vars_to_plot:
 
-                # get unique metadata values for selected station
-                unique_station_meta = \
-                    self.read_instance.station_metadata[selected_station_reference][meta_var]['unique']
+                #gather all selected station metadata for current meta variable         
+                all_current_meta = self.read_instance.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
 
-                # is there just 1 unique value in the metadata array?
-                if len(unique_station_meta) == 1:
-                    # set meta string as just the meta_var:unique value
-                    meta_string = '%s: %s\n'%(metadata_variable_naming[meta_var], unique_station_meta[0])
+                #get counts of all unique metadata elements for selected station
+                unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
+                #get number of unique metadata elements across selected stations
+                n_unique_meta = len(unique_meta)
+            
+                #1 unique metadata element?
+                if n_unique_meta == 1:
+                    meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], unique_meta[0])
+                #elif have > 2 unique metadata elements, just return count of the elements for the selected station
+                elif n_unique_meta > 2:
+                    meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
+                #otherwise, get percentage of unique metadata elements across selected stations
+                else:
+                    meta_pc = (100./len(all_current_meta))*meta_counts
+                    meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
+                    #create string for variable to plot
+                    meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], ', '.join([':'.join([str(var),pc]) for var, pc in zip(unique_meta, meta_pc)]))
 
-                # add meta string to str_to_plot
+                #add meta string to str_to_plot
                 str_to_plot += meta_string
 
         # more than 1 station selected?
