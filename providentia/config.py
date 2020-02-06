@@ -87,6 +87,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--temp_agg_expbias_markersize",
                                      dest="temp_agg_expbias_markersize",
                                      help="define marker sizes on temporally aggregated experiment bias plot")
+            self.parser.add_argument("--map_coastline_resolution",
+                                     dest="map_coastline_resolution",
+                                     help="define coastlines resolution")
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)

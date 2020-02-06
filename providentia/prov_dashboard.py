@@ -77,6 +77,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         self.main_window_geometry = None
 
+        self.parameter_dictionary = parameter_dictionary
+
         # create UI
         self.init_ui()
 
