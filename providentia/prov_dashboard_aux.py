@@ -111,15 +111,6 @@ class QVLine(QtWidgets.QFrame):
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
 
-class QHLine(QtWidgets.QFrame):
-    """Define class that generates horizontal separator line"""
-
-    def __init__(self):
-        super(QHLine, self).__init__()
-        self.setFrameShape(QtWidgets.QFrame.HLine)
-        self.setFrameShadow(QtWidgets.QFrame.Sunken)
-
-
 class PopUpWindow(QtWidgets.QWidget):
     """Define class that generates generalised pop-up window"""
 

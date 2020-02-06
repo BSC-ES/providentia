@@ -46,6 +46,20 @@ class Stats(object):
         """
         return np.count_nonzero(~np.isnan(self.data), axis=-1)
 
+    def max_repeated_nans_fraction(self):
+        """Get % of total period of the maximum run of consecutive NaNs in array"""
+        max_gap_pc = []
+
+        for station_data in self.data:
+            mask = np.concatenate(([False], np.isnan(station_data), [False]))
+            if ~mask.any():
+                max_gap_pc.append(0)
+            else:
+                idx = np.nonzero(mask[1:] != mask[:-1])[0]
+                max_gap_pc.append((idx[1::2] - idx[::2]).max())
+
+        return np.array(max_gap_pc) * (100. / self.data.shape[1])
+
 
 class ExpBias(object):
 
