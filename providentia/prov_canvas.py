@@ -365,21 +365,20 @@ class MPLCanvas(FigureCanvas):
                     period_inds_split = [period_inds]
 
                 # iterate through indices associated with periodic chunks for current period
+                # create Stats object instance, TODO: check correctness
+                stats_inst = Stats(self.read_instance.data_in_memory_filtered['observations'][
+                                    self.read_instance.active_species][:, period_inds])
                 for period_inds in period_inds_split:
                     if len(period_inds) > 0:
                         # max gap variable?
                         if 'max_gap' in var:
-                            max_gap_percent = max_repeated_NaNs_fraction(
-                                self.read_instance.data_in_memory_filtered['observations'][
-                                    self.read_instance.active_species][:, period_inds])
+                            max_gap_percent = stats_inst.max_repeated_nans_fraction()
                             self.read_instance.data_in_memory_filtered['observations'][
                                 self.read_instance.active_species][
                                 max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
                         # data representativity variable?
                         else:
-                            data_availability_percent = calculate_data_availability_fraction(
-                                self.read_instance.data_in_memory_filtered['observations'][
-                                    self.read_instance.active_species][:, period_inds])
+                            data_availability_percent = stats_inst.calculate_data_availability_fraction()
                             self.read_instance.data_in_memory_filtered['observations'][
                                 self.read_instance.active_species][
                                 data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
@@ -1506,58 +1505,64 @@ class MPLCanvas(FigureCanvas):
             selected_station_references = self.read_instance.station_references[self.relative_selected_station_inds]
 
             # add N stations selected, in N countries
-            str_to_plot += "%s Stations Selected\n"%(len(self.relative_selected_station_inds))
+            str_to_plot += "%s Stations Selected\n" % (len(self.relative_selected_station_inds))
             # add median measurement altitude
-            str_to_plot += "Median Measurement Altitude: %sm   " % (round(
-                np.nanmedian(self.read_instance.station_measurement_altitudes[self.relative_selected_station_inds]), 2))
+            str_to_plot += "Median Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
+                self.read_instance.metadata_in_memory['measurement_altitude'][
+                    self.relative_selected_station_inds].astype(np.float32)))
             # add median GSFC coastline proximity
-            str_to_plot += "Median To Coast: %skm\n" % (round(np.nanmedian(
-                self.read_instance.station_GSFC_coastline_proximities[self.relative_selected_station_inds]), 2))
+            str_to_plot += "Median To Coast: {:.2f}km\n".format(np.nanmedian(
+                self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                    self.relative_selected_station_inds].astype(np.float32)))
+            # add median GPW population density
+            str_to_plot += "Median Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
+                self.read_instance.metadata_in_memory['GPW_population_density'][
+                    self.relative_selected_station_inds].astype(np.float32)))
+            # add median NOAA-DMSP-OLS nighttime lights
+            str_to_plot += "Median Nighttime Lights: {:.1f}\n".format(np.nanmedian(
+                self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                    self.relative_selected_station_inds].astype(np.float32)))
 
             # get percentage of element occurrences across selected stations, for certain metadata variables
-            metadata_vars_get_pc = ['network', 'country', 'standardised_network_provided_area_classification',
+            metadata_vars_get_pc = ['country', 'standardised_network_provided_area_classification',
                                     'standardised_network_provided_station_classification',
                                     'standardised_network_provided_terrain',
                                     'standardised_network_provided_land_use',
-                                    'standardised_network_provided_main_emission_source',
-                                    'standardised_network_provided_measurement_scale',
-                                    'measurement_methodology', 'measuring_instrument_name',
-                                    'measuring_instrument_sampling_type']
+                                    'MODIS_MCD12C1_v6_IGBP_land_use', 'UMBC_anthrome_classification',
+                                    'measurement_methodology', 'measuring_instrument_name']
+
             # iterate through metadata variables
             for meta_var in metadata_vars_get_pc:
 
-                # iterate through selected references, gathering all metadata across time
-                all_current_meta = []
-                for selected_station_reference in selected_station_references:
-                    all_current_meta = np.append(
-                        all_current_meta,
-                        self.read_instance.station_metadata[selected_station_reference][meta_var]['all'])
+                # gather all selected station metadata for current meta variable
+                all_current_meta = self.read_instance.metadata_in_memory[meta_var][
+                    self.relative_selected_station_inds].flatten().astype(np.str)
 
                 # get counts of all unique metadata elements across selected stations
                 unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
                 # get number of unique metadata elements across selected stations
                 n_unique_meta = len(unique_meta)
 
-                # if have > 8 unique metadata elements, just return count of the elements across the selected stations
-                if n_unique_meta > 8:
-                    meta_string = '%s: %s unique elements\n'%(metadata_variable_naming[meta_var], n_unique_meta)
+                # if have > 4 unique metadata elements, just return count of the elements across the selected stations
+                if n_unique_meta > 4:
+                    meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
                 # otherwise, get percentage of unique metadata elements across selected stations
                 else:
-                    meta_pc = (100./len(all_current_meta))*meta_counts
-                    meta_pc = [str(round(meta,1))+'%' for meta in meta_pc]
+                    meta_pc = (100. / len(all_current_meta)) * meta_counts
+                    meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
                     # create string for variable to plot
-                    meta_string = '%s: %s\n' % (metadata_variable_naming[meta_var], ', '.join(
+                    meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], ', '.join(
                         [':'.join([str(var), pc]) for var, pc in zip(unique_meta, meta_pc)]))
 
                 # add meta string to str_to_plot
                 str_to_plot += meta_string
 
         # plot string to axis
-        plot_txt = self.station_metadata_ax.text(
-            0.0, 1.0, str_to_plot, ha='left', va='top', fontsize=8.0,
-            transform=self.station_metadata_ax.transAxes, wrap=True, linespacing=1.5)
-        # modify limit to wrap text as axis width in pixels
-        # --> hack as matplotlib automatically sets limit as figure width
+        plot_txt = self.station_metadata_ax.text(0.0, 1.0, str_to_plot, ha='left', va='top', fontsize=8.0,
+                                                 transform=self.station_metadata_ax.transAxes, wrap=True,
+                                                 linespacing=1.5)
+        # modify limit to wrap text as axis width in pixels  --> hack as matplotlib
+        # automatically sets limit as figure width
         plot_txt._get_wrap_line_width = lambda: ax_width_px
 
     def calculate_z_statistic(self):
@@ -1565,10 +1570,10 @@ class MPLCanvas(FigureCanvas):
 
         # get relevant observational array (dependent on colocation)
         if self.colocate_active is False:
-            obs_array = self.read_instance.data_in_memory_filtered['observations']['valid_station_inds']
+            obs_array = self.read_instance.plotting_params['observations']['valid_station_inds']
         else:
             obs_array = \
-                self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments']['valid_station_inds']
+                self.read_instance.plotting_params['observations_colocatedto_experiments']['valid_station_inds']
 
         # before doing anything check if have any valid station data for observations,
         # if not update active map valid station indices to be empty list and return
@@ -1650,24 +1655,25 @@ class MPLCanvas(FigureCanvas):
 
         # get active map valid station indices (i.e. the indices of the stations data to plot on the map)
         # if only have z1, valid map indices are those simply for the z1 array
-        if not have_z2:
+        if have_z2 is False:
             self.active_map_valid_station_inds = \
-                self.read_instance.data_in_memory_filtered[z1_array_to_read]['valid_station_inds']
+                self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds']
         else:
             # if have z2 array, get intersection of z1 and z2 valid station indices
             self.active_map_valid_station_inds = \
-                np.intersect1d(self.read_instance.data_in_memory_filtered[z1_array_to_read]['valid_station_inds'],
-                               self.read_instance.data_in_memory_filtered[z2_array_to_read]['valid_station_inds'])
+                np.intersect1d(self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds'],
+                               self.read_instance.plotting_params[z2_array_to_read]['valid_station_inds'])
 
         # update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array(
-            [np.where(self.active_map_valid_station_inds == selected_ind)[0][0]
-             for selected_ind in self.relative_selected_station_inds if selected_ind
-             in self.active_map_valid_station_inds], dtype=np.int)
+            [np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind in
+             self.relative_selected_station_inds if selected_ind in self.active_map_valid_station_inds],
+            dtype=np.int)
 
         # read z1 data
+        # TODO: check 'data' replaced with self.read_instance.active_species
         z1_array_data = \
-            self.read_instance.data_in_memory_filtered[z1_array_to_read]['data'][self.active_map_valid_station_inds,:]
+            self.read_instance.data_in_memory_filtered[z1_array_to_read][self.read_instance.active_species][self.active_map_valid_station_inds,:]
         # drop NaNs and reshape to object list of station data arrays (if not checking data %)
         if z_statistic_name != 'Data %':
             z1_array_data = drop_nans(z1_array_data)
@@ -1695,7 +1701,9 @@ class MPLCanvas(FigureCanvas):
         # else, read z2 data then calculate 'difference' statistic
         else:
             # read z2 data
-            z2_array_data = self.read_instance.data_in_memory_filtered[z2_array_to_read]['data'][self.active_map_valid_station_inds,:]
+            # TODO: check 'data' replaced with self.read_instance.active_species
+            z2_array_data = \
+                self.read_instance.data_in_memory_filtered[z2_array_to_read][self.read_instance.active_species][self.active_map_valid_station_inds,:]
             # drop NaNs and reshape to object list of station data arrays (if not checking data %)
             if z_statistic_name != 'Data %':
                 z2_array_data = drop_nans(z2_array_data)
@@ -1788,7 +1796,7 @@ class MPLCanvas(FigureCanvas):
     def handle_map_z_statistic_update(self):
         """Define function which handles update of map z statistic"""
 
-        if not self.read_instance.block_config_bar_handling_updates:
+        if self.read_instance.block_config_bar_handling_updates is False:
 
             # update map z statistic comboboxes
             # set variable that blocks configuration bar handling updates until all
@@ -1842,7 +1850,7 @@ class MPLCanvas(FigureCanvas):
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
-            if not self.read_instance.block_MPL_canvas_updates:
+            if self.read_instance.block_MPL_canvas_updates is False:
 
                 # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
                 self.calculate_z_statistic()
@@ -1856,7 +1864,7 @@ class MPLCanvas(FigureCanvas):
     def handle_experiment_bias_update(self):
         """Define function that handles update of plotted experiment bias statistics"""
 
-        if not self.read_instance.block_config_bar_handling_updates:
+        if self.read_instance.block_config_bar_handling_updates is False:
 
             # if no experiment data loaded, do not update
             if len(self.read_instance.experiment_bias_types) > 0:
@@ -1873,7 +1881,7 @@ class MPLCanvas(FigureCanvas):
 
                 # update experiment bias statistics (used for Aggregated field), to all basic stats
                 # if colocation not-active, and basic+bias stats if colocation active
-                if not self.colocate_active:
+                if self.colocate_active is False:
                     available_experiment_bias_stats = copy.deepcopy(self.read_instance.basic_z_stats)
                 else:
                     available_experiment_bias_stats = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
@@ -1906,7 +1914,7 @@ class MPLCanvas(FigureCanvas):
                 # allow handling updates to the configuration bar again
                 self.read_instance.block_config_bar_handling_updates = False
 
-                if not self.read_instance.block_MPL_canvas_updates:
+                if self.read_instance.block_MPL_canvas_updates is False:
 
                     # update experiment bias plot/s if have some stations selected on map
                     if len(self.relative_selected_station_inds) > 0:
@@ -1930,7 +1938,7 @@ class MPLCanvas(FigureCanvas):
         """Define function that selects/unselects all plotted stations
         (and associated plots) upon ticking of checkbox"""
 
-        if not self.read_instance.block_MPL_canvas_updates:
+        if self.read_instance.block_MPL_canvas_updates is False:
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1959,7 +1967,7 @@ class MPLCanvas(FigureCanvas):
             self.update_map_station_selection()
 
             # if selected stations have changed from previous selected, update associated plots
-            if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+            if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) is False:
                 self.update_associated_selected_station_plots()
 
             # draw changes
@@ -1972,7 +1980,7 @@ class MPLCanvas(FigureCanvas):
         upon ticking of checkbox
         """
 
-        if not self.read_instance.block_MPL_canvas_updates:
+        if self.read_instance.block_MPL_canvas_updates is False:
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -2000,7 +2008,7 @@ class MPLCanvas(FigureCanvas):
                     for data_label in list(self.read_instance.data_in_memory.keys()):
                         if data_label != 'observations':
                             intersect_lists.append(
-                                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'])
+                                self.read_instance.plotting_params[data_label]['valid_station_inds'])
                     # get intersect between active map valid station indices and valid station indices
                     # associated with each loaded experiment array --> relative selected station indcies
                     self.relative_selected_station_inds = np.sort(list(set.intersection(*map(set, intersect_lists))))
@@ -2019,7 +2027,7 @@ class MPLCanvas(FigureCanvas):
             self.update_map_station_selection()
 
             # if selected stations have changed from previous selected, update associated plots
-            if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+            if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) is False:
                 self.update_associated_selected_station_plots()
 
             # draw changes
@@ -2036,21 +2044,47 @@ class MPLCanvas(FigureCanvas):
         # the variable will be reset by lasso handler (which is always called after on_click)
         self.map_already_updated = True
 
+        # if the mouse click is not recognised as left(1)/right(3) then return from function
+        if event.mouseevent.button not in [1, 3]:
+            return
+
         # make copy of current full array relative selected stations indices, before selecting new ones
         self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+        self.previous_absolute_selected_station_inds = copy.deepcopy(self.absolute_selected_station_inds)
 
         # get absolute selected index of station on map
-        self.absolute_selected_station_inds = np.array([event.ind[0]], dtype=np.int)
+        absolute_selected_station_inds = np.array([event.ind[0]], dtype=np.int)
 
-        # get selected station indices with respect to all available stations
-        self.relative_selected_station_inds = \
-            self.map_selected_station_inds_to_all_available_inds(self.absolute_selected_station_inds)
+        # get new relative selected index with respect to all available stations
+        relative_selected_station_inds = self.map_selected_station_inds_to_all_available_inds(
+            absolute_selected_station_inds)
+
+        # if left click (code of 1) --> select station
+        if event.mouseevent.button == 1:
+            self.absolute_selected_station_inds = absolute_selected_station_inds
+            self.relative_selected_station_inds = relative_selected_station_inds
+        # if right click (code of 3) --> unselect station (if currently selected), select station (if currently unselected)
+        elif event.mouseevent.button == 3:
+            # if len(self.previous_relative_selected_station_inds) > 0:
+            relative_index = np.where(self.previous_relative_selected_station_inds == relative_selected_station_inds)[0]
+            if len(relative_index) > 0:
+                self.relative_selected_station_inds = np.delete(self.relative_selected_station_inds, relative_index)
+            else:
+                self.relative_selected_station_inds = np.append(self.relative_selected_station_inds,
+                                                                relative_selected_station_inds)
+
+            absolute_index = np.where(self.previous_absolute_selected_station_inds == absolute_selected_station_inds)[0]
+            if len(absolute_index) > 0:
+                self.absolute_selected_station_inds = np.delete(self.absolute_selected_station_inds, absolute_index)
+            else:
+                self.absolute_selected_station_inds = np.append(self.absolute_selected_station_inds,
+                                                                absolute_selected_station_inds)
 
         # update map station selection
         self.update_map_station_selection()
 
         # if selected stations have changed from previous selected, update associated plots
-        if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+        if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) is False:
             self.update_associated_selected_station_plots()
 
         # draw changes
@@ -2100,7 +2134,7 @@ class MPLCanvas(FigureCanvas):
         self.lasso.set_visible(False)
 
         # if selected stations have changed from previous selected, update associated plots
-        if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+        if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) is False:
             self.update_associated_selected_station_plots()
 
         # draw changes
