@@ -36,20 +36,6 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 ###------------------------------------------------------------------------------------###
 ###IMPORT GHOST STANDARDS
 ###------------------------------------------------------------------------------------###
-sys.path.insert(1, '{}/GHOST_standards/{}'.format(obs_root,GHOST_version))
-from GHOST_standards import standard_parameters, get_standard_metadata, standard_data_flag_name_to_data_flag_code, standard_QA_name_to_QA_code
-# modify standard parameter dictionary to have BSC standard parameter names as
-# keys (rather than GHOST)
-parameter_dictionary = {}
-for param, param_dict in standard_parameters.items():
-    parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
-#get standard metadata dictionary
-standard_metadata = get_standard_metadata({'standard_units':''})
-#create list of metadata variables to read (make global)
-metadata_vars_to_read = [key for key in standard_metadata.keys()
-                             if pd.isnull(standard_metadata[key]['metadata_type']) == False]
-metadata_dtype = [(key, standard_metadata[key]['data_type']) for key in
-                  metadata_vars_to_read]
 
 
 class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
@@ -77,7 +63,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         self.main_window_geometry = None
 
-        self.parameter_dictionary = parameter_dictionary
+        self.parameter_dictionary = {}
+        self.standard_metadata = {}
+        self.metadata_vars_to_read = {}
+        self.metadata_dtype = {}
+        self.standard_data_flag_name_to_data_flag_code = {}
+        self.standard_QA_name_to_QA_code = {}
+        self.init_standards()
 
         # create UI
         self.init_ui()
@@ -85,6 +77,28 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # setup callback events upon resizing/moving of Providentia window
         self.resized.connect(self.get_geometry)
         self.move.connect(self.get_geometry)
+
+    def init_standards(self):
+        """ Read from ghost standards """
+        sys.path.insert(1, '{}/GHOST_standards/{}'.format(self.obs_root, self.ghost_version))
+        from GHOST_standards import standard_parameters, \
+            get_standard_metadata, standard_data_flag_name_to_data_flag_code, \
+            standard_QA_name_to_QA_code
+        # modify standard parameter dictionary to have BSC standard parameter names as
+        # keys (rather than GHOST)
+        for _, param_dict in standard_parameters.items():
+            self.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
+        #get standard metadata dictionary
+        self.standard_metadata = get_standard_metadata({'standard_units':''})
+        #create list of metadata variables to read (make global)
+        self.metadata_vars_to_read = [key for key in self.standard_metadata.keys()
+                                      if pd.isnull(self.standard_metadata[key]['metadata_type'])
+                                      == False]
+        self.metadata_dtype = [(key, self.standard_metadata[key]['data_type']) for key in
+                               self.metadata_vars_to_read]
+        self.standard_data_flag_name_to_data_flag_code = \
+            standard_data_flag_name_to_data_flag_code
+        self.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
 
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
@@ -269,18 +283,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         #setup pop-up window menu tree for flags
         self.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
-        self.flag_menu['checkboxes']['labels'] = np.array(sorted(standard_data_flag_name_to_data_flag_code, key=standard_data_flag_name_to_data_flag_code.get))
+        self.flag_menu['checkboxes']['labels'] = np.array(sorted(self.standard_data_flag_name_to_data_flag_code, key=self.standard_data_flag_name_to_data_flag_code.get))
         self.flag_menu['checkboxes']['remove_default'] = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20, 21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 90, 150, 154, 155, 156, 157], dtype=np.uint8)
         self.flag_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
-        self.flag_menu['checkboxes']['map_vars'] = np.sort(list(standard_data_flag_name_to_data_flag_code.values()))
+        self.flag_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_data_flag_name_to_data_flag_code.values()))
         self.flag_menu['select_buttons'] = ['all', 'clear', 'default']
 
         #setup pop-up window menu tree for qa
         self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
-        self.qa_menu['checkboxes']['labels'] = np.array(sorted(standard_QA_name_to_QA_code, key=standard_QA_name_to_QA_code.get))
+        self.qa_menu['checkboxes']['labels'] = np.array(sorted(self.standard_QA_name_to_QA_code, key=self.standard_QA_name_to_QA_code.get))
         self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 4, 5, 7, 8, 10, 12, 13, 14, 17, 18, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
         self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
-        self.qa_menu['checkboxes']['map_vars'] = np.sort(list(standard_QA_name_to_QA_code.values()))
+        self.qa_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_QA_name_to_QA_code.values()))
         self.qa_menu['select_buttons'] = ['all', 'clear', 'default']
 
         #setup pop-up window menu tree for experiments
@@ -302,8 +316,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.metadata_menu['navigation_buttons']['tooltips'] = [self.metadata_types[key] for key in self.metadata_menu['navigation_buttons']['labels']]
         for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
             self.metadata_menu[metadata_type] = {'window_title':metadata_type, 'page_title':self.metadata_menu['navigation_buttons']['tooltips'][metadata_type_ii], 'navigation_buttons':{}, 'rangeboxes':{}}
-            self.metadata_menu[metadata_type]['navigation_buttons']['labels'] = [metadata_name for metadata_name in standard_metadata.keys() if (standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (standard_metadata[metadata_name]['data_type'] == np.object)]
-            self.metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = [standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['navigation_buttons']['labels']]
+            self.metadata_menu[metadata_type]['navigation_buttons']['labels'] = [metadata_name for metadata_name in self.standard_metadata.keys() if (self.standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (self.standard_metadata[metadata_name]['data_type'] == np.object)]
+            self.metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = [self.standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['navigation_buttons']['labels']]
             for label in self.metadata_menu[metadata_type]['navigation_buttons']['labels']:
                 self.metadata_menu[metadata_type][label] = {'window_title':label, 'page_title':'Filter stations by unique {} metadata'.format(label), 'checkboxes':{}}
                 self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
@@ -314,8 +328,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 self.metadata_menu[metadata_type][label]['checkboxes']['keep_default'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['remove_default'] = []
             #self.metadata_menu[metadata_type]['rangeboxes']['previous_labels'] = []
-            self.metadata_menu[metadata_type]['rangeboxes']['labels'] = [metadata_name for metadata_name in standard_metadata.keys() if (standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (standard_metadata[metadata_name]['data_type'] != np.object)]
-            self.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = [standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['rangeboxes']['labels']]
+            self.metadata_menu[metadata_type]['rangeboxes']['labels'] = [metadata_name for metadata_name in self.standard_metadata.keys() if (self.standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (self.standard_metadata[metadata_name]['data_type'] != np.object)]
+            self.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = [self.standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['rangeboxes']['labels']]
             self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
             self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
             self.metadata_menu[metadata_type]['rangeboxes']['previous_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
