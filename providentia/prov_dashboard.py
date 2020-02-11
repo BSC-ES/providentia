@@ -452,7 +452,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # with pop up windows to be empty lists
             self.active_experiment_grids = []
             self.active_qa = []
-            self.active_flag = []
+            self.active_flags = []
 
             # set initial time array to be None
             self.time_array = None
@@ -795,15 +795,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # determine if any of the key variables have changed
         # (network, resolution, species, qa, flags, classifications_to_retain, classifications_to_remove)
         # if any have changed, observations and any selected experiments have to be re-read entirely
-        if (self.active_network != self.previous_active_network) or \
-                (self.active_resolution != self.previous_active_resolution) or \
-                (self.active_species != self.previous_active_species) or \
-                (np.array_equal(self.active_qa_inds, self.previous_active_qa_inds) is False) or \
-                (np.array_equal(self.active_flag_inds, self.previous_active_flag_inds) is False) or \
-                (np.array_equal(self.active_classifications_to_retain_inds,
-                                self.previous_active_classifications_to_retain_inds) is False) or \
-                (np.array_equal(self.active_classifications_to_remove_inds,
-                                self.previous_active_classifications_to_remove_inds) is False):
+        if (self.active_network != self.previous_active_network) or (
+                self.active_resolution != self.previous_active_resolution) or (
+                self.active_species != self.previous_active_species) or (
+                np.array_equal(self.active_qa, self.previous_active_qa) is False) or (
+                np.array_equal(self.active_flags, self.previous_active_flags) is False):
             read_all = True
         # key variables have not changed, has start/end date?
         else:
@@ -1239,7 +1235,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 # create argument tuple of function
                 tuple_arguments = relevant_file, self.time_array, self.station_references, \
                                   self.active_species, self.process_type,\
-                                  self.selected_qa, self.selected_flags, \
+                                  self.active_qa, self.active_flags, \
                                   self.data_dtype, self.data_vars_to_read, \
                                   self.metadata_dtype, self.metadata_vars_to_read
                 # read file
@@ -1256,7 +1252,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # read netCDF files in parallel
             tuple_arguments = [(file_name, self.time_array, self.station_references, self.active_species,
-                                self.process_type, self.selected_qa, self.selected_flags,
+                                self.process_type, self.active_qa, self.active_flags,
                                 self.data_dtype, self.data_vars_to_read,
                                 self.metadata_dtype, self.metadata_vars_to_read) for
                                file_name in relevant_files]
@@ -1399,9 +1395,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # assign a colour/zorder to all selected data arrays
 
         # define observations colour to be 'black'
-        self.data_in_memory['observations']['colour'] = 'black'
+        self.plotting_params['observations']['colour'] = 'black'
         # define zorder of observations to be 5
-        self.data_in_memory['observations']['zorder'] = 5
+        self.plotting_params['observations']['zorder'] = 5
 
         # generate a list of RGB tuples for number of experiments there are
         sns.reset_orig()
@@ -1412,10 +1408,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         for experiment in sorted(list(self.data_in_memory.keys())):
             if experiment != 'observations':
                 # define colour for experiment
-                self.data_in_memory[experiment]['colour'] = clrs[experiment_ind-1]
+                self.plotting_params[experiment]['colour'] = clrs[experiment_ind-1]
                 # define zorder for experiment (obs zorder + experiment_ind)
-                self.data_in_memory[experiment]['zorder'] = \
-                    self.data_in_memory['observations']['zorder'] + experiment_ind
+                self.plotting_params[experiment]['zorder'] = \
+                    self.plotting_params['observations']['zorder'] + experiment_ind
                 # update count of experiments
                 experiment_ind += 1
 
