@@ -897,7 +897,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     new_station_inds = np.where(np.in1d(self.station_references, self.previous_station_references))[0]
 
                     new_metadata_array = np.full((len(self.station_references), len(self.previous_relevant_yearmonths)),
-                                                 np.NaN, dtype=metadata_dtype)
+                                                 np.NaN, dtype=self.metadata_dtype)
                     new_metadata_array[new_station_inds, :] = self.metadata_in_memory[old_station_inds, :]
                     self.metadata_in_memory = new_metadata_array
 
@@ -965,7 +965,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 n_new_left_metadata_inds = (new_relative_delta.years * 12) + new_relative_delta.months
                 self.metadata_inds_to_fill = np.arange(0, n_new_left_metadata_inds)
                 self.metadata_in_memory = np.concatenate((np.full(
-                    (len(self.station_references), n_new_left_metadata_inds), np.NaN, dtype=metadata_dtype),
+                    (len(self.station_references), n_new_left_metadata_inds), np.NaN, dtype=self.metadata_dtype),
                                                           self.metadata_in_memory), axis=1)
 
                 # iterate through all keys in data in memory dictionary
@@ -1011,8 +1011,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # if species has changed, update default species specific lower/upper limits
         if self.active_species != self.previous_active_species:
             # update default lower/upper species specific limits and filter data outside limits
-            species_lower_limit = np.float32(parameter_dictionary[self.active_species]['extreme_lower_limit'])
-            species_upper_limit = np.float32(parameter_dictionary[self.active_species]['extreme_upper_limit'])
+            species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
+            species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
             # set default limits
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
@@ -1141,7 +1141,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.station_latitudes = self.station_latitudes[station_unique_indices]
 
         # update measurement units for species (take standard units from parameter dictionary)
-        self.measurement_units = parameter_dictionary[self.active_species]['standard_units']
+        self.measurement_units = self.parameter_dictionary[self.active_species]['standard_units']
 
         # set data variables to read (dependent on active data resolution)
         if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
@@ -1216,7 +1216,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
                                                           np.NaN, dtype=self.data_dtype)
                 self.metadata_in_memory = np.full((len(self.station_references), len(self.relevant_yearmonths)),
-                                                  np.NaN, dtype=metadata_dtype)
+                                                  np.NaN, dtype=self.metadata_dtype)
 
             # if process_type is experiment, get experiment specific grid edges from
             # first relevant file, and save to data in memory dictionary
@@ -1241,7 +1241,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                   self.active_species, self.process_type,\
                                   self.selected_qa, self.selected_flags, \
                                   self.data_dtype, self.data_vars_to_read, \
-                                  metadata_dtype, metadata_vars_to_read
+                                  self.metadata_dtype, self.metadata_vars_to_read
                 # read file
                 file_data, time_indices, full_array_station_indices = read_netcdf_data(tuple_arguments)
                 # place read data into big array as appropriate
@@ -1258,7 +1258,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             tuple_arguments = [(file_name, self.time_array, self.station_references, self.active_species,
                                 self.process_type, self.selected_qa, self.selected_flags,
                                 self.data_dtype, self.data_vars_to_read,
-                                metadata_dtype, metadata_vars_to_read) for
+                                self.metadata_dtype, self.metadata_vars_to_read) for
                                file_name in relevant_files]
             all_file_data = pool.map(read_netcdf_data, tuple_arguments)
             # will not submit more files to pool, so close access to it
@@ -1282,13 +1282,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         """
 
         # iterate through metadata variables
-        for meta_var in metadata_vars_to_read:
+        for meta_var in self.metadata_vars_to_read:
 
             meta_var_field = self.metadata_in_memory[meta_var]
 
             # get metadata variable type/data type
-            metadata_type = standard_metadata[meta_var]['metadata_type']
-            metadata_data_type = standard_metadata[meta_var]['data_type']
+            metadata_type = self.standard_metadata[meta_var]['metadata_type']
+            metadata_data_type = self.standard_metadata[meta_var]['data_type']
 
             # remove NaNs from field
             meta_var_field_nan_removed = meta_var_field[~pd.isnull(meta_var_field)]

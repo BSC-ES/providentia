@@ -385,9 +385,9 @@ class MPLCanvas(FigureCanvas):
 
         # fiter all observational data by selected metadata
         # iterate through all metadata
-        for meta_var in metadata_vars_to_read:
-            metadata_type = standard_metadata[meta_var]['metadata_type']
-            metadata_data_type = standard_metadata[meta_var]['data_type']
+        for meta_var in self.read_instance.metadata_vars_to_read:
+            metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
+            metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
 
             # handle non-numeric metadata
             if metadata_data_type == np.object:
