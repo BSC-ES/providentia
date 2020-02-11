@@ -1444,3 +1444,4 @@ def main(**kwargs):
     q_app = QtWidgets.QApplication(sys.argv)
     q_app.setStyle("Fusion")
     ProvidentiaMainWindow(**kwargs)
+    sys.exit(q_app.exec_())
