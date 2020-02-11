@@ -378,7 +378,7 @@ class MPLCanvas(FigureCanvas):
                                 max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
                         # data representativity variable?
                         else:
-                            data_availability_percent = stats_inst.calculate_data_availability_fraction()
+                            data_availability_percent = stats_inst.calculate_data_avail_fraction()
                             self.read_instance.data_in_memory_filtered['observations'][
                                 self.read_instance.active_species][
                                 data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
@@ -537,11 +537,11 @@ class MPLCanvas(FigureCanvas):
             if data_label.split('_')[0] != 'observations':
                 # get indices of associated observational data array valid stations
                 # (pre-written to experiment data arrays)
-                valid_station_inds = self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds']
+                valid_station_inds = self.read_instance.plotting_params[data_label]['valid_station_inds']
                 # get absolute data availability number per station in experiment data array
                 # after subsetting valid observational stations (i.e. number of non-NaN measurements)
                 # update stats object data and call data availability function
-                stats_obj = Stats(self.read_instance.data_in_memory_filtered[data_label]['data'][valid_station_inds, :])
+                stats_obj = Stats(self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][valid_station_inds, :])
                 station_data_availability_number = stats_obj.calculate_data_avail_number()
                 # get indices of stations with > 1 available measurements
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
@@ -588,7 +588,7 @@ class MPLCanvas(FigureCanvas):
             # the other array value is also made NaN
 
             # get all instances observations are NaN
-            nan_obs = np.isnan(self.read_instance.data_in_memory_filtered['observations']['data'])
+            nan_obs = np.isnan(self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species])
 
             # create array for finding instances where have 0 valid values across all experiments
             # initialise as being all True, set as False on the occasion there is a valid value in an experiment
@@ -598,24 +598,30 @@ class MPLCanvas(FigureCanvas):
             for data_label in list(self.read_instance.data_in_memory.keys()):
                 if data_label != 'observations':
                     # get all instances experiment are NaN
-                    nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[data_label]['data'])
+                    nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])
                     # get all instances where either the observational array or experiment array are NaN at a given time
                     nan_instances = np.any([nan_obs, nan_exp], axis=0)
                     # create new observational array colocated to experiment
-                    obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations']['data'])
+                    obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
                     obs_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['observations_colocatedto_%s'%(data_label)] = {'data':obs_data, 'colour':self.read_instance.data_in_memory_filtered['observations']['colour'], 'zorder':self.read_instance.data_in_memory_filtered['observations']['zorder']}
+                    self.read_instance.data_in_memory_filtered['observations_colocatedto_%s' % (data_label)] = obs_data
+                    self.read_instance.plotting_params['observations_colocatedto_%s' % (data_label)] = {
+                        'colour': self.read_instance.plotting_params['observations']['colour'],
+                        'zorder': self.read_instance.plotting_params['observations']['zorder']}
                     # create new experiment array colocated to observations
-                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[data_label]['data'])
+                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[data_label])
                     exp_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['%s_colocatedto_observations'%(data_label)] = {'data':exp_data, 'colour':self.read_instance.data_in_memory_filtered[data_label]['colour'], 'zorder':self.read_instance.data_in_memory_filtered[data_label]['zorder']}
+                    self.read_instance.data_in_memory_filtered['%s_colocatedto_observations' % (data_label)] = exp_data
+                    self.read_instance.plotting_params['%s_colocatedto_observations' % (data_label)] = {
+                        'colour': self.read_instance.plotting_params[data_label]['colour'],
+                        'zorder': self.read_instance.plotting_params[data_label]['zorder']}
                     # update exps_all_nan array, making False all instances where have valid experiment data
                     exps_all_nan = np.all([exps_all_nan, nan_exp], axis=0)
 
             # create observational data array colocated to be non-NaN whenever
             # there is a valid data in at least 1 experiment
             exps_all_nan = np.any([nan_obs, exps_all_nan], axis=0)
-            obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations']['data'])
+            obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
             obs_data[exps_all_nan] = np.NaN
             self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments'] = obs_data
             self.read_instance.plotting_params['observations_colocatedto_experiments'] = {'colour':self.read_instance.plotting_params['observations']['colour'], 'zorder':self.read_instance.plotting_params['observations']['zorder']}
@@ -848,7 +854,7 @@ class MPLCanvas(FigureCanvas):
                 # exp_x,exp_y = self.bm(self.read_instance.data_in_memory[experiment]['grid_edge_longitude'],
                 # self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])
                 # create matplotlib polygon object from experiment grid edge map projection coordinates
-                grid_edge_outline_poly = Polygon(np.vstack((self.read_instance.data_in_memory[experiment]['grid_edge_longitude'],self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])).T,edgecolor=self.read_instance.data_in_memory[experiment]['colour'],linewidth=1, linestyle='--', fill=False, zorder=1,transform=self.datacrs)
+                grid_edge_outline_poly = Polygon(np.vstack((self.read_instance.plotting_params[experiment]['grid_edge_longitude'],self.read_instance.plotting_params[experiment]['grid_edge_latitude'])).T,edgecolor=self.read_instance.plotting_params[experiment]['colour'],linewidth=1, linestyle='--', fill=False, zorder=1,transform=self.datacrs)
                 # plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
 
@@ -859,14 +865,14 @@ class MPLCanvas(FigureCanvas):
         # create legend elements
         # add observations element
         legend_elements = [Line2D([0], [0], marker='o', color='white',
-                                  markerfacecolor=self.read_instance.data_in_memory['observations']['colour'],
+                                  markerfacecolor=self.read_instance.plotting_params['observations']['colour'],
                                   markersize=self.read_instance.legend_markersize, label='observations')]
         # add element for each experiment
         for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.data_in_memory.keys()))):
             if experiment != 'observations':
                 # add experiment element
                 legend_elements.append(Line2D([0], [0], marker='o', color='white',
-                                              markerfacecolor=self.read_instance.data_in_memory[experiment]['colour'],
+                                              markerfacecolor=self.read_instance.plotting_params[experiment]['colour'],
                                               markersize=self.read_instance.legend_markersize, label=experiment))
 
         # plot legend
@@ -894,14 +900,14 @@ class MPLCanvas(FigureCanvas):
             # observational arrays
             if data_label.split('_')[0] == 'observations':
                 # get data for selected stations
-                data_array = self.read_instance.data_in_memory_filtered[data_label]['data'][self.relative_selected_station_inds,:]
+                data_array = self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][self.relative_selected_station_inds,:]
             # experiment arrays
             else:
                 # get intersect between selected station indices and valid available indices for experiment data array
-                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'])
+                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.plotting_params[data_label]['valid_station_inds'])
                 # get data for valid selected stations
                 data_array = \
-                    self.read_instance.data_in_memory_filtered[data_label]['data'][valid_selected_station_indices,:]
+                    self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][valid_selected_station_indices,:]
 
             # if data array has no valid data for selected stations, do not create a pandas dataframe
             # data array has valid data?
@@ -1104,11 +1110,11 @@ class MPLCanvas(FigureCanvas):
             # plot time series data
             self.data_array_ts = \
                 self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
-                                color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
+                                color=self.read_instance.plotting_params[data_label]['colour'],
                                 marker='o', markeredgecolor=None, mew=0,
                                 markersize=self.read_instance.time_series_markersize,
                                 linestyle='None',
-                                zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'])
+                                zorder=self.read_instance.plotting_params[data_label]['zorder'])
 
         # set axes labels
         if self.read_instance.measurement_units == 'unitless':
@@ -1125,7 +1131,6 @@ class MPLCanvas(FigureCanvas):
         # as are re-plotting on time series axis, reset the navigation
         # toolbar stack dictionaries entries associated with time series axis
         self.reset_ax_navigation_toolbar_stack(self.ts_ax)
-
 
     def update_violin_plots(self):
         """function that updates violin plots of temporally aggregated data upon selection of station/s"""
@@ -1224,8 +1229,8 @@ class MPLCanvas(FigureCanvas):
 
                 # update plotted objects with necessary colour, zorder and alpha
                 for patch in violin_plot['bodies']:
-                    patch.set_facecolor(self.read_instance.data_in_memory_filtered[data_label]['colour'])
-                    patch.set_zorder(self.read_instance.data_in_memory_filtered[data_label]['zorder'])
+                    patch.set_facecolor(self.read_instance.plotting_params[data_label]['colour'])
+                    patch.set_zorder(self.read_instance.plotting_params[data_label]['zorder'])
                     if data_label.split('_')[0] == 'observations':
                         patch.set_alpha(0.7)
                     else:
@@ -1246,9 +1251,9 @@ class MPLCanvas(FigureCanvas):
                 # overplot time series of medians over boxes in necessary color
 
                 # generate zorder to overplot medians in same order as violin plots are ordered, but on top of them
-                median_zorder = (self.read_instance.data_in_memory_filtered['observations']['zorder']+len(
+                median_zorder = (self.read_instance.plotting_params['observations']['zorder']+len(
                     list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys())) - 1) + \
-                                self.read_instance.data_in_memory_filtered[data_label]['zorder']
+                                self.read_instance.plotting_params[data_label]['zorder']
 
                 # get xticks (all valid aggregated time indexes) and medians to plot
                 xticks = aggregation_dict[temporal_aggregation_resolution]['xticks']
@@ -1259,7 +1264,7 @@ class MPLCanvas(FigureCanvas):
                 if len(inds_to_split) == 0:
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks, medians, marker='o',
-                        color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
+                        color=self.read_instance.plotting_params[data_label]['colour'],
                         markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                 else:
                     inds_to_split += 1
@@ -1267,12 +1272,12 @@ class MPLCanvas(FigureCanvas):
                     for end_ind in inds_to_split:
                         aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                             xticks[start_ind:end_ind], medians[start_ind:end_ind],
-                            marker='o', color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
+                            marker='o', color=self.read_instance.plotting_params[data_label]['colour'],
                             markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                         start_ind = end_ind
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks[start_ind:], medians[start_ind:], marker='o',
-                        color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
+                        color=self.read_instance.plotting_params[data_label]['colour'],
                         markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
 
         # plot title (with units)
@@ -1373,8 +1378,8 @@ class MPLCanvas(FigureCanvas):
                             aggregation_dict[temporal_aggregation_resolution]['xticks'],
                             self.selected_station_data[data_label][temporal_aggregation_resolution]
                             [selected_experiment_bias_stat],
-                            color=self.read_instance.data_in_memory_filtered[data_label]['colour'],
-                            marker='o', zorder=self.read_instance.data_in_memory_filtered[data_label]['zorder'],
+                            color=self.read_instance.plotting_params[data_label]['colour'],
+                            marker='o', zorder=self.read_instance.plotting_params[data_label]['zorder'],
                             markersize=self.read_instance.temp_agg_expbias_markersize, linewidth=0.5)
 
             # set x axis limits
@@ -1429,17 +1434,28 @@ class MPLCanvas(FigureCanvas):
                                     'network': 'Network',
                                     'standardised_network_provided_area_classification': 'Area Classification',
                                     'standardised_network_provided_station_classification': 'Station Classification',
-                                    'standardised_network_provided_main_emission_source':'Main Emission Source',
+                                    'standardised_network_provided_main_emission_source': 'Main Emission Source',
                                     'standardised_network_provided_land_use': 'Land Use',
                                     'standardised_network_provided_terrain': 'Terrain',
                                     'standardised_network_provided_measurement_scale': 'Measurement Scale',
                                     'representative_radius': 'Representative Radius',
+                                    'ESDAC_Iwahashi_landform_classification': 'Iwahashi Landform',
+                                    'ESDAC_Meybeck_landform_classification': 'Meybeck Landform',
+                                    'Joly-Peuch_classification_code': 'Joly-Peuch Class',
+                                    'Koppen-Geiger_classification': 'Koppen-Geiger Class',
+                                    'MODIS_MCD12C1_v6_IGBP_land_use': 'MODIS Land Use',
+                                    'WMO_region': 'WMO Region',
+                                    'WWF_TEOW_terrestrial_ecoregion': 'WWF TEOW Terrestrial Ecoregion',
+                                    'WWF_TEOW_biogeographical_realm': 'WWF TEOW Biogeographical Realm',
+                                    'WWF_TEOW_biome': 'WWF TEOW Biome',
+                                    'UMBC_anthrome_classification': 'UMBC Anthrome Class',
                                     'GSFC_coastline_proximity': 'To Coast',
                                     'primary_sampling_type': 'Sampling Instrument Type',
                                     'sample_preparation_types': 'Sample Preparation',
                                     'measurement_methodology': 'Measurement Method',
                                     'measuring_instrument_name': 'Measuring Instrument',
-                                    'measuring_instrument_sampling_type': 'Measuring Instrument Sampling'}
+                                    'measuring_instrument_sampling_type': 'Measuring Instrument Sampling'
+                                    }
 
         # is just 1 station selected?
         if len(self.relative_selected_station_inds) == 1:

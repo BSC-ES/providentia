@@ -51,8 +51,8 @@ def read_netcdf_data(tuple_arguments):
 
     # assign arguments from tuple to variables
     relevant_file, time_array, station_references, active_species, process_type, \
-            selected_qa, selected_flags, data_dtype, data_vars_to_read, \
-            metadata_dtype, metadata_vars_to_read = tuple_arguments
+    selected_qa, selected_flags, data_dtype, data_vars_to_read, \
+    metadata_dtype, metadata_vars_to_read = tuple_arguments
 
     # read netCDF frame
     ncdf_root = Dataset(relevant_file)
