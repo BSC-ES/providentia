@@ -1471,19 +1471,24 @@ class MPLCanvas(FigureCanvas):
             # get station reference of selected station
             selected_station_reference = self.read_instance.station_references[self.relative_selected_station_inds][0]
 
-            # add station reference, latitude, longitude and measurement altitude and
-            # GSFC coastline proximity to string (have 1 unique associated metadata value per station)
-            str_to_plot += "%s   " % selected_station_reference
-            str_to_plot += "Latitude: %s   " % (str(
-                round(self.read_instance.station_latitudes[self.relative_selected_station_inds][0], 4)))
-            str_to_plot += "Longitude: %s\n"%(str(
-                round(self.read_instance.station_longitudes[self.relative_selected_station_inds][0], 4)))
-            str_to_plot += "Measurement Altitude: %sm   " % (str(
-                round(self.read_instance.station_measurement_altitudes[self.relative_selected_station_inds][0], 2)))
-            str_to_plot += "To Coast: %skm\n" % (str(round(
-                self.read_instance.station_GSFC_coastline_proximities[self.relative_selected_station_inds][0], 2)))
-            str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(self.read_instance.metadata_in_memory['GPW_population_density'][self.relative_selected_station_inds].astype(np.float32)))
-            str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][self.relative_selected_station_inds].astype(np.float32)))
+            # add station reference, latitude, longitude, measurement altitude, GSFC coastline proximity, GPW population density and NOAA-DMSP-OLS nighttime stable lights
+            str_to_plot += "%s   " % (selected_station_reference)
+            str_to_plot += "Latitude: {:.4f}   ".format(
+                self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+            str_to_plot += "Longitude: {:.4f}\n".format(
+                self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
+            str_to_plot += "Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
+                self.read_instance.metadata_in_memory['measurement_altitude'][
+                    self.relative_selected_station_inds].astype(np.float32)))
+            str_to_plot += "To Coast: {:.2f}km\n".format(np.nanmedian(
+                self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                    self.relative_selected_station_inds].astype(np.float32)))
+            str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
+                self.read_instance.metadata_in_memory['GPW_population_density'][
+                    self.relative_selected_station_inds].astype(np.float32)))
+            str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(
+                self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                    self.relative_selected_station_inds].astype(np.float32)))
 
             #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
             metadata_vars_to_plot = ['station_name', 'country',
