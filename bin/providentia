@@ -80,7 +80,7 @@ python_command="python3 -c 'from providentia import providentia;providentia.main
 #CTE POWER
 if [ "${BSC_MACHINE}" == "power" ]; then
     #get allocation of resources on CTE-POWER machine
-    eval "${srun_command} --threads-per-cpu=4 ${queue_option} ${memory_option} ${python_command}"
+    eval "${srun_command} --threads-per-core=4 ${queue_option} ${memory_option} ${python_command}"
 #Marenustrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     #get allocation of resources on MN4 machine
