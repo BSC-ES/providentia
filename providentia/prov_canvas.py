@@ -209,7 +209,7 @@ class MPLCanvas(FigureCanvas):
         self.calculate_z_statistic()
 
         # update plotted map z statistic
-        self.update_map_z_statisitic()
+        self.update_map_z_statistic()
 
         # plot experiment grid domain edges on map
         self.update_experiment_grid_domain_edges()
@@ -554,7 +554,7 @@ class MPLCanvas(FigureCanvas):
             self.calculate_z_statistic()
 
             # update plotted map z statistic
-            self.update_map_z_statisitic()
+            self.update_map_z_statistic()
 
             # if selected stations have changed from previous selected, update associated plots
             if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
@@ -658,7 +658,7 @@ class MPLCanvas(FigureCanvas):
             self.calculate_z_statistic()
 
             # update plotted map z statistic
-            self.update_map_z_statisitic()
+            self.update_map_z_statistic()
 
             # update associated plots with selected stations
             self.update_associated_selected_station_plots()
@@ -667,7 +667,7 @@ class MPLCanvas(FigureCanvas):
             self.draw()
 
 
-    def update_map_z_statisitic(self):
+    def update_map_z_statistic(self):
         """Function that updates plotted z statistic on map, with colourbar"""
 
         # clear previously plotted station points
@@ -711,7 +711,11 @@ class MPLCanvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],self.read_instance.station_latitudes[self.active_map_valid_station_inds], s=self.read_instance.unsel_station_markersize, c=self.z_statistic, vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker=1, zorder=2, transform=self.datacrs, linewidth=0.0, alpha=None)
+            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],
+                                                  self.read_instance.station_latitudes[self.active_map_valid_station_inds],
+                                                  s=self.read_instance.unsel_station_markersize, c=self.z_statistic,
+                                                  vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker=1,
+                                                  zorder=3, transform=self.datacrs, linewidth=0.0, alpha=None)
             # create 2D numpy array of plotted station coordinates
             self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds], self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
 
@@ -854,7 +858,11 @@ class MPLCanvas(FigureCanvas):
                 # exp_x,exp_y = self.bm(self.read_instance.data_in_memory[experiment]['grid_edge_longitude'],
                 # self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])
                 # create matplotlib polygon object from experiment grid edge map projection coordinates
-                grid_edge_outline_poly = Polygon(np.vstack((self.read_instance.plotting_params[experiment]['grid_edge_longitude'],self.read_instance.plotting_params[experiment]['grid_edge_latitude'])).T,edgecolor=self.read_instance.plotting_params[experiment]['colour'],linewidth=1, linestyle='--', fill=False, zorder=1,transform=self.datacrs)
+                grid_edge_outline_poly = \
+                    Polygon(np.vstack((self.read_instance.plotting_params[experiment]['grid_edge_longitude'],
+                                       self.read_instance.plotting_params[experiment]['grid_edge_latitude'])).T,
+                                       edgecolor=self.read_instance.plotting_params[experiment]['colour'],
+                                       linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
                 # plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
 
@@ -1872,7 +1880,7 @@ class MPLCanvas(FigureCanvas):
                 self.calculate_z_statistic()
 
                 # update plotted map z statistic
-                self.update_map_z_statisitic()
+                self.update_map_z_statistic()
 
                 # draw changes
                 self.draw()
