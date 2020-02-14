@@ -5,30 +5,6 @@ import numpy as np
 import pandas as pd
 
 
-def read_netcdf_station(tuple_to_read):
-    """Function that handles reading of observational
-    desired station metadata in a netCDF file,
-    returning a dictionary with read metadata.
-
-    Args:
-        tuple_to_read(tuple): file, [metadata_vars_to_read]
-    """
-    relevant_file, metadata_vars = tuple_to_read
-    # read netCDF frame
-    ncdf_root = Dataset(relevant_file)
-
-    # read all desired metadata, placing it within
-    # a dictionary by variable name
-    read_metadata = {}
-    for meta_var in metadata_vars:
-        read_metadata[meta_var] = ncdf_root[meta_var][:]
-
-    # close netCDF
-    ncdf_root.close()
-
-    return read_metadata
-
-
 def drop_nans(data):
     """Function that returns numpy object of lists
     of station data with NaNs removed
