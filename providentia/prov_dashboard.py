@@ -793,83 +793,82 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         cut_right = False
 
         # determine if any of the key variables have changed
-        # (network, resolution, species, qa, flags, classifications_to_retain, classifications_to_remove)
+        # (network, resolution, species, qa, flags)
         # if any have changed, observations and any selected experiments have to be re-read entirely
         if (self.active_network != self.previous_active_network) or (
                 self.active_resolution != self.previous_active_resolution) or (
                 self.active_species != self.previous_active_species) or (
-                np.array_equal(self.active_qa, self.previous_active_qa) is False) or (
-                np.array_equal(self.active_flags, self.previous_active_flags) is False):
+                np.array_equal(self.active_qa, self.previous_active_qa) == False) or (
+                np.array_equal(self.active_flags, self.previous_active_flags) == False):
             read_all = True
         # key variables have not changed, has start/end date?
         else:
             # determine if start date/end date have changed
-            if (self.active_start_date != self.previous_active_start_date) or \
-                    (self.active_end_date != self.previous_active_end_date):
+            if (self.active_start_date != self.previous_active_start_date) or (
+                    self.active_end_date != self.previous_active_end_date):
                 # if date range has changed then determine type of overlap with previous date range
                 # no overlap (i.e. start date >= than previous end date, or end date <= than previous start date)?
-                if (self.active_start_date >= self.previous_active_end_date) or \
-                        (self.active_end_date <= self.previous_active_start_date):
+                if (self.active_start_date >= self.previous_active_end_date) or (
+                        self.active_end_date <= self.previous_active_start_date):
                     read_all = True
                 # data range fully inside previous data range (i.e. start date later and end date earlier)?
-                elif (self.active_start_date > self.previous_active_start_date) & \
-                        (self.active_end_date < self.previous_active_end_date):
+                elif (self.active_start_date > self.previous_active_start_date) & (
+                        self.active_end_date < self.previous_active_end_date):
                     cut_left = True
                     cut_right = True
                 # need to read data on left edge and right edge of previous date range
                 # (i.e. start date earlier and end date later)?
-                elif (self.active_start_date < self.previous_active_start_date) & \
-                        (self.active_end_date > self.previous_active_end_date):
+                elif (self.active_start_date < self.previous_active_start_date) & (
+                        self.active_end_date > self.previous_active_end_date):
                     read_left = True
                     read_right = True
                 # need to read data on left edge and cut on right edge of previous date range
                 # (i.e. start date earlier and end date earlier)?
-                elif (self.active_start_date < self.previous_active_start_date) & \
-                        (self.active_end_date < self.previous_active_end_date):
+                elif (self.active_start_date < self.previous_active_start_date) & (
+                        self.active_end_date < self.previous_active_end_date):
                     read_left = True
                     cut_right = True
                 # need to cut data on left edge and read data on right edge of previous date range
                 # (i.e. start date later and end date later)?
-                elif (self.active_start_date > self.previous_active_start_date) & \
-                        (self.active_end_date > self.previous_active_end_date):
+                elif (self.active_start_date > self.previous_active_start_date) & (
+                        self.active_end_date > self.previous_active_end_date):
                     cut_left = True
                     read_right = True
                 # need to read data on left edge of previous date range (i.e. start date earlier)?
-                elif self.active_start_date < self.previous_active_start_date:
+                elif (self.active_start_date < self.previous_active_start_date):
                     read_left = True
                 # need to read data on right edge of previous date range (i.e. end date later)?
-                elif self.active_end_date > self.previous_active_end_date:
+                elif (self.active_end_date > self.previous_active_end_date):
                     read_right = True
                 # need to cut data on left edge of previous date range (i.e. start date later)?
-                elif self.active_start_date > self.previous_active_start_date:
+                elif (self.active_start_date > self.previous_active_start_date):
                     cut_left = True
                 # need to cut data on right edge of previous date range (i.e. end date earlier)?
-                elif self.active_end_date < self.previous_active_end_date:
+                elif (self.active_end_date < self.previous_active_end_date):
                     cut_right = True
 
-        # ---------------------------------------#
+                    # ---------------------------------------#
 
         # determine if any of the active experiments have changed
         # remove experiments that are no longer selected from data_in_memory dictionary
-        experiments_to_remove = [experiment for experiment in self.previous_active_experiment_grids
-                                 if experiment not in self.active_experiment_grids]
-
+        experiments_to_remove = [experiment for experiment in self.previous_active_experiment_grids if
+                                 experiment not in self.active_experiment_grids]
         for experiment in experiments_to_remove:
             del self.data_in_memory[experiment]
-
         # any new experiments will need completely re-reading
-        experiments_to_read = [experiment for experiment in self.active_experiment_grids
-                               if experiment not in self.previous_active_experiment_grids]
+        experiments_to_read = [experiment for experiment in self.active_experiment_grids if
+                               experiment not in self.previous_active_experiment_grids]
 
         # has date range changed?
-        if (read_all is True) or (read_left is True) or (read_right is True) or \
-                (cut_left is True) or (cut_right is True):
+        if (read_all == True) or (read_left == True) or (read_right == True) or (cut_left == True) or (
+                cut_right == True):
+
             # set new active time array/unique station references/longitudes/latitudes
             # adjust data arrays to account for potential changing number of stations
             self.read_setup()
 
             # need to re-read all observations/experiments?
-            if read_all:
+            if read_all == True:
                 # reset data in memory dictionary
                 self.data_in_memory = {}
                 self.plotting_params = {}
@@ -883,13 +882,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     if data_label in experiments_to_read:
                         experiments_to_read.remove(data_label)
             else:
-                # if station references array has changed then as cutting/appending to existing data
-                # need to rearrange existing data arrays accordingly
-                if np.array_equal(self.previous_station_references, self.station_references) is False:
+                # if station references array has changed then as cutting/appending to
+                # existing data need to rearrange existing data arrays accordingly
+                if np.array_equal(self.previous_station_references, self.station_references) == False:
                     # get indices of stations in previous station references array in current station references array
                     old_station_inds = np.where(np.in1d(self.previous_station_references, self.station_references))[0]
-                    # get indices of stations in current station references array
-                    # that were in previous station references array
+                    # get indices of stations in current station references array that were in previous station references array
                     new_station_inds = np.where(np.in1d(self.station_references, self.previous_station_references))[0]
 
                     new_metadata_array = np.full((len(self.station_references), len(self.previous_relevant_yearmonths)),
@@ -912,17 +910,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         self.data_in_memory[data_label] = new_data_array
 
             # need to cut edges?
-            if (cut_left is True) or (cut_right is True):
+            if (cut_left == True) or (cut_right == True):
 
                 # set default edge limits as current edges
-                left_edge_ind = 0
-                right_edge_ind = len(self.previous_time_array)
+                data_left_edge_ind = 0
+                data_right_edge_ind = len(self.previous_time_array)
 
                 metadata_left_edge_ind = 0
                 metadata_right_edge_ind = len(self.previous_relevant_yearmonths)
 
                 # need to cut on left data edge?
-                if cut_left is True:
+                if cut_left == True:
                     data_left_edge_ind = np.where(self.previous_time_array == self.time_array[0])[0][0]
                     new_relative_delta = relativedelta(
                         datetime.datetime(int(self.relevant_yearmonths[0][:4]), int(self.relevant_yearmonths[0][4:6]),
@@ -931,67 +929,77 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                                       0, 0))
                     metadata_left_edge_ind = (new_relative_delta.years * 12) + new_relative_delta.months
 
-                # need to cut on right data edge?
-                if cut_right is True:
+                    # need to cut on right data edge?
+                if cut_right == True:
                     data_right_edge_ind = np.where(self.previous_time_array == self.time_array[-1])[0][0] + 1
-                    new_relative_delta = relativedelta(datetime.datetime(int(self.relevant_yearmonths[-1][:4]),
-                                                                         int(self.relevant_yearmonths[-1][4:6]), 1,
-                                                                         0, 0), datetime.datetime(
-                        int(self.previous_relevant_yearmonths[-1][:4]),
-                        int(self.previous_relevant_yearmonths[-1][4:6]), 1, 0, 0))
+                    new_relative_delta = relativedelta(
+                        datetime.datetime(int(self.relevant_yearmonths[-1][:4]), int(self.relevant_yearmonths[-1][4:6]),
+                                          1, 0, 0), datetime.datetime(int(self.previous_relevant_yearmonths[-1][:4]),
+                                                                      int(self.previous_relevant_yearmonths[-1][4:6]),
+                                                                      1, 0, 0))
                     metadata_right_edge_ind = (new_relative_delta.years * 12) + new_relative_delta.months
 
-                # iterate through all keys in data in memory dictionary and
-                # cut edges of the associated arrays appropriately
+                    # iterate through all keys in data in memory dictionary and
+                    # cut edges of the associated arrays appropriately
                 for data_label in list(self.data_in_memory.keys()):
                     self.data_in_memory[data_label] = self.data_in_memory[data_label][:,
                                                       data_left_edge_ind:data_right_edge_ind]
-                    self.metadata_in_memory = self.metadata_in_memory[:,
-                                              metadata_left_edge_ind:metadata_right_edge_ind]
+                    self.metadata_in_memory = self.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
 
             # need to read on left edge?
-            if read_left is True:
+            if read_left == True:
                 # get n number of new elements on left edge
                 n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
-                new_relative_delta = relativedelta(
-                    datetime.datetime(int(self.previous_relevant_yearmonths[0][:4]),
-                                      int(self.previous_relevant_yearmonths[0][4:6]), 1, 0, 0),
-                    datetime.datetime(int(self.relevant_yearmonths[0][:4]),
-                                      int(self.relevant_yearmonths[0][4:6]), 1, 0, 0))
+                new_relative_delta = relativedelta(datetime.datetime(int(self.previous_relevant_yearmonths[0][:4]),
+                                                                     int(self.previous_relevant_yearmonths[0][4:6]), 1,
+                                                                     0, 0),
+                                                   datetime.datetime(int(self.relevant_yearmonths[0][:4]),
+                                                                     int(self.relevant_yearmonths[0][4:6]), 1, 0, 0))
                 n_new_left_metadata_inds = (new_relative_delta.years * 12) + new_relative_delta.months
                 self.metadata_inds_to_fill = np.arange(0, n_new_left_metadata_inds)
                 self.metadata_in_memory = np.concatenate((np.full(
                     (len(self.station_references), n_new_left_metadata_inds), np.NaN, dtype=self.metadata_dtype),
                                                           self.metadata_in_memory), axis=1)
 
-                # iterate through all keys in data in memory dictionary
-                # and insert read data on left edge of the associated arrays
+                # iterate through all keys in data in memory dictionary and
+                # insert read data on left edge of the associated arrays
                 for data_label in list(self.data_in_memory.keys()):
                     # add space on left edge to insert new read data
                     if data_label == 'observations':
                         self.data_in_memory[data_label] = np.concatenate((np.full(
                             (len(self.station_references), n_new_left_data_inds), np.NaN, dtype=self.data_dtype),
-                                                                          self.data_in_memory[data_label]),
-                                                                         axis=1)
+                                                                          self.data_in_memory[data_label]), axis=1)
                     else:
                         self.data_in_memory[data_label] = np.concatenate((np.full(
                             (len(self.station_references), n_new_left_data_inds), np.NaN, dtype=self.data_dtype[:1]),
-                                                                          self.data_in_memory[data_label]),
-                                                                         axis=1)
+                                                                          self.data_in_memory[data_label]), axis=1)
                     self.read_data(data_label, self.active_start_date, self.previous_active_start_date)
 
             # need to read on right edge?
-            if read_right is True:
+            if read_right == True:
                 # get n number of new elements on right edge
-                n_new_right_inds = \
-                    (len(self.time_array) - 1) - np.where(self.time_array == self.previous_time_array[-1])[0][0]
-                # iterate through all keys in data in memory dictionary
-                # and insert read data on right edge of the associated arrays
+                n_new_right_data_inds = (len(self.time_array) - 1) - \
+                                        np.where(self.time_array == self.previous_time_array[-1])[0][0]
+                new_relative_delta = relativedelta(
+                    datetime.datetime(int(self.relevant_yearmonths[-1][:4]), int(self.relevant_yearmonths[-1][4:6]), 1,
+                                      0, 0), datetime.datetime(int(self.previous_relevant_yearmonths[-1][:4]),
+                                                               int(self.previous_relevant_yearmonths[-1][4:6]), 1, 0,
+                                                               0))
+                n_new_right_metadata_inds = (new_relative_delta.years * 12) + new_relative_delta.months
+                self.metadata_inds_to_fill = np.arange(-n_new_right_metadata_inds, 0)
+                self.metadata_in_memory = np.concatenate((self.metadata_in_memory, np.full(
+                    (len(self.station_references), n_new_right_metadata_inds), np.NaN, dtype=self.metadata_dtype)), axis=1)
+
+                # iterate through all keys in data in memory dictionary and
+                # insert read data on right edge of the associated arrays
                 for data_label in list(self.data_in_memory.keys()):
-                    self.data_in_memory[data_label]['data'] = \
-                        np.append(self.data_in_memory[data_label]['data'],
-                                  np.full((len(self.station_references),
-                                           n_new_right_inds), np.NaN), axis=0)
+                    if data_label == 'observations':
+                        self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full(
+                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype)), axis=1)
+                    else:
+                        self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full(
+                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype[:1])),
+                                                                         axis=1)
                     self.read_data(data_label, self.previous_active_end_date, self.active_end_date)
 
             # update menu object fields
@@ -1004,8 +1012,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             for data_label in experiments_to_read:
                 self.read_data(data_label, self.active_start_date, self.active_end_date)
 
+                # --------------------------------------------------------------------#
         # if species has changed, update default species specific lower/upper limits
-        if self.active_species != self.previous_active_species:
+        if (self.active_species != self.previous_active_species):
             # update default lower/upper species specific limits and filter data outside limits
             species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
             species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
@@ -1013,13 +1022,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
 
+            # --------------------------------------------------------------------#
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         self.update_plotting_parameters()
 
-        # run function to filter data outside lower/upper limits, not using desired measurement methods
-        # and < desired minimum data availability
+        # --------------------------------------------------------------------#
+        # run function to filter data outside lower/upper limits, not using desired
+        # measurement methods, and < desired minimum data availability
         self.mpl_canvas.handle_data_filter_update()
 
+        # --------------------------------------------------------------------#
         # update map z combobox fields based on data in memory
 
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
@@ -1032,16 +1044,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
             OrderedDict(sorted(expbias_dict.items(), key=lambda x: x[1]['order'])).keys()))
 
-        # generate list of sorted z1/z2 data arrays names in memory,
-        # putting observations before experiments and
-        # empty string item as first element in z2 array list
+        # generate list of sorted z1/z2 data arrays names in memory, putting observations
+        # before experiments, and empty string item as first element in z2 array list
         # (for changing from 'difference' statistics to 'absolute')
         if len(list(self.data_in_memory.keys())) == 1:
             self.z1_arrays = np.array(['observations'])
         else:
             data_array_labels = np.array(list(self.data_in_memory.keys()))
-            self.z1_arrays = np.append(['observations'], np.delete(
-                data_array_labels, np.where(data_array_labels == 'observations')))
+            self.z1_arrays = np.append(['observations'],
+                                       np.delete(data_array_labels, np.where(data_array_labels == 'observations')))
         self.z2_arrays = np.append([''], self.z1_arrays)
 
         # initialise map z statistic comboboxes
@@ -1075,6 +1086,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
+
 
     def read_setup(self):
         """Function that setups key variables for new read of
