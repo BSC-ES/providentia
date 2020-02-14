@@ -5,7 +5,7 @@ if [ "${BSC_MACHINE}" == "power" ]; then
     module load Python/3.7.0-foss-2018b \
      Cartopy/0.17.0-foss-2018b-Python-3.7.0 \
      cftime/1.0.3.4-foss-2018b-Python-3.7.0 \
-     matplotlib/3.0.3-foss-2018b-Python-3.7.0 \
+     matplotlib/3.1.1-foss-2018b-Python-3.7.0 \
      netcdf4-python/1.5.1.2-foss-2018b-Python-3.7.0 \
      numpy/1.16.4-foss-2018b-Python-3.7.0 \
      pandas/0.24.2-foss-2018b-Python-3.7.0 \
