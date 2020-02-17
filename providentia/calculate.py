@@ -12,45 +12,47 @@ import scipy
 
 class Stats(object):
 
-    def __init__(self, data):
-        """Initialize attributes"""
-
-        self.data = data
-
-    def calculate_mean(self):
+    @staticmethod
+    def calculate_mean(data):
         """Calculate mean in a dataset"""
-        return np.mean(self.data)
+        return np.mean(data)
 
-    def calculate_percentile(self, percentile=50.0):
+    @staticmethod
+    def calculate_percentile(data, percentile=50.0):
         """Calculate specific percentile in a dataset"""
-        return np.percentile(self.data, percentile)
+        return np.percentile(data, percentile)
 
-    def calculate_standard_deviation(self):
+    @staticmethod
+    def calculate_standard_deviation(data):
         """Calculate standard deviation in a dataset"""
-        return np.std(self.data)
+        return np.std(data)
 
-    def calculate_variance(self):
+    @staticmethod
+    def calculate_variance(data):
         """Calculate variance in a dataset"""
-        return np.var(self.data)
+        return np.var(data)
 
-    def calculate_data_avail_fraction(self):
+    @staticmethod
+    def calculate_data_avail_fraction(data):
         """Calculate data availability fraction
         (i.e. fraction of total data array not equal to NaN)
         """
-        return (100. / self.data.shape[-1]) * \
-               (np.count_nonzero(~np.isnan(self.data), axis=-1))
+        return (100. / np.array(data).shape[-1]) * \
+               (np.count_nonzero(~np.isnan(data), axis=-1))
 
-    def calculate_data_avail_number(self):
+    @staticmethod
+    def calculate_data_avail_number(data):
         """Calculate data availability absolute number
         (i.e. number of total data measurements not equal to NaN)
         """
-        return np.count_nonzero(~np.isnan(self.data), axis=-1)
+        return np.count_nonzero(~np.isnan(data), axis=-1)
 
-    def max_repeated_nans_fraction(self):
+    @staticmethod
+    def max_repeated_nans_fraction(data):
         """Get % of total period of the maximum run of consecutive NaNs in array"""
         max_gap_pc = []
 
-        for station_data in self.data:
+        for station_data in data:
             mask = np.concatenate(([False], np.isnan(station_data), [False]))
             if ~mask.any():
                 max_gap_pc.append(0)
@@ -58,28 +60,27 @@ class Stats(object):
                 idx = np.nonzero(mask[1:] != mask[:-1])[0]
                 max_gap_pc.append((idx[1::2] - idx[::2]).max())
 
-        return np.array(max_gap_pc) * (100. / self.data.shape[1])
+        return np.array(max_gap_pc) * (100. / data.shape[1])
 
 
 class ExpBias(object):
 
-    def __init__(self, obs, exp):
-        self.obs = obs
-        self.exp = exp
-
-    def calculate_apbe(self):
+    @staticmethod
+    def calculate_apbe(obs, exp):
         """Calculate absolute percent bias error (APBE)
         between observations and experiment
         """
-        return 100.0 * np.sum(np.abs(self.exp - self.obs)) / np.sum(self.obs)
+        return 100.0 * np.sum(np.abs(exp - obs)) / np.sum(obs)
 
-    def calculate_pbe(self):
+    @staticmethod
+    def calculate_pbe(obs, exp):
         """Calculate percent bias error (PBE)
         between observations and experiment
         """
-        return 100.0 * np.sum(self.exp - self.obs) / np.sum(self.obs)
+        return 100.0 * np.sum(exp - obs) / np.sum(obs)
 
-    def calculate_coe(self):
+    @staticmethod
+    def calculate_coe(obs, exp):
         """Calculate coefficient of efficiency (COE) between observations and experiment,
            based on Legates and McCabe (1999, 2012). There have been many suggestions for
            measuring model performance over the years, but the COE is a simple formulation
@@ -96,10 +97,11 @@ class ExpBias(object):
            Legates DR, McCabe GJ. (2012). A refined index of model performance: a rejoinder,
            International Journal of Climatology.
         """
-        return 1.0 - (np.mean(np.abs(self.exp - self.obs)) /
-                      np.mean(np.abs(self.obs - np.mean(self.obs))))
+        return 1.0 - (np.mean(np.abs(exp - obs)) /
+                      np.mean(np.abs(obs - np.mean(obs))))
 
-    def calculate_ioa(self):
+    @staticmethod
+    def calculate_ioa(obs, exp):
         """Calculate the Index of Agreement (IOA) between observations and experiment, based on Willmott et al. (2011)
            The metric spans between -1 and +1 with values approaching +1 representing better model performance.
            An IOA of 0.5, for example, indicates that the sum of the error-magnitudes is one half of the sum
@@ -115,60 +117,64 @@ class ExpBias(object):
            Willmott, C.J., Robeson, S.M., Matsuura, K., 2011. A refined index of model performance. International
            Journal of Climatology.
         """
-        return 1.0 - (np.sum((self.obs - self.exp) ** 2)) /\
-                     (np.sum((np.abs(self.exp - np.mean(self.obs)) +
-                              np.abs(self.obs - np.mean(self.obs))) ** 2))
+        return 1.0 - (np.sum((obs - exp) ** 2)) /\
+                     (np.sum((np.abs(exp - np.mean(obs)) +
+                              np.abs(obs - np.mean(obs))) ** 2))
 
-    def calculate_mae(self, normalisation_type='none'):
+    @staticmethod
+    def calculate_mae(obs, exp, normalisation_type='none'):
         """Calculate mean absolute error (MAE)/ normalised mean absolute
          error (NMAE) between observations and experiment
          """
-        mae = np.mean(np.abs(self.exp - self.obs))
+        mae = np.mean(np.abs(exp - obs))
         # handle normalisation if desired
         if normalisation_type == 'max_min':
-            mae = mae / (np.max(self.obs) - np.min(self.obs))
+            mae = mae / (np.max(obs) - np.min(obs))
         elif normalisation_type == 'mean':
-            mae = mae / np.mean(self.obs)
+            mae = mae / np.mean(obs)
         elif normalisation_type == 'iq':
-            mae = mae / (np.percentile(self.obs, 75) - np.percentile(self.obs, 25))
+            mae = mae / (np.percentile(obs, 75) - np.percentile(obs, 25))
         elif normalisation_type == 'stdev':
-            mae = mae / np.std(self.obs)
+            mae = mae / np.std(obs)
         return mae
 
-    def calculate_mbe(self, normalisation_type='none'):
+    @staticmethod
+    def calculate_mbe(obs, exp, normalisation_type='none'):
         """Calculate mean bias error (MBE)/ normalised mean bias
         error (NMBE) between observations and experiment
         """
-        mbe = np.mean(self.exp - self.obs)
+        mbe = np.mean(exp - obs)
         # handle normalisation if desired
         if normalisation_type == 'max_min':
-            mbe = mbe / (np.max(self.obs) - np.min(self.obs))
+            mbe = mbe / (np.max(obs) - np.min(obs))
         elif normalisation_type == 'mean':
-            mbe = mbe / np.mean(self.obs)
+            mbe = mbe / np.mean(obs)
         elif normalisation_type == 'iq':
-            mbe = mbe / (np.percentile(self.obs, 75) - np.percentile(self.obs, 25))
+            mbe = mbe / (np.percentile(obs, 75) - np.percentile(obs, 25))
         elif normalisation_type == 'stdev':
-            mbe = mbe / np.std(self.obs)
+            mbe = mbe / np.std(obs)
         return mbe
 
-    def calculate_rmse(self, normalisation_type='none'):
+    @staticmethod
+    def calculate_rmse(obs, exp, normalisation_type='none'):
         """Calculate root mean squared error (RMSE) /
         normalised root mean squared error (NRMSE)
         between observations and experiment
         """
-        rmse = np.sqrt(np.mean((self.exp - self.obs) ** 2))
+        rmse = np.sqrt(np.mean((exp - obs) ** 2))
         # handle normalisation if desired
         if normalisation_type == 'max_min':
-            rmse = rmse / (np.max(self.obs) - np.min(self.obs))
+            rmse = rmse / (np.max(obs) - np.min(obs))
         elif normalisation_type == 'mean':
-            rmse = rmse / np.mean(self.obs)
+            rmse = rmse / np.mean(obs)
         elif normalisation_type == 'iq':
-            rmse = rmse / (np.percentile(self.obs, 75) - np.percentile(self.obs, 25))
+            rmse = rmse / (np.percentile(obs, 75) - np.percentile(obs, 25))
         elif normalisation_type == 'stdev':
-            rmse = rmse / np.std(self.obs)
+            rmse = rmse / np.std(obs)
         return rmse
 
-    def calculate_r(self):
+    @staticmethod
+    def calculate_r(obs, exp):
         """Calculate the Pearson correlation coefficient (r) between observations and experiment
            The Pearson correlation coefficient measures the linear relationship between two datasets.
            Strictly speaking, Pearson’s correlation requires that each dataset be normally distributed.
@@ -177,26 +183,29 @@ class ExpBias(object):
            Positive correlations imply that as x increases, so does y.
            Negative correlations imply that as x increases, y decreases.
         """
-        return scipy.stats.pearsonr(self.obs, self.exp)[0]
+        return scipy.stats.pearsonr(obs, exp)[0]
 
-    def calculate_r_squared(self):
+    @staticmethod
+    def calculate_r_squared(obs, exp):
         """Calculate the coefficient of determination, r squared, between observations and experiment
            It is the proportion of the variance in the dependent variable
            that is predictable from the independent variable(s).
            In linear least squares multiple regression with an estimated intercept term,
            the r squared equals the square of the Pearson correlation coefficient
         """
-        return self.calculate_r() ** 2
+        return ExpBias.calculate_r(obs, exp) ** 2
 
-    def calculate_fac2(self):
+    @staticmethod
+    def calculate_fac2(obs, exp):
         """Calculate fraction of experiment values within
         a factor of two of observed values (FAC2)
         """
-        frac = self.exp / self.obs
+        frac = exp / obs
         return (100.0 / len(frac)) * len(frac[(frac >= 0.5) & (frac <= 2.0)])
 
-    def calculate_upa(self):
+    @staticmethod
+    def calculate_upa(obs, exp):
         """Calculate unpaired peak accuracy (UPA)"""
-        obs_max = np.max(self.obs)
-        exp_max = np.max(self.exp)
+        obs_max = np.max(obs)
+        exp_max = np.max(exp)
         return (exp_max - obs_max) - obs_max
