@@ -33,11 +33,6 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 
-###------------------------------------------------------------------------------------###
-###IMPORT GHOST STANDARDS
-###------------------------------------------------------------------------------------###
-
-
 class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
     """Define class that generates Providentia dashboard"""
 
@@ -77,6 +72,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # setup callback events upon resizing/moving of Providentia window
         self.resized.connect(self.get_geometry)
         self.move.connect(self.get_geometry)
+
+        # load necessary dictionaries
+        self.basic_stats_dict = json.load(open('providentia/conf/basic_stats_dict.json'))
+        self.expbias_dict = json.load(open('providentia/conf/experiment_bias_stats_dict.json'))
 
     def init_standards(self):
         """ Read from ghost standards """
@@ -574,7 +573,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.selected_matrix = self.cb_matrix.currentText()
 
         # update species field
-        available_species = sorted(self.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()][self.cb_matrix.currentText()])
+        available_species = sorted(self.available_observation_data[self.cb_network.currentText()][
+                                       self.cb_resolution.currentText()][self.cb_matrix.currentText()])
         self.cb_species.addItems(available_species)
         if self.selected_species in available_species:
             self.cb_species.setCurrentText(self.selected_species)
@@ -1022,7 +1022,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
 
-            # --------------------------------------------------------------------#
+        # --------------------------------------------------------------------#
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         self.update_plotting_parameters()
 
@@ -1035,14 +1035,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update map z combobox fields based on data in memory
 
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
-        basic_stats_dict = json.load(open('providentia/conf/basic_stats_dict.json'))
         self.basic_z_stats = np.array(list(
-            OrderedDict(sorted(basic_stats_dict.items(), key=lambda x: x[1]['order'])).keys()))
+            OrderedDict(sorted(self.basic_stats_dict.items(), key=lambda x: x[1]['order'])).keys()))
 
-        # load experiment bias dictionary from configuration
-        expbias_dict = json.load(open('providentia/conf/experiment_bias_stats_dict.json'))
         self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-            OrderedDict(sorted(expbias_dict.items(), key=lambda x: x[1]['order'])).keys()))
+            OrderedDict(sorted(self.expbias_dict.items(), key=lambda x: x[1]['order'])).keys()))
 
         # generate list of sorted z1/z2 data arrays names in memory, putting observations
         # before experiments, and empty string item as first element in z2 array list
