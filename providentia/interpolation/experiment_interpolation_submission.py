@@ -21,7 +21,7 @@ import sys
 import time
 
 #Read configuration file
-from .configuration import *
+from configuration import *
 
 ###--------------------------------------------------------------------------------------------------###
 ###--------------------------------------------------------------------------------------------------###
@@ -31,7 +31,7 @@ def gather_arguments(interpolation_log_dir):
     '''gather list of arguments for all unique tasks to process, as defined in the configuration file'''
 
     #read defined experiments dictionary
-    from .defined_experiments import defined_experiments_dictionary
+    from defined_experiments import defined_experiments_dictionary
 
     #create arguments list
     arguments_list = []
@@ -70,8 +70,8 @@ def gather_arguments(interpolation_log_dir):
                 #get intersection between desired species to process and species available in directory
                 available_species = [x for x in available_species if x in species_to_process]
 
-                #iterate though species to process
-                for speci_to_process in species_to_process:
+                #iterate though available species to process
+                for speci_to_process in available_species:
 
                     #iterate through GHOST observational networks to interpolate against
                     for GHOST_network_to_interpolate_against in GHOST_networks_to_interpolate_against:
@@ -83,60 +83,87 @@ def gather_arguments(interpolation_log_dir):
                             obs_files = np.sort(glob.glob('/gpfs/projects/bsc32/AC_cache/obs/ghost/{}/{}/{}/{}/{}*.nc'.format(GHOST_network_to_interpolate_against, GHOST_version, temporal_resolution_to_output, speci_to_process, speci_to_process)))
 
                             #get all relevant experiment files
-                            exp_files = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process)))
-                            #remove new type of REDUCE output with member number (will be handled in future)
-                            exp_files = np.array([exp_file for exp_file in exp_files if '-000_' not in exp_file]) 
+                            exp_files_all = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process)))
+                            
+                            #determine if simulation generates files with ensemble member numbers or not (test first file)
+                            if exp_files_all[0].split('_')[0] != speci_to_process:
+                                have_ensemble_members = True
+                                #if have ensemble members in filename, get all unique numbers
+                                unique_ensemble_members = np.unique([f.split('{}-'.format(speci_to_process))[0][:3] for f in exp_files_all])
+                                #get intersection between desired ensemble members to process and those available in directory
+                                #if no members defined explicitly to process, process them all 
+                                if model_ensemble_members_to_process == []:
+                                    available_ensemble_members = unique_ensemble_members
+                                else:
+                                    available_ensemble_members = [x for x in unique_ensemble_members if x in model_ensemble_members_to_process]
+                            else:
+                                have_ensemble_members = False
+                                #if have defined ensemble members to process, then continue as no files in this directory have ensemble member number
+                                if model_ensemble_members_to_process != []:
+                                    continue
+                                #otherwise, proceed (tag files as ensemble member '000' for sake of code)
+                                else:
+                                    unique_ensemble_members = ['000']
+                                                                                     
+                            #iterate through available ensemble members to process
+                            for ensemble_member in model_ensemble_members_to_process:
 
-                            #get all observational file start dates (year and month)
-                            obs_files_dates = []
-                            for obs_file in obs_files:
-                                obs_file_date = obs_file.split('{}_'.format(speci_to_process))[-1].split('.nc')[0]
-                                obs_files_dates.append(obs_file_date[:6])
-                            obs_files_dates = np.sort(obs_files_dates)
+                                #limit experiment files to be just those for current ensemble member
+                                if have_ensemble_members == True:
+                                    exp_files = [f for f in exp_files_all if '-{}_'.format(ensemble_member) in f]
+                                else:
+                                    exp_files = copy.deepcopy(exp_files_all)
 
-                            #get all experiment file start dates (year and month)
-                            exp_files_dates = []   
-                            for exp_file in exp_files:
-                                exp_file_date = exp_file.split('{}_'.format(speci_to_process))[-1].split('.nc')[0]
-                                exp_files_dates.append(exp_file_date[:6])
-                            exp_files_dates = np.sort(exp_files_dates) 
+                                #get all observational file start dates (year and month)
+                                obs_files_dates = []
+                                for obs_file in obs_files:
+                                    obs_file_date = obs_file.split('{}_'.format(speci_to_process))[-1].split('.nc')[0]
+                                    obs_files_dates.append(obs_file_date[:6])
+                                obs_files_dates = np.sort(obs_files_dates)
 
-                            #remove observational/experiment files outside date ranges 
-                            obs_files_ii = np.array([obs_files_ii for obs_files_ii, obs_files_date in enumerate(obs_files_dates) if (int(obs_files_date) >= int(start_date)) and (int(obs_files_date) < int(end_date))])       
-                            if len(obs_files_ii) == 0:
-                                continue
-                            obs_files = obs_files[obs_files_ii]
-                            obs_files_dates = obs_files_dates[obs_files_ii]
-                            exp_files_ii = np.array([exp_files_ii for exp_files_ii, exp_files_date in enumerate(exp_files_dates) if (int(exp_files_date) >= int(start_date)) and (int(exp_files_date) < int(end_date))])      
-                            if len(exp_files_ii) == 0:
-                                continue
-                            exp_files = exp_files[exp_files_ii]
-                            exp_files_dates = exp_files_dates[exp_files_ii]
+                                #get all experiment file start dates (year and month)
+                                exp_files_dates = []   
+                                for exp_file in exp_files:
+                                    exp_file_date = exp_file.split('.nc')[0][-10:]
+                                    exp_files_dates.append(exp_file_date[:6])
+                                exp_files_dates = np.sort(exp_files_dates) 
 
-                            #get intersection of file yearmonths between observations and experiment
-                            intersect_yearmonths = np.intersect1d(obs_files_dates, exp_files_dates)
+                                #remove observational/experiment files outside date ranges 
+                                obs_files_ii = np.array([obs_files_ii for obs_files_ii, obs_files_date in enumerate(obs_files_dates) if (int(obs_files_date) >= int(start_date)) and (int(obs_files_date) < int(end_date))])       
+                                if len(obs_files_ii) == 0:
+                                    continue
+                                obs_files = obs_files[obs_files_ii]
+                                obs_files_dates = obs_files_dates[obs_files_ii]
+                                exp_files_ii = np.array([exp_files_ii for exp_files_ii, exp_files_date in enumerate(exp_files_dates) if (int(exp_files_date) >= int(start_date)) and (int(exp_files_date) < int(end_date))])      
+                                if len(exp_files_ii) == 0:
+                                    continue
+                                exp_files = exp_files[exp_files_ii]
+                                exp_files_dates = exp_files_dates[exp_files_ii]
 
-                            #if have no intersecting months, continue
-                            if len(intersect_yearmonths) == 0:
-                                continue
+                                #get intersection of file yearmonths between observations and experiment
+                                intersect_yearmonths = np.intersect1d(obs_files_dates, exp_files_dates)
+
+                                #if have no intersecting months, continue
+                                if len(intersect_yearmonths) == 0:
+                                    continue
     
-                            #create directories to store slurm output/error logs for interpolation task of specific combination of iterated variables (if does not already exist)
-                            if not os.path.exists('{}/{}/{}/{}/{}/{}/{}'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output)):
-                                os.makedirs('{}/{}/{}/{}/{}/{}/{}'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output))
+                                #create directories to store slurm output/error logs for interpolation task of specific combination of iterated variables (if does not already exist)
+                                if not os.path.exists('{}/{}/{}/{}/{}/{}/{}/{}'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, ensemble_member)):
+                                    os.makedirs('{}/{}/{}/{}/{}/{}/{}/{}'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, ensemble_member))
 
-                            #iterate through intersecting yearmonths and write all current variable arguments to arguments file
-                            for yearmonth in intersect_yearmonths:
+                                #iterate through intersecting yearmonths and write all current variable arguments to arguments file
+                                for yearmonth in intersect_yearmonths:
 
-                                #append current iterative arguments to arguments list               
-                                arguments_list.append("{} {} {} {} {} {} {}".format(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                         
+                                    #append current iterative arguments to arguments list               
+                                    arguments_list.append("{} {} {} {} {} {} {} {}".format(experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, ensemble_member, yearmonth))                         
 
-                                #append root name of .out file that will be output for each processed task
-                                output_log_roots.append('{}/{}/{}/{}/{}/{}/{}/{}'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))                           
+                                    #append root name of .out file that will be output for each processed task
+                                    output_log_roots.append('{}/{}/{}/{}/{}/{}/{}/{}/{}'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, ensemble_member, yearmonth))                           
 
-                                #remove previous output logs
-                                previous_logs = glob.glob('{}/{}/{}/{}/{}/{}/{}/{}*'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, yearmonth))
-                                for previous_log in previous_logs:
-                                    os.remove(previous_log)
+                                    #remove previous output logs
+                                    previous_logs = glob.glob('{}/{}/{}/{}/{}/{}/{}/{}/{}*'.format(interpolation_log_dir, experiment_to_process, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, GHOST_network_to_interpolate_against, temporal_resolution_to_output, ensemble_member, yearmonth))
+                                    for previous_log in previous_logs:
+                                        os.remove(previous_log)
 
     return arguments_list, output_log_roots 
 
