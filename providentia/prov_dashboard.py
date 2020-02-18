@@ -302,7 +302,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.experiments_menu['checkboxes']['keep_default'] = []
         self.experiments_menu['checkboxes']['keep_selected'] = []
         self.experiments_menu['checkboxes']['map_vars'] = []
-        self.experiments_menu['select_buttons'] = ['all', 'clear', 'default']
+        self.experiments_menu['select_buttons'] = ['all', 'clear']
 
         #setup pop-up window menu tree for metadata
         self.metadata_types =  {'STATION POSITION':'Filter stations by measurement position',
@@ -1133,6 +1133,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.time_array >= datetime.datetime.strptime(start_yyyymm, '%Y%m%d')) for month_ii, start_yyyymm in
                                           enumerate(self.relevant_yearmonths)])
 
+        self.station_references = []
         self.station_longitudes = []
         self.station_latitudes = []
         for relevant_file in relevant_files:
