@@ -11,7 +11,7 @@
 ###IMPORT MODULES
 ###--------------------------------------------------------------------------------------------------###
 
-import .experiment_interpolation_functions
+import experiment_interpolation_functions
 import glob
 from netCDF4 import Dataset
 import inspect
