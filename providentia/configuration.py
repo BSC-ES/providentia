@@ -99,7 +99,7 @@ class ProvConfiguration(object):
             if value == '':
                 # running on CTE-POWER?
                 if (MACHINE == 'power') or (MACHINE == 'mn4'):
-                    return '/gpfs/projects/bsc32/AC_cache/recon/ghost_interp_new'
+                    return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
 
                 # running on workstation?
                 value = '/esarchive/recon/ghost_interp_new'

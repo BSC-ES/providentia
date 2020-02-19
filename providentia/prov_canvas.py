@@ -279,56 +279,68 @@ class MPLCanvas(FigureCanvas):
 
         # filter/limit data for periods selected
         if len(self.read_instance.period_menu['checkboxes']['keep_selected']) > 0:
+            day_night_codes_to_keep = []
             if 'Daytime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['day_night_code'] != 0] = np.NaN
+                day_night_codes_to_keep.append(0)
             if 'Nighttime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['day_night_code'] != 1] = np.NaN
+                day_night_codes_to_keep.append(1)
+            if len(day_night_codes_to_keep) == 1:
+                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][     
+                    np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'], day_night_codes_to_keep, invert=True)] = np.NaN
+
+            weekday_weekend_codes_to_keep = []
             if 'Weekday' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] != 0] = np.NaN
+                weekday_weekend_codes_to_keep.append(0)
             if 'Weekend' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                weekday_weekend_codes_to_keep.append(1)
+            if len(weekday_weekend_codes_to_keep) == 1:
                 self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] != 1] = np.NaN
+                    np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'], weekday_weekend_codes_to_keep, invert=True)] = np.NaN
+
+            season_codes_to_keep = []
             if 'Spring' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['season_code'] != 0] = np.NaN
+                season_codes_to_keep.append(0)
             if 'Summer' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['season_code'] != 1] = np.NaN
+                season_codes_to_keep.append(1)
             if 'Autumn' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['season_code'] != 2] = np.NaN
+                season_codes_to_keep.append(2)
             if 'Winter' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+                season_codes_to_keep.append(3)
+            if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
                 self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['season_code'] != 3] = np.NaN
+                    np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'], season_codes_to_keep, invert=True)] = np.NaN           
 
         if len(self.read_instance.period_menu['checkboxes']['remove_selected']) > 0:
+            day_night_codes_to_remove = []
             if 'Daytime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['day_night_code'] == 0] = np.NaN
+                day_night_codes_to_remove.append(0)
             if 'Nighttime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                day_night_codes_to_remove.append(1)
+            if len(day_night_codes_to_remove) > 0:
                 self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['day_night_code'] == 1] = np.NaN
+                    np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'], day_night_codes_to_remove)] = np.NaN
+
+            weekday_weekend_codes_to_remove = []
             if 'Weekday' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] == 0] = np.NaN
+                weekday_weekend_codes_to_remove.append(0)
             if 'Weekend' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                weekday_weekend_codes_to_remove.append(1)
+            if len(weekday_weekend_codes_to_remove) > 0:
                 self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'] == 1] = np.NaN
+                    np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'], weekday_weekend_codes_to_remove)] = np.NaN
+
+            season_codes_to_remove = []
             if 'Spring' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['season_code'] == 0] = np.NaN
+                season_codes_to_remove.append(0)
             if 'Summer' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['season_code'] == 1] = np.NaN
+                season_codes_to_remove.append(1)
             if 'Autumn' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['season_code'] == 2] = np.NaN
+                season_codes_to_remove.append(2)
             if 'Winter' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+                season_codes_to_remove.append(3)
+            if len(season_codes_to_remove) > 0:
                 self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    self.read_instance.data_in_memory_filtered['observations']['season_code'] == 3] = np.NaN
+                    np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'], season_codes_to_remove)] = np.NaN            
 
         # filter all obersvational data out of set bounds of native percentage data availability variables
         for var_ii, var in enumerate(active_data_availablity_vars):

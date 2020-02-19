@@ -67,13 +67,6 @@ def read_netcdf_data(tuple_arguments):
     current_file_station_indices = \
         np.where(np.in1d(file_station_references, station_references))[0]
 
-#    # read in species data
-#    file_data = ncdf_root[active_species][:, valid_file_time_indices]
-#    # get masked data
-#    data_mask = file_data.mask
-#    # set masked data as NaN
-#    file_data[data_mask] = np.NaN
-
     # for observations, set species data based on selected qa flags/standard data provider
     # flags/classifications to retain or remove as NaN
     if process_type == 'observations':
@@ -111,10 +104,11 @@ def read_netcdf_data(tuple_arguments):
         file_data = np.full((len(current_file_station_indices),
                              len(valid_file_time_indices)), np.NaN,
                             dtype=data_dtype[:1])
-        file_data[data_vars_to_read[0]][:, :] = \
-                    ncdf_root[data_vars_to_read[0]]\
-                        [current_file_station_indices, valid_file_time_indices]
-
+        
+        relevant_data = ncdf_root[data_vars_to_read[0]][current_file_station_indices, valid_file_time_indices]
+        #mask out fill values for parameter field
+        relevant_data[relevant_data.mask] = np.NaN
+        file_data[data_vars_to_read[0]][:, :] = relevant_data
 
     # close netCDF
     ncdf_root.close()
