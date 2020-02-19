@@ -33,7 +33,7 @@ start_date = '197001' #YYYYMM   START FROM THIS POINT
 end_date =   '201901' #YYYYMM   GO UP TO THIS POINT    
 
 #define all experiments (by ID) to process
-experiments_to_process = ['a1vv']
+experiments_to_process = ['a1vv','a2jj']
 
 #define complete list of desired species to process (this is later filtered based on availability of species in experiment directories)
 species_to_process = ['sconcco','sconchno3','sconcnh3','sconcisop','sconcno','sconcno2','sconco3','sconcpan','sconcso2',
@@ -55,7 +55,8 @@ model_temporal_resolutions_to_process = ['hourly']
 model_ensemble_members_to_process = []
 
 #define complete list of GHOST observational networks to interpolate against
-GHOST_networks_to_interpolate_against  = ['EBAS','EEA_AQ_eReporting','NCDC_ISD']
+#GHOST_networks_to_interpolate_against  = ['EBAS','EEA_AQ_eReporting','NCDC_ISD']
+GHOST_networks_to_interpolate_against  = ['EEA_AQ_eReporting']
 
 #define complete lost of interpolated model temporal resolutions to output (interpolating against equivalent temporal resolution observational files)
 temporal_resolutions_to_output = ['hourly', 'hourly_instantaneous', 'daily', 'monthly']

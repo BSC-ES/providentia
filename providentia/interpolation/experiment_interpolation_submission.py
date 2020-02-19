@@ -5,7 +5,7 @@
 
 #experiment_interpolation_submission.py
 
-#module which sets up parallel execution of interpolation jobs for defined configuration
+#module which defines class which sets up parallel execution of interpolation jobs for defined configuration
 
 ###--------------------------------------------------------------------------------------------------###
 ###IMPORT MODULES
@@ -84,12 +84,12 @@ def gather_arguments(interpolation_log_dir):
 
                             #get all relevant experiment files
                             exp_files_all = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(exp_dir, grid_type_to_process, model_temporal_resolution_to_process, speci_to_process, speci_to_process)))
-                            
+
                             #determine if simulation generates files with ensemble member numbers or not (test first file)
-                            if exp_files_all[0].split('_')[0] != speci_to_process:
+                            if exp_files_all[0].split('/')[-1].split('_')[0] != speci_to_process:
                                 have_ensemble_members = True
                                 #if have ensemble members in filename, get all unique numbers
-                                unique_ensemble_members = np.unique([f.split('{}-'.format(speci_to_process))[0][:3] for f in exp_files_all])
+                                unique_ensemble_members = np.unique([f.split('/{}-'.format(speci_to_process))[-1][:3] for f in exp_files_all])
                                 #get intersection between desired ensemble members to process and those available in directory
                                 #if no members defined explicitly to process, process them all 
                                 if model_ensemble_members_to_process == []:
@@ -101,16 +101,18 @@ def gather_arguments(interpolation_log_dir):
                                 #if have defined ensemble members to process, then continue as no files in this directory have ensemble member number
                                 if model_ensemble_members_to_process != []:
                                     continue
-                                #otherwise, proceed (tag files as ensemble member '000' for sake of code)
+                                #otherwise, proceed (tag files as ensemble member '000' for sake of operation)
                                 else:
-                                    unique_ensemble_members = ['000']
+                                    available_ensemble_members = ['000']
                                                                                      
                             #iterate through available ensemble members to process
-                            for ensemble_member in model_ensemble_members_to_process:
+                            for ensemble_member in available_ensemble_members:
+
+                                #/esarchive/exp/monarch/a2jj//regional/hourly/sconco3/sconco3-000_2016010700.nc
 
                                 #limit experiment files to be just those for current ensemble member
                                 if have_ensemble_members == True:
-                                    exp_files = [f for f in exp_files_all if '-{}_'.format(ensemble_member) in f]
+                                    exp_files = np.sort([f for f in exp_files_all if '{}-{}_'.format(speci_to_process,ensemble_member) in f])
                                 else:
                                     exp_files = copy.deepcopy(exp_files_all)
 
