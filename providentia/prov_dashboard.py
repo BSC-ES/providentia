@@ -944,13 +944,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                                       int(self.previous_relevant_yearmonths[-1][4:6]),
                                                                       1, 0, 0))
                     metadata_right_edge_ind = (new_relative_delta.years * 12) + new_relative_delta.months
-
+                self.metadata_in_memory = self.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
                     # iterate through all keys in data in memory dictionary and
                     # cut edges of the associated arrays appropriately
                 for data_label in list(self.data_in_memory.keys()):
                     self.data_in_memory[data_label] = self.data_in_memory[data_label][:,
                                                       data_left_edge_ind:data_right_edge_ind]
-                    self.metadata_in_memory = self.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
+                    
 
             # need to read on left edge?
             if read_left:
