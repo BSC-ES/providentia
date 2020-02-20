@@ -21,6 +21,7 @@ from matplotlib.widgets import LassoSelector
 from matplotlib.gridspec import GridSpec
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 
 import numpy as np
 import pandas as pd
@@ -246,6 +247,9 @@ class MPLCanvas(FigureCanvas):
         selected lower/upper limit bounds, selected measurement
         methods and selected minimum data availability %"""
 
+        # Update mouse cursor to a waiting cursor
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
         # get set variables names representing percentage data availability (native and non-native)
         active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['labels']
 
@@ -264,6 +268,8 @@ class MPLCanvas(FigureCanvas):
             selected_upper_bound = np.float32(selected_upper_bound)
         # if any of the fields are not numbers, return from function
         except ValueError:
+            # Restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
             return
 
         # reset data arrays to be un-filtered
@@ -534,6 +540,9 @@ class MPLCanvas(FigureCanvas):
 
             # draw changes
             self.draw()
+
+        # Restore mouse cursor to normal
+        QtWidgets.QApplication.restoreOverrideCursor()
 
     def colocate_data(self):
         """Define function which colocates observational and experiment data"""
@@ -1051,14 +1060,14 @@ class MPLCanvas(FigureCanvas):
                                 function_arguments['exp'] = exp_group
 
                                 # calculate experiment bias statistic between observations and
-                                # experiment group data (if have valid data in both groups)
-                                if (len(function_arguments['obs']) > 0) & (len(function_arguments['exp']) > 0):
+                                # experiment group data 
+                                try:
                                     # calculate experiment bias statistic
                                     stat_output_by_group = \
                                         np.append(stat_output_by_group,
                                                   getattr(ExpBias, stats_dict['function'])(**function_arguments))
-                                # if no valid data in one (or both) of observations/experiment groups, append NaN
-                                else:
+                                # if can not calculate statistic, append NaN
+                                except:
                                     stat_output_by_group = np.append(stat_output_by_group, np.NaN)
                             # save experiment bias statistic by group to selected station data dictionary
                             self.selected_station_data[data_label][temporal_aggregation_resolution][
