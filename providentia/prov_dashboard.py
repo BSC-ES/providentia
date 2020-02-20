@@ -142,11 +142,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         config_bar.setAlignment(QtCore.Qt.AlignLeft)
 
         #define all configuration box objects (labels, comboboxes etc.)
-        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text = "Data Selection"), formatting_dict['title_menu'])
+        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"), formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
         self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
         self.bu_read.setFixedWidth(40)
-        self.bu_read.setStyleSheet("color: red;")
+        self.bu_read.setStyleSheet("color: green;")
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), formatting_dict['checkbox_menu'])
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
@@ -179,7 +179,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
-        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Data Filter"), formatting_dict['title_menu'])
+        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), formatting_dict['title_menu'])
         self.lb_data_filter.setFixedWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
         self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), formatting_dict['button_menu'])
@@ -188,6 +188,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), formatting_dict['button_menu'])
         self.bu_meta.setFixedWidth(46)
         self.bu_meta.setToolTip('Select metadata to filter by')
+        self.bu_reset = set_formatting(QtWidgets.QPushButton('RESET', self), formatting_dict['button_menu'])
+        self.bu_reset.setFixedWidth(50)
+        self.bu_reset.setToolTip('Reset filter fields in initial values')
+        self.bu_reset.setStyleSheet("color: red;")
         self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), formatting_dict['button_menu'])
         self.bu_period.setFixedWidth(50)
         self.bu_period.setToolTip('Select data in specific periods')
@@ -253,6 +257,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_rep, 1, 6)
         config_bar.addWidget(self.bu_meta, 2, 6)
+        config_bar.addWidget(self.bu_reset, 0, 7)
         config_bar.addWidget(self.bu_period, 1, 7)
         config_bar.addWidget(self.bu_screen, 2, 7)
         config_bar.addWidget(self.lb_data_bounds, 0, 8, QtCore.Qt.AlignCenter)
@@ -371,6 +376,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # Enable interactivity of functions which update MPL canvas
         # enable READ button
         self.bu_read.clicked.connect(self.handle_data_selection_update)
+
+        # enable RESET button
+        self.bu_reset.clicked.connect(self.reset_options)
 
         # enable interactivity of colocation checkbox
         self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_colocate_update)
@@ -1089,6 +1097,51 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
+
+    def reset_options(self):
+        """Resets all metadata fields to initial values"""
+
+        # set rep fields to empty lists and initialize again
+        self.representativity_menu['rangeboxes']['labels'] = []
+        self.representativity_menu['rangeboxes']['current_lower'] = []
+        self.update_representativity_fields()
+
+        # set period fields to empty and initiliaze them
+        self.period_menu['checkboxes']['keep_selected'] = []
+        self.period_menu['checkboxes']['remove_selected'] = []
+        self.update_period_fields()
+
+        # reset metadata
+        for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
+            for label in self.metadata_menu[metadata_type]['navigation_buttons']['labels']:
+                self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['previous_keep_selected'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['previous_remove_selected'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['keep_default'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['remove_default'] = []
+            # self.metadata_menu[metadata_type]['rangeboxes']['previous_labels'] = []
+            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = [''] * len(
+                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = [''] * len(
+                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['previous_lower'] = [''] * len(
+                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['previous_upper'] = [''] * len(
+                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = [''] * len(
+                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = [''] * len(
+                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+        self.update_metadata_fields()
+
+        # reset bounds
+        species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
+        species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
+        # set default limits
+        self.le_minimum_value.setText(str(species_lower_limit))
+        self.le_maximum_value.setText(str(species_upper_limit))
 
     def read_setup(self):
         """Function that setups key variables for new read of
