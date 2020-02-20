@@ -157,7 +157,7 @@ class MPLCanvas(FigureCanvas):
         self.station_metadata_ax.axis('off')
 
         # add map axis if map not yet initialised (i.e. first time loading some data)
-        if self.map_initialised is False:
+        if not self.map_initialised:
 
             # create map axis
             map_ax = self.gridspec.new_subplotspec((0, 0), rowspan=45, colspan=45)
@@ -435,7 +435,7 @@ class MPLCanvas(FigureCanvas):
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['previous_lower'][meta_var_index])
                     # if current lower value is non-NaN, and different from previous value,
                     # then filter out data with metadata < current lower value
-                    if (pd.isnull(current_lower) is False) & (current_lower != previous_lower):
+                    if (not pd.isnull(current_lower)) & (current_lower != previous_lower):
                         invalid_below = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] < current_lower,
                                                   self.read_instance.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
@@ -450,7 +450,7 @@ class MPLCanvas(FigureCanvas):
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['previous_upper'][meta_var_index])
                     # if current upper value is non-NaN, and different from previous value,
                     # then filter out data with metadata > current upper value
-                    if (pd.isnull(current_upper) is False) & (current_upper != previous_upper):
+                    if (not pd.isnull(current_upper)) & (current_upper != previous_upper):
                         invalid_above = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] > current_upper,
                                                   self.read_instance.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
@@ -479,43 +479,6 @@ class MPLCanvas(FigureCanvas):
                 # save valid station indices with data array
                 self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
                 np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
-
-#                # get unique standard measurement methodologies across stations
-#                self.read_instance.previous_station_unique_methods = \
-#                    copy.deepcopy(self.read_instance.station_unique_methods)
-#                self.read_instance.station_unique_methods = \
-#                    np.unique(self.read_instance.station_methods[valid_station_indices_availability])
-#
-#                # if unique methods have changed from previous, update method checkboxes
-#                if np.array_equal(self.read_instance.previous_station_unique_methods,
-#                                  self.read_instance.station_unique_methods) is False:
-#
-#                    # if are reading new data into memory, update all methods to be checked by default
-#                    if self.read_instance.block_MPL_canvas_updates is True:
-#                        self.read_instance.selected_indices['METHODS'] = \
-#                            [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
-#
-#                    # else if all previous methods were ticked then, update all new methods to be ticked also
-#                    elif len(self.read_instance.selected_indices['METHODS'][0]) == \
-#                            len(self.read_instance.previous_station_unique_methods):
-#                        self.read_instance.selected_indices['METHODS'] = \
-#                            [np.arange(len(self.read_instance.station_unique_methods), dtype=np.int)]
-#
-#                    # otherwise, update checked methods to be the subset between previously
-#                    # checked methods and current unique methods
-#                    else:
-#                        intersect_methods = np.intersect1d(self.read_instance.previous_station_unique_methods[self.read_instance.selected_indices['METHODS'][0]], self.read_instance.station_unique_methods)
-#                        self.read_instance.selected_indices['METHODS'] = [[np.where(self.read_instance.station_unique_methods == intersect_method)[0][0] for intersect_method in intersect_methods]]
-#
-#                # get indices of subset stations which use checked standard methodologies
-#                checked_methods = \
-#                    self.read_instance.station_unique_methods[self.read_instance.selected_indices['METHODS'][0]]
-#                valid_station_indices = \
-#                    valid_station_indices_availability[np.isin(
-#                        self.read_instance.station_methods[valid_station_indices_availability], checked_methods)]
-#
-#                # save valid station indices with data array
-#                self.read_instance.data_in_memory_filtered[data_label]['valid_station_inds'] = valid_station_indices
 
         # write valid station indices calculated for observations across to associated experimental data arrays
         # iterate through all data arrays
@@ -558,7 +521,7 @@ class MPLCanvas(FigureCanvas):
                 self.read_instance.plotting_params[data_label]['valid_station_inds'] = valid_station_inds
 
         # update plotted map z statistic (if necessary)
-        if self.read_instance.block_MPL_canvas_updates is False:
+        if not self.read_instance.block_MPL_canvas_updates:
             # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
             self.calculate_z_statistic()
 
@@ -635,12 +598,11 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments'] = obs_data
             self.read_instance.plotting_params['observations_colocatedto_experiments'] = {'colour':self.read_instance.plotting_params['observations']['colour'], 'zorder':self.read_instance.plotting_params['observations']['zorder']}
 
-
     def handle_colocate_update(self):
         """Function that handles the update of the MPL canvas
         with colocated data upon checking of the colocate checkbox"""
 
-        if self.read_instance.block_MPL_canvas_updates is False:
+        if not self.read_instance.block_MPL_canvas_updates:
 
             # if only have 1 data array in memory (i.e. observations), no colocation is possible,
             # therefore set colocation_active to be False, and return
@@ -708,7 +670,7 @@ class MPLCanvas(FigureCanvas):
             # if any of the currently selected stations are not in the current active map
             # valid station indices --> unselect selected stations (and associated plots)
             # also uncheck select all/intersect checkboxes
-            if np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)) is False:
+            if not np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)):
                 # unselect all/intersect checkboxes
                 self.read_instance.block_MPL_canvas_updates = True
                 self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
@@ -905,11 +867,11 @@ class MPLCanvas(FigureCanvas):
         for data_label in list(self.read_instance.data_in_memory_filtered.keys()):
 
             # if colocation is not active, do not convert colocated data arrays to pandas data frames
-            if self.colocate_active is False:
+            if not self.colocate_active:
                 if 'colocated' in data_label:
                     continue
             # else, if colocation is active, do not convert non-colocated data arrays to pandas data frames
-            elif self.colocate_active is True:
+            elif self.colocate_active:
                 if 'colocated' not in data_label:
                     continue
 
@@ -1055,7 +1017,7 @@ class MPLCanvas(FigureCanvas):
                                 temporal_aggregation_resolution][basic_stat][group_ii]
 
                             # take difference between observations and experiment statistics, if both values not NaN
-                            if (np.isnan(group_obs_stat) == False) & (np.isnan(group_exp_stat) == False):
+                            if (not np.isnan(group_obs_stat)) & (not np.isnan(group_exp_stat)):
                                 # calculate difference statistic (experiment - observations)
                                 stat_diff_by_group = np.append(stat_diff_by_group, group_exp_stat-group_obs_stat)
                             # else, if one (or both) of observations/experiment statistics are NaN, append NaN
@@ -1600,7 +1562,7 @@ class MPLCanvas(FigureCanvas):
         """Function that calculates selected z statistic for map"""
 
         # get relevant observational array (dependent on colocation)
-        if self.colocate_active is False:
+        if not self.colocate_active:
             obs_array = self.read_instance.plotting_params['observations']['valid_station_inds']
         else:
             obs_array = \
@@ -1645,14 +1607,14 @@ class MPLCanvas(FigureCanvas):
         # else, set appropriate colourmap for the type of statistic
         else:
             # if only have selected z1 array, the statistic is 'absolute', so use sequential colourbar
-            if have_z2 is False:
+            if not have_z2:
                 self.z_colourmap = self.read_instance.sequential_colourmap
             # if have selected z1 and z2 arrays, the statistic is 'difference', so use diverging colourbar
             else:
                 self.z_colourmap = self.read_instance.diverging_colourmap
 
         # generate z colourbar label
-        if have_z2 is False:
+        if not have_z2:
             self.z_label = '%s\n%s %s' % (z1_selected_name, stats_dict['label'], label_units)
         else:
             self.z_label = '%s - %s\n%s %s' % (z2_selected_name, z1_selected_name, stats_dict['label'], label_units)
@@ -1660,7 +1622,7 @@ class MPLCanvas(FigureCanvas):
         # if colocation is active, set appropriate z1/z2 arrays to read to get colocated data arrays
         if self.colocate_active:
             # don't have z2 array?
-            if have_z2 is False:
+            if not have_z2:
                 if z1_selected_name == 'observations':
                     z1_array_to_read = 'observations_colocatedto_experiments'
                 else:
@@ -1686,7 +1648,7 @@ class MPLCanvas(FigureCanvas):
 
         # get active map valid station indices (i.e. the indices of the stations data to plot on the map)
         # if only have z1, valid map indices are those simply for the z1 array
-        if have_z2 is False:
+        if not have_z2:
             self.active_map_valid_station_inds = \
                 self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds']
         else:
@@ -1715,7 +1677,7 @@ class MPLCanvas(FigureCanvas):
         self.z_statistic = np.empty(len(z1_array_data))
 
         # if have no z2 data, calculate 'absolute' basic statistic
-        if have_z2 is False:
+        if not have_z2:
 
             # load default selected z statistic arguments for passing to statistical function
             function_arguments = stats_dict['arguments']
@@ -1786,7 +1748,7 @@ class MPLCanvas(FigureCanvas):
         have_defined_vmin = False
         if 'vmin' in list(stats_dict.keys()):
             # if z statistic type is 'basic' and taking a difference, then DO NOT use defined vmin
-            if (z_statistic_type == 'basic') & (have_z2 is False):
+            if (z_statistic_type == 'basic') & (not have_z2):
                 have_defined_vmin = True
             elif z_statistic_type == 'bias':
                 have_defined_vmin = True
@@ -1801,7 +1763,7 @@ class MPLCanvas(FigureCanvas):
         have_defined_vmax = False
         if 'vmax' in list(stats_dict.keys()):
             # if z statistic type is 'basic' and taking a difference, then DO NOT use defined vmax
-            if (z_statistic_type == 'basic') & (have_z2 is False):
+            if (z_statistic_type == 'basic') & (not have_z2):
                 have_defined_vmax = True
             elif z_statistic_type == 'bias':
                 have_defined_vmax = True
@@ -1814,7 +1776,7 @@ class MPLCanvas(FigureCanvas):
 
         # if z statistic is a 'difference', and do not have one of vmin/vmax pre-defined,
         # force vmin/vmax to be symmetrical across 0
-        if (have_z2 is True) & (have_defined_vmin is False) & (have_defined_vmax is False):
+        if have_z2 & (not have_defined_vmin) & (not have_defined_vmax):
             limit_stat = np.max(np.abs([self.z_vmin, self.z_vmax]))
             self.z_vmin = -limit_stat
             self.z_vmax = limit_stat
@@ -1822,7 +1784,7 @@ class MPLCanvas(FigureCanvas):
     def handle_map_z_statistic_update(self):
         """Define function which handles update of map z statistic"""
 
-        if self.read_instance.block_config_bar_handling_updates is False:
+        if not self.read_instance.block_config_bar_handling_updates:
 
             # update map z statistic comboboxes
             # set variable that blocks configuration bar handling updates until all
@@ -1844,7 +1806,7 @@ class MPLCanvas(FigureCanvas):
 
             # update z statistic field to all basic stats if colocation not-active OR z2
             # array not selected, else select basic+bias stats
-            if (self.colocate_active is False) or (selected_z2_array == ''):
+            if (not self.colocate_active) or (selected_z2_array == ''):
                 z_stat_items = copy.deepcopy(self.read_instance.basic_z_stats)
             else:
                 z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
@@ -1876,7 +1838,7 @@ class MPLCanvas(FigureCanvas):
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
-            if self.read_instance.block_MPL_canvas_updates is False:
+            if not self.read_instance.block_MPL_canvas_updates:
 
                 # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
                 self.calculate_z_statistic()
@@ -1890,7 +1852,7 @@ class MPLCanvas(FigureCanvas):
     def handle_experiment_bias_update(self):
         """Define function that handles update of plotted experiment bias statistics"""
 
-        if self.read_instance.block_config_bar_handling_updates is False:
+        if not self.read_instance.block_config_bar_handling_updates:
 
             # if no experiment data loaded, do not update
             if len(self.read_instance.experiment_bias_types) > 0:
@@ -1907,7 +1869,7 @@ class MPLCanvas(FigureCanvas):
 
                 # update experiment bias statistics (used for Aggregated field), to all basic stats
                 # if colocation not-active, and basic+bias stats if colocation active
-                if self.colocate_active is False:
+                if not self.colocate_active:
                     available_experiment_bias_stats = copy.deepcopy(self.read_instance.basic_z_stats)
                 else:
                     available_experiment_bias_stats = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
@@ -1940,7 +1902,7 @@ class MPLCanvas(FigureCanvas):
                 # allow handling updates to the configuration bar again
                 self.read_instance.block_config_bar_handling_updates = False
 
-                if self.read_instance.block_MPL_canvas_updates is False:
+                if not self.read_instance.block_MPL_canvas_updates:
 
                     # update experiment bias plot/s if have some stations selected on map
                     if len(self.relative_selected_station_inds) > 0:
@@ -1964,7 +1926,7 @@ class MPLCanvas(FigureCanvas):
         """Define function that selects/unselects all plotted stations
         (and associated plots) upon ticking of checkbox"""
 
-        if self.read_instance.block_MPL_canvas_updates is False:
+        if not self.read_instance.block_MPL_canvas_updates:
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1993,7 +1955,7 @@ class MPLCanvas(FigureCanvas):
             self.update_map_station_selection()
 
             # if selected stations have changed from previous selected, update associated plots
-            if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) is False:
+            if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
                 self.update_associated_selected_station_plots()
 
             # draw changes
@@ -2006,7 +1968,7 @@ class MPLCanvas(FigureCanvas):
         upon ticking of checkbox
         """
 
-        if self.read_instance.block_MPL_canvas_updates is False:
+        if not self.read_instance.block_MPL_canvas_updates:
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -2053,7 +2015,7 @@ class MPLCanvas(FigureCanvas):
             self.update_map_station_selection()
 
             # if selected stations have changed from previous selected, update associated plots
-            if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) is False:
+            if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
                 self.update_associated_selected_station_plots()
 
             # draw changes
@@ -2110,7 +2072,7 @@ class MPLCanvas(FigureCanvas):
         self.update_map_station_selection()
 
         # if selected stations have changed from previous selected, update associated plots
-        if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) is False:
+        if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
             self.update_associated_selected_station_plots()
 
         # draw changes
@@ -2160,7 +2122,7 @@ class MPLCanvas(FigureCanvas):
         self.lasso.set_visible(False)
 
         # if selected stations have changed from previous selected, update associated plots
-        if np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds) is False:
+        if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
             self.update_associated_selected_station_plots()
 
         # draw changes
