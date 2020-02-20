@@ -426,7 +426,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.block_config_bar_handling_updates = True
 
         # set some default configuration values when initialising config bar
-        if self.config_bar_initialisation is True:
+        if self.config_bar_initialisation:
             # set initially selected/active start-end date as default 201601-201701
             self.le_start_date.setText('20160101')
             self.le_end_date.setText('20170101')
@@ -524,7 +524,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.get_valid_obs_files_in_date_range()
 
         # if date range has changed then update available observational data dictionary
-        if self.date_range_has_changed is True:
+        if self.date_range_has_changed:
             self.get_valid_obs_files_in_date_range()
 
         # initialise/update fields - maintain previously selected values wherever possible
@@ -587,8 +587,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set selected indices as previously selected indices in current available list of experiments
         self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for previous_selected_experiment in self.experiments_menu['checkboxes']['keep_selected'] if previous_selected_experiment in self.experiments_menu['checkboxes']['map_vars']]
 
-        #if initialising config bar then check default selection of QA checkboxes
-        if self.config_bar_initialisation == True:
+        # if initialising config bar then check default selection of QA checkboxes
+        if self.config_bar_initialisation:
             self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa_menu['checkboxes']['remove_default'])
 
         #unset variable to allow interactive handling from now
@@ -713,7 +713,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
     def config_bar_params_change_handler(self, changed_param):
         """Define function which handles interactive updates of combo box fields"""
 
-        if (changed_param != '') & (self.block_config_bar_handling_updates is False):
+        if (changed_param != '') & (not self.block_config_bar_handling_updates):
 
             # get event origin source
             event_source = self.sender()
@@ -757,7 +757,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         """
 
         # if have no data to read, then do not read any data
-        if self.no_data_to_read is True:
+        if self.no_data_to_read:
             return
 
         # Update mouse cursor to a waiting cursor
@@ -866,15 +866,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                experiment not in self.previous_active_experiment_grids]
 
         # has date range changed?
-        if (read_all == True) or (read_left == True) or (read_right == True) or (cut_left == True) or (
-                cut_right == True):
+        if read_all or read_left or read_right or cut_left or cut_right :
 
             # set new active time array/unique station references/longitudes/latitudes
             # adjust data arrays to account for potential changing number of stations
             self.read_setup()
 
             # need to re-read all observations/experiments?
-            if read_all == True:
+            if read_all:
                 # reset data in memory dictionary
                 self.data_in_memory = {}
                 self.plotting_params = {}
@@ -890,10 +889,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             else:
                 # if station references array has changed then as cutting/appending to
                 # existing data need to rearrange existing data arrays accordingly
-                if np.array_equal(self.previous_station_references, self.station_references) == False:
+                if not np.array_equal(self.previous_station_references, self.station_references):
                     # get indices of stations in previous station references array in current station references array
                     old_station_inds = np.where(np.in1d(self.previous_station_references, self.station_references))[0]
-                    # get indices of stations in current station references array that were in previous station references array
+                    # get indices of stations in current station references array
+                    # that were in previous station references array
                     new_station_inds = np.where(np.in1d(self.station_references, self.previous_station_references))[0]
 
                     new_metadata_array = np.full((len(self.station_references), len(self.previous_relevant_yearmonths)),
@@ -916,7 +916,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         self.data_in_memory[data_label] = new_data_array
 
             # need to cut edges?
-            if (cut_left == True) or (cut_right == True):
+            if cut_left or cut_right:
 
                 # set default edge limits as current edges
                 data_left_edge_ind = 0
@@ -926,7 +926,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 metadata_right_edge_ind = len(self.previous_relevant_yearmonths)
 
                 # need to cut on left data edge?
-                if cut_left == True:
+                if cut_left:
                     data_left_edge_ind = np.where(self.previous_time_array == self.time_array[0])[0][0]
                     new_relative_delta = relativedelta(
                         datetime.datetime(int(self.relevant_yearmonths[0][:4]), int(self.relevant_yearmonths[0][4:6]),
@@ -936,7 +936,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     metadata_left_edge_ind = (new_relative_delta.years * 12) + new_relative_delta.months
 
                     # need to cut on right data edge?
-                if cut_right == True:
+                if cut_right:
                     data_right_edge_ind = np.where(self.previous_time_array == self.time_array[-1])[0][0] + 1
                     new_relative_delta = relativedelta(
                         datetime.datetime(int(self.relevant_yearmonths[-1][:4]), int(self.relevant_yearmonths[-1][4:6]),
@@ -953,7 +953,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     self.metadata_in_memory = self.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
 
             # need to read on left edge?
-            if read_left == True:
+            if read_left:
                 # get n number of new elements on left edge
                 n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
                 new_relative_delta = relativedelta(datetime.datetime(int(self.previous_relevant_yearmonths[0][:4]),
@@ -982,7 +982,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     self.read_data(data_label, self.active_start_date, self.previous_active_start_date)
 
             # need to read on right edge?
-            if read_right == True:
+            if read_right:
                 # get n number of new elements on right edge
                 n_new_right_data_inds = (len(self.time_array) - 1) - \
                                         np.where(self.time_array == self.previous_time_array[-1])[0][0]
@@ -1089,7 +1089,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
-
 
     def read_setup(self):
         """Function that setups key variables for new read of
