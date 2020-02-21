@@ -205,7 +205,9 @@ class ExpBias(object):
 
     @staticmethod
     def calculate_upa(obs, exp):
-        """Calculate unpaired peak accuracy (UPA)"""
+        """Calculate unpaired peak accuracy (UPA)
+           see here: https://gitlab.com/polyphemus/atmopy/-/blob/master/stat/measure.py
+        """
         obs_max = np.max(obs)
         exp_max = np.max(exp)
-        return (exp_max - obs_max) - obs_max
+        return (exp_max - obs_max) / obs_max
