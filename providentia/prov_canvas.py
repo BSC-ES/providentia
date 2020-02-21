@@ -1025,8 +1025,8 @@ class MPLCanvas(FigureCanvas):
                             group_exp_stat = self.selected_station_data[data_label][
                                 temporal_aggregation_resolution][basic_stat][group_ii]
 
-                            # take difference between observations and experiment statistics, if both values not NaN
-                            if (not np.isnan(group_obs_stat)) & (not np.isnan(group_exp_stat)):
+                            # take difference between observations and experiment statistics, if both values finite
+                            if (np.isfinite(group_obs_stat)) & (np.isfinite(group_exp_stat)):
                                 # calculate difference statistic (experiment - observations)
                                 stat_diff_by_group = np.append(stat_diff_by_group, group_exp_stat-group_obs_stat)
                             # else, if one (or both) of observations/experiment statistics are NaN, append NaN
@@ -1741,11 +1741,11 @@ class MPLCanvas(FigureCanvas):
                     # calculate statistic
                     self.z_statistic[z_ii] = getattr(ExpBias, stats_dict['function'])(**function_arguments)
 
-        # if any station z statistics come out as NaN, remove respective
+        # if any station z statistics come out as NaN/inf, remove respective
         # stations from active map valid station indices
-        # also cut z_statistic to remove invalid NaNs
+        # also cut z_statistic to remove invalid NaNs/infs
 
-        valid_z_statistic_boolean = ~np.isnan(self.z_statistic)
+        valid_z_statistic_boolean = np.isfinite(self.z_statistic) 
         self.active_map_valid_station_inds = self.active_map_valid_station_inds[valid_z_statistic_boolean]
         self.z_statistic = self.z_statistic[valid_z_statistic_boolean]
 
