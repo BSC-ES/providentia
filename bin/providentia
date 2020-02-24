@@ -5,7 +5,6 @@ cores=16
 jobname="PRV"
 queue="debug"
 mem="50Gb"
-cpuspertask="4" 
 
 function usage () {
 echo "Usage: providentia [-h|--help] [-c|--cores NUM_CORES (default=16)]"
@@ -65,18 +64,15 @@ while [[ $# -gt 0 ]]; do
                     queue="$1";;
         -m|--mem) shift
                     mem="$1";;
-        -c|--cpus-per-task) shift
-                    cpuspertask="$1";;
         *) break ;;
     esac
     shift  # Expose the next argument
 done
 
-echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}, cpuspertask: ${cpuspertask}"
+echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
 
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
-cpuspertask_option="--cpus-per-task=$cpuspertask" 
 srun_command="srun -t 02:00:00 -n 1 -c $cores -J $jobname --x11=first"
 python_command="python3 -Wi -c 'from providentia import providentia;providentia.main()' $@"
 
@@ -84,7 +80,7 @@ python_command="python3 -Wi -c 'from providentia import providentia;providentia.
 #CTE POWER
 if [ "${BSC_MACHINE}" == "power" ]; then
     #get allocation of resources on CTE-POWER machine
-    eval "${srun_command} ${cpuspertask_option} ${queue_option} ${memory_option} ${python_command}"
+    eval "${srun_command} ${queue_option} ${memory_option} ${python_command}"
 #Marenustrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     #get allocation of resources on MN4 machine
