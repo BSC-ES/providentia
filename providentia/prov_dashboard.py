@@ -477,8 +477,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.all_observation_data = {}
 
             # set all available networks
-            print("*****", type(self.available_networks), "--", available_networks)
-            available_networks = self.available_networks
+            available_networks = eval(self.available_networks)
 
             # set all available temporal resolutions
             available_resolutions = ['hourly', 'hourly_instantaneous', 'daily', 'monthly']
