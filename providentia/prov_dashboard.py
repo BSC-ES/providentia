@@ -928,25 +928,35 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 # need to cut on left data edge?
                 if cut_left:
                     data_left_edge_ind = np.where(self.previous_time_array == self.time_array[0])[0][0]
-                    new_relative_delta = relativedelta(
-                        datetime.datetime(int(self.relevant_yearmonths[0][:4]), int(self.relevant_yearmonths[0][4:6]),
-                                          1, 0, 0), datetime.datetime(int(self.previous_relevant_yearmonths[0][:4]),
-                                                                      int(self.previous_relevant_yearmonths[0][4:6]), 1,
+                    str_first_relevant_yearmonth = str(self.relevant_yearmonths[0])
+                    str_previous_first_relevant_yearmonth = str(self.previous_relevant_yearmonths[0])
+                    monthly_relative_delta = relativedelta(
+                        datetime.datetime(int(str_first_relevant_yearmonth[:4]), int(str_first_relevant_yearmonth[4:6]),
+                                          1, 0, 0), datetime.datetime(int(str_previous_first_relevant_yearmonth[:4]),
+                                                                      int(str_previous_first_relevant_yearmonth[4:6]), 1,
                                                                       0, 0))
-                    metadata_left_edge_ind = (new_relative_delta.years * 12) + new_relative_delta.months
+                    metadata_left_edge_ind = (monthly_relative_delta.years * 12) + monthly_relative_delta.months
 
-                    # need to cut on right data edge?
+                # need to cut on right data edge?
                 if cut_right:
                     data_right_edge_ind = np.where(self.previous_time_array == self.time_array[-1])[0][0] + 1
-                    new_relative_delta = relativedelta(
-                        datetime.datetime(int(self.relevant_yearmonths[-1][:4]), int(self.relevant_yearmonths[-1][4:6]),
-                                          1, 0, 0), datetime.datetime(int(self.previous_relevant_yearmonths[-1][:4]),
-                                                                      int(self.previous_relevant_yearmonths[-1][4:6]),
+                    str_last_relevant_yearmonth = str(self.relevant_yearmonths[-1])
+                    str_previous_last_relevant_yearmonth = str(self.previous_relevant_yearmonths[-1])
+                    monthly_relative_delta = relativedelta(
+                        datetime.datetime(int(str_previous_last_relevant_yearmonth[:4]), int(str_previous_last_relevant_yearmonth[4:6]),
+                                          1, 0, 0), datetime.datetime(int(str_last_relevant_yearmonth[:4]),
+                                                                      int(str_last_relevant_yearmonth[4:6]),
                                                                       1, 0, 0))
-                    metadata_right_edge_ind = (new_relative_delta.years * 12) + new_relative_delta.months
-                self.metadata_in_memory = self.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
-                    # iterate through all keys in data in memory dictionary and
-                    # cut edges of the associated arrays appropriately
+                    metadata_right_edge_ind = metadata_right_edge_ind - ((monthly_relative_delta.years * 12) + monthly_relative_delta.months)
+                
+                #do metadata array cut
+                if metadata_left_edge_ind == metadata_right_edge_ind:
+                    self.metadata_in_memory = self.metadata_in_memory[:, [metadata_left_edge_ind]]
+                else:
+                    self.metadata_in_memory = self.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]           
+ 
+                # iterate through all keys in data in memory dictionary and
+                # cut edges of the associated arrays appropriately
                 for data_label in list(self.data_in_memory.keys()):
                     self.data_in_memory[data_label] = self.data_in_memory[data_label][:,
                                                       data_left_edge_ind:data_right_edge_ind]
@@ -956,15 +966,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             if read_left:
                 # get n number of new elements on left edge
                 n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
-                new_relative_delta = relativedelta(datetime.datetime(int(self.previous_relevant_yearmonths[0][:4]),
-                                                                     int(self.previous_relevant_yearmonths[0][4:6]), 1,
-                                                                     0, 0),
-                                                   datetime.datetime(int(self.relevant_yearmonths[0][:4]),
-                                                                     int(self.relevant_yearmonths[0][4:6]), 1, 0, 0))
-                n_new_left_metadata_inds = (new_relative_delta.years * 12) + new_relative_delta.months
-                self.metadata_inds_to_fill = np.arange(0, n_new_left_metadata_inds)
+
+                #get list of yearmonths to read
+                yearmonths_to_read = self.get_yearmonths_to_read(self.relevant_yearmonths, self.active_start_date, self.previous_active_start_date)
+                #check which yearmonths_to_read in previous matrix
+                yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths) 
+                #get yearmonths not currently accounted for in matrix
+                new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix] 
+
+                self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
                 self.metadata_in_memory = np.concatenate((np.full(
-                    (len(self.station_references), n_new_left_metadata_inds), np.NaN, dtype=self.metadata_dtype),
+                    (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
                                                           self.metadata_in_memory), axis=1)
 
                 # iterate through all keys in data in memory dictionary and
@@ -986,15 +998,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 # get n number of new elements on right edge
                 n_new_right_data_inds = (len(self.time_array) - 1) - \
                                         np.where(self.time_array == self.previous_time_array[-1])[0][0]
-                new_relative_delta = relativedelta(
-                    datetime.datetime(int(self.relevant_yearmonths[-1][:4]), int(self.relevant_yearmonths[-1][4:6]), 1,
-                                      0, 0), datetime.datetime(int(self.previous_relevant_yearmonths[-1][:4]),
-                                                               int(self.previous_relevant_yearmonths[-1][4:6]), 1, 0,
-                                                               0))
-                n_new_right_metadata_inds = (new_relative_delta.years * 12) + new_relative_delta.months
-                self.metadata_inds_to_fill = np.arange(-n_new_right_metadata_inds, 0)
+
+                #get list of yearmonths to read
+                yearmonths_to_read = self.get_yearmonths_to_read(self.relevant_yearmonths, self.previous_active_end_date, self.active_end_date)
+                #check which yearmonths_to_read in previous matrix
+                yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths) 
+                #get yearmonths not currently accounted for in matrix
+                new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]  
+
+                self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
                 self.metadata_in_memory = np.concatenate((self.metadata_in_memory, np.full(
-                    (len(self.station_references), n_new_right_metadata_inds), np.NaN, dtype=self.metadata_dtype)), axis=1)
+                    (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
 
                 # iterate through all keys in data in memory dictionary and
                 # insert read data on right edge of the associated arrays
@@ -1127,15 +1141,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
                                             self.active_network, self.ghost_version,
                                             self.active_resolution, self.active_species, self.active_species)
-        self.relevant_yearmonths = sorted([str(yyyymm) for yyyymm in
+        self.relevant_yearmonths = np.sort([yyyymm for yyyymm in
                                            self.available_observation_data[self.active_network][self.active_resolution][
                                                self.active_matrix][self.active_species]])
-        relevant_files = sorted([file_root+yyyymm[:6]+'.nc' for yyyymm in self.relevant_yearmonths])
+        relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.relevant_yearmonths])
         self.N_inds_per_month = np.array([np.count_nonzero(np.all(
-            [self.time_array >= datetime.datetime.strptime(start_yyyymm, '%Y%m%d'),
-             self.time_array < datetime.datetime.strptime(self.relevant_yearmonths[month_ii + 1], '%Y%m%d')],
+            [self.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d'),
+             self.time_array < datetime.datetime.strptime(str(self.relevant_yearmonths[month_ii + 1]), '%Y%m%d')],
             axis=0)) if month_ii != (len(self.relevant_yearmonths) - 1) else np.count_nonzero(
-            self.time_array >= datetime.datetime.strptime(start_yyyymm, '%Y%m%d')) for month_ii, start_yyyymm in
+            self.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d')) for month_ii, start_yyyymm in
                                           enumerate(self.relevant_yearmonths)])
 
         self.station_references = []
@@ -1177,6 +1191,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set data dtype
         self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
 
+    def get_yearmonths_to_read(self, yearmonths, start_date_to_read, end_date_to_read):
+        """Function that returns the yearmonths of the files needed to be read.
+           This is done by limiting a list of relevant yearmonths by a start/end date
+        """
+          
+        first_valid_file_ind = bisect.bisect_right(yearmonths, int(start_date_to_read))
+        if first_valid_file_ind != 0:
+            first_valid_file_ind = first_valid_file_ind - 1
+        last_valid_file_ind = bisect.bisect_left(yearmonths, int(end_date_to_read))
+        if first_valid_file_ind == last_valid_file_ind:
+            return [yearmonths[first_valid_file_ind]]
+        else:
+            return yearmonths[first_valid_file_ind:last_valid_file_ind]      
+
     def read_data(self, data_label, start_date_to_read, end_date_to_read):
         """Function that handles reading of observational/experiment data"""
 
@@ -1206,18 +1234,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                               self.active_species, self.active_network, self.active_species)
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 
-        # create list of relevant files to read
-        relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in relevant_file_start_dates]
-
-        # limit data files to required date range to read (i.e. taking care not to re-read what has already been read)
-        first_valid_file_ind = bisect.bisect_right(relevant_file_start_dates, int(start_date_to_read))
-        if first_valid_file_ind != 0:
-            first_valid_file_ind = first_valid_file_ind - 1
-        last_valid_file_ind = bisect.bisect_left(relevant_file_start_dates, int(end_date_to_read))
-        if first_valid_file_ind == last_valid_file_ind:
-            relevant_files = [relevant_files[first_valid_file_ind]]
-        else:
-            relevant_files = relevant_files[first_valid_file_ind:last_valid_file_ind]
+        # get data files in required date range to read, taking care not to re-read what has already been read
+        yearmonths_to_read = self.get_yearmonths_to_read(relevant_file_start_dates, start_date_to_read, end_date_to_read)
+        relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in yearmonths_to_read]
 
         # check if data label in data in memory dictionary
         if data_label not in list(self.data_in_memory.keys()):
