@@ -90,6 +90,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--map_coastline_resolution",
                                      dest="map_coastline_resolution",
                                      help="define coastlines resolution")
+            self.parser.add_argument("--available_networks",
+                                     dest="available_networks",
+                                     help="define available networks (default=['EBAS', 'EEA_AQ_eReporting'])")
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
