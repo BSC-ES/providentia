@@ -1115,6 +1115,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
     def reset_options(self):
         """Resets all metadata fields to initial values"""
 
+        if self.block_MPL_canvas_updates:
+            return
+
         # set rep fields to empty lists and initialize again
         self.representativity_menu['rangeboxes']['labels'] = []
         self.representativity_menu['rangeboxes']['current_lower'] = []
@@ -1156,6 +1159,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set default limits
         self.le_minimum_value.setText(str(species_lower_limit))
         self.le_maximum_value.setText(str(species_upper_limit))
+
+        # unfilter data
+        self.mpl_canvas.handle_data_filter_update()
 
     def read_setup(self):
         """Function that setups key variables for new read of
