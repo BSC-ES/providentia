@@ -54,7 +54,7 @@ setup(
     packages=['providentia', 'providentia.interpolation'],
 
     # Include additional files into the package
-    # include_package_data=True,
+    include_package_data=True,
     scripts=['bin/providentia'],
 
     # Details
