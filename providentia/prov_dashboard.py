@@ -16,6 +16,7 @@ import datetime
 import gc
 import multiprocessing
 import os
+import os.path
 import json
 import sys
 from functools import partial
@@ -31,6 +32,8 @@ from dateutil.relativedelta import relativedelta
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
@@ -66,16 +69,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.standard_QA_name_to_QA_code = {}
         self.init_standards()
 
+        # load necessary dictionaries
+        self.basic_stats_dict = json.load(open(os.path.join(CURRENT_PATH,
+                                                            'conf/basic_stats_dict.json')))
+        self.expbias_dict = json.load(open(os.path.join(CURRENT_PATH,
+                                                        'conf/experiment_bias_stats_dict.json')))
         # create UI
         self.init_ui()
 
         # setup callback events upon resizing/moving of Providentia window
         self.resized.connect(self.get_geometry)
         self.move.connect(self.get_geometry)
-
-        # load necessary dictionaries
-        self.basic_stats_dict = json.load(open('providentia/conf/basic_stats_dict.json'))
-        self.expbias_dict = json.load(open('providentia/conf/experiment_bias_stats_dict.json'))
 
     def init_standards(self):
         """ Read from ghost standards """
@@ -956,19 +960,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                                       int(str_last_relevant_yearmonth[4:6]),
                                                                       1, 0, 0))
                     metadata_right_edge_ind = metadata_right_edge_ind - ((monthly_relative_delta.years * 12) + monthly_relative_delta.months)
-                
+
                 #do metadata array cut
                 if metadata_left_edge_ind == metadata_right_edge_ind:
                     self.metadata_in_memory = self.metadata_in_memory[:, [metadata_left_edge_ind]]
                 else:
-                    self.metadata_in_memory = self.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]           
- 
+                    self.metadata_in_memory = self.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
+
                 # iterate through all keys in data in memory dictionary and
                 # cut edges of the associated arrays appropriately
                 for data_label in list(self.data_in_memory.keys()):
                     self.data_in_memory[data_label] = self.data_in_memory[data_label][:,
                                                       data_left_edge_ind:data_right_edge_ind]
-                    
+
 
             # need to read on left edge?
             if read_left:
@@ -978,9 +982,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 #get list of yearmonths to read
                 yearmonths_to_read = self.get_yearmonths_to_read(self.relevant_yearmonths, self.active_start_date, self.previous_active_start_date)
                 #check which yearmonths_to_read in previous matrix
-                yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths) 
+                yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths)
                 #get yearmonths not currently accounted for in matrix
-                new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix] 
+                new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
                 self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
                 self.metadata_in_memory = np.concatenate((np.full(
@@ -1010,9 +1014,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 #get list of yearmonths to read
                 yearmonths_to_read = self.get_yearmonths_to_read(self.relevant_yearmonths, self.previous_active_end_date, self.active_end_date)
                 #check which yearmonths_to_read in previous matrix
-                yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths) 
+                yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths)
                 #get yearmonths not currently accounted for in matrix
-                new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]  
+                new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
                 self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
                 self.metadata_in_memory = np.concatenate((self.metadata_in_memory, np.full(
@@ -1254,7 +1258,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         """Function that returns the yearmonths of the files needed to be read.
            This is done by limiting a list of relevant yearmonths by a start/end date
         """
-          
+
         first_valid_file_ind = bisect.bisect_right(yearmonths, int(start_date_to_read))
         if first_valid_file_ind != 0:
             first_valid_file_ind = first_valid_file_ind - 1
@@ -1262,7 +1266,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         if first_valid_file_ind == last_valid_file_ind:
             return [yearmonths[first_valid_file_ind]]
         else:
-            return yearmonths[first_valid_file_ind:last_valid_file_ind]      
+            return yearmonths[first_valid_file_ind:last_valid_file_ind]
 
     def read_data(self, data_label, start_date_to_read, end_date_to_read):
         """Function that handles reading of observational/experiment data"""
@@ -1289,7 +1293,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             active_member = experiment_grid_split[2]
             file_root = \
                 '%s/%s/%s/%s/%s/%s/%s/%s/%s_' % (self.exp_root, self.ghost_version, active_experiment,
-                                              active_grid, active_member, self.active_resolution, 
+                                              active_grid, active_member, self.active_resolution,
                                               self.active_species, self.active_network, self.active_species)
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 

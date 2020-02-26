@@ -25,7 +25,7 @@ from PyQt5 import QtWidgets
 
 import numpy as np
 import pandas as pd
-import json
+# import json
 
 # Make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
@@ -121,14 +121,21 @@ class MPLCanvas(FigureCanvas):
 
         # load basic statistics dictionary from conf, set in self
         # for rest of functions to see
-        self.bstats_dict = json.load(open('providentia/conf/basic_stats_dict.json'))
-        # same for experiment bias statistics
-        self.expbias_dict = json.load(open('providentia/conf/experiment_bias_stats_dict.json'))
+        # json.load(open('providentia/conf/basic_stats_dict.json'))
+        self.bstats_dict = self.read_instance.basic_stats_dict
 
-        # Define dictionary for mapping days of week/months as integers to equivalent strings for writing on axes
-        self.temporal_axis_mapping_dict = {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
-                                           'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
-                                                     7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}}
+        # same for experiment bias statistics
+        # json.load(open('providentia/conf/experiment_bias_stats_dict.json'))
+        self.expbias_dict = self.read_instance.expbias_dict
+
+        # Define dictionary for mapping days of week/months as integers to
+        # equivalent strings for writing on axes
+        self.temporal_axis_mapping_dict = {
+            'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6:
+                          'S'},
+            'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J', 7:
+                      'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
+        }
 
     def update_MPL_canvas(self):
         """Function that updates MPL canvas upon clicking
