@@ -8,3 +8,4 @@ providentia.egg-info
 .eggs
 .coverage
 __pycache__
+dist
