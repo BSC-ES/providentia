@@ -1184,7 +1184,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.previous_relevant_yearmonths = self.relevant_yearmonths
 
         # get N time chunks between desired start date and end date to set time array
-        if self.active_resolution == 'hourly':
+        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
             self.active_frequency_code = 'H'
         elif self.active_resolution == 'daily':
             self.active_frequency_code = 'D'
