@@ -1133,7 +1133,8 @@ class MPLCanvas(FigureCanvas):
             'ax': self.violin_months_ax, 'title': 'M', 'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
 
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
-        if self.read_instance.active_resolution == 'hourly':
+        if (self.read_instance.active_resolution == 'hourly') or \
+                (self.read_instance.active_resolution == 'hourly_instantaneous'):
             aggregation_dict = {'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict,
                                 'month': month_aggregation_dict}
         elif self.read_instance.active_resolution == 'daily':
