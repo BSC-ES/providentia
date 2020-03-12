@@ -504,9 +504,8 @@ class MPLCanvas(FigureCanvas):
                 if '_colocatedto_' in data_label:
                     exp_name = data_label.split('_colocatedto_')[0]
                     self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
-                        copy.deepcopy(self.read_instance.plotting_params['observations_colocatedto_%s' %
-                                                                                 exp_name]['valid_station_inds'])
-                # handle non-located experimental arrays
+                        copy.deepcopy(self.read_instance.plotting_params['observations_colocatedto_{}'.format(exp_name)]['valid_station_inds'])
+                # handle non-colocated experimental arrays
                 else:
                     self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
                         copy.deepcopy(self.read_instance.plotting_params['observations']['valid_station_inds'])
@@ -582,30 +581,54 @@ class MPLCanvas(FigureCanvas):
             # initialise as being all True, set as False on the occasion there is a valid value in an experiment
             exps_all_nan = np.full(nan_obs.shape, True)
 
-            # iterate through experiment data arrays in data in memory dictionary
-            for data_label in list(self.read_instance.data_in_memory.keys()):
-                if data_label != 'observations':
-                    # get all instances experiment are NaN
-                    nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])
-                    # get all instances where either the observational array or experiment array are NaN at a given time
-                    nan_instances = np.any([nan_obs, nan_exp], axis=0)
-                    # create new observational array colocated to experiment
-                    obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
-                    obs_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['observations_colocatedto_%s' % (data_label)] = obs_data
-                    self.read_instance.plotting_params['observations_colocatedto_%s' % (data_label)] = {
-                        'colour': self.read_instance.plotting_params['observations']['colour'],
-                        'zorder': self.read_instance.plotting_params['observations']['zorder']}
-                    # create new experiment array colocated to observations
-                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[data_label])
-                    exp_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['%s_colocatedto_observations' % (data_label)] = exp_data
-                    self.read_instance.plotting_params['%s_colocatedto_observations' % (data_label)] = {
-                        'colour': self.read_instance.plotting_params[data_label]['colour'],
-                        'zorder': self.read_instance.plotting_params[data_label]['zorder']}
-                    # update exps_all_nan array, making False all instances where have valid experiment data
-                    exps_all_nan = np.all([exps_all_nan, nan_exp], axis=0)
+            #get name of all experiment labels in memory
+            exp_labels = sorted(list(self.read_instance.data_in_memory.keys()))
+            exp_labels.remove('observations')
 
+            # iterate through experiment data arrays in data in memory dictionary
+            exp_nan_dict = {}
+            for exp_label in exp_labels:
+                # get all instances experiment are NaN
+                exp_nan_dict[exp_label] = np.isnan(self.read_instance.data_in_memory_filtered[exp_label][self.read_instance.active_species])
+                # get all instances where either the observational array or experiment array are NaN at a given time
+                nan_instances = np.any([nan_obs, exp_nan_dict[exp_label]], axis=0)
+                # create new observational array colocated to experiment
+                obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
+                obs_data[nan_instances] = np.NaN
+                self.read_instance.data_in_memory_filtered['observations_colocatedto_{}'.format(exp_label)] = obs_data
+                self.read_instance.plotting_params['observations_colocatedto_{}'.format(exp_label)] = {
+                    'colour': self.read_instance.plotting_params['observations']['colour'],
+                    'zorder': self.read_instance.plotting_params['observations']['zorder']}
+                # create new experiment array colocated to observations
+                exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label])
+                exp_data[nan_instances] = np.NaN
+                self.read_instance.data_in_memory_filtered['{}_colocatedto_observations'.format(exp_label)] = exp_data
+                self.read_instance.plotting_params['{}_colocatedto_observations'.format(exp_label)] = {
+                    'colour': self.read_instance.plotting_params[exp_label]['colour'],
+                    'zorder': self.read_instance.plotting_params[exp_label]['zorder']}
+                # update exps_all_nan array, making False all instances where have valid experiment data
+                exps_all_nan = np.all([exps_all_nan, exp_nan_dict[exp_label]], axis=0)
+                
+            #colocate experiments with all other experiments
+            for exp_label_ii, exp_label in enumerate(exp_labels):
+                for exp_label_2 in exp_labels[exp_label_ii+1:]:
+                    # get all instances where either of the experiment arrays are NaN at a given time
+                    nan_instances = np.any([exp_nan_dict[exp_label], exp_nan_dict[exp_label_2]], axis=0) 
+                    # create new experiment array for experiment1 colocated to experiment2
+                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label])
+                    exp_data[nan_instances] = np.NaN
+                    self.read_instance.data_in_memory_filtered['{}_colocatedto_{}'.format(exp_label,exp_label_2)] = exp_data
+                    self.read_instance.plotting_params['{}_colocatedto_{}'.format(exp_label,exp_label_2)] = {
+                        'colour': self.read_instance.plotting_params[exp_label]['colour'],
+                        'zorder': self.read_instance.plotting_params[exp_label]['zorder']}
+                    # create new experiment array for experiment2 colocated to experiment1
+                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label_2])
+                    exp_data[nan_instances] = np.NaN
+                    self.read_instance.data_in_memory_filtered['{}_colocatedto_{}'.format(exp_label_2,exp_label)] = exp_data
+                    self.read_instance.plotting_params['{}_colocatedto_{}'.format(exp_label_2,exp_label)] = {
+                        'colour': self.read_instance.plotting_params[exp_label_2]['colour'],
+                        'zorder': self.read_instance.plotting_params[exp_label_2]['zorder']}
+                    
             # create observational data array colocated to be non-NaN whenever
             # there is a valid data in at least 1 experiment
             exps_all_nan = np.any([nan_obs, exps_all_nan], axis=0)
@@ -1608,7 +1631,7 @@ class MPLCanvas(FigureCanvas):
             stats_dict = self.bstats_dict[z_statistic_name]
             # set label units for statistic
             if z_statistic_name != 'Data %':
-                label_units = ' (%s)' % self.read_instance.measurement_units
+                label_units = ' ({})'.format(self.read_instance.measurement_units)
             else:
                 label_units = ''
         # if not a basic statistic, it must be an experiment bias statistic
@@ -1632,9 +1655,9 @@ class MPLCanvas(FigureCanvas):
 
         # generate z colourbar label
         if not have_z2:
-            self.z_label = '%s\n%s %s' % (z1_selected_name, stats_dict['label'], label_units)
+            self.z_label = '{}\n{} {}'.format(z1_selected_name, stats_dict['label'], label_units)
         else:
-            self.z_label = '%s - %s\n%s %s' % (z2_selected_name, z1_selected_name, stats_dict['label'], label_units)
+            self.z_label = '{} - {}\n{} {}'.format(z2_selected_name, z1_selected_name, stats_dict['label'], label_units)
 
         # if colocation is active, set appropriate z1/z2 arrays to read to get colocated data arrays
         if self.colocate_active:
@@ -1643,18 +1666,25 @@ class MPLCanvas(FigureCanvas):
                 if z1_selected_name == 'observations':
                     z1_array_to_read = 'observations_colocatedto_experiments'
                 else:
-                    z1_array_to_read = '%s_colocatedto_observations' % z1_selected_name
+                    z1_array_to_read = '{}_colocatedto_observations'.format(z1_selected_name)
             # have z2 array?
             elif have_z2:
                 if z1_selected_name == 'observations':
-                    z1_array_to_read = 'observations_colocatedto_%s' % z2_selected_name
+                    z1_array_to_read = 'observations_colocatedto_{}'.format(z2_selected_name)
                 else:
-                    z1_array_to_read = '%s_colocatedto_observations' % z1_selected_name
+                    if z2_selected_name == 'observations':
+                        z1_array_to_read = '{}_colocatedto_observations'.format(z1_selected_name)
+                    else:   
+                        z1_array_to_read = '{}_colocatedto_{}'.format(z1_selected_name, z2_selected_name) 
 
                 if z2_selected_name == 'observations':
-                    z2_array_to_read = 'observations_colocatedto_%s' % z1_selected_name
+                    z2_array_to_read = 'observations_colocatedto_{}'.format(z1_selected_name)
                 else:
-                    z2_array_to_read = '%s_colocatedto_observations' % z2_selected_name
+                    if z1_selected_name == 'observations':
+                        z2_array_to_read = '{}_colocatedto_observations'.format(z2_selected_name)
+                    else:
+                        z2_array_to_read = '{}_colocatedto_{}'.format(z2_selected_name, z1_selected_name)
+
         # else, simply use selected z1/z2 array names to read uncolocated data arrays
         else:
             z1_array_to_read = copy.deepcopy(z1_selected_name)
