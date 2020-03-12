@@ -48,7 +48,7 @@ class ProvConfiguration(object):
         self.map_coastline_resolution = \
                 kwargs.get('map_coastline_resolution', 'low')
         self.available_networks = \
-                kwargs.get('available_networks', "['EBAS','EEA_AQ_eReporting']")
+                kwargs.get('available_networks', "['AERONET_v3','EBAS','EEA_AQ_eReporting','NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP']")
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
