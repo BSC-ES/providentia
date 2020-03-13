@@ -99,6 +99,7 @@ class ComboBox(QtWidgets.QComboBox):
         """Shows popups"""
         QtWidgets.QComboBox.showPopup(self)
         self.view().parent().move(self.mapToGlobal(QtCore.QPoint()))
+        #self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
 
 class QVLine(QtWidgets.QFrame):
