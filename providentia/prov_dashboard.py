@@ -164,7 +164,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.cb_matrix.setFixedWidth(95)
         self.cb_matrix.setToolTip('Select data matrix')
         self.cb_species = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_species.setStyleSheet("QComboBox { combobox-popup: 0; }}")
+        self.cb_species.setStyleSheet("QComboBox { combobox-popup: 0; }")
         self.cb_species.setFixedWidth(95)
         self.cb_species.setToolTip('Select species')
         self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
