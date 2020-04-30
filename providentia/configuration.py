@@ -89,7 +89,7 @@ class ProvConfiguration(object):
             # set observational root data directory if left undefined
             if value == '':
                 # running on CTE-POWER/MN4?
-                if (MACHINE == 'power') or (MACHINE == 'mn4'):
+                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3'):
                     value = '/gpfs/projects/bsc32/AC_cache/obs/ghost'
                 else:
                     # running on workstation?
@@ -100,7 +100,7 @@ class ProvConfiguration(object):
             # set experiment root data directory if left undefined
             if value == '':
                 # running on CTE-POWER?
-                if (MACHINE == 'power') or (MACHINE == 'mn4'):
+                if (MACHINE == 'power') or (MACHINE == 'mn4') (MACHINE == 'nord3'):
                     return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
 
                 # running on workstation?
