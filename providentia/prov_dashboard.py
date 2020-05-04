@@ -557,7 +557,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.no_data_to_read = False
 
         # update network field
-        available_networks = sorted(list(self.available_observation_data.keys()))
+        available_networks = list(self.available_observation_data.keys())
         self.cb_network.addItems(available_networks)
         if self.selected_network in available_networks:
             self.cb_network.setCurrentText(self.selected_network)
@@ -567,7 +567,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.cb_network.currentText()].keys())
         # manually force order of available resolutions
-        resolution_order_dict = {'hourly':1, 'hourly_instantaneous':2, 'daily':3, 'monthly':4}
+        resolution_order_dict = {'hourly':1, '3hourly':2, 'hourly_instantaneous':3, 'daily':4, 'monthly':5}
         available_resolutions = sorted(available_resolutions, key=resolution_order_dict.__getitem__)
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
@@ -662,6 +662,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                             # add species with associated list of file start yearmonths
                             self.available_observation_data[network][resolution][matrix][
                                 species] = valid_species_files_yearmonths
+
+        # load dictionary with esarchive files
+        esarchive_files = json.load(open(os.path.join(CURRENT_PATH, 'conf/esarchive_files.json')))
+        # and merge to existing dict
+        self.available_observation_data = {**self.available_observation_data, **esarchive_files}
 
     def get_valid_experiment_files_in_date_range(self):
         """Define function which gathers available experiment
