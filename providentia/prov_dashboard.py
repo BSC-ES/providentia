@@ -759,6 +759,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # update configuration bar fields
             self.update_configuration_bar_fields()
 
+            # if we're reading nonghost files, then disable fields
+            if '*' in self.cb_network.currentText():
+                self.disable_ghost_buttons()
+                self.reading_nonghost = True
+            else:
+                self.reading_nonghost = False
+                self.enable_ghost_buttons()
+
     def valid_date(self, date_text):
         """define function that determines if a date string is in the correct format"""
 
@@ -894,7 +902,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 # reset data in memory dictionary
                 self.data_in_memory = {}
                 self.plotting_params = {}
-                self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
+                if not self.reading_nonghost:
+                    self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
                 # read observations
                 self.read_data('observations', self.active_start_date, self.active_end_date)
                 # read selected experiments (iterate through)
@@ -1535,6 +1544,31 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             return opts
 
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
+
+    def disable_ghost_buttons(self):
+        """Disable button related only to ghost data"""
+        # TODO: add all ghost related fields to a list
+        # and set to False in a list-comprehension way
+        # change background-color to indicate that it's nonusable
+        self.bu_flags.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        self.bu_rep.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        self.bu_meta.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        self.bu_period.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        self.bu_QA.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        # and disable
+        self.bu_QA.setEnabled(False)
+        self.bu_flags.setEnabled(False)
+        self.bu_rep.setEnabled(False)
+        self.bu_meta.setEnabled(False)
+        self.bu_period.setEnabled(False)
+
+    def enable_ghost_buttons(self):
+        """Enable button related only to ghost data"""
+        self.bu_QA.setEnabled(True)
+        self.bu_flags.setEnabled(True)
+        self.bu_rep.setEnabled(True)
+        self.bu_meta.setEnabled(True)
+        self.bu_period.setEnabled(True)
 
 
 # generate Providentia dashboard
