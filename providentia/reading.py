@@ -119,3 +119,64 @@ def read_netcdf_data(tuple_arguments):
         return file_data, full_array_time_indices, full_array_station_indices, file_metadata
     else:
         return file_data, full_array_time_indices, full_array_station_indices
+
+
+def read_netcdf_nonghost(tuple_arguments):
+    """Function to handle reading of non-ghost files"""
+
+    # assign arguments from tuple to variables
+    relevant_file, time_array, station_references, active_species, process_type = tuple_arguments
+    # read netCDF frame
+    ncdf_root = Dataset(relevant_file)
+
+    # get time units
+    time_units = ncdf_root['time'].units
+
+    # get file time (handle monthly resolution data differently to hourly/daily
+    # as num2date does not support 'months since' units)
+    if 'months' in time_units:
+        monthly_start_date = time_units.split(' ')[2]
+        file_time = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
+    else:
+        file_time = num2date(ncdf_root['time'][:], time_units)
+        # remove microseconds
+        file_time = pd.to_datetime([t.replace(microsecond=0) for t in file_time])
+
+    # get valid file time indices (i.e. those times in active full time array)
+    valid_file_time_indices = \
+        np.array([i for i, val in enumerate(file_time)
+                  if (val >= time_array[0]) & (val <= time_array[-1])],
+                 dtype=np.int)
+    # cut file time for valid indices
+    file_time = file_time[valid_file_time_indices]
+
+    # get indices relative to active full time array
+    full_array_time_indices = np.searchsorted(time_array, file_time)
+
+    # get all station references in file
+    # file_station_references = station_references  #ncdf_root['station_name'][:]
+    file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
+                                        for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+    # get indices of all unique station references that are contained
+    # within file station references array
+    full_array_station_indices = \
+        np.where(np.in1d(station_references, file_station_references))[0]
+    # get indices of file station station references that are
+    # contained in all unique station references array
+    current_file_station_indices = \
+        np.where(np.in1d(file_station_references, station_references))[0]
+    # for observations, set species data based on selected qa flags/standard data provider
+    # flags/classifications to retain or remove as NaN
+    if process_type == 'observations':
+        file_data = np.full((len(current_file_station_indices),
+                             len(valid_file_time_indices)), np.NaN)
+        # for data_var in data_vars_to_read:
+        file_data[:] = ncdf_root[active_species][valid_file_time_indices, current_file_station_indices].T
+
+    # close netCDF
+    ncdf_root.close()
+
+    # return valid species data, time indices relative to active full time array,
+    # file station indices relative to all unique station references array
+    if process_type == 'observations':
+        return file_data, full_array_time_indices, full_array_station_indices
