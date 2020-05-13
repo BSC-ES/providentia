@@ -2,6 +2,7 @@
 from .configuration import ProvConfiguration
 from .configuration import parse_path
 from .reading import read_netcdf_data
+from .reading import read_netcdf_nonghost
 from .prov_canvas import MPLCanvas
 from .prov_canvas import NavigationToolbar
 from .prov_dashboard_aux import ComboBox
@@ -1214,10 +1215,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                               int(str_active_end_date[6:8])),
                                         freq=self.active_frequency_code)[:-1]
 
-        # get all relevant observational files
-        file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
-                                            self.active_network, self.ghost_version,
-                                            self.active_resolution, self.active_species, self.active_species)
+        if not self.reading_nonghost:
+            # get all relevant observational files
+            file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
+                                                self.active_network, self.ghost_version,
+                                                self.active_resolution, self.active_species, self.active_species)
+        else:
+            # "/esarchive/obs/eea/eionet/hourly/sconco3/"
+            nonghost_root = "/esarchive/obs"
+            file_root = '%s/%s/%s/%s/%s/%s_' % (nonghost_root, self.active_network[1:].lower(),
+                                                self.selected_matrix, self.active_resolution, self.active_species,
+                                                self.active_species)
+
         self.relevant_yearmonths = np.sort([yyyymm for yyyymm in
                                            self.available_observation_data[self.active_network][self.active_resolution][
                                                self.active_matrix][self.active_species]])
@@ -1229,18 +1238,28 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d')) for month_ii, start_yyyymm in
                                           enumerate(self.relevant_yearmonths)])
 
+
         self.station_references = []
         self.station_longitudes = []
         self.station_latitudes = []
-        for relevant_file in relevant_files:
-            ncdf_root = Dataset(relevant_file)
-            self.station_references = np.append(self.station_references, ncdf_root['station_reference'][:])
+        if not self.reading_nonghost:
+            for relevant_file in relevant_files:
+                ncdf_root = Dataset(relevant_file)
+                self.station_references = np.append(self.station_references, ncdf_root['station_reference'][:])
+                self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
+                self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
+                ncdf_root.close()
+            self.station_references, station_unique_indices = np.unique(self.station_references, return_index=True)
+            self.station_longitudes = self.station_longitudes[station_unique_indices]
+            self.station_latitudes = self.station_latitudes[station_unique_indices]
+        else:
+            ncdf_root = Dataset(relevant_files[0])
+            self.station_references = np.array(
+                [st_name.tostring().decode('ascii').replace('\x00', '') for st_name in ncdf_root['station_name'][:]],
+                dtype=np.str)
             self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
             self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
             ncdf_root.close()
-        self.station_references, station_unique_indices = np.unique(self.station_references, return_index=True)
-        self.station_longitudes = self.station_longitudes[station_unique_indices]
-        self.station_latitudes = self.station_latitudes[station_unique_indices]
 
         # update measurement units for species (take standard units from parameter dictionary)
         self.measurement_units = self.parameter_dictionary[self.active_species]['standard_units']
@@ -1292,12 +1311,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # also get relevant file start dates
         if data_label == 'observations':
             self.process_type = 'observations'
-            file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
-                                                self.active_network, self.ghost_version,
-                                                self.active_resolution, self.active_species, self.active_species)
-            relevant_file_start_dates = \
-                sorted(self.available_observation_data[self.active_network]
-                       [self.active_resolution][self.active_matrix][self.active_species])
+            if not self.reading_nonghost:
+                file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
+                                                    self.active_network, self.ghost_version,
+                                                    self.active_resolution, self.active_species, self.active_species)
+                relevant_file_start_dates = \
+                    sorted(self.available_observation_data[self.active_network]
+                           [self.active_resolution][self.active_matrix][self.active_species])
+            else:
+                nonghost_root = "/esarchive/obs"
+                file_root = '%s/%s/%s/%s/%s/%s_' % (nonghost_root, self.active_network[1:].lower(),
+                                                    self.selected_matrix, self.active_resolution, self.active_species,
+                                                    self.active_species)
+                relevant_file_start_dates = \
+                    sorted(self.available_observation_data[self.active_network]
+                           [self.active_resolution][self.active_matrix][self.active_species])
 
         else:
             self.process_type = 'experiment'
@@ -1363,12 +1391,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             pool = multiprocessing.Pool(self.n_cpus)
 
             # read netCDF files in parallel
-            tuple_arguments = [(file_name, self.time_array, self.station_references, self.active_species,
-                                self.process_type, self.active_qa, self.active_flags,
-                                self.data_dtype, self.data_vars_to_read,
-                                self.metadata_dtype, self.metadata_vars_to_read) for
-                               file_name in relevant_files]
-            all_file_data = pool.map(read_netcdf_data, tuple_arguments)
+            if not self.reading_nonghost:
+                tuple_arguments = [(file_name, self.time_array, self.station_references, self.active_species,
+                                    self.process_type, self.active_qa, self.active_flags,
+                                    self.data_dtype, self.data_vars_to_read,
+                                    self.metadata_dtype, self.metadata_vars_to_read) for
+                                   file_name in relevant_files]
+                all_file_data = pool.map(read_netcdf_data, tuple_arguments)
+            else:
+                tuple_arguments = [
+                    (file_name, self.time_array, self.station_references, self.active_species, self.process_type) for
+                    file_name in relevant_files]
+                all_file_data = pool.map(read_nonghost, tuple_arguments)
+
+
             # will not submit more files to pool, so close access to it
             pool.close()
             # wait for worker processes to terminate before continuing
@@ -1377,7 +1413,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # iterate through read file data and place data into data array as appropriate
             for file_data_ii, file_data in enumerate(all_file_data):
                 self.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = file_data[0]
-                if self.process_type == 'observations':
+                if self.process_type == 'observations' and not self.reading_nonghost:
                     self.metadata_in_memory[file_data[2][:, np.newaxis], self.metadata_inds_to_fill[file_data_ii]] = \
                     file_data[3]
 
