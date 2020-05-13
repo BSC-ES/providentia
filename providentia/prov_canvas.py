@@ -356,18 +356,19 @@ class MPLCanvas(FigureCanvas):
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'], season_codes_to_remove)] = np.NaN            
 
         # filter all obersvational data out of set bounds of native percentage data availability variables
-        for var_ii, var in enumerate(active_data_availablity_vars):
-            if 'native' in var:
-                # max gap variable?
-                if 'max_gap' in var:
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                        self.read_instance.data_in_memory_filtered['observations'][var] >
-                        data_availability_lower_bounds[var_ii]] = np.NaN
-                # data representativity variable?
-                else:
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                        self.read_instance.data_in_memory_filtered['observations'][var] <
-                        data_availability_lower_bounds[var_ii]] = np.NaN
+        if not self.read_instance.reading_nonghost:
+            for var_ii, var in enumerate(active_data_availablity_vars):
+                if 'native' in var:
+                    # max gap variable?
+                    if 'max_gap' in var:
+                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            self.read_instance.data_in_memory_filtered['observations'][var] >
+                            data_availability_lower_bounds[var_ii]] = np.NaN
+                    # data representativity variable?
+                    else:
+                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            self.read_instance.data_in_memory_filtered['observations'][var] <
+                            data_availability_lower_bounds[var_ii]] = np.NaN
 
         # filter all obersvational data out of set bounds of non-native percentage data availability variables
         for var_ii, var in enumerate(active_data_availablity_vars):
