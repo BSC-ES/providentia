@@ -1402,7 +1402,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 tuple_arguments = [
                     (file_name, self.time_array, self.station_references, self.active_species, self.process_type) for
                     file_name in relevant_files]
-                all_file_data = pool.map(read_nonghost, tuple_arguments)
+                all_file_data = pool.map(read_netcdf_nonghost, tuple_arguments)
 
 
             # will not submit more files to pool, so close access to it
