@@ -1199,6 +1199,9 @@ class MPLCanvas(FigureCanvas):
                     if data_label.split('_')[0] == 'observations':
                         if data_label != 'observations_colocatedto_experiments':
                             continue
+                        # print only relevant data, otherwise we get double lines for multiple exps
+                        if data_label.split('_')[-1] not in ("observations", "experiments"):
+                            continue
 
                 # get grouped data for current temporal aggregation resolution
                 grouped_data = self.selected_station_data[data_label][temporal_aggregation_resolution]['grouped_data']
@@ -1382,6 +1385,8 @@ class MPLCanvas(FigureCanvas):
 
                 # if data array is observational, continue to next experiment data array
                 if data_label.split('_')[0] == 'observations':
+                    continue
+                if data_label.split('_')[-1] != 'observations':
                     continue
                 # else, make temporally aggregated plot for currently active experiment bias statistic
                 else:
