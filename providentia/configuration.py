@@ -22,7 +22,7 @@ class ProvConfiguration(object):
     def __init__(self, **kwargs):
         self.config_dir = kwargs.get('config_dir', \
              os.path.join(os.environ['HOME'], '.providentia'))
-        self.ghost_version = kwargs.get('ghost_version', '1.2')
+        self.ghost_version = kwargs.get('ghost_version', '1.3')
         self.cartopy_data_dir = kwargs.get('cartopy_data_dir', '')
         self.available_cpus = kwargs.get('available_cpus', '')
         self.n_cpus = kwargs.get('n_cpus', '')
@@ -48,7 +48,7 @@ class ProvConfiguration(object):
         self.map_coastline_resolution = \
                 kwargs.get('map_coastline_resolution', 'low')
         self.available_networks = \
-                kwargs.get('available_networks', "['AERONET_v3','EBAS','EEA_AQ_eReporting','NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP']")
+                kwargs.get('available_networks', "['AERONET_v3','EBAS','EEA_AQ_eReporting','NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP','NCDC_ISD_NA']")
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
