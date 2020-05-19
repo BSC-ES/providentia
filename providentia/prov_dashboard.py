@@ -292,7 +292,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         #setup pop-up window menu tree for flags
         self.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
         self.flag_menu['checkboxes']['labels'] = np.array(sorted(self.standard_data_flag_name_to_data_flag_code, key=self.standard_data_flag_name_to_data_flag_code.get))
-        self.flag_menu['checkboxes']['remove_default'] = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20, 21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 90, 150, 154, 155, 156, 157], dtype=np.uint8)
+        self.flag_menu['checkboxes']['remove_default'] = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20, 21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 80, 90, 94, 95, 96, 97], dtype=np.uint8)
         self.flag_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
         self.flag_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_data_flag_name_to_data_flag_code.values()))
         self.flag_menu['select_buttons'] = ['all', 'clear', 'default']
@@ -300,7 +300,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         #setup pop-up window menu tree for qa
         self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
         self.qa_menu['checkboxes']['labels'] = np.array(sorted(self.standard_QA_name_to_QA_code, key=self.standard_QA_name_to_QA_code.get))
-        self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 5, 6, 8, 10, 12, 13, 14, 17, 18, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
+        self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 6, 8, 9, 10, 12, 13, 14, 15, 18, 19, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
         self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
         self.qa_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_QA_name_to_QA_code.values()))
         self.qa_menu['select_buttons'] = ['all', 'clear', 'default']
