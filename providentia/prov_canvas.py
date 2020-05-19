@@ -1382,11 +1382,13 @@ class MPLCanvas(FigureCanvas):
 
             # iterate through data array names in selected station data dictionary
             for data_label in list(self.selected_station_data.keys()):
-
+                # if colocation is selected, print only relevant labels
+                # to avoid double lines being printed
+                if self.colocate_active:
+                    if data_label.split('_')[-1] != 'observations':
+                        continue
                 # if data array is observational, continue to next experiment data array
                 if data_label.split('_')[0] == 'observations':
-                    continue
-                if data_label.split('_')[-1] != 'observations':
                     continue
                 # else, make temporally aggregated plot for currently active experiment bias statistic
                 else:
