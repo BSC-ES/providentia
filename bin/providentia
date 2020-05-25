@@ -74,7 +74,7 @@ echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 srun_command="srun -t 02:00:00 -n 1 -c $cores -J $jobname --x11=first"
-bsub_command="bsub -W 1:00 -n 16 -M 3000 -q x11 xterm -T Providentia -e"
+bsub_command="bsub -W 2:00 -n 16 -M 3000 -q x11 xterm -T Providentia -e"
 python_command="python3 -Wi -c 'from providentia import providentia;providentia.main()' $@"
 
 
