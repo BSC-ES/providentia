@@ -1201,6 +1201,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # get N time chunks between desired start date and end date to set time array
         if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
             self.active_frequency_code = 'H'
+        elif self.active_resolution == '3hourly':
+            self.active_frequency_code = '3H'
         elif self.active_resolution == 'daily':
             self.active_frequency_code = 'D'
         elif self.active_resolution == 'monthly':
@@ -1222,7 +1224,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                 self.active_resolution, self.active_species, self.active_species)
         else:
             # "/esarchive/obs/eea/eionet/hourly/sconco3/"
-            nonghost_root = "/esarchive/obs"
+            nonghost_root = "/gpfs/scratch/archive/bsc32/esarchive/obs"
             file_root = '%s/%s/%s/%s/%s/%s_' % (nonghost_root, self.active_network[1:].lower(),
                                                 self.selected_matrix, self.active_resolution, self.active_species,
                                                 self.active_species)
@@ -1253,19 +1255,30 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.station_longitudes = self.station_longitudes[station_unique_indices]
             self.station_latitudes = self.station_latitudes[station_unique_indices]
         else:
-            ncdf_root = Dataset(relevant_files[0])
+            # first, try to take the data files and handle in case of daily files
+            if os.path.exists(relevant_files[0]):
+                ncdf_root = Dataset(relevant_files[0])
+            else:
+                relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm in self.relevant_yearmonths])
+                ncdf_root = Dataset(relevant_files[0])
             self.station_references = np.array(
                 [st_name.tostring().decode('ascii').replace('\x00', '') for st_name in ncdf_root['station_name'][:]],
                 dtype=np.str)
-            self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
-            self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
+            # get staion refs
+            if "latitude" in ncdf_root.variables:
+                self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
+                self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
+            else:
+                self.station_longitudes = np.append(self.station_longitudes, ncdf_root['lon'][:])
+                self.station_latitudes = np.append(self.station_latitudes, ncdf_root['lat'][:])
             ncdf_root.close()
 
         # update measurement units for species (take standard units from parameter dictionary)
         self.measurement_units = self.parameter_dictionary[self.active_species]['standard_units']
 
         # set data variables to read (dependent on active data resolution)
-        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
+        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous') \
+                or (self.active_resolution == '3hourly'):
             self.data_vars_to_read = [self.active_species, 'hourly_native_representativity_percent',
                                       'daily_native_representativity_percent',
                                       'monthly_native_representativity_percent',
@@ -1319,7 +1332,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     sorted(self.available_observation_data[self.active_network]
                            [self.active_resolution][self.active_matrix][self.active_species])
             else:
-                nonghost_root = "/esarchive/obs"
+                nonghost_root = "/gpfs/scratch/archive/bsc32/esarchive/obs"
                 file_root = '%s/%s/%s/%s/%s/%s_' % (nonghost_root, self.active_network[1:].lower(),
                                                     self.selected_matrix, self.active_resolution, self.active_species,
                                                     self.active_species)
