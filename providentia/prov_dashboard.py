@@ -533,6 +533,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         # write nested dictionary for species, with associated file yearmonths
                         self.all_observation_data[network][resolution][matrix][species] = species_files_yearmonths
 
+            # load dictionary with esarchive files
+            esarchive_files = json.load(open(os.path.join(CURRENT_PATH, 'conf/esarchive_files.json')))
+            # and merge to existing dict
+            self.all_observation_data = {**self.all_observation_data, **esarchive_files}
             # create dictionary of observational data inside date range
             self.get_valid_obs_files_in_date_range()
 
@@ -664,10 +668,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                             self.available_observation_data[network][resolution][matrix][
                                 species] = valid_species_files_yearmonths
 
-        # load dictionary with esarchive files
-        esarchive_files = json.load(open(os.path.join(CURRENT_PATH, 'conf/esarchive_files.json')))
-        # and merge to existing dict
-        self.available_observation_data = {**self.available_observation_data, **esarchive_files}
 
     def get_valid_experiment_files_in_date_range(self):
         """Define function which gathers available experiment
