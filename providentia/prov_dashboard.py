@@ -1356,6 +1356,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         yearmonths_to_read = self.get_yearmonths_to_read(relevant_file_start_dates, start_date_to_read, end_date_to_read)
         relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in yearmonths_to_read]
 
+        if not os.path.exists(relevant_files[0]):
+            relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm in self.relevant_yearmonths])
+
+
         # check if data label in data in memory dictionary
         if data_label not in list(self.data_in_memory.keys()):
             # if not create empty array (filled with NaNs) to store species data and place it in the dictionary
