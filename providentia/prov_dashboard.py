@@ -1223,9 +1223,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                 self.active_network, self.ghost_version,
                                                 self.active_resolution, self.active_species, self.active_species)
         else:
-            # "/esarchive/obs/eea/eionet/hourly/sconco3/"
-            nonghost_root = "/gpfs/scratch/archive/bsc32/esarchive/obs"
-            file_root = '%s/%s/%s/%s/%s/%s_' % (nonghost_root, self.active_network[1:].lower(),
+            # get files from nonghost path
+            file_root = '%s/%s/%s/%s/%s/%s_' % (self.nonghost_root, self.active_network[1:].lower(),
                                                 self.selected_matrix, self.active_resolution, self.active_species,
                                                 self.active_species)
 
@@ -1332,8 +1331,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     sorted(self.available_observation_data[self.active_network]
                            [self.active_resolution][self.active_matrix][self.active_species])
             else:
-                nonghost_root = "/gpfs/scratch/archive/bsc32/esarchive/obs"
-                file_root = '%s/%s/%s/%s/%s/%s_' % (nonghost_root, self.active_network[1:].lower(),
+                # get files from nonghost path
+                file_root = '%s/%s/%s/%s/%s/%s_' % (self.nonghost_root, self.active_network[1:].lower(),
                                                     self.selected_matrix, self.active_resolution, self.active_species,
                                                     self.active_species)
                 relevant_file_start_dates = \
