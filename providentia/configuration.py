@@ -27,6 +27,7 @@ class ProvConfiguration(object):
         self.available_cpus = kwargs.get('available_cpus', '')
         self.n_cpus = kwargs.get('n_cpus', '')
         self.obs_root = kwargs.get('obs_root', '')
+        self.nonghost_root = kwargs.get('nonghost_root', '')
         self.exp_root = kwargs.get('exp_root', '')
         self.sequential_colourmap = kwargs.get('sequential_colourmap',
                                                'viridis')
@@ -94,6 +95,19 @@ class ProvConfiguration(object):
                 else:
                     # running on workstation?
                     value = '/esarchive/obs/ghost'
+
+        elif key == 'nonghost_root':
+            # Define observational root data directory (if undefined it is
+            # automatically taken from the BSC machine the tool is ran on)
+
+            # set observational root data directory if left undefined
+            if value == '':
+                # running on CTE-POWER/MN4?
+                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3'):
+                    value = '/gpfs/scratch/archive/bsc32/esarchive/obs'
+                else:
+                    # running on workstation?
+                    value = '/esarchive/obs'
 
         elif key == 'exp_root':
             # Define experiment root data directory
