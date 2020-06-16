@@ -2,6 +2,7 @@
 from .configuration import ProvConfiguration
 from .configuration import parse_path
 from .reading import read_netcdf_data
+from .reading import read_netcdf_nonghost
 from .prov_canvas import MPLCanvas
 from .prov_canvas import NavigationToolbar
 from .prov_dashboard_aux import ComboBox
@@ -534,6 +535,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         # write nested dictionary for species, with associated file yearmonths
                         self.all_observation_data[network][resolution][matrix][species] = species_files_yearmonths
 
+            # load dictionary with esarchive files
+            esarchive_files = json.load(open(os.path.join(CURRENT_PATH, 'conf/esarchive_files.json')))
+            # and merge to existing dict
+            self.all_observation_data = {**self.all_observation_data, **esarchive_files}
             # create dictionary of observational data inside date range
             self.get_valid_obs_files_in_date_range()
 
@@ -559,7 +564,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.no_data_to_read = False
 
         # update network field
-        available_networks = sorted(list(self.available_observation_data.keys()))
+        available_networks = list(self.available_observation_data.keys())
         self.cb_network.addItems(available_networks)
         if self.selected_network in available_networks:
             self.cb_network.setCurrentText(self.selected_network)
@@ -569,7 +574,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.cb_network.currentText()].keys())
         # manually force order of available resolutions
-        resolution_order_dict = {'hourly':1, 'hourly_instantaneous':2, 'daily':3, 'monthly':4}
+        resolution_order_dict = {'hourly':1, '3hourly':2, 'hourly_instantaneous':3, 'daily':4, 'monthly':5}
         available_resolutions = sorted(available_resolutions, key=resolution_order_dict.__getitem__)
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
@@ -665,6 +670,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                             self.available_observation_data[network][resolution][matrix][
                                 species] = valid_species_files_yearmonths
 
+
     def get_valid_experiment_files_in_date_range(self):
         """Define function which gathers available experiment
         data for selected network/resolution/species.
@@ -755,6 +761,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # update configuration bar fields
             self.update_configuration_bar_fields()
+
+            # if we're reading nonghost files, then disable fields
+            if '*' in self.cb_network.currentText():
+                self.disable_ghost_buttons()
+                self.reading_nonghost = True
+            else:
+                self.reading_nonghost = False
+                self.enable_ghost_buttons()
 
     def valid_date(self, date_text):
         """define function that determines if a date string is in the correct format"""
@@ -891,7 +905,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 # reset data in memory dictionary
                 self.data_in_memory = {}
                 self.plotting_params = {}
-                self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
+                if not self.reading_nonghost:
+                    self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
                 # read observations
                 self.read_data('observations', self.active_start_date, self.active_end_date)
                 # read selected experiments (iterate through)
@@ -1188,6 +1203,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # get N time chunks between desired start date and end date to set time array
         if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
             self.active_frequency_code = 'H'
+        elif self.active_resolution == '3hourly':
+            self.active_frequency_code = '3H'
         elif self.active_resolution == 'daily':
             self.active_frequency_code = 'D'
         elif self.active_resolution == 'monthly':
@@ -1202,10 +1219,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                               int(str_active_end_date[6:8])),
                                         freq=self.active_frequency_code)[:-1]
 
-        # get all relevant observational files
-        file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
-                                            self.active_network, self.ghost_version,
-                                            self.active_resolution, self.active_species, self.active_species)
+        if not self.reading_nonghost:
+            # get all relevant observational files
+            file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
+                                                self.active_network, self.ghost_version,
+                                                self.active_resolution, self.active_species, self.active_species)
+        else:
+            # get files from nonghost path
+            file_root = '%s/%s/%s/%s/%s/%s_' % (self.nonghost_root, self.active_network[1:].lower(),
+                                                self.selected_matrix, self.active_resolution, self.active_species,
+                                                self.active_species)
+
         self.relevant_yearmonths = np.sort([yyyymm for yyyymm in
                                            self.available_observation_data[self.active_network][self.active_resolution][
                                                self.active_matrix][self.active_species]])
@@ -1217,24 +1241,45 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d')) for month_ii, start_yyyymm in
                                           enumerate(self.relevant_yearmonths)])
 
+
         self.station_references = []
         self.station_longitudes = []
         self.station_latitudes = []
-        for relevant_file in relevant_files:
-            ncdf_root = Dataset(relevant_file)
-            self.station_references = np.append(self.station_references, ncdf_root['station_reference'][:])
-            self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
-            self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
+        if not self.reading_nonghost:
+            for relevant_file in relevant_files:
+                ncdf_root = Dataset(relevant_file)
+                self.station_references = np.append(self.station_references, ncdf_root['station_reference'][:])
+                self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
+                self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
+                ncdf_root.close()
+            self.station_references, station_unique_indices = np.unique(self.station_references, return_index=True)
+            self.station_longitudes = self.station_longitudes[station_unique_indices]
+            self.station_latitudes = self.station_latitudes[station_unique_indices]
+        else:
+            # first, try to take the data files and handle in case of daily files
+            if os.path.exists(relevant_files[0]):
+                ncdf_root = Dataset(relevant_files[0])
+            else:
+                relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm in self.relevant_yearmonths])
+                ncdf_root = Dataset(relevant_files[0])
+            self.station_references = np.array(
+                [st_name.tostring().decode('ascii').replace('\x00', '') for st_name in ncdf_root['station_name'][:]],
+                dtype=np.str)
+            # get staion refs
+            if "latitude" in ncdf_root.variables:
+                self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
+                self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
+            else:
+                self.station_longitudes = np.append(self.station_longitudes, ncdf_root['lon'][:])
+                self.station_latitudes = np.append(self.station_latitudes, ncdf_root['lat'][:])
             ncdf_root.close()
-        self.station_references, station_unique_indices = np.unique(self.station_references, return_index=True)
-        self.station_longitudes = self.station_longitudes[station_unique_indices]
-        self.station_latitudes = self.station_latitudes[station_unique_indices]
 
         # update measurement units for species (take standard units from parameter dictionary)
         self.measurement_units = self.parameter_dictionary[self.active_species]['standard_units']
 
         # set data variables to read (dependent on active data resolution)
-        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
+        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous') \
+                or (self.active_resolution == '3hourly'):
             self.data_vars_to_read = [self.active_species, 'hourly_native_representativity_percent',
                                       'daily_native_representativity_percent',
                                       'monthly_native_representativity_percent',
@@ -1280,12 +1325,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # also get relevant file start dates
         if data_label == 'observations':
             self.process_type = 'observations'
-            file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
-                                                self.active_network, self.ghost_version,
-                                                self.active_resolution, self.active_species, self.active_species)
-            relevant_file_start_dates = \
-                sorted(self.available_observation_data[self.active_network]
-                       [self.active_resolution][self.active_matrix][self.active_species])
+            if not self.reading_nonghost:
+                file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
+                                                    self.active_network, self.ghost_version,
+                                                    self.active_resolution, self.active_species, self.active_species)
+                relevant_file_start_dates = \
+                    sorted(self.available_observation_data[self.active_network]
+                           [self.active_resolution][self.active_matrix][self.active_species])
+            else:
+                # get files from nonghost path
+                file_root = '%s/%s/%s/%s/%s/%s_' % (self.nonghost_root, self.active_network[1:].lower(),
+                                                    self.selected_matrix, self.active_resolution, self.active_species,
+                                                    self.active_species)
+                relevant_file_start_dates = \
+                    sorted(self.available_observation_data[self.active_network]
+                           [self.active_resolution][self.active_matrix][self.active_species])
 
         else:
             self.process_type = 'experiment'
@@ -1302,6 +1356,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # get data files in required date range to read, taking care not to re-read what has already been read
         yearmonths_to_read = self.get_yearmonths_to_read(relevant_file_start_dates, start_date_to_read, end_date_to_read)
         relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in yearmonths_to_read]
+
+        if not os.path.exists(relevant_files[0]):
+            relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm in self.relevant_yearmonths])
+
 
         # check if data label in data in memory dictionary
         if data_label not in list(self.data_in_memory.keys()):
@@ -1351,12 +1409,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             pool = multiprocessing.Pool(self.n_cpus)
 
             # read netCDF files in parallel
-            tuple_arguments = [(file_name, self.time_array, self.station_references, self.active_species,
-                                self.process_type, self.active_qa, self.active_flags,
-                                self.data_dtype, self.data_vars_to_read,
-                                self.metadata_dtype, self.metadata_vars_to_read) for
-                               file_name in relevant_files]
-            all_file_data = pool.map(read_netcdf_data, tuple_arguments)
+            if not self.reading_nonghost:
+                tuple_arguments = [(file_name, self.time_array, self.station_references, self.active_species,
+                                    self.process_type, self.active_qa, self.active_flags,
+                                    self.data_dtype, self.data_vars_to_read,
+                                    self.metadata_dtype, self.metadata_vars_to_read) for
+                                   file_name in relevant_files]
+                all_file_data = pool.map(read_netcdf_data, tuple_arguments)
+            else:
+                tuple_arguments = [
+                    (file_name, self.time_array, self.station_references, self.active_species, self.process_type) for
+                    file_name in relevant_files]
+                all_file_data = pool.map(read_netcdf_nonghost, tuple_arguments)
+
+
             # will not submit more files to pool, so close access to it
             pool.close()
             # wait for worker processes to terminate before continuing
@@ -1365,7 +1431,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # iterate through read file data and place data into data array as appropriate
             for file_data_ii, file_data in enumerate(all_file_data):
                 self.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = file_data[0]
-                if self.process_type == 'observations':
+                if self.process_type == 'observations' and not self.reading_nonghost:
                     self.metadata_in_memory[file_data[2][:, np.newaxis], self.metadata_inds_to_fill[file_data_ii]] = \
                     file_data[3]
 
@@ -1532,6 +1598,31 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             return opts
 
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
+
+    def disable_ghost_buttons(self):
+        """Disable button related only to ghost data"""
+        # TODO: add all ghost related fields to a list
+        # and set to False in a list-comprehension way
+        # change background-color to indicate that it's nonusable
+        self.bu_flags.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        self.bu_rep.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        self.bu_meta.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        self.bu_period.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        self.bu_QA.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        # and disable
+        self.bu_QA.setEnabled(False)
+        self.bu_flags.setEnabled(False)
+        self.bu_rep.setEnabled(False)
+        self.bu_meta.setEnabled(False)
+        self.bu_period.setEnabled(False)
+
+    def enable_ghost_buttons(self):
+        """Enable button related only to ghost data"""
+        self.bu_QA.setEnabled(True)
+        self.bu_flags.setEnabled(True)
+        self.bu_rep.setEnabled(True)
+        self.bu_meta.setEnabled(True)
+        self.bu_period.setEnabled(True)
 
 
 # generate Providentia dashboard
