@@ -155,8 +155,13 @@ def read_netcdf_nonghost(tuple_arguments):
 
     # get all station references in file
     # file_station_references = station_references  #ncdf_root['station_name'][:]
-    file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
+    if process_type == 'observations':
+        file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
                                         for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+    # if we're reading exp, the station references have been handled and exist in
+    # in variable station_reference
+    else:
+        file_station_references = ncdf_root['station_reference'][:]
     # get indices of all unique station references that are contained
     # within file station references array
     full_array_station_indices = \
@@ -173,10 +178,19 @@ def read_netcdf_nonghost(tuple_arguments):
         # for data_var in data_vars_to_read:
         file_data[:] = ncdf_root[active_species][valid_file_time_indices, current_file_station_indices].T
 
+    else:
+        file_data = np.full((len(current_file_station_indices),
+                             len(valid_file_time_indices)), np.NaN)
+
+        relevant_data = ncdf_root[active_species][current_file_station_indices, valid_file_time_indices]
+        # mask out fill values for parameter field
+        relevant_data[relevant_data.mask] = np.NaN
+        file_data[:] = relevant_data
+
     # close netCDF
     ncdf_root.close()
 
     # return valid species data, time indices relative to active full time array,
     # file station indices relative to all unique station references array
-    if process_type == 'observations':
-        return file_data, full_array_time_indices, full_array_station_indices
+    # if process_type == 'observations':
+    return file_data, full_array_time_indices, full_array_station_indices
