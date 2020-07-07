@@ -440,6 +440,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
 
+        self.check_for_ghost()
+
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
             # set initially selected/active start-end date as default 201601-201701
@@ -762,13 +764,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # update configuration bar fields
             self.update_configuration_bar_fields()
 
-            # if we're reading nonghost files, then disable fields
-            if '*' in self.cb_network.currentText():
-                self.disable_ghost_buttons()
-                self.reading_nonghost = True
-            else:
-                self.reading_nonghost = False
-                self.enable_ghost_buttons()
+            # if we're reading nonghost files, then disable fields again
+            self.check_for_ghost()
+
+    def check_for_ghost(self):
+        """ It checks whether the selected network comes from GHOST or not.
+        In case of non-ghost, it disables ghost-related fields"""
+
+        # if we're reading nonghost files, then disable fields
+        if '*' in self.cb_network.currentText():
+            self.disable_ghost_buttons()
+            self.reading_nonghost = True
+        else:
+            self.reading_nonghost = False
+            self.enable_ghost_buttons()
 
     def valid_date(self, date_text):
         """define function that determines if a date string is in the correct format"""
