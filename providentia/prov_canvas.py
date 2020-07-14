@@ -1473,7 +1473,7 @@ class MPLCanvas(FigureCanvas):
                                     'WWF_TEOW_terrestrial_ecoregion': 'WWF TEOW Terrestrial Ecoregion',
                                     'WWF_TEOW_biogeographical_realm': 'WWF TEOW Biogeographical Realm',
                                     'WWF_TEOW_biome': 'WWF TEOW Biome',
-                                    'UMBC_anthrome_classification': 'UMBC Anthrome Class',
+                                    'GHSL_settlement_model_classification': 'GHSL Settlement Class',
                                     'GSFC_coastline_proximity': 'To Coast',
                                     'primary_sampling_type': 'Sampling Instrument Type',
                                     'sample_preparation_types': 'Sample Preparation',
@@ -1510,7 +1510,7 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GPW_population_density'][
+                    self.read_instance.metadata_in_memory['GHSL_population_density'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(
                     self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
@@ -1523,7 +1523,7 @@ class MPLCanvas(FigureCanvas):
                                          'standardised_network_provided_terrain',
                                          'standardised_network_provided_land_use',
                                          'MODIS_MCD12C1_v6_IGBP_land_use',
-                                         'UMBC_anthrome_classification',
+                                         'GHSL_settlement_model_classification',
                                          'measurement_methodology', 'measuring_instrument_name']
 
                 # iterate through metadata variables
@@ -1574,7 +1574,7 @@ class MPLCanvas(FigureCanvas):
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median GPW population density
                 str_to_plot += "Median Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GPW_population_density'][
+                    self.read_instance.metadata_in_memory['GHSL_population_density'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median NOAA-DMSP-OLS nighttime lights
                 str_to_plot += "Median Nighttime Lights: {:.1f}\n".format(np.nanmedian(
@@ -1586,7 +1586,7 @@ class MPLCanvas(FigureCanvas):
                                         'standardised_network_provided_station_classification',
                                         'standardised_network_provided_terrain',
                                         'standardised_network_provided_land_use',
-                                        'MODIS_MCD12C1_v6_IGBP_land_use', 'UMBC_anthrome_classification',
+                                        'MODIS_MCD12C1_v6_IGBP_land_use', 'GHSL_settlement_model_classification',
                                         'measurement_methodology', 'measuring_instrument_name']
 
                 # iterate through metadata variables
