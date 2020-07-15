@@ -301,7 +301,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.flag_menu['select_buttons'] = ['all', 'clear', 'default']
 
         #setup pop-up window menu tree for qa
-        self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
+        self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
         self.qa_menu['checkboxes']['labels'] = np.array(sorted(self.standard_QA_name_to_QA_code, key=self.standard_QA_name_to_QA_code.get))
         self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 6, 8, 9, 10, 12, 13, 14, 15, 18, 19, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
         self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
