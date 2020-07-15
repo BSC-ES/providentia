@@ -22,7 +22,7 @@ class ProvConfiguration(object):
     def __init__(self, **kwargs):
         self.config_dir = kwargs.get('config_dir', \
              os.path.join(os.environ['HOME'], '.providentia'))
-        self.ghost_version = kwargs.get('ghost_version', '1.3')
+        self.ghost_version = kwargs.get('ghost_version', '1.3.1')
         self.cartopy_data_dir = kwargs.get('cartopy_data_dir', '')
         self.available_cpus = kwargs.get('available_cpus', '')
         self.n_cpus = kwargs.get('n_cpus', '')
