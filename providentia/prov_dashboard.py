@@ -103,6 +103,43 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.standard_data_flag_name_to_data_flag_code = \
             standard_data_flag_name_to_data_flag_code
         self.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
+        self.get_qa_codes()
+
+    def get_qa_codes(self):
+        """Retrieve QA codes from GHOST_standards using the qa flags' names. """
+
+        # qa codes for specific species
+        specific_qa_names = ['Missing Measurement', 'Infinite Value', 'Negative Measurement',
+                      'Invalid Data Provider Flags - GHOST Decreed', 'Erroneous Primary Sampling',
+                      'Erroneous Sample Preparation', 'Erroneous Measurement Methodology',
+                      'Below Preferential Lower Limit of Detection', 'Above Preferential Upper Limit of Detection',
+                      'Insufficient Measurement Resolution - Preferential', 'Insufficient Measurement Resolution - Empirical',
+                      'Data Outlier - Exceeds Scientifically Decreed Lower/Upper Limit',
+                      'Data Outlier - Monthly Median Exceeds Scientifically Decreed Upper Limit',
+                      'Data Outlier - Network Decreed', 'Data Outlier - Manually Decreed',
+                      'Probable Data Outlier - Monthly Adjusted Boxplot',
+                      'Monthly Distribution Consistency - Zone 8', 'Monthly Distribution Consistency - Zone 9',
+                      'Monthly Distribution Consistency - Zone 10', 'Systematic Inconsistent Monthly Distributions - 2/3 Months >= Zone 6',
+                      'Systematic Inconsistent Monthly Distributions - 4/6 Months >= Zone 6',
+                      'Systematic Inconsistent Monthly Distributions - 8/12 Months >= Zone 6']
+
+        # qa codes for specific species
+        general_qa_names = ['Missing Measurement', 'Infinite Value', 'Negative Measurement', 'Zero Measurement',
+                      'Invalid Data Provider Flags - GHOST Decreed', 'Erroneous Primary Sampling', 'Erroneous Sample Preparation',
+                      'Erroneous Measurement Methodology', 'Below Preferential Lower Limit of Detection',
+                      'Above Preferential Upper Limit of Detection', 'Insufficient Measurement Resolution - Preferential',
+                      'Insufficient Measurement Resolution - Empirical', 'Persistent Recurring Values - 5/6',
+                      'Persistent Recurring Values - 9/12', 'Persistent Recurring Values - 16/24', 'Monthly Fractional Unique Values <= 70%',
+                      'Data Outlier - Exceeds Scientifically Decreed Lower/Upper Limit',
+                      'Data Outlier - Monthly Median Exceeds Scientifically Decreed Upper Limit', 'Data Outlier - Network Decreed',
+                      'Data Outlier - Manually Decreed', 'Probable Data Outlier - Monthly Adjusted Boxplot',
+                      'Monthly Distribution Consistency - Zone 8', 'Monthly Distribution Consistency - Zone 9',
+                      'Monthly Distribution Consistency - Zone 10', 'Systematic Inconsistent Monthly Distributions - 2/3 Months >= Zone 6',
+                      'Systematic Inconsistent Monthly Distributions - 4/6 Months >= Zone 6',
+                      'Systematic Inconsistent Monthly Distributions - 8/12 Months >= Zone 6']
+
+        self.specific_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in specific_qa_names]
+        self.general_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in general_qa_names]
 
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
@@ -303,7 +340,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         #setup pop-up window menu tree for qa
         self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
         self.qa_menu['checkboxes']['labels'] = np.array(sorted(self.standard_QA_name_to_QA_code, key=self.standard_QA_name_to_QA_code.get))
-        self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 6, 8, 9, 10, 12, 13, 14, 15, 18, 19, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
+        #self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 6, 8, 9, 10, 12, 13, 14, 15, 18, 19, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
+        self.qa_menu['checkboxes']['remove_default'] = np.array(self.general_qa, dtype=np.uint8)
         self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
         self.qa_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_QA_name_to_QA_code.values()))
         self.qa_menu['select_buttons'] = ['all', 'clear', 'default']
