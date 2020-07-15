@@ -106,38 +106,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.get_qa_codes()
 
     def get_qa_codes(self):
-        """Retrieve QA codes from GHOST_standards using the qa flags' names. """
+        """Retrieve QA codes from GHOST_standards using the qa flags' names.
 
-        # qa codes for specific species
-        specific_qa_names = ['Missing Measurement', 'Infinite Value', 'Negative Measurement',
-                      'Invalid Data Provider Flags - GHOST Decreed', 'Erroneous Primary Sampling',
-                      'Erroneous Sample Preparation', 'Erroneous Measurement Methodology',
-                      'Below Preferential Lower Limit of Detection', 'Above Preferential Upper Limit of Detection',
-                      'Insufficient Measurement Resolution - Preferential', 'Insufficient Measurement Resolution - Empirical',
-                      'Data Outlier - Exceeds Scientifically Decreed Lower/Upper Limit',
-                      'Data Outlier - Monthly Median Exceeds Scientifically Decreed Upper Limit',
-                      'Data Outlier - Network Decreed', 'Data Outlier - Manually Decreed',
-                      'Probable Data Outlier - Monthly Adjusted Boxplot',
-                      'Monthly Distribution Consistency - Zone 8', 'Monthly Distribution Consistency - Zone 9',
-                      'Monthly Distribution Consistency - Zone 10', 'Systematic Inconsistent Monthly Distributions - 2/3 Months >= Zone 6',
-                      'Systematic Inconsistent Monthly Distributions - 4/6 Months >= Zone 6',
-                      'Systematic Inconsistent Monthly Distributions - 8/12 Months >= Zone 6']
+        Specific flags are defined for the following species:
+        ['WND_DIR_10M','WND_SPD_10M','RH_2M','PREC_ACCUM','SNOW_ACCUM',
+        'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']"""
 
-        # qa codes for specific species
-        general_qa_names = ['Missing Measurement', 'Infinite Value', 'Negative Measurement', 'Zero Measurement',
-                      'Invalid Data Provider Flags - GHOST Decreed', 'Erroneous Primary Sampling', 'Erroneous Sample Preparation',
-                      'Erroneous Measurement Methodology', 'Below Preferential Lower Limit of Detection',
-                      'Above Preferential Upper Limit of Detection', 'Insufficient Measurement Resolution - Preferential',
-                      'Insufficient Measurement Resolution - Empirical', 'Persistent Recurring Values - 5/6',
-                      'Persistent Recurring Values - 9/12', 'Persistent Recurring Values - 16/24', 'Monthly Fractional Unique Values <= 70%',
-                      'Data Outlier - Exceeds Scientifically Decreed Lower/Upper Limit',
-                      'Data Outlier - Monthly Median Exceeds Scientifically Decreed Upper Limit', 'Data Outlier - Network Decreed',
-                      'Data Outlier - Manually Decreed', 'Probable Data Outlier - Monthly Adjusted Boxplot',
-                      'Monthly Distribution Consistency - Zone 8', 'Monthly Distribution Consistency - Zone 9',
-                      'Monthly Distribution Consistency - Zone 10', 'Systematic Inconsistent Monthly Distributions - 2/3 Months >= Zone 6',
-                      'Systematic Inconsistent Monthly Distributions - 4/6 Months >= Zone 6',
-                      'Systematic Inconsistent Monthly Distributions - 8/12 Months >= Zone 6']
-
+        # get names from json files
+        specific_qa_names = self.specific_qa = json.load(open("providentia/conf/default_flags.json"))['specific_qa']
+        general_qa_names = self.general_qa = json.load(open("providentia/conf/default_flags.json"))['general_qa']
+        # get codes
         self.specific_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in specific_qa_names]
         self.general_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in general_qa_names]
 
@@ -332,7 +310,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         #setup pop-up window menu tree for flags
         self.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
         self.flag_menu['checkboxes']['labels'] = np.array(sorted(self.standard_data_flag_name_to_data_flag_code, key=self.standard_data_flag_name_to_data_flag_code.get))
-        self.flag_menu['checkboxes']['remove_default'] = np.array([1, 2, 3, 10, 11, 12, 13, 14, 15, 16, 20, 21, 24, 25, 26, 29, 30, 31, 32, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 80, 90, 94, 95, 96, 97], dtype=np.uint8)
+        self.flag_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
         self.flag_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
         self.flag_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_data_flag_name_to_data_flag_code.values()))
         self.flag_menu['select_buttons'] = ['all', 'clear', 'default']
@@ -340,7 +318,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         #setup pop-up window menu tree for qa
         self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
         self.qa_menu['checkboxes']['labels'] = np.array(sorted(self.standard_QA_name_to_QA_code, key=self.standard_QA_name_to_QA_code.get))
-        #self.qa_menu['checkboxes']['remove_default'] = np.array([0, 1, 2, 3, 6, 8, 9, 10, 12, 13, 14, 15, 18, 19, 22, 25, 30, 40, 41, 42], dtype=np.uint8)
         self.qa_menu['checkboxes']['remove_default'] = np.array(self.general_qa, dtype=np.uint8)
         self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
         self.qa_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_QA_name_to_QA_code.values()))
