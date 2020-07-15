@@ -119,6 +119,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.specific_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in specific_qa_names]
         self.general_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in general_qa_names]
 
+    def which_qa(self):
+        """Checks if the species we currently have selected belongs to the ones
+        that have specific qa flags selected as default"""
+
+        qa_exceptions = ['dir10', 'spd10', 'rho2', 'acprec', 'acsnow', 'si',
+                         'cldbot', 'vdist', 'ccovmean', 'cfracmean']
+
+        if self.selected_species in qa_exceptions:
+            return self.specific_qa
+        else:
+            return self.general_qa
+
+
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
         self.resized.emit()
@@ -318,7 +331,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         #setup pop-up window menu tree for qa
         self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
         self.qa_menu['checkboxes']['labels'] = np.array(sorted(self.standard_QA_name_to_QA_code, key=self.standard_QA_name_to_QA_code.get))
-        self.qa_menu['checkboxes']['remove_default'] = np.array(self.general_qa, dtype=np.uint8)
+        self.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
         self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
         self.qa_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_QA_name_to_QA_code.values()))
         self.qa_menu['select_buttons'] = ['all', 'clear', 'default']
@@ -623,9 +636,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set selected indices as previously selected indices in current available list of experiments
         self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for previous_selected_experiment in self.experiments_menu['checkboxes']['keep_selected'] if previous_selected_experiment in self.experiments_menu['checkboxes']['map_vars']]
 
-        # if initialising config bar then check default selection of QA checkboxes
-        if self.config_bar_initialisation:
-            self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa_menu['checkboxes']['remove_default'])
+        # since a selection has changed, update also the qa flags
+        flags_to_select = self.which_qa()  # first check which flags
+        self.qa_menu['checkboxes']['remove_selected'] = flags_to_select
 
         #unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
