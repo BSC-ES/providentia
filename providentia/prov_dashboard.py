@@ -517,7 +517,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             available_networks = eval(self.available_networks)
 
             # set all available temporal resolutions
-            available_resolutions = ['hourly', 'hourly_instantaneous', 'daily', 'monthly']
+            available_resolutions = ['hourly', '3hourly', '6hourly', 'hourly_instantaneous'
+                                     '3hourly_instantaneous', '6hourly_instantaneous',
+                                     'daily', 'monthly']
 
             # iterate through available networks
             for network in available_networks:
@@ -605,6 +607,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         available_resolutions = list(self.available_observation_data[self.cb_network.currentText()].keys())
         # manually force order of available resolutions
         resolution_order_dict = {'hourly':1, '3hourly':2, 'hourly_instantaneous':3, 'daily':4, 'monthly':5}
+        resolution_order_dict = {'hourly':1, '3hourly':2, '6hourly':3, 'hourly_instantaneous':4,
+                                 '3hourly_instantaneous':5, '6hourly_instantaneous':6,
+                                 'daily':7, 'monthly':8}
         available_resolutions = sorted(available_resolutions, key=resolution_order_dict.__getitem__)
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
@@ -1240,8 +1245,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # get N time chunks between desired start date and end date to set time array
         if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
             self.active_frequency_code = 'H'
-        elif self.active_resolution == '3hourly':
+        elif (self.active_resolution == '3hourly') or (self.active_resolution == '3hourly_instantaneous'):
             self.active_frequency_code = '3H'
+        elif (self.active_resolution == '6hourly') or (self.active_resolution == '6hourly_instantaneous'):
+            self.active_frequency_code = '6H'
         elif self.active_resolution == 'daily':
             self.active_frequency_code = 'D'
         elif self.active_resolution == 'monthly':
@@ -1315,8 +1322,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.measurement_units = self.parameter_dictionary[self.active_species]['standard_units']
 
         # set data variables to read (dependent on active data resolution)
-        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous') \
-                or (self.active_resolution == '3hourly'):
+        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
             self.data_vars_to_read = [self.active_species, 'hourly_native_representativity_percent',
                                       'daily_native_representativity_percent',
                                       'monthly_native_representativity_percent',
@@ -1324,7 +1330,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                       'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                       'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
                                       'season_code']
-        elif self.active_resolution == 'daily':
+        elif (self.active_resolution == 'daily') or (self.active_resolution == '3hourly') or \
+                (self.active_resolution == '6hourly') or (self.active_resolution == '3hourly_instantaneous') or \
+                (self.active_resolution == '6hourly_instantaneous'):
             self.data_vars_to_read = [self.active_species, 'daily_native_representativity_percent',
                                       'monthly_native_representativity_percent',
                                       'annual_native_representativity_percent',
@@ -1543,7 +1551,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                                   'monthly_max_gap_percent',
                                                                   'all_representativity_percent', 'all_max_gap_percent']
         # daily temporal resolution?
-        elif self.active_resolution == 'daily':
+        elif (self.active_resolution == 'daily') or (self.active_resolution == '3hourly') or \
+                (self.active_resolution == '6hourly') or (self.active_resolution == '3hourly_instantaneous') or \
+                (self.active_resolution == '6hourly_instantaneous'):
             self.representativity_menu['rangeboxes']['labels'] = ['daily_native_representativity_percent',
                                                                   'daily_native_max_gap_percent',
                                                                   'monthly_native_representativity_percent',
@@ -1580,7 +1590,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         '''
 
         # hourly temporal resolution?
-        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
+        if 'hourly' in self.active_resolution:
             self.period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend', 'Spring',
                                                         'Summer', 'Autumn', 'Winter']
         # daily temporal resolution?
