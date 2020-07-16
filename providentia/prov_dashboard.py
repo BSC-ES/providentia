@@ -103,6 +103,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.standard_data_flag_name_to_data_flag_code = \
             standard_data_flag_name_to_data_flag_code
         self.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
+        self.qa_exceptions = ['dir10', 'spd10', 'rho2', 'acprec', 'acsnow', 'si',
+                              'cldbot', 'vdist', 'ccovmean', 'cfracmean']
         self.get_qa_codes()
 
     def get_qa_codes(self):
@@ -118,15 +120,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # get codes
         self.specific_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in specific_qa_names]
         self.general_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in general_qa_names]
+        # get difference of flags, needed later for updating default selection
+        self.qa_diff = list(set(self.general_qa) - set(self.specific_qa))
+
 
     def which_qa(self):
         """Checks if the species we currently have selected belongs to the ones
         that have specific qa flags selected as default"""
 
-        qa_exceptions = ['dir10', 'spd10', 'rho2', 'acprec', 'acsnow', 'si',
-                         'cldbot', 'vdist', 'ccovmean', 'cfracmean']
-
-        if self.selected_species in qa_exceptions:
+        if self.selected_species in self.qa_exceptions:
             return self.specific_qa
         else:
             return self.general_qa
@@ -643,7 +645,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # since a selection has changed, update also the qa flags
         flags_to_select = self.which_qa()  # first check which flags
-        self.qa_menu['checkboxes']['remove_selected'] = flags_to_select
+        if self.config_bar_initialisation:
+            self.qa_menu['checkboxes']['remove_selected'] = flags_to_select
+        else:
+            # if the selected species has specific qa flags, ensure none that none of the
+            # inapplicable is selected
+            if self.selected_species in self.qa_exceptions:
+                self.qa_menu['checkboxes']['remove_selected'] = list(set(
+                    self.qa_menu['checkboxes']['remove_selected']) - set(self.qa_diff))
+
+
 
         #unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
