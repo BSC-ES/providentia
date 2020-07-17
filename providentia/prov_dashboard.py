@@ -645,6 +645,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # since a selection has changed, update also the qa flags
         flags_to_select = self.which_qa()  # first check which flags
+        self.qa_menu['checkboxes']['remove_default'] = flags_to_select
         if self.config_bar_initialisation:
             self.qa_menu['checkboxes']['remove_selected'] = flags_to_select
         else:
