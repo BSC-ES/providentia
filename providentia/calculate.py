@@ -33,6 +33,16 @@ class Stats(object):
         return np.var(data)
 
     @staticmethod
+    def calculate_minimum(data):
+        """Calculate minimum in a dataset"""
+        return np.min(data)
+
+    @staticmethod
+    def calculate_maximum(data):
+        """Calculate minimum in a dataset"""
+        return np.max(data)
+
+    @staticmethod
     def calculate_data_avail_fraction(data):
         """Calculate data availability fraction
         (i.e. fraction of total data array not equal to NaN)
@@ -64,20 +74,6 @@ class Stats(object):
 
 
 class ExpBias(object):
-
-    @staticmethod
-    def calculate_apbe(obs, exp):
-        """Calculate absolute percent bias error (APBE)
-        between observations and experiment
-        """
-        return 100.0 * np.sum(np.abs(exp - obs)) / np.sum(obs)
-
-    @staticmethod
-    def calculate_pbe(obs, exp):
-        """Calculate percent bias error (PBE)
-        between observations and experiment
-        """
-        return 100.0 * np.sum(exp - obs) / np.sum(obs)
 
     @staticmethod
     def calculate_coe(obs, exp):
@@ -122,10 +118,34 @@ class ExpBias(object):
                               np.abs(obs - np.mean(obs))) ** 2))
 
     @staticmethod
+    def calculate_mb(obs, exp, normalisation_type='none'):
+        """Calculate mean bias (MB), or normalised derivation.
+           The difference between a modelled and an observed value,
+           𝑀𝑖 − 𝑂𝑖 , is referred to as the bias.
+           The mean bias is simply the average bias between the modelled and observed values.
+        """
+
+        mbe = np.mean(exp - obs)
+        # handle normalisation if desired
+        if normalisation_type == 'max_min':
+            mbe = mbe / (np.max(obs) - np.min(obs))
+        elif normalisation_type == 'mean':
+            mbe = mbe / np.mean(obs)
+        elif normalisation_type == 'iq':
+            mbe = mbe / (np.percentile(obs, 75) - np.percentile(obs, 25))
+        elif normalisation_type == 'stdev':
+            mbe = mbe / np.std(obs)
+        return mbe
+
+    @staticmethod
     def calculate_mae(obs, exp, normalisation_type='none'):
-        """Calculate mean absolute error (MAE)/ normalised mean absolute
-         error (NMAE) between observations and experiment
-         """
+        """Calculate mean absolute error (MAE), or normalised derivation.
+           It is calculated from the absolute of the difference between a modelled
+           and an observed value,|𝑀𝑖 −𝑂𝑖|. Therefore the mean absolute error is always positive.
+           This metric can highlight reveal somes biases not seen using the MB metric, where
+           postive and negative biases can average out to be zero.
+        """
+
         mae = np.mean(np.abs(exp - obs))
         # handle normalisation if desired
         if normalisation_type == 'max_min':
@@ -139,21 +159,53 @@ class ExpBias(object):
         return mae
 
     @staticmethod
-    def calculate_mbe(obs, exp, normalisation_type='none'):
-        """Calculate mean bias error (MBE)/ normalised mean bias
-        error (NMBE) between observations and experiment
+    def calculate_mnb(obs, exp):
+        """Calculate mean normalised bias (MNB).
+           The mean normalised bias (MNB) is calculated in a similar fashion to the mean bias.
+           The mean normalised bias is calculated from the difference between the modelled and observed values
+           (i.e., the bias, 𝑀𝑖 − 𝑂𝑖) is normalised (divided) by the observed value (𝑂𝑖).
+           The mean normalised bias is reported as a percentage.
         """
-        mbe = np.mean(exp - obs)
-        # handle normalisation if desired
-        if normalisation_type == 'max_min':
-            mbe = mbe / (np.max(obs) - np.min(obs))
-        elif normalisation_type == 'mean':
-            mbe = mbe / np.mean(obs)
-        elif normalisation_type == 'iq':
-            mbe = mbe / (np.percentile(obs, 75) - np.percentile(obs, 25))
-        elif normalisation_type == 'stdev':
-            mbe = mbe / np.std(obs)
-        return mbe
+
+        mnb = np.mean((exp - obs) / obs)
+        return mnb
+
+    @staticmethod
+    def calculate_mnae(obs, exp):
+        """Calculate mean normalised absolute error (MNAE).
+           The mean normalised absolute error (MNAE) is calculated in a similar fashion to the mean absolute error.
+           The mean normalised absolute error is calculated from the absolute of the bias, 𝑀𝑖 − 𝑂𝑖,
+           normalised by the observed value, 𝑂𝑖. Therefore the mean normalised absolute error is always positive.
+           The mean normalised absolute error is reported as a percentage.
+        """
+
+        mnae = np.mean((np.abs(exp - obs)) / obs)
+        return mnae
+
+    @staticmethod
+    def calculate_mfb(obs, exp):
+        """Calculate mean fractional bias (MFB).
+           The mean fractional bias (MFB) is used as a substitute for the mean normalised bias (MNB),
+           when the mean normalised bias becomes large.
+           The mean normalised bias can become very large when a minimum threshold is not used for the observations.
+           The fractional bias for cases with factors of 2 under-and over-prediction are -67 and +67%,
+           respectively (as opposed to -50 and +100%, when using normalised bias).
+           The mean fractional bias is a useful indicator because it has the advantage of equally weighting positive and
+           negative bias estimates.
+           It has also the advantage of not considering observations as the true value. The mean fractional bias can
+           range in value from -200% to +200%.
+        """
+
+        mfb = np.mean((exp - obs) / ((exp + obs) / 2.))
+        return mfb
+
+    @staticmethod
+    def calculate_mafb(obs, exp):
+        """Calculate mean absolute fractional bias (MAFB).
+        """
+
+        mafb = np.mean(np.abs((exp - obs) / ((exp + obs) / 2.)))
+        return mafb
 
     @staticmethod
     def calculate_rmse(obs, exp, normalisation_type='none'):
