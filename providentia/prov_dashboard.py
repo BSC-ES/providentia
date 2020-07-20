@@ -519,7 +519,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             available_networks = eval(self.available_networks)
 
             # set all available temporal resolutions
-            available_resolutions = ['hourly', '3hourly', '6hourly', 'hourly_instantaneous'
+            available_resolutions = ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                      '3hourly_instantaneous', '6hourly_instantaneous',
                                      'daily', 'monthly']
 
@@ -608,7 +608,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.cb_network.currentText()].keys())
         # manually force order of available resolutions
-        resolution_order_dict = {'hourly':1, '3hourly':2, 'hourly_instantaneous':3, 'daily':4, 'monthly':5}
         resolution_order_dict = {'hourly':1, '3hourly':2, '6hourly':3, 'hourly_instantaneous':4,
                                  '3hourly_instantaneous':5, '6hourly_instantaneous':6,
                                  'daily':7, 'monthly':8}
