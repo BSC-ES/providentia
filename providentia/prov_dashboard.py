@@ -187,7 +187,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_network.setFixedWidth(95)
-        self.cb_network.setToolTip('Select providing observational data network')
+        self.cb_network.setToolTip('Select providing observational data network. Names starting with * indicate non-GHOST datasets')
         self.cb_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_resolution.setFixedWidth(95)
         self.cb_resolution.setToolTip('Select temporal resolution of data')
