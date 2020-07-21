@@ -199,9 +199,7 @@ class MPLCanvas(FigureCanvas):
 
         # define all temporal aggregation resolutions that will be used to aggregate data
         # (variable by temporal resolution of data in memory)
-        if (self.read_instance.active_resolution == 'hourly') or (
-                self.read_instance.active_resolution == 'hourly_instantaneous') or \
-                (self.read_instance.active_resolution == '3hourly'):
+        if 'hourly' in self.read_instance.active_resolution:
             self.temporal_aggregation_resolutions = ['hour', 'dayofweek', 'month']
         elif self.read_instance.active_resolution == 'daily':
             self.temporal_aggregation_resolutions = ['dayofweek', 'month']
@@ -1158,9 +1156,7 @@ class MPLCanvas(FigureCanvas):
             'ax': self.violin_months_ax, 'title': 'M', 'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
 
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
-        if (self.read_instance.active_resolution == 'hourly') or \
-                (self.read_instance.active_resolution == 'hourly_instantaneous') or \
-                (self.read_instance.active_resolution == '3hourly'):
+        if 'hourly' in self.read_instance.active_resolution:
             aggregation_dict = {'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict,
                                 'month': month_aggregation_dict}
         elif self.read_instance.active_resolution == 'daily':
@@ -1300,9 +1296,7 @@ class MPLCanvas(FigureCanvas):
 
         # plot title (with units)
         # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
-        if (self.read_instance.active_resolution == 'hourly') or \
-                (self.read_instance.active_resolution == 'hourly_instantaneous') or \
-                (self.read_instance.active_resolution == '3hourly'):
+        if 'hourly' in self.read_instance.active_resolution:
             self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
                                            fontsize=8.0, loc='left')
         # otherwise, plot the units on the monthly aggregation axis
@@ -1334,9 +1328,7 @@ class MPLCanvas(FigureCanvas):
             'ax': self.exp_bias_months_ax, 'title': 'M',   'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
 
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
-        if (self.read_instance.active_resolution == 'hourly') or \
-                (self.read_instance.active_resolution == 'hourly_instantaneous') or \
-                (self.read_instance.active_resolution == '3hourly'):
+        if 'hourly' in self.read_instance.active_resolution:
             aggregation_dict = {
                 'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
         elif self.read_instance.active_resolution == 'daily':
