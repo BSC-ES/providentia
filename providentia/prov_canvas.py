@@ -2201,3 +2201,10 @@ class MPLCanvas(FigureCanvas):
         # index the array of indices of stations plotted on the map (indexed with respect to
         # all available stations), with the absolute indices of the subset of plotted selected stations
         return self.active_map_valid_station_inds[selected_map_inds]
+
+    def write_out_data_in_memory(self):
+        """Function that writes out current data in memory to .npy file"""
+
+        np.savez(fname,data=self.read_data_in_memory_filtered,metadata=self.read_instance.metadata_in_memory)
+
+         
