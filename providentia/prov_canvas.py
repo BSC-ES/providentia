@@ -199,8 +199,7 @@ class MPLCanvas(FigureCanvas):
 
         # define all temporal aggregation resolutions that will be used to aggregate data
         # (variable by temporal resolution of data in memory)
-        if (self.read_instance.active_resolution == 'hourly') or (
-                self.read_instance.active_resolution == 'hourly_instantaneous'):
+        if 'hourly' in self.read_instance.active_resolution:
             self.temporal_aggregation_resolutions = ['hour', 'dayofweek', 'month']
         elif self.read_instance.active_resolution == 'daily':
             self.temporal_aggregation_resolutions = ['dayofweek', 'month']
@@ -356,18 +355,19 @@ class MPLCanvas(FigureCanvas):
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'], season_codes_to_remove)] = np.NaN            
 
         # filter all obersvational data out of set bounds of native percentage data availability variables
-        for var_ii, var in enumerate(active_data_availablity_vars):
-            if 'native' in var:
-                # max gap variable?
-                if 'max_gap' in var:
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                        self.read_instance.data_in_memory_filtered['observations'][var] >
-                        data_availability_lower_bounds[var_ii]] = np.NaN
-                # data representativity variable?
-                else:
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                        self.read_instance.data_in_memory_filtered['observations'][var] <
-                        data_availability_lower_bounds[var_ii]] = np.NaN
+        if not self.read_instance.reading_nonghost:
+            for var_ii, var in enumerate(active_data_availablity_vars):
+                if 'native' in var:
+                    # max gap variable?
+                    if 'max_gap' in var:
+                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            self.read_instance.data_in_memory_filtered['observations'][var] >
+                            data_availability_lower_bounds[var_ii]] = np.NaN
+                    # data representativity variable?
+                    else:
+                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            self.read_instance.data_in_memory_filtered['observations'][var] <
+                            data_availability_lower_bounds[var_ii]] = np.NaN
 
         # filter all obersvational data out of set bounds of non-native percentage data availability variables
         for var_ii, var in enumerate(active_data_availablity_vars):
@@ -504,9 +504,8 @@ class MPLCanvas(FigureCanvas):
                 if '_colocatedto_' in data_label:
                     exp_name = data_label.split('_colocatedto_')[0]
                     self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
-                        copy.deepcopy(self.read_instance.plotting_params['observations_colocatedto_%s' %
-                                                                                 exp_name]['valid_station_inds'])
-                # handle non-located experimental arrays
+                        copy.deepcopy(self.read_instance.plotting_params['observations_colocatedto_{}'.format(exp_name)]['valid_station_inds'])
+                # handle non-colocated experimental arrays
                 else:
                     self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
                         copy.deepcopy(self.read_instance.plotting_params['observations']['valid_station_inds'])
@@ -582,30 +581,54 @@ class MPLCanvas(FigureCanvas):
             # initialise as being all True, set as False on the occasion there is a valid value in an experiment
             exps_all_nan = np.full(nan_obs.shape, True)
 
-            # iterate through experiment data arrays in data in memory dictionary
-            for data_label in list(self.read_instance.data_in_memory.keys()):
-                if data_label != 'observations':
-                    # get all instances experiment are NaN
-                    nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])
-                    # get all instances where either the observational array or experiment array are NaN at a given time
-                    nan_instances = np.any([nan_obs, nan_exp], axis=0)
-                    # create new observational array colocated to experiment
-                    obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
-                    obs_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['observations_colocatedto_%s' % (data_label)] = obs_data
-                    self.read_instance.plotting_params['observations_colocatedto_%s' % (data_label)] = {
-                        'colour': self.read_instance.plotting_params['observations']['colour'],
-                        'zorder': self.read_instance.plotting_params['observations']['zorder']}
-                    # create new experiment array colocated to observations
-                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[data_label])
-                    exp_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['%s_colocatedto_observations' % (data_label)] = exp_data
-                    self.read_instance.plotting_params['%s_colocatedto_observations' % (data_label)] = {
-                        'colour': self.read_instance.plotting_params[data_label]['colour'],
-                        'zorder': self.read_instance.plotting_params[data_label]['zorder']}
-                    # update exps_all_nan array, making False all instances where have valid experiment data
-                    exps_all_nan = np.all([exps_all_nan, nan_exp], axis=0)
+            #get name of all experiment labels in memory
+            exp_labels = sorted(list(self.read_instance.data_in_memory.keys()))
+            exp_labels.remove('observations')
 
+            # iterate through experiment data arrays in data in memory dictionary
+            exp_nan_dict = {}
+            for exp_label in exp_labels:
+                # get all instances experiment are NaN
+                exp_nan_dict[exp_label] = np.isnan(self.read_instance.data_in_memory_filtered[exp_label][self.read_instance.active_species])
+                # get all instances where either the observational array or experiment array are NaN at a given time
+                nan_instances = np.any([nan_obs, exp_nan_dict[exp_label]], axis=0)
+                # create new observational array colocated to experiment
+                obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
+                obs_data[nan_instances] = np.NaN
+                self.read_instance.data_in_memory_filtered['observations_colocatedto_{}'.format(exp_label)] = obs_data
+                self.read_instance.plotting_params['observations_colocatedto_{}'.format(exp_label)] = {
+                    'colour': self.read_instance.plotting_params['observations']['colour'],
+                    'zorder': self.read_instance.plotting_params['observations']['zorder']}
+                # create new experiment array colocated to observations
+                exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label])
+                exp_data[nan_instances] = np.NaN
+                self.read_instance.data_in_memory_filtered['{}_colocatedto_observations'.format(exp_label)] = exp_data
+                self.read_instance.plotting_params['{}_colocatedto_observations'.format(exp_label)] = {
+                    'colour': self.read_instance.plotting_params[exp_label]['colour'],
+                    'zorder': self.read_instance.plotting_params[exp_label]['zorder']}
+                # update exps_all_nan array, making False all instances where have valid experiment data
+                exps_all_nan = np.all([exps_all_nan, exp_nan_dict[exp_label]], axis=0)
+                
+            #colocate experiments with all other experiments
+            for exp_label_ii, exp_label in enumerate(exp_labels):
+                for exp_label_2 in exp_labels[exp_label_ii+1:]:
+                    # get all instances where either of the experiment arrays are NaN at a given time
+                    nan_instances = np.any([exp_nan_dict[exp_label], exp_nan_dict[exp_label_2]], axis=0) 
+                    # create new experiment array for experiment1 colocated to experiment2
+                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label])
+                    exp_data[nan_instances] = np.NaN
+                    self.read_instance.data_in_memory_filtered['{}_colocatedto_{}'.format(exp_label,exp_label_2)] = exp_data
+                    self.read_instance.plotting_params['{}_colocatedto_{}'.format(exp_label,exp_label_2)] = {
+                        'colour': self.read_instance.plotting_params[exp_label]['colour'],
+                        'zorder': self.read_instance.plotting_params[exp_label]['zorder']}
+                    # create new experiment array for experiment2 colocated to experiment1
+                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label_2])
+                    exp_data[nan_instances] = np.NaN
+                    self.read_instance.data_in_memory_filtered['{}_colocatedto_{}'.format(exp_label_2,exp_label)] = exp_data
+                    self.read_instance.plotting_params['{}_colocatedto_{}'.format(exp_label_2,exp_label)] = {
+                        'colour': self.read_instance.plotting_params[exp_label_2]['colour'],
+                        'zorder': self.read_instance.plotting_params[exp_label_2]['zorder']}
+                    
             # create observational data array colocated to be non-NaN whenever
             # there is a valid data in at least 1 experiment
             exps_all_nan = np.any([nan_obs, exps_all_nan], axis=0)
@@ -1133,7 +1156,7 @@ class MPLCanvas(FigureCanvas):
             'ax': self.violin_months_ax, 'title': 'M', 'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
 
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
-        if self.read_instance.active_resolution == 'hourly':
+        if 'hourly' in self.read_instance.active_resolution:
             aggregation_dict = {'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict,
                                 'month': month_aggregation_dict}
         elif self.read_instance.active_resolution == 'daily':
@@ -1175,6 +1198,9 @@ class MPLCanvas(FigureCanvas):
                     if data_label.split('_')[0] == 'observations':
                         if data_label != 'observations_colocatedto_experiments':
                             continue
+                    # print only relevant data, otherwise we get double lines for multiple exps
+                    if data_label.split('_')[-1] not in ("observations", "experiments"):
+                        continue
 
                 # get grouped data for current temporal aggregation resolution
                 grouped_data = self.selected_station_data[data_label][temporal_aggregation_resolution]['grouped_data']
@@ -1270,8 +1296,7 @@ class MPLCanvas(FigureCanvas):
 
         # plot title (with units)
         # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
-        if (self.read_instance.active_resolution == 'hourly') or \
-                (self.read_instance.active_resolution == 'hourly_instantaneous'):
+        if 'hourly' in self.read_instance.active_resolution:
             self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
                                            fontsize=8.0, loc='left')
         # otherwise, plot the units on the monthly aggregation axis
@@ -1303,7 +1328,7 @@ class MPLCanvas(FigureCanvas):
             'ax': self.exp_bias_months_ax, 'title': 'M',   'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
 
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
-        if (self.read_instance.active_resolution == 'hourly') or (self.read_instance.active_resolution == 'hourly_instantaneous'):
+        if 'hourly' in self.read_instance.active_resolution:
             aggregation_dict = {
                 'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
         elif self.read_instance.active_resolution == 'daily':
@@ -1355,7 +1380,11 @@ class MPLCanvas(FigureCanvas):
 
             # iterate through data array names in selected station data dictionary
             for data_label in list(self.selected_station_data.keys()):
-
+                # if colocation is selected, print only relevant labels
+                # to avoid double lines being printed
+                if self.colocate_active:
+                    if data_label.split('_')[-1] != 'observations':
+                        continue
                 # if data array is observational, continue to next experiment data array
                 if data_label.split('_')[0] == 'observations':
                     continue
@@ -1436,7 +1465,7 @@ class MPLCanvas(FigureCanvas):
                                     'WWF_TEOW_terrestrial_ecoregion': 'WWF TEOW Terrestrial Ecoregion',
                                     'WWF_TEOW_biogeographical_realm': 'WWF TEOW Biogeographical Realm',
                                     'WWF_TEOW_biome': 'WWF TEOW Biome',
-                                    'UMBC_anthrome_classification': 'UMBC Anthrome Class',
+                                    'GHSL_settlement_model_classification': 'GHSL Settlement Class',
                                     'GSFC_coastline_proximity': 'To Coast',
                                     'primary_sampling_type': 'Sampling Instrument Type',
                                     'sample_preparation_types': 'Sample Preparation',
@@ -1451,120 +1480,132 @@ class MPLCanvas(FigureCanvas):
             # get station reference of selected station
             selected_station_reference = self.read_instance.station_references[self.relative_selected_station_inds][0]
 
-            # add station reference, latitude, longitude, measurement altitude, GSFC coastline proximity, GPW population density and NOAA-DMSP-OLS nighttime stable lights
-            str_to_plot += "%s   " % (selected_station_reference)
-            str_to_plot += "Latitude: {:.4f}   ".format(
-                self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
-            str_to_plot += "Longitude: {:.4f}\n".format(
-                self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
-            str_to_plot += "Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
-                self.read_instance.metadata_in_memory['measurement_altitude'][
-                    self.relative_selected_station_inds].astype(np.float32)))
-            str_to_plot += "To Coast: {:.2f}km\n".format(np.nanmedian(
-                self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
-                    self.relative_selected_station_inds].astype(np.float32)))
-            str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                self.read_instance.metadata_in_memory['GPW_population_density'][
-                    self.relative_selected_station_inds].astype(np.float32)))
-            str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(
-                self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
-                    self.relative_selected_station_inds].astype(np.float32)))
+            if self.read_instance.reading_nonghost:
+                str_to_plot += "%s   " % (selected_station_reference)
+                str_to_plot += "Latitude: {:.4f}   ".format(
+                    self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+                str_to_plot += "Longitude: {:.4f}\n".format(
+                    self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
 
-            #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
-            metadata_vars_to_plot = ['station_name', 'country',
-                                     'standardised_network_provided_area_classification',
-                                     'standardised_network_provided_station_classification',
-                                     'standardised_network_provided_terrain',
-                                     'standardised_network_provided_land_use',
-                                     'MODIS_MCD12C1_v6_IGBP_land_use',
-                                     'UMBC_anthrome_classification',
-                                     'measurement_methodology', 'measuring_instrument_name']
+            else:
+                # add station reference, latitude, longitude, measurement altitude, GSFC coastline proximity,
+                # GPW population density and NOAA-DMSP-OLS nighttime stable lights
+                str_to_plot += "%s   " % (selected_station_reference)
+                str_to_plot += "Latitude: {:.4f}   ".format(
+                    self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+                str_to_plot += "Longitude: {:.4f}\n".format(
+                    self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
+                str_to_plot += "Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
+                    self.read_instance.metadata_in_memory['measurement_altitude'][
+                        self.relative_selected_station_inds].astype(np.float32)))
+                str_to_plot += "To Coast: {:.2f}km\n".format(np.nanmedian(
+                    self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                        self.relative_selected_station_inds].astype(np.float32)))
+                str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
+                    self.read_instance.metadata_in_memory['GHSL_population_density'][
+                        self.relative_selected_station_inds].astype(np.float32)))
+                str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(
+                    self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                        self.relative_selected_station_inds].astype(np.float32)))
 
-            # iterate through metadata variables
-            for meta_var in metadata_vars_to_plot:
+                #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
+                metadata_vars_to_plot = ['station_name', 'country',
+                                         'standardised_network_provided_area_classification',
+                                         'standardised_network_provided_station_classification',
+                                         'standardised_network_provided_terrain',
+                                         'standardised_network_provided_land_use',
+                                         'MODIS_MCD12C1_v6_IGBP_land_use',
+                                         'GHSL_settlement_model_classification',
+                                         'measurement_methodology', 'measuring_instrument_name']
 
-                #gather all selected station metadata for current meta variable         
-                all_current_meta = self.read_instance.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
+                # iterate through metadata variables
+                for meta_var in metadata_vars_to_plot:
 
-                #get counts of all unique metadata elements for selected station
-                unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
-                #get number of unique metadata elements across selected stations
-                n_unique_meta = len(unique_meta)
-            
-                #1 unique metadata element?
-                if n_unique_meta == 1:
-                    meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], unique_meta[0])
-                #elif have > 2 unique metadata elements, just return count of the elements for the selected station
-                elif n_unique_meta > 2:
-                    meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
-                #otherwise, get percentage of unique metadata elements across selected stations
-                else:
-                    meta_pc = (100./len(all_current_meta))*meta_counts
-                    meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
-                    #create string for variable to plot
-                    meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], ', '.join([':'.join([str(var),pc]) for var, pc in zip(unique_meta, meta_pc)]))
+                    #gather all selected station metadata for current meta variable
+                    all_current_meta = self.read_instance.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
 
-                #add meta string to str_to_plot
-                str_to_plot += meta_string
+                    #get counts of all unique metadata elements for selected station
+                    unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
+                    #get number of unique metadata elements across selected stations
+                    n_unique_meta = len(unique_meta)
+
+                    #1 unique metadata element?
+                    if n_unique_meta == 1:
+                        meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], unique_meta[0])
+                    #elif have > 2 unique metadata elements, just return count of the elements for the selected station
+                    elif n_unique_meta > 2:
+                        meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
+                    #otherwise, get percentage of unique metadata elements across selected stations
+                    else:
+                        meta_pc = (100./len(all_current_meta))*meta_counts
+                        meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
+                        #create string for variable to plot
+                        meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], ', '.join([':'.join([str(var),pc]) for var, pc in zip(unique_meta, meta_pc)]))
+
+                    #add meta string to str_to_plot
+                    str_to_plot += meta_string
 
         # more than 1 station selected?
         else:
+            if self.read_instance.reading_nonghost:
+                str_to_plot += "%s Stations Selected\n" % (len(self.relative_selected_station_inds))
+            else:
+                # TODO looks like this variable is not used
+                # get station references of all selected stations
+                selected_station_references = self.read_instance.station_references[self.relative_selected_station_inds]
 
-            # get station references of all selected stations
-            selected_station_references = self.read_instance.station_references[self.relative_selected_station_inds]
+                # add N stations selected, in N countries
+                str_to_plot += "%s Stations Selected\n" % (len(self.relative_selected_station_inds))
+                # add median measurement altitude
+                str_to_plot += "Median Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
+                    self.read_instance.metadata_in_memory['measurement_altitude'][
+                        self.relative_selected_station_inds].astype(np.float32)))
+                # add median GSFC coastline proximity
+                str_to_plot += "Median To Coast: {:.2f}km\n".format(np.nanmedian(
+                    self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                        self.relative_selected_station_inds].astype(np.float32)))
+                # add median GPW population density
+                str_to_plot += "Median Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
+                    self.read_instance.metadata_in_memory['GHSL_population_density'][
+                        self.relative_selected_station_inds].astype(np.float32)))
+                # add median NOAA-DMSP-OLS nighttime lights
+                str_to_plot += "Median Nighttime Lights: {:.1f}\n".format(np.nanmedian(
+                    self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                        self.relative_selected_station_inds].astype(np.float32)))
 
-            # add N stations selected, in N countries
-            str_to_plot += "%s Stations Selected\n" % (len(self.relative_selected_station_inds))
-            # add median measurement altitude
-            str_to_plot += "Median Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
-                self.read_instance.metadata_in_memory['measurement_altitude'][
-                    self.relative_selected_station_inds].astype(np.float32)))
-            # add median GSFC coastline proximity
-            str_to_plot += "Median To Coast: {:.2f}km\n".format(np.nanmedian(
-                self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
-                    self.relative_selected_station_inds].astype(np.float32)))
-            # add median GPW population density
-            str_to_plot += "Median Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                self.read_instance.metadata_in_memory['GPW_population_density'][
-                    self.relative_selected_station_inds].astype(np.float32)))
-            # add median NOAA-DMSP-OLS nighttime lights
-            str_to_plot += "Median Nighttime Lights: {:.1f}\n".format(np.nanmedian(
-                self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
-                    self.relative_selected_station_inds].astype(np.float32)))
+                # get percentage of element occurrences across selected stations, for certain metadata variables
+                metadata_vars_get_pc = ['country', 'standardised_network_provided_area_classification',
+                                        'standardised_network_provided_station_classification',
+                                        'standardised_network_provided_terrain',
+                                        'standardised_network_provided_land_use',
+                                        'MODIS_MCD12C1_v6_IGBP_land_use', 'GHSL_settlement_model_classification',
+                                        'measurement_methodology', 'measuring_instrument_name']
 
-            # get percentage of element occurrences across selected stations, for certain metadata variables
-            metadata_vars_get_pc = ['country', 'standardised_network_provided_area_classification',
-                                    'standardised_network_provided_station_classification',
-                                    'standardised_network_provided_terrain',
-                                    'standardised_network_provided_land_use',
-                                    'MODIS_MCD12C1_v6_IGBP_land_use', 'UMBC_anthrome_classification',
-                                    'measurement_methodology', 'measuring_instrument_name']
+                # iterate through metadata variables
+                for meta_var in metadata_vars_get_pc:
 
-            # iterate through metadata variables
-            for meta_var in metadata_vars_get_pc:
+                    # gather all selected station metadata for current meta variable
+                    all_current_meta = self.read_instance.metadata_in_memory[meta_var][
+                        self.relative_selected_station_inds].flatten().astype(np.str)
 
-                # gather all selected station metadata for current meta variable
-                all_current_meta = self.read_instance.metadata_in_memory[meta_var][
-                    self.relative_selected_station_inds].flatten().astype(np.str)
+                    # get counts of all unique metadata elements across selected stations
+                    unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
+                    # get number of unique metadata elements across selected stations
+                    n_unique_meta = len(unique_meta)
 
-                # get counts of all unique metadata elements across selected stations
-                unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
-                # get number of unique metadata elements across selected stations
-                n_unique_meta = len(unique_meta)
+                    # if have > 4 unique metadata elements, just return count of the elements across the selected stations
+                    if n_unique_meta > 4:
+                        meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
+                    # otherwise, get percentage of unique metadata elements across selected stations
+                    else:
+                        meta_pc = (100. / len(all_current_meta)) * meta_counts
+                        meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
+                        # create string for variable to plot
+                        meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], ', '.join(
+                            [':'.join([str(var), pc]) for var, pc in zip(unique_meta, meta_pc)]))
 
-                # if have > 4 unique metadata elements, just return count of the elements across the selected stations
-                if n_unique_meta > 4:
-                    meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
-                # otherwise, get percentage of unique metadata elements across selected stations
-                else:
-                    meta_pc = (100. / len(all_current_meta)) * meta_counts
-                    meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
-                    # create string for variable to plot
-                    meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], ', '.join(
-                        [':'.join([str(var), pc]) for var, pc in zip(unique_meta, meta_pc)]))
-
-                # add meta string to str_to_plot
-                str_to_plot += meta_string
+                    # add meta string to str_to_plot
+                    str_to_plot += meta_string
 
         # plot string to axis
         plot_txt = self.station_metadata_ax.text(0.0, 1.0, str_to_plot, ha='left', va='top', fontsize=8.0,
@@ -1607,7 +1648,7 @@ class MPLCanvas(FigureCanvas):
             stats_dict = self.bstats_dict[z_statistic_name]
             # set label units for statistic
             if z_statistic_name != 'Data %':
-                label_units = ' (%s)' % self.read_instance.measurement_units
+                label_units = ' ({})'.format(self.read_instance.measurement_units)
             else:
                 label_units = ''
         # if not a basic statistic, it must be an experiment bias statistic
@@ -1631,9 +1672,9 @@ class MPLCanvas(FigureCanvas):
 
         # generate z colourbar label
         if not have_z2:
-            self.z_label = '%s\n%s %s' % (z1_selected_name, stats_dict['label'], label_units)
+            self.z_label = '{}\n{} {}'.format(z1_selected_name, stats_dict['label'], label_units)
         else:
-            self.z_label = '%s - %s\n%s %s' % (z2_selected_name, z1_selected_name, stats_dict['label'], label_units)
+            self.z_label = '{} - {}\n{} {}'.format(z2_selected_name, z1_selected_name, stats_dict['label'], label_units)
 
         # if colocation is active, set appropriate z1/z2 arrays to read to get colocated data arrays
         if self.colocate_active:
@@ -1642,18 +1683,25 @@ class MPLCanvas(FigureCanvas):
                 if z1_selected_name == 'observations':
                     z1_array_to_read = 'observations_colocatedto_experiments'
                 else:
-                    z1_array_to_read = '%s_colocatedto_observations' % z1_selected_name
+                    z1_array_to_read = '{}_colocatedto_observations'.format(z1_selected_name)
             # have z2 array?
             elif have_z2:
                 if z1_selected_name == 'observations':
-                    z1_array_to_read = 'observations_colocatedto_%s' % z2_selected_name
+                    z1_array_to_read = 'observations_colocatedto_{}'.format(z2_selected_name)
                 else:
-                    z1_array_to_read = '%s_colocatedto_observations' % z1_selected_name
+                    if z2_selected_name == 'observations':
+                        z1_array_to_read = '{}_colocatedto_observations'.format(z1_selected_name)
+                    else:   
+                        z1_array_to_read = '{}_colocatedto_{}'.format(z1_selected_name, z2_selected_name) 
 
                 if z2_selected_name == 'observations':
-                    z2_array_to_read = 'observations_colocatedto_%s' % z1_selected_name
+                    z2_array_to_read = 'observations_colocatedto_{}'.format(z1_selected_name)
                 else:
-                    z2_array_to_read = '%s_colocatedto_observations' % z2_selected_name
+                    if z1_selected_name == 'observations':
+                        z2_array_to_read = '{}_colocatedto_observations'.format(z2_selected_name)
+                    else:
+                        z2_array_to_read = '{}_colocatedto_{}'.format(z2_selected_name, z1_selected_name)
+
         # else, simply use selected z1/z2 array names to read uncolocated data arrays
         else:
             z1_array_to_read = copy.deepcopy(z1_selected_name)
