@@ -54,6 +54,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--obs_root",
                                      dest="obs_root",
                                      help="directory where is/are to be stored observations")
+            self.parser.add_argument("--nonghost_root",
+                                     dest="nonghost_root",
+                                     help="directory where is/are to stored nonghost observations")
             self.parser.add_argument("--exp_root",
                                      dest="exp_root",
                                      help="set experiment root data directory")

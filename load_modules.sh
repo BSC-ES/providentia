@@ -14,6 +14,17 @@ if [ "${BSC_MACHINE}" == "power" ]; then
 #Marenustrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     module load bsc/1.0 gcc/5.4.0 intel/2017.4 impi/2017.4 mkl/2017.4 python/3.7.4_ES udunits/2.2.25 hdf5/1.10.5 netcdf/4.4.1.1_lf geos/3.6.1 proj/4.9.3 gdal/2.2.3
+#Nord3
+elif [ "${BSC_MACHINE}" == "nord3" ]; then
+    module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
+    module load bsc/default \
+     Python/3.7.4-GCCcore-8.3.0 \
+     matplotlib/3.1.1-foss-2019b-Python-3.7.4 \
+     seaborn/0.9.0-foss-2019b-Python-3.7.4 \
+     Cartopy/0.17.0-foss-2019b-Python-3.7.4 \
+     netcdf4-python/1.5.3-foss-2019b-Python-3.7.4 \
+     geopandas/0.7.0-foss-2019b-Python-3.7.4 \
+     PyQt5/5.13.1-GCCcore-8.3.0-Python-3.7.4
 #Workstations/fatnodes
 else
     module load Python/3.7.3-foss-2015a \
