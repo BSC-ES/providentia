@@ -28,6 +28,7 @@ import numpy as np
 import pandas as pd
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
+from PyQt5 import QtGui
 import seaborn as sns
 from dateutil.relativedelta import relativedelta
 
@@ -439,6 +440,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # Generate MPL navigation toolbar
         self.navi_toolbar = NavigationToolbar(self.mpl_canvas, self)
 
+        # add more buttons on the toolbar
+        self.fbutton = QtWidgets.QPushButton()
+        # self.fbutton.setIcon(QtGui.QIcon("/home/bsc32/bsc32099/image_test.png"))
+        self.navi_toolbar.addWidget(self.fbutton)
+        self.fbutton.clicked.connect(self.test_button)
+
         # position config bar, navigation toolbar and MPL canvas and elements in parent layout
 
         # add config bar to parent frame
@@ -458,6 +465,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # maximise window to fit screen
         self.showMaximized()
+
+    def test_button(self):
+        MPLCanvas.save_data_button(self.mpl_canvas)
 
     def generate_pop_up_window(self, menu_root):
         '''generate pop up window'''
