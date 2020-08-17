@@ -3,6 +3,7 @@ from .calculate import Stats
 from .calculate import ExpBias
 from .reading import drop_nans
 
+import os
 import copy
 from weakref import WeakKeyDictionary
 
@@ -19,6 +20,7 @@ from matplotlib.patches import Polygon
 from matplotlib.path import Path
 from matplotlib.widgets import LassoSelector
 from matplotlib.gridspec import GridSpec
+from matplotlib.backends import qt_compat
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
@@ -2202,9 +2204,33 @@ class MPLCanvas(FigureCanvas):
         # all available stations), with the absolute indices of the subset of plotted selected stations
         return self.active_map_valid_station_inds[selected_map_inds]
 
-    def write_out_data_in_memory(self):
+    @staticmethod
+    def save_data_button(self):
+        filetypes = {'Numpy file': ['npz']}
+        sorted_filetypes = sorted(filetypes.items())
+        startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
+        start = os.path.join(startpath, 'default_filename')
+        filters = []
+        selectedFilter = None
+        for name, exts in sorted_filetypes:
+            exts_list = " ".join(['*.%s' % ext for ext in exts])
+            filter = '%s (%s)' % (name, exts_list)
+            filters.append(filter)
+            filters = ';;'.join(filters)
+            fname, filter = qt_compat._getSaveFileName(self.read_instance.mpl_canvas.parent(),
+                                                       "Choose a filename to save to", start, filters, selectedFilter)
+            if fname:
+                # Save dir for next time, unless empty str (i.e., use cwd).
+                if startpath != "":
+                    matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
+                    try:
+                        self.write_out_data_in_memory(fname)
+                        # self.canvas.figure.savefig(fname)
+                    except Exception as e:
+                        QtWidgets.QMessageBox.critical(self, "Error saving file", str(e), QtWidgets.QMessageBox.Ok,
+                                                       QtWidgets.QMessageBox.NoButton)
+
+    def write_out_data_in_memory(self, fname):
         """Function that writes out current data in memory to .npy file"""
 
-        np.savez(fname,data=self.read_data_in_memory_filtered,metadata=self.read_instance.metadata_in_memory)
-
-         
+        np.savez(fname, data=self.read_instance.data_in_memory_filtered, metadata=self.read_instance.metadata_in_memory)
