@@ -124,7 +124,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # get difference of flags, needed later for updating default selection
         self.qa_diff = list(set(self.general_qa) - set(self.specific_qa))
 
-
     def which_qa(self):
         """Checks if the species we currently have selected belongs to the ones
         that have specific qa flags selected as default"""
@@ -133,7 +132,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             return self.specific_qa
         else:
             return self.general_qa
-
 
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
@@ -176,6 +174,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         config_bar.setVerticalSpacing(1)
         config_bar.setContentsMargins(5, 0, 0, 0)
         config_bar.setAlignment(QtCore.Qt.AlignLeft)
+
+        # add one more horizontal layout
+        hbox = QtWidgets.QHBoxLayout()
 
         #define all configuration box objects (labels, comboboxes etc.)
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"), formatting_dict['title_menu'])
@@ -442,17 +443,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # add more buttons on the toolbar
         self.fbutton = QtWidgets.QPushButton()
-        # self.fbutton.setIcon(QtGui.QIcon("/home/bsc32/bsc32099/image_test.png"))
-        self.navi_toolbar.addWidget(self.fbutton)
+        self.fbutton.setFlat(True)
+        self.fbutton.setIcon(QtGui.QIcon("/gpfs/scratch/bsc32/bsc32099/new_icon.png"))
         self.fbutton.clicked.connect(self.test_button)
 
         # position config bar, navigation toolbar and MPL canvas and elements in parent layout
 
-        # add config bar to parent frame
+        hbox.addWidget(self.fbutton)
+        hbox.addWidget(self.navi_toolbar)
+
+        # add config bar and hbox to parent frame
         parent_layout.addLayout(config_bar)
+        parent_layout.addLayout(hbox)
 
         # add MPL navigation toolbar to parent frame
-        parent_layout.addWidget(self.navi_toolbar)
+        #parent_layout.addWidget(self.navi_toolbar)
 
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
