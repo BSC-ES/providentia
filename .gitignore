@@ -1,6 +1,5 @@
 *.pyc
 .idea
-*.png
 test-reports
 providentia.egg-info
 .vscode
