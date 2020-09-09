@@ -444,7 +444,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # add more buttons on the toolbar
         self.fbutton = QtWidgets.QPushButton()
         self.fbutton.setFlat(True)
-        self.fbutton.setIcon(QtGui.QIcon("/gpfs/scratch/bsc32/bsc32099/new_icon.png"))
+        self.fbutton.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_data.png")))
         self.fbutton.clicked.connect(self.test_button)
 
         # position config bar, navigation toolbar and MPL canvas and elements in parent layout
