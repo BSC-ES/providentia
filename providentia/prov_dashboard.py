@@ -444,7 +444,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # add more buttons on the toolbar
         self.fbutton = QtWidgets.QPushButton()
         self.fbutton.setFlat(True)
+        self.fbutton.setToolTip("Save current instance of data and metadata")
         self.fbutton.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_data.png")))
+        self.fbutton.setIconSize(QtCore.QSize(31, 35))
+        self.fbutton.setStyleSheet("QPushButton { border: none;} QPushButton:hover { border-width: 1px; border-style: solid; border-color: darkgrey; border-radius: 4px; background-color : white; }")
         self.fbutton.clicked.connect(self.test_button)
 
         # position config bar, navigation toolbar and MPL canvas and elements in parent layout
