@@ -13,7 +13,6 @@ import cartopy.feature as cfeature
 import matplotlib
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
         as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
@@ -34,21 +33,21 @@ matplotlib.use('Qt5Agg')
 register_matplotlib_converters()
 
 
-class NavigationToolbar(NavigationToolbar2QT):
-    """Define class that updates available buttons on matplotlib toolbar"""
-
-    # only display wanted buttons
-    NavigationToolbar2QT.toolitems = (
-        ('Home', 'Reset original view', 'home', 'home'),
-        ('Back', 'Back to previous view', 'back', 'back'),
-        ('Forward', 'Forward to next view', 'forward', 'forward'),
-        (None, None, None, None),
-        ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
-        ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
-        (None, None, None, None),
-        ('Save', 'Save the figure', 'filesave', 'save_figure'),
-        (None, None, None, None)
-    )
+# class NavigationToolbar(NavigationToolbar2QT):
+#     """Define class that updates available buttons on matplotlib toolbar"""
+#
+#     # only display wanted buttons
+#     NavigationToolbar2QT.toolitems = (
+#         ('Home', 'Reset original view', 'home', 'home'),
+#         ('Back', 'Back to previous view', 'back', 'back'),
+#         ('Forward', 'Forward to next view', 'forward', 'forward'),
+#         (None, None, None, None),
+#         ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
+#         ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
+#         (None, None, None, None),
+#         ('Save', 'Save the figure', 'filesave', 'save_figure'),
+#         (None, None, None, None)
+#     )
 
 
 class MPLCanvas(FigureCanvas):
@@ -2204,33 +2203,7 @@ class MPLCanvas(FigureCanvas):
         # all available stations), with the absolute indices of the subset of plotted selected stations
         return self.active_map_valid_station_inds[selected_map_inds]
 
-    @staticmethod
-    def save_data_button(self):
-        filetypes = {'Numpy file': ['npz']}
-        sorted_filetypes = sorted(filetypes.items())
-        startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
-        start = os.path.join(startpath, 'default_filename')
-        filters = []
-        selectedFilter = None
-        for name, exts in sorted_filetypes:
-            exts_list = " ".join(['*.%s' % ext for ext in exts])
-            filter = '%s (%s)' % (name, exts_list)
-            filters.append(filter)
-            filters = ';;'.join(filters)
-            fname, filter = qt_compat._getSaveFileName(self.read_instance.mpl_canvas.parent(),
-                                                       "Choose a filename to save to", start, filters, selectedFilter)
-            if fname:
-                # Save dir for next time, unless empty str (i.e., use cwd).
-                if startpath != "":
-                    matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
-                    try:
-                        self.write_out_data_in_memory(fname)
-                        # self.canvas.figure.savefig(fname)
-                    except Exception as e:
-                        QtWidgets.QMessageBox.critical(self, "Error saving file", str(e), QtWidgets.QMessageBox.Ok,
-                                                       QtWidgets.QMessageBox.NoButton)
-
-    def write_out_data_in_memory(self, fname):
+    def write_data_npz(self, fname):
         """Function that writes out current data in memory to .npy file"""
 
         np.savez(fname, data=self.read_instance.data_in_memory_filtered, metadata=self.read_instance.metadata_in_memory)

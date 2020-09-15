@@ -4,7 +4,7 @@ from .configuration import parse_path
 from .reading import read_netcdf_data
 from .reading import read_netcdf_nonghost
 from .prov_canvas import MPLCanvas
-from .prov_canvas import NavigationToolbar
+from .toolbar import NavigationToolbar
 from .prov_dashboard_aux import ComboBox
 from .prov_dashboard_aux import QVLine
 from .prov_dashboard_aux import PopUpWindow
@@ -475,7 +475,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.showMaximized()
 
     def test_button(self):
-        MPLCanvas.save_data_button(self.mpl_canvas)
+        NavigationToolbar.save_data_button(self.mpl_canvas)
 
     def generate_pop_up_window(self, menu_root):
         '''generate pop up window'''
