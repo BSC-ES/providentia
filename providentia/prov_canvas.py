@@ -3,7 +3,6 @@ from .calculate import Stats
 from .calculate import ExpBias
 from .reading import drop_nans
 
-import os
 import copy
 from weakref import WeakKeyDictionary
 
@@ -19,35 +18,16 @@ from matplotlib.patches import Polygon
 from matplotlib.path import Path
 from matplotlib.widgets import LassoSelector
 from matplotlib.gridspec import GridSpec
-from matplotlib.backends import qt_compat
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 import numpy as np
 import pandas as pd
-# import json
 
 # Make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
 register_matplotlib_converters()
-
-
-# class NavigationToolbar(NavigationToolbar2QT):
-#     """Define class that updates available buttons on matplotlib toolbar"""
-#
-#     # only display wanted buttons
-#     NavigationToolbar2QT.toolitems = (
-#         ('Home', 'Reset original view', 'home', 'home'),
-#         ('Back', 'Back to previous view', 'back', 'back'),
-#         ('Forward', 'Forward to next view', 'forward', 'forward'),
-#         (None, None, None, None),
-#         ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
-#         ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
-#         (None, None, None, None),
-#         ('Save', 'Save the figure', 'filesave', 'save_figure'),
-#         (None, None, None, None)
-#     )
 
 
 class MPLCanvas(FigureCanvas):
@@ -2203,7 +2183,3 @@ class MPLCanvas(FigureCanvas):
         # all available stations), with the absolute indices of the subset of plotted selected stations
         return self.active_map_valid_station_inds[selected_map_inds]
 
-    def write_data_npz(self, fname):
-        """Function that writes out current data in memory to .npy file"""
-
-        np.savez(fname, data=self.read_instance.data_in_memory_filtered, metadata=self.read_instance.metadata_in_memory)
