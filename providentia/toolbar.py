@@ -26,6 +26,10 @@ class NavigationToolbar(NavigationToolbar2QT):
 
 
 def save_data(mpl_canvas):
+    """Pops window for choosing directory, filename and type
+    for saving data, metadata and configuration.
+    Available filetypes: Numpy file: .npz, netCDF: .nc"""
+
     filetypes = {'Numpy file': ['npz']}
     sorted_filetypes = sorted(filetypes.items())
     startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
