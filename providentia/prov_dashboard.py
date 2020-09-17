@@ -1496,7 +1496,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # iterate through read file data and place data into data array as appropriate
             for file_data_ii, file_data in enumerate(all_file_data):
-                self.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = file_data[0]
+                try:
+                    # some file_data might be none, in case the file did not exist
+                    self.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = \
+                        file_data[0]
+                except Exception as e:
+                    continue
                 if self.process_type == 'observations' and not self.reading_nonghost:
                     self.metadata_in_memory[file_data[2][:, np.newaxis], self.metadata_inds_to_fill[file_data_ii]] = \
                     file_data[3]
