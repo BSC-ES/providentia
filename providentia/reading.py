@@ -23,7 +23,8 @@ def drop_nans(data):
 def read_netcdf_data(tuple_arguments):
     """Function that handles reading of observational/experiment
     netCDF data also handles filtering of observational data based
-    on selected qa/flag/classification flags.
+    on selected qa/flag/classification flags. If file does not exist,
+    returns None.
     """
 
     # assign arguments from tuple to variables
@@ -31,8 +32,11 @@ def read_netcdf_data(tuple_arguments):
     selected_qa, selected_flags, data_dtype, data_vars_to_read, \
     metadata_dtype, metadata_vars_to_read = tuple_arguments
 
-    # read netCDF frame
-    ncdf_root = Dataset(relevant_file)
+    # read netCDF frame, if files doesn't exist, return with None
+    try:
+        ncdf_root = Dataset(relevant_file)
+    except Exception as e:
+        return
 
     # get time units
     time_units = ncdf_root['time'].units
@@ -123,12 +127,16 @@ def read_netcdf_data(tuple_arguments):
 
 
 def read_netcdf_nonghost(tuple_arguments):
-    """Function to handle reading of non-ghost files"""
+    """Function to handle reading of non-ghost files. If file to be read
+    does not exist, returns None"""
 
     # assign arguments from tuple to variables
     relevant_file, time_array, station_references, active_species, process_type = tuple_arguments
-    # read netCDF frame
-    ncdf_root = Dataset(relevant_file)
+    # read netCDF frame, if files doesn't exist, return with None
+    try:
+        ncdf_root = Dataset(relevant_file)
+    except Exception as e:
+        return
 
     # get time units
     time_units = ncdf_root['time'].units
