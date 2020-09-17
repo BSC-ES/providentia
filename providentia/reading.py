@@ -3,6 +3,7 @@ from netCDF4 import num2date
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
+import bisect
 
 
 def drop_nans(data):
@@ -194,3 +195,18 @@ def read_netcdf_nonghost(tuple_arguments):
     # file station indices relative to all unique station references array
     # if process_type == 'observations':
     return file_data, full_array_time_indices, full_array_station_indices
+
+
+def get_yearmonths_to_read(yearmonths, start_date_to_read, end_date_to_read):
+    """Function that returns the yearmonths of the files needed to be read.
+       This is done by limiting a list of relevant yearmonths by a start/end date
+    """
+
+    first_valid_file_ind = bisect.bisect_right(yearmonths, int(start_date_to_read))
+    if first_valid_file_ind != 0:
+        first_valid_file_ind = first_valid_file_ind - 1
+    last_valid_file_ind = bisect.bisect_left(yearmonths, int(end_date_to_read))
+    if first_valid_file_ind == last_valid_file_ind:
+        return [yearmonths[first_valid_file_ind]]
+    else:
+        return yearmonths[first_valid_file_ind:last_valid_file_ind]
