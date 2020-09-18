@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets
 import matplotlib
 from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from .writting import write_data_npz
+from .writting import export_data_npz, export_netcdf
 
 
 class NavigationToolbar(NavigationToolbar2QT):
@@ -30,25 +30,25 @@ def save_data(mpl_canvas):
     for saving data, metadata and configuration.
     Available filetypes: Numpy file: .npz, netCDF: .nc"""
 
-    filetypes = {'Numpy file': ['npz']}
+    filetypes = {'Numpy file': 'npz', 'netCDF': 'nc'}
     sorted_filetypes = sorted(filetypes.items())
     startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
     start = os.path.join(startpath, 'default_filename')
-    filters = []
-    selectedFilter = None
-    for name, exts in sorted_filetypes:
-        exts_list = " ".join(['*.%s' % ext for ext in exts])
-        filter = '%s (%s)' % (name, exts_list)
-        filters.append(filter)
-        filters = ';;'.join(filters)
-        fname, filter = qt_compat._getSaveFileName(None, "Choose a filename to save to",
-                                                   start, filters, selectedFilter)
-        if fname:
-            # Save dir for next time, unless empty str (i.e., use cwd).
-            if startpath != "":
-                matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
-                try:
-                    write_data_npz(mpl_canvas, fname)
-                except Exception as e:
-                    QtWidgets.QMessageBox.critical(mpl_canvas, "Error saving file", str(e), QtWidgets.QMessageBox.Ok,
-                                                   QtWidgets.QMessageBox.NoButton)
+
+    filter_ext = ['%s (%s)' % (name, '*.%s' % ext) for name, ext in sorted_filetypes]
+    filter_ext = ';;'.join(filter_ext)
+    # prompt with file name and extension
+    fname, fext = qt_compat._getSaveFileName(None, "Choose a filename to save to", start, filter_ext)
+    chose_npz = "npz" in fext
+    if fname:
+        # Save dir for next time, unless empty str (i.e., use cwd).
+        if startpath != "":
+            matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
+            try:
+                if chose_npz:
+                    export_data_npz(mpl_canvas, fname)
+                else:
+                    export_netcdf()
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(mpl_canvas, "Error saving file", str(e),
+                                               QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
