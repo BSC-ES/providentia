@@ -48,7 +48,7 @@ def save_data(mpl_canvas):
                 if chose_npz:
                     export_data_npz(mpl_canvas, fname)
                 else:
-                    export_netcdf()
+                    export_netcdf(mpl_canvas, fname)
             except Exception as e:
                 QtWidgets.QMessageBox.critical(mpl_canvas, "Error saving file", str(e),
                                                QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
