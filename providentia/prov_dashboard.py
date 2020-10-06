@@ -1368,6 +1368,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # set data dtype
         self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
+        self.data_vars_to_read.append('time')
+        self.data_dtype.append(('time', 'datetime64[ns]'))
 
     def get_yearmonths_to_read(self, yearmonths, start_date_to_read, end_date_to_read):
         """Function that returns the yearmonths of the files needed to be read.
