@@ -80,9 +80,13 @@ def read_netcdf_data(tuple_arguments):
                              len(valid_file_time_indices)), np.NaN,
                             dtype=data_dtype)
         for data_var in data_vars_to_read:
-            file_data[data_var][:, :] = \
-                    ncdf_root[data_var][current_file_station_indices,
-                                        valid_file_time_indices]
+            if data_var == 'time':
+                # len(len(file_data)) = number of stations
+                file_data['time'] = file_time.to_numpy().repeat(len(file_data))\
+                    .reshape(file_time.shape[0], len(file_data)).T
+            else:
+                file_data[data_var][:, :] = ncdf_root[data_var][current_file_station_indices,
+                                                                valid_file_time_indices]
 
         # if some qa flags selected then screen
         if len(selected_qa) > 0:
@@ -99,8 +103,7 @@ def read_netcdf_data(tuple_arguments):
                     [np.isin(ncdf_root['flag'][:, valid_file_time_indices, :],
                              selected_flags).any(axis=2)] = np.NaN
 
-
-        #get file metadata
+        # get file metadata
         file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
         for meta_var in metadata_vars_to_read:
             file_metadata[meta_var][current_file_station_indices, 0] = ncdf_root[meta_var][:]
@@ -111,7 +114,7 @@ def read_netcdf_data(tuple_arguments):
                             dtype=data_dtype[:1])
         
         relevant_data = ncdf_root[data_vars_to_read[0]][current_file_station_indices, valid_file_time_indices]
-        #mask out fill values for parameter field
+        # mask out fill values for parameter field
         relevant_data[relevant_data.mask] = np.NaN
         file_data[data_vars_to_read[0]][:, :] = relevant_data
 
