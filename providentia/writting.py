@@ -9,7 +9,8 @@ def export_data_npz(mpl_canvas, fname):
     """Function that writes out current data in memory to .npy file"""
 
     np.savez(fname, data=mpl_canvas.read_instance.data_in_memory_filtered,
-             metadata=mpl_canvas.read_instance.metadata_in_memory)
+             metadata=mpl_canvas.read_instance.metadata_in_memory,
+             data_resolution=mpl_canvas.read_instance.active_resolution)
 
 
 def export_netcdf(mpl_canvas, fname):
