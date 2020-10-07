@@ -33,7 +33,11 @@ def save_data(mpl_canvas):
     filetypes = {'Numpy file': 'npz', 'netCDF': 'nc'}
     sorted_filetypes = sorted(filetypes.items())
     startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
-    start = os.path.join(startpath, 'default_filename')
+    try:
+        eg_name = "PRV_" + mpl_canvas.read_instance.active_species
+    except:
+        eg_name = "default_filename"
+    start = os.path.join(startpath, eg_name)
 
     filter_ext = ['%s (%s)' % (name, '*.%s' % ext) for name, ext in sorted_filetypes]
     filter_ext = ';;'.join(filter_ext)
