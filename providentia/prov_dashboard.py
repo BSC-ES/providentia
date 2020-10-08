@@ -3,8 +3,10 @@ from .configuration import ProvConfiguration
 from .configuration import parse_path
 from .reading import read_netcdf_data
 from .reading import read_netcdf_nonghost
+from .reading import get_yearmonths_to_read
 from .prov_canvas import MPLCanvas
-from .prov_canvas import NavigationToolbar
+from .toolbar import NavigationToolbar
+from .toolbar import save_data
 from .prov_dashboard_aux import ComboBox
 from .prov_dashboard_aux import QVLine
 from .prov_dashboard_aux import PopUpWindow
@@ -23,11 +25,10 @@ import sys
 from functools import partial
 from collections import OrderedDict
 
+from PyQt5 import QtCore, QtWidgets, QtGui
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
 import seaborn as sns
 from dateutil.relativedelta import relativedelta
 
@@ -92,9 +93,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # keys (rather than GHOST)
         for _, param_dict in standard_parameters.items():
             self.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
-        #get standard metadata dictionary
+        # get standard metadata dictionary
         self.standard_metadata = get_standard_metadata({'standard_units':''})
-        #create list of metadata variables to read (make global)
+        # create list of metadata variables to read (make global)
         self.metadata_vars_to_read = [key for key in self.standard_metadata.keys()
                                       if pd.isnull(self.standard_metadata[key]['metadata_type'])
                                       == False]
@@ -123,7 +124,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # get difference of flags, needed later for updating default selection
         self.qa_diff = list(set(self.general_qa) - set(self.specific_qa))
 
-
     def which_qa(self):
         """Checks if the species we currently have selected belongs to the ones
         that have specific qa flags selected as default"""
@@ -132,7 +132,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             return self.specific_qa
         else:
             return self.general_qa
-
 
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
@@ -175,6 +174,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         config_bar.setVerticalSpacing(1)
         config_bar.setContentsMargins(5, 0, 0, 0)
         config_bar.setAlignment(QtCore.Qt.AlignLeft)
+
+        # add one more horizontal layout
+        hbox = QtWidgets.QHBoxLayout()
 
         #define all configuration box objects (labels, comboboxes etc.)
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"), formatting_dict['title_menu'])
@@ -386,13 +388,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.representativity_menu['rangeboxes']['current_lower'] = []
         #self.representativity_menu['rangeboxes']['current_upper'] = []
 
-        #setup pop-up window menu tree for data periods
+        # setup pop-up window menu tree for data periods
         self.period_menu = {'window_title':'DATA PERIOD', 'page_title':'Select Data Periods', 'checkboxes':{}}
         self.period_menu['checkboxes']['labels'] = []
         self.period_menu['checkboxes']['keep_selected'] = []
         self.period_menu['checkboxes']['remove_selected'] = []
 
-        #enable pop up configuration windows
+        # enable pop up configuration windows
         self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
         self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
         self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window, self.experiments_menu))
@@ -400,7 +402,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
         self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
 
-        #initialise configuration bar fields
+        # initialise configuration bar fields
         self.config_bar_initialisation = True
         self.update_configuration_bar_fields()
         self.config_bar_initialisation = False
@@ -439,13 +441,24 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # Generate MPL navigation toolbar
         self.navi_toolbar = NavigationToolbar(self.mpl_canvas, self)
 
+        # add more buttons on the toolbar, next to the navi_toolbar
+        self.savebutton = QtWidgets.QPushButton()
+        self.savebutton.setFlat(True)
+        self.savebutton.setToolTip("Save current instance of data and metadata")
+        self.savebutton.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_data.png")))
+        self.savebutton.setIconSize(QtCore.QSize(31, 35))
+        self.savebutton.setStyleSheet("QPushButton { border: none;} QPushButton:hover "
+                                      "{ border-width: 1px; border-style: solid; border-color: darkgrey; "
+                                      "border-radius: 4px; background-color : white; }")
+        self.savebutton.clicked.connect(self.savebutton_func)
+
         # position config bar, navigation toolbar and MPL canvas and elements in parent layout
+        hbox.addWidget(self.savebutton)
+        hbox.addWidget(self.navi_toolbar)
 
-        # add config bar to parent frame
+        # add config bar and hbox to parent frame
         parent_layout.addLayout(config_bar)
-
-        # add MPL navigation toolbar to parent frame
-        parent_layout.addWidget(self.navi_toolbar)
+        parent_layout.addLayout(hbox)
 
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
@@ -458,6 +471,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # maximise window to fit screen
         self.showMaximized()
+
+    def savebutton_func(self):
+        save_data(self.mpl_canvas)
 
     def generate_pop_up_window(self, menu_root):
         '''generate pop up window'''
@@ -654,9 +670,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 self.qa_menu['checkboxes']['remove_selected'] = list(set(
                     self.qa_menu['checkboxes']['remove_selected']) - set(self.qa_diff))
 
-
-
-        #unset variable to allow interactive handling from now
+        # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
 
     def get_valid_obs_files_in_date_range(self):
@@ -716,7 +730,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                             self.available_observation_data[network][resolution][matrix][
                                 species] = valid_species_files_yearmonths
 
-
     def get_valid_experiment_files_in_date_range(self):
         """Define function which gathers available experiment
         data for selected network/resolution/species.
@@ -739,10 +752,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # iterate through all available grids
             for grid in available_grids:
 
-                #get all available ensemble member numbers
+                # get all available ensemble member numbers
                 available_member_numbers = os.listdir('%s/%s/%s/%s' % (self.exp_root, self.ghost_version, experiment, grid))
 
-                #iterate through all available ensemble member numbers
+                # iterate through all available ensemble member numbers
                 for member in available_member_numbers:
 
                     # test first if interpolated directory exists before trying to get files from it
@@ -756,8 +769,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         # get all experiment netCDF files by experiment/grid/selected
                         # resolution/selected species/selected network
                         network_files = os.listdir(
-                            '%s/%s/%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version, experiment, grid, member,
-                                                      self.selected_resolution, self.selected_species, self.selected_network))
+                            '%s/%s/%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version,
+                                                         experiment, grid, member, self.selected_resolution,
+                                                         self.selected_species, self.selected_network))
                         # get start YYYYMM yearmonths of data files
                         network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files]
                         # limit data files to just those within date range
@@ -934,8 +948,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 elif (self.active_end_date < self.previous_active_end_date):
                     cut_right = True
 
-                    # ---------------------------------------#
-
         # determine if any of the active experiments have changed
         # remove experiments that are no longer selected from data_in_memory dictionary
         experiments_to_remove = [experiment for experiment in self.previous_active_experiment_grids if
@@ -1043,17 +1055,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     self.data_in_memory[data_label] = self.data_in_memory[data_label][:,
                                                       data_left_edge_ind:data_right_edge_ind]
 
-
             # need to read on left edge?
             if read_left:
                 # get n number of new elements on left edge
                 n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
 
-                #get list of yearmonths to read
-                yearmonths_to_read = self.get_yearmonths_to_read(self.relevant_yearmonths, self.active_start_date, self.previous_active_start_date)
-                #check which yearmonths_to_read in previous matrix
+                # get list of yearmonths to read
+                yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, self.active_start_date,
+                                                            self.previous_active_start_date)
+                # check which yearmonths_to_read in previous matrix
                 yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths)
-                #get yearmonths not currently accounted for in matrix
+                # get yearmonths not currently accounted for in matrix
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
                 self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
@@ -1081,11 +1093,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 n_new_right_data_inds = (len(self.time_array) - 1) - \
                                         np.where(self.time_array == self.previous_time_array[-1])[0][0]
 
-                #get list of yearmonths to read
-                yearmonths_to_read = self.get_yearmonths_to_read(self.relevant_yearmonths, self.previous_active_end_date, self.active_end_date)
-                #check which yearmonths_to_read in previous matrix
+                # get list of yearmonths to read
+                yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, self.previous_active_end_date,
+                                                            self.active_end_date)
+                # check which yearmonths_to_read in previous matrix
                 yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths)
-                #get yearmonths not currently accounted for in matrix
+                # get yearmonths not currently accounted for in matrix
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
                 self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
@@ -1296,7 +1309,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d')) for month_ii, start_yyyymm in
                                           enumerate(self.relevant_yearmonths)])
 
-
         self.station_references = []
         self.station_longitudes = []
         self.station_latitudes = []
@@ -1356,6 +1368,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # set data dtype
         self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
+        self.data_vars_to_read.append('time')
+        self.data_dtype.append(('time', 'datetime64[ns]'))
 
     def get_yearmonths_to_read(self, yearmonths, start_date_to_read, end_date_to_read):
         """Function that returns the yearmonths of the files needed to be read.
@@ -1410,12 +1424,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 
         # get data files in required date range to read, taking care not to re-read what has already been read
-        yearmonths_to_read = self.get_yearmonths_to_read(relevant_file_start_dates, start_date_to_read, end_date_to_read)
+        yearmonths_to_read = get_yearmonths_to_read(relevant_file_start_dates, start_date_to_read, end_date_to_read)
         relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in yearmonths_to_read]
 
         if not os.path.exists(relevant_files[0]):
             relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm in self.relevant_yearmonths])
-
 
         # check if data label in data in memory dictionary
         if data_label not in list(self.data_in_memory.keys()):
@@ -1478,7 +1491,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     file_name in relevant_files]
                 all_file_data = pool.map(read_netcdf_nonghost, tuple_arguments)
 
-
             # will not submit more files to pool, so close access to it
             pool.close()
             # wait for worker processes to terminate before continuing
@@ -1486,7 +1498,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # iterate through read file data and place data into data array as appropriate
             for file_data_ii, file_data in enumerate(all_file_data):
-                self.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = file_data[0]
+                try:
+                    # some file_data might be none, in case the file did not exist
+                    self.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = \
+                        file_data[0]
+                except Exception as e:
+                    continue
                 if self.process_type == 'observations' and not self.reading_nonghost:
                     self.metadata_in_memory[file_data[2][:, np.newaxis], self.metadata_inds_to_fill[file_data_ii]] = \
                     file_data[3]
