@@ -12,7 +12,6 @@ import cartopy.feature as cfeature
 import matplotlib
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
         as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
@@ -25,28 +24,10 @@ from PyQt5 import QtWidgets
 
 import numpy as np
 import pandas as pd
-# import json
 
 # Make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
 register_matplotlib_converters()
-
-
-class NavigationToolbar(NavigationToolbar2QT):
-    """Define class that updates available buttons on matplotlib toolbar"""
-
-    # only display wanted buttons
-    NavigationToolbar2QT.toolitems = (
-        ('Home', 'Reset original view', 'home', 'home'),
-        ('Back', 'Back to previous view', 'back', 'back'),
-        ('Forward', 'Forward to next view', 'forward', 'forward'),
-        (None, None, None, None),
-        ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
-        ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
-        (None, None, None, None),
-        ('Save', 'Save the figure', 'filesave', 'save_figure'),
-        (None, None, None, None)
-    )
 
 
 class MPLCanvas(FigureCanvas):
@@ -2201,3 +2182,4 @@ class MPLCanvas(FigureCanvas):
         # index the array of indices of stations plotted on the map (indexed with respect to
         # all available stations), with the absolute indices of the subset of plotted selected stations
         return self.active_map_valid_station_inds[selected_map_inds]
+
