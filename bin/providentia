@@ -78,7 +78,9 @@ bsub_command="bsub -W 2:00 -n 16 -M 3000 -q x11 xterm -T Providentia -e"
 python_command="python3 -Wi -c 'from providentia import providentia;providentia.main()' $@"
 
 #set QT scale to avoid magnifying issues
-export QT_AUTO_SCREEN_SCALE_FACTOR=0
+if [ "${BSC_MACHINE}" != "nord3" ]; then
+    export QT_AUTO_SCREEN_SCALE_FACTOR=0
+fi
 
 #CTE POWER
 if [ "${BSC_MACHINE}" == "power" ]; then
