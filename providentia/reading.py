@@ -82,7 +82,9 @@ def read_netcdf_data(tuple_arguments):
         for data_var in data_vars_to_read:
             if data_var == 'time':
                 # len(len(file_data)) = number of stations
-                file_data['time'] = file_time.to_numpy().repeat(len(file_data))\
+                # save time as unix time to avoid dtype issues
+                unix_time = np.array([t.value // 10**9 for t in file_time])
+                file_data['time'] = unix_time.repeat(len(file_data))\
                     .reshape(file_time.shape[0], len(file_data)).T
             else:
                 file_data[data_var][:, :] = ncdf_root[data_var][current_file_station_indices,
