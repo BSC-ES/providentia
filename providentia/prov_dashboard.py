@@ -1352,7 +1352,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                       'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
                                       'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                       'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                      'season_code']
+                                      'season_code', 'time']
         elif (self.active_resolution == 'daily') or (self.active_resolution == '3hourly') or \
                 (self.active_resolution == '6hourly') or (self.active_resolution == '3hourly_instantaneous') or \
                 (self.active_resolution == '6hourly_instantaneous'):
@@ -1360,16 +1360,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                       'monthly_native_representativity_percent',
                                       'annual_native_representativity_percent',
                                       'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                      'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code']
+                                      'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code', 'time']
         elif self.active_resolution == 'monthly':
             self.data_vars_to_read = [self.active_species, 'monthly_native_representativity_percent',
                                       'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
-                                      'annual_native_max_gap_percent', 'season_code']
+                                      'annual_native_max_gap_percent', 'season_code', 'time']
 
         # set data dtype
         self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
-        self.data_vars_to_read.append('time')
-        self.data_dtype.append(('time', 'datetime64[ns]'))
 
     def get_yearmonths_to_read(self, yearmonths, start_date_to_read, end_date_to_read):
         """Function that returns the yearmonths of the files needed to be read.
