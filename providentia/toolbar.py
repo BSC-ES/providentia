@@ -33,8 +33,10 @@ def save_data(mpl_canvas):
     filetypes = {'Numpy file': 'npz', 'netCDF': 'nc'}
     sorted_filetypes = sorted(filetypes.items())
     startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
+    daterange = mpl_canvas.read_instance.le_start_date.text() + "_" \
+                + mpl_canvas.read_instance.le_end_date.text()
     try:
-        eg_name = "PRV_" + mpl_canvas.read_instance.active_species
+        eg_name = "PRV_" + mpl_canvas.read_instance.active_species + "_" + daterange
     except:
         eg_name = "default_filename"
     start = os.path.join(startpath, eg_name)
@@ -48,11 +50,11 @@ def save_data(mpl_canvas):
         # Save dir for next time, unless empty str (i.e., use cwd).
         if startpath != "":
             matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
-            try:
-                if chose_npz:
-                    export_data_npz(mpl_canvas, fname)
-                else:
-                    export_netcdf(mpl_canvas, fname)
-            except Exception as e:
-                QtWidgets.QMessageBox.critical(mpl_canvas, "Error saving file", str(e),
-                                               QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+            # try:
+            if chose_npz:
+                export_data_npz(mpl_canvas, fname)
+            else:
+                export_netcdf(mpl_canvas, fname)
+            # except Exception as e:
+            #     QtWidgets.QMessageBox.critical(mpl_canvas, "Error saving file", str(e),
+            #                                    QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
