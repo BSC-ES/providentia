@@ -56,6 +56,8 @@ def export_netcdf(mpl_canvas, fname):
 
     data_arr = mpl_canvas.read_instance.data_in_memory_filtered['observations'][speci]
     metadata_arr = mpl_canvas.read_instance.metadata_in_memory
+    expids = mpl_canvas.read_instance.experiments_menu['checkboxes']['keep_selected']
+    exp_to_write = []
 
     fout = Dataset(fname+".nc", 'w', format="NETCDF4")
 
@@ -94,12 +96,37 @@ def export_netcdf(mpl_canvas, fname):
             var.calendar = 'standard'
             var.tz = 'UTC'
 
+    if mpl_canvas.colocate_active:
+        for k in mpl_canvas.read_instance.data_in_memory_filtered.keys():
+            if 'colocatedto' in k:
+                expids.append(k)
+
+    # create vars for exps
+    if expids:
+        for exp in expids:
+            if mpl_canvas.colocate_active:
+                key = speci + "_" + exp
+            else:
+                if 'colocatedto' not in exp:
+                    key = speci + "_" + exp
+                else:
+                    continue
+            exp_to_write.append(exp)
+            var = fout.createVariable(key, current_data_type, ('station', 'time'))
+            var.standard_name = data_format_dict[speci]['standard_name']
+            var.long_name = data_format_dict[speci]['long_name']
+            var.units = data_format_dict[speci]['units']
+            var.description = data_format_dict[speci]['description']
+
     # write station data to netCDF
     for data_key in data_keys:
         if data_key == 'time':
             fout[data_key][:] = time
         else:
             fout[data_key+"_"+network][:, :] = data_arr
+
+    for exp in exp_to_write:
+        fout[speci+"_"+exp][:, :] = mpl_canvas.read_instance.data_in_memory_filtered[exp][speci]
 
     # metadata variables
     for metadata_key in metadata_keys:
