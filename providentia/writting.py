@@ -21,21 +21,22 @@ def export_data_npz(mpl_canvas, fname):
 def export_netcdf(mpl_canvas, fname):
     """Write data and metadata to netcdf file"""
 
+    instance = mpl_canvas.read_instance
     sys.path.append('/gpfs/projects/bsc32/AC_cache/obs/ghost/GHOST_standards/{}'
-                    .format(mpl_canvas.read_instance.ghost_version))
+                    .format(instance.ghost_version))
     from GHOST_standards import standard_parameters, get_standard_data, get_standard_metadata
     parameter_dictionary = {}
     for _, param_dict in standard_parameters.items():
         parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
 
-    speci = mpl_canvas.read_instance.active_species
-    network = mpl_canvas.read_instance.active_network
-    start = mpl_canvas.read_instance.le_start_date.text()
-    end = mpl_canvas.read_instance.le_end_date.text()
-    relevant_yearmonths = mpl_canvas.read_instance.relevant_yearmonths
+    speci = instance.active_species
+    network = instance.active_network
+    start = instance.le_start_date.text()
+    end = instance.le_end_date.text()
+    relevant_yearmonths = instance.relevant_yearmonths
 
     # frequency for pandas
-    fq = mpl_canvas.read_instance.active_frequency_code
+    fq = instance.active_frequency_code
 
     # create time array in selected resolution between start and end date
     pd_time = pd.date_range(start=datetime.datetime(year=int(start[:4]), month=int(start[4:6]), day=1),
@@ -43,30 +44,28 @@ def export_netcdf(mpl_canvas, fname):
     time = np.arange(len(pd_time))
 
     # dictionary to map python types to netcdf types
-    type_map = {np.uint8: 'u1', np.uint32: 'u4', np.object: str, np.float32: 'f4', np.float64: 'f8'}
+    type_map = {np.uint8: 'u1', np.uint32: 'u4', np.object: str,
+                np.float32: 'f4', np.float64: 'f8'}
 
     parameter_details = parameter_dictionary[speci]
     metadata_format_dict = get_standard_metadata(parameter_details)
     data_format_dict = get_standard_data(parameter_details)
 
-    # metadata_keys = metadata_format_dict.keys()
-    metadata_keys = mpl_canvas.read_instance.metadata_vars_to_read
-    # metadata_keys = [metadata_key for metadata_key in metadata_keys if
-    #                  metadata_key not in ['meta_update_stamp', 'data_download_stamp']]
-
-    data_arr = mpl_canvas.read_instance.data_in_memory_filtered['observations'][speci]
-    metadata_arr = mpl_canvas.read_instance.metadata_in_memory
-    expids = mpl_canvas.read_instance.experiments_menu['checkboxes']['keep_selected']
+    metadata_keys = instance.metadata_vars_to_read
+    data_arr = instance.data_in_memory_filtered['observations'][speci]
+    metadata_arr = instance.metadata_in_memory
+    expids = instance.experiments_menu['checkboxes']['keep_selected']
     exp_to_write = []
-
+    # start file
     fout = Dataset(fname+".nc", 'w', format="NETCDF4")
 
     # file contents
-    fout.title = 'Surface {} data in the {} network between {}-{}.'.format(speci, network, start, end)
+    fout.title = 'Surface {} data in the {} network between {}-{}.'\
+        .format(speci, network, start, end)
     fout.institution = 'Barcelona Supercomputing Center'
     fout.source = 'Surface observations'
     fout.conventions = 'CF-1.7'
-    fout.data_version = mpl_canvas.read_instance.ghost_version
+    fout.data_version = instance.ghost_version
 
     # netcdf dimensions
     fout.createDimension('station', None)
@@ -97,7 +96,7 @@ def export_netcdf(mpl_canvas, fname):
             var.tz = 'UTC'
 
     if mpl_canvas.colocate_active:
-        for k in mpl_canvas.read_instance.data_in_memory_filtered.keys():
+        for k in instance.data_in_memory_filtered.keys():
             if 'colocatedto' in k:
                 expids.append(k)
 
@@ -126,7 +125,7 @@ def export_netcdf(mpl_canvas, fname):
             fout[data_key+"_"+network][:, :] = data_arr
 
     for exp in exp_to_write:
-        fout[speci+"_"+exp][:, :] = mpl_canvas.read_instance.data_in_memory_filtered[exp][speci]
+        fout[speci+"_"+exp][:, :] = instance.data_in_memory_filtered[exp][speci]
 
     # metadata variables
     for metadata_key in metadata_keys:
@@ -156,5 +155,3 @@ def export_netcdf(mpl_canvas, fname):
 
     # close writing to netCDF
     fout.close()
-
-    return
