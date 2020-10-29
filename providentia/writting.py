@@ -13,8 +13,13 @@ from netCDF4 import Dataset, num2date
 def export_data_npz(mpl_canvas, fname):
     """Function that writes out current data in memory to .npy file"""
 
+    if mpl_canvas.read_instance.reading_nonghost:
+        mdata = mpl_canvas.read_instance.nonghost_metadata
+    else:
+        mdata = mpl_canvas.read_instance.metadata_in_memory
+
     np.savez(fname, data=mpl_canvas.read_instance.data_in_memory_filtered,
-             metadata=mpl_canvas.read_instance.metadata_in_memory,
+             metadata=mdata,
              data_resolution=mpl_canvas.read_instance.active_resolution)
 
 
