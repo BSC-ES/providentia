@@ -137,6 +137,10 @@ def read_netcdf_nonghost(tuple_arguments):
 
     # assign arguments from tuple to variables
     relevant_file, time_array, station_references, active_species, process_type = tuple_arguments
+    # nonghost have separate metadata to read
+    metadata_vars_to_read = ['station_name', 'latitude', 'longitude', 'altitude']
+    metadata_dtype = [('station_name', np.object), ('latitude', np.float),
+                      ('longitude', np.float), ('altitude', np.float)]
     # read netCDF frame, if files doesn't exist, return with None
     try:
         ncdf_root = Dataset(relevant_file)
@@ -189,8 +193,14 @@ def read_netcdf_nonghost(tuple_arguments):
     if process_type == 'observations':
         file_data = np.full((len(current_file_station_indices),
                              len(valid_file_time_indices)), np.NaN)
+        file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
         # for data_var in data_vars_to_read:
         file_data[:] = ncdf_root[active_species][valid_file_time_indices, current_file_station_indices].T
+        for meta_var in metadata_vars_to_read:
+            if meta_var == "station_name":
+                file_metadata[meta_var][current_file_station_indices, 0] = station_references
+            else:
+                file_metadata[meta_var][current_file_station_indices, 0] = ncdf_root[meta_var][:]
 
     else:
         file_data = np.full((len(current_file_station_indices),
@@ -207,7 +217,7 @@ def read_netcdf_nonghost(tuple_arguments):
     # return valid species data, time indices relative to active full time array,
     # file station indices relative to all unique station references array
     # if process_type == 'observations':
-    return file_data, full_array_time_indices, full_array_station_indices
+    return file_data, full_array_time_indices, full_array_station_indices, file_metadata
 
 
 def get_yearmonths_to_read(yearmonths, start_date_to_read, end_date_to_read):
