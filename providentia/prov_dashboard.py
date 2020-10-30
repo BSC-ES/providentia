@@ -1434,8 +1434,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             if self.process_type == 'observations':
                 self.plotting_params['observations'] = {}
-                self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
+                if not self.reading_nonghost:
+                    self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
                                                           np.NaN, dtype=self.data_dtype)
+                else:
+                    self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
+                                                          np.NaN, dtype=self.data_dtype[:1])
                 self.metadata_in_memory = np.full((len(self.station_references), len(self.relevant_yearmonths)),
                                                   np.NaN, dtype=self.metadata_dtype)
                 if self.reading_nonghost:
