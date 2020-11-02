@@ -1,8 +1,6 @@
 """ Module storing writting functions """
 
 import datetime
-import glob
-import os
 import sys
 
 import numpy as np
@@ -61,6 +59,12 @@ def export_netcdf(mpl_canvas, fname):
     metadata_arr = instance.metadata_in_memory
     expids = instance.experiments_menu['checkboxes']['keep_selected']
     exp_to_write = []
+    # change some vars if we're treating nonghost
+    if instance.reading_nonghost:
+        network = instance.active_network.replace("*", "")
+        metadata_keys = ['station_name', 'latitude', 'longitude', 'altitude']
+        metadata_arr = instance.nonghost_metadata
+
     # start file
     fout = Dataset(fname+".nc", 'w', format="NETCDF4")
 
@@ -75,7 +79,9 @@ def export_netcdf(mpl_canvas, fname):
     # netcdf dimensions
     fout.createDimension('station', None)
     fout.createDimension('time', len(time))
-    fout.createDimension('month', len(relevant_yearmonths))
+    # create month dimension only for GHOST case
+    if not instance.reading_nonghost:
+        fout.createDimension('month', len(relevant_yearmonths))
 
     data_keys = ['time', speci]
     for data_key in data_keys:
@@ -137,7 +143,10 @@ def export_netcdf(mpl_canvas, fname):
 
         # current_data_type = type_map[metadata[metadata_key].dtype]
         current_data_type = type_map[metadata_format_dict[metadata_key]['data_type']]
-        var = fout.createVariable(metadata_key, current_data_type, ('station', 'month'))
+        if instance.reading_nonghost:
+            var = fout.createVariable(metadata_key, current_data_type, ('station',))
+        else:
+            var = fout.createVariable(metadata_key, current_data_type, ('station', 'month'))
 
         # set variable attributes
         var.standard_name = metadata_format_dict[metadata_key]['standard_name']
@@ -153,10 +162,16 @@ def export_netcdf(mpl_canvas, fname):
 
     # write station metadata to netCDF
     for metadata_key in metadata_keys:
-        if fout[metadata_key].dtype == str:
-            fout[metadata_key][:, :] = metadata_arr[metadata_key].astype(str)
+        if instance.reading_nonghost:
+            if fout[metadata_key].dtype == str:
+                fout[metadata_key][:] = metadata_arr[metadata_key].astype(str)
+            else:
+                fout[metadata_key][:] = metadata_arr[metadata_key]
         else:
-            fout[metadata_key][:, :] = metadata_arr[metadata_key]
+            if fout[metadata_key].dtype == str:
+                fout[metadata_key][:, :] = metadata_arr[metadata_key].astype(str)
+            else:
+                fout[metadata_key][:, :] = metadata_arr[metadata_key]
 
     # close writing to netCDF
     fout.close()
