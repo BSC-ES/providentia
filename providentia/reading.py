@@ -138,14 +138,20 @@ def read_netcdf_nonghost(tuple_arguments):
     # assign arguments from tuple to variables
     relevant_file, time_array, station_references, active_species, process_type = tuple_arguments
     # nonghost have separate metadata to read
-    metadata_vars_to_read = ['station_name', 'latitude', 'longitude', 'altitude']
-    metadata_dtype = [('station_name', np.object), ('latitude', np.float),
-                      ('longitude', np.float), ('altitude', np.float)]
     # read netCDF frame, if files doesn't exist, return with None
     try:
         ncdf_root = Dataset(relevant_file)
     except Exception as e:
         return
+
+    latitude = "latitude"
+    longitude = "longitude"
+    if "latitude" not in ncdf_root.variables:
+        latitude = "lat"
+        longitude = "lon"
+    metadata_vars_to_read = ['station_name', latitude, longitude, 'altitude']
+    metadata_dtype = [('station_name', np.object), (latitude, np.float),
+                      (longitude, np.float), ('altitude', np.float)]
 
     # get time units
     time_units = ncdf_root['time'].units
