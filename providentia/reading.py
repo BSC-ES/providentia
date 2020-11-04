@@ -222,8 +222,10 @@ def read_netcdf_nonghost(tuple_arguments):
 
     # return valid species data, time indices relative to active full time array,
     # file station indices relative to all unique station references array
-    # if process_type == 'observations':
-    return file_data, full_array_time_indices, full_array_station_indices, file_metadata
+    if process_type == 'observations':
+        return file_data, full_array_time_indices, full_array_station_indices, file_metadata
+    else:
+        return file_data, full_array_time_indices, full_array_station_indices
 
 
 def get_yearmonths_to_read(yearmonths, start_date_to_read, end_date_to_read):
