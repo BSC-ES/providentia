@@ -62,8 +62,9 @@ def export_netcdf(mpl_canvas, fname):
     # change some vars if we're treating nonghost
     if instance.reading_nonghost:
         network = instance.active_network.replace("*", "")
-        metadata_keys = ['station_name', 'latitude', 'longitude', 'altitude']
+        # metadata_keys = ['station_name', 'latitude', 'longitude', 'altitude']
         metadata_arr = instance.nonghost_metadata
+        metadata_keys = list(metadata_arr.dtype.names)
 
     # start file
     fout = Dataset(fname+".nc", 'w', format="NETCDF4")
@@ -140,6 +141,9 @@ def export_netcdf(mpl_canvas, fname):
 
     # metadata variables
     for metadata_key in metadata_keys:
+        # rename station_code to station_reference
+        if metadata_key == "station_code":
+            metadata_key = "station_reference"
 
         # current_data_type = type_map[metadata[metadata_key].dtype]
         current_data_type = type_map[metadata_format_dict[metadata_key]['data_type']]
@@ -164,7 +168,10 @@ def export_netcdf(mpl_canvas, fname):
     for metadata_key in metadata_keys:
         if instance.reading_nonghost:
             if fout[metadata_key].dtype == str:
-                fout[metadata_key][:] = metadata_arr[metadata_key].astype(str)
+                if metadata_key == "station_code":
+                    fout["station_reference"][:] = metadata_arr[metadata_key].astype(str)
+                else:
+                    fout[metadata_key][:] = metadata_arr[metadata_key].astype(str)
             else:
                 fout[metadata_key][:] = metadata_arr[metadata_key]
         else:
