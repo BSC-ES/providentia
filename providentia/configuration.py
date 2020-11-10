@@ -103,8 +103,10 @@ class ProvConfiguration(object):
             # set observational root data directory if left undefined
             if value == '':
                 # running on CTE-POWER/MN4?
-                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3'):
-                    value = '/gpfs/scratch/archive/bsc32/esarchive/obs'
+                if (MACHINE == 'nord3'):
+                    value = '/esarchive/obs'
+                elif (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3'):
+                    value = None
                 else:
                     # running on workstation?
                     value = '/esarchive/obs'

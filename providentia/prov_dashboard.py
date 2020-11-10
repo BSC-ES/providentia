@@ -587,8 +587,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # load dictionary with esarchive files
             esarchive_files = json.load(open(os.path.join(CURRENT_PATH, 'conf/esarchive_files.json')))
-            # and merge to existing dict
-            self.all_observation_data = {**self.all_observation_data, **esarchive_files}
+            # and merge to existing dict if we have the path
+            if self.nonghost_root is not None:
+                self.all_observation_data = {**self.all_observation_data, **esarchive_files}
             # create dictionary of observational data inside date range
             self.get_valid_obs_files_in_date_range()
 
@@ -1443,9 +1444,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 self.metadata_in_memory = np.full((len(self.station_references), len(self.relevant_yearmonths)),
                                                   np.NaN, dtype=self.metadata_dtype)
                 if self.reading_nonghost:
+                    tmp_ncdf = Dataset(relevant_files[0])
                     # create separate structure of nonghost metadata
                     nonghost_mdata_dtype = [('station_name', np.object), ('latitude', np.float),
                                             ('longitude', np.float), ('altitude', np.float)]
+                    if "station_code" in tmp_ncdf.variables:
+                        nonghost_mdata_dtype.append(('station_code', np.object))
                     self.nonghost_metadata = np.full((len(self.station_references)),
                                                      np.NaN, dtype=nonghost_mdata_dtype)
 
