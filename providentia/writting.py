@@ -167,13 +167,14 @@ def export_netcdf(mpl_canvas, fname):
     # write station metadata to netCDF
     for metadata_key in metadata_keys:
         if instance.reading_nonghost:
-            if fout[metadata_key].dtype == str:
-                if metadata_key == "station_code":
-                    fout["station_reference"][:] = metadata_arr[metadata_key].astype(str)
-                else:
-                    fout[metadata_key][:] = metadata_arr[metadata_key].astype(str)
+            # treat station_code differently
+            if metadata_key == "station_code":
+                fout["station_reference"][:] = metadata_arr[metadata_key].astype(str)
             else:
-                fout[metadata_key][:] = metadata_arr[metadata_key]
+                if fout[metadata_key].dtype == str:
+                        fout[metadata_key][:] = metadata_arr[metadata_key].astype(str)
+                else:
+                    fout[metadata_key][:] = metadata_arr[metadata_key]
         else:
             if fout[metadata_key].dtype == str:
                 fout[metadata_key][:, :] = metadata_arr[metadata_key].astype(str)
