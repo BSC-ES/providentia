@@ -141,11 +141,6 @@ def export_netcdf(mpl_canvas, fname):
 
     # metadata variables
     for metadata_key in metadata_keys:
-        # rename station_code to station_reference
-        if metadata_key == "station_code":
-            metadata_key = "station_reference"
-
-        # current_data_type = type_map[metadata[metadata_key].dtype]
         current_data_type = type_map[metadata_format_dict[metadata_key]['data_type']]
         if instance.reading_nonghost:
             var = fout.createVariable(metadata_key, current_data_type, ('station',))
@@ -167,14 +162,10 @@ def export_netcdf(mpl_canvas, fname):
     # write station metadata to netCDF
     for metadata_key in metadata_keys:
         if instance.reading_nonghost:
-            # treat station_code differently
-            if metadata_key == "station_code":
-                fout["station_reference"][:] = metadata_arr[metadata_key].astype(str)
+            if fout[metadata_key].dtype == str:
+                    fout[metadata_key][:] = metadata_arr[metadata_key].astype(str)
             else:
-                if fout[metadata_key].dtype == str:
-                        fout[metadata_key][:] = metadata_arr[metadata_key].astype(str)
-                else:
-                    fout[metadata_key][:] = metadata_arr[metadata_key]
+                fout[metadata_key][:] = metadata_arr[metadata_key]
         else:
             if fout[metadata_key].dtype == str:
                 fout[metadata_key][:, :] = metadata_arr[metadata_key].astype(str)
