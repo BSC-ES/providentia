@@ -30,11 +30,13 @@ def save_data(mpl_canvas):
     for saving data, metadata and configuration.
     Available filetypes: Numpy file: .npz, netCDF: .nc"""
 
-    filetypes = {'Numpy file': 'npz', 'netCDF': 'nc'}
+    filetypes = {'Numpy file': 'npz', 'NetCDF': 'nc'}
     sorted_filetypes = sorted(filetypes.items())
     startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
+    daterange = mpl_canvas.read_instance.le_start_date.text() + "_" \
+                + mpl_canvas.read_instance.le_end_date.text()
     try:
-        eg_name = "PRV_" + mpl_canvas.read_instance.active_species
+        eg_name = "PRV_" + mpl_canvas.read_instance.active_species + "_" + daterange
     except:
         eg_name = "default_filename"
     start = os.path.join(startpath, eg_name)

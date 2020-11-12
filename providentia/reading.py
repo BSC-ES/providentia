@@ -137,12 +137,24 @@ def read_netcdf_nonghost(tuple_arguments):
 
     # assign arguments from tuple to variables
     relevant_file, time_array, station_references, active_species, process_type = tuple_arguments
+    # nonghost have separate metadata to read
     # read netCDF frame, if files doesn't exist, return with None
     try:
         ncdf_root = Dataset(relevant_file)
     except Exception as e:
         return
 
+    latitude = "latitude"
+    longitude = "longitude"
+    if "latitude" not in ncdf_root.variables:
+        latitude = "lat"
+        longitude = "lon"
+    metadata_vars_to_read = ['station_name', latitude, longitude, 'altitude']
+    metadata_dtype = [('station_name', np.object), (latitude, np.float),
+                      (longitude, np.float), ('altitude', np.float)]
+    if "station_code" in ncdf_root.variables:
+        metadata_vars_to_read.append('station_code')
+        metadata_dtype.append(('station_code', np.object))
     # get time units
     time_units = ncdf_root['time'].units
 
@@ -189,8 +201,18 @@ def read_netcdf_nonghost(tuple_arguments):
     if process_type == 'observations':
         file_data = np.full((len(current_file_station_indices),
                              len(valid_file_time_indices)), np.NaN)
+        file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
         # for data_var in data_vars_to_read:
         file_data[:] = ncdf_root[active_species][valid_file_time_indices, current_file_station_indices].T
+        for meta_var in metadata_vars_to_read:
+            if meta_var == "station_name":
+                file_metadata[meta_var][current_file_station_indices, 0] = station_references
+            elif meta_var == "station_code":
+                codes = np.array([st_code.tostring().decode('ascii').replace('\x00', '')
+                                  for st_code in ncdf_root['station_code'][:]], dtype=np.str)
+                file_metadata[meta_var][current_file_station_indices, 0] = codes
+            else:
+                file_metadata[meta_var][current_file_station_indices, 0] = ncdf_root[meta_var][:]
 
     else:
         file_data = np.full((len(current_file_station_indices),
@@ -206,8 +228,10 @@ def read_netcdf_nonghost(tuple_arguments):
 
     # return valid species data, time indices relative to active full time array,
     # file station indices relative to all unique station references array
-    # if process_type == 'observations':
-    return file_data, full_array_time_indices, full_array_station_indices
+    if process_type == 'observations':
+        return file_data, full_array_time_indices, full_array_station_indices, file_metadata
+    else:
+        return file_data, full_array_time_indices, full_array_station_indices
 
 
 def get_yearmonths_to_read(yearmonths, start_date_to_read, end_date_to_read):
