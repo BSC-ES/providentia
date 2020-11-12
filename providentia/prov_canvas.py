@@ -418,7 +418,7 @@ class MPLCanvas(FigureCanvas):
                         self.read_instance.N_inds_per_month, axis=1)
                     self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                         invalid_remove] = np.NaN
-                    # handle numeric metadata
+            # handle numeric metadata
             else:
                 meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
                 # filter out data with metadata < current lower value (if this is numeric)
