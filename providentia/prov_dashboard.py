@@ -1449,7 +1449,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     nonghost_mdata_dtype = [('station_name', np.object), ('latitude', np.float),
                                             ('longitude', np.float), ('altitude', np.float)]
                     if "station_code" in tmp_ncdf.variables:
-                        nonghost_mdata_dtype.append(('station_code', np.object))
+                        nonghost_mdata_dtype.append(('station_reference', np.object))
                     self.nonghost_metadata = np.full((len(self.station_references)),
                                                      np.NaN, dtype=nonghost_mdata_dtype)
 
