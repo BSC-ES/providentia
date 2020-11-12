@@ -153,8 +153,9 @@ def read_netcdf_nonghost(tuple_arguments):
     metadata_dtype = [('station_name', np.object), (latitude, np.float),
                       (longitude, np.float), ('altitude', np.float)]
     if "station_code" in ncdf_root.variables:
-        metadata_vars_to_read.append('station_code')
-        metadata_dtype.append(('station_code', np.object))
+        # rename it to station_reference for consistency
+        metadata_vars_to_read.append('station_reference')
+        metadata_dtype.append(('station_reference', np.object))
     # get time units
     time_units = ncdf_root['time'].units
 
@@ -207,7 +208,7 @@ def read_netcdf_nonghost(tuple_arguments):
         for meta_var in metadata_vars_to_read:
             if meta_var == "station_name":
                 file_metadata[meta_var][current_file_station_indices, 0] = station_references
-            elif meta_var == "station_code":
+            elif meta_var == "station_reference":
                 codes = np.array([st_code.tostring().decode('ascii').replace('\x00', '')
                                   for st_code in ncdf_root['station_code'][:]], dtype=np.str)
                 file_metadata[meta_var][current_file_station_indices, 0] = codes
