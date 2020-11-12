@@ -587,8 +587,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # load dictionary with esarchive files
             esarchive_files = json.load(open(os.path.join(CURRENT_PATH, 'conf/esarchive_files.json')))
-            # and merge to existing dict
-            self.all_observation_data = {**self.all_observation_data, **esarchive_files}
+            # and merge to existing dict if we have the path
+            if self.nonghost_root is not None:
+                self.all_observation_data = {**self.all_observation_data, **esarchive_files}
             # create dictionary of observational data inside date range
             self.get_valid_obs_files_in_date_range()
 
@@ -1434,10 +1435,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             if self.process_type == 'observations':
                 self.plotting_params['observations'] = {}
-                self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
+                if not self.reading_nonghost:
+                    self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
                                                           np.NaN, dtype=self.data_dtype)
+                else:
+                    self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
+                                                          np.NaN, dtype=self.data_dtype[:1])
                 self.metadata_in_memory = np.full((len(self.station_references), len(self.relevant_yearmonths)),
                                                   np.NaN, dtype=self.metadata_dtype)
+                if self.reading_nonghost:
+                    tmp_ncdf = Dataset(relevant_files[0])
+                    # create separate structure of nonghost metadata
+                    nonghost_mdata_dtype = [('station_name', np.object), ('latitude', np.float),
+                                            ('longitude', np.float), ('altitude', np.float)]
+                    if "station_code" in tmp_ncdf.variables:
+                        nonghost_mdata_dtype.append(('station_code', np.object))
+                    self.nonghost_metadata = np.full((len(self.station_references)),
+                                                     np.NaN, dtype=nonghost_mdata_dtype)
 
             # if process_type is experiment, get experiment specific grid edges from
             # first relevant file, and save to data in memory dictionary
@@ -1502,9 +1516,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         file_data[0]
                 except Exception as e:
                     continue
-                if self.process_type == 'observations' and not self.reading_nonghost:
-                    self.metadata_in_memory[file_data[2][:, np.newaxis], self.metadata_inds_to_fill[file_data_ii]] = \
-                    file_data[3]
+                if self.process_type == 'observations':
+                    if not self.reading_nonghost:
+                        self.metadata_in_memory[file_data[2][:, np.newaxis],
+                                                self.metadata_inds_to_fill[file_data_ii]] = file_data[3]
+                    else:
+                        self.nonghost_metadata[file_data[2][:, np.newaxis]] = file_data[3]
 
     def update_metadata_fields(self):
 
