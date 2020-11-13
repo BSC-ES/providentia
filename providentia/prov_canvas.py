@@ -260,7 +260,9 @@ class MPLCanvas(FigureCanvas):
             return
 
         # reset data arrays to be un-filtered
-        self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
+        if self.read_instance.block_MPL_canvas_updates:
+            self.read_instance.data_in_memory_filtered = self.read_instance.data_in_memory
+        # self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
 
         # filter all observational data out of bounds of lower/upper limits
         inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations'][
