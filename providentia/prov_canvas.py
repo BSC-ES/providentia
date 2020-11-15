@@ -233,7 +233,7 @@ class MPLCanvas(FigureCanvas):
         """Function which handles updates data filtering by
         selected lower/upper limit bounds, selected measurement
         methods and selected minimum data availability %"""
-
+ 
         # Update mouse cursor to a waiting cursor
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
@@ -260,9 +260,7 @@ class MPLCanvas(FigureCanvas):
             return
 
         # reset data arrays to be un-filtered
-        if self.read_instance.block_MPL_canvas_updates:
-            self.read_instance.data_in_memory_filtered = self.read_instance.data_in_memory
-        # self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
+        self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
 
         # filter all observational data out of bounds of lower/upper limits
         inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations'][
@@ -337,24 +335,39 @@ class MPLCanvas(FigureCanvas):
                 self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'], season_codes_to_remove)] = np.NaN            
 
-        # filter all obersvational data out of set bounds of native percentage data availability variables
+        # filter all observational data out of set bounds of native percentage data availability variables
         if not self.read_instance.reading_nonghost:
             for var_ii, var in enumerate(active_data_availablity_vars):
                 if 'native' in var:
                     # max gap variable?
                     if 'max_gap' in var:
-                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                            self.read_instance.data_in_memory_filtered['observations'][var] >
-                            data_availability_lower_bounds[var_ii]] = np.NaN
+                        #bound is < 100?:
+                        if data_availability_lower_bounds[var_ii] < 100:
+                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                                self.read_instance.data_in_memory_filtered['observations'][var] >
+                                data_availability_lower_bounds[var_ii]] = np.NaN
                     # data representativity variable?
-                    else:
-                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                            self.read_instance.data_in_memory_filtered['observations'][var] <
-                            data_availability_lower_bounds[var_ii]] = np.NaN
+                    else: 
+                        #bound is > 0?
+                        if data_availability_lower_bounds[var_ii] > 0:
+                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                                self.read_instance.data_in_memory_filtered['observations'][var] <
+                                data_availability_lower_bounds[var_ii]] = np.NaN
 
-        # filter all obersvational data out of set bounds of non-native percentage data availability variables
+        # filter all observational data out of set bounds of non-native percentage data availability variables
         for var_ii, var in enumerate(active_data_availablity_vars):
             if 'native' not in var:
+                # max gap variable?
+                if 'max_gap' in var:
+                    #bound is == 100?
+                    if data_availability_lower_bounds[var_ii] == 100:
+                        continue
+                # data representativity variable?
+                else:
+                    #bound == 0?
+                    if data_availability_lower_bounds[var_ii] == 0:
+                        continue
+
                 # get period associate with variable
                 period = var.split('_')[0]
                 period_inds = np.arange(
@@ -397,24 +410,18 @@ class MPLCanvas(FigureCanvas):
 
             # handle non-numeric metadata
             if metadata_data_type == np.object:
-                # if any of the keep checkboxes have been selected, and some checkboxes have
-                # been changed from previous update, filter out data by fields that have not been selected
+                # if any of the keep checkboxes are selected, filter out data by fields that have not been selected
                 current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
-                previous_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
-                    'previous_keep_selected']
-                if (len(current_keep) > 0) & (set(previous_keep) != set(current_keep)):
+                if len(current_keep) > 0:
                     invalid_keep = np.repeat(
                         np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_keep, invert=True),
                         self.read_instance.N_inds_per_month, axis=1)
                     self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                         invalid_keep] = np.NaN
-                # if any of the remove checkboxes have been selected, and some checkboxes have been
-                # changed from previous update, filter out data by these selected fields
+                # if any of the remove checkboxes have been selected, filter out data by these selected fields
                 current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
                     'remove_selected']
-                previous_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
-                    'previous_remove_selected']
-                if (len(current_remove) > 0) & (set(previous_remove) != set(current_remove)):
+                if len(current_remove) > 0:
                     invalid_remove = np.repeat(
                         np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_remove),
                         self.read_instance.N_inds_per_month, axis=1)
@@ -423,36 +430,28 @@ class MPLCanvas(FigureCanvas):
             # handle numeric metadata
             else:
                 meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
-                # filter out data with metadata < current lower value (if this is numeric)
-                try:
-                    current_lower = np.float32(
-                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
-                    previous_lower = np.float32(
-                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['previous_lower'][meta_var_index])
-                    # if current lower value is non-NaN, and different from previous value,
-                    # then filter out data with metadata < current lower value
-                    if (not pd.isnull(current_lower)) & (current_lower != previous_lower):
+                # if current lower > than the minimum extent, then filter out data with metadata < current lower value (if this is numeric)
+                current_lower = np.float32(self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
+                # if current lower value is non-NaN, then filter out data with metadata < current lower value
+                if not pd.isnull(current_lower):
+                    lower_default = np.float32(
+                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
+                    if current_lower > lower_default:
                         invalid_below = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] < current_lower,
                                                   self.read_instance.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                             invalid_below] = np.NaN
-                except:
-                    pass
-                # filter out data with metadata > current upper value (if this is numeric)
-                try:
-                    current_upper = np.float32(
-                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
-                    previous_upper = np.float32(
-                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['previous_upper'][meta_var_index])
-                    # if current upper value is non-NaN, and different from previous value,
-                    # then filter out data with metadata > current upper value
-                    if (not pd.isnull(current_upper)) & (current_upper != previous_upper):
+                # if current upper < than the maximum extent, then filter out data with metadata > current upper value (if this is numeric)
+                current_upper = np.float32(self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
+                # if current upper value is non-NaN, then filter out data with metadata > current upper value
+                if not pd.isnull(current_upper):
+                    upper_default = np.float32(
+                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
+                    if current_upper < upper_default:
                         invalid_above = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] > current_upper,
                                                   self.read_instance.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                             invalid_above] = np.NaN
-                except:
-                    pass
 
         # colocate data (if necessary)
         self.colocate_data()
@@ -529,7 +528,7 @@ class MPLCanvas(FigureCanvas):
 
             # draw changes
             self.draw()
-
+             
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 
