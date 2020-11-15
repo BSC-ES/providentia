@@ -366,27 +366,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['previous_keep_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['previous_remove_selected'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['keep_default'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['remove_default'] = []
-            #self.metadata_menu[metadata_type]['rangeboxes']['previous_labels'] = []
             self.metadata_menu[metadata_type]['rangeboxes']['labels'] = [metadata_name for metadata_name in self.standard_metadata.keys() if (self.standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (self.standard_metadata[metadata_name]['data_type'] != np.object)]
             self.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = [self.standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['rangeboxes']['labels']]
-            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['previous_lower'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['previous_upper'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = [''] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
 
         #setup pop-up window menu tree for % data representativity
         self.representativity_menu = {'window_title':'% DATA REPRESENTATIVITY', 'page_title':'Select % Data Representativity Bounds', 'rangeboxes':{}}
-        #self.representativity_menu['rangeboxes']['previous_labels'] = []
         self.representativity_menu['rangeboxes']['labels'] = []
         self.representativity_menu['rangeboxes']['tooltips'] = []
         self.representativity_menu['rangeboxes']['current_lower'] = []
-        #self.representativity_menu['rangeboxes']['current_upper'] = []
 
         # setup pop-up window menu tree for data periods
         self.period_menu = {'window_title':'DATA PERIOD', 'page_title':'Select Data Periods', 'checkboxes':{}}
@@ -1206,6 +1199,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         if self.block_MPL_canvas_updates:
             return
 
+        #set mouse cursor to hourglass
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
         # set rep fields to empty lists and initialize again
         self.representativity_menu['rangeboxes']['labels'] = []
         self.representativity_menu['rangeboxes']['current_lower'] = []
@@ -1222,22 +1218,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['previous_keep_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['previous_remove_selected'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['keep_default'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['remove_default'] = []
-            # self.metadata_menu[metadata_type]['rangeboxes']['previous_labels'] = []
-            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = [''] * len(
+            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = ['nan'] * len(
                 self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = [''] * len(
+            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = ['nan'] * len(
                 self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['previous_lower'] = [''] * len(
+            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = ['nan'] * len(
                 self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['previous_upper'] = [''] * len(
-                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = [''] * len(
-                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = [''] * len(
+            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = ['nan'] * len(
                 self.metadata_menu[metadata_type]['rangeboxes']['labels'])
         self.update_metadata_fields()
 
@@ -1250,6 +1239,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
+
+        # Restore mouse cursor to normal
+        QtWidgets.QApplication.restoreOverrideCursor()
 
     def read_setup(self):
         """Function that setups key variables for new read of
@@ -1528,7 +1520,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         """update the metadata menu object with metadata associated with newly read data
            for non-numeric metadata gets all the unique fields per metadata variable,
            and sets the available fields as such, and for numeric gets the minimum and maximum
-           boundaries of each metadata variable, and sets initial boundaries as such
+           boundaries of each metadata variable. 
+
+           If previously metadata settings for a field deviate from the default, then if the same field still 
+           exists then the settings (i.e. bounds or checkbox selection) are copied across, rather than setting to the default.  
         """
 
         # iterate through metadata variables
@@ -1544,24 +1539,59 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             meta_var_field_nan_removed = meta_var_field[~pd.isnull(meta_var_field)]
 
             # update pop-up metadata menu object with read metadata values
-            # for non-numeric metadata gets all the unique fields per metadata variable,
+            # for non-numeric metadata gets all the unique fields per metadata variable
             # and sets the available fields as such
             if metadata_data_type == np.object:
+                #get previous fields
+                previous_fields = copy.deepcopy(self.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'])
+                #update new labels
                 self.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'] = np.unique(
                     meta_var_field_nan_removed)
+                #if field previously existed, then copy across checkbox settings for field
+                #else set initial checkboxes to be all blank
+                previous_keep = copy.deepcopy(self.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'])
+                previous_remove = copy.deepcopy(self.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'])
+                self.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'] = []
+                self.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'] = []
+                for field in self.metadata_menu[metadata_type][meta_var]['checkboxes']['labels']:
+                    if field in previous_fields:
+                        if field in previous_keep:
+                            self.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'].append(field)
+                        if field in previous_remove:
+                            self.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'].append(field)
+                #set defaults to be empty
                 self.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
                 self.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []
-                # for numeric fields get the minimum and maximum boundaries of each metadata variable,
-                # and sets initial boundaries as such
+            # for numeric fields get the minimum and maximum boundaries of each metadata variable
+            # if previous set values vary from min/max boundaries, copy across the values
+            # set as min/max as nan if have no numeric metadata for variable
             else:
                 meta_var_index = self.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
+                #have some numeric values for metadata variable?
                 if len(meta_var_field_nan_removed) > 0:
                     min_val = str(np.min(meta_var_field_nan_removed))
                     max_val = str(np.max(meta_var_field_nan_removed))
+                    #get previous lower/upper extents and defaults
+                    previous_lower_default = copy.deepcopy(self.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
+                    previous_upper_default = copy.deepcopy(self.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
+                    previous_lower = copy.deepcopy(self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
+                    previous_upper = copy.deepcopy(self.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
+                    #if previous lower > previous default lower bound then copy across (and also not 'nan') 
+                    #initially set as min extent
                     self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = min_val
-                    self.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
+                    if (previous_lower != 'nan') & (previous_lower_default != 'nan'):   
+                        if previous_lower > previous_lower_default:
+                            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = copy.deepcopy(previous_lower)
+                    #if previous upper < previous default upper bound then copy across (and also not 'nan')
+                    #initially set as max extent
                     self.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = max_val
+                    if (previous_upper != 'nan') & (previous_upper_default != 'nan'):
+                        if previous_upper < previous_upper_default:
+                            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = copy.deepcopy(previous_upper)
+                    #set defaults to min/max extents
+                    self.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
                     self.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = max_val
+                #do not have some numeric values for metadata variable so set as 'nan'
                 else:
                     self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = 'nan'
                     self.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
@@ -1619,8 +1649,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             else:
                 self.representativity_menu['rangeboxes']['current_lower'].append('0')
 
-                # set new rangebox values (using previous values where possible)
-        for label_ii, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
             # label previously existed?
             if label in previous_labels:
                 self.representativity_menu['rangeboxes']['current_lower'][label_ii] = previous_lower[
