@@ -131,7 +131,6 @@ class PopUpWindow(QtWidgets.QWidget):
         #define stylesheet for tooltips
         self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family()))
 
-
     def generate_window(self):
 
         """generate GUI window for current menu level"""
@@ -239,7 +238,6 @@ class PopUpWindow(QtWidgets.QWidget):
         #setup event to get selected checkbox indices when closing window
         quit_event = QtWidgets.QAction("Quit", self)
         quit_event.triggered.connect(self.closeEvent)
-
 
     def create_grid(self, menu_types):
         """create grid for each needed checkbox/rangebox/navigation button menu types, that wrap vertically
