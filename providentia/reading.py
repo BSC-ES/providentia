@@ -3,6 +3,7 @@ from netCDF4 import num2date
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
+import bisect
 
 
 def drop_nans(data):
@@ -22,7 +23,8 @@ def drop_nans(data):
 def read_netcdf_data(tuple_arguments):
     """Function that handles reading of observational/experiment
     netCDF data also handles filtering of observational data based
-    on selected qa/flag/classification flags.
+    on selected qa/flag/classification flags. If file does not exist,
+    returns None.
     """
 
     # assign arguments from tuple to variables
@@ -30,8 +32,11 @@ def read_netcdf_data(tuple_arguments):
     selected_qa, selected_flags, data_dtype, data_vars_to_read, \
     metadata_dtype, metadata_vars_to_read = tuple_arguments
 
-    # read netCDF frame
-    ncdf_root = Dataset(relevant_file)
+    # read netCDF frame, if files doesn't exist, return with None
+    try:
+        ncdf_root = Dataset(relevant_file)
+    except Exception as e:
+        return
 
     # get time units
     time_units = ncdf_root['time'].units
@@ -75,9 +80,15 @@ def read_netcdf_data(tuple_arguments):
                              len(valid_file_time_indices)), np.NaN,
                             dtype=data_dtype)
         for data_var in data_vars_to_read:
-            file_data[data_var][:, :] = \
-                    ncdf_root[data_var][current_file_station_indices,
-                                        valid_file_time_indices]
+            if data_var == 'time':
+                # len(len(file_data)) = number of stations
+                # save time as unix time to avoid dtype issues
+                unix_time = np.array([t.value // 10**9 for t in file_time])
+                file_data['time'] = unix_time.repeat(len(file_data))\
+                    .reshape(file_time.shape[0], len(file_data)).T
+            else:
+                file_data[data_var][:, :] = ncdf_root[data_var][current_file_station_indices,
+                                                                valid_file_time_indices]
 
         # if some qa flags selected then screen
         if len(selected_qa) > 0:
@@ -94,8 +105,7 @@ def read_netcdf_data(tuple_arguments):
                     [np.isin(ncdf_root['flag'][:, valid_file_time_indices, :],
                              selected_flags).any(axis=2)] = np.NaN
 
-
-        #get file metadata
+        # get file metadata
         file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
         for meta_var in metadata_vars_to_read:
             file_metadata[meta_var][current_file_station_indices, 0] = ncdf_root[meta_var][:]
@@ -106,7 +116,7 @@ def read_netcdf_data(tuple_arguments):
                             dtype=data_dtype[:1])
         
         relevant_data = ncdf_root[data_vars_to_read[0]][current_file_station_indices, valid_file_time_indices]
-        #mask out fill values for parameter field
+        # mask out fill values for parameter field
         relevant_data[relevant_data.mask] = np.NaN
         file_data[data_vars_to_read[0]][:, :] = relevant_data
 
@@ -122,13 +132,30 @@ def read_netcdf_data(tuple_arguments):
 
 
 def read_netcdf_nonghost(tuple_arguments):
-    """Function to handle reading of non-ghost files"""
+    """Function to handle reading of non-ghost files. If file to be read
+    does not exist, returns None"""
 
     # assign arguments from tuple to variables
     relevant_file, time_array, station_references, active_species, process_type = tuple_arguments
-    # read netCDF frame
-    ncdf_root = Dataset(relevant_file)
+    # nonghost have separate metadata to read
+    # read netCDF frame, if files doesn't exist, return with None
+    try:
+        ncdf_root = Dataset(relevant_file)
+    except Exception as e:
+        return
 
+    latitude = "latitude"
+    longitude = "longitude"
+    if "latitude" not in ncdf_root.variables:
+        latitude = "lat"
+        longitude = "lon"
+    metadata_vars_to_read = ['station_name', latitude, longitude, 'altitude']
+    metadata_dtype = [('station_name', np.object), (latitude, np.float),
+                      (longitude, np.float), ('altitude', np.float)]
+    if "station_code" in ncdf_root.variables:
+        # rename it to station_reference for consistency
+        metadata_vars_to_read.append('station_reference')
+        metadata_dtype.append(('station_reference', np.object))
     # get time units
     time_units = ncdf_root['time'].units
 
@@ -175,8 +202,18 @@ def read_netcdf_nonghost(tuple_arguments):
     if process_type == 'observations':
         file_data = np.full((len(current_file_station_indices),
                              len(valid_file_time_indices)), np.NaN)
+        file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
         # for data_var in data_vars_to_read:
         file_data[:] = ncdf_root[active_species][valid_file_time_indices, current_file_station_indices].T
+        for meta_var in metadata_vars_to_read:
+            if meta_var == "station_name":
+                file_metadata[meta_var][current_file_station_indices, 0] = station_references
+            elif meta_var == "station_reference":
+                codes = np.array([st_code.tostring().decode('ascii').replace('\x00', '')
+                                  for st_code in ncdf_root['station_code'][:]], dtype=np.str)
+                file_metadata[meta_var][current_file_station_indices, 0] = codes
+            else:
+                file_metadata[meta_var][current_file_station_indices, 0] = ncdf_root[meta_var][:]
 
     else:
         file_data = np.full((len(current_file_station_indices),
@@ -192,5 +229,22 @@ def read_netcdf_nonghost(tuple_arguments):
 
     # return valid species data, time indices relative to active full time array,
     # file station indices relative to all unique station references array
-    # if process_type == 'observations':
-    return file_data, full_array_time_indices, full_array_station_indices
+    if process_type == 'observations':
+        return file_data, full_array_time_indices, full_array_station_indices, file_metadata
+    else:
+        return file_data, full_array_time_indices, full_array_station_indices
+
+
+def get_yearmonths_to_read(yearmonths, start_date_to_read, end_date_to_read):
+    """Function that returns the yearmonths of the files needed to be read.
+       This is done by limiting a list of relevant yearmonths by a start/end date
+    """
+
+    first_valid_file_ind = bisect.bisect_right(yearmonths, int(start_date_to_read))
+    if first_valid_file_ind != 0:
+        first_valid_file_ind = first_valid_file_ind - 1
+    last_valid_file_ind = bisect.bisect_left(yearmonths, int(end_date_to_read))
+    if first_valid_file_ind == last_valid_file_ind:
+        return [yearmonths[first_valid_file_ind]]
+    else:
+        return yearmonths[first_valid_file_ind:last_valid_file_ind]
