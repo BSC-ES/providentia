@@ -42,8 +42,7 @@ def export_netcdf(mpl_canvas, fname):
     fq = instance.active_frequency_code
 
     # create time array in selected resolution between start and end date
-    pd_time = pd.date_range(start=datetime.datetime(year=int(start[:4]), month=int(start[4:6]), day=1),
-                            end=datetime.datetime(year=int(end[:4]), month=int(end[4:6]), day=1), freq=fq)[:-1]
+    pd_time = pd.date_range(start=start, end=end, freq=fq)[:-1]
     time = np.arange(len(pd_time))
 
     # dictionary to map python types to netcdf types
