@@ -96,6 +96,22 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--available_networks",
                                      dest="available_networks",
                                      help="define available networks (default=['EBAS', 'EEA_AQ_eReporting'])")
+            self.parser.add_argument("--network",
+                                     dest="selected_network",
+                                     help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
+            self.parser.add_argument("--resolution",
+                                     dest="selected_resolution",
+                                     help="define data resolution (e.g. 'hourly', '3hourly', 'daily'")
+            self.parser.add_argument("--species",
+                                     dest="selected_species",
+                                     help="define species to load (e.g. 'sconco3', 'pm10'")
+            self.parser.add_argument("--start_date",
+                                     dest="selected_start_date",
+                                     help="define start date in format as 20160101")
+            self.parser.add_argument("--end_date",
+                                     dest="selected_end_date",
+                                     help="define ned date in format as 20170101")
+
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
