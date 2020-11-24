@@ -50,6 +50,12 @@ class ProvConfiguration(object):
                 kwargs.get('map_coastline_resolution', 'low')
         self.available_networks = \
                 kwargs.get('available_networks', "['AERONET_v3','EBAS','EEA_AQ_eReporting','NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP','NCDC_ISD_NA']")
+        self.selected_network = kwargs.get('selected_network', 'EBAS')
+        self.selected_resolution = kwargs.get('selected_resolution', 'EBAS')
+        self.selected_species = kwargs.get('selected_species', 'sconco3')
+        self.selected_start_date = kwargs.get('selected_start_date', '20170101')
+        self.selected_end_date = kwargs.get('selected_end_date', '20180101')
+
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
@@ -103,9 +109,9 @@ class ProvConfiguration(object):
             # set observational root data directory if left undefined
             if value == '':
                 # running on CTE-POWER/MN4?
-                if (MACHINE == 'nord3'):
+                if MACHINE == 'nord3':
                     value = '/esarchive/obs'
-                elif (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3'):
+                elif (MACHINE == 'power') or (MACHINE == 'mn4'):
                     value = None
                 else:
                     # running on workstation?
