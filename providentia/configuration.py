@@ -50,11 +50,12 @@ class ProvConfiguration(object):
                 kwargs.get('map_coastline_resolution', 'low')
         self.available_networks = \
                 kwargs.get('available_networks', "['AERONET_v3','EBAS','EEA_AQ_eReporting','NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP','NCDC_ISD_NA']")
-        self.selected_network = kwargs.get('selected_network', 'EBAS')
-        self.selected_resolution = kwargs.get('selected_resolution', 'EBAS')
-        self.selected_species = kwargs.get('selected_species', 'sconco3')
-        self.selected_start_date = kwargs.get('selected_start_date', '20170101')
-        self.selected_end_date = kwargs.get('selected_end_date', '20180101')
+        self.selected_network = kwargs.get('network', None)
+        self.selected_resolution = kwargs.get('resolution', None)
+        self.selected_species = kwargs.get('matrix', None)
+        self.selected_species = kwargs.get('species', None)
+        self.selected_start_date = kwargs.get('start_date', '20170101')
+        self.selected_end_date = kwargs.get('end_date', '20180101')
 
 
     def __setattr__(self, key, value):
