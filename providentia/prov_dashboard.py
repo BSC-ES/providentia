@@ -57,6 +57,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update from config file
         if ('config' in kwargs) and ('section' in kwargs):
             self.load_conf(kwargs['section'], kwargs['config'])
+            self.from_conf = True
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
         # arguments are only local
@@ -494,14 +495,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.date_range_has_changed = False
 
             # set selected/active values of other fields to be initially None
-            self.selected_network = None
-            self.active_network = None
-            self.selected_resolution = None
-            self.active_resolution = None
-            self.selected_matrix = None
-            self.active_matrix = None
-            self.selected_species = None
-            self.active_species = None
+            # TODO: no need to initialize to None, as we're initializing in configuration.py
+            # self.selected_network = None
+            # self.active_network = None
+            # self.selected_resolution = None
+            # self.active_resolution = None
+            # self.selected_matrix = None
+            # self.active_matrix = None
+            # self.selected_species = None
+            # self.active_species = None
 
             # set selected/active values of variables associated
             # with pop up windows to be empty lists
