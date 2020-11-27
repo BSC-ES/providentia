@@ -495,20 +495,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.date_range_has_changed = False
 
             # set selected/active values of other fields to be initially None
-            # TODO: no need to initialize to None, as we're initializing in configuration.py
+            # TODO: no need to initialize to None, as we're initializing from conf
             # self.selected_network = None
-            # self.active_network = None
+            self.active_network = None
             # self.selected_resolution = None
-            # self.active_resolution = None
+            self.active_resolution = None
             # self.selected_matrix = None
-            # self.active_matrix = None
+            self.active_matrix = None
             # self.selected_species = None
-            # self.active_species = None
+            self.active_species = None
 
             # set selected/active values of variables associated
             # with pop up windows to be empty lists
             self.active_experiment_grids = []
-            self.active_qa = []
+            # self.active_qa = []
             self.active_flags = []
 
             # set initial time array to be None
