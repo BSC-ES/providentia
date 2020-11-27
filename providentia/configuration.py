@@ -52,7 +52,7 @@ class ProvConfiguration(object):
                 kwargs.get('available_networks', "['AERONET_v3','EBAS','EEA_AQ_eReporting','NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP','NCDC_ISD_NA']")
         self.selected_network = kwargs.get('network', None)
         self.selected_resolution = kwargs.get('resolution', None)
-        self.selected_species = kwargs.get('matrix', None)
+        self.selected_matrix = kwargs.get('matrix', None)
         self.selected_species = kwargs.get('species', None)
         self.selected_start_date = kwargs.get('start_date', '20170101')
         self.selected_end_date = kwargs.get('end_date', '20180101')
