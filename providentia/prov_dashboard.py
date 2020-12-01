@@ -54,9 +54,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # store options to be restored at the end
         # self.localvars = copy.deepcopy(vars(self))
+        dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
         # update from config file
         if ('config' in kwargs) and ('section' in kwargs):
             self.load_conf(kwargs['section'], kwargs['config'])
+            self.from_conf = True
+        elif os.path.isfile(dconf_path):
+            self.load_conf('default', dconf_path)
             self.from_conf = True
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
@@ -117,8 +121,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']"""
 
         # get names from json files
-        specific_qa_names = self.specific_qa = json.load(open("providentia/conf/default_flags.json"))['specific_qa']
-        general_qa_names = self.general_qa = json.load(open("providentia/conf/default_flags.json"))['general_qa']
+        specific_qa_names = json.load(open("providentia/conf/default_flags.json"))['specific_qa']
+        general_qa_names = json.load(open("providentia/conf/default_flags.json"))['general_qa']
         # get codes
         self.specific_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in specific_qa_names]
         self.general_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in general_qa_names]
@@ -485,8 +489,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
             # set initially selected/active start-end date as default 201601-201701
-            self.le_start_date.setText('20160101')
-            self.le_end_date.setText('20170101')
+            self.le_start_date.setText(self.start_date)
+            self.le_end_date.setText(self.end_date)
             self.selected_start_date = int(self.le_start_date.text())
             self.selected_end_date = int(self.le_end_date.text())
             self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
@@ -508,7 +512,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # set selected/active values of variables associated
             # with pop up windows to be empty lists
             self.active_experiment_grids = []
-            # self.active_qa = []
+            self.active_qa = []
             self.active_flags = []
 
             # set initial time array to be None
