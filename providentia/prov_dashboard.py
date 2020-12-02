@@ -133,10 +133,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         """Checks if the species we currently have selected belongs to the ones
         that have specific qa flags selected as default"""
 
+        if hasattr(self, 'qa'):
+            # return subset the user has selected in conf
+            return self.qa
         if self.selected_species in self.qa_exceptions:
             return self.specific_qa
         else:
             return self.general_qa
+
+    def which_flags(self):
+
+        if hasattr(self, 'flags'):
+            return eval(self.flags)
+        else:
+            return []
 
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
@@ -167,7 +177,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         parent_layout.setSpacing(0)
         parent_layout.setContentsMargins(0, 0, 0, 0)
 
-        #define stylesheet for tooltips
+        # define stylesheet for tooltips
         self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family()))
 
         # setup configuration bar with combo boxes, input boxes and buttons
@@ -183,7 +193,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # add one more horizontal layout
         hbox = QtWidgets.QHBoxLayout()
 
-        #define all configuration box objects (labels, comboboxes etc.)
+        # define all configuration box objects (labels, comboboxes etc.)
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"), formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
         self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
@@ -284,7 +294,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), formatting_dict['checkbox_menu'])
         self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
 
-        #position objects on gridded configuration bar
+        # position objects on gridded configuration bar
         config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_colocate, 0, 1, QtCore.Qt.AlignCenter)
         config_bar.addWidget(self.bu_read, 0, 2, QtCore.Qt.AlignCenter)
@@ -321,7 +331,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         config_bar.addWidget(self.ch_select_all, 1, 14)
         config_bar.addWidget(self.ch_intersect, 2, 14)
 
-        #enable dynamic updating of configuration bar fields which filter data files
+        # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.config_bar_params_change_handler)
         self.cb_resolution.currentTextChanged.connect(self.config_bar_params_change_handler)
         self.cb_matrix.currentTextChanged.connect(self.config_bar_params_change_handler)
@@ -502,11 +512,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # TODO: no need to initialize to None, as we're initializing from conf
             # self.selected_network = None
             self.active_network = None
-            # self.selected_resolution = None
             self.active_resolution = None
-            # self.selected_matrix = None
             self.active_matrix = None
-            # self.selected_species = None
             self.active_species = None
 
             # set selected/active values of variables associated
@@ -656,19 +663,30 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.get_valid_experiment_files_in_date_range()
         # update selected indices for experiments -- keeping previously selected experiments if available
         # set selected indices as previously selected indices in current available list of experiments
-        self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for previous_selected_experiment in self.experiments_menu['checkboxes']['keep_selected'] if previous_selected_experiment in self.experiments_menu['checkboxes']['map_vars']]
+        if self.config_bar_initialisation and hasattr(self, 'experiments'):
+            self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in eval(self.experiments)
+                                                                    if experiment in
+                                                                    self.experiments_menu['checkboxes']['map_vars']]
+        self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for
+                                                                previous_selected_experiment in
+                                                                self.experiments_menu['checkboxes']['keep_selected']
+                                                                if previous_selected_experiment in
+                                                                self.experiments_menu['checkboxes']['map_vars']]
 
         # since a selection has changed, update also the qa flags
-        flags_to_select = self.which_qa()  # first check which flags
-        self.qa_menu['checkboxes']['remove_default'] = flags_to_select
+        qa_to_select = self.which_qa()  # first check which flags
+        self.qa_menu['checkboxes']['remove_default'] = qa_to_select
         if self.config_bar_initialisation:
-            self.qa_menu['checkboxes']['remove_selected'] = flags_to_select
+            self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
         else:
-            # if the selected species has specific qa flags, ensure none that none of the
+            # if the selected species has specific qa flags, ensure that none of the
             # inapplicable is selected
             if self.selected_species in self.qa_exceptions:
                 self.qa_menu['checkboxes']['remove_selected'] = list(set(
                     self.qa_menu['checkboxes']['remove_selected']) - set(self.qa_diff))
+
+        if self.config_bar_initialisation:
+            self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
