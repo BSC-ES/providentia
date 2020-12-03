@@ -142,11 +142,29 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             return self.general_qa
 
     def which_flags(self):
+        """if there are flags coming from a config file, select those"""
 
         if hasattr(self, 'flags'):
             return eval(self.flags)
         else:
             return []
+
+    def which_bounds(self):
+        """if there are bounds defined in a config file, fill that value,
+        if it is withing the feasible bounds of the species"""
+
+        lower = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
+        upper = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
+
+        if hasattr(self, 'lower_bound'):
+            if self.lower_bound >= lower:
+                lower = self.lower_bound
+
+        if hasattr(self, 'upper_bound'):
+            if self.upper_bound <= upper:
+                upper = self.upper_bound
+
+        return np.float32(lower), np.float32(upper)
 
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
@@ -1149,8 +1167,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # if species has changed, update default species specific lower/upper limits
         if (self.active_species != self.previous_active_species):
             # update default lower/upper species specific limits and filter data outside limits
-            species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
-            species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
+            # species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
+            # species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
+            species_lower_limit, species_upper_limit = self.which_bounds()
             # set default limits
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
