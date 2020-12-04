@@ -135,7 +135,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         if hasattr(self, 'qa'):
             # return subset the user has selected in conf
-            return self.qa
+            return eval(self.qa)
         if self.selected_species in self.qa_exceptions:
             return self.specific_qa
         else:
@@ -498,6 +498,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # maximise window to fit screen
         self.showMaximized()
 
+    def load_conf(self):
+        """if user has specified a conf file on startup, load
+        the session according to that configuration"""
+
     def savebutton_func(self):
         save_data(self.mpl_canvas)
 
@@ -617,6 +621,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # create dictionary of observational data inside date range
             self.get_valid_obs_files_in_date_range()
 
+            # check which flags to select, depending if we have conf file or no
+            self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
+
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
             self.get_valid_obs_files_in_date_range()
@@ -703,8 +710,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 self.qa_menu['checkboxes']['remove_selected'] = list(set(
                     self.qa_menu['checkboxes']['remove_selected']) - set(self.qa_diff))
 
-        if self.config_bar_initialisation:
-            self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
+        # if self.config_bar_initialisation:
+        #     self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -1079,7 +1086,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                                       1, 0, 0))
                     metadata_right_edge_ind = metadata_right_edge_ind - ((monthly_relative_delta.years * 12) + monthly_relative_delta.months)
 
-                #do metadata array cut
+                # do metadata array cut
                 if metadata_left_edge_ind == metadata_right_edge_ind:
                     self.metadata_in_memory = self.metadata_in_memory[:, [metadata_left_edge_ind]]
                 else:
