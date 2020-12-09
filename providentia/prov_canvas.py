@@ -1847,6 +1847,9 @@ class MPLCanvas(FigureCanvas):
             # force them to be 'observations' and first basic z statistic respectively
             if selected_z_stat == '':
                 selected_z_stat = self.read_instance.basic_z_stats[0]
+            if hasattr(self.read_instance, 'map_z'):
+                if self.read_instance.map_z in self.read_instance.basic_z_stats:
+                    selected_z_stat = self.read_instance.map_z
             if selected_z1_array == '':
                 selected_z1_array = 'observations'
 
