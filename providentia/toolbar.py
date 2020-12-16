@@ -1,7 +1,7 @@
 """ Navigation toolbar and buttons/options functions"""
 import os
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtWidgets
 import matplotlib
 from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
@@ -51,10 +51,12 @@ def save_data(mpl_canvas):
         if startpath != "":
             matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
             try:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
                 if chose_npz:
                     export_data_npz(mpl_canvas, fname)
                 else:
                     export_netcdf(mpl_canvas, fname)
+                QtWidgets.QApplication.restoreOverrideCursor()
             except Exception as e:
                 QtWidgets.QMessageBox.critical(mpl_canvas, "Error saving file", str(e),
                                                QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
