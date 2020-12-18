@@ -471,15 +471,27 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.savebutton = QtWidgets.QPushButton()
         self.savebutton.setFlat(True)
         self.savebutton.setToolTip("Save current instance of data and metadata")
-        self.savebutton.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_data.png")))
+        self.savebutton.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/conf_icon.png")))
         self.savebutton.setIconSize(QtCore.QSize(31, 35))
         self.savebutton.setStyleSheet("QPushButton { border: none;} QPushButton:hover "
                                       "{ border-width: 1px; border-style: solid; border-color: darkgrey; "
                                       "border-radius: 4px; background-color : white; }")
         self.savebutton.clicked.connect(self.savebutton_func)
 
+        # add more buttons on the toolbar, next to the navi_toolbar
+        self.conf_load = QtWidgets.QPushButton()
+        self.conf_load.setFlat(True)
+        self.conf_load.setToolTip("Load toolbar selections from configuration file")
+        self.conf_load.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_data.png")))
+        self.conf_load.setIconSize(QtCore.QSize(31, 35))
+        self.conf_load.setStyleSheet("QPushButton { border: none;} QPushButton:hover "
+                                      "{ border-width: 1px; border-style: solid; border-color: darkgrey; "
+                                      "border-radius: 4px; background-color : white; }")
+        self.savebutton.clicked.connect(self.savebutton_func)
+
         # position config bar, navigation toolbar and MPL canvas and elements in parent layout
         hbox.addWidget(self.savebutton)
+        hbox.addWidget(self.conf_load)
         hbox.addWidget(self.navi_toolbar)
 
         # add config bar and hbox to parent frame
