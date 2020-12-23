@@ -1,6 +1,7 @@
 """ Module which provides main window """
 from .configuration import ProvConfiguration
 from .configuration import parse_path
+from .config import split_options
 from .reading import read_netcdf_data
 from .reading import read_netcdf_nonghost
 from .reading import get_yearmonths_to_read
@@ -61,7 +62,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.from_conf = True
         elif os.path.isfile(dconf_path):
             self.load_conf('default', dconf_path)
-            self.from_conf = True
+            self.from_conf = False
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
         # arguments are only local
@@ -501,6 +502,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
 
+        # if we're starting from a configuration file, read first the setup
+        if self.from_conf:
+            self.handle_data_selection_update()
+            # then see if we have fields that require to be se (meta, rep, period)
+            self.representativity_conf()
+            if hasattr(self, 'period'):
+                self.period_conf()
+            # call function to apply changes (filter)
+            self.mpl_canvas.handle_data_filter_update()
+
         # set finalised layout
         self.setLayout(parent_layout)
 
@@ -510,15 +521,25 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # maximise window to fit screen
         self.showMaximized()
 
-    def load_conf(self):
-        """if user has specified a conf file on startup, load
-        the session according to that configuration"""
+    def period_conf(self):
+        keeps, removes = split_options(self.period)
+        # for i, label in enumerate(self.period_menu['checkboxes']['labels']):
+        self.period_menu['checkboxes']['keep_selected'] += keeps
+        self.period_menu['checkboxes']['remove_selected'] += removes
+
+    def representativity_conf(self):
+        """Comes here if there is a configuration loaded. Checks if there is a
+        representative field loaded in the object from the conf and if there is
+        assigns the value in the representativity menu"""
+        for i, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
+            if hasattr(self, label):
+                self.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(self, label))
 
     def savebutton_func(self):
         save_data(self.mpl_canvas)
 
     def generate_pop_up_window(self, menu_root):
-        '''generate pop up window'''
+        """generate pop up window"""
 
         self.pop_up_window = PopUpWindow(menu_root, [], self.main_window_geometry)
 
@@ -533,8 +554,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
             # set initially selected/active start-end date as default 201601-201701
-            self.le_start_date.setText(self.start_date)
-            self.le_end_date.setText(self.end_date)
+            self.le_start_date.setText(str(self.start_date))
+            self.le_end_date.setText(str(self.end_date))
             self.selected_start_date = int(self.le_start_date.text())
             self.selected_end_date = int(self.le_end_date.text())
             self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
