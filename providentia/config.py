@@ -172,3 +172,22 @@ def write_conf(section, fpath, opts):
     # write configuration
     with open(fpath, 'wb') as configfile:
         config.write(configfile)
+
+
+def split_options(conf_string):
+    """For the options in the configuration that define the keep and remove
+    options. Returns the values in two lists, the keeps and removes"""
+    keeps, removes = [], []
+    if "keep:" in conf_string:
+        keep_start, keep_end = conf_string.find("keep:"), conf_string.find(";")
+        keeps = conf_string[keep_start+5:keep_end]
+        keeps = keeps.split(",")
+        keeps = [k.strip() for k in keeps]
+
+    if "remove:" in conf_string:
+        remove_start = conf_string.find("remove:")
+        removes = conf_string[remove_start+7:-1]
+        removes = removes.split(",")
+        removes = [r.strip() for r in removes]
+
+    return keeps, removes
