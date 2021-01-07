@@ -136,7 +136,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         if hasattr(self, 'qa'):
             # return subset the user has selected in conf
-            return eval(self.qa)
+            return list(self.qa)
         if self.selected_species in self.qa_exceptions:
             return self.specific_qa
         else:
@@ -146,7 +146,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         """if there are flags coming from a config file, select those"""
 
         if hasattr(self, 'flags'):
-            return eval(self.flags)
+            return list(self.flags)
         else:
             return []
 
@@ -722,7 +722,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update selected indices for experiments -- keeping previously selected experiments if available
         # set selected indices as previously selected indices in current available list of experiments
         if self.config_bar_initialisation and hasattr(self, 'experiments'):
-            self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in eval(self.experiments)
+            conf_experiments = [exp.strip() for exp in self.experiments.split(",")]
+            self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in conf_experiments
                                                                     if experiment in
                                                                     self.experiments_menu['checkboxes']['map_vars']]
         self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for
