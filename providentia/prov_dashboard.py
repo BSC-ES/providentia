@@ -511,7 +511,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 self.period_conf()
             # if there are there are metadata reported in configuratoin
             if set(self.metadata_vars_to_read).intersection(vars(self).keys()):
-                print("has metadata")
                 self.meta_from_conf()
             # call function to apply changes (filter)
             self.mpl_canvas.handle_data_filter_update()
@@ -541,12 +540,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
     def meta_from_conf(self):
         """Comes here if there in a loaded configuration there are also metadata fields."""
-        print(self.altitude)
-        # firstly, station position
-        for i, label in enumerate(self.metadata_menu['STATION POSITION']['rangeboxes']['labels']):
-            if hasattr(self, label):
-                self.metadata_menu['STATION POSITION']['rangeboxes']['current_lower'][i] = str(getattr(self, label)[0])
-                self.metadata_menu['STATION POSITION']['rangeboxes']['current_upper'][i] = str(getattr(self, label)[1])
+
+        for menu_type in self.metadata_types:
+            # treat first ranges
+            for i, label_cap in enumerate(self.metadata_menu[menu_type]['rangeboxes']['labels']):
+                label = label_cap.lower()
+                if hasattr(self, label):
+                    self.metadata_menu[menu_type]['rangeboxes']['current_lower'][i] = str(getattr(self, label)[0])
+                    self.metadata_menu[menu_type]['rangeboxes']['current_upper'][i] = str(getattr(self, label)[1])
+            # and then treat the keep/remove
+            for label_cap in self.metadata_menu[menu_type]['navigation_buttons']['labels']:
+                label = label_cap.lower()
+                if hasattr(self, label):
+                    keeps, removes = split_options(getattr(self, label))
+                    self.metadata_menu[menu_type][label]['checkboxes']['keep_selected'] = keeps
+                    self.metadata_menu[menu_type][label]['checkboxes']['remove_selected'] = removes
 
     def savebutton_func(self):
         save_data(self.mpl_canvas)
