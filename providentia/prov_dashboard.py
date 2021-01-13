@@ -553,8 +553,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 label = label_cap.lower()
                 if hasattr(self, label):
                     keeps, removes = split_options(getattr(self, label))
-                    self.metadata_menu[menu_type][label]['checkboxes']['keep_selected'] = keeps
-                    self.metadata_menu[menu_type][label]['checkboxes']['remove_selected'] = removes
+                    self.metadata_menu[menu_type][label_cap]['checkboxes']['keep_selected'] = keeps
+                    self.metadata_menu[menu_type][label_cap]['checkboxes']['remove_selected'] = removes
 
     def savebutton_func(self):
         save_data(self.mpl_canvas)
