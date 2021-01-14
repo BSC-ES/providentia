@@ -7,7 +7,7 @@ from .reading import read_netcdf_nonghost
 from .reading import get_yearmonths_to_read
 from .prov_canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .toolbar import save_data
+from .toolbar import save_data, reload_conf
 from .prov_dashboard_aux import ComboBox
 from .prov_dashboard_aux import QVLine
 from .prov_dashboard_aux import PopUpWindow
@@ -472,7 +472,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.savebutton = QtWidgets.QPushButton()
         self.savebutton.setFlat(True)
         self.savebutton.setToolTip("Save current instance of data and metadata")
-        self.savebutton.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/conf_icon.png")))
+        self.savebutton.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_data.png")))
         self.savebutton.setIconSize(QtCore.QSize(31, 35))
         self.savebutton.setStyleSheet("QPushButton { border: none;} QPushButton:hover "
                                       "{ border-width: 1px; border-style: solid; border-color: darkgrey; "
@@ -483,14 +483,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.conf_load = QtWidgets.QPushButton()
         self.conf_load.setFlat(True)
         self.conf_load.setToolTip("Load toolbar selections from configuration file")
-        self.conf_load.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_data.png")))
+        self.conf_load.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/conf_icon.png")))
         self.conf_load.setIconSize(QtCore.QSize(31, 35))
         self.conf_load.setStyleSheet("QPushButton { border: none;} QPushButton:hover "
                                       "{ border-width: 1px; border-style: solid; border-color: darkgrey; "
                                       "border-radius: 4px; background-color : white; }")
-        self.savebutton.clicked.connect(self.savebutton_func)
+        self.conf_load.clicked.connect(self.conf_load_func)
 
-        # position config bar, navigation toolbar and MPL canvas and elements in parent layout
+        # position config bar, navigation toolbar and MPL canvas and elements in parent layout`
         hbox.addWidget(self.savebutton)
         hbox.addWidget(self.conf_load)
         hbox.addWidget(self.navi_toolbar)
@@ -558,6 +558,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
     def savebutton_func(self):
         save_data(self.mpl_canvas)
+
+    def conf_load_func(self):
+        reload_conf(self.mpl_canvas)
 
     def generate_pop_up_window(self, menu_root):
         """generate pop up window"""
