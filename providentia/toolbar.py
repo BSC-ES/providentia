@@ -1,11 +1,17 @@
 """ Navigation toolbar and buttons/options functions"""
 import os
+import configparser
 
+from .prov_dashboard_aux import PopUpWindow
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QFileDialog
 import matplotlib
 from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from .writting import export_data_npz, export_netcdf
+
+# to be removed
+import numpy as np
 
 
 class NavigationToolbar(NavigationToolbar2QT):
@@ -60,3 +66,35 @@ def save_data(mpl_canvas):
             except Exception as e:
                 QtWidgets.QMessageBox.critical(mpl_canvas, "Error saving file", str(e),
                                                QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+
+
+def reload_conf(mpl_canvas):
+    """Pops window for selecting configuration file, and resets according
+    to the fields found in the conf"""
+
+    conf_to_load = openFileNameDialog(mpl_canvas)
+    try:
+        config = configparser.ConfigParser()
+        config.read(conf_to_load)
+        all_sections = config.sections()
+    except Exception as e:
+        QtWidgets.QMessageBox.critical(mpl_canvas, "Error loading configuration file",
+                                       str(e) + "\n\nAdd section name to your configuration",
+                                       QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+
+    # sections_menu = {'window_title': 'Select section to load from', 'page_title': '', 'checkboxes': {}}
+    # sections_menu['checkboxes']['labels'] = np.array([], dtype=np.uint8)
+    # sections_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
+    # sections_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
+    # sections_menu['checkboxes']['map_vars'] = np.array([], dtype=np.uint8)
+    # sections_menu['select_buttons'] = all_sections
+    # PopUpWindow(sections_menu, [], mpl_canvas.read_instance.main_window_geometry)
+
+
+def openFileNameDialog(mpl_canvas):
+    options = QFileDialog.Options()
+    options |= QFileDialog.DontUseNativeDialog
+    filename, _ = QFileDialog.getOpenFileName(mpl_canvas, "Choose configuration file to load", "",
+                                              "All Files (*);;Python Files (*.py)", options=options)
+    if filename:
+        return filename
