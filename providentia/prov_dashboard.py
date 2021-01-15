@@ -7,7 +7,7 @@ from .reading import read_netcdf_nonghost
 from .reading import get_yearmonths_to_read
 from .prov_canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .toolbar import save_data, reload_conf
+from .toolbar import save_data, conf_dialogs
 from .prov_dashboard_aux import ComboBox
 from .prov_dashboard_aux import QVLine
 from .prov_dashboard_aux import PopUpWindow
@@ -560,7 +560,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         save_data(self.mpl_canvas)
 
     def conf_load_func(self):
-        reload_conf(self.mpl_canvas)
+        conf_dialogs(self)
 
     def generate_pop_up_window(self, menu_root):
         """generate pop up window"""
