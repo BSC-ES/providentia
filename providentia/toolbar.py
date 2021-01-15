@@ -2,16 +2,12 @@
 import os
 import configparser
 
-from .prov_dashboard_aux import PopUpWindow
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 import matplotlib
 from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from .writting import export_data_npz, export_netcdf
-
-# to be removed
-import numpy as np
 
 
 class NavigationToolbar(NavigationToolbar2QT):
@@ -68,33 +64,36 @@ def save_data(mpl_canvas):
                                                QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
 
 
-def reload_conf(mpl_canvas):
-    """Pops window for selecting configuration file, and resets according
-    to the fields found in the conf"""
+def conf_dialogs(instance):
+    """Pops window for selecting configuration file. If file selcted, pops an
+    input dialog for the user to select which section wants to load. Calls
+    reload_conf to reset the fields"""
 
-    conf_to_load = openFileNameDialog(mpl_canvas)
+    conf_to_load = filename_dialog(instance)
     try:
         config = configparser.ConfigParser()
         config.read(conf_to_load)
         all_sections = config.sections()
+        section, okpressed = QtWidgets.QInputDialog.getItem(instance, 'Sections',
+                                                            'Select section to load',  all_sections, 0, False)
+        if okpressed:
+            reload_conf(instance, section, conf_to_load)
     except Exception as e:
-        QtWidgets.QMessageBox.critical(mpl_canvas, "Error loading configuration file",
+        QtWidgets.QMessageBox.critical(instance, "Error loading configuration file",
                                        str(e) + "\n\nAdd section name to your configuration",
                                        QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
 
-    # sections_menu = {'window_title': 'Select section to load from', 'page_title': '', 'checkboxes': {}}
-    # sections_menu['checkboxes']['labels'] = np.array([], dtype=np.uint8)
-    # sections_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
-    # sections_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
-    # sections_menu['checkboxes']['map_vars'] = np.array([], dtype=np.uint8)
-    # sections_menu['select_buttons'] = all_sections
-    # PopUpWindow(sections_menu, [], mpl_canvas.read_instance.main_window_geometry)
 
-
-def openFileNameDialog(mpl_canvas):
+def filename_dialog(instance):
     options = QFileDialog.Options()
     options |= QFileDialog.DontUseNativeDialog
-    filename, _ = QFileDialog.getOpenFileName(mpl_canvas, "Choose configuration file to load", "",
+    filename, _ = QFileDialog.getOpenFileName(instance, "Choose configuration file to load", "",
                                               "All Files (*);;Python Files (*.py)", options=options)
     if filename:
         return filename
+
+
+def reload_conf(instance, section, fpath):
+    """"""
+    instance.load_conf(section, fpath)
+    instance.update_configuration_bar_fields()
