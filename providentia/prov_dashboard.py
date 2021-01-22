@@ -82,7 +82,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                             'conf/basic_stats_dict.json')))
         self.expbias_dict = json.load(open(os.path.join(CURRENT_PATH,
                                                         'conf/experiment_bias_stats_dict.json')))
-        # create UI
         self.init_ui()
 
         # setup callback events upon resizing/moving of Providentia window
@@ -130,23 +129,40 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # get difference of flags, needed later for updating default selection
         self.qa_diff = list(set(self.general_qa) - set(self.specific_qa))
 
-    def which_qa(self):
+    def which_qa(self, return_defaults=False):
         """Checks if the species we currently have selected belongs to the ones
         that have specific qa flags selected as default"""
 
+        if return_defaults:
+            if self.selected_species in self.qa_exceptions:
+                return self.specific_qa
+            else:
+                return self.general_qa
+
         if hasattr(self, 'qa'):
+            # if conf has only 1 QA
+            if isinstance(self.qa, int):
+                return [self.qa]
+            # if the QAs are written with their names
+            elif isinstance(self.qa, str):
+                return [self.standard_QA_name_to_QA_code[q.strip()] for q in self.qa.split(",")]
             # return subset the user has selected in conf
-            return list(self.qa)
-        if self.selected_species in self.qa_exceptions:
-            return self.specific_qa
-        else:
-            return self.general_qa
+            else:
+                return list(self.qa)
 
     def which_flags(self):
         """if there are flags coming from a config file, select those"""
 
         if hasattr(self, 'flags'):
-            return list(self.flags)
+            # if conf has only one flag
+            if isinstance(self.flags, int):
+                return [self.flags]
+            # if flags are writtern as strings
+            elif isinstance(self.flags, str):
+                return [self.standard_data_flag_name_to_data_flag_code[f.strip()] for f in
+                        self.flags.split(",")]
+            else:
+                return list(self.flags)
         else:
             return []
 
@@ -588,7 +604,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.date_range_has_changed = False
 
             # set selected/active values of other fields to be initially None
-            # TODO: no need to initialize to None, as we're initializing from conf
             # self.selected_network = None
             self.active_network = None
             self.active_resolution = None
@@ -758,7 +773,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # since a selection has changed, update also the qa flags
         qa_to_select = self.which_qa()  # first check which flags
-        self.qa_menu['checkboxes']['remove_default'] = qa_to_select
+        self.qa_menu['checkboxes']['remove_default'] = self.which_qa(return_defaults=True)
         if self.config_bar_initialisation:
             self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
         else:
@@ -1823,6 +1838,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         if section is None:
             return opts
 
+        self.opts = opts
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
 
     def disable_ghost_buttons(self):
