@@ -70,6 +70,10 @@ def conf_dialogs(instance):
     reload_conf to reset the fields"""
 
     conf_to_load = filename_dialog(instance)
+    # is user pressed cancel
+    if conf_to_load is None:
+        return
+
     try:
         config = configparser.ConfigParser()
         config.read(conf_to_load)
@@ -80,8 +84,7 @@ def conf_dialogs(instance):
             reload_conf(instance, section, conf_to_load)
     except Exception as e:
         QtWidgets.QMessageBox.critical(instance, "Error loading configuration file",
-                                       str(e) + "\n\nAdd section name to your configuration",
-                                       QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+                                       str(e), QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
 
 
 def filename_dialog(instance):
@@ -95,5 +98,31 @@ def filename_dialog(instance):
 
 def reload_conf(instance, section, fpath):
     """"""
+    # firstly, delete previous attributes that we loaded from
+    # the config file
+    if instance.from_conf:
+        for k in instance.opts:
+            delattr(instance, k)
+    # # update config and section attributes of instance
+    instance.config = fpath
+    instance.section = section
+    instance.from_conf = True
+    # and load the new confs
     instance.load_conf(section, fpath)
+
+    # update species, experiments, qa & flags
+    instance.config_bar_initialisation = True
     instance.update_configuration_bar_fields()
+    instance.config_bar_initialisation = False
+    # read
+    instance.handle_data_selection_update()
+    # reset the meta fields after loading
+    instance.reset_options()
+    # set fields from conf as you do in init
+    instance.representativity_conf()
+    if hasattr(instance, 'period'):
+        instance.period_conf()
+    if set(instance.metadata_vars_to_read).intersection(vars(instance).keys()):
+        instance.meta_from_conf()
+    # call function to apply changes (filter)
+    instance.mpl_canvas.handle_data_filter_update()
