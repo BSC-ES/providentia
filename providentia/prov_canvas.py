@@ -1847,6 +1847,9 @@ class MPLCanvas(FigureCanvas):
             # force them to be 'observations' and first basic z statistic respectively
             if selected_z_stat == '':
                 selected_z_stat = self.read_instance.basic_z_stats[0]
+            if hasattr(self.read_instance, 'map_z'):
+                if self.read_instance.map_z in self.read_instance.basic_z_stats:
+                    selected_z_stat = self.read_instance.map_z
             if selected_z1_array == '':
                 selected_z1_array = 'observations'
 
@@ -1926,6 +1929,9 @@ class MPLCanvas(FigureCanvas):
                     selected_experiment_bias_type = self.read_instance.experiment_bias_types[0]
                     # set experiment bias stat to be first available stat
                     selected_experiment_bias_stat = available_experiment_bias_stats[0]
+                    if hasattr(self.read_instance, 'exp_bias_stat'):
+                        if self.read_instance.exp_bias_stat in available_experiment_bias_stats:
+                            selected_experiment_bias_stat = self.read_instance.exp_bias_stat
 
                 # if selected bias type is 'Rank', then there are no stat options so force the
                 # available items and selected stat to be empty
