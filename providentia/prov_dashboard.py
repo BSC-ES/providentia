@@ -133,7 +133,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         """Checks if the species we currently have selected belongs to the ones
         that have specific qa flags selected as default"""
 
-        if return_defaults:
+        if return_defaults or (not hasattr(self, 'qa')):
             if self.selected_species in self.qa_exceptions:
                 return self.specific_qa
             else:
@@ -144,6 +144,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             if isinstance(self.qa, int):
                 return [self.qa]
             # if the QAs are written with their names
+            elif self.qa == "":
+                return []
             elif isinstance(self.qa, str):
                 return [self.standard_QA_name_to_QA_code[q.strip()] for q in self.qa.split(",")]
             # return subset the user has selected in conf
@@ -158,6 +160,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             if isinstance(self.flags, int):
                 return [self.flags]
             # if flags are writtern as strings
+            elif self.flags == "":
+                return []
             elif isinstance(self.flags, str):
                 return [self.standard_data_flag_name_to_data_flag_code[f.strip()] for f in
                         self.flags.split(",")]
