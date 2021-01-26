@@ -96,6 +96,25 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--available_networks",
                                      dest="available_networks",
                                      help="define available networks (default=['EBAS', 'EEA_AQ_eReporting'])")
+            self.parser.add_argument("--network",
+                                     dest="network",
+                                     help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
+            self.parser.add_argument("--resolution",
+                                     dest="resolution",
+                                     help="define data resolution (e.g. 'hourly', '3hourly', 'daily'")
+            self.parser.add_argument("--matrix",
+                                     dest="matrix",
+                                     help="define species matrix (e.g. 'gas', 'aerosol'")
+            self.parser.add_argument("--species",
+                                     dest="species",
+                                     help="define species to load (e.g. 'sconco3', 'pm10'")
+            self.parser.add_argument("--start_date",
+                                     dest="start_date",
+                                     help="define start date in format as 20160101")
+            self.parser.add_argument("--end_date",
+                                     dest="end_date",
+                                     help="define ned date in format as 20170101")
+
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
@@ -153,3 +172,22 @@ def write_conf(section, fpath, opts):
     # write configuration
     with open(fpath, 'wb') as configfile:
         config.write(configfile)
+
+
+def split_options(conf_string):
+    """For the options in the configuration that define the keep and remove
+    options. Returns the values in two lists, the keeps and removes"""
+    keeps, removes = [], []
+    if "keep:" in conf_string:
+        keep_start, keep_end = conf_string.find("keep:"), conf_string.find(";")
+        keeps = conf_string[keep_start+5:keep_end]
+        keeps = keeps.split(",")
+        keeps = [k.strip() for k in keeps]
+
+    if "remove:" in conf_string:
+        remove_start = conf_string.find("remove:")
+        removes = conf_string[remove_start+7:-1]
+        removes = removes.split(",")
+        removes = [r.strip() for r in removes]
+
+    return keeps, removes
