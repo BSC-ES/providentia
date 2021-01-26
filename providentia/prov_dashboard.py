@@ -1,12 +1,13 @@
 """ Module which provides main window """
 from .configuration import ProvConfiguration
 from .configuration import parse_path
+from .config import split_options
 from .reading import read_netcdf_data
 from .reading import read_netcdf_nonghost
 from .reading import get_yearmonths_to_read
 from .prov_canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .toolbar import save_data
+from .toolbar import save_data, conf_dialogs
 from .prov_dashboard_aux import ComboBox
 from .prov_dashboard_aux import QVLine
 from .prov_dashboard_aux import PopUpWindow
@@ -54,9 +55,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # store options to be restored at the end
         # self.localvars = copy.deepcopy(vars(self))
+        dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
         # update from config file
         if ('config' in kwargs) and ('section' in kwargs):
             self.load_conf(kwargs['section'], kwargs['config'])
+            self.from_conf = True
+        elif os.path.isfile(dconf_path):
+            self.load_conf('default', dconf_path)
+            self.from_conf = False
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
         # arguments are only local
@@ -76,7 +82,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                             'conf/basic_stats_dict.json')))
         self.expbias_dict = json.load(open(os.path.join(CURRENT_PATH,
                                                         'conf/experiment_bias_stats_dict.json')))
-        # create UI
         self.init_ui()
 
         # setup callback events upon resizing/moving of Providentia window
@@ -116,22 +121,71 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']"""
 
         # get names from json files
-        specific_qa_names = self.specific_qa = json.load(open("providentia/conf/default_flags.json"))['specific_qa']
-        general_qa_names = self.general_qa = json.load(open("providentia/conf/default_flags.json"))['general_qa']
+        specific_qa_names = json.load(open("providentia/conf/default_flags.json"))['specific_qa']
+        general_qa_names = json.load(open("providentia/conf/default_flags.json"))['general_qa']
         # get codes
         self.specific_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in specific_qa_names]
         self.general_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in general_qa_names]
         # get difference of flags, needed later for updating default selection
         self.qa_diff = list(set(self.general_qa) - set(self.specific_qa))
 
-    def which_qa(self):
+    def which_qa(self, return_defaults=False):
         """Checks if the species we currently have selected belongs to the ones
         that have specific qa flags selected as default"""
 
-        if self.selected_species in self.qa_exceptions:
-            return self.specific_qa
+        if return_defaults or (not hasattr(self, 'qa')):
+            if self.selected_species in self.qa_exceptions:
+                return self.specific_qa
+            else:
+                return self.general_qa
+
+        if hasattr(self, 'qa'):
+            # if conf has only 1 QA
+            if isinstance(self.qa, int):
+                return [self.qa]
+            # if the QAs are written with their names
+            elif self.qa == "":
+                return []
+            elif isinstance(self.qa, str):
+                return [self.standard_QA_name_to_QA_code[q.strip()] for q in self.qa.split(",")]
+            # return subset the user has selected in conf
+            else:
+                return list(self.qa)
+
+    def which_flags(self):
+        """if there are flags coming from a config file, select those"""
+
+        if hasattr(self, 'flags'):
+            # if conf has only one flag
+            if isinstance(self.flags, int):
+                return [self.flags]
+            # if flags are writtern as strings
+            elif self.flags == "":
+                return []
+            elif isinstance(self.flags, str):
+                return [self.standard_data_flag_name_to_data_flag_code[f.strip()] for f in
+                        self.flags.split(",")]
+            else:
+                return list(self.flags)
         else:
-            return self.general_qa
+            return []
+
+    def which_bounds(self):
+        """if there are bounds defined in a config file, fill that value,
+        if it is withing the feasible bounds of the species"""
+
+        lower = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
+        upper = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
+
+        if hasattr(self, 'lower_bound'):
+            if self.lower_bound >= lower:
+                lower = self.lower_bound
+
+        if hasattr(self, 'upper_bound'):
+            if self.upper_bound <= upper:
+                upper = self.upper_bound
+
+        return np.float32(lower), np.float32(upper)
 
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
@@ -162,7 +216,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         parent_layout.setSpacing(0)
         parent_layout.setContentsMargins(0, 0, 0, 0)
 
-        #define stylesheet for tooltips
+        # define stylesheet for tooltips
         self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family()))
 
         # setup configuration bar with combo boxes, input boxes and buttons
@@ -178,7 +232,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # add one more horizontal layout
         hbox = QtWidgets.QHBoxLayout()
 
-        #define all configuration box objects (labels, comboboxes etc.)
+        # define all configuration box objects (labels, comboboxes etc.)
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"), formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
         self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
@@ -279,7 +333,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), formatting_dict['checkbox_menu'])
         self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
 
-        #position objects on gridded configuration bar
+        # position objects on gridded configuration bar
         config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_colocate, 0, 1, QtCore.Qt.AlignCenter)
         config_bar.addWidget(self.bu_read, 0, 2, QtCore.Qt.AlignCenter)
@@ -316,7 +370,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         config_bar.addWidget(self.ch_select_all, 1, 14)
         config_bar.addWidget(self.ch_intersect, 2, 14)
 
-        #enable dynamic updating of configuration bar fields which filter data files
+        # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.config_bar_params_change_handler)
         self.cb_resolution.currentTextChanged.connect(self.config_bar_params_change_handler)
         self.cb_matrix.currentTextChanged.connect(self.config_bar_params_change_handler)
@@ -445,8 +499,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                       "border-radius: 4px; background-color : white; }")
         self.savebutton.clicked.connect(self.savebutton_func)
 
-        # position config bar, navigation toolbar and MPL canvas and elements in parent layout
+        # add more buttons on the toolbar, next to the navi_toolbar
+        self.conf_load = QtWidgets.QPushButton()
+        self.conf_load.setFlat(True)
+        self.conf_load.setToolTip("Load toolbar selections from configuration file")
+        self.conf_load.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/conf_icon.png")))
+        self.conf_load.setIconSize(QtCore.QSize(31, 35))
+        self.conf_load.setStyleSheet("QPushButton { border: none;} QPushButton:hover "
+                                      "{ border-width: 1px; border-style: solid; border-color: darkgrey; "
+                                      "border-radius: 4px; background-color : white; }")
+        self.conf_load.clicked.connect(self.conf_load_func)
+
+        # position config bar, navigation toolbar and MPL canvas and elements in parent layout`
         hbox.addWidget(self.savebutton)
+        hbox.addWidget(self.conf_load)
         hbox.addWidget(self.navi_toolbar)
 
         # add config bar and hbox to parent frame
@@ -455,6 +521,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
+
+        # if we're starting from a configuration file, read first the setup
+        if self.from_conf:
+            self.handle_data_selection_update()
+            # then see if we have fields that require to be se (meta, rep, period)
+            self.representativity_conf()
+            if hasattr(self, 'period'):
+                self.period_conf()
+            # if there are there are metadata reported in configuratoin
+            if set(self.metadata_vars_to_read).intersection(vars(self).keys()):
+                self.meta_from_conf()
+            # call function to apply changes (filter)
+            self.mpl_canvas.handle_data_filter_update()
 
         # set finalised layout
         self.setLayout(parent_layout)
@@ -465,11 +544,46 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # maximise window to fit screen
         self.showMaximized()
 
+    def period_conf(self):
+        keeps, removes = split_options(self.period)
+        # for i, label in enumerate(self.period_menu['checkboxes']['labels']):
+        self.period_menu['checkboxes']['keep_selected'] += keeps
+        self.period_menu['checkboxes']['remove_selected'] += removes
+
+    def representativity_conf(self):
+        """Comes here if there is a configuration loaded. Checks if there is a
+        representative field loaded in the object from the conf and if there is
+        assigns the value in the representativity menu"""
+        for i, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
+            if hasattr(self, label):
+                self.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(self, label))
+
+    def meta_from_conf(self):
+        """Comes here if there in a loaded configuration there are also metadata fields."""
+
+        for menu_type in self.metadata_types:
+            # treat first ranges
+            for i, label_cap in enumerate(self.metadata_menu[menu_type]['rangeboxes']['labels']):
+                label = label_cap.lower()
+                if hasattr(self, label):
+                    self.metadata_menu[menu_type]['rangeboxes']['current_lower'][i] = str(getattr(self, label)[0])
+                    self.metadata_menu[menu_type]['rangeboxes']['current_upper'][i] = str(getattr(self, label)[1])
+            # and then treat the keep/remove
+            for label_cap in self.metadata_menu[menu_type]['navigation_buttons']['labels']:
+                label = label_cap.lower()
+                if hasattr(self, label):
+                    keeps, removes = split_options(getattr(self, label))
+                    self.metadata_menu[menu_type][label_cap]['checkboxes']['keep_selected'] = keeps
+                    self.metadata_menu[menu_type][label_cap]['checkboxes']['remove_selected'] = removes
+
     def savebutton_func(self):
         save_data(self.mpl_canvas)
 
+    def conf_load_func(self):
+        conf_dialogs(self)
+
     def generate_pop_up_window(self, menu_root):
-        '''generate pop up window'''
+        """generate pop up window"""
 
         self.pop_up_window = PopUpWindow(menu_root, [], self.main_window_geometry)
 
@@ -484,8 +598,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
             # set initially selected/active start-end date as default 201601-201701
-            self.le_start_date.setText('20160101')
-            self.le_end_date.setText('20170101')
+            self.le_start_date.setText(str(self.start_date))
+            self.le_end_date.setText(str(self.end_date))
             self.selected_start_date = int(self.le_start_date.text())
             self.selected_end_date = int(self.le_end_date.text())
             self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
@@ -494,13 +608,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.date_range_has_changed = False
 
             # set selected/active values of other fields to be initially None
-            self.selected_network = None
+            # self.selected_network = None
             self.active_network = None
-            self.selected_resolution = None
             self.active_resolution = None
-            self.selected_matrix = None
             self.active_matrix = None
-            self.selected_species = None
             self.active_species = None
 
             # set selected/active values of variables associated
@@ -586,6 +697,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # create dictionary of observational data inside date range
             self.get_valid_obs_files_in_date_range()
 
+            # check which flags to select, depending if we have conf file or no
+            self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
+
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
             self.get_valid_obs_files_in_date_range()
@@ -650,19 +764,31 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.get_valid_experiment_files_in_date_range()
         # update selected indices for experiments -- keeping previously selected experiments if available
         # set selected indices as previously selected indices in current available list of experiments
-        self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for previous_selected_experiment in self.experiments_menu['checkboxes']['keep_selected'] if previous_selected_experiment in self.experiments_menu['checkboxes']['map_vars']]
+        if self.config_bar_initialisation and hasattr(self, 'experiments'):
+            conf_experiments = [exp.strip() for exp in self.experiments.split(",")]
+            self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in conf_experiments
+                                                                    if experiment in
+                                                                    self.experiments_menu['checkboxes']['map_vars']]
+        self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for
+                                                                previous_selected_experiment in
+                                                                self.experiments_menu['checkboxes']['keep_selected']
+                                                                if previous_selected_experiment in
+                                                                self.experiments_menu['checkboxes']['map_vars']]
 
         # since a selection has changed, update also the qa flags
-        flags_to_select = self.which_qa()  # first check which flags
-        self.qa_menu['checkboxes']['remove_default'] = flags_to_select
+        qa_to_select = self.which_qa()  # first check which flags
+        self.qa_menu['checkboxes']['remove_default'] = self.which_qa(return_defaults=True)
         if self.config_bar_initialisation:
-            self.qa_menu['checkboxes']['remove_selected'] = flags_to_select
+            self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
         else:
-            # if the selected species has specific qa flags, ensure none that none of the
+            # if the selected species has specific qa flags, ensure that none of the
             # inapplicable is selected
             if self.selected_species in self.qa_exceptions:
                 self.qa_menu['checkboxes']['remove_selected'] = list(set(
                     self.qa_menu['checkboxes']['remove_selected']) - set(self.qa_diff))
+
+        # if self.config_bar_initialisation:
+        #     self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -1037,7 +1163,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                                       1, 0, 0))
                     metadata_right_edge_ind = metadata_right_edge_ind - ((monthly_relative_delta.years * 12) + monthly_relative_delta.months)
 
-                #do metadata array cut
+                # do metadata array cut
                 if metadata_left_edge_ind == metadata_right_edge_ind:
                     self.metadata_in_memory = self.metadata_in_memory[:, [metadata_left_edge_ind]]
                 else:
@@ -1125,8 +1251,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # if species has changed, update default species specific lower/upper limits
         if (self.active_species != self.previous_active_species):
             # update default lower/upper species specific limits and filter data outside limits
-            species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
-            species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
+            # species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
+            # species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
+            species_lower_limit, species_upper_limit = self.which_bounds()
             # set default limits
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
@@ -1715,6 +1842,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         if section is None:
             return opts
 
+        self.opts = opts
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
 
     def disable_ghost_buttons(self):
