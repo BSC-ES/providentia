@@ -1,11 +1,10 @@
 """ Module storing writting functions """
-
-import datetime
 import sys
 
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset, num2date
+from .config import write_conf
 
 
 def export_data_npz(mpl_canvas, fname):
@@ -173,3 +172,56 @@ def export_netcdf(mpl_canvas, fname):
 
     # close writing to netCDF
     fout.close()
+
+
+def export_configuration(prv, cname):
+    """Create all items to be written in configuration file
+    and send them to write_conf"""
+
+    # default
+    options = {'selected_network': prv.selected_network,
+               'selected_resolution': prv.selected_resolution,
+               'selected_matrix': prv.selected_matrix,
+               'selected_species': prv.selected_species,
+               'start_date': prv.selected_start_date,
+               'end_date': prv.selected_end_date}
+
+    # QA
+    if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):
+        options['QA'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
+    # flags
+    if prv.flag_menu['checkboxes']['remove_selected']:
+        options['flags'] = ",".join(str(i) for i in prv.flag_menu['checkboxes']['remove_selected'])
+    # experiments
+    if prv.experiments_menu['checkboxes']['keep_selected']:
+        options['experiments'] = ",".join(str(i) for i in prv.experiments_menu['checkboxes']['keep_selected'])
+
+    # representativity
+    for i, label in enumerate(prv.representativity_menu['rangeboxes']['labels']):
+        if 'max_gap' in label:
+            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '100':
+                options[label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
+        else:
+            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '0':
+                options[label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
+
+    # period
+    if prv.period_menu['checkboxes']['keep_selected'] or prv.period_menu['checkboxes']['remove_selected']:
+        period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + "; "
+        period_r = "remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + "; "
+        options['period'] = period_k + period_r
+
+    # bounds
+    if prv.le_minimum_value != np.float32(prv.parameter_dictionary[prv.active_species]['extreme_lower_limit']):
+        options['lower_bound'] = prv.le_minimum_value.text()
+    if prv.le_maximum_value != np.float32(prv.parameter_dictionary[prv.active_species]['extreme_upper_limit']):
+        options['lower_bound'] = prv.le_maximum_value.text()
+
+    # metadata
+
+
+    # map z
+    if prv.cb_z_stat.text() != prv.basic_z_stats[0]:
+        options['map_z'] = prv.cb_z_stat.text()
+
+    write_conf("testing", cname+".conf", options)
