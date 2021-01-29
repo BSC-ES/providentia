@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QFileDialog
 import matplotlib
 from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from .writting import export_data_npz, export_netcdf
+from .writting import export_data_npz, export_netcdf, export_configuration
 
 
 class NavigationToolbar(NavigationToolbar2QT):
@@ -32,7 +32,7 @@ def save_data(mpl_canvas):
     for saving data, metadata and configuration.
     Available filetypes: Numpy file: .npz, netCDF: .nc"""
 
-    filetypes = {'Numpy file': 'npz', 'NetCDF': 'nc'}
+    filetypes = {'NetCDF': 'nc', 'Numpy file': 'npz', 'Configuration': 'conf'}
     sorted_filetypes = sorted(filetypes.items())
     startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
     daterange = mpl_canvas.read_instance.le_start_date.text() + "_" \
@@ -48,6 +48,7 @@ def save_data(mpl_canvas):
     # prompt with file name and extension
     fname, fext = qt_compat._getSaveFileName(None, "Choose a filename to save to", start, filter_ext)
     chose_npz = "npz" in fext
+    chose_conf = "conf" in fext
     if fname:
         # Save dir for next time, unless empty str (i.e., use cwd).
         if startpath != "":
@@ -56,6 +57,8 @@ def save_data(mpl_canvas):
                 QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
                 if chose_npz:
                     export_data_npz(mpl_canvas, fname)
+                elif chose_conf:
+                    export_configuration(mpl_canvas.read_instance, fname)
                 else:
                     export_netcdf(mpl_canvas, fname)
                 QtWidgets.QApplication.restoreOverrideCursor()
