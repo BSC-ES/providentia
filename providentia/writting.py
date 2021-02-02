@@ -218,10 +218,29 @@ def export_configuration(prv, cname):
         options['lower_bound'] = prv.le_maximum_value.text()
 
     # metadata
+    for menu_type in prv.metadata_types:
+        # treat ranges first
+        for i, label in enumerate(prv.metadata_menu[menu_type]['rangeboxes']['labels']):
+            lower_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_lower'][i]
+            lower_def = prv.metadata_menu[menu_type]['rangeboxes']['lower_default'][i]
+            upper_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_upper'][i]
+            upper_def = prv.metadata_menu[menu_type]['rangeboxes']['upper_default'][i]
+            if (lower_cur != lower_def) or (upper_cur != upper_def):
+                options[label] = lower_cur + ", " + upper_cur
 
+        # and then treat the keep/remove
+        for label in prv.metadata_menu[menu_type]['navigation_buttons']['labels']:
+            #         keeps, removes = split_options(getattr(self, label))
+            keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
+            removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
+
+            if keeps or removes:
+                meta_keep = "keep: " + ",".join(str(i) for i in keeps) + "; "
+                meta_remove = "remove: " + ",".join(str(i) for i in removes) + "; "
+                options[label] = meta_keep + meta_remove
 
     # map z
-    if prv.cb_z_stat.text() != prv.basic_z_stats[0]:
-        options['map_z'] = prv.cb_z_stat.text()
+    if prv.cb_z_stat.currentText() != prv.basic_z_stats[0]:
+        options['map_z'] = prv.cb_z_stat.currentText()
 
     write_conf("testing", cname+".conf", options)
