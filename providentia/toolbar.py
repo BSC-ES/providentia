@@ -100,7 +100,8 @@ def filename_dialog(instance):
 
 
 def reload_conf(instance, section, fpath):
-    """"""
+    """Resets previous selections, fills values according to new conf file,
+    reads and filters."""
     # firstly, delete previous attributes that we loaded from
     # the config file
     if instance.from_conf:
