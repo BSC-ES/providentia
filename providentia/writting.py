@@ -215,7 +215,7 @@ def export_configuration(prv, cname):
     if prv.le_minimum_value != np.float32(prv.parameter_dictionary[prv.active_species]['extreme_lower_limit']):
         options['lower_bound'] = prv.le_minimum_value.text()
     if prv.le_maximum_value != np.float32(prv.parameter_dictionary[prv.active_species]['extreme_upper_limit']):
-        options['lower_bound'] = prv.le_maximum_value.text()
+        options['upper_bound'] = prv.le_maximum_value.text()
 
     # metadata
     for menu_type in prv.metadata_types:
@@ -243,4 +243,5 @@ def export_configuration(prv, cname):
     if prv.cb_z_stat.currentText() != prv.basic_z_stats[0]:
         options['map_z'] = prv.cb_z_stat.currentText()
 
-    write_conf("testing", cname+".conf", options)
+    section_name = cname[cname.rfind("/")+1:]
+    write_conf(section_name, cname+".conf", options)

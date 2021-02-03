@@ -1251,8 +1251,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # if species has changed, update default species specific lower/upper limits
         if (self.active_species != self.previous_active_species):
             # update default lower/upper species specific limits and filter data outside limits
-            # species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
-            # species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
             species_lower_limit, species_upper_limit = self.which_bounds()
             # set default limits
             self.le_minimum_value.setText(str(species_lower_limit))
