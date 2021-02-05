@@ -170,7 +170,7 @@ def write_conf(section, fpath, opts):
         config.set(section, item, val)
 
     # write configuration
-    with open(fpath, 'wb') as configfile:
+    with open(fpath, 'w') as configfile:
         config.write(configfile)
 
 
