@@ -175,8 +175,16 @@ def export_netcdf(mpl_canvas, fname):
 
 
 def export_configuration(prv, cname):
-    """Create all items to be written in configuration file
-    and send them to write_conf"""
+    """
+    Create all items to be written in configuration file
+    and send them to write_conf
+
+    :prv: Instance of providentia main window
+    :type prv: instance of ProvidentiaMainWindow
+
+    :cname: Name for the configuration file
+    :type cname:
+    """
 
     # default
     options = {'selected_network': prv.selected_network,
@@ -212,9 +220,11 @@ def export_configuration(prv, cname):
         options['period'] = period_k + period_r
 
     # bounds
-    if prv.le_minimum_value != np.float32(prv.parameter_dictionary[prv.active_species]['extreme_lower_limit']):
+    if np.float32(prv.le_minimum_value.text()) != \
+            np.float32(prv.parameter_dictionary[prv.active_species]['extreme_lower_limit']):
         options['lower_bound'] = prv.le_minimum_value.text()
-    if prv.le_maximum_value != np.float32(prv.parameter_dictionary[prv.active_species]['extreme_upper_limit']):
+    if np.float32(prv.le_maximum_value.text()) != \
+            np.float32(prv.parameter_dictionary[prv.active_species]['extreme_upper_limit']):
         options['upper_bound'] = prv.le_maximum_value.text()
 
     # metadata
