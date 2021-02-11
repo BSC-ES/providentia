@@ -23,6 +23,7 @@ import os
 import os.path
 import json
 import sys
+from glob import glob
 from functools import partial
 from collections import OrderedDict
 
@@ -690,9 +691,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         self.all_observation_data[network][resolution][matrix][species] = species_files_yearmonths
 
             # load dictionary with esarchive files
-            esarchive_files = json.load(open(os.path.join(CURRENT_PATH, 'conf/esarchive_files.json')))
+            esarchive_files_empty = json.load(open(os.path.join(CURRENT_PATH, 'conf/esarchive_files.json')))
             # and merge to existing dict if we have the path
             if self.nonghost_root is not None:
+                esarchive_files = self.get_esarchive_yearmonth(esarchive_files_empty)
                 self.all_observation_data = {**self.all_observation_data, **esarchive_files}
             # create dictionary of observational data inside date range
             self.get_valid_obs_files_in_date_range()
@@ -1867,6 +1869,31 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.bu_rep.setEnabled(True)
         self.bu_meta.setEnabled(True)
         self.bu_period.setEnabled(True)
+
+    def get_esarchive_yearmonth(self, esfiles):
+        """
+        Returns the esarchive_files json filles with yearmonth
+        from esarchive available files
+
+        :esfiles: contains structure of esarchives to read
+        :type esfiles: json
+        """
+        for n in esfiles:
+            network = n[1:].lower()
+            for r in esfiles[n]:
+                resolution = r
+                for d in esfiles[n][r]:
+                    detail = d
+                    for s in esfiles[n][r][d]:
+                        species = s
+                        path = "{}/{}/{}/{}/{}".format(self.nonghost_root, network,
+                                                       detail, resolution, species)
+                        if os.path.exists(path):
+                            species_files = glob(path + '*/*_??????.nc')
+                            species_files_yearmonths = [int(f.split('_')[-1][:6] + '01') for f in species_files]
+                            # print(species_files_yearmonths)
+                            esfiles[n][r][d][s] = species_files_yearmonths
+        return esfiles
 
 
 # generate Providentia dashboard
