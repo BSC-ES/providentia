@@ -1,4 +1,4 @@
-""" Module storing writting functions """
+""" Module storing writing functions """
 import sys
 
 import numpy as np
