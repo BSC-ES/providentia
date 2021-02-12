@@ -1431,12 +1431,12 @@ class MPLCanvas(FigureCanvas):
                                     'measurement_altitude': 'Measurement Altitude',
                                     'country': 'Country',
                                     'network': 'Network',
-                                    'standardised_network_provided_area_classification': 'Area Classification',
-                                    'standardised_network_provided_station_classification': 'Station Classification',
-                                    'standardised_network_provided_main_emission_source': 'Main Emission Source',
-                                    'standardised_network_provided_land_use': 'Land Use',
-                                    'standardised_network_provided_terrain': 'Terrain',
-                                    'standardised_network_provided_measurement_scale': 'Measurement Scale',
+                                    'area_classification': 'Area Classification',
+                                    'station_classification': 'Station Classification',
+                                    'main_emission_source': 'Main Emission Source',
+                                    'land_use': 'Land Use',
+                                    'terrain': 'Terrain',
+                                    'measurement_scale': 'Measurement Scale',
                                     'representative_radius': 'Representative Radius',
                                     'ESDAC_Iwahashi_landform_classification': 'Iwahashi Landform',
                                     'ESDAC_Meybeck_landform_classification': 'Meybeck Landform',
@@ -1491,12 +1491,9 @@ class MPLCanvas(FigureCanvas):
                         self.relative_selected_station_inds].astype(np.float32)))
 
                 #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
-                metadata_vars_to_plot = ['station_name', 'country',
-                                         'standardised_network_provided_area_classification',
-                                         'standardised_network_provided_station_classification',
-                                         'standardised_network_provided_terrain',
-                                         'standardised_network_provided_land_use',
-                                         'MODIS_MCD12C1_v6_IGBP_land_use',
+                metadata_vars_to_plot = ['station_name', 'country', 'area_classification',
+                                         'station_classification', 'terrain',
+                                         'land_use', 'MODIS_MCD12C1_v6_IGBP_land_use',
                                          'GHSL_settlement_model_classification',
                                          'measurement_methodology', 'measuring_instrument_name']
 
@@ -1556,11 +1553,9 @@ class MPLCanvas(FigureCanvas):
                         self.relative_selected_station_inds].astype(np.float32)))
 
                 # get percentage of element occurrences across selected stations, for certain metadata variables
-                metadata_vars_get_pc = ['country', 'standardised_network_provided_area_classification',
-                                        'standardised_network_provided_station_classification',
-                                        'standardised_network_provided_terrain',
-                                        'standardised_network_provided_land_use',
-                                        'MODIS_MCD12C1_v6_IGBP_land_use', 'GHSL_settlement_model_classification',
+                metadata_vars_get_pc = ['country', 'area_classification', 'station_classification',
+                                        'terrain', 'land_use', 'MODIS_MCD12C1_v6_IGBP_land_use',
+                                        'GHSL_settlement_model_classification',
                                         'measurement_methodology', 'measuring_instrument_name']
 
                 # iterate through metadata variables
