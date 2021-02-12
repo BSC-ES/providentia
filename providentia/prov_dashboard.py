@@ -531,7 +531,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             if hasattr(self, 'period'):
                 self.period_conf()
             # if there are there are metadata reported in configuratoin
-            if set(self.metadata_vars_to_read).intersection(vars(self).keys()):
+            if set([m.lower() for m in self.metadata_vars_to_read]).intersection(vars(self).keys()):
                 self.meta_from_conf()
             # call function to apply changes (filter)
             self.mpl_canvas.handle_data_filter_update()
