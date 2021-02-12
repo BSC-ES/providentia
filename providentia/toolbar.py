@@ -126,7 +126,7 @@ def reload_conf(instance, section, fpath):
     instance.representativity_conf()
     if hasattr(instance, 'period'):
         instance.period_conf()
-    if set(instance.metadata_vars_to_read).intersection(vars(instance).keys()):
+    if set([m.lower() for m in instance.metadata_vars_to_read]).intersection(vars(instance).keys()):
         instance.meta_from_conf()
     # call function to apply changes (filter)
     instance.mpl_canvas.handle_data_filter_update()
