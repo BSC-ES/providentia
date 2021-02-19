@@ -1461,9 +1461,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                       'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                       'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
                                       'season_code', 'time']
-        elif (self.active_resolution == 'daily') or (self.active_resolution == '3hourly') or \
+        elif (self.active_resolution == '3hourly') or \
                 (self.active_resolution == '6hourly') or (self.active_resolution == '3hourly_instantaneous') or \
                 (self.active_resolution == '6hourly_instantaneous'):
+            self.data_vars_to_read = [self.active_species, 'daily_native_representativity_percent',
+                                      'monthly_native_representativity_percent',
+                                      'annual_native_representativity_percent',
+                                      'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                      'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                      'season_code', 'time']
+        elif self.active_resolution == 'daily':
             self.data_vars_to_read = [self.active_species, 'daily_native_representativity_percent',
                                       'monthly_native_representativity_percent',
                                       'annual_native_representativity_percent',
@@ -1779,9 +1786,26 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # daily temporal resolution?
         elif self.active_resolution == 'daily':
             self.period_menu['checkboxes']['labels'] = ['Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
+
+            #drop selected fields from higher temporal resolutions
+            labels_to_remove = ['Daytime', 'Nighttime']
+            for label in labels_to_remove:
+                if label in self.period_menu['checkboxes']['keep_selected']:
+                    self.period_menu['checkboxes']['keep_selected'].remove(label)
+                if label in self.period_menu['checkboxes']['remove_selected']:
+                    self.period_menu['checkboxes']['remove_selected'].remove(label)
+
         # monthly temporal resolution?
         elif self.active_resolution == 'monthly':
             self.period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
+
+            #drop selected fields from higher temporal resolutions
+            labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend']
+            for label in labels_to_remove:
+                if label in self.period_menu['checkboxes']['keep_selected']:
+                    self.period_menu['checkboxes']['keep_selected'].remove(label)
+                if label in self.period_menu['checkboxes']['remove_selected']:
+                    self.period_menu['checkboxes']['remove_selected'].remove(label)
 
     def update_plotting_parameters(self):
         """Function that updates plotting parameters (colour
