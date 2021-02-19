@@ -72,6 +72,15 @@ class Stats(object):
 
         return np.array(max_gap_pc) * (100. / data.shape[1])
 
+    @staticmethod
+    def calculate_exceedances(data, threshold=0):
+        """Calculate number of data exceedances
+        (i.e. number of measurements exceeding a set threshold)
+        """
+        n_exceed = len(np.where(data > threshold)[0])
+        # print('n exceed = ', n_exceed, np.max(data), threshold)
+        return n_exceed
+
 
 class ExpBias(object):
 
