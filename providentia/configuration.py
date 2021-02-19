@@ -7,12 +7,13 @@ import subprocess
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 
+
 def parse_path(dir, f):
-    #print "Opening data file", f
+    # print "Opening data file", f
     if os.path.isabs(f):
         return f
     else:
-        #log.info("Input: %s", f)
+        # log.info("Input: %s", f)
         return os.path.join(dir, f)
 
 
@@ -20,8 +21,8 @@ class ProvConfiguration(object):
     """ Configuration parameters definitions """
 
     def __init__(self, **kwargs):
-        self.config_dir = kwargs.get('config_dir', \
-             os.path.join(os.environ['HOME'], '.providentia'))
+        self.config_dir = kwargs.get('config_dir',
+                                     os.path.join(os.environ['HOME'], '.providentia'))
         self.ghost_version = kwargs.get('ghost_version', '1.3.3')
         self.cartopy_data_dir = kwargs.get('cartopy_data_dir', '')
         self.available_cpus = kwargs.get('available_cpus', '')
@@ -32,25 +33,26 @@ class ProvConfiguration(object):
         self.sequential_colourmap = kwargs.get('sequential_colourmap',
                                                'viridis')
         self.sequential_colourmap_warm = \
-                kwargs.get('sequential_colourmap_warm', 'Reds')
+            kwargs.get('sequential_colourmap_warm', 'Reds')
 
         self.diverging_colourmap = kwargs.get('diverging_colourmap', 'bwr')
         self.unsel_station_markersize = \
-                                   kwargs.get('unsel_station_markersize', 3)
+            kwargs.get('unsel_station_markersize', 3)
         self.sel_station_markersize = \
-                                   kwargs.get('sel_station_markersize', 8)
+            kwargs.get('sel_station_markersize', 8)
         self.legend_markersize = kwargs.get('legend_markersize', 11)
         self.time_series_markersize = \
-                                   kwargs.get('time_series_markersize', 1.1)
+            kwargs.get('time_series_markersize', 1.1)
         self.temp_agg_markersize = \
-                                   kwargs.get('temp_agg_markersize', 3)
+            kwargs.get('temp_agg_markersize', 3)
         self.temp_agg_expbias_markersize = \
-                kwargs.get('temp_agg_expbias_markersize', 3)
+            kwargs.get('temp_agg_expbias_markersize', 3)
         self.map_coastline_resolution = \
-                kwargs.get('map_coastline_resolution', 'low')
-        self.available_networks = \
-                kwargs.get('available_networks',
-                           "['AERONET_v3','EBAS','EEA_AQ_eReporting','MITECO','NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP','NCDC_ISD_NA']")
+            kwargs.get('map_coastline_resolution', 'low')
+        self.available_networks =\
+            kwargs.get('available_networks',
+                       "['AERONET_v3','EBAS','EEA_AQ_eReporting','MITECO',"
+                       "'NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP','NCDC_ISD_NA']")
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
