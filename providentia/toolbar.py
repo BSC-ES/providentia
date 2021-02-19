@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QFileDialog
 import matplotlib
 from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from .writting import export_data_npz, export_netcdf, export_configuration
+from .writing import export_data_npz, export_netcdf, export_configuration
 
 
 class NavigationToolbar(NavigationToolbar2QT):
