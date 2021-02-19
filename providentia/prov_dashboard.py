@@ -868,43 +868,31 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # iterate through available experiments
         for experiment in available_experiments:
 
-            # get all available grid types by experiment
-            available_grids = os.listdir('%s/%s/%s' % (self.exp_root, self.ghost_version, experiment))
+            # test first if interpolated directory exists before trying to get files from it
+            # if it does not exit, continue
+            if not os.path.exists(
+                    '%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version, experiment,
+                                           self.selected_resolution, self.selected_species,
+                                           self.selected_network)):
+                continue
+            else:
+                # get all experiment netCDF files by experiment/grid/selected
+                # resolution/selected species/selected network
+                network_files = os.listdir(
+                    '%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version,
+                                           experiment, self.selected_resolution,
+                                           self.selected_species, self.selected_network))
+                # get start YYYYMM yearmonths of data files
+                network_files_yearmonths = [int(f.split('_')[-1][:6] + '01') for f in network_files]
+                # limit data files to just those within date range
+                valid_network_files_yearmonths = \
+                    [ym for ym in network_files_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) &
+                     (ym < self.selected_end_date)]
 
-            # iterate through all available grids
-            for grid in available_grids:
-
-                # get all available ensemble member numbers
-                available_member_numbers = os.listdir('%s/%s/%s/%s' % (self.exp_root, self.ghost_version, experiment, grid))
-
-                # iterate through all available ensemble member numbers
-                for member in available_member_numbers:
-
-                    # test first if interpolated directory exists before trying to get files from it
-                    # if it does not exit, continue
-                    if not os.path.exists(
-                            '%s/%s/%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version, experiment, grid, member,
-                                                      self.selected_resolution, self.selected_species,
-                                                      self.selected_network)):
-                        continue
-                    else:
-                        # get all experiment netCDF files by experiment/grid/selected
-                        # resolution/selected species/selected network
-                        network_files = os.listdir(
-                            '%s/%s/%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version,
-                                                         experiment, grid, member, self.selected_resolution,
-                                                         self.selected_species, self.selected_network))
-                        # get start YYYYMM yearmonths of data files
-                        network_files_yearmonths = [int(f.split('_')[-1][:6]+'01') for f in network_files]
-                        # limit data files to just those within date range
-                        valid_network_files_yearmonths = \
-                            [ym for ym in network_files_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) &
-                             (ym < self.selected_end_date)]
-
-                        # if have some valid data files for experiment-grid-member, add experiment-grid-member key
-                        # (with associated yearmonths) to dictionary
-                        if len(valid_network_files_yearmonths) > 0:
-                            self.available_experiment_data['%s-%s-%s' % (experiment, grid, member)] = valid_network_files_yearmonths
+                # if have some valid data files for experiment, add experiment key
+                # (with associated yearmonths) to dictionary
+                if len(valid_network_files_yearmonths) > 0:
+                    self.available_experiment_data['%s' % (experiment)] = valid_network_files_yearmonths
 
         # get list of available experiment-grid names
         self.experiments_menu['checkboxes']['labels'] = np.array(
@@ -1473,9 +1461,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                       'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                       'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
                                       'season_code', 'time']
-        elif (self.active_resolution == 'daily') or (self.active_resolution == '3hourly') or \
+        elif (self.active_resolution == '3hourly') or \
                 (self.active_resolution == '6hourly') or (self.active_resolution == '3hourly_instantaneous') or \
                 (self.active_resolution == '6hourly_instantaneous'):
+            self.data_vars_to_read = [self.active_species, 'daily_native_representativity_percent',
+                                      'monthly_native_representativity_percent',
+                                      'annual_native_representativity_percent',
+                                      'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                      'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                      'season_code', 'time']
+        elif self.active_resolution == 'daily':
             self.data_vars_to_read = [self.active_species, 'daily_native_representativity_percent',
                                       'monthly_native_representativity_percent',
                                       'annual_native_representativity_percent',
@@ -1531,14 +1526,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         else:
             self.process_type = 'experiment'
-            experiment_grid_split = data_label.split('-')
-            active_experiment = experiment_grid_split[0]
-            active_grid = experiment_grid_split[1]
-            active_member = experiment_grid_split[2]
             file_root = \
-                '%s/%s/%s/%s/%s/%s/%s/%s/%s_' % (self.exp_root, self.ghost_version, active_experiment,
-                                              active_grid, active_member, self.active_resolution,
-                                              self.active_species, self.active_network, self.active_species)
+                '%s/%s/%s/%s/%s/%s/%s_' % (self.exp_root, self.ghost_version, data_label,
+                                           self.active_resolution, self.active_species, self.active_network,
+                                           self.active_species)
+
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 
         # get data files in required date range to read, taking care not to re-read what has already been read
@@ -1794,9 +1786,26 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # daily temporal resolution?
         elif self.active_resolution == 'daily':
             self.period_menu['checkboxes']['labels'] = ['Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
+
+            #drop selected fields from higher temporal resolutions
+            labels_to_remove = ['Daytime', 'Nighttime']
+            for label in labels_to_remove:
+                if label in self.period_menu['checkboxes']['keep_selected']:
+                    self.period_menu['checkboxes']['keep_selected'].remove(label)
+                if label in self.period_menu['checkboxes']['remove_selected']:
+                    self.period_menu['checkboxes']['remove_selected'].remove(label)
+
         # monthly temporal resolution?
         elif self.active_resolution == 'monthly':
             self.period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
+
+            #drop selected fields from higher temporal resolutions
+            labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend']
+            for label in labels_to_remove:
+                if label in self.period_menu['checkboxes']['keep_selected']:
+                    self.period_menu['checkboxes']['keep_selected'].remove(label)
+                if label in self.period_menu['checkboxes']['remove_selected']:
+                    self.period_menu['checkboxes']['remove_selected'].remove(label)
 
     def update_plotting_parameters(self):
         """Function that updates plotting parameters (colour
