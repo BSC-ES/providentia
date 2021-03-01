@@ -1,11 +1,10 @@
-""" Module storing writting functions """
-
-import datetime
+""" Module storing writing functions """
 import sys
 
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset, num2date
+from .config import write_conf
 
 
 def export_data_npz(mpl_canvas, fname):
@@ -173,3 +172,86 @@ def export_netcdf(mpl_canvas, fname):
 
     # close writing to netCDF
     fout.close()
+
+
+def export_configuration(prv, cname):
+    """
+    Create all items to be written in configuration file
+    and send them to write_conf
+
+    :prv: Instance of providentia main window
+    :type prv: instance of ProvidentiaMainWindow
+
+    :cname: Name for the configuration file
+    :type cname:
+    """
+
+    # default
+    options = {'selected_network': prv.selected_network,
+               'selected_resolution': prv.selected_resolution,
+               'selected_matrix': prv.selected_matrix,
+               'selected_species': prv.selected_species,
+               'start_date': prv.selected_start_date,
+               'end_date': prv.selected_end_date}
+
+    # QA
+    if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):
+        options['QA'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
+    # flags
+    if prv.flag_menu['checkboxes']['remove_selected']:
+        options['flags'] = ",".join(str(i) for i in prv.flag_menu['checkboxes']['remove_selected'])
+    # experiments
+    if prv.experiments_menu['checkboxes']['keep_selected']:
+        options['experiments'] = ",".join(str(i) for i in prv.experiments_menu['checkboxes']['keep_selected'])
+
+    # representativity
+    for i, label in enumerate(prv.representativity_menu['rangeboxes']['labels']):
+        if 'max_gap' in label:
+            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '100':
+                options[label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
+        else:
+            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '0':
+                options[label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
+
+    # period
+    if prv.period_menu['checkboxes']['keep_selected'] or prv.period_menu['checkboxes']['remove_selected']:
+        period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + "; "
+        period_r = "remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + "; "
+        options['period'] = period_k + period_r
+
+    # bounds
+    if np.float32(prv.le_minimum_value.text()) != \
+            np.float32(prv.parameter_dictionary[prv.active_species]['extreme_lower_limit']):
+        options['lower_bound'] = prv.le_minimum_value.text()
+    if np.float32(prv.le_maximum_value.text()) != \
+            np.float32(prv.parameter_dictionary[prv.active_species]['extreme_upper_limit']):
+        options['upper_bound'] = prv.le_maximum_value.text()
+
+    # metadata
+    for menu_type in prv.metadata_types:
+        # treat ranges first
+        for i, label in enumerate(prv.metadata_menu[menu_type]['rangeboxes']['labels']):
+            lower_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_lower'][i]
+            lower_def = prv.metadata_menu[menu_type]['rangeboxes']['lower_default'][i]
+            upper_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_upper'][i]
+            upper_def = prv.metadata_menu[menu_type]['rangeboxes']['upper_default'][i]
+            if (lower_cur != lower_def) or (upper_cur != upper_def):
+                options[label] = lower_cur + ", " + upper_cur
+
+        # and then treat the keep/remove
+        for label in prv.metadata_menu[menu_type]['navigation_buttons']['labels']:
+            #         keeps, removes = split_options(getattr(self, label))
+            keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
+            removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
+
+            if keeps or removes:
+                meta_keep = "keep: " + ",".join(str(i) for i in keeps) + "; "
+                meta_remove = "remove: " + ",".join(str(i) for i in removes) + "; "
+                options[label] = meta_keep + meta_remove
+
+    # map z
+    if prv.cb_z_stat.currentText() != prv.basic_z_stats[0]:
+        options['map_z'] = prv.cb_z_stat.currentText()
+
+    section_name = cname[cname.rfind("/")+1:]
+    write_conf(section_name, cname+".conf", options)
