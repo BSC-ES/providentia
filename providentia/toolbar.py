@@ -129,4 +129,5 @@ def reload_conf(instance, section, fpath):
     if set([m.lower() for m in instance.metadata_vars_to_read]).intersection(vars(instance).keys()):
         instance.meta_from_conf()
     # call function to apply changes (filter)
+    # TODO: set cursor to loading before and after
     instance.mpl_canvas.handle_data_filter_update()

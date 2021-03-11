@@ -13,6 +13,7 @@ from .prov_dashboard_aux import QVLine
 from .prov_dashboard_aux import PopUpWindow
 from .prov_dashboard_aux import formatting_dict
 from .prov_dashboard_aux import set_formatting
+from .filter import DataFilter
 
 import copy
 import bisect
@@ -471,6 +472,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_colocate_update)
 
         # enable FILTER button
+        # TODO: connect to a new function, that calls class of filter
         self.bu_screen.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
         # enable updating of map z statistic
@@ -534,6 +536,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             if set([m.lower() for m in self.metadata_vars_to_read]).intersection(vars(self).keys()):
                 self.meta_from_conf()
             # call function to apply changes (filter)
+            # TODO: call to new function?
             self.mpl_canvas.handle_data_filter_update()
 
         # set finalised layout
@@ -1253,6 +1256,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # --------------------------------------------------------------------#
         # run function to filter data outside lower/upper limits, not using desired
         # measurement methods, and < desired minimum data availability
+        # TODO: call to new function?
         self.mpl_canvas.handle_data_filter_update()
 
         # --------------------------------------------------------------------#
@@ -1353,6 +1357,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.le_maximum_value.setText(str(species_upper_limit))
 
         # unfilter data
+        # TODO: call on filter object the reset_data_filter?
         self.mpl_canvas.handle_data_filter_update()
 
         # Restore mouse cursor to normal
