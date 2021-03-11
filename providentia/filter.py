@@ -4,6 +4,8 @@ import copy
 import numpy as np
 import pandas as pd
 
+from PyQt5 import QtCore
+
 
 class DataFilter:
     """
@@ -12,17 +14,47 @@ class DataFilter:
 
     def __init__(self, read_instance):
         self.read_instance = read_instance
+        self.filter_all()
 
+    def filter_all(self):
         # call functions to start filtering
         self.reset_data_filter()
+        self.filter_data_limits()
         self.filter_by_period()
-        # self.filter_by_data_availability()
+        self.filter_by_data_availability()
         self.filter_by_metadata()
         self.colocate_data()
+        self.update_active_map()
+        self.get_valid_stations_after_filtering()
 
     def reset_data_filter(self):
         """Resets data arrays to be un-filtered"""
         self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
+
+    def filter_data_limits(self):
+        """Filter out (set to NaN) data which exceed the lower/upper limits"""
+
+        # get set lower/upper data bounds
+        selected_lower_bound = self.read_instance.le_minimum_value.text()
+        selected_upper_bound = self.read_instance.le_maximum_value.text()
+
+        # check selected lower/upper bounds are numbers
+        try:
+            selected_lower_bound = np.float32(selected_lower_bound)
+            selected_upper_bound = np.float32(selected_upper_bound)
+        # if any of the fields are not numbers, return from function
+        except ValueError:
+            # # Restore mouse cursor to normal
+            # QtWidgets.QApplication.restoreOverrideCursor()
+            return
+
+        # filter all observational data out of bounds of lower/upper limits
+        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations'][
+                                               self.read_instance.active_species] < selected_lower_bound,
+                                           self.read_instance.data_in_memory_filtered['observations'][
+                                               self.read_instance.active_species] > selected_upper_bound)
+        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+            inds_out_of_bounds] = np.NaN
 
     def filter_by_period(self):
         """Filters data for selected periods (keeping or removing data, as defined)"""
@@ -100,7 +132,86 @@ class DataFilter:
 
     def filter_by_data_availability(self):
         """Function which filters data by selected data availability variables"""
-        # ?? code from dashboard???
+
+        # get set variables names representing percentage data availability (native and non-native)
+        active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['labels']
+
+        try:
+            data_availability_lower_bounds = []
+            for var_ii, var in enumerate(active_data_availablity_vars):
+                data_availability_lower_bounds.append(
+                    np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
+        # if any of the fields are not numbers, return from function
+        except ValueError:
+            # # Restore mouse cursor to normal
+            # QtWidgets.QApplication.restoreOverrideCursor()
+            return
+
+        if not self.read_instance.reading_nonghost:
+            for var_ii, var in enumerate(active_data_availablity_vars):
+                if 'native' in var:
+                    # max gap variable?
+                    if 'max_gap' in var:
+                        # bound is < 100?:
+                        if data_availability_lower_bounds[var_ii] < 100:
+                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                                self.read_instance.data_in_memory_filtered['observations'][var] >
+                                data_availability_lower_bounds[var_ii]] = np.NaN
+                    # data representativity variable?
+                    else:
+                        # bound is > 0?
+                        if data_availability_lower_bounds[var_ii] > 0:
+                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                                self.read_instance.data_in_memory_filtered['observations'][var] <
+                                data_availability_lower_bounds[var_ii]] = np.NaN
+
+        # filter all observational data out of set bounds of non-native percentage data availability variables
+        for var_ii, var in enumerate(active_data_availablity_vars):
+            if 'native' not in var:
+                # max gap variable?
+                if 'max_gap' in var:
+                    # bound is == 100?
+                    if data_availability_lower_bounds[var_ii] == 100:
+                        continue
+                # data representativity variable?
+                else:
+                    # bound == 0?
+                    if data_availability_lower_bounds[var_ii] == 0:
+                        continue
+
+                # get period associate with variable
+                period = var.split('_')[0]
+                period_inds = np.arange(
+                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species].shape[
+                        1])
+                # daily variable?
+                if period == 'daily':
+                    period_inds_split = np.array_split(period_inds,
+                                                       [24 * i for i in range(1, int(np.ceil(len(period_inds) / 24)))])
+                # monthly variable?
+                elif period == 'monthly':
+                    period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.N_inds_per_month))
+                # whole record variable?
+                else:
+                    period_inds_split = [period_inds]
+
+                # iterate through indices associated with periodic chunks for current period
+                for period_inds in period_inds_split:
+                    if len(period_inds) > 0:
+                        # max gap variable?
+                        if 'max_gap' in var:
+                            max_gap_percent = Stats.max_repeated_nans_fraction(self.read_instance.data_in_memory_filtered['observations'][
+                                    self.read_instance.active_species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][
+                                self.read_instance.active_species][
+                                max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
+                        # data representativity variable?
+                        else:
+                            data_availability_percent = Stats.calculate_data_avail_fraction(self.read_instance.data_in_memory_filtered['observations'][
+                                    self.read_instance.active_species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][
+                                self.read_instance.active_species][
+                                data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
 
     def filter_by_metadata(self):
         """Filters data by selected metadata"""
@@ -312,3 +423,19 @@ class DataFilter:
                     station_data_availability_number > 1]]
                 # overwrite previous written valid station indices (now at best a subset of those indices)
                 self.read_instance.plotting_params[data_label]['valid_station_inds'] = valid_station_inds
+
+    def update_active_map(self):
+        if not self.read_instance.block_MPL_canvas_updates:
+            # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
+            self.read_instance.mpl_canvas.calculate_z_statistic()
+
+            # update plotted map z statistic
+            self.read_instance.mpl_canvas.update_map_z_statistic()
+
+            # if selected stations have changed from previous selected, update associated plots
+            if not np.array_equal(self.read_instance.mpl_canvas.previous_relative_selected_station_inds,
+                                  self.read_instance.mpl_canvas.relative_selected_station_inds):
+                self.read_instance.mpl_canvas.update_associated_selected_station_plots()
+
+            # draw changes
+            self.read_instance.mpl_canvas.draw()
