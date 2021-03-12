@@ -4,8 +4,6 @@ import copy
 import numpy as np
 import pandas as pd
 
-from PyQt5 import QtCore
-
 
 class DataFilter:
     """
@@ -24,7 +22,6 @@ class DataFilter:
         self.filter_by_data_availability()
         self.filter_by_metadata()
         self.colocate_data()
-        self.update_active_map()
         self.get_valid_stations_after_filtering()
 
     def reset_data_filter(self):
@@ -273,19 +270,9 @@ class DataFilter:
     def colocate_data(self):
         """Define function which colocates observational and experiment data"""
 
-        # check if colocation is active or not (to inform subsequent plotting
-        # functions whether to use colocated data/or not)
-        check_state = self.read_instance.ch_colocate.checkState()
-        # update variable to inform plotting functions whether to use colocated data/or not
-        if check_state == QtCore.Qt.Checked:
-            self.colocate_active = True
-        else:
-            self.colocate_active = False
-
-        # if do not have any experiment data loaded, no colocation is possible, therefore
-        # return from function (set colocation to be not active, regardless if the checkbox is ticked or not)
+        # if do not have any experiment data loaded, no colocation is possible,
+        # therefore return from function
         if len(list(self.read_instance.data_in_memory.keys())) == 1:
-            self.colocate_active = False
             return
         else:
             # otherwise, colocate observational and experiment data, creating new data arrays
@@ -423,19 +410,3 @@ class DataFilter:
                     station_data_availability_number > 1]]
                 # overwrite previous written valid station indices (now at best a subset of those indices)
                 self.read_instance.plotting_params[data_label]['valid_station_inds'] = valid_station_inds
-
-    def update_active_map(self):
-        if not self.read_instance.block_MPL_canvas_updates:
-            # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
-            self.read_instance.mpl_canvas.calculate_z_statistic()
-
-            # update plotted map z statistic
-            self.read_instance.mpl_canvas.update_map_z_statistic()
-
-            # if selected stations have changed from previous selected, update associated plots
-            if not np.array_equal(self.read_instance.mpl_canvas.previous_relative_selected_station_inds,
-                                  self.read_instance.mpl_canvas.relative_selected_station_inds):
-                self.read_instance.mpl_canvas.update_associated_selected_station_plots()
-
-            # draw changes
-            self.read_instance.mpl_canvas.draw()
