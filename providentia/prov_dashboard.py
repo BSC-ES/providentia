@@ -13,6 +13,7 @@ from .prov_dashboard_aux import QVLine
 from .prov_dashboard_aux import PopUpWindow
 from .prov_dashboard_aux import formatting_dict
 from .prov_dashboard_aux import set_formatting
+from .filter import DataFilter
 
 import copy
 import bisect
@@ -1353,6 +1354,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.le_maximum_value.setText(str(species_upper_limit))
 
         # unfilter data
+        # TODO: call on filter object the reset_data_filter?
         self.mpl_canvas.handle_data_filter_update()
 
         # Restore mouse cursor to normal
