@@ -72,7 +72,7 @@ class DataReader:
         # set current time array, as previous time array
         self.previous_time_array = self.read_instance.time_array
         # set current station references, as previous station references
-        self.previous_station_references = self.read_instance.station_references
+        self.previous_station_references = self.station_references
         # set current relevant yearmonths, as previous relevant yearmonths
         self.previous_relevant_yearmonths = self.read_instance.relevant_yearmonths
 
@@ -251,14 +251,14 @@ class DataReader:
             if process_type == 'observations':
                 self.read_instance.plotting_params['observations'] = {}
                 if not self.reading_nonghost:
-                    self.read_instance.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
+                    self.read_instance.data_in_memory[data_label] = np.full((len(self.station_references),
                                                                              len(self.read_instance.time_array)),
                                                                             np.NaN, dtype=self.data_dtype)
                 else:
-                    self.read_instance.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
+                    self.read_instance.data_in_memory[data_label] = np.full((len(self.station_references),
                                                                              len(self.read_instance.time_array)),
                                                                             np.NaN, dtype=self.data_dtype[:1])
-                self.metadata_in_memory = np.full((len(self.read_instance.station_references),
+                self.metadata_in_memory = np.full((len(self.station_references),
                                                    len(self.read_instance.relevant_yearmonths)),
                                                   np.NaN, dtype=self.read_instance.metadata_dtype)
                 if self.reading_nonghost:
@@ -268,13 +268,13 @@ class DataReader:
                                             ('longitude', np.float), ('altitude', np.float)]
                     if "station_code" in tmp_ncdf.variables:
                         nonghost_mdata_dtype.append(('station_reference', np.object))
-                    self.nonghost_metadata = np.full((len(self.read_instance.station_references)),
+                    self.nonghost_metadata = np.full((len(self.station_references)),
                                                      np.NaN, dtype=nonghost_mdata_dtype)
 
             # if process_type is experiment, get experiment specific grid edges from
             # first relevant file, and save to data in memory dictionary
             if process_type == 'experiment':
-                self.read_instance.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
+                self.read_instance.data_in_memory[data_label] = np.full((len(self.station_references),
                                                                          len(self.read_instance.time_array)),
                                                                         np.NaN, dtype=self.data_dtype[:1])
                 self.read_instance.plotting_params[data_label] = {}
@@ -292,7 +292,7 @@ class DataReader:
             # iterate through relevant netCDF files
             for relevant_file in relevant_files:
                 # create argument tuple of function
-                tuple_arguments = relevant_file, self.read_instance.time_array, self.read_instance.station_references, \
+                tuple_arguments = relevant_file, self.read_instance.time_array, self.station_references, \
                                   self.read_instance.active_species, process_type,\
                                   self.read_instance.active_qa, self.read_instance.active_flags, \
                                   self.data_dtype, self.data_vars_to_read, \
@@ -311,7 +311,7 @@ class DataReader:
 
             # read netCDF files in parallel
             if not self.reading_nonghost:
-                tuple_arguments = [(file_name, self.read_instance.time_array, self.read_instance.station_references,
+                tuple_arguments = [(file_name, self.read_instance.time_array, self.station_references,
                                     self.read_instance.active_species, process_type, self.read_instance.active_qa,
                                     self.read_instance.active_flags, self.data_dtype,
                                     self.data_vars_to_read, self.read_instance.metadata_dtype,
@@ -319,7 +319,7 @@ class DataReader:
                 all_file_data = pool.map(read_netcdf_data, tuple_arguments)
             else:
                 tuple_arguments = [
-                    (file_name, self.read_instance.time_array, self.read_instance.station_references,
+                    (file_name, self.read_instance.time_array, self.station_references,
                      self.read_instance.active_species, process_type) for
                     file_name in relevant_files]
                 all_file_data = pool.map(read_netcdf_nonghost, tuple_arguments)

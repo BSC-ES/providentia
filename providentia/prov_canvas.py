@@ -355,13 +355,13 @@ class MPLCanvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],
-                                                  self.read_instance.station_latitudes[self.active_map_valid_station_inds],
+            self.map_points = self.map_ax.scatter(self.read_instance.datareader.station_longitudes[self.active_map_valid_station_inds],
+                                                  self.read_instance.datareader.station_latitudes[self.active_map_valid_station_inds],
                                                   s=self.read_instance.unsel_station_markersize, c=self.z_statistic,
                                                   vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker=1,
                                                   zorder=3, transform=self.datacrs, linewidth=0.0, alpha=None)
             # create 2D numpy array of plotted station coordinates
-            self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds], self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
+            self.map_points_coordinates = np.vstack((self.read_instance.datareader.station_longitudes[self.active_map_valid_station_inds], self.read_instance.datareader.station_latitudes[self.active_map_valid_station_inds])).T
 
             # create colour normalisation instance
             colour_norm = matplotlib.colors.Normalize(vmin=self.z_vmin, vmax=self.z_vmax)
@@ -397,7 +397,7 @@ class MPLCanvas(FigureCanvas):
         # update map title
         if len(self.relative_selected_station_inds) == 1:
             self.map_ax.set_title('%s Selected' % (
-                self.read_instance.station_references[self.relative_selected_station_inds][0]), fontsize=8.5, pad=3)
+                self.read_instance.datareader.station_references[self.relative_selected_station_inds][0]), fontsize=8.5, pad=3)
         else:
             self.map_ax.set_title('%s Stations Selected of %s Available' % (len(
                 self.relative_selected_station_inds), len(self.active_map_valid_station_inds)), fontsize=8.5, pad=3)
@@ -762,10 +762,10 @@ class MPLCanvas(FigureCanvas):
                                 zorder=self.read_instance.plotting_params[data_label]['zorder'])
 
         # set axes labels
-        if self.read_instance.measurement_units == 'unitless':
-            self.ts_ax.set_ylabel('{}'.format(self.read_instance.measurement_units), fontsize=8.0)
+        if self.read_instance.datareader.measurement_units == 'unitless':
+            self.ts_ax.set_ylabel('{}'.format(self.read_instance.datareader.measurement_units), fontsize=8.0)
         else:
-            self.ts_ax.set_ylabel('{} ({})'.format(self.read_instance.parameter_dictionary[self.read_instance.active_species]['axis_label'],self.read_instance.measurement_units), fontsize=8.0)
+            self.ts_ax.set_ylabel('{} ({})'.format(self.read_instance.parameter_dictionary[self.read_instance.active_species]['axis_label'],self.read_instance.datareader.measurement_units), fontsize=8.0)
 
         # plot grid
         self.ts_ax.grid(color='lightgrey', alpha=0.8)
@@ -931,11 +931,11 @@ class MPLCanvas(FigureCanvas):
         # plot title (with units)
         # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
         if 'hourly' in self.read_instance.active_resolution:
-            self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
+            self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.datareader.measurement_units,
                                            fontsize=8.0, loc='left')
         # otherwise, plot the units on the monthly aggregation axis
         else:
-            self.violin_months_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
+            self.violin_months_ax.set_title('Temporal Distributions (%s)' % self.read_instance.datareader.measurement_units,
                                             fontsize=8.0, loc='left')
 
         # as are re-plotting on violin plot axes, reset the navigation toolbar stack
@@ -991,7 +991,7 @@ class MPLCanvas(FigureCanvas):
         else:
             stats_dict = self.bstats_dict[selected_stat]
             if selected_stat != 'Data %':
-                title_units = ' (%s)' % self.read_instance.measurement_units
+                title_units = ' (%s)' % self.read_instance.datareader.measurement_units
             else:
                 title_units = ''
             plot_title = 'Experiment %s bias%s' % (stats_dict['label'], title_units)
@@ -1112,34 +1112,34 @@ class MPLCanvas(FigureCanvas):
         if len(self.relative_selected_station_inds) == 1:
 
             # get station reference of selected station
-            selected_station_reference = self.read_instance.station_references[self.relative_selected_station_inds][0]
+            selected_station_reference = self.read_instance.datareader.station_references[self.relative_selected_station_inds][0]
 
             if self.read_instance.reading_nonghost:
                 str_to_plot += "%s   " % (selected_station_reference)
                 str_to_plot += "Latitude: {:.4f}   ".format(
-                    self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_latitudes[self.relative_selected_station_inds][0])
                 str_to_plot += "Longitude: {:.4f}\n".format(
-                    self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_longitudes[self.relative_selected_station_inds][0])
 
             else:
                 # add station reference, latitude, longitude, measurement altitude, GSFC coastline proximity,
                 # GPW population density and NOAA-DMSP-OLS nighttime stable lights
                 str_to_plot += "%s   " % (selected_station_reference)
                 str_to_plot += "Latitude: {:.4f}   ".format(
-                    self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_latitudes[self.relative_selected_station_inds][0])
                 str_to_plot += "Longitude: {:.4f}\n".format(
-                    self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_longitudes[self.relative_selected_station_inds][0])
                 str_to_plot += "Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['measurement_altitude'][
+                    self.read_instance.datareader.metadata_in_memory['measurement_altitude'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "To Coast: {:.2f}km\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                    self.read_instance.datareader.metadata_in_memory['GSFC_coastline_proximity'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GHSL_population_density'][
+                    self.read_instance.datareader.metadata_in_memory['GHSL_population_density'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                    self.read_instance.datareader.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
                         self.relative_selected_station_inds].astype(np.float32)))
 
                 #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
@@ -1153,7 +1153,7 @@ class MPLCanvas(FigureCanvas):
                 for meta_var in metadata_vars_to_plot:
 
                     #gather all selected station metadata for current meta variable
-                    all_current_meta = self.read_instance.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
+                    all_current_meta = self.read_instance.datareader.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
 
                     #get counts of all unique metadata elements for selected station
                     unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
@@ -1183,25 +1183,25 @@ class MPLCanvas(FigureCanvas):
             else:
                 # TODO looks like this variable is not used
                 # get station references of all selected stations
-                selected_station_references = self.read_instance.station_references[self.relative_selected_station_inds]
+                selected_station_references = self.read_instance.datareader.station_references[self.relative_selected_station_inds]
 
                 # add N stations selected, in N countries
                 str_to_plot += "%s Stations Selected\n" % (len(self.relative_selected_station_inds))
                 # add median measurement altitude
                 str_to_plot += "Median Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['measurement_altitude'][
+                    self.read_instance.datareader.metadata_in_memory['measurement_altitude'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median GSFC coastline proximity
                 str_to_plot += "Median To Coast: {:.2f}km\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                    self.read_instance.datareader.metadata_in_memory['GSFC_coastline_proximity'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median GPW population density
                 str_to_plot += "Median Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GHSL_population_density'][
+                    self.read_instance.datareader.metadata_in_memory['GHSL_population_density'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median NOAA-DMSP-OLS nighttime lights
                 str_to_plot += "Median Nighttime Lights: {:.1f}\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                    self.read_instance.datareader.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
                         self.relative_selected_station_inds].astype(np.float32)))
 
                 # get percentage of element occurrences across selected stations, for certain metadata variables
@@ -1214,7 +1214,7 @@ class MPLCanvas(FigureCanvas):
                 for meta_var in metadata_vars_get_pc:
 
                     # gather all selected station metadata for current meta variable
-                    all_current_meta = self.read_instance.metadata_in_memory[meta_var][
+                    all_current_meta = self.read_instance.datareader.metadata_in_memory[meta_var][
                         self.relative_selected_station_inds].flatten().astype(np.str)
 
                     # get counts of all unique metadata elements across selected stations
@@ -1277,7 +1277,7 @@ class MPLCanvas(FigureCanvas):
             stats_dict = self.bstats_dict[z_statistic_name]
             # set label units for statistic
             if z_statistic_name != 'Data %':
-                label_units = ' ({})'.format(self.read_instance.measurement_units)
+                label_units = ' ({})'.format(self.read_instance.datareader.measurement_units)
             else:
                 label_units = ''
         # if not a basic statistic, it must be an experiment bias statistic
