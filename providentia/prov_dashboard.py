@@ -2,8 +2,6 @@
 from .configuration import ProvConfiguration
 from .configuration import parse_path
 from .config import split_options
-from .reading import read_netcdf_data
-from .reading import read_netcdf_nonghost
 from .reading import get_yearmonths_to_read
 from .prov_canvas import MPLCanvas
 from .toolbar import NavigationToolbar
@@ -16,10 +14,7 @@ from .prov_dashboard_aux import set_formatting
 from .prov_read import DataReader
 
 import copy
-import bisect
 import datetime
-import gc
-import multiprocessing
 import os
 import os.path
 import json
@@ -29,10 +24,8 @@ from functools import partial
 from collections import OrderedDict
 
 from PyQt5 import QtCore, QtWidgets, QtGui
-from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from dateutil.relativedelta import relativedelta
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -638,7 +631,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.relevant_yearmonths = None
 
             # set initial station references to be empty list
-            self.station_references = []
+            self.datareader.station_references = []
 
             # Gather all observational data
             # create nested dictionary storing all observational species
@@ -809,111 +802,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
 
-    # def get_valid_obs_files_in_date_range(self):
-    #     """Define function that iterates through observational dictionary tree
-    #     and returns a dictionary of available data in the selected date
-    #     range"""
-    #
-    #     # create dictionary to store available observational data
-    #     self.available_observation_data = {}
-    #
-    #     # check if start/end date are valid values, if not, return with no valid obs. files
-    #     selected_start_date = self.le_start_date.text()
-    #     selected_end_date = self.le_end_date.text()
-    #     if (self.valid_date(selected_start_date)) & (self.valid_date(selected_end_date)):
-    #         self.date_range_has_changed = True
-    #         self.selected_start_date = int(selected_start_date)
-    #         self.selected_end_date = int(selected_end_date)
-    #         self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6] + '01')
-    #     else:
-    #         return
-    #
-    #     # check end date is > start date, if not, return with no valid obs. files
-    #     if self.selected_start_date >= self.selected_end_date:
-    #         return
-    #
-    #     # check start date and end date are both within if valid date range (19000101 - 20500101),
-    #     # if not, return with no valid obs. files
-    #     if (self.selected_start_date < 19000101) or (self.selected_end_date < 19000101) or (
-    #             self.selected_start_date >= 20500101) or (self.selected_end_date >= 20500101):
-    #         return
-    #
-    #     # iterate through networks
-    #     for network in list(self.all_observation_data.keys()):
-    #         # iterate through resolutions
-    #         for resolution in list(self.all_observation_data[network].keys()):
-    #             # iterate through matrices
-    #             for matrix in list(self.all_observation_data[network][resolution].keys()):
-    #                 # iterate through species
-    #                 for species in list(self.all_observation_data[network][resolution][matrix].keys()):
-    #                     # get all file yearmonths associated with species
-    #                     species_file_yearmonths = self.all_observation_data[network][resolution][matrix][species]
-    #                     # get file yearmonths within date range
-    #                     valid_species_files_yearmonths = [ym for ym in species_file_yearmonths if
-    #                                                       (ym >= self.selected_start_date_firstdayofmonth) & (
-    #                                                                   ym < self.selected_end_date)]
-    #                     if len(valid_species_files_yearmonths) > 0:
-    #                         # if network not in dictionary yet, add it
-    #                         if network not in list(self.available_observation_data.keys()):
-    #                             self.available_observation_data[network] = {}
-    #                         # if resolution not in dictionary yet, add it
-    #                         if resolution not in list(self.available_observation_data[network].keys()):
-    #                             self.available_observation_data[network][resolution] = {}
-    #                         # if matrix not in dictionary yet, add it
-    #                         if matrix not in list(self.available_observation_data[network][resolution].keys()):
-    #                             self.available_observation_data[network][resolution][matrix] = {}
-    #                         # add species with associated list of file start yearmonths
-    #                         self.available_observation_data[network][resolution][matrix][
-    #                             species] = valid_species_files_yearmonths
-
-    # def get_valid_experiment_files_in_date_range(self):
-    #     """Define function which gathers available experiment
-    #     data for selected network/resolution/species.
-    #     A dictionary is created storing available experiment-grid
-    #     names associated with valid files in set date range.
-    #     """
-    #
-    #     # create dictionary to store available experiment information
-    #     self.available_experiment_data = {}
-    #
-    #     # get all different experiment names
-    #     available_experiments = os.listdir('%s/%s' % (self.exp_root, self.ghost_version))
-    #
-    #     # iterate through available experiments
-    #     for experiment in available_experiments:
-    #
-    #         # test first if interpolated directory exists before trying to get files from it
-    #         # if it does not exit, continue
-    #         if not os.path.exists(
-    #                 '%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version, experiment,
-    #                                        self.selected_resolution, self.selected_species,
-    #                                        self.selected_network)):
-    #             continue
-    #         else:
-    #             # get all experiment netCDF files by experiment/grid/selected
-    #             # resolution/selected species/selected network
-    #             network_files = os.listdir(
-    #                 '%s/%s/%s/%s/%s/%s' % (self.exp_root, self.ghost_version,
-    #                                        experiment, self.selected_resolution,
-    #                                        self.selected_species, self.selected_network))
-    #             # get start YYYYMM yearmonths of data files
-    #             network_files_yearmonths = [int(f.split('_')[-1][:6] + '01') for f in network_files]
-    #             # limit data files to just those within date range
-    #             valid_network_files_yearmonths = \
-    #                 [ym for ym in network_files_yearmonths if (ym >= self.selected_start_date_firstdayofmonth) &
-    #                  (ym < self.selected_end_date)]
-    #
-    #             # if have some valid data files for experiment, add experiment key
-    #             # (with associated yearmonths) to dictionary
-    #             if len(valid_network_files_yearmonths) > 0:
-    #                 self.available_experiment_data['%s' % (experiment)] = valid_network_files_yearmonths
-    #
-    #     # get list of available experiment-grid names
-    #     self.experiments_menu['checkboxes']['labels'] = np.array(
-    #         sorted(list(self.available_experiment_data.keys())))
-    #     self.experiments_menu['checkboxes']['map_vars'] = copy.deepcopy(
-    #         self.experiments_menu['checkboxes']['labels'])
-
     def config_bar_params_change_handler(self, changed_param):
         """Define function which handles interactive updates of combo box fields"""
 
@@ -948,27 +836,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # if we're reading nonghost files, then disable fields again
             self.datareader.check_for_ghost()
-
-    # def check_for_ghost(self):
-    #     """ It checks whether the selected network comes from GHOST or not.
-    #     In case of non-ghost, it disables ghost-related fields"""
-    #
-    #     # if we're reading nonghost files, then disable fields
-    #     if '*' in self.cb_network.currentText():
-    #         self.disable_ghost_buttons()
-    #         self.reading_nonghost = True
-    #     else:
-    #         self.reading_nonghost = False
-    #         self.enable_ghost_buttons()
-    #
-    # def valid_date(self, date_text):
-    #     """define function that determines if a date string is in the correct format"""
-    #
-    #     try:
-    #         datetime.datetime.strptime(date_text, '%Y%m%d')
-    #         return True
-    #     except:
-    #         return False
 
     def handle_data_selection_update(self):
         """Define function which handles update of data selection
@@ -1110,26 +977,31 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             else:
                 # if station references array has changed then as cutting/appending to
                 # existing data need to rearrange existing data arrays accordingly
-                if not np.array_equal(self.previous_station_references, self.station_references):
+                if not np.array_equal(self.datareader.previous_station_references, self.datareader.station_references):
                     # get indices of stations in previous station references array in current station references array
-                    old_station_inds = np.where(np.in1d(self.previous_station_references, self.station_references))[0]
+                    old_station_inds = np.where(np.in1d(self.datareader.previous_station_references,
+                                                        self.datareader.station_references))[0]
                     # get indices of stations in current station references array
                     # that were in previous station references array
-                    new_station_inds = np.where(np.in1d(self.station_references, self.previous_station_references))[0]
+                    new_station_inds = np.where(np.in1d(self.datareader.station_references,
+                                                        self.datareader.previous_station_references))[0]
 
-                    new_metadata_array = np.full((len(self.station_references), len(self.previous_relevant_yearmonths)),
+                    new_metadata_array = np.full((len(self.datareader.station_references),
+                                                  len(self.previous_relevant_yearmonths)),
                                                  np.NaN, dtype=self.metadata_dtype)
-                    new_metadata_array[new_station_inds, :] = self.metadata_in_memory[old_station_inds, :]
-                    self.metadata_in_memory = new_metadata_array
+                    new_metadata_array[new_station_inds, :] = self.datareader.metadata_in_memory[old_station_inds, :]
+                    self.datareader.metadata_in_memory = new_metadata_array
 
                     # iterate through all keys in data in memory dictionary
                     for data_label in list(self.data_in_memory.keys()):
                         # create new data array in shape of current station references array
                         if data_label == 'observations':
-                            new_data_array = np.full((len(self.station_references), len(self.previous_time_array)),
+                            new_data_array = np.full((len(self.datareader.station_references),
+                                                      len(self.previous_time_array)),
                                                      np.NaN, dtype=self.data_dtype)
                         else:
-                            new_data_array = np.full((len(self.station_references), len(self.previous_time_array)),
+                            new_data_array = np.full((len(self.datareader.station_references),
+                                                      len(self.previous_time_array)),
                                                      np.NaN, dtype=self.data_dtype[:1])
                         # put the old data into new array in the correct positions
                         new_data_array[new_station_inds, :] = self.data_in_memory[data_label][old_station_inds, :]
@@ -1172,9 +1044,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
                 # do metadata array cut
                 if metadata_left_edge_ind == metadata_right_edge_ind:
-                    self.metadata_in_memory = self.metadata_in_memory[:, [metadata_left_edge_ind]]
+                    self.datareader.metadata_in_memory = self.datareader.metadata_in_memory[:, [metadata_left_edge_ind]]
                 else:
-                    self.metadata_in_memory = self.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
+                    self.datareader.metadata_in_memory = self.datareader.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
 
                 # iterate through all keys in data in memory dictionary and
                 # cut edges of the associated arrays appropriately
@@ -1196,9 +1068,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
                 self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
-                self.metadata_in_memory = np.concatenate((np.full(
-                    (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
-                                                          self.metadata_in_memory), axis=1)
+                self.datareader.metadata_in_memory = np.concatenate((np.full(
+                    (len(self.datareader.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
+                                                          self.datareader.metadata_in_memory), axis=1)
 
                 # iterate through all keys in data in memory dictionary and
                 # insert read data on left edge of the associated arrays
@@ -1206,12 +1078,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     # add space on left edge to insert new read data
                     if data_label == 'observations':
                         self.data_in_memory[data_label] = np.concatenate((np.full(
-                            (len(self.station_references), n_new_left_data_inds), np.NaN, dtype=self.data_dtype),
-                                                                          self.data_in_memory[data_label]), axis=1)
+                            (len(self.datareader.station_references), n_new_left_data_inds), np.NaN,
+                            dtype=self.data_dtype), self.data_in_memory[data_label]), axis=1)
                     else:
                         self.data_in_memory[data_label] = np.concatenate((np.full(
-                            (len(self.station_references), n_new_left_data_inds), np.NaN, dtype=self.data_dtype[:1]),
-                                                                          self.data_in_memory[data_label]), axis=1)
+                            (len(self.datareader.station_references), n_new_left_data_inds), np.NaN,
+                            dtype=self.data_dtype[:1]), self.data_in_memory[data_label]), axis=1)
                     # self.read_data(data_label, self.active_start_date, self.previous_active_start_date)
                     self.datareader.read_data(data_label, self.active_start_date, self.previous_active_start_date)
 
@@ -1230,18 +1102,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
                 self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
-                self.metadata_in_memory = np.concatenate((self.metadata_in_memory, np.full(
-                    (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
+                self.datareader.metadata_in_memory = np.concatenate((self.datareader.metadata_in_memory, np.full(
+                    (len(self.datareader.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
 
                 # iterate through all keys in data in memory dictionary and
                 # insert read data on right edge of the associated arrays
                 for data_label in list(self.data_in_memory.keys()):
                     if data_label == 'observations':
                         self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full(
-                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype)), axis=1)
+                            (len(self.datareader.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype)), axis=1)
                     else:
                         self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full(
-                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype[:1])),
+                            (len(self.datareader.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype[:1])),
                                                                          axis=1)
                     # self.read_data(data_label, self.previous_active_end_date, self.active_end_date)
                     self.datareader.read_data(data_label, self.previous_active_end_date, self.active_end_date)
@@ -1335,7 +1207,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         if self.block_MPL_canvas_updates:
             return
 
-        #set mouse cursor to hourglass
+        # set mouse cursor to hourglass
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # set rep fields to empty lists and initialize again
@@ -1379,288 +1251,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 
-    # def read_setup(self):
-    #     """Function that setups key variables for new read of
-    #     observational/experiment data a time array and arrays
-    #     of unique station references/longitudes/latitudes are created.
-    #     """
-    #
-    #     # force garbage collection (to avoid memory issues)
-    #     gc.collect()
-    #
-    #     # set current time array, as previous time array
-    #     self.previous_time_array = self.time_array
-    #     # set current station references, as previous station references
-    #     self.previous_station_references = self.station_references
-    #     # set current relevant yearmonths, as previous relevant yearmonths
-    #     self.previous_relevant_yearmonths = self.relevant_yearmonths
-    #
-    #     # get N time chunks between desired start date and end date to set time array
-    #     if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
-    #         self.active_frequency_code = 'H'
-    #     elif (self.active_resolution == '3hourly') or (self.active_resolution == '3hourly_instantaneous'):
-    #         self.active_frequency_code = '3H'
-    #     elif (self.active_resolution == '6hourly') or (self.active_resolution == '6hourly_instantaneous'):
-    #         self.active_frequency_code = '6H'
-    #     elif self.active_resolution == 'daily':
-    #         self.active_frequency_code = 'D'
-    #     elif self.active_resolution == 'monthly':
-    #         self.active_frequency_code = 'MS'
-    #     str_active_start_date = str(self.active_start_date)
-    #     str_active_end_date = str(self.active_end_date)
-    #     self.time_array = pd.date_range(start=datetime.datetime(int(str_active_start_date[:4]),
-    #                                                             int(str_active_start_date[4:6]),
-    #                                                             int(str_active_start_date[6:8])),
-    #                                     end=datetime.datetime(int(str_active_end_date[:4]),
-    #                                                           int(str_active_end_date[4:6]),
-    #                                                           int(str_active_end_date[6:8])),
-    #                                     freq=self.active_frequency_code)[:-1]
-    #
-    #     if not self.reading_nonghost:
-    #         # get all relevant observational files
-    #         file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
-    #                                             self.active_network, self.ghost_version,
-    #                                             self.active_resolution, self.active_species, self.active_species)
-    #     else:
-    #         # get files from nonghost path
-    #         file_root = '%s/%s/%s/%s/%s/%s_' % (self.nonghost_root, self.active_network[1:].lower(),
-    #                                             self.selected_matrix, self.active_resolution, self.active_species,
-    #                                             self.active_species)
-    #
-    #     self.relevant_yearmonths = np.sort([yyyymm for yyyymm in
-    #                                        self.available_observation_data[self.active_network][self.active_resolution][
-    #                                            self.active_matrix][self.active_species]])
-    #     relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.relevant_yearmonths])
-    #     self.N_inds_per_month = np.array([np.count_nonzero(np.all(
-    #         [self.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d'),
-    #          self.time_array < datetime.datetime.strptime(str(self.relevant_yearmonths[month_ii + 1]), '%Y%m%d')],
-    #         axis=0)) if month_ii != (len(self.relevant_yearmonths) - 1) else np.count_nonzero(
-    #         self.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d')) for month_ii, start_yyyymm in
-    #                                       enumerate(self.relevant_yearmonths)])
-    #
-    #     self.station_references = []
-    #     self.station_longitudes = []
-    #     self.station_latitudes = []
-    #     if not self.reading_nonghost:
-    #         for relevant_file in relevant_files:
-    #             ncdf_root = Dataset(relevant_file)
-    #             self.station_references = np.append(self.station_references, ncdf_root['station_reference'][:])
-    #             self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
-    #             self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
-    #             ncdf_root.close()
-    #         self.station_references, station_unique_indices = np.unique(self.station_references, return_index=True)
-    #         self.station_longitudes = self.station_longitudes[station_unique_indices]
-    #         self.station_latitudes = self.station_latitudes[station_unique_indices]
-    #     else:
-    #         # first, try to take the data files and handle in case of daily files
-    #         if os.path.exists(relevant_files[0]):
-    #             ncdf_root = Dataset(relevant_files[0])
-    #         else:
-    #             relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm in self.relevant_yearmonths])
-    #             ncdf_root = Dataset(relevant_files[0])
-    #         self.station_references = np.array(
-    #             [st_name.tostring().decode('ascii').replace('\x00', '') for st_name in ncdf_root['station_name'][:]],
-    #             dtype=np.str)
-    #         # get staion refs
-    #         if "latitude" in ncdf_root.variables:
-    #             self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
-    #             self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
-    #         else:
-    #             self.station_longitudes = np.append(self.station_longitudes, ncdf_root['lon'][:])
-    #             self.station_latitudes = np.append(self.station_latitudes, ncdf_root['lat'][:])
-    #         ncdf_root.close()
-    #
-    #     # update measurement units for species (take standard units from parameter dictionary)
-    #     self.measurement_units = self.parameter_dictionary[self.active_species]['standard_units']
-    #
-    #     # set data variables to read (dependent on active data resolution)
-    #     if not self.reading_nonghost:
-    #         if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
-    #             self.data_vars_to_read = [self.active_species, 'hourly_native_representativity_percent',
-    #                                       'daily_native_representativity_percent',
-    #                                       'monthly_native_representativity_percent',
-    #                                       'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
-    #                                       'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-    #                                       'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-    #                                       'season_code', 'time']
-    #         elif (self.active_resolution == '3hourly') or \
-    #                 (self.active_resolution == '6hourly') or (self.active_resolution == '3hourly_instantaneous') or \
-    #                 (self.active_resolution == '6hourly_instantaneous'):
-    #              self.data_vars_to_read = [self.active_species, 'daily_native_representativity_percent',
-    #                                       'monthly_native_representativity_percent',
-    #                                       'annual_native_representativity_percent',
-    #                                       'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-    #                                       'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-    #                                       'season_code', 'time']
-    #         elif self.active_resolution == 'daily':
-    #             self.data_vars_to_read = [self.active_species, 'daily_native_representativity_percent',
-    #                                       'monthly_native_representativity_percent',
-    #                                       'annual_native_representativity_percent',
-    #                                       'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-    #                                       'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code', 'time']
-    #         elif self.active_resolution == 'monthly':
-    #             self.data_vars_to_read = [self.active_species, 'monthly_native_representativity_percent',
-    #                                       'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
-    #                                       'annual_native_max_gap_percent', 'season_code', 'time']
-    #     else:
-    #         self.data_vars_to_read = [self.active_species]
-    #
-    #     # set data dtype
-    #     self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
-
-    # def get_yearmonths_to_read(self, yearmonths, start_date_to_read, end_date_to_read):
-    #     """Function that returns the yearmonths of the files needed to be read.
-    #        This is done by limiting a list of relevant yearmonths by a start/end date
-    #     """
-    #
-    #     first_valid_file_ind = bisect.bisect_right(yearmonths, int(start_date_to_read))
-    #     if first_valid_file_ind != 0:
-    #         first_valid_file_ind = first_valid_file_ind - 1
-    #     last_valid_file_ind = bisect.bisect_left(yearmonths, int(end_date_to_read))
-    #     if first_valid_file_ind == last_valid_file_ind:
-    #         return [yearmonths[first_valid_file_ind]]
-    #     else:
-    #         return yearmonths[first_valid_file_ind:last_valid_file_ind]
-
-    # def read_data(self, data_label, start_date_to_read, end_date_to_read):
-    #     """Function that handles reading of observational/experiment data"""
-    #
-    #     # force garbage collection (to avoid memory issues)
-    #     gc.collect()
-    #
-    #     # set process_type variable to self (for access by parallel read function)
-    #     # also get relevant file start dates
-    #     if data_label == 'observations':
-    #         self.process_type = 'observations'
-    #         if not self.reading_nonghost:
-    #             file_root = '%s/%s/%s/%s/%s/%s_' % (self.obs_root,
-    #                                                 self.active_network, self.ghost_version,
-    #                                                 self.active_resolution, self.active_species, self.active_species)
-    #             relevant_file_start_dates = \
-    #                 sorted(self.available_observation_data[self.active_network]
-    #                        [self.active_resolution][self.active_matrix][self.active_species])
-    #         else:
-    #             # get files from nonghost path
-    #             file_root = '%s/%s/%s/%s/%s/%s_' % (self.nonghost_root, self.active_network[1:].lower(),
-    #                                                 self.selected_matrix, self.active_resolution, self.active_species,
-    #                                                 self.active_species)
-    #             relevant_file_start_dates = \
-    #                 sorted(self.available_observation_data[self.active_network]
-    #                        [self.active_resolution][self.active_matrix][self.active_species])
-    #
-    #     else:
-    #         self.process_type = 'experiment'
-    #         file_root = \
-    #             '%s/%s/%s/%s/%s/%s/%s_' % (self.exp_root, self.ghost_version, data_label,
-    #                                        self.active_resolution, self.active_species, self.active_network,
-    #                                        self.active_species)
-    #
-    #         relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
-    #
-    #     # get data files in required date range to read, taking care not to re-read what has already been read
-    #     yearmonths_to_read = get_yearmonths_to_read(relevant_file_start_dates, start_date_to_read, end_date_to_read)
-    #     relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in yearmonths_to_read]
-    #
-    #     if not os.path.exists(relevant_files[0]):
-    #         relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm in self.relevant_yearmonths])
-    #
-    #     # check if data label in data in memory dictionary
-    #     if data_label not in list(self.data_in_memory.keys()):
-    #         # if not create empty array (filled with NaNs) to store species data and place it in the dictionary
-    #
-    #         if self.process_type == 'observations':
-    #             self.plotting_params['observations'] = {}
-    #             if not self.reading_nonghost:
-    #                 self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
-    #                                                       np.NaN, dtype=self.data_dtype)
-    #             else:
-    #                 self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
-    #                                                       np.NaN, dtype=self.data_dtype[:1])
-    #             self.metadata_in_memory = np.full((len(self.station_references), len(self.relevant_yearmonths)),
-    #                                               np.NaN, dtype=self.metadata_dtype)
-    #             if self.reading_nonghost:
-    #                 tmp_ncdf = Dataset(relevant_files[0])
-    #                 # create separate structure of nonghost metadata
-    #                 nonghost_mdata_dtype = [('station_name', np.object), ('latitude', np.float),
-    #                                         ('longitude', np.float), ('altitude', np.float)]
-    #                 if "station_code" in tmp_ncdf.variables:
-    #                     nonghost_mdata_dtype.append(('station_reference', np.object))
-    #                 self.nonghost_metadata = np.full((len(self.station_references)),
-    #                                                  np.NaN, dtype=nonghost_mdata_dtype)
-    #
-    #         # if process_type is experiment, get experiment specific grid edges from
-    #         # first relevant file, and save to data in memory dictionary
-    #         if self.process_type == 'experiment':
-    #             self.data_in_memory[data_label] = np.full((len(self.station_references), len(self.time_array)),
-    #                                                       np.NaN, dtype=self.data_dtype[:1])
-    #             self.plotting_params[data_label] = {}
-    #             exp_nc_root = Dataset(relevant_files[0])
-    #             self.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
-    #             self.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
-    #             exp_nc_root.close()
-    #
-    #     # iterate and read species data in all relevant netCDF files (either in serial/parallel)
-    #
-    #     # read serially
-    #     if self.read_type == 'serial':
-    #
-    #         # iterate through relevant netCDF files
-    #         for relevant_file in relevant_files:
-    #             # create argument tuple of function
-    #             tuple_arguments = relevant_file, self.time_array, self.station_references, \
-    #                               self.active_species, self.process_type,\
-    #                               self.active_qa, self.active_flags, \
-    #                               self.data_dtype, self.data_vars_to_read, \
-    #                               self.metadata_dtype, self.metadata_vars_to_read
-    #             # read file
-    #             file_data, time_indices, full_array_station_indices = read_netcdf_data(tuple_arguments)
-    #             # place read data into big array as appropriate
-    #             self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis, :],
-    #                                                     time_indices[:, np.newaxis]] = file_data
-    #
-    #     # read in parallel
-    #     elif self.read_type == 'parallel':
-    #
-    #         # setup pool of N workers on N CPUs
-    #         pool = multiprocessing.Pool(self.n_cpus)
-    #
-    #         # read netCDF files in parallel
-    #         if not self.reading_nonghost:
-    #             tuple_arguments = [(file_name, self.time_array, self.station_references, self.active_species,
-    #                                 self.process_type, self.active_qa, self.active_flags,
-    #                                 self.data_dtype, self.data_vars_to_read,
-    #                                 self.metadata_dtype, self.metadata_vars_to_read) for
-    #                                file_name in relevant_files]
-    #             all_file_data = pool.map(read_netcdf_data, tuple_arguments)
-    #         else:
-    #             tuple_arguments = [
-    #                 (file_name, self.time_array, self.station_references, self.active_species, self.process_type) for
-    #                 file_name in relevant_files]
-    #             all_file_data = pool.map(read_netcdf_nonghost, tuple_arguments)
-    #
-    #         # will not submit more files to pool, so close access to it
-    #         pool.close()
-    #         # wait for worker processes to terminate before continuing
-    #         pool.join()
-    #
-    #         # iterate through read file data and place data into data array as appropriate
-    #         for file_data_ii, file_data in enumerate(all_file_data):
-    #             try:
-    #                 # some file_data might be none, in case the file did not exist
-    #                 self.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = \
-    #                     file_data[0]
-    #             except Exception as e:
-    #                 continue
-    #             if self.process_type == 'observations':
-    #                 if not self.reading_nonghost:
-    #                     self.metadata_in_memory[file_data[2][:, np.newaxis],
-    #                                             self.metadata_inds_to_fill[file_data_ii]] = file_data[3]
-    #                 else:
-    #                     self.nonghost_metadata[file_data[2][:, np.newaxis]] = file_data[3]
-
     def update_metadata_fields(self):
-
-        """update the metadata menu object with metadata associated with newly read data
+        """Update the metadata menu object with metadata associated with newly read data
            for non-numeric metadata gets all the unique fields per metadata variable,
            and sets the available fields as such, and for numeric gets the minimum and maximum
            boundaries of each metadata variable. 
@@ -1672,7 +1264,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # iterate through metadata variables
         for meta_var in self.metadata_vars_to_read:
 
-            meta_var_field = self.metadata_in_memory[meta_var]
+            meta_var_field = self.datareader.metadata_in_memory[meta_var]
 
             # get metadata variable type/data type
             metadata_type = self.standard_metadata[meta_var]['metadata_type']
@@ -1742,10 +1334,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     self.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
 
     def update_representativity_fields(self):
-
-        '''update the data representativity menu -> 1D list of rangebox values
+        """Update the data representativity menu -> 1D list of rangebox values
            dependent on the temporal resolution, some fields will appear or not
-        '''
+        """
 
         # get previous set labels
         previous_labels = copy.deepcopy(self.representativity_menu['rangeboxes']['labels'])
@@ -1798,10 +1389,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     previous_labels.index(label)]
 
     def update_period_fields(self):
-
-        '''update the data period menu -> list of checkboxes
+        """Update the data period menu -> list of checkboxes
            dependent on the temporal resolution, some fields will appear or not
-        '''
+        """
 
         # hourly temporal resolution?
         if 'hourly' in self.active_resolution:
@@ -1811,7 +1401,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         elif self.active_resolution == 'daily':
             self.period_menu['checkboxes']['labels'] = ['Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
 
-            #drop selected fields from higher temporal resolutions
+            # drop selected fields from higher temporal resolutions
             labels_to_remove = ['Daytime', 'Nighttime']
             for label in labels_to_remove:
                 if label in self.period_menu['checkboxes']['keep_selected']:
@@ -1823,41 +1413,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         elif self.active_resolution == 'monthly':
             self.period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
 
-            #drop selected fields from higher temporal resolutions
+            # drop selected fields from higher temporal resolutions
             labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend']
             for label in labels_to_remove:
                 if label in self.period_menu['checkboxes']['keep_selected']:
                     self.period_menu['checkboxes']['keep_selected'].remove(label)
                 if label in self.period_menu['checkboxes']['remove_selected']:
                     self.period_menu['checkboxes']['remove_selected'].remove(label)
-
-    # def update_plotting_parameters(self):
-    #     """Function that updates plotting parameters (colour
-    #     and zorder) for each selected data array
-    #     """
-    #
-    #     # assign a colour/zorder to all selected data arrays
-    #
-    #     # define observations colour to be 'black'
-    #     self.plotting_params['observations']['colour'] = 'black'
-    #     # define zorder of observations to be 5
-    #     self.plotting_params['observations']['zorder'] = 5
-    #
-    #     # generate a list of RGB tuples for number of experiments there are
-    #     sns.reset_orig()
-    #     clrs = sns.color_palette('husl', n_colors=len(list(self.data_in_memory.keys()))-1)
-    #
-    #     # iterate through sorted experiment names, assigning each experiment a new RGB colour tuple, and zorder
-    #     experiment_ind = 1
-    #     for experiment in sorted(list(self.data_in_memory.keys())):
-    #         if experiment != 'observations':
-    #             # define colour for experiment
-    #             self.plotting_params[experiment]['colour'] = clrs[experiment_ind-1]
-    #             # define zorder for experiment (obs zorder + experiment_ind)
-    #             self.plotting_params[experiment]['zorder'] = \
-    #                 self.plotting_params['observations']['zorder'] + experiment_ind
-    #             # update count of experiments
-    #             experiment_ind += 1
 
     def load_conf(self, section=None, fpath=None):
         """ Load existing configurations from file. """
