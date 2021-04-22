@@ -998,11 +998,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         if data_label == 'observations':
                             new_data_array = np.full((len(self.station_references),
                                                       len(self.previous_time_array)),
-                                                     np.NaN, dtype=self.data_dtype)
+                                                     np.NaN, dtype=self.datareader.data_dtype)
                         else:
                             new_data_array = np.full((len(self.station_references),
                                                       len(self.previous_time_array)),
-                                                     np.NaN, dtype=self.data_dtype[:1])
+                                                     np.NaN, dtype=self.datareader.data_dtype[:1])
                         # put the old data into new array in the correct positions
                         new_data_array[new_station_inds, :] = self.data_in_memory[data_label][old_station_inds, :]
                         # overwrite data array with reshaped version
@@ -1079,11 +1079,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     if data_label == 'observations':
                         self.data_in_memory[data_label] = np.concatenate((np.full(
                             (len(self.station_references), n_new_left_data_inds), np.NaN,
-                            dtype=self.data_dtype), self.data_in_memory[data_label]), axis=1)
+                            dtype=self.datareader.data_dtype), self.data_in_memory[data_label]), axis=1)
                     else:
                         self.data_in_memory[data_label] = np.concatenate((np.full(
                             (len(self.station_references), n_new_left_data_inds), np.NaN,
-                            dtype=self.data_dtype[:1]), self.data_in_memory[data_label]), axis=1)
+                            dtype=self.datareader.data_dtype[:1]), self.data_in_memory[data_label]), axis=1)
                     # self.read_data(data_label, self.active_start_date, self.previous_active_start_date)
                     self.datareader.read_data(data_label, self.active_start_date, self.previous_active_start_date)
 
@@ -1110,10 +1110,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 for data_label in list(self.data_in_memory.keys()):
                     if data_label == 'observations':
                         self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full(
-                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype)), axis=1)
+                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype)), axis=1)
                     else:
                         self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full(
-                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype[:1])),
+                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype[:1])),
                                                                          axis=1)
                     # self.read_data(data_label, self.previous_active_end_date, self.active_end_date)
                     self.datareader.read_data(data_label, self.previous_active_end_date, self.active_end_date)
