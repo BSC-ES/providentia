@@ -397,7 +397,7 @@ class MPLCanvas(FigureCanvas):
         # update map title
         if len(self.relative_selected_station_inds) == 1:
             self.map_ax.set_title('%s Selected' % (
-                self.read_instance.datareader.station_references[self.relative_selected_station_inds][0]), fontsize=8.5, pad=3)
+                self.read_instance.station_references[self.relative_selected_station_inds][0]), fontsize=8.5, pad=3)
         else:
             self.map_ax.set_title('%s Stations Selected of %s Available' % (len(
                 self.relative_selected_station_inds), len(self.active_map_valid_station_inds)), fontsize=8.5, pad=3)
@@ -1112,7 +1112,7 @@ class MPLCanvas(FigureCanvas):
         if len(self.relative_selected_station_inds) == 1:
 
             # get station reference of selected station
-            selected_station_reference = self.read_instance.datareader.station_references[self.relative_selected_station_inds][0]
+            selected_station_reference = self.read_instance.station_references[self.relative_selected_station_inds][0]
 
             if self.read_instance.reading_nonghost:
                 str_to_plot += "%s   " % (selected_station_reference)
@@ -1183,7 +1183,7 @@ class MPLCanvas(FigureCanvas):
             else:
                 # TODO looks like this variable is not used
                 # get station references of all selected stations
-                selected_station_references = self.read_instance.datareader.station_references[self.relative_selected_station_inds]
+                selected_station_references = self.read_instance.station_references[self.relative_selected_station_inds]
 
                 # add N stations selected, in N countries
                 str_to_plot += "%s Stations Selected\n" % (len(self.relative_selected_station_inds))
