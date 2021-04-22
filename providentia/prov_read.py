@@ -54,7 +54,7 @@ class DataReader:
         try:
             datetime.datetime.strptime(date_text, '%Y%m%d')
             return True
-        except TypeError:
+        except Exception as e:
             return False
 
     def read_setup(self):
