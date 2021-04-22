@@ -631,7 +631,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.relevant_yearmonths = None
 
             # set initial station references to be empty list
-            self.datareader.station_references = []
+            self.station_references = []
 
             # Gather all observational data
             # create nested dictionary storing all observational species
@@ -769,7 +769,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.selected_species = self.cb_species.currentText()
 
         # update available experiment data dictionary
-        # self.get_valid_experiment_files_in_date_range()
+        self.datareader.get_valid_experiment_files_in_date_range()
         self.datareader.get_valid_obs_files_in_date_range()
         # update selected indices for experiments -- keeping previously selected experiments if available
         # set selected indices as previously selected indices in current available list of experiments
@@ -977,16 +977,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             else:
                 # if station references array has changed then as cutting/appending to
                 # existing data need to rearrange existing data arrays accordingly
-                if not np.array_equal(self.datareader.previous_station_references, self.datareader.station_references):
+                if not np.array_equal(self.previous_station_references, self.station_references):
                     # get indices of stations in previous station references array in current station references array
-                    old_station_inds = np.where(np.in1d(self.datareader.previous_station_references,
-                                                        self.datareader.station_references))[0]
+                    old_station_inds = np.where(np.in1d(self.previous_station_references,
+                                                        self.station_references))[0]
                     # get indices of stations in current station references array
                     # that were in previous station references array
-                    new_station_inds = np.where(np.in1d(self.datareader.station_references,
-                                                        self.datareader.previous_station_references))[0]
+                    new_station_inds = np.where(np.in1d(self.station_references,
+                                                        self.previous_station_references))[0]
 
-                    new_metadata_array = np.full((len(self.datareader.station_references),
+                    new_metadata_array = np.full((len(self.station_references),
                                                   len(self.previous_relevant_yearmonths)),
                                                  np.NaN, dtype=self.metadata_dtype)
                     new_metadata_array[new_station_inds, :] = self.datareader.metadata_in_memory[old_station_inds, :]
@@ -996,11 +996,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     for data_label in list(self.data_in_memory.keys()):
                         # create new data array in shape of current station references array
                         if data_label == 'observations':
-                            new_data_array = np.full((len(self.datareader.station_references),
+                            new_data_array = np.full((len(self.station_references),
                                                       len(self.previous_time_array)),
                                                      np.NaN, dtype=self.data_dtype)
                         else:
-                            new_data_array = np.full((len(self.datareader.station_references),
+                            new_data_array = np.full((len(self.station_references),
                                                       len(self.previous_time_array)),
                                                      np.NaN, dtype=self.data_dtype[:1])
                         # put the old data into new array in the correct positions
@@ -1069,7 +1069,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
                 self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
                 self.datareader.metadata_in_memory = np.concatenate((np.full(
-                    (len(self.datareader.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
+                    (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
                                                           self.datareader.metadata_in_memory), axis=1)
 
                 # iterate through all keys in data in memory dictionary and
@@ -1078,11 +1078,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     # add space on left edge to insert new read data
                     if data_label == 'observations':
                         self.data_in_memory[data_label] = np.concatenate((np.full(
-                            (len(self.datareader.station_references), n_new_left_data_inds), np.NaN,
+                            (len(self.station_references), n_new_left_data_inds), np.NaN,
                             dtype=self.data_dtype), self.data_in_memory[data_label]), axis=1)
                     else:
                         self.data_in_memory[data_label] = np.concatenate((np.full(
-                            (len(self.datareader.station_references), n_new_left_data_inds), np.NaN,
+                            (len(self.station_references), n_new_left_data_inds), np.NaN,
                             dtype=self.data_dtype[:1]), self.data_in_memory[data_label]), axis=1)
                     # self.read_data(data_label, self.active_start_date, self.previous_active_start_date)
                     self.datareader.read_data(data_label, self.active_start_date, self.previous_active_start_date)
@@ -1103,17 +1103,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
                 self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
                 self.datareader.metadata_in_memory = np.concatenate((self.datareader.metadata_in_memory, np.full(
-                    (len(self.datareader.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
+                    (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
 
                 # iterate through all keys in data in memory dictionary and
                 # insert read data on right edge of the associated arrays
                 for data_label in list(self.data_in_memory.keys()):
                     if data_label == 'observations':
                         self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full(
-                            (len(self.datareader.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype)), axis=1)
+                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype)), axis=1)
                     else:
                         self.data_in_memory[data_label] = np.concatenate((self.data_in_memory[data_label], np.full(
-                            (len(self.datareader.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype[:1])),
+                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.data_dtype[:1])),
                                                                          axis=1)
                     # self.read_data(data_label, self.previous_active_end_date, self.active_end_date)
                     self.datareader.read_data(data_label, self.previous_active_end_date, self.active_end_date)
