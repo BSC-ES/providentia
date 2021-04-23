@@ -4,6 +4,8 @@ import copy
 import numpy as np
 import pandas as pd
 
+from PyQt5 import QtWidgets
+
 
 class DataFilter:
     """
@@ -213,6 +215,9 @@ class DataFilter:
     def filter_by_metadata(self):
         """Filters data by selected metadata"""
 
+        # validate fields before filtering
+        self.validate_values()
+
         # iterate through all metadata
         for meta_var in self.read_instance.metadata_vars_to_read:
             metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
@@ -240,10 +245,11 @@ class DataFilter:
             # handle numeric metadata
             else:
                 meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
-                # if current lower > than the minimum extent, then filter out
-                # data with metadata < current lower value (if this is numeric)
                 current_lower = np.float32(
                     self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
+                current_upper = np.float32(
+                    self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
+
                 # if current lower value is non-NaN, then filter out data with metadata < current lower value
                 if not pd.isnull(current_lower):
                     lower_default = np.float32(
@@ -255,8 +261,6 @@ class DataFilter:
                             invalid_below] = np.NaN
                 # if current upper < than the maximum extent, then filter out
                 # data with metadata > current upper value (if this is numeric)
-                current_upper = np.float32(
-                    self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
                 # if current upper value is non-NaN, then filter out data with metadata > current upper value
                 if not pd.isnull(current_upper):
                     upper_default = np.float32(
@@ -266,6 +270,28 @@ class DataFilter:
                                                   self.read_instance.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                             invalid_above] = np.NaN
+
+    def validate_values(self):
+        """Validates that field inserted by user is float"""
+
+        # iterate through all metadata
+        for meta_var in self.read_instance.metadata_vars_to_read:
+            metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
+            metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
+
+            if metadata_data_type != np.object:
+                meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
+                try:
+                    np.float32(self.read_instance.metadata_menu[metadata_type][
+                                   'rangeboxes']['current_lower'][meta_var_index])
+                    np.float32(self.read_instance.metadata_menu[metadata_type][
+                                   'rangeboxes']['current_upper'][meta_var_index])
+                except ValueError as e:
+                    # TODO: this cannot be here when we work with offline
+                    QtWidgets.QMessageBox.critical(self.read_instance, "Error in metadata fields",
+                                                   "The field of '{}' should be numeric, \n{}"
+                                                   .format(meta_var, str(e)),
+                                                   QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
 
     def colocate_data(self):
         """Define function which colocates observational and experiment data"""
