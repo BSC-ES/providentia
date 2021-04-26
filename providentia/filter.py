@@ -216,7 +216,8 @@ class DataFilter:
         """Filters data by selected metadata"""
 
         # validate fields before filtering
-        self.validate_values()
+        if not self.validate_values():
+            return
 
         # iterate through all metadata
         for meta_var in self.read_instance.metadata_vars_to_read:
@@ -286,12 +287,14 @@ class DataFilter:
                                    'rangeboxes']['current_lower'][meta_var_index])
                     np.float32(self.read_instance.metadata_menu[metadata_type][
                                    'rangeboxes']['current_upper'][meta_var_index])
+                    return True
                 except ValueError as e:
                     # TODO: this cannot be here when we work with offline
                     QtWidgets.QMessageBox.critical(self.read_instance, "Error in metadata fields",
                                                    "The field of '{}' should be numeric, \n{}"
                                                    .format(meta_var, str(e)),
                                                    QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+                    return False
 
     def colocate_data(self):
         """Define function which colocates observational and experiment data"""
