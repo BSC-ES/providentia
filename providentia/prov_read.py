@@ -77,17 +77,17 @@ class DataReader:
         # get N time chunks between desired start date and end date to set time array
         if (self.read_instance.active_resolution == 'hourly') or \
                 (self.read_instance.active_resolution == 'hourly_instantaneous'):
-            active_frequency_code = 'H'
+            self.active_frequency_code = 'H'
         elif (self.read_instance.active_resolution == '3hourly') or \
                 (self.read_instance.active_resolution == '3hourly_instantaneous'):
-            active_frequency_code = '3H'
+            self.active_frequency_code = '3H'
         elif (self.read_instance.active_resolution == '6hourly') or \
                 (self.read_instance.active_resolution == '6hourly_instantaneous'):
-            active_frequency_code = '6H'
+            self.active_frequency_code = '6H'
         elif self.read_instance.active_resolution == 'daily':
-            active_frequency_code = 'D'
+            self.active_frequency_code = 'D'
         elif self.read_instance.active_resolution == 'monthly':
-            active_frequency_code = 'MS'
+            self.active_frequency_code = 'MS'
         str_active_start_date = str(self.read_instance.active_start_date)
         str_active_end_date = str(self.read_instance.active_end_date)
         self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str_active_start_date[:4]),
@@ -96,7 +96,7 @@ class DataReader:
                                         end=datetime.datetime(int(str_active_end_date[:4]),
                                                               int(str_active_end_date[4:6]),
                                                               int(str_active_end_date[6:8])),
-                                        freq=active_frequency_code)[:-1]
+                                        freq=self.active_frequency_code)[:-1]
 
         if not self.read_instance.reading_nonghost:
             # get all relevant observational files
