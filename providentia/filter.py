@@ -187,7 +187,7 @@ class DataFilter:
                                                        [24 * i for i in range(1, int(np.ceil(len(period_inds) / 24)))])
                 # monthly variable?
                 elif period == 'monthly':
-                    period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.N_inds_per_month))
+                    period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.datareader.N_inds_per_month))
                 # whole record variable?
                 else:
                     period_inds_split = [period_inds]
@@ -224,8 +224,8 @@ class DataFilter:
                 current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
                 if len(current_keep) > 0:
                     invalid_keep = np.repeat(
-                        np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_keep, invert=True),
-                        self.read_instance.N_inds_per_month, axis=1)
+                        np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_keep, invert=True),
+                        self.read_instance.datareader.N_inds_per_month, axis=1)
                     self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                         invalid_keep] = np.NaN
                 # if any of the remove checkboxes have been selected, filter out data by these selected fields
@@ -233,8 +233,8 @@ class DataFilter:
                     'remove_selected']
                 if len(current_remove) > 0:
                     invalid_remove = np.repeat(
-                        np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_remove),
-                        self.read_instance.N_inds_per_month, axis=1)
+                        np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_remove),
+                        self.read_instance.datareader.N_inds_per_month, axis=1)
                     self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                         invalid_remove] = np.NaN
             # handle numeric metadata
@@ -249,8 +249,8 @@ class DataFilter:
                     lower_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
                     if current_lower > lower_default:
-                        invalid_below = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] < current_lower,
-                                                  self.read_instance.N_inds_per_month, axis=1)
+                        invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] < current_lower,
+                                                  self.read_instance.datareader.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                             invalid_below] = np.NaN
                 # if current upper < than the maximum extent, then filter out
@@ -262,8 +262,8 @@ class DataFilter:
                     upper_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
                     if current_upper < upper_default:
-                        invalid_above = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] > current_upper,
-                                                  self.read_instance.N_inds_per_month, axis=1)
+                        invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] > current_upper,
+                                                  self.read_instance.datareader.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                             invalid_above] = np.NaN
 

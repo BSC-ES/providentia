@@ -13,7 +13,7 @@ def export_data_npz(mpl_canvas, fname):
     if mpl_canvas.read_instance.reading_nonghost:
         mdata = mpl_canvas.read_instance.nonghost_metadata
     else:
-        mdata = mpl_canvas.read_instance.metadata_in_memory
+        mdata = mpl_canvas.read_instance.datareader.metadata_in_memory
 
     np.savez(fname, data=mpl_canvas.read_instance.data_in_memory_filtered,
              metadata=mdata,
@@ -38,7 +38,7 @@ def export_netcdf(mpl_canvas, fname):
     relevant_yearmonths = instance.relevant_yearmonths
 
     # frequency for pandas
-    fq = instance.active_frequency_code
+    fq = instance.datareader.active_frequency_code
 
     # create time array in selected resolution between start and end date
     pd_time = pd.date_range(start=start, end=end, freq=fq)[:-1]
@@ -54,7 +54,7 @@ def export_netcdf(mpl_canvas, fname):
 
     metadata_keys = instance.metadata_vars_to_read
     data_arr = instance.data_in_memory_filtered['observations'][speci]
-    metadata_arr = instance.metadata_in_memory
+    metadata_arr = instance.datareader.metadata_in_memory
     expids = instance.experiments_menu['checkboxes']['keep_selected']
     exp_to_write = []
     # change some vars if we're treating nonghost
