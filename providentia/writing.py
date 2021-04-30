@@ -11,7 +11,7 @@ def export_data_npz(mpl_canvas, fname):
     """Function that writes out current data in memory to .npy file"""
 
     if mpl_canvas.read_instance.reading_nonghost:
-        mdata = mpl_canvas.read_instance.nonghost_metadata
+        mdata = mpl_canvas.read_instance.datareader.nonghost_metadata
     else:
         mdata = mpl_canvas.read_instance.datareader.metadata_in_memory
 
@@ -61,7 +61,7 @@ def export_netcdf(mpl_canvas, fname):
     if instance.reading_nonghost:
         network = instance.active_network.replace("*", "")
         # metadata_keys = ['station_name', 'latitude', 'longitude', 'altitude']
-        metadata_arr = instance.nonghost_metadata
+        metadata_arr = instance.datareader.nonghost_metadata
         metadata_keys = list(metadata_arr.dtype.names)
 
     # start file
