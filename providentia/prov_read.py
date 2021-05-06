@@ -36,6 +36,10 @@ class DataReader:
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         self.update_plotting_parameters()
 
+    def reset_data_in_memory(self):
+        self.data_in_memory = {}
+        self.plotting_params = {}
+
     def check_for_ghost(self):
         """ It checks whether the selected network comes from GHOST or not.
         In case of non-ghost, it disables ghost-related fields"""
@@ -243,17 +247,17 @@ class DataReader:
                                      in self.read_instance.relevant_yearmonths])
 
         # check if data label in data in memory dictionary
-        if data_label not in list(self.read_instance.data_in_memory.keys()):
+        if data_label not in list(self.data_in_memory.keys()):
             # if not create empty array (filled with NaNs) to store species data and place it in the dictionary
 
             if process_type == 'observations':
-                self.read_instance.plotting_params['observations'] = {}
+                self.plotting_params['observations'] = {}
                 if not self.read_instance.reading_nonghost:
-                    self.read_instance.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
+                    self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
                                                                              len(self.read_instance.time_array)),
                                                                             np.NaN, dtype=self.data_dtype)
                 else:
-                    self.read_instance.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
+                    self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
                                                                              len(self.read_instance.time_array)),
                                                                             np.NaN, dtype=self.data_dtype[:1])
                 self.metadata_in_memory = np.full((len(self.read_instance.station_references),
@@ -272,14 +276,14 @@ class DataReader:
             # if process_type is experiment, get experiment specific grid edges from
             # first relevant file, and save to data in memory dictionary
             if process_type == 'experiment':
-                self.read_instance.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
+                self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
                                                                          len(self.read_instance.time_array)),
                                                                         np.NaN, dtype=self.data_dtype[:1])
-                self.read_instance.plotting_params[data_label] = {}
+                self.plotting_params[data_label] = {}
                 exp_nc_root = Dataset(relevant_files[0])
-                self.read_instance.plotting_params[data_label]['grid_edge_longitude'] = \
+                self.plotting_params[data_label]['grid_edge_longitude'] = \
                     exp_nc_root['grid_edge_longitude'][:]
-                self.read_instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
+                self.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
                 exp_nc_root.close()
 
         # iterate and read species data in all relevant netCDF files (either in serial/parallel)
@@ -298,7 +302,7 @@ class DataReader:
                 # read file
                 file_data, time_indices, full_array_station_indices = read_netcdf_data(tuple_arguments)
                 # place read data into big array as appropriate
-                self.read_instance.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis, :],
+                self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis, :],
                                                                       time_indices[:, np.newaxis]] = file_data
 
         # read in parallel
@@ -331,7 +335,7 @@ class DataReader:
             for file_data_ii, file_data in enumerate(all_file_data):
                 try:
                     # some file_data might be none, in case the file did not exist
-                    self.read_instance.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = \
+                    self.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = \
                         file_data[0]
                 except Exception as e:
                     continue
@@ -455,22 +459,22 @@ class DataReader:
         # assign a colour/zorder to all selected data arrays
 
         # define observations colour to be 'black'
-        self.read_instance.plotting_params['observations']['colour'] = 'black'
+        self.plotting_params['observations']['colour'] = 'black'
         # define zorder of observations to be 5
-        self.read_instance.plotting_params['observations']['zorder'] = 5
+        self.plotting_params['observations']['zorder'] = 5
 
         # generate a list of RGB tuples for number of experiments there are
         sns.reset_orig()
-        clrs = sns.color_palette('husl', n_colors=len(list(self.read_instance.data_in_memory.keys()))-1)
+        clrs = sns.color_palette('husl', n_colors=len(list(self.data_in_memory.keys()))-1)
 
         # iterate through sorted experiment names, assigning each experiment a new RGB colour tuple, and zorder
         experiment_ind = 1
-        for experiment in sorted(list(self.read_instance.data_in_memory.keys())):
+        for experiment in sorted(list(self.data_in_memory.keys())):
             if experiment != 'observations':
                 # define colour for experiment
-                self.read_instance.plotting_params[experiment]['colour'] = clrs[experiment_ind-1]
+                self.plotting_params[experiment]['colour'] = clrs[experiment_ind-1]
                 # define zorder for experiment (obs zorder + experiment_ind)
-                self.read_instance.plotting_params[experiment]['zorder'] = \
-                    self.read_instance.plotting_params['observations']['zorder'] + experiment_ind
+                self.plotting_params[experiment]['zorder'] = \
+                    self.plotting_params['observations']['zorder'] + experiment_ind
                 # update count of experiments
                 experiment_ind += 1
