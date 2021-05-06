@@ -237,7 +237,7 @@ class MPLCanvas(FigureCanvas):
         methods and selected minimum data availability %"""
 
         # return if nothing has been loaded yet
-        if not hasattr(self.read_instance, 'data_in_memory'):
+        if not hasattr(self.read_instance.datareader, 'data_in_memory'):
             return
 
         check_state = self.read_instance.ch_colocate.checkState()
@@ -495,17 +495,17 @@ class MPLCanvas(FigureCanvas):
         self.grid_edge_polygons = []
 
         # iterate through read experiments and plot grid domain edges on map
-        for experiment in sorted(list(self.read_instance.data_in_memory.keys())):
+        for experiment in sorted(list(self.read_instance.datareader.data_in_memory.keys())):
             if experiment != 'observations':
                 # compute map projection coordinates for each pair of
                 # longitude/latitude experiment grid edge coordinates
-                # exp_x,exp_y = self.bm(self.read_instance.data_in_memory[experiment]['grid_edge_longitude'],
-                # self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])
+                # exp_x,exp_y = self.bm(self.read_instance.datareader.data_in_memory[experiment]['grid_edge_longitude'],
+                # self.read_instance.datareader.data_in_memory[experiment]['grid_edge_latitude'])
                 # create matplotlib polygon object from experiment grid edge map projection coordinates
                 grid_edge_outline_poly = \
-                    Polygon(np.vstack((self.read_instance.plotting_params[experiment]['grid_edge_longitude'],
-                                       self.read_instance.plotting_params[experiment]['grid_edge_latitude'])).T,
-                                       edgecolor=self.read_instance.plotting_params[experiment]['colour'],
+                    Polygon(np.vstack((self.read_instance.datareader.plotting_params[experiment]['grid_edge_longitude'],
+                                       self.read_instance.datareader.plotting_params[experiment]['grid_edge_latitude'])).T,
+                                       edgecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
                                        linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
                 # plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
@@ -517,14 +517,14 @@ class MPLCanvas(FigureCanvas):
         # create legend elements
         # add observations element
         legend_elements = [Line2D([0], [0], marker='o', color='white',
-                                  markerfacecolor=self.read_instance.plotting_params['observations']['colour'],
+                                  markerfacecolor=self.read_instance.datareader.plotting_params['observations']['colour'],
                                   markersize=self.read_instance.legend_markersize, label='observations')]
         # add element for each experiment
-        for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.data_in_memory.keys()))):
+        for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.datareader.data_in_memory.keys()))):
             if experiment != 'observations':
                 # add experiment element
                 legend_elements.append(Line2D([0], [0], marker='o', color='white',
-                                              markerfacecolor=self.read_instance.plotting_params[experiment]['colour'],
+                                              markerfacecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
                                               markersize=self.read_instance.legend_markersize, label=experiment))
 
         # plot legend
@@ -555,7 +555,7 @@ class MPLCanvas(FigureCanvas):
             # experiment arrays
             else:
                 # get intersect between selected station indices and valid available indices for experiment data array
-                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.plotting_params[data_label]['valid_station_inds'])
+                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
                 # get data for valid selected stations
                 data_array = \
                     self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][valid_selected_station_indices,:]
@@ -755,11 +755,11 @@ class MPLCanvas(FigureCanvas):
             # plot time series data
             self.data_array_ts = \
                 self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
-                                color=self.read_instance.plotting_params[data_label]['colour'],
+                                color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                                 marker='o', markeredgecolor=None, mew=0,
                                 markersize=self.read_instance.time_series_markersize,
                                 linestyle='None',
-                                zorder=self.read_instance.plotting_params[data_label]['zorder'])
+                                zorder=self.read_instance.datareader.plotting_params[data_label]['zorder'])
 
         # set axes labels
         if self.read_instance.datareader.measurement_units == 'unitless':
@@ -877,8 +877,8 @@ class MPLCanvas(FigureCanvas):
 
                 # update plotted objects with necessary colour, zorder and alpha
                 for patch in violin_plot['bodies']:
-                    patch.set_facecolor(self.read_instance.plotting_params[data_label]['colour'])
-                    patch.set_zorder(self.read_instance.plotting_params[data_label]['zorder'])
+                    patch.set_facecolor(self.read_instance.datareader.plotting_params[data_label]['colour'])
+                    patch.set_zorder(self.read_instance.datareader.plotting_params[data_label]['zorder'])
                     if data_label.split('_')[0] == 'observations':
                         patch.set_alpha(0.7)
                     else:
@@ -899,9 +899,9 @@ class MPLCanvas(FigureCanvas):
                 # overplot time series of medians over boxes in necessary color
 
                 # generate zorder to overplot medians in same order as violin plots are ordered, but on top of them
-                median_zorder = (self.read_instance.plotting_params['observations']['zorder']+len(
+                median_zorder = (self.read_instance.datareader.plotting_params['observations']['zorder']+len(
                     list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys())) - 1) + \
-                                self.read_instance.plotting_params[data_label]['zorder']
+                                self.read_instance.datareader.plotting_params[data_label]['zorder']
 
                 # get xticks (all valid aggregated time indexes) and medians to plot
                 xticks = aggregation_dict[temporal_aggregation_resolution]['xticks']
@@ -912,7 +912,7 @@ class MPLCanvas(FigureCanvas):
                 if len(inds_to_split) == 0:
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks, medians, marker='o',
-                        color=self.read_instance.plotting_params[data_label]['colour'],
+                        color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                         markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                 else:
                     inds_to_split += 1
@@ -920,12 +920,12 @@ class MPLCanvas(FigureCanvas):
                     for end_ind in inds_to_split:
                         aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                             xticks[start_ind:end_ind], medians[start_ind:end_ind],
-                            marker='o', color=self.read_instance.plotting_params[data_label]['colour'],
+                            marker='o', color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                             markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                         start_ind = end_ind
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks[start_ind:], medians[start_ind:], marker='o',
-                        color=self.read_instance.plotting_params[data_label]['colour'],
+                        color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                         markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
 
         # plot title (with units)
@@ -1029,8 +1029,8 @@ class MPLCanvas(FigureCanvas):
                             aggregation_dict[temporal_aggregation_resolution]['xticks'],
                             self.selected_station_data[data_label][temporal_aggregation_resolution]
                             [selected_experiment_bias_stat],
-                            color=self.read_instance.plotting_params[data_label]['colour'],
-                            marker='o', zorder=self.read_instance.plotting_params[data_label]['zorder'],
+                            color=self.read_instance.datareader.plotting_params[data_label]['colour'],
+                            marker='o', zorder=self.read_instance.datareader.plotting_params[data_label]['zorder'],
                             markersize=self.read_instance.temp_agg_expbias_markersize, linewidth=0.5)
 
             # set x axis limits
@@ -1249,10 +1249,10 @@ class MPLCanvas(FigureCanvas):
 
         # get relevant observational array (dependent on colocation)
         if not self.colocate_active:
-            obs_array = self.read_instance.plotting_params['observations']['valid_station_inds']
+            obs_array = self.read_instance.datareader.plotting_params['observations']['valid_station_inds']
         else:
             obs_array = \
-                self.read_instance.plotting_params['observations_colocatedto_experiments']['valid_station_inds']
+                self.read_instance.datareader.plotting_params['observations_colocatedto_experiments']['valid_station_inds']
 
         # before doing anything check if have any valid station data for observations,
         # if not update active map valid station indices to be empty list and return
@@ -1343,12 +1343,12 @@ class MPLCanvas(FigureCanvas):
         # if only have z1, valid map indices are those simply for the z1 array
         if not have_z2:
             self.active_map_valid_station_inds = \
-                self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds']
+                self.read_instance.datareader.plotting_params[z1_array_to_read]['valid_station_inds']
         else:
             # if have z2 array, get intersection of z1 and z2 valid station indices
             self.active_map_valid_station_inds = \
-                np.intersect1d(self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds'],
-                               self.read_instance.plotting_params[z2_array_to_read]['valid_station_inds'])
+                np.intersect1d(self.read_instance.datareader.plotting_params[z1_array_to_read]['valid_station_inds'],
+                               self.read_instance.datareader.plotting_params[z2_array_to_read]['valid_station_inds'])
 
         # update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array(
@@ -1684,7 +1684,7 @@ class MPLCanvas(FigureCanvas):
             elif check_state == QtCore.Qt.Checked:
 
                 # if have only observations loaded into memory, select all plotted stations
-                if len(list(self.read_instance.data_in_memory.keys())) == 1:
+                if len(list(self.read_instance.datareader.data_in_memory.keys())) == 1:
                     self.relative_selected_station_inds = copy.deepcopy(self.active_map_valid_station_inds)
                     self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
                                                                     dtype=np.int)
@@ -1692,10 +1692,10 @@ class MPLCanvas(FigureCanvas):
                 # valid_station_inds, and valid station indices associated with each loaded experiment array)
                 else:
                     intersect_lists = [self.active_map_valid_station_inds]
-                    for data_label in list(self.read_instance.data_in_memory.keys()):
+                    for data_label in list(self.read_instance.datareader.data_in_memory.keys()):
                         if data_label != 'observations':
                             intersect_lists.append(
-                                self.read_instance.plotting_params[data_label]['valid_station_inds'])
+                                self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
                     # get intersect between active map valid station indices and valid station indices
                     # associated with each loaded experiment array --> relative selected station indcies
                     self.relative_selected_station_inds = np.sort(list(set.intersection(*map(set, intersect_lists))))
