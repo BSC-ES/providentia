@@ -28,7 +28,7 @@ class DataFilter:
 
     def reset_data_filter(self):
         """Resets data arrays to be un-filtered"""
-        self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
+        self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.datareader.data_in_memory)
 
     def filter_data_limits(self):
         """Filter out (set to NaN) data which exceed the lower/upper limits"""
@@ -189,7 +189,7 @@ class DataFilter:
                                                        [24 * i for i in range(1, int(np.ceil(len(period_inds) / 24)))])
                 # monthly variable?
                 elif period == 'monthly':
-                    period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.N_inds_per_month))
+                    period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.datareader.N_inds_per_month))
                 # whole record variable?
                 else:
                     period_inds_split = [period_inds]
@@ -230,8 +230,8 @@ class DataFilter:
                 current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
                 if len(current_keep) > 0:
                     invalid_keep = np.repeat(
-                        np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_keep, invert=True),
-                        self.read_instance.N_inds_per_month, axis=1)
+                        np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_keep, invert=True),
+                        self.read_instance.datareader.N_inds_per_month, axis=1)
                     self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                         invalid_keep] = np.NaN
                 # if any of the remove checkboxes have been selected, filter out data by these selected fields
@@ -239,8 +239,8 @@ class DataFilter:
                     'remove_selected']
                 if len(current_remove) > 0:
                     invalid_remove = np.repeat(
-                        np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_remove),
-                        self.read_instance.N_inds_per_month, axis=1)
+                        np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_remove),
+                        self.read_instance.datareader.N_inds_per_month, axis=1)
                     self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                         invalid_remove] = np.NaN
             # handle numeric metadata
@@ -256,8 +256,8 @@ class DataFilter:
                     lower_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
                     if current_lower > lower_default:
-                        invalid_below = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] < current_lower,
-                                                  self.read_instance.N_inds_per_month, axis=1)
+                        invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] < current_lower,
+                                                  self.read_instance.datareader.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                             invalid_below] = np.NaN
                 # if current upper < than the maximum extent, then filter out
@@ -267,8 +267,8 @@ class DataFilter:
                     upper_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
                     if current_upper < upper_default:
-                        invalid_above = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] > current_upper,
-                                                  self.read_instance.N_inds_per_month, axis=1)
+                        invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] > current_upper,
+                                                  self.read_instance.datareader.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
                             invalid_above] = np.NaN
 
@@ -301,7 +301,7 @@ class DataFilter:
 
         # if do not have any experiment data loaded, no colocation is possible,
         # therefore return from function
-        if len(list(self.read_instance.data_in_memory.keys())) == 1:
+        if len(list(self.read_instance.datareader.data_in_memory.keys())) == 1:
             return
         else:
             # otherwise, colocate observational and experiment data, creating new data arrays
@@ -319,7 +319,7 @@ class DataFilter:
             exps_all_nan = np.full(nan_obs.shape, True)
 
             # get name of all experiment labels in memory
-            exp_labels = sorted(list(self.read_instance.data_in_memory.keys()))
+            exp_labels = sorted(list(self.read_instance.datareader.data_in_memory.keys()))
             exp_labels.remove('observations')
 
             # iterate through experiment data arrays in data in memory dictionary
@@ -334,16 +334,16 @@ class DataFilter:
                 obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
                 obs_data[nan_instances] = np.NaN
                 self.read_instance.data_in_memory_filtered['observations_colocatedto_{}'.format(exp_label)] = obs_data
-                self.read_instance.plotting_params['observations_colocatedto_{}'.format(exp_label)] = {
-                    'colour': self.read_instance.plotting_params['observations']['colour'],
-                    'zorder': self.read_instance.plotting_params['observations']['zorder']}
+                self.read_instance.datareader.plotting_params['observations_colocatedto_{}'.format(exp_label)] = {
+                    'colour': self.read_instance.datareader.plotting_params['observations']['colour'],
+                    'zorder': self.read_instance.datareader.plotting_params['observations']['zorder']}
                 # create new experiment array colocated to observations
                 exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label])
                 exp_data[nan_instances] = np.NaN
                 self.read_instance.data_in_memory_filtered['{}_colocatedto_observations'.format(exp_label)] = exp_data
-                self.read_instance.plotting_params['{}_colocatedto_observations'.format(exp_label)] = {
-                    'colour': self.read_instance.plotting_params[exp_label]['colour'],
-                    'zorder': self.read_instance.plotting_params[exp_label]['zorder']}
+                self.read_instance.datareader.plotting_params['{}_colocatedto_observations'.format(exp_label)] = {
+                    'colour': self.read_instance.datareader.plotting_params[exp_label]['colour'],
+                    'zorder': self.read_instance.datareader.plotting_params[exp_label]['zorder']}
                 # update exps_all_nan array, making False all instances where have valid experiment data
                 exps_all_nan = np.all([exps_all_nan, exp_nan_dict[exp_label]], axis=0)
 
@@ -357,17 +357,17 @@ class DataFilter:
                     exp_data[nan_instances] = np.NaN
                     self.read_instance.data_in_memory_filtered[
                         '{}_colocatedto_{}'.format(exp_label, exp_label_2)] = exp_data
-                    self.read_instance.plotting_params['{}_colocatedto_{}'.format(exp_label, exp_label_2)] = {
-                        'colour': self.read_instance.plotting_params[exp_label]['colour'],
-                        'zorder': self.read_instance.plotting_params[exp_label]['zorder']}
+                    self.read_instance.datareader.plotting_params['{}_colocatedto_{}'.format(exp_label, exp_label_2)] = {
+                        'colour': self.read_instance.datareader.plotting_params[exp_label]['colour'],
+                        'zorder': self.read_instance.datareader.plotting_params[exp_label]['zorder']}
                     # create new experiment array for experiment2 colocated to experiment1
                     exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label_2])
                     exp_data[nan_instances] = np.NaN
                     self.read_instance.data_in_memory_filtered[
                         '{}_colocatedto_{}'.format(exp_label_2, exp_label)] = exp_data
-                    self.read_instance.plotting_params['{}_colocatedto_{}'.format(exp_label_2, exp_label)] = {
-                        'colour': self.read_instance.plotting_params[exp_label_2]['colour'],
-                        'zorder': self.read_instance.plotting_params[exp_label_2]['zorder']}
+                    self.read_instance.datareader.plotting_params['{}_colocatedto_{}'.format(exp_label_2, exp_label)] = {
+                        'colour': self.read_instance.datareader.plotting_params[exp_label_2]['colour'],
+                        'zorder': self.read_instance.datareader.plotting_params[exp_label_2]['zorder']}
 
             # create observational data array colocated to be non-NaN whenever
             # there is a valid data in at least 1 experiment
@@ -375,9 +375,9 @@ class DataFilter:
             obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
             obs_data[exps_all_nan] = np.NaN
             self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments'] = obs_data
-            self.read_instance.plotting_params['observations_colocatedto_experiments'] = {
-                'colour': self.read_instance.plotting_params['observations']['colour'],
-                'zorder': self.read_instance.plotting_params['observations']['zorder']}
+            self.read_instance.datareader.plotting_params['observations_colocatedto_experiments'] = {
+                'colour': self.read_instance.datareader.plotting_params['observations']['colour'],
+                'zorder': self.read_instance.datareader.plotting_params['observations']['zorder']}
 
     def get_valid_stations_after_filtering(self):
         # get intersect of indices of stations with >= % minimum data availability percent,
@@ -395,7 +395,7 @@ class DataFilter:
 
                 # get indices of stations with > 1 available measurements
                 # save valid station indices with data array
-                self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
+                self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'] = \
                     np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
 
         # write valid station indices calculated for observations across to associated experimental data arrays
@@ -408,14 +408,14 @@ class DataFilter:
                 # handle colocated experimental arrays
                 if '_colocatedto_' in data_label:
                     exp_name = data_label.split('_colocatedto_')[0]
-                    self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
+                    self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'] = \
                         copy.deepcopy(
-                            self.read_instance.plotting_params['observations_colocatedto_{}'.format(exp_name)][
+                            self.read_instance.datareader.plotting_params['observations_colocatedto_{}'.format(exp_name)][
                                 'valid_station_inds'])
                 # handle non-colocated experimental arrays
                 else:
-                    self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
-                        copy.deepcopy(self.read_instance.plotting_params['observations']['valid_station_inds'])
+                    self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'] = \
+                        copy.deepcopy(self.read_instance.datareader.plotting_params['observations']['valid_station_inds'])
 
         # after subsetting by pre-written associated observational valid stations, get
         # indices of stations with > 1 valid measurements in all experiment data arrays (colocated and non-colocated)
@@ -426,7 +426,7 @@ class DataFilter:
             if data_label.split('_')[0] != 'observations':
                 # get indices of associated observational data array valid stations
                 # (pre-written to experiment data arrays)
-                valid_station_inds = self.read_instance.plotting_params[data_label]['valid_station_inds']
+                valid_station_inds = self.read_instance.datareader.plotting_params[data_label]['valid_station_inds']
                 # get absolute data availability number per station in experiment data array
                 # after subsetting valid observational stations (i.e. number of non-NaN measurements)
                 # update stats object data and call data availability function
@@ -438,4 +438,4 @@ class DataFilter:
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[
                     station_data_availability_number > 1]]
                 # overwrite previous written valid station indices (now at best a subset of those indices)
-                self.read_instance.plotting_params[data_label]['valid_station_inds'] = valid_station_inds
+                self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'] = valid_station_inds
