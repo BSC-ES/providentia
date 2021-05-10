@@ -237,7 +237,7 @@ class MPLCanvas(FigureCanvas):
         methods and selected minimum data availability %"""
 
         # return if nothing has been loaded yet
-        if not hasattr(self.read_instance, 'data_in_memory'):
+        if not hasattr(self.read_instance.datareader, 'data_in_memory'):
             return
 
         check_state = self.read_instance.ch_colocate.checkState()
@@ -355,13 +355,13 @@ class MPLCanvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],
-                                                  self.read_instance.station_latitudes[self.active_map_valid_station_inds],
+            self.map_points = self.map_ax.scatter(self.read_instance.datareader.station_longitudes[self.active_map_valid_station_inds],
+                                                  self.read_instance.datareader.station_latitudes[self.active_map_valid_station_inds],
                                                   s=self.read_instance.unsel_station_markersize, c=self.z_statistic,
                                                   vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker=1,
                                                   zorder=3, transform=self.datacrs, linewidth=0.0, alpha=None)
             # create 2D numpy array of plotted station coordinates
-            self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds], self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
+            self.map_points_coordinates = np.vstack((self.read_instance.datareader.station_longitudes[self.active_map_valid_station_inds], self.read_instance.datareader.station_latitudes[self.active_map_valid_station_inds])).T
 
             # create colour normalisation instance
             colour_norm = matplotlib.colors.Normalize(vmin=self.z_vmin, vmax=self.z_vmax)
@@ -495,17 +495,17 @@ class MPLCanvas(FigureCanvas):
         self.grid_edge_polygons = []
 
         # iterate through read experiments and plot grid domain edges on map
-        for experiment in sorted(list(self.read_instance.data_in_memory.keys())):
+        for experiment in sorted(list(self.read_instance.datareader.data_in_memory.keys())):
             if experiment != 'observations':
                 # compute map projection coordinates for each pair of
                 # longitude/latitude experiment grid edge coordinates
-                # exp_x,exp_y = self.bm(self.read_instance.data_in_memory[experiment]['grid_edge_longitude'],
-                # self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])
+                # exp_x,exp_y = self.bm(self.read_instance.datareader.data_in_memory[experiment]['grid_edge_longitude'],
+                # self.read_instance.datareader.data_in_memory[experiment]['grid_edge_latitude'])
                 # create matplotlib polygon object from experiment grid edge map projection coordinates
                 grid_edge_outline_poly = \
-                    Polygon(np.vstack((self.read_instance.plotting_params[experiment]['grid_edge_longitude'],
-                                       self.read_instance.plotting_params[experiment]['grid_edge_latitude'])).T,
-                                       edgecolor=self.read_instance.plotting_params[experiment]['colour'],
+                    Polygon(np.vstack((self.read_instance.datareader.plotting_params[experiment]['grid_edge_longitude'],
+                                       self.read_instance.datareader.plotting_params[experiment]['grid_edge_latitude'])).T,
+                                       edgecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
                                        linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
                 # plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
@@ -517,14 +517,14 @@ class MPLCanvas(FigureCanvas):
         # create legend elements
         # add observations element
         legend_elements = [Line2D([0], [0], marker='o', color='white',
-                                  markerfacecolor=self.read_instance.plotting_params['observations']['colour'],
+                                  markerfacecolor=self.read_instance.datareader.plotting_params['observations']['colour'],
                                   markersize=self.read_instance.legend_markersize, label='observations')]
         # add element for each experiment
-        for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.data_in_memory.keys()))):
+        for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.datareader.data_in_memory.keys()))):
             if experiment != 'observations':
                 # add experiment element
                 legend_elements.append(Line2D([0], [0], marker='o', color='white',
-                                              markerfacecolor=self.read_instance.plotting_params[experiment]['colour'],
+                                              markerfacecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
                                               markersize=self.read_instance.legend_markersize, label=experiment))
 
         # plot legend
@@ -555,7 +555,7 @@ class MPLCanvas(FigureCanvas):
             # experiment arrays
             else:
                 # get intersect between selected station indices and valid available indices for experiment data array
-                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.plotting_params[data_label]['valid_station_inds'])
+                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
                 # get data for valid selected stations
                 data_array = \
                     self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][valid_selected_station_indices,:]
@@ -755,17 +755,17 @@ class MPLCanvas(FigureCanvas):
             # plot time series data
             self.data_array_ts = \
                 self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
-                                color=self.read_instance.plotting_params[data_label]['colour'],
+                                color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                                 marker='o', markeredgecolor=None, mew=0,
                                 markersize=self.read_instance.time_series_markersize,
                                 linestyle='None',
-                                zorder=self.read_instance.plotting_params[data_label]['zorder'])
+                                zorder=self.read_instance.datareader.plotting_params[data_label]['zorder'])
 
         # set axes labels
-        if self.read_instance.measurement_units == 'unitless':
-            self.ts_ax.set_ylabel('{}'.format(self.read_instance.measurement_units), fontsize=8.0)
+        if self.read_instance.datareader.measurement_units == 'unitless':
+            self.ts_ax.set_ylabel('{}'.format(self.read_instance.datareader.measurement_units), fontsize=8.0)
         else:
-            self.ts_ax.set_ylabel('{} ({})'.format(self.read_instance.parameter_dictionary[self.read_instance.active_species]['axis_label'],self.read_instance.measurement_units), fontsize=8.0)
+            self.ts_ax.set_ylabel('{} ({})'.format(self.read_instance.parameter_dictionary[self.read_instance.active_species]['axis_label'],self.read_instance.datareader.measurement_units), fontsize=8.0)
 
         # plot grid
         self.ts_ax.grid(color='lightgrey', alpha=0.8)
@@ -877,8 +877,8 @@ class MPLCanvas(FigureCanvas):
 
                 # update plotted objects with necessary colour, zorder and alpha
                 for patch in violin_plot['bodies']:
-                    patch.set_facecolor(self.read_instance.plotting_params[data_label]['colour'])
-                    patch.set_zorder(self.read_instance.plotting_params[data_label]['zorder'])
+                    patch.set_facecolor(self.read_instance.datareader.plotting_params[data_label]['colour'])
+                    patch.set_zorder(self.read_instance.datareader.plotting_params[data_label]['zorder'])
                     if data_label.split('_')[0] == 'observations':
                         patch.set_alpha(0.7)
                     else:
@@ -899,9 +899,9 @@ class MPLCanvas(FigureCanvas):
                 # overplot time series of medians over boxes in necessary color
 
                 # generate zorder to overplot medians in same order as violin plots are ordered, but on top of them
-                median_zorder = (self.read_instance.plotting_params['observations']['zorder']+len(
+                median_zorder = (self.read_instance.datareader.plotting_params['observations']['zorder']+len(
                     list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys())) - 1) + \
-                                self.read_instance.plotting_params[data_label]['zorder']
+                                self.read_instance.datareader.plotting_params[data_label]['zorder']
 
                 # get xticks (all valid aggregated time indexes) and medians to plot
                 xticks = aggregation_dict[temporal_aggregation_resolution]['xticks']
@@ -912,7 +912,7 @@ class MPLCanvas(FigureCanvas):
                 if len(inds_to_split) == 0:
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks, medians, marker='o',
-                        color=self.read_instance.plotting_params[data_label]['colour'],
+                        color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                         markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                 else:
                     inds_to_split += 1
@@ -920,22 +920,22 @@ class MPLCanvas(FigureCanvas):
                     for end_ind in inds_to_split:
                         aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                             xticks[start_ind:end_ind], medians[start_ind:end_ind],
-                            marker='o', color=self.read_instance.plotting_params[data_label]['colour'],
+                            marker='o', color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                             markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                         start_ind = end_ind
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks[start_ind:], medians[start_ind:], marker='o',
-                        color=self.read_instance.plotting_params[data_label]['colour'],
+                        color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                         markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
 
         # plot title (with units)
         # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
         if 'hourly' in self.read_instance.active_resolution:
-            self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
+            self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.datareader.measurement_units,
                                            fontsize=8.0, loc='left')
         # otherwise, plot the units on the monthly aggregation axis
         else:
-            self.violin_months_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
+            self.violin_months_ax.set_title('Temporal Distributions (%s)' % self.read_instance.datareader.measurement_units,
                                             fontsize=8.0, loc='left')
 
         # as are re-plotting on violin plot axes, reset the navigation toolbar stack
@@ -991,7 +991,7 @@ class MPLCanvas(FigureCanvas):
         else:
             stats_dict = self.bstats_dict[selected_stat]
             if selected_stat != 'Data %':
-                title_units = ' (%s)' % self.read_instance.measurement_units
+                title_units = ' (%s)' % self.read_instance.datareader.measurement_units
             else:
                 title_units = ''
             plot_title = 'Experiment %s bias%s' % (stats_dict['label'], title_units)
@@ -1029,8 +1029,8 @@ class MPLCanvas(FigureCanvas):
                             aggregation_dict[temporal_aggregation_resolution]['xticks'],
                             self.selected_station_data[data_label][temporal_aggregation_resolution]
                             [selected_experiment_bias_stat],
-                            color=self.read_instance.plotting_params[data_label]['colour'],
-                            marker='o', zorder=self.read_instance.plotting_params[data_label]['zorder'],
+                            color=self.read_instance.datareader.plotting_params[data_label]['colour'],
+                            marker='o', zorder=self.read_instance.datareader.plotting_params[data_label]['zorder'],
                             markersize=self.read_instance.temp_agg_expbias_markersize, linewidth=0.5)
 
             # set x axis limits
@@ -1117,29 +1117,29 @@ class MPLCanvas(FigureCanvas):
             if self.read_instance.reading_nonghost:
                 str_to_plot += "%s   " % (selected_station_reference)
                 str_to_plot += "Latitude: {:.4f}   ".format(
-                    self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_latitudes[self.relative_selected_station_inds][0])
                 str_to_plot += "Longitude: {:.4f}\n".format(
-                    self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_longitudes[self.relative_selected_station_inds][0])
 
             else:
                 # add station reference, latitude, longitude, measurement altitude, GSFC coastline proximity,
                 # GPW population density and NOAA-DMSP-OLS nighttime stable lights
                 str_to_plot += "%s   " % (selected_station_reference)
                 str_to_plot += "Latitude: {:.4f}   ".format(
-                    self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_latitudes[self.relative_selected_station_inds][0])
                 str_to_plot += "Longitude: {:.4f}\n".format(
-                    self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_longitudes[self.relative_selected_station_inds][0])
                 str_to_plot += "Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['measurement_altitude'][
+                    self.read_instance.datareader.metadata_in_memory['measurement_altitude'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "To Coast: {:.2f}km\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                    self.read_instance.datareader.metadata_in_memory['GSFC_coastline_proximity'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GHSL_population_density'][
+                    self.read_instance.datareader.metadata_in_memory['GHSL_population_density'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                    self.read_instance.datareader.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
                         self.relative_selected_station_inds].astype(np.float32)))
 
                 #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
@@ -1153,7 +1153,7 @@ class MPLCanvas(FigureCanvas):
                 for meta_var in metadata_vars_to_plot:
 
                     #gather all selected station metadata for current meta variable
-                    all_current_meta = self.read_instance.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
+                    all_current_meta = self.read_instance.datareader.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
 
                     #get counts of all unique metadata elements for selected station
                     unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
@@ -1189,19 +1189,19 @@ class MPLCanvas(FigureCanvas):
                 str_to_plot += "%s Stations Selected\n" % (len(self.relative_selected_station_inds))
                 # add median measurement altitude
                 str_to_plot += "Median Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['measurement_altitude'][
+                    self.read_instance.datareader.metadata_in_memory['measurement_altitude'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median GSFC coastline proximity
                 str_to_plot += "Median To Coast: {:.2f}km\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                    self.read_instance.datareader.metadata_in_memory['GSFC_coastline_proximity'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median GPW population density
                 str_to_plot += "Median Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GHSL_population_density'][
+                    self.read_instance.datareader.metadata_in_memory['GHSL_population_density'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median NOAA-DMSP-OLS nighttime lights
                 str_to_plot += "Median Nighttime Lights: {:.1f}\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                    self.read_instance.datareader.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
                         self.relative_selected_station_inds].astype(np.float32)))
 
                 # get percentage of element occurrences across selected stations, for certain metadata variables
@@ -1214,7 +1214,7 @@ class MPLCanvas(FigureCanvas):
                 for meta_var in metadata_vars_get_pc:
 
                     # gather all selected station metadata for current meta variable
-                    all_current_meta = self.read_instance.metadata_in_memory[meta_var][
+                    all_current_meta = self.read_instance.datareader.metadata_in_memory[meta_var][
                         self.relative_selected_station_inds].flatten().astype(np.str)
 
                     # get counts of all unique metadata elements across selected stations
@@ -1249,10 +1249,10 @@ class MPLCanvas(FigureCanvas):
 
         # get relevant observational array (dependent on colocation)
         if not self.colocate_active:
-            obs_array = self.read_instance.plotting_params['observations']['valid_station_inds']
+            obs_array = self.read_instance.datareader.plotting_params['observations']['valid_station_inds']
         else:
             obs_array = \
-                self.read_instance.plotting_params['observations_colocatedto_experiments']['valid_station_inds']
+                self.read_instance.datareader.plotting_params['observations_colocatedto_experiments']['valid_station_inds']
 
         # before doing anything check if have any valid station data for observations,
         # if not update active map valid station indices to be empty list and return
@@ -1277,7 +1277,7 @@ class MPLCanvas(FigureCanvas):
             stats_dict = self.bstats_dict[z_statistic_name]
             # set label units for statistic
             if z_statistic_name != 'Data %':
-                label_units = ' ({})'.format(self.read_instance.measurement_units)
+                label_units = ' ({})'.format(self.read_instance.datareader.measurement_units)
             else:
                 label_units = ''
         # if not a basic statistic, it must be an experiment bias statistic
@@ -1343,12 +1343,12 @@ class MPLCanvas(FigureCanvas):
         # if only have z1, valid map indices are those simply for the z1 array
         if not have_z2:
             self.active_map_valid_station_inds = \
-                self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds']
+                self.read_instance.datareader.plotting_params[z1_array_to_read]['valid_station_inds']
         else:
             # if have z2 array, get intersection of z1 and z2 valid station indices
             self.active_map_valid_station_inds = \
-                np.intersect1d(self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds'],
-                               self.read_instance.plotting_params[z2_array_to_read]['valid_station_inds'])
+                np.intersect1d(self.read_instance.datareader.plotting_params[z1_array_to_read]['valid_station_inds'],
+                               self.read_instance.datareader.plotting_params[z2_array_to_read]['valid_station_inds'])
 
         # update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array(
@@ -1684,7 +1684,7 @@ class MPLCanvas(FigureCanvas):
             elif check_state == QtCore.Qt.Checked:
 
                 # if have only observations loaded into memory, select all plotted stations
-                if len(list(self.read_instance.data_in_memory.keys())) == 1:
+                if len(list(self.read_instance.datareader.data_in_memory.keys())) == 1:
                     self.relative_selected_station_inds = copy.deepcopy(self.active_map_valid_station_inds)
                     self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
                                                                     dtype=np.int)
@@ -1692,10 +1692,10 @@ class MPLCanvas(FigureCanvas):
                 # valid_station_inds, and valid station indices associated with each loaded experiment array)
                 else:
                     intersect_lists = [self.active_map_valid_station_inds]
-                    for data_label in list(self.read_instance.data_in_memory.keys()):
+                    for data_label in list(self.read_instance.datareader.data_in_memory.keys()):
                         if data_label != 'observations':
                             intersect_lists.append(
-                                self.read_instance.plotting_params[data_label]['valid_station_inds'])
+                                self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
                     # get intersect between active map valid station indices and valid station indices
                     # associated with each loaded experiment array --> relative selected station indcies
                     self.relative_selected_station_inds = np.sort(list(set.intersection(*map(set, intersect_lists))))
