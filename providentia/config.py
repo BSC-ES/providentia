@@ -60,6 +60,11 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--exp_root",
                                      dest="exp_root",
                                      help="set experiment root data directory")
+            self.parser.add_argument("--offline",
+                                     dest="offline",
+                                     default=False,
+                                     action='store_true',
+                                     help="run Providentia offline")
 #            self.parser.add_argument("--debug",
 #                                dest="debug",
 #                                help="debug (default=False)")
