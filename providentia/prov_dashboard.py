@@ -12,6 +12,7 @@ from .prov_dashboard_aux import PopUpWindow
 from .prov_dashboard_aux import formatting_dict
 from .prov_dashboard_aux import set_formatting
 from .prov_read import DataReader
+from .prov_offline import ProvidentiaOffline
 
 import copy
 import datetime
@@ -80,11 +81,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # initialize DataReader
         self.datareader = DataReader(self)
 
-        self.init_ui()
+        if self.offline:
+            ProvidentiaOffline(self)
+        else:
+            self.init_ui()
 
-        # setup callback events upon resizing/moving of Providentia window
-        self.resized.connect(self.get_geometry)
-        self.move.connect(self.get_geometry)
+            # setup callback events upon resizing/moving of Providentia window
+            self.resized.connect(self.get_geometry)
+            self.move.connect(self.get_geometry)
 
     def init_standards(self):
         """ Read from ghost standards """
@@ -1439,7 +1443,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
     def disable_ghost_buttons(self):
         """Disable button related only to ghost data"""
-        # TODO: add all ghost related fields to a list
         # and set to False in a list-comprehension way
         # change background-color to indicate that it's nonusable
         self.bu_flags.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
@@ -1495,3 +1498,8 @@ def main(**kwargs):
     q_app.setStyle("Fusion")
     ProvidentiaMainWindow(**kwargs)
     sys.exit(q_app.exec_())
+
+# # generate Providentia dashboard
+# def main_offline(**kwargs):
+#     """Main function when running offine reports"""
+#     ProvidentiaMainWindow(**kwargs)
