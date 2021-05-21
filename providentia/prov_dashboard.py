@@ -1498,8 +1498,3 @@ def main(**kwargs):
     q_app.setStyle("Fusion")
     ProvidentiaMainWindow(**kwargs)
     sys.exit(q_app.exec_())
-
-# # generate Providentia dashboard
-# def main_offline(**kwargs):
-#     """Main function when running offine reports"""
-#     ProvidentiaMainWindow(**kwargs)
