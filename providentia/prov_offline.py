@@ -126,6 +126,10 @@ class ProvidentiaOffline(ProvConfiguration):
     def start_pdf(self):
         filename = "test_pdf.pdf"
 
+        # read
+        self.datareader.read_setup(self.selected_resolution, self.start_date, self.end_date,
+                                   self.selected_network, self.selected_species, self.selected_matrix)
+
         # open new PDF file
         with PdfPages(filename) as pdf:
             self.pdf = pdf

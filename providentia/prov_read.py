@@ -31,7 +31,9 @@ class DataReader:
         self.get_valid_experiment_files_in_date_range()
 
         # setup read
-        self.read_setup()
+        self.read_setup(self.read_instance.active_resolution, self.read_instance.active_start_date,
+                        self.read_instance.active_end_date, self.read_instance.active_network,
+                        self.read_instance.active_species, self.read_instance.active_matrix)
 
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         self.update_plotting_parameters()
@@ -61,39 +63,39 @@ class DataReader:
         except Exception as e:
             return False
 
-    def read_setup(self):
-        """Function that setups key variables for new read of
-        observational/experiment data a time array and arrays
-        of unique station references/longitudes/latitudes are created.
+    def read_setup(self, resolution, start_date, end_date, network, species, matrix):
+        """Setup key variables for new read of observational/experiment
+        data a time array and create arrays of unique station
+        references/longitudes/latitudes.
         """
 
         # force garbage collection (to avoid memory issues)
         gc.collect()
-        self.read_instance.reading_nonghost = self.check_for_ghost()
+        self.read_instance.reading_nonghost = False  # TODO: remoe line, was added for testing
+        # series of actions not applicable when --offline
+        if not self.read_instance.offline:
+            self.read_instance.reading_nonghost = self.check_for_ghost()
 
-        # set current time array, as previous time array
-        self.read_instance.previous_time_array = self.read_instance.time_array
-        # set current station references, as previous station references
-        self.read_instance.previous_station_references = self.read_instance.station_references
-        # set current relevant yearmonths, as previous relevant yearmonths
-        self.read_instance.previous_relevant_yearmonths = self.read_instance.relevant_yearmonths
+            # set current time array, as previous time array
+            self.read_instance.previous_time_array = self.read_instance.time_array
+            # set current station references, as previous station references
+            self.read_instance.previous_station_references = self.read_instance.station_references
+            # set current relevant yearmonths, as previous relevant yearmonths
+            self.read_instance.previous_relevant_yearmonths = self.read_instance.relevant_yearmonths
 
         # get N time chunks between desired start date and end date to set time array
-        if (self.read_instance.active_resolution == 'hourly') or \
-                (self.read_instance.active_resolution == 'hourly_instantaneous'):
+        if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
             self.active_frequency_code = 'H'
-        elif (self.read_instance.active_resolution == '3hourly') or \
-                (self.read_instance.active_resolution == '3hourly_instantaneous'):
+        elif (resolution == '3hourly') or (resolution == '3hourly_instantaneous'):
             self.active_frequency_code = '3H'
-        elif (self.read_instance.active_resolution == '6hourly') or \
-                (self.read_instance.active_resolution == '6hourly_instantaneous'):
+        elif (resolution == '6hourly') or (resolution == '6hourly_instantaneous'):
             self.active_frequency_code = '6H'
-        elif self.read_instance.active_resolution == 'daily':
+        elif resolution == 'daily':
             self.active_frequency_code = 'D'
-        elif self.read_instance.active_resolution == 'monthly':
+        elif resolution == 'monthly':
             self.active_frequency_code = 'MS'
-        str_active_start_date = str(self.read_instance.active_start_date)
-        str_active_end_date = str(self.read_instance.active_end_date)
+        str_active_start_date = str(start_date)
+        str_active_end_date = str(end_date)
         self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str_active_start_date[:4]),
                                                                 int(str_active_start_date[4:6]),
                                                                 int(str_active_start_date[6:8])),
@@ -104,22 +106,21 @@ class DataReader:
 
         if not self.read_instance.reading_nonghost:
             # get all relevant observational files
-            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, self.read_instance.active_network,
-                                                self.read_instance.ghost_version, self.read_instance.active_resolution,
-                                                self.read_instance.active_species, self.read_instance.active_species)
+            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
+                                                self.read_instance.ghost_version, resolution,
+                                                species, species)
         else:
             # get files from nonghost path
-            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root,
-                                                self.read_instance.active_network[1:].lower(),
+            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network[1:].lower(),
                                                 self.read_instance.selected_matrix,
-                                                self.read_instance.active_resolution, self.read_instance.active_species,
-                                                self.read_instance.active_species)
+                                                resolution, species, species)
 
         # TODO: fix this madeness with the indices
-        self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[self.read_instance.active_network][self.read_instance.active_resolution][
-                                               self.read_instance.active_matrix][self.read_instance.active_species]])
+        self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[
+            network][resolution][matrix][species]])
 
-        relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.read_instance.relevant_yearmonths])
+        relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc'
+                                 for yyyymm in self.read_instance.relevant_yearmonths])
         self.N_inds_per_month = np.array([np.count_nonzero(np.all(
             [self.read_instance.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d'),
              self.read_instance.time_array < datetime.datetime.strptime(str(self.read_instance.relevant_yearmonths[month_ii + 1]), '%Y%m%d')],
@@ -145,11 +146,12 @@ class DataReader:
             if os.path.exists(relevant_files[0]):
                 ncdf_root = Dataset(relevant_files[0])
             else:
-                relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm in self.read_instance.relevant_yearmonths])
+                relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc'
+                                         for yyyymm in self.read_instance.relevant_yearmonths])
                 ncdf_root = Dataset(relevant_files[0])
             self.read_instance.station_references = np.array(
-                [st_name.tostring().decode('ascii').replace('\x00', '') for st_name in ncdf_root['station_name'][:]],
-                dtype=np.str)
+                [st_name.tostring().decode('ascii').replace('\x00', '')
+                 for st_name in ncdf_root['station_name'][:]], dtype=np.str)
             # get staion refs
             if "latitude" in ncdf_root.variables:
                 self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
@@ -160,39 +162,39 @@ class DataReader:
             ncdf_root.close()
 
         # update measurement units for species (take standard units from parameter dictionary)
-        self.measurement_units = self.read_instance.parameter_dictionary[self.read_instance.active_species]['standard_units']
+        self.measurement_units = self.read_instance.parameter_dictionary[species]['standard_units']
 
         # set data variables to read (dependent on active data resolution)
         if not self.read_instance.reading_nonghost:
-            if (self.read_instance.active_resolution == 'hourly') or (self.read_instance.active_resolution == 'hourly_instantaneous'):
-                self.data_vars_to_read = [self.read_instance.active_species, 'hourly_native_representativity_percent',
+            if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
+                self.data_vars_to_read = [species, 'hourly_native_representativity_percent',
                                           'daily_native_representativity_percent',
                                           'monthly_native_representativity_percent',
                                           'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                           'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
                                           'season_code', 'time']
-            elif (self.read_instance.active_resolution == '3hourly') or \
-                    (self.read_instance.active_resolution == '6hourly') or (self.read_instance.active_resolution == '3hourly_instantaneous') or \
-                    (self.read_instance.active_resolution == '6hourly_instantaneous'):
-                 self.data_vars_to_read = [self.read_instance.active_species, 'daily_native_representativity_percent',
+            elif (resolution == '3hourly') or \
+                    (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
+                    (resolution == '6hourly_instantaneous'):
+                 self.data_vars_to_read = [species, 'daily_native_representativity_percent',
                                           'monthly_native_representativity_percent',
                                           'annual_native_representativity_percent',
                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                           'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
                                           'season_code', 'time']
-            elif self.read_instance.active_resolution == 'daily':
-                self.data_vars_to_read = [self.read_instance.active_species, 'daily_native_representativity_percent',
+            elif resolution == 'daily':
+                self.data_vars_to_read = [species, 'daily_native_representativity_percent',
                                           'monthly_native_representativity_percent',
                                           'annual_native_representativity_percent',
                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                           'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code', 'time']
-            elif self.read_instance.active_resolution == 'monthly':
-                self.data_vars_to_read = [self.read_instance.active_species, 'monthly_native_representativity_percent',
+            elif resolution == 'monthly':
+                self.data_vars_to_read = [species, 'monthly_native_representativity_percent',
                                           'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
                                           'annual_native_max_gap_percent', 'season_code', 'time']
         else:
-            self.data_vars_to_read = [self.read_instance.active_species]
+            self.data_vars_to_read = [species]
 
         # set data dtype
         self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
