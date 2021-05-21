@@ -959,7 +959,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # set new active time array/unique station references/longitudes/latitudes
             # adjust data arrays to account for potential changing number of stations
             # self.read_setup()
-            self.datareader.read_setup()
+            self.datareader.read_setup(self.active_resolution, self.active_start_date,
+                                       self.active_end_date, self.active_network,
+                                       self.active_species, self.active_matrix)
 
             # need to re-read all observations/experiments?
             if read_all:
