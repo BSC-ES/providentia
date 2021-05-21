@@ -15,6 +15,7 @@
 from __future__ import print_function
 from .config import ProvArgumentParser
 from . import prov_dashboard as dashboard
+from . import prov_offline as offline
 
 import sys
 import logging
@@ -54,7 +55,10 @@ class Providentia(object):
             LOG.info(res)
 
             # call dashboard
-            dashboard.main(**res)
+            if args.offline:
+                offline.main_offline(**res)
+            else:
+                dashboard.main(**res)
 
         except Exception as err:
             LOG.error('Unhandled exception on Providentia: %s' % err, exc_info=True)
