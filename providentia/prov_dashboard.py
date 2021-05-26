@@ -705,16 +705,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 esarchive_files = self.get_esarchive_yearmonth(esarchive_files_empty)
                 self.all_observation_data = {**self.all_observation_data, **esarchive_files}
             # create dictionary of observational data inside date range
-            # self.get_valid_obs_files_in_date_range()
-            self.datareader.get_valid_obs_files_in_date_range()
+            self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
+                                                              self.le_end_date.text())
 
             # check which flags to select, depending if we have conf file or no
             self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
 
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
-            # self.get_valid_obs_files_in_date_range()
-            self.datareader.get_valid_obs_files_in_date_range()
+            self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
+                                                              self.le_end_date.text())
 
         # initialise/update fields - maintain previously selected values wherever possible
 
@@ -774,7 +774,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # update available experiment data dictionary
         self.datareader.get_valid_experiment_files_in_date_range()
-        self.datareader.get_valid_obs_files_in_date_range()
+        self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
+                                                          self.le_end_date.text())
         # update selected indices for experiments -- keeping previously selected experiments if available
         # set selected indices as previously selected indices in current available list of experiments
         if self.config_bar_initialisation and hasattr(self, 'experiments'):
@@ -971,10 +972,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 if not self.reading_nonghost:
                     self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
                 # read observations
-                self.datareader.read_data('observations', self.active_start_date, self.active_end_date)
+                self.datareader.read_data('observations', self.active_start_date,
+                                          self.active_end_date, self.active_network,
+                                          self.active_resolution, self.active_species,
+                                          self.active_matrix)
                 # read selected experiments (iterate through)
                 for data_label in self.active_experiment_grids:
-                    self.datareader.read_data(data_label, self.active_start_date, self.active_end_date)
+                    self.datareader.read_data(data_label, self.active_start_date,
+                                              self.active_end_date, self.active_network,
+                                              self.active_resolution, self.active_species,
+                                              self.active_matrix)
                     # if experiment in experiments_to_read list, remove it (as no longer need to read it)
                     if data_label in experiments_to_read:
                         experiments_to_read.remove(data_label)
@@ -1088,7 +1095,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
                             (len(self.station_references), n_new_left_data_inds), np.NaN,
                             dtype=self.datareader.data_dtype[:1]), self.datareader.data_in_memory[data_label]), axis=1)
-                    self.datareader.read_data(data_label, self.active_start_date, self.previous_active_start_date)
+                    self.datareader.read_data(data_label, self.active_start_date, self.previous_active_start_date,
+                                              self.active_network, self.active_resolution,
+                                              self.active_species, self.active_matrix)
 
             # need to read on right edge?
             if read_right:
@@ -1118,8 +1127,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
                             (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype[:1])),
                                                                          axis=1)
-                    # self.read_data(data_label, self.previous_active_end_date, self.active_end_date)
-                    self.datareader.read_data(data_label, self.previous_active_end_date, self.active_end_date)
+                    self.datareader.read_data(data_label, self.previous_active_end_date, self.active_end_date,
+                                              self.active_network, self.active_resolution,
+                                              self.active_species, self.active_matrix)
 
             # update menu object fields
             self.update_metadata_fields()
@@ -1129,8 +1139,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # if have new experiments to read, then read them now
         if len(experiments_to_read) > 0:
             for data_label in experiments_to_read:
-                # self.read_data(data_label, self.active_start_date, self.active_end_date)
-                self.datareader.read_data(data_label, self.active_start_date, self.active_end_date)
+                self.datareader.read_data(data_label, self.active_start_date, self.active_end_date,
+                                          self.active_network, self.active_resolution,
+                                          self.active_species, self.active_matrix)
 
                 # --------------------------------------------------------------------#
         # if species has changed, update default species specific lower/upper limits
