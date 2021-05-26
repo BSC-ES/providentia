@@ -3,11 +3,13 @@ import sys
 import json
 import copy
 
+import numpy as np
 import pandas as pd
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.lines import Line2D
 from matplotlib.backends.backend_pdf import PdfPages
 
 from .prov_read import DataReader
@@ -53,8 +55,56 @@ class ProvidentiaOffline(ProvConfiguration):
             CURRENT_PATH, 'conf/basic_stats_dict.json')))
         self.expbias_dict = json.load(open(os.path.join(
             CURRENT_PATH, 'conf/experiment_bias_stats_dict.json')))
+
+        self.station_subset_names = list('Barcelona')
+
+        self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
+        self.active_qa = self.which_qa()
+        self.active_flags = self.which_flags()
+
+        # get all netCDF monthly files per species
+        species_files = os.listdir(
+            '%s/%s/%s/%s/%s' % (self.obs_root, self.selected_network, self.ghost_version,
+                                self.selected_resolution, self.selected_species))
+
+        # get monthly start date (YYYYMM) of all species files
+        species_files_yearmonths = \
+            [int(f.split('_')[-1][:6] + '01') for f in species_files if f != 'temporary']
+
+        # initialize structure to store all obs
+        self.all_observation_data = {}
+        self.all_observation_data[self.selected_network] = {}
+        self.all_observation_data[self.selected_network][self.selected_resolution] = {}
+        self.all_observation_data[self.selected_network][self.selected_resolution][self.selected_matrix] = {}
+        self.all_observation_data[self.selected_network][
+            self.selected_resolution][self.selected_matrix][self.selected_species] = species_files_yearmonths
+
         # initialize DataReader
         self.datareader = DataReader(self)
+        # read
+        self.datareader.get_valid_obs_files_in_date_range(self.start_date, self.end_date)
+        self.datareader.get_valid_experiment_files_in_date_range()
+
+        self.datareader.read_setup(self.selected_resolution, self.start_date, self.end_date,
+                                   self.selected_network, self.selected_species, self.selected_matrix)
+
+        # create data dictionaries to fill
+        self.datareader.reset_data_in_memory()
+        self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
+
+        # read observations
+        self.datareader.read_data('observations', self.start_date, self.end_date,
+                                  self.selected_network, self.selected_resolution,
+                                  self.selected_species, self.selected_matrix)
+        # read selected experiments (iterate through)
+        for exp in [exp.strip() for exp in self.experiments.split(",")]:
+            self.datareader.read_data(exp, self.selected_start_date, self.selected_end_date, self.selected_network,
+                                      self.selected_resolution, self.selected_species, self.selected_matrix)
+
+        # update dictionary of plotting parameters (colour and zorder etc.) for each data array
+        self.datareader.update_plotting_parameters()
+
+        print(list(self.datareader.plotting_params.keys()))
 
         self.start_pdf()
 
@@ -123,12 +173,49 @@ class ProvidentiaOffline(ProvConfiguration):
         self.opts = opts
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
 
+    def which_qa(self, return_defaults=False):
+        """Checks if the species we currently have selected belongs to the ones
+        that have specific qa flags selected as default"""
+
+        if return_defaults or (not hasattr(self, 'qa')):
+            if self.selected_species in self.qa_exceptions:
+                return self.specific_qa
+            else:
+                return self.general_qa
+
+        if hasattr(self, 'qa'):
+            # if conf has only 1 QA
+            if isinstance(self.qa, int):
+                return [self.qa]
+            # if the QAs are written with their names
+            elif self.qa == "":
+                return []
+            elif isinstance(self.qa, str):
+                return [self.standard_QA_name_to_QA_code[q.strip()] for q in self.qa.split(",")]
+            # return subset the user has selected in conf
+            else:
+                return list(self.qa)
+
+    def which_flags(self):
+        """if there are flags coming from a config file, select those"""
+
+        if hasattr(self, 'flags'):
+            # if conf has only one flag
+            if isinstance(self.flags, int):
+                return [self.flags]
+            # if flags are writtern as strings
+            elif self.flags == "":
+                return []
+            elif isinstance(self.flags, str):
+                return [self.standard_data_flag_name_to_data_flag_code[f.strip()] for f in
+                        self.flags.split(",")]
+            else:
+                return list(self.flags)
+        else:
+            return []
+
     def start_pdf(self):
         filename = "test_pdf.pdf"
-
-        # read
-        self.datareader.read_setup(self.selected_resolution, self.start_date, self.end_date,
-                                   self.selected_network, self.selected_species, self.selected_matrix)
 
         # open new PDF file
         with PdfPages(filename) as pdf:
@@ -218,7 +305,7 @@ class ProvidentiaOffline(ProvConfiguration):
                            'xtick_share': True, 'grid': {'axis': 'both', 'color': 'lightgrey', 'alpha': 0.8},
                            'page_title': {'t': 'Time Series', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
                            'axis_title': {'label': '', 'fontsize': 8}, 'axis_xlabel': {'xlabel': 'Time', 'fontsize': 8},
-                           'axis_ylabel': {'ylabel': '{}'.format(self.measurement_units), 'fontsize': 8},
+                           'axis_ylabel': {'ylabel': '{}'.format(self.datareader.measurement_units), 'fontsize': 8},
                            'xticks': {'labelsize': 7, 'rotation': 0}, 'yticks': {'labelsize': 7},
                            'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 'tightlayout': True,
                            'subplots_adjust': {'top': 0.90, 'bottom': 0.08}},
@@ -227,7 +314,7 @@ class ProvidentiaOffline(ProvConfiguration):
                              'grid': {'axis': 'both', 'color': 'lightgrey', 'alpha': 0.8},
                              'page_title': {'t': 'Distribution', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
                              'axis_title': {'label': '', 'fontsize': 10},
-                             'axis_xlabel': {'xlabel': '{}'.format(self.measurement_units), 'fontsize': 8},
+                             'axis_xlabel': {'xlabel': '{}'.format(self.datareader.measurement_units), 'fontsize': 8},
                              'axis_ylabel': {'ylabel': 'Density', 'fontsize': 8}, 'xticks': {'labelsize': 7},
                              'yticks': {'labelsize': 7}, 'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0},
                              'tightlayout': True, 'subplots_adjust': {'top': 0.90}},
@@ -235,7 +322,7 @@ class ProvidentiaOffline(ProvConfiguration):
                                   'grid': {'axis': 'both', 'color': 'lightgrey', 'alpha': 0.8},
                                   'page_title': {'t': 'Distributional bias', 'fontsize': 18, 'ha': 'left', 'x': 0.05,
                                                  'y': 0.98}, 'axis_title': {'label': '', 'fontsize': 10},
-                                  'axis_xlabel': {'xlabel': '{}'.format(self.measurement_units), 'fontsize': 8},
+                                  'axis_xlabel': {'xlabel': '{}'.format(self.datareader.measurement_units), 'fontsize': 8},
                                   'axis_ylabel': {'ylabel': 'Density', 'fontsize': 8}, 'xticks': {'labelsize': 7},
                                   'yticks': {'labelsize': 7},
                                   'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 'tightlayout': True,
@@ -314,7 +401,7 @@ class ProvidentiaOffline(ProvConfiguration):
             self.expbias_dict[estat]['label']
 
         # iterate through needed plot types, creating
-        self.summary_plots_to_make = plot_types_per_report_type[self.offline_configuration.report_type]
+        self.summary_plots_to_make = plot_types_per_report_type[self.report_type]
         current_page_n = 1
 
         # iterate through plot types to make
@@ -330,21 +417,23 @@ class ProvidentiaOffline(ProvConfiguration):
                 # get base name name of zstat (dropping _bias suffix)
                 base_zstat = zstat.split('_bias')[0]
                 # get zstat type (basic or expbias)
-                z_statistic_type = self.get_z_statistic_type(base_zstat)
+                z_statistic_type = get_z_statistic_type(self.basic_stats_dict, base_zstat)
                 # get zstat sign (absolute or bias)
-                z_statistic_sign = self.get_z_statistic_sign(zstat, z_statistic_type)
+                z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
 
             if 'map-' in plot_type:
                 if '-obs' in plot_type:
                     n_plots_per_plot_type = len(self.station_subset_names)
                 elif z_statistic_sign == 'bias':
-                    n_plots_per_plot_type = len(self.station_subset_names) * (len(list(self.data_in_memory.keys())) - 1)
+                    n_plots_per_plot_type = len(self.station_subset_names) * \
+                                            (len(list(self.datareader.data_in_memory.keys())) - 1)
                 else:
-                    n_plots_per_plot_type = len(self.station_subset_names) * len(list(self.data_in_memory.keys()))
+                    n_plots_per_plot_type = len(self.station_subset_names) * \
+                                            len(list(self.datareader.data_in_memory.keys()))
             elif 'periodic-' in plot_type:
                 if z_statistic_type == 'basic':
                     if base_zstat not in ['Data %', 'Exceedances']:
-                        plot_characteristics['axis_ylabel']['ylabel'] = self.measurement_units  # 'µg m⁻³'
+                        plot_characteristics['axis_ylabel']['ylabel'] = self.datareader.measurement_units  # 'µg m⁻³'
                     else:
                         plot_characteristics['axis_ylabel']['ylabel'] = self.basic_stats_dict[base_zstat]['label']
                 else:
@@ -432,30 +521,26 @@ class ProvidentiaOffline(ProvConfiguration):
                         if 'map-' in plot_type:
                             ax.add_feature(feature)
                             ax.gridlines(linestyle='-', alpha=0.4)
-                            if hasattr(self.offline_configuration, 'bounding_box'):
-                                if 'longitude' in self.offline_configuration.bounding_box.keys():
-                                    if 'min' in self.offline_configuration.bounding_box['longitude']:
+                            if hasattr(self, 'bounding_box'):
+                                if 'longitude' in self.bounding_box.keys():
+                                    if 'min' in self.bounding_box['longitude']:
                                         min_lon, null = self.plotcrs.transform_point(
-                                            self.offline_configuration.bounding_box['longitude']['min'], 0,
+                                            self.bounding_box['longitude']['min'], 0,
                                             src_crs=self.datacrs)
                                         ax.set_xlim(left=min_lon)
-                                    if 'max' in self.offline_configuration.bounding_box['longitude']:
+                                    if 'max' in self.bounding_box['longitude']:
                                         max_lon, null = self.plotcrs.transform_point(
-                                            self.offline_configuration.bounding_box['longitude']['max'], 0,
+                                            self.bounding_box['longitude']['max'], 0,
                                             src_crs=self.datacrs)
                                         ax.set_xlim(right=max_lon)
-                                if 'latitude' in self.offline_configuration.bounding_box.keys():
-                                    if 'min' in self.offline_configuration.bounding_box['latitude']:
-                                        null, min_lat = self.plotcrs.transform_point(0,
-                                                                                     self.offline_configuration.bounding_box[
-                                                                                         'latitude']['min'],
-                                                                                     src_crs=self.datacrs)
+                                if 'latitude' in self.bounding_box.keys():
+                                    if 'min' in self.bounding_box['latitude']:
+                                        null, min_lat = self.plotcrs.transform_point(0, self.bounding_box[
+                                            'latitude']['min'], src_crs=self.datacrs)
                                         ax.set_ylim(bottom=min_lat)
-                                    if 'max' in self.offline_configuration.bounding_box['latitude']:
-                                        null, max_lat = self.plotcrs.transform_point(0,
-                                                                                     self.offline_configuration.bounding_box[
-                                                                                         'latitude']['max'],
-                                                                                     src_crs=self.datacrs)
+                                    if 'max' in self.bounding_box['latitude']:
+                                        null, max_lat = self.plotcrs.transform_point(0, self.bounding_box[
+                                            'latitude']['max'], src_crs=self.datacrs)
                                         ax.set_ylim(top=max_lat)
 
                     else:
@@ -484,6 +569,45 @@ class ProvidentiaOffline(ProvConfiguration):
                 # add current page number
                 self.characteristics_per_plot_type[plot_type]['pages'].append(current_page_n)
                 current_page_n += 1
+
+    def make_legend_elements(self):
+        """Function that makes legend elements"""
+
+        # create legend elements
+        # add observations element
+        legend_elements = [Line2D([0], [0], marker='o', color='white',
+                                  markerfacecolor=self.datareader.plotting_params['observations']['colour'],
+                                  markersize=self.legend_markersize, label='observations')]
+        # add element for each experiment
+        for experiment_ind, experiment in enumerate(sorted(list(self.datareader.data_in_memory.keys()))):
+            if experiment != 'observations':
+                # add experiment element
+                legend_elements.append(Line2D([0], [0], marker='o', color='white',
+                                              markerfacecolor=self.datareader.plotting_params[experiment]['colour'],
+                                              markersize=self.legend_markersize,
+                                              label=experiment))
+
+
+def get_z_statistic_type(stats_dict, zstat):
+    """Function that checks if the z statistic is basic or expbias statistic"""
+
+    # check if the chosen statistic is a basic statistic
+    if zstat in stats_dict.keys():
+        return 'basic'
+    # if not a basic statistic, it must be an experiment bias statistic
+    else:
+        return 'expbias'
+
+
+def get_z_statistic_sign(zstat, zstat_type):
+    """Function that checks if the z statistic is an absolute or bias statistic"""
+
+    # statistic is bias?
+    if ('_bias' in zstat) or (zstat_type == 'expbias'):
+        return 'bias'
+    # statistic is bias?
+    else:
+        return 'absolute'
 
 
 def main_offline(**kwargs):
