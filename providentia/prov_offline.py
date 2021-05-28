@@ -13,6 +13,7 @@ from matplotlib.lines import Line2D
 from matplotlib.backends.backend_pdf import PdfPages
 
 from .prov_read import DataReader
+from .filter import DataFilter
 from .configuration import parse_path
 from .configuration import ProvConfiguration
 
@@ -229,6 +230,264 @@ class ProvidentiaOffline(ProvConfiguration):
             if self.summary_pages:
                 # setup plotting geometry of summary plots
                 self.setup_summary_plots_geometry()
+
+            # iterate through station_subset_names
+            for station_subset_ind, station_subset in enumerate(self.station_subset_names):
+
+                print('Filtering Data for {} Subset'.format(station_subset))
+
+                # filter dataset for current station_subset
+                # filter_instance = DataFilter(self, station_subset=station_subset)
+                filter_instance = DataFilter(self)
+                # TODO: initialize all the menus that are filtered separately in filter
+                # in simple lists (?) and refactor the calls to the filtering module
+                # maybe instead of calling
+                # self.datareader.plotting_params = filter_instance.plotting_params ????
+                # self.data_in_memory_filtered = filter_instance.data_in_memory_filtered
+
+                print('Placing Data Arrays in Pandas Dataframes')
+
+                self.station_subset = station_subset
+                # convert filtered dataset to pandas dataframe
+                self.to_pandas_dataframe()
+
+                print('Doing Temporal Aggregation on Dataframes')
+
+                # temporally aggregate selected data dataframes (by hour, day of week, month)
+                self.pandas_temporal_aggregation()
+
+                # if have some experiment data associated with selected stations, calculate
+                # temporally aggregated basic statistic differences and bias statistics between
+                # observations and experiment data arrays
+                if len(self.offline_configuration.experiments) > 0:
+                    print('Calculating Temporally Aggregated Bias Statisitics')
+                    self.calculate_temporally_aggregated_experiment_bias_statistics()
+
+                print('Making {} Subset Plots'.format(station_subset))
+
+                # make summary plots?
+                if self.offline_configuration.summary_pages:
+
+                    # iterate through each summary plot to make
+                    for plot_type in self.summary_plots_to_make:
+
+                        # heatmap plot?
+                        if 'heatm-' in plot_type:
+                            heatmap_types = plot_type.split('-')[1:]
+                            if station_subset_ind == 0:
+                                heatmap_dict = {}
+                                for heatmap_type in heatmap_types:
+                                    heatmap_dict[heatmap_type] = {}
+                                    for original_data_label in self.data_in_memory.keys():
+                                        if original_data_label != 'observations':
+                                            heatmap_dict[heatmap_type][
+                                                self.offline_configuration.experiments[original_data_label][
+                                                    'name']] = []
+                            for heatmap_type in heatmap_types:
+                                for original_data_label in self.data_in_memory.keys():
+                                    if original_data_label != 'observations':
+                                        if self.offline_configuration.temporal_colocation:
+                                            data_label = '{}_colocatedto_observations'.format(original_data_label)
+                                        else:
+                                            data_label = original_data_label
+                                        if data_label in list(self.selected_station_data.keys()):
+                                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
+                                                if heatmap_type in list(self.basic_stats_dict.keys()):
+                                                    heatmap_dict[heatmap_type][
+                                                        self.offline_configuration.experiments[original_data_label][
+                                                            'name']].append(
+                                                        self.selected_station_data[data_label]['all'][
+                                                            '{}_bias'.format(heatmap_type)][0])
+                                                else:
+                                                    heatmap_dict[heatmap_type][
+                                                        self.offline_configuration.experiments[original_data_label][
+                                                            'name']].append(
+                                                        self.selected_station_data[data_label]['all'][heatmap_type][
+                                                            0])
+                                            else:
+                                                heatmap_dict[heatmap_type][
+                                                    self.offline_configuration.experiments[original_data_label][
+                                                        'name']].append(np.NaN)
+                                        else:
+                                            heatmap_dict[heatmap_type][
+                                                self.offline_configuration.experiments[original_data_label][
+                                                    'name']].append(np.NaN)
+
+                            if station_subset_ind == (len(self.station_subset_names) - 1):
+                                for heatmap_type_ii, heatmap_type in enumerate(heatmap_types):
+                                    relevant_axis = self.get_relevant_axis('heatm', heatmap_type_ii)
+                                    self.characteristics_per_plot_type['heatm']['axis_title'][
+                                        'label'] = heatmap_type
+                                    relevant_axis.set_title(
+                                        **self.characteristics_per_plot_type['heatm']['axis_title'])
+                                    if heatmap_dict:
+                                        heatmap_df = pd.DataFrame(data=heatmap_dict[heatmap_type],
+                                                                  index=self.station_subset_names)
+                                        self.make_heatmap(relevant_axis, heatmap_type, heatmap_df)
+                        # other plot type?
+                        else:
+                            # count how many plots are made per plot type
+                            current_plot_ind = 0
+
+                            # iterate through all data arrays
+                            original_data_array_labels = list(self.data_in_memory.keys())
+                            for original_data_label in original_data_array_labels:
+
+                                # get zstat for plot type (if exists)
+                                if '-' in plot_type:
+                                    zstat = plot_type.split('-')[1]
+                                    # get base name name of zstat (dropping _bias suffix)
+                                    base_zstat = zstat.split('_bias')[0]
+                                    # get zstat type (basic or expbias)
+                                    z_statistic_type = self.get_z_statistic_type(base_zstat)
+                                    # get zstat sign (absolute or bias)
+                                    z_statistic_sign = self.get_z_statistic_sign(zstat, z_statistic_type)
+
+                                # map plots (1 plot per data array/s (1 array if absolute plot, 2 arrays if making bias plot), per subset)
+                                if 'map-' in plot_type:
+
+                                    # get necessary data arrays
+                                    if '-obs' in plot_type:
+                                        if original_data_label != 'observations':
+                                            continue
+                                        if self.offline_configuration.temporal_colocation:
+                                            z1 = 'observations_colocatedto_experiments'
+                                        else:
+                                            z1 = 'observations'
+                                        z2 = ''
+                                    elif z_statistic_sign == 'bias':
+                                        if original_data_label == 'observations':
+                                            continue
+                                        if self.offline_configuration.temporal_colocation:
+                                            z1 = 'observations_colocatedto_{}'.format(original_data_label)
+                                            z2 = '{}_colocatedto_observations'.format(original_data_label)
+                                        else:
+                                            z1 = 'observations'
+                                            z2 = original_data_label
+                                    else:
+                                        if original_data_label == 'observations':
+                                            if self.offline_configuration.temporal_colocation:
+                                                z1 = 'observations_colocatedto_experiments'
+                                            else:
+                                                z1 = 'observations'
+                                        else:
+                                            if self.offline_configuration.temporal_colocation:
+                                                z1 = '{}_colocatedto_observations'.format(original_data_label)
+                                            else:
+                                                z1 = original_data_label
+                                        z2 = ''
+
+                                    # get relevant axis to plot on
+                                    relevant_axis = self.get_relevant_axis(plot_type, (current_plot_ind * len(
+                                        self.station_subset_names)) + station_subset_ind)
+
+                                    # make map plot
+                                    n_stations = self.make_map(relevant_axis, z1, z2, zstat)
+
+                                    # set axis title
+                                    if plot_type == 'map-Data %-obs':
+                                        self.characteristics_per_plot_type[plot_type]['axis_title'][
+                                            'label'] = '{} {}\n({} Stations)'.format(original_data_label,
+                                                                                     station_subset, n_stations)
+                                    else:
+                                        self.characteristics_per_plot_type[plot_type]['axis_title'][
+                                            'label'] = '{}\n{}'.format(original_data_label, station_subset)
+                                    relevant_axis.set_title(
+                                        **self.characteristics_per_plot_type[plot_type]['axis_title'])
+
+                                # other plots (1 plot per subset, with multiple data arrays)
+                                else:
+                                    # get relevant axis to plot on
+                                    relevant_axis = self.get_relevant_axis(plot_type, station_subset_ind)
+
+                                    # get necessary data array to plot
+                                    if original_data_label == 'observations':
+                                        if self.offline_configuration.temporal_colocation:
+                                            data_label = 'observations_colocatedto_experiments'
+                                        else:
+                                            data_label = 'observations'
+                                    else:
+                                        if self.offline_configuration.temporal_colocation:
+                                            data_label = '{}_colocatedto_observations'.format(original_data_label)
+                                        else:
+                                            data_label = original_data_label
+
+                                    # periodic plots
+                                    if 'periodic-' in plot_type:
+                                        # skip observational array if plotting bias stat
+                                        if (z_statistic_sign == 'bias') & (original_data_label == 'observations'):
+                                            continue
+                                        func = getattr(self, 'make_periodic')
+                                        if data_label in list(self.selected_station_data.keys()):
+                                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
+                                                func(relevant_axis, data_label, zstat)
+                                        # set axis title
+                                        self.characteristics_per_plot_type[plot_type]['axis_title'][
+                                            'label'] = station_subset
+                                        relevant_axis['hour'].set_title(
+                                            **self.characteristics_per_plot_type[plot_type]['axis_title'])
+                                    # other plot types (distribution, timeseries etc.)
+                                    else:
+                                        # determine if plotting bias stat
+                                        bias_stat = False
+                                        plot_type_split = plot_type.split('_')
+                                        if len(plot_type_split) > 1:
+                                            bias_stat = True
+                                        # skip observational array if plotting bias stat
+                                        if (bias_stat) & (original_data_label == 'observations'):
+                                            continue
+                                        # make plot
+                                        func = getattr(self, 'make_{}'.format(plot_type_split[0]))
+
+                                        if data_label in list(self.selected_station_data.keys()):
+                                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
+                                                # bias plot or standard?
+                                                if bias_stat:
+                                                    func(relevant_axis, data_label, bias=True)
+                                                else:
+                                                    func(relevant_axis, data_label)
+                                        # set axis title
+                                        self.characteristics_per_plot_type[plot_type_split[0]]['axis_title'][
+                                            'label'] = station_subset
+                                        relevant_axis.set_title(
+                                            **self.characteristics_per_plot_type[plot_type_split[0]]['axis_title'])
+
+                                # iterate number of plots have made for current type of plot
+                                current_plot_ind += 1
+
+                # make individual station pages?
+
+            # generate colourbars
+            if self.offline_configuration.summary_pages:
+                relevant_axs = []
+                cb_axs = []
+                previous_plot_type = ''
+                for figure_n in self.plot_dictionary.keys():
+                    plot_type = self.plot_dictionary[figure_n]['plot_type']
+                    if (previous_plot_type != plot_type) & (len(relevant_axs) > 0):
+                        self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
+                        relevant_axs = []
+                        cb_axs = []
+                    if 'cb' in list(self.characteristics_per_plot_type[plot_type].keys()):
+                        relevant_axs.extend(self.plot_dictionary[figure_n]['axs'])
+                        cb_axs.append(self.plot_dictionary[figure_n]['cb_ax'])
+                    previous_plot_type = copy.deepcopy(plot_type)
+                if len(relevant_axs) > 0:
+                    self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
+
+                #
+                for plot_type in self.summary_plots_to_make:
+                    if ('timeseries' not in plot_type) & ('map-' not in plot_type) & ('heatm-' not in plot_type):
+                        # if ('map-' not in plot_type) & ('heatm-' not in plot_type):
+                        # if 'heatm-' not in plot_type:
+                        self.harmonise_xy_lims(plot_type)
+
+            # save page figures
+            print('WRITING PDF')
+            for figure_n in self.plot_dictionary.keys():
+                fig = self.plot_dictionary[figure_n]['fig']
+                self.pdf.savefig(fig, dpi=self.dpi)
+                plt.close(fig)
 
     def make_header(self):
         # set tile
