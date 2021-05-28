@@ -19,6 +19,11 @@ class DataFilter:
     def filter_all(self):
         # call functions to start filtering
         self.reset_data_filter()
+        if not self.read_instance.offline:
+            # tmp = self.read_instance.period_menu['checkboxes']
+            # and then send this tmp to filter, and it will be like
+            # tmp['remove_selected']
+            print("check your comments over here")
         self.filter_data_limits()
         self.filter_by_period()
         self.filter_by_data_availability()
@@ -380,6 +385,12 @@ class DataFilter:
                 'zorder': self.read_instance.datareader.plotting_params['observations']['zorder']}
 
     def get_valid_stations_after_filtering(self):
+
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+        else:
+            species = self.read_instance.active_species
+
         # get intersect of indices of stations with >= % minimum data availability percent,
         # and with > 1 valid measurements ,in all observational data arrays (colocated and non-colocated)
         # then subset these indices with standard methods == selected methods,
@@ -391,7 +402,7 @@ class DataFilter:
                 # calculate data availability fraction per station in observational data array
                 # get absolute data availability number per station in observational data array
                 station_data_availability_number = Stats.calculate_data_avail_number(
-                    self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])
+                    self.read_instance.data_in_memory_filtered[data_label][species])
 
                 # get indices of stations with > 1 available measurements
                 # save valid station indices with data array
@@ -432,8 +443,7 @@ class DataFilter:
                 # update stats object data and call data availability function
                 station_data_availability_number = \
                     Stats.calculate_data_avail_number(
-                        self.read_instance.data_in_memory_filtered[data_label][
-                            self.read_instance.active_species][valid_station_inds, :])
+                        self.read_instance.data_in_memory_filtered[data_label][species][valid_station_inds, :])
                 # get indices of stations with > 1 available measurements
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[
                     station_data_availability_number > 1]]
