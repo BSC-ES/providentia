@@ -1,4 +1,5 @@
 from .calculate import Stats
+from .config import split_options
 
 import copy
 import numpy as np
@@ -19,11 +20,6 @@ class DataFilter:
     def filter_all(self):
         # call functions to start filtering
         self.reset_data_filter()
-        if not self.read_instance.offline:
-            # tmp = self.read_instance.period_menu['checkboxes']
-            # and then send this tmp to filter, and it will be like
-            # tmp['remove_selected']
-            print("check your comments over here")
         self.filter_data_limits()
         self.filter_by_period()
         self.filter_by_data_availability()
@@ -39,8 +35,14 @@ class DataFilter:
         """Filter out (set to NaN) data which exceed the lower/upper limits"""
 
         # get set lower/upper data bounds
-        selected_lower_bound = self.read_instance.le_minimum_value.text()
-        selected_upper_bound = self.read_instance.le_maximum_value.text()
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+            selected_lower_bound = self.read_instance.minimum_value
+            selected_upper_bound = self.read_instance.maximum_value
+        else:
+            species = self.read_instance.active_species
+            selected_lower_bound = self.read_instance.le_minimum_value.text()
+            selected_upper_bound = self.read_instance.le_maximum_value.text()
 
         # check selected lower/upper bounds are numbers
         try:
@@ -48,94 +50,107 @@ class DataFilter:
             selected_upper_bound = np.float32(selected_upper_bound)
         # if any of the fields are not numbers, return from function
         except ValueError:
-            # # Restore mouse cursor to normal
-            # QtWidgets.QApplication.restoreOverrideCursor()
             return
 
         # filter all observational data out of bounds of lower/upper limits
-        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations'][
-                                               self.read_instance.active_species] < selected_lower_bound,
-                                           self.read_instance.data_in_memory_filtered['observations'][
-                                               self.read_instance.active_species] > selected_upper_bound)
-        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-            inds_out_of_bounds] = np.NaN
+        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered[
+                                               'observations'][species] < selected_lower_bound,
+                                           self.read_instance.data_in_memory_filtered[
+                                               'observations'][species] > selected_upper_bound)
+        self.read_instance.data_in_memory_filtered['observations'][species][inds_out_of_bounds] = np.NaN
 
     def filter_by_period(self):
         """Filters data for selected periods (keeping or removing data, as defined)"""
 
+        keeps, removes = [], []
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+            if hasattr(self.read_instance, 'period'):
+                keeps, removes = split_options(self.read_instance.period)
+                print(keeps, removes)
+        else:
+            species = self.read_instance.active_species
+            keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
+            removes = self.read_instance.period_menu['checkboxes']['remove_selected']
+
         # filter/limit data for periods selected
-        if len(self.read_instance.period_menu['checkboxes']['keep_selected']) > 0:
+        if len(keeps) > 0:
             day_night_codes_to_keep = []
-            if 'Daytime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Daytime' in keeps:
                 day_night_codes_to_keep.append(0)
-            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Nighttime' in keeps:
                 day_night_codes_to_keep.append(1)
             if len(day_night_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'],
                             day_night_codes_to_keep, invert=True)] = np.NaN
 
             weekday_weekend_codes_to_keep = []
-            if 'Weekday' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Weekday' in keeps:
                 weekday_weekend_codes_to_keep.append(0)
-            if 'Weekend' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Weekend' in keeps:
                 weekday_weekend_codes_to_keep.append(1)
             if len(weekday_weekend_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'],
                             weekday_weekend_codes_to_keep, invert=True)] = np.NaN
 
             season_codes_to_keep = []
-            if 'Spring' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Spring' in keeps:
                 season_codes_to_keep.append(0)
-            if 'Summer' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Summer' in keeps:
                 season_codes_to_keep.append(1)
-            if 'Autumn' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Autumn' in keeps:
                 season_codes_to_keep.append(2)
-            if 'Winter' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Winter' in keeps:
                 season_codes_to_keep.append(3)
             if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'],
                             season_codes_to_keep, invert=True)] = np.NaN
 
-        if len(self.read_instance.period_menu['checkboxes']['remove_selected']) > 0:
+        if len(removes) > 0:
             day_night_codes_to_remove = []
-            if 'Daytime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Daytime' in removes:
                 day_night_codes_to_remove.append(0)
-            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Nighttime' in removes:
                 day_night_codes_to_remove.append(1)
             if len(day_night_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'],
                             day_night_codes_to_remove)] = np.NaN
 
             weekday_weekend_codes_to_remove = []
-            if 'Weekday' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Weekday' in removes:
                 weekday_weekend_codes_to_remove.append(0)
-            if 'Weekend' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Weekend' in removes:
                 weekday_weekend_codes_to_remove.append(1)
             if len(weekday_weekend_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'],
                             weekday_weekend_codes_to_remove)] = np.NaN
 
             season_codes_to_remove = []
-            if 'Spring' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Spring' in removes:
                 season_codes_to_remove.append(0)
-            if 'Summer' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Summer' in removes:
                 season_codes_to_remove.append(1)
-            if 'Autumn' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Autumn' in removes:
                 season_codes_to_remove.append(2)
-            if 'Winter' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Winter' in removes:
                 season_codes_to_remove.append(3)
             if len(season_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'],
                             season_codes_to_remove)] = np.NaN
 
     def filter_by_data_availability(self):
         """Function which filters data by selected data availability variables"""
+
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+        else:
+            species = self.read_instance.active_species
 
         # get set variables names representing percentage data availability (native and non-native)
         active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['labels']
@@ -158,14 +173,14 @@ class DataFilter:
                     if 'max_gap' in var:
                         # bound is < 100?:
                         if data_availability_lower_bounds[var_ii] < 100:
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            self.read_instance.data_in_memory_filtered['observations'][species][
                                 self.read_instance.data_in_memory_filtered['observations'][var] >
                                 data_availability_lower_bounds[var_ii]] = np.NaN
                     # data representativity variable?
                     else:
                         # bound is > 0?
                         if data_availability_lower_bounds[var_ii] > 0:
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            self.read_instance.data_in_memory_filtered['observations'][species][
                                 self.read_instance.data_in_memory_filtered['observations'][var] <
                                 data_availability_lower_bounds[var_ii]] = np.NaN
 
@@ -186,7 +201,7 @@ class DataFilter:
                 # get period associate with variable
                 period = var.split('_')[0]
                 period_inds = np.arange(
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species].shape[
+                    self.read_instance.data_in_memory_filtered['observations'][species].shape[
                         1])
                 # daily variable?
                 if period == 'daily':
@@ -204,17 +219,15 @@ class DataFilter:
                     if len(period_inds) > 0:
                         # max gap variable?
                         if 'max_gap' in var:
-                            max_gap_percent = Stats.max_repeated_nans_fraction(self.read_instance.data_in_memory_filtered['observations'][
-                                    self.read_instance.active_species][:, period_inds])
-                            self.read_instance.data_in_memory_filtered['observations'][
-                                self.read_instance.active_species][
+                            max_gap_percent = Stats.max_repeated_nans_fraction(
+                                self.read_instance.data_in_memory_filtered['observations'][species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][species][
                                 max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
                         # data representativity variable?
                         else:
-                            data_availability_percent = Stats.calculate_data_avail_fraction(self.read_instance.data_in_memory_filtered['observations'][
-                                    self.read_instance.active_species][:, period_inds])
-                            self.read_instance.data_in_memory_filtered['observations'][
-                                self.read_instance.active_species][
+                            data_availability_percent = Stats.calculate_data_avail_fraction(
+                                self.read_instance.data_in_memory_filtered['observations'][species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][species][
                                 data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
 
     def filter_by_metadata(self):
