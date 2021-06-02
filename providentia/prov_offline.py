@@ -62,6 +62,7 @@ class ProvidentiaOffline(ProvConfiguration):
         self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
         self.active_qa = self.which_qa()
         self.active_flags = self.which_flags()
+        self.minimum_value, self.maximum_value = self.which_bounds()
 
         # get all netCDF monthly files per species
         species_files = os.listdir(
@@ -214,6 +215,23 @@ class ProvidentiaOffline(ProvConfiguration):
                 return list(self.flags)
         else:
             return []
+
+    def which_bounds(self):
+        """if there are bounds defined in a config file, fill that value,
+        if it is withing the feasible bounds of the species"""
+
+        lower = np.float32(self.parameter_dictionary[self.selected_species]['extreme_lower_limit'])
+        upper = np.float32(self.parameter_dictionary[self.selected_species]['extreme_upper_limit'])
+
+        if hasattr(self, 'lower_bound'):
+            if self.lower_bound >= lower:
+                lower = self.lower_bound
+
+        if hasattr(self, 'upper_bound'):
+            if self.upper_bound <= upper:
+                upper = self.upper_bound
+
+        return np.float32(lower), np.float32(upper)
 
     def start_pdf(self):
         filename = "test_pdf.pdf"
