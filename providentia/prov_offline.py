@@ -81,6 +81,9 @@ class ProvidentiaOffline(ProvConfiguration):
         self.all_observation_data[self.selected_network][
             self.selected_resolution][self.selected_matrix][self.selected_species] = species_files_yearmonths
 
+        self.representativity_menu = init_representativity(self.selected_resolution)
+        self.representativity_conf()
+
         # initialize DataReader
         self.datareader = DataReader(self)
         # read
@@ -232,6 +235,14 @@ class ProvidentiaOffline(ProvConfiguration):
                 upper = self.upper_bound
 
         return np.float32(lower), np.float32(upper)
+
+    def representativity_conf(self):
+        """Comes here if there is a configuration loaded. Checks if there is a
+        representative field loaded in the object from the conf and if there is
+        assigns the value in the representativity menu"""
+        for i, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
+            if hasattr(self, label):
+                self.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(self, label))
 
     def start_pdf(self):
         filename = "test_pdf.pdf"
@@ -586,7 +597,6 @@ class ProvidentiaOffline(ProvConfiguration):
                            'xticks': {'labelsize': 7, 'rotation': 0}, 'yticks': {'labelsize': 7},
                            'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 'tightlayout': True,
                            'subplots_adjust': {'top': 0.90, 'bottom': 0.08}},
-            # 'timeseries':  {'pages':[], 'figure':{'figsize':self.landscape_figsize,  'ncols':2, 'nrows':3}, 'xtick_share':True, 'grid':{'axis':'both', 'color':'lightgrey', 'alpha':0.8}, 'page_title':{'t':'', 'fontsize':18, 'ha':'left', 'x':0.05, 'y':0.98},         'axis_title':{'label':'', 'fontsize':8},  'axis_xlabel':{'xlabel':'Time','fontsize':8},                              'axis_ylabel':{'ylabel':'µg m⁻³','fontsize':8}, 'xticks':{'labelsize':7, 'rotation':0}, 'yticks':{'labelsize':7},                  'legend':{'loc':'upper right', 'ncol':3, 'fontsize':8.0}, 'tightlayout':True, 'subplots_adjust':{'top':0.90,'bottom':0.08},                                                                        'trend':{'n_points':24, 'min_points':6}},
             'distribution': {'pages': [], 'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 4},
                              'grid': {'axis': 'both', 'color': 'lightgrey', 'alpha': 0.8},
                              'page_title': {'t': 'Distribution', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
@@ -604,7 +614,7 @@ class ProvidentiaOffline(ProvConfiguration):
                                   'yticks': {'labelsize': 7},
                                   'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 'tightlayout': True,
                                   'subplots_adjust': {'top': 0.90}},
-            # 'distribution':{'pages':[], 'figure':{'figsize':self.portrait_figsize,  'ncols':2, 'nrows':4},                     'grid':{'axis':'both', 'color':'lightgrey', 'alpha':0.8}, 'page_title':{'t':'Distribution', 'fontsize':18, 'ha':'left', 'x':0.05, 'y':0.98},        'axis_title':{'label':'', 'fontsize':10}, 'axis_xlabel':{'xlabel':'µg m⁻³','fontsize':8}, 'axis_ylabel':{'ylabel':'Density','fontsize':8},                           'xticks':{'labelsize':7},                  'yticks':{'labelsize':7},                  'legend':{'loc':'upper right', 'ncol':3, 'fontsize':8.0}, 'tightlayout':True, 'subplots_adjust':{'top':0.90}},
+
             'heatm': {'pages': [], 'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 1},
                       'page_title': {'t': 'Statistical Heatmap', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
                       'axis_title': {'label': '', 'fontsize': 8}, 'xticks': {'labelsize': 7, 'rotation': -270},
@@ -755,7 +765,7 @@ class ProvidentiaOffline(ProvConfiguration):
                             # setup periodic plot type gridspec
                         if 'periodic-' in plot_type:
                             gs = gridspec.GridSpecFromSubplotSpec(20, 20, subplot_spec=ax)
-                            grid_dict = {}
+                            grid_dict = dict()
                             grid_dict['hour'] = fig.add_subplot(gs[:9, :])
                             grid_dict['month'] = fig.add_subplot(gs[11:, :11])
                             grid_dict['dayofweek'] = fig.add_subplot(gs[11:, 13:])
@@ -775,14 +785,15 @@ class ProvidentiaOffline(ProvConfiguration):
 
                         # make axis xlabel (only on last row on page/last valid row of visible axes)?
                         if 'axis_xlabel' in plot_characteristics_vars:
-                            if (last_valid_row) or (last_row_on_page):
+                            if last_valid_row or last_row_on_page:
                                 ax.set_xlabel(**plot_characteristics['axis_xlabel'])
 
                         # make axis ylabel (only on leftmost column of visible axes)?
                         if ('axis_ylabel' in plot_characteristics_vars) & (col_ii == 0):
                             ax.set_ylabel(**plot_characteristics['axis_ylabel'])
 
-                        # if are sharing xticks, and not on last row on page/last valid row, then ensure current axis xticks are hidden
+                        # if are sharing xticks, and not on last row on page/last
+                        # valid row, then ensure current axis xticks are hidden
                         if ('xtick_share' in plot_characteristics_vars) & (not last_valid_row) & (not last_row_on_page):
                             plt.setp(ax.get_xticklabels(), visible=False)
 
@@ -863,6 +874,7 @@ class ProvidentiaOffline(ProvConfiguration):
                                               markerfacecolor=self.datareader.plotting_params[experiment]['colour'],
                                               markersize=self.legend_markersize,
                                               label=experiment))
+        return legend_elements
 
 
 def get_z_statistic_type(stats_dict, zstat):
@@ -885,6 +897,54 @@ def get_z_statistic_sign(zstat, zstat_type):
     # statistic is bias?
     else:
         return 'absolute'
+
+
+def init_representativity(resolution):
+    """Initialize representativity structure, similar to the one used
+    in Providentia dashboard, keeping only the necessary fields"""
+
+    # initialize representativity menu, inly with necessary substructures
+    representativity = {'rangeboxes': {'labels': [], 'current_lower': []}}
+
+    if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
+        representativity['rangeboxes']['labels'] = ['hourly_native_representativity_percent',
+                                                    'hourly_native_max_gap_percent',
+                                                    'daily_native_representativity_percent',
+                                                    'daily_representativity_percent',
+                                                    'daily_native_max_gap_percent',
+                                                    'daily_max_gap_percent',
+                                                    'monthly_native_representativity_percent',
+                                                    'monthly_representativity_percent',
+                                                    'monthly_native_max_gap_percent',
+                                                    'monthly_max_gap_percent',
+                                                    'all_representativity_percent', 'all_max_gap_percent']
+    # daily temporal resolution?
+    elif (resolution == 'daily') or (resolution == '3hourly') or \
+            (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
+            (resolution == '6hourly_instantaneous'):
+        representativity['rangeboxes']['labels'] = ['daily_native_representativity_percent',
+                                                    'daily_native_max_gap_percent',
+                                                    'monthly_native_representativity_percent',
+                                                    'monthly_representativity_percent',
+                                                    'monthly_native_max_gap_percent',
+                                                    'monthly_max_gap_percent',
+                                                    'all_representativity_percent', 'all_max_gap_percent']
+    # monthly temporal resolution?
+    elif resolution == 'monthly':
+        representativity['rangeboxes']['labels'] = ['monthly_native_representativity_percent',
+                                                    'monthly_native_max_gap_percent',
+                                                    'all_representativity_percent', 'all_max_gap_percent']
+
+    # initialise rangebox values --> for data representativity fields
+    # the default is 0%, for max gap fields % the default is 100%
+    representativity['rangeboxes']['current_lower'] = []
+    for label_ii, label in enumerate(representativity['rangeboxes']['labels']):
+        if 'max_gap' in label:
+            representativity['rangeboxes']['current_lower'].append('100')
+        else:
+            representativity['rangeboxes']['current_lower'].append('0')
+
+    return representativity
 
 
 def main_offline(**kwargs):
