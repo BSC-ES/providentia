@@ -162,8 +162,6 @@ class DataFilter:
                     np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
         # if any of the fields are not numbers, return from function
         except ValueError:
-            # # Restore mouse cursor to normal
-            # QtWidgets.QApplication.restoreOverrideCursor()
             return
 
         if not self.read_instance.reading_nonghost:
@@ -233,6 +231,11 @@ class DataFilter:
     def filter_by_metadata(self):
         """Filters data by selected metadata"""
 
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+        else:
+            species = self.read_instance.active_species
+
         # validate fields before filtering
         if not self.validate_values():
             return
@@ -248,9 +251,9 @@ class DataFilter:
                 current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
                 if len(current_keep) > 0:
                     invalid_keep = np.repeat(
-                        np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_keep, invert=True),
-                        self.read_instance.datareader.N_inds_per_month, axis=1)
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :],
+                                current_keep, invert=True), self.read_instance.datareader.N_inds_per_month, axis=1)
+                    self.read_instance.data_in_memory_filtered['observations'][species][
                         invalid_keep] = np.NaN
                 # if any of the remove checkboxes have been selected, filter out data by these selected fields
                 current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
@@ -259,7 +262,7 @@ class DataFilter:
                     invalid_remove = np.repeat(
                         np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_remove),
                         self.read_instance.datareader.N_inds_per_month, axis=1)
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations'][species][
                         invalid_remove] = np.NaN
             # handle numeric metadata
             else:
@@ -274,9 +277,9 @@ class DataFilter:
                     lower_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
                     if current_lower > lower_default:
-                        invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] < current_lower,
-                                                  self.read_instance.datareader.N_inds_per_month, axis=1)
-                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] <
+                                                  current_lower, self.read_instance.datareader.N_inds_per_month, axis=1)
+                        self.read_instance.data_in_memory_filtered['observations'][species][
                             invalid_below] = np.NaN
                 # if current upper < than the maximum extent, then filter out
                 # data with metadata > current upper value (if this is numeric)
@@ -285,9 +288,9 @@ class DataFilter:
                     upper_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
                     if current_upper < upper_default:
-                        invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] > current_upper,
-                                                  self.read_instance.datareader.N_inds_per_month, axis=1)
-                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] >
+                                                  current_upper, self.read_instance.datareader.N_inds_per_month, axis=1)
+                        self.read_instance.data_in_memory_filtered['observations'][species][
                             invalid_above] = np.NaN
 
     def validate_values(self):
@@ -299,7 +302,8 @@ class DataFilter:
             metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
 
             if metadata_data_type != np.object:
-                meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
+                meta_var_index = self.read_instance.metadata_menu[metadata_type][
+                    'rangeboxes']['labels'].index(meta_var)
                 try:
                     np.float32(self.read_instance.metadata_menu[metadata_type][
                                    'rangeboxes']['current_lower'][meta_var_index])
@@ -307,11 +311,14 @@ class DataFilter:
                                    'rangeboxes']['current_upper'][meta_var_index])
                     return True
                 except ValueError as e:
-                    # TODO: this cannot be here when we work with offline
-                    QtWidgets.QMessageBox.critical(self.read_instance, "Error in metadata fields",
-                                                   "The field of '{}' should be numeric, \n{}"
-                                                   .format(meta_var, str(e)),
-                                                   QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+                    if self.read_instance.offline:
+                        print("Error in metadata fields. The field of '{}' "
+                              "should be numeric, \n{}".format(meta_var, str(e)))
+                    else:
+                        QtWidgets.QMessageBox.critical(self.read_instance, "Error in metadata fields",
+                                                       "The field of '{}' should be numeric, \n{}"
+                                                       .format(meta_var, str(e)),
+                                                       QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
                     return False
 
     def colocate_data(self):
