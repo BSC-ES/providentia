@@ -13,6 +13,7 @@ from .prov_dashboard_aux import formatting_dict
 from .prov_dashboard_aux import set_formatting
 from .prov_read import DataReader
 from .prov_offline import ProvidentiaOffline
+from providentia import aux
 
 import copy
 import datetime
@@ -101,11 +102,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         for _, param_dict in standard_parameters.items():
             self.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
         # get standard metadata dictionary
-        self.standard_metadata = get_standard_metadata({'standard_units':''})
+        self.standard_metadata = get_standard_metadata({'standard_units': ''})
         # create list of metadata variables to read (make global)
-        self.metadata_vars_to_read = [key for key in self.standard_metadata.keys()
-                                      if pd.isnull(self.standard_metadata[key]['metadata_type'])
-                                      == False]
+        self.metadata_vars_to_read = [key for key in self.standard_metadata.keys() if
+                                      pd.isnull(self.standard_metadata[key]['metadata_type']) == False]
         self.metadata_dtype = [(key, self.standard_metadata[key]['data_type']) for key in
                                self.metadata_vars_to_read]
         self.standard_data_flag_name_to_data_flag_code = \
@@ -113,81 +113,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
         self.qa_exceptions = ['dir10', 'spd10', 'rho2', 'acprec', 'acsnow', 'si',
                               'cldbot', 'vdist', 'ccovmean', 'cfracmean']
-        self.get_qa_codes()
-
-    def get_qa_codes(self):
-        """Retrieve QA codes from GHOST_standards using the qa flags' names.
-
-        Specific flags are defined for the following species:
-        ['WND_DIR_10M','WND_SPD_10M','RH_2M','PREC_ACCUM','SNOW_ACCUM',
-        'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']"""
-
-        # get names from json files
-        specific_qa_names = json.load(open("providentia/conf/default_flags.json"))['specific_qa']
-        general_qa_names = json.load(open("providentia/conf/default_flags.json"))['general_qa']
-        # get codes
-        self.specific_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in specific_qa_names]
-        self.general_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in general_qa_names]
-        # get difference of flags, needed later for updating default selection
-        self.qa_diff = list(set(self.general_qa) - set(self.specific_qa))
-
-    def which_qa(self, return_defaults=False):
-        """Checks if the species we currently have selected belongs to the ones
-        that have specific qa flags selected as default"""
-
-        if return_defaults or (not hasattr(self, 'qa')):
-            if self.selected_species in self.qa_exceptions:
-                return self.specific_qa
-            else:
-                return self.general_qa
-
-        if hasattr(self, 'qa'):
-            # if conf has only 1 QA
-            if isinstance(self.qa, int):
-                return [self.qa]
-            # if the QAs are written with their names
-            elif self.qa == "":
-                return []
-            elif isinstance(self.qa, str):
-                return [self.standard_QA_name_to_QA_code[q.strip()] for q in self.qa.split(",")]
-            # return subset the user has selected in conf
-            else:
-                return list(self.qa)
-
-    def which_flags(self):
-        """if there are flags coming from a config file, select those"""
-
-        if hasattr(self, 'flags'):
-            # if conf has only one flag
-            if isinstance(self.flags, int):
-                return [self.flags]
-            # if flags are writtern as strings
-            elif self.flags == "":
-                return []
-            elif isinstance(self.flags, str):
-                return [self.standard_data_flag_name_to_data_flag_code[f.strip()] for f in
-                        self.flags.split(",")]
-            else:
-                return list(self.flags)
-        else:
-            return []
-
-    def which_bounds(self):
-        """if there are bounds defined in a config file, fill that value,
-        if it is withing the feasible bounds of the species"""
-
-        lower = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
-        upper = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
-
-        if hasattr(self, 'lower_bound'):
-            if self.lower_bound >= lower:
-                lower = self.lower_bound
-
-        if hasattr(self, 'upper_bound'):
-            if self.upper_bound <= upper:
-                upper = self.upper_bound
-
-        return np.float32(lower), np.float32(upper)
+        self.specific_qa, self.general_qa, self.qa_diff = aux.get_qa_codes(self)
 
     def resizeEvent(self, event):
         '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
@@ -709,7 +635,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                               self.le_end_date.text())
 
             # check which flags to select, depending if we have conf file or no
-            self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
+            self.flag_menu['checkboxes']['remove_selected'] = aux.which_flags(self)
 
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
@@ -790,8 +716,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                                 self.experiments_menu['checkboxes']['map_vars']]
 
         # since a selection has changed, update also the qa flags
-        qa_to_select = self.which_qa()  # first check which flags
-        self.qa_menu['checkboxes']['remove_default'] = self.which_qa(return_defaults=True)
+        qa_to_select = aux.which_qa(self)  # first check which flags
+        self.qa_menu['checkboxes']['remove_default'] = aux.which_qa(self, return_defaults=True)
         if self.config_bar_initialisation:
             self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
         else:
@@ -800,9 +726,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             if self.selected_species in self.qa_exceptions:
                 self.qa_menu['checkboxes']['remove_selected'] = list(set(
                     self.qa_menu['checkboxes']['remove_selected']) - set(self.qa_diff))
-
-        # if self.config_bar_initialisation:
-        #     self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -1145,9 +1068,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
                 # --------------------------------------------------------------------#
         # if species has changed, update default species specific lower/upper limits
-        if (self.active_species != self.previous_active_species):
+        if self.active_species != self.previous_active_species:
             # update default lower/upper species specific limits and filter data outside limits
-            species_lower_limit, species_upper_limit = self.which_bounds()
+            species_lower_limit, species_upper_limit = aux.which_bounds(self, self.active_species)
             # set default limits
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
