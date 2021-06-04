@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.lines import Line2D
 from matplotlib.backends.backend_pdf import PdfPages
+from providentia import aux
 
 from .prov_read import DataReader
 from .filter import DataFilter
@@ -60,9 +61,9 @@ class ProvidentiaOffline(ProvConfiguration):
         self.station_subset_names = list('Barcelona')
 
         self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
-        self.active_qa = self.which_qa()
-        self.active_flags = self.which_flags()
-        self.minimum_value, self.maximum_value = self.which_bounds()
+        self.active_qa = aux.which_qa(self)
+        self.active_flags = aux.which_flags(self)
+        self.minimum_value, self.maximum_value = aux.which_bounds(self, self.selected_species)
 
         # get all netCDF monthly files per species
         species_files = os.listdir(
@@ -137,27 +138,7 @@ class ProvidentiaOffline(ProvConfiguration):
         self.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
         self.qa_exceptions = ['dir10', 'spd10', 'rho2', 'acprec', 'acsnow', 'si',
                               'cldbot', 'vdist', 'ccovmean', 'cfracmean']
-        self.get_qa_codes()
-
-    def get_qa_codes(self):
-        """Retrieve QA codes from GHOST_standards using the qa flags' names.
-
-        Specific flags are defined for the following species:
-        ['WND_DIR_10M','WND_SPD_10M','RH_2M','PREC_ACCUM','SNOW_ACCUM',
-        'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']"""
-
-        # get names from json files
-        specific_qa_names = json.load(open(
-            "providentia/conf/default_flags.json"))['specific_qa']
-        general_qa_names = json.load(open(
-            "providentia/conf/default_flags.json"))['general_qa']
-        # get codes
-        self.specific_qa = [self.standard_QA_name_to_QA_code[qa_name]
-                            for qa_name in specific_qa_names]
-        self.general_qa = [self.standard_QA_name_to_QA_code[qa_name]
-                           for qa_name in general_qa_names]
-        # get difference of flags, needed later for updating default selection
-        self.qa_diff = list(set(self.general_qa) - set(self.specific_qa))
+        self.specific_qa, self.general_qa, self.qa_diff = aux.get_qa_codes(self)
 
     def load_conf(self, section=None, fpath=None):
         """ Load existing configurations from file. """
@@ -177,64 +158,6 @@ class ProvidentiaOffline(ProvConfiguration):
 
         self.opts = opts
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
-
-    def which_qa(self, return_defaults=False):
-        """Checks if the species we currently have selected belongs to the ones
-        that have specific qa flags selected as default"""
-
-        if return_defaults or (not hasattr(self, 'qa')):
-            if self.selected_species in self.qa_exceptions:
-                return self.specific_qa
-            else:
-                return self.general_qa
-
-        if hasattr(self, 'qa'):
-            # if conf has only 1 QA
-            if isinstance(self.qa, int):
-                return [self.qa]
-            # if the QAs are written with their names
-            elif self.qa == "":
-                return []
-            elif isinstance(self.qa, str):
-                return [self.standard_QA_name_to_QA_code[q.strip()] for q in self.qa.split(",")]
-            # return subset the user has selected in conf
-            else:
-                return list(self.qa)
-
-    def which_flags(self):
-        """if there are flags coming from a config file, select those"""
-
-        if hasattr(self, 'flags'):
-            # if conf has only one flag
-            if isinstance(self.flags, int):
-                return [self.flags]
-            # if flags are writtern as strings
-            elif self.flags == "":
-                return []
-            elif isinstance(self.flags, str):
-                return [self.standard_data_flag_name_to_data_flag_code[f.strip()] for f in
-                        self.flags.split(",")]
-            else:
-                return list(self.flags)
-        else:
-            return []
-
-    def which_bounds(self):
-        """if there are bounds defined in a config file, fill that value,
-        if it is withing the feasible bounds of the species"""
-
-        lower = np.float32(self.parameter_dictionary[self.selected_species]['extreme_lower_limit'])
-        upper = np.float32(self.parameter_dictionary[self.selected_species]['extreme_upper_limit'])
-
-        if hasattr(self, 'lower_bound'):
-            if self.lower_bound >= lower:
-                lower = self.lower_bound
-
-        if hasattr(self, 'upper_bound'):
-            if self.upper_bound <= upper:
-                upper = self.upper_bound
-
-        return np.float32(lower), np.float32(upper)
 
     def representativity_conf(self):
         """Comes here if there is a configuration loaded. Checks if there is a
@@ -372,7 +295,8 @@ class ProvidentiaOffline(ProvConfiguration):
                                     # get zstat sign (absolute or bias)
                                     z_statistic_sign = self.get_z_statistic_sign(zstat, z_statistic_type)
 
-                                # map plots (1 plot per data array/s (1 array if absolute plot, 2 arrays if making bias plot), per subset)
+                                # map plots (1 plot per data array/s (1 array if absolute plot,
+                                # 2 arrays if making bias plot), per subset)
                                 if 'map-' in plot_type:
 
                                     # get necessary data arrays
