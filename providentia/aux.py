@@ -1,6 +1,8 @@
 import json
 import numpy as np
 
+from .config import split_options
+
 
 def which_bounds(instance, species):
     """If there are bounds defined in a config file, fill that value,
@@ -84,3 +86,86 @@ def get_qa_codes(instance):
     qa_diff = list(set(general_qa) - set(specific_qa))
 
     return specific_qa, general_qa, qa_diff
+
+
+def representativity_conf(instance):
+    """Comes here if there is a configuration loaded. Checks if there is a
+    representative field loaded in the object from the conf and if there is
+    assigns the value in the representativity menu"""
+    for i, label in enumerate(instance.representativity_menu['rangeboxes']['labels']):
+        if hasattr(instance, label):
+            instance.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(instance, label))
+
+
+def init_metadata(instance):
+    """Initialise internal structure to store metadata."""
+
+    # setup pop-up window menu tree for metadata
+    metadata_types = {'STATION POSITION': 'Filter stations by measurement position',
+                      'STATION CLASSIFICATIONS': 'Filter stations by station provided classifications',
+                      'STATION MISCELLANEOUS': 'Filter stations by miscellaneous station provided metadata',
+                      'GLOBALLY GRIDDED CLASSIFICATIONS': 'Filter stations by globally gridded classifications',
+                      'MEASUREMENT PROCESS INFORMATION': 'Filter stations by measurement process information'}
+    metadata_menu = {'window_title': 'METADATA', 'page_title': 'Select metadata type to filter stations by',
+                     'navigation_buttons': {}}
+
+    metadata_menu['navigation_buttons']['labels'] = list(metadata_types.keys())
+    metadata_menu['navigation_buttons']['tooltips'] = [metadata_types[key] for key in
+                                                       metadata_menu['navigation_buttons']['labels']]
+
+    for metadata_type_ii, metadata_type in enumerate(metadata_menu['navigation_buttons']['labels']):
+        metadata_menu[metadata_type] = {'window_title': metadata_type,
+                                        'page_title': metadata_menu['navigation_buttons']['tooltips'][
+                                            metadata_type_ii], 'navigation_buttons': {}, 'rangeboxes': {}}
+        metadata_menu[metadata_type]['navigation_buttons']['labels'] = \
+            [metadata_name for metadata_name in instance.standard_metadata.keys() if
+             (instance.standard_metadata[metadata_name]['metadata_type'] == metadata_type) &
+             (instance.standard_metadata[metadata_name]['data_type'] == np.object)]
+        metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = \
+            [instance.standard_metadata[metadata_name]['description'] for metadata_name in
+             metadata_menu[metadata_type]['navigation_buttons']['labels']]
+
+        for label in metadata_menu[metadata_type]['navigation_buttons']['labels']:
+            metadata_menu[metadata_type][label] = {'window_title': label,
+                                                   'page_title': 'Filter stations by unique {} metadata'.format(
+                                                       label), 'checkboxes': {}}
+            metadata_menu[metadata_type][label]['checkboxes'] = {'labels': [], 'keep_selected': [],
+                                                                 'remove_selected': [], 'keep_default': [],
+                                                                 'remove_default': []}
+
+        metadata_menu[metadata_type]['rangeboxes']['labels'] = \
+            [metadata_name for metadata_name in instance.standard_metadata.keys()
+             if (instance.standard_metadata[metadata_name]['metadata_type'] == metadata_type)
+             & (instance.standard_metadata[metadata_name]['data_type'] != np.object)]
+        metadata_menu[metadata_type]['rangeboxes']['tooltips'] = \
+            [instance.standard_metadata[metadata_name]['description']
+             for metadata_name in metadata_menu[metadata_type]['rangeboxes']['labels']]
+        metadata_menu[metadata_type]['rangeboxes']['current_lower'] = \
+            ['nan'] * len(metadata_menu[metadata_type]['rangeboxes']['labels'])
+        metadata_menu[metadata_type]['rangeboxes']['current_upper'] = \
+            ['nan'] * len(metadata_menu[metadata_type]['rangeboxes']['labels'])
+        metadata_menu[metadata_type]['rangeboxes']['lower_default'] = \
+            ['nan'] * len(metadata_menu[metadata_type]['rangeboxes']['labels'])
+        metadata_menu[metadata_type]['rangeboxes']['upper_default'] = \
+            ['nan'] * len(metadata_menu[metadata_type]['rangeboxes']['labels'])
+
+    return metadata_types, metadata_menu
+
+
+def meta_from_conf(instance):
+    """Comes here if there in a loaded configuration there are also metadata fields."""
+
+    for menu_type in instance.metadata_types:
+        # treat first ranges
+        for i, label_cap in enumerate(instance.metadata_menu[menu_type]['rangeboxes']['labels']):
+            label = label_cap.lower()
+            if hasattr(instance, label):
+                instance.metadata_menu[menu_type]['rangeboxes']['current_lower'][i] = str(getattr(instance, label)[0])
+                instance.metadata_menu[menu_type]['rangeboxes']['current_upper'][i] = str(getattr(instance, label)[1])
+        # and then treat the keep/remove
+        for label_cap in instance.metadata_menu[menu_type]['navigation_buttons']['labels']:
+            label = label_cap.lower()
+            if hasattr(instance, label):
+                keeps, removes = split_options(getattr(instance, label))
+                instance.metadata_menu[menu_type][label_cap]['checkboxes']['keep_selected'] = keeps
+                instance.metadata_menu[menu_type][label_cap]['checkboxes']['remove_selected'] = removes

@@ -306,7 +306,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.le_start_date.textChanged.connect(self.config_bar_params_change_handler)
         self.le_end_date.textChanged.connect(self.config_bar_params_change_handler)
 
-        #setup pop-up window menu tree for flags
+        # setup pop-up window menu tree for flags
         self.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
         self.flag_menu['checkboxes']['labels'] = np.array(sorted(self.standard_data_flag_name_to_data_flag_code, key=self.standard_data_flag_name_to_data_flag_code.get))
         self.flag_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
@@ -314,7 +314,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.flag_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_data_flag_name_to_data_flag_code.values()))
         self.flag_menu['select_buttons'] = ['all', 'clear', 'default']
 
-        #setup pop-up window menu tree for qa
+        # setup pop-up window menu tree for qa
         self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
         self.qa_menu['checkboxes']['labels'] = np.array(sorted(self.standard_QA_name_to_QA_code, key=self.standard_QA_name_to_QA_code.get))
         self.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
@@ -322,7 +322,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.qa_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_QA_name_to_QA_code.values()))
         self.qa_menu['select_buttons'] = ['all', 'clear', 'default']
 
-        #setup pop-up window menu tree for experiments
+        # setup pop-up window menu tree for experiments
         self.experiments_menu = {'window_title':'EXPERIMENTS', 'page_title':'Select Experiment/s', 'checkboxes':{}}
         self.experiments_menu['checkboxes']['labels'] = []
         self.experiments_menu['checkboxes']['keep_default'] = []
@@ -330,32 +330,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.experiments_menu['checkboxes']['map_vars'] = []
         self.experiments_menu['select_buttons'] = ['all', 'clear']
 
-        #setup pop-up window menu tree for metadata
-        self.metadata_types =  {'STATION POSITION':'Filter stations by measurement position',
-                                'STATION CLASSIFICATIONS':'Filter stations by station provided classifications',
-                                'STATION MISCELLANEOUS':'Filter stations by miscellaneous station provided metadata',
-                                'GLOBALLY GRIDDED CLASSIFICATIONS':'Filter stations by globally gridded classifications',
-                                'MEASUREMENT PROCESS INFORMATION':'Filter stations by measurement process information'}
-        self.metadata_menu = {'window_title':'METADATA', 'page_title':'Select metadata type to filter stations by', 'navigation_buttons':{}}
-        self.metadata_menu['navigation_buttons']['labels'] = list(self.metadata_types.keys())
-        self.metadata_menu['navigation_buttons']['tooltips'] = [self.metadata_types[key] for key in self.metadata_menu['navigation_buttons']['labels']]
-        for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
-            self.metadata_menu[metadata_type] = {'window_title':metadata_type, 'page_title':self.metadata_menu['navigation_buttons']['tooltips'][metadata_type_ii], 'navigation_buttons':{}, 'rangeboxes':{}}
-            self.metadata_menu[metadata_type]['navigation_buttons']['labels'] = [metadata_name for metadata_name in self.standard_metadata.keys() if (self.standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (self.standard_metadata[metadata_name]['data_type'] == np.object)]
-            self.metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = [self.standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['navigation_buttons']['labels']]
-            for label in self.metadata_menu[metadata_type]['navigation_buttons']['labels']:
-                self.metadata_menu[metadata_type][label] = {'window_title':label, 'page_title':'Filter stations by unique {} metadata'.format(label), 'checkboxes':{}}
-                self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['keep_default'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['remove_default'] = []
-            self.metadata_menu[metadata_type]['rangeboxes']['labels'] = [metadata_name for metadata_name in self.standard_metadata.keys() if (self.standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (self.standard_metadata[metadata_name]['data_type'] != np.object)]
-            self.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = [self.standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['rangeboxes']['labels']]
-            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+        # setup pop-up window menu tree for metadata
+        self.metadata_types, self.metadata_menu = aux.init_metadata(self)
 
         #setup pop-up window menu tree for % data representativity
         self.representativity_menu = {'window_title':'% DATA REPRESENTATIVITY', 'page_title':'Select % Data Representativity Bounds', 'rangeboxes':{}}
@@ -454,12 +430,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         if self.from_conf:
             self.handle_data_selection_update()
             # then see if we have fields that require to be se (meta, rep, period)
-            self.representativity_conf()
+            aux.representativity_conf(self)
             if hasattr(self, 'period'):
                 self.period_conf()
             # if there are there are metadata reported in configuratoin
             if set([m.lower() for m in self.metadata_vars_to_read]).intersection(vars(self).keys()):
-                self.meta_from_conf()
+                aux.meta_from_conf(self)
             # call function to apply changes (filter)
             self.mpl_canvas.handle_data_filter_update()
 
@@ -477,32 +453,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # for i, label in enumerate(self.period_menu['checkboxes']['labels']):
         self.period_menu['checkboxes']['keep_selected'] += keeps
         self.period_menu['checkboxes']['remove_selected'] += removes
-
-    def representativity_conf(self):
-        """Comes here if there is a configuration loaded. Checks if there is a
-        representative field loaded in the object from the conf and if there is
-        assigns the value in the representativity menu"""
-        for i, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
-            if hasattr(self, label):
-                self.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(self, label))
-
-    def meta_from_conf(self):
-        """Comes here if there in a loaded configuration there are also metadata fields."""
-
-        for menu_type in self.metadata_types:
-            # treat first ranges
-            for i, label_cap in enumerate(self.metadata_menu[menu_type]['rangeboxes']['labels']):
-                label = label_cap.lower()
-                if hasattr(self, label):
-                    self.metadata_menu[menu_type]['rangeboxes']['current_lower'][i] = str(getattr(self, label)[0])
-                    self.metadata_menu[menu_type]['rangeboxes']['current_upper'][i] = str(getattr(self, label)[1])
-            # and then treat the keep/remove
-            for label_cap in self.metadata_menu[menu_type]['navigation_buttons']['labels']:
-                label = label_cap.lower()
-                if hasattr(self, label):
-                    keeps, removes = split_options(getattr(self, label))
-                    self.metadata_menu[menu_type][label_cap]['checkboxes']['keep_selected'] = keeps
-                    self.metadata_menu[menu_type][label_cap]['checkboxes']['remove_selected'] = removes
 
     def savebutton_func(self):
         save_data(self.mpl_canvas)
