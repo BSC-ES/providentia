@@ -324,6 +324,11 @@ class DataFilter:
     def colocate_data(self):
         """Define function which colocates observational and experiment data"""
 
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+        else:
+            species = self.read_instance.active_species
+
         # if do not have any experiment data loaded, no colocation is possible,
         # therefore return from function
         if len(list(self.read_instance.datareader.data_in_memory.keys())) == 1:
@@ -337,7 +342,7 @@ class DataFilter:
 
             # get all instances observations are NaN
             nan_obs = np.isnan(
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species])
+                self.read_instance.data_in_memory_filtered['observations'][species])
 
             # create array for finding instances where have 0 valid values across all experiments
             # initialise as being all True, set as False on the occasion there is a valid value in an experiment
@@ -351,8 +356,7 @@ class DataFilter:
             exp_nan_dict = {}
             for exp_label in exp_labels:
                 # get all instances experiment are NaN
-                exp_nan_dict[exp_label] = np.isnan(
-                    self.read_instance.data_in_memory_filtered[exp_label][self.read_instance.active_species])
+                exp_nan_dict[exp_label] = np.isnan(self.read_instance.data_in_memory_filtered[exp_label][species])
                 # get all instances where either the observational array or experiment array are NaN at a given time
                 nan_instances = np.any([nan_obs, exp_nan_dict[exp_label]], axis=0)
                 # create new observational array colocated to experiment
