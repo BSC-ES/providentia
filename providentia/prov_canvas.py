@@ -551,7 +551,8 @@ class MPLCanvas(FigureCanvas):
             # observational arrays
             if data_label.split('_')[0] == 'observations':
                 # get data for selected stations
-                data_array = self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][self.relative_selected_station_inds,:]
+                data_array = self.read_instance.data_in_memory_filtered[data_label][
+                                 self.read_instance.active_species][self.relative_selected_station_inds,:]
             # experiment arrays
             else:
                 # get intersect between selected station indices and valid available indices for experiment data array
