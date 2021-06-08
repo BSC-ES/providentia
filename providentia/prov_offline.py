@@ -83,7 +83,10 @@ class ProvidentiaOffline(ProvConfiguration):
             self.selected_resolution][self.selected_matrix][self.selected_species] = species_files_yearmonths
 
         self.representativity_menu = init_representativity(self.selected_resolution)
-        self.representativity_conf()
+        aux.representativity_conf(self)
+
+        self.metadata_types, self.metadata_menu = aux.init_metadata(self)
+        aux.meta_from_conf(self)
 
         # initialize DataReader
         self.datareader = DataReader(self)
@@ -158,14 +161,6 @@ class ProvidentiaOffline(ProvConfiguration):
 
         self.opts = opts
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
-
-    def representativity_conf(self):
-        """Comes here if there is a configuration loaded. Checks if there is a
-        representative field loaded in the object from the conf and if there is
-        assigns the value in the representativity menu"""
-        for i, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
-            if hasattr(self, label):
-                self.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(self, label))
 
     def start_pdf(self):
         filename = "test_pdf.pdf"
