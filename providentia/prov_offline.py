@@ -47,6 +47,8 @@ class ProvidentiaOffline(ProvConfiguration):
         # update from config file
         if ('config' in kwargs) and ('section' in kwargs):
             self.load_conf(kwargs['section'], kwargs['config'])
+        elif os.path.isfile(dconf_path):
+            self.load_conf('default', dconf_path)
 
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
@@ -83,14 +85,12 @@ class ProvidentiaOffline(ProvConfiguration):
             [int(f.split('_')[-1][:6] + '01') for f in species_files if f != 'temporary']
 
         # initialize structure to store all obs
-        self.all_observation_data = {}
-        self.all_observation_data[self.selected_network] = {}
-        self.all_observation_data[self.selected_network][self.selected_resolution] = {}
-        self.all_observation_data[self.selected_network][self.selected_resolution][self.selected_matrix] = {}
-        self.all_observation_data[self.selected_network][
-            self.selected_resolution][self.selected_matrix][self.selected_species] = species_files_yearmonths
+        self.all_observation_data = {self.selected_network: {
+            self.selected_resolution: {self.selected_matrix: {
+                self.selected_species: species_files_yearmonths}}}}
 
-        self.representativity_menu = init_representativity(self.selected_resolution)
+        # self.representativity_menu = init_representativity(self.selected_resolution)
+        self.representativity_menu = aux.representativity_fields(self, self.selected_resolution)
         aux.representativity_conf(self)
 
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
@@ -1554,54 +1554,6 @@ def get_z_statistic_sign(zstat, zstat_type):
     # statistic is bias?
     else:
         return 'absolute'
-
-
-def init_representativity(resolution):
-    """Initialize representativity structure, similar to the one used
-    in Providentia dashboard, keeping only the necessary fields"""
-
-    # initialize representativity menu, inly with necessary substructures
-    representativity = {'rangeboxes': {'labels': [], 'current_lower': []}}
-
-    if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
-        representativity['rangeboxes']['labels'] = ['hourly_native_representativity_percent',
-                                                    'hourly_native_max_gap_percent',
-                                                    'daily_native_representativity_percent',
-                                                    'daily_representativity_percent',
-                                                    'daily_native_max_gap_percent',
-                                                    'daily_max_gap_percent',
-                                                    'monthly_native_representativity_percent',
-                                                    'monthly_representativity_percent',
-                                                    'monthly_native_max_gap_percent',
-                                                    'monthly_max_gap_percent',
-                                                    'all_representativity_percent', 'all_max_gap_percent']
-    # daily temporal resolution?
-    elif (resolution == 'daily') or (resolution == '3hourly') or \
-            (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
-            (resolution == '6hourly_instantaneous'):
-        representativity['rangeboxes']['labels'] = ['daily_native_representativity_percent',
-                                                    'daily_native_max_gap_percent',
-                                                    'monthly_native_representativity_percent',
-                                                    'monthly_representativity_percent',
-                                                    'monthly_native_max_gap_percent',
-                                                    'monthly_max_gap_percent',
-                                                    'all_representativity_percent', 'all_max_gap_percent']
-    # monthly temporal resolution?
-    elif resolution == 'monthly':
-        representativity['rangeboxes']['labels'] = ['monthly_native_representativity_percent',
-                                                    'monthly_native_max_gap_percent',
-                                                    'all_representativity_percent', 'all_max_gap_percent']
-
-    # initialise rangebox values --> for data representativity fields
-    # the default is 0%, for max gap fields % the default is 100%
-    representativity['rangeboxes']['current_lower'] = []
-    for label_ii, label in enumerate(representativity['rangeboxes']['labels']):
-        if 'max_gap' in label:
-            representativity['rangeboxes']['current_lower'].append('100')
-        else:
-            representativity['rangeboxes']['current_lower'].append('0')
-
-    return representativity
 
 
 def main_offline(**kwargs):
