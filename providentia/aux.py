@@ -1,3 +1,4 @@
+import copy
 import json
 import numpy as np
 
@@ -169,3 +170,65 @@ def meta_from_conf(instance):
                 keeps, removes = split_options(getattr(instance, label))
                 instance.metadata_menu[menu_type][label_cap]['checkboxes']['keep_selected'] = keeps
                 instance.metadata_menu[menu_type][label_cap]['checkboxes']['remove_selected'] = removes
+
+
+def representativity_fields(instance, resolution):
+    """Update the data representativity menu -> 1D list of rangebox values
+       dependent on the temporal resolution, some fields will appear or not
+    """
+
+    # get previous set labels of dashboard
+    if instance.offline:
+        repr_menu = {'rangeboxes': {'labels': [], 'current_lower': []}}
+        previous_labels = []
+    else:
+        previous_labels = copy.deepcopy(instance.representativity_menu['rangeboxes']['labels'])
+        # get previously set rangebox values
+        previous_lower = copy.deepcopy(instance.representativity_menu['rangeboxes']['current_lower'])
+        repr_menu = instance.representativity_menu
+
+    # hourly temporal resolution?
+    if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
+        repr_menu['rangeboxes']['labels'] = ['hourly_native_representativity_percent',
+                                             'hourly_native_max_gap_percent',
+                                             'daily_native_representativity_percent',
+                                             'daily_representativity_percent',
+                                             'daily_native_max_gap_percent',
+                                             'daily_max_gap_percent',
+                                             'monthly_native_representativity_percent',
+                                             'monthly_representativity_percent',
+                                             'monthly_native_max_gap_percent',
+                                             'monthly_max_gap_percent',
+                                             'all_representativity_percent', 'all_max_gap_percent']
+    # daily temporal resolution?
+    elif (resolution == 'daily') or (resolution == '3hourly') or \
+            (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
+            (resolution == '6hourly_instantaneous'):
+        repr_menu['rangeboxes']['labels'] = ['daily_native_representativity_percent',
+                                             'daily_native_max_gap_percent',
+                                             'monthly_native_representativity_percent',
+                                             'monthly_representativity_percent',
+                                             'monthly_native_max_gap_percent',
+                                             'monthly_max_gap_percent',
+                                             'all_representativity_percent', 'all_max_gap_percent']
+    # monthly temporal resolution?
+    elif resolution == 'monthly':
+        repr_menu['rangeboxes']['labels'] = ['monthly_native_representativity_percent',
+                                             'monthly_native_max_gap_percent',
+                                             'all_representativity_percent', 'all_max_gap_percent']
+
+    # initialise rangebox values --> for data representativity fields
+    # the default is 0%, for max gap fields % the default is 100%
+    repr_menu['rangeboxes']['current_lower'] = []
+    for label_ii, label in enumerate(repr_menu['rangeboxes']['labels']):
+        if 'max_gap' in label:
+            repr_menu['rangeboxes']['current_lower'].append('100')
+        else:
+            repr_menu['rangeboxes']['current_lower'].append('0')
+
+        # label previously existed?
+        if label in previous_labels:
+            repr_menu['rangeboxes']['current_lower'][label_ii] = \
+                previous_lower[previous_labels.index(label)]
+
+    return repr_menu
