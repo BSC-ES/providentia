@@ -145,7 +145,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         parent_layout.setContentsMargins(0, 0, 0, 0)
 
         # define stylesheet for tooltips
-        self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family()))
+        self.setStyleSheet("QToolTip { font: %spt %s}" % (formatting_dict['tooltip']['font'].pointSizeF(),
+                                                          formatting_dict['tooltip']['font'].family()))
 
         # setup configuration bar with combo boxes, input boxes and buttons
         # use a gridded layout to place objects
