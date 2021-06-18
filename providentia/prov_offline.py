@@ -131,10 +131,9 @@ class ProvidentiaOffline(ProvConfiguration):
             self.exceedance_limit = np.NaN
 
         self.temporal_axis_mapping_dict = {
-            'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6:
-                'S'},
-            'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J', 7:
-                'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
+            'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
+            'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
+                      7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
         }
 
         self.experiments2 = {'cams61_chimere_ph2-eu-000': {'name': 'CHIMERE', 'colour': '#ffcc00'},

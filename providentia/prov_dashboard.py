@@ -1,5 +1,6 @@
 """ Module which provides main window """
 from .configuration import ProvConfiguration
+from .init_standards import InitStandards
 from .configuration import parse_path
 from .config import split_options
 from .reading import get_yearmonths_to_read
@@ -36,7 +37,7 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
-class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
+class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards):
     """Define class that generates Providentia dashboard"""
 
     # create signals that are fired upon resizing/moving of main Providentia window
@@ -51,7 +52,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.read_type = read_type
 
         # store options to be restored at the end
-        # self.localvars = copy.deepcopy(vars(self))
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
         # update from config file
         if ('config' in kwargs) and ('section' in kwargs):
@@ -63,16 +63,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
         # arguments are only local
-
         self.main_window_geometry = None
-
-        self.parameter_dictionary = {}
-        self.standard_metadata = {}
-        self.metadata_vars_to_read = {}
-        self.metadata_dtype = {}
-        self.standard_data_flag_name_to_data_flag_code = {}
-        self.standard_QA_name_to_QA_code = {}
-        self.init_standards()
+        InitStandards.__init__(self, obs_root=self.obs_root,
+                               ghost_version=self.ghost_version)
 
         # load necessary dictionaries
         self.basic_stats_dict = json.load(open(os.path.join(CURRENT_PATH,
@@ -81,39 +74,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                         'conf/experiment_bias_stats_dict.json')))
         # initialize DataReader
         self.datareader = DataReader(self)
-
         if self.offline:
             ProvidentiaOffline(self)
         else:
             self.init_ui()
-
             # setup callback events upon resizing/moving of Providentia window
             self.resized.connect(self.get_geometry)
             self.move.connect(self.get_geometry)
-
-    def init_standards(self):
-        """ Read from ghost standards """
-        sys.path.insert(1, '{}/GHOST_standards/{}'.format(self.obs_root, self.ghost_version))
-        from GHOST_standards import standard_parameters, \
-            get_standard_metadata, standard_data_flag_name_to_data_flag_code, \
-            standard_QA_name_to_QA_code
-        # modify standard parameter dictionary to have BSC standard parameter names as
-        # keys (rather than GHOST)
-        for _, param_dict in standard_parameters.items():
-            self.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
-        # get standard metadata dictionary
-        self.standard_metadata = get_standard_metadata({'standard_units': ''})
-        # create list of metadata variables to read (make global)
-        self.metadata_vars_to_read = [key for key in self.standard_metadata.keys() if
-                                      pd.isnull(self.standard_metadata[key]['metadata_type']) == False]
-        self.metadata_dtype = [(key, self.standard_metadata[key]['data_type']) for key in
-                               self.metadata_vars_to_read]
-        self.standard_data_flag_name_to_data_flag_code = \
-            standard_data_flag_name_to_data_flag_code
-        self.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
-        self.qa_exceptions = ['dir10', 'spd10', 'rho2', 'acprec', 'acsnow', 'si',
-                              'cldbot', 'vdist', 'ccovmean', 'cfracmean']
-        self.specific_qa, self.general_qa, self.qa_diff = aux.get_qa_codes(self)
 
     def resizeEvent(self, event):
         """Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry"""
@@ -157,12 +124,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         config_bar.setVerticalSpacing(1)
         config_bar.setContentsMargins(5, 0, 0, 0)
         config_bar.setAlignment(QtCore.Qt.AlignLeft)
-
         # add one more horizontal layout
         hbox = QtWidgets.QHBoxLayout()
 
         # define all configuration box objects (labels, comboboxes etc.)
-        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"), formatting_dict['title_menu'])
+        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"),
+                                                formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
         self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
         self.bu_read.setFixedWidth(40)
@@ -172,7 +139,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_network.setFixedWidth(95)
-        self.cb_network.setToolTip('Select providing observational data network. Names starting with * indicate non-GHOST datasets')
+        self.cb_network.setToolTip('Select providing observational data network. '
+                                   'Names starting with * indicate non-GHOST datasets')
         self.cb_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_resolution.setFixedWidth(95)
         self.cb_resolution.setToolTip('Select temporal resolution of data')
@@ -206,7 +174,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
         self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), formatting_dict['button_menu'])
         self.bu_rep.setFixedWidth(46)
-        self.bu_rep.setToolTip('Select % desired representativity in data across whole record and for specific temporal periods')
+        self.bu_rep.setToolTip('Select % desired representativity in data across '
+                               'whole record and for specific temporal periods')
         self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), formatting_dict['button_menu'])
         self.bu_meta.setFixedWidth(46)
         self.bu_meta.setToolTip('Select metadata to filter by')
@@ -245,7 +214,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.cb_z2.setToolTip('Select Z2 dataset')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
-        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp. Bias"), formatting_dict['title_menu'])
+        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp. Bias"),
+                                                 formatting_dict['title_menu'])
         self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
         self.cb_experiment_bias_type = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_experiment_bias_type.setFixedWidth(100)
@@ -255,7 +225,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.cb_experiment_bias_stat.setToolTip('Select experiment bias statistic')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
-        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Select"), formatting_dict['title_menu'])
+        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Select"),
+                                                   formatting_dict['title_menu'])
         self.lb_station_selection.setToolTip('Select stations')
         self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), formatting_dict['checkbox_menu'])
         self.ch_select_all.setToolTip('Select all stations')
@@ -328,20 +299,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                  'checkboxes': {'labels': [],
                                                 'keep_default': [],
                                                 'keep_selected': [],
-                                                'map_vars':[],
+                                                'map_vars': [],
                                                 'select_buttons': ['all', 'clear']}}
-
 
         # setup pop-up window menu tree for metadata
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
-
         # setup pop-up window menu tree for % data representativity
         self.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY',
                                       'page_title': 'Select % Data Representativity Bounds',
                                       'rangeboxes': {'labels': [],
                                                      'tooltips': [],
                                                      'current_lower': []}}
-
         # setup pop-up window menu tree for data periods
         self.period_menu = {'window_title': 'DATA PERIOD', 'page_title': 'Select Data Periods',
                             'checkboxes': {'labels': [],
@@ -369,13 +337,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # Enable interactivity of functions which update MPL canvas
         # enable READ button
         self.bu_read.clicked.connect(self.handle_data_selection_update)
-
         # enable RESET button
         self.bu_reset.clicked.connect(self.reset_options)
-
         # enable interactivity of colocation checkbox
         self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_colocate_update)
-
         # enable FILTER button
         self.bu_screen.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
@@ -444,16 +409,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # set finalised layout
         self.setLayout(parent_layout)
-
         # plot whole dashboard
         self.show()
-
         # maximise window to fit screen
         self.showMaximized()
 
     def period_conf(self):
         keeps, removes = split_options(self.period)
-        # for i, label in enumerate(self.period_menu['checkboxes']['labels']):
         self.period_menu['checkboxes']['keep_selected'] += keeps
         self.period_menu['checkboxes']['remove_selected'] += removes
 
@@ -464,8 +426,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         conf_dialogs(self)
 
     def generate_pop_up_window(self, menu_root):
-        """generate pop up window"""
-
+        """Generate pop up window"""
         self.pop_up_window = PopUpWindow(menu_root, [], self.main_window_geometry)
 
     def update_configuration_bar_fields(self):
@@ -474,9 +435,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
 
-        # self.check_for_ghost()
         self.reading_nonghost = self.datareader.check_for_ghost()
-
         if self.reading_nonghost:
             self.disable_ghost_buttons()
         else:
@@ -495,7 +454,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.date_range_has_changed = False
 
             # set selected/active values of other fields to be initially None
-            # self.selected_network = None
             self.active_network = None
             self.active_resolution = None
             self.active_matrix = None
@@ -509,9 +467,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # set initial time array to be None
             self.time_array = None
-
             self.relevant_yearmonths = None
-
             # set initial station references to be empty list
             self.station_references = []
 
@@ -519,17 +475,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # create nested dictionary storing all observational species
             # data by species matrix, by temporal resolution, by network,
             # associated with list of start YYYYMM yearmonths of data files
-
             self.all_observation_data = {}
-
             # set all available networks
             available_networks = eval(self.available_networks)
-
             # set all available temporal resolutions
             available_resolutions = ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                      '3hourly_instantaneous', '6hourly_instantaneous',
                                      'daily', 'monthly']
-
             # iterate through available networks
             for network in available_networks:
 
@@ -537,7 +489,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 # if not, continue
                 if not os.path.exists('%s/%s/%s' % (self.obs_root, network, self.ghost_version)):
                     continue
-
                 # write empty dictionary for network
                 self.all_observation_data[network] = {}
 
@@ -557,18 +508,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
                     # iterate through available files per species
                     for species in available_species:
-
                         # get all netCDF monthly files per species
                         species_files = os.listdir(
                             '%s/%s/%s/%s/%s' % (self.obs_root, network, self.ghost_version, resolution, species))
-
                         # get monthly start date (YYYYMM) of all species files
                         species_files_yearmonths = \
                             [int(f.split('_')[-1][:6]+'01') for f in species_files if f != 'temporary']
-
                         # get matrix for current species
                         matrix = self.parameter_dictionary[species]['matrix']
-
                         if matrix not in list(self.all_observation_data[network][resolution].keys()):
                             # write nested empty dictionary for matrix
                             self.all_observation_data[network][resolution][matrix] = {}
@@ -595,7 +542,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                               self.le_end_date.text())
 
         # initialise/update fields - maintain previously selected values wherever possible
-
         # clear fields
         self.cb_network.clear()
         self.cb_resolution.clear()
@@ -622,9 +568,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update resolution field
         available_resolutions = list(self.datareader.available_observation_data[self.cb_network.currentText()].keys())
         # manually force order of available resolutions
-        resolution_order_dict = {'hourly':1, '3hourly':2, '6hourly':3, 'hourly_instantaneous':4,
-                                 '3hourly_instantaneous':5, '6hourly_instantaneous':6,
-                                 'daily':7, 'monthly':8}
+        resolution_order_dict = {'hourly': 1, '3hourly': 2, '6hourly': 3, 'hourly_instantaneous': 4,
+                                 '3hourly_instantaneous': 5, '6hourly_instantaneous': 6,
+                                 'daily': 7, 'monthly': 8}
         available_resolutions = sorted(available_resolutions, key=resolution_order_dict.__getitem__)
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
@@ -689,7 +635,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # get event origin source
             event_source = self.sender()
-
             # if network, resolution, matrix or species have changed then respective
             # current selection for the changed param
             if event_source == self.cb_network:
@@ -706,14 +651,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
-
             # check if start date/end date have changed
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
                 self.date_range_has_changed = True
 
             # update configuration bar fields
             self.update_configuration_bar_fields()
-
             # if we're reading nonghost files, then disable fields again
             self.datareader.check_for_ghost()
 
@@ -755,7 +698,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # --------------------------------------------------------------------#
         # determine what data (if any) needs to be read
-
         # set variables that inform what data needs to be read (set all initially as False)
         read_all = False
         read_left = False
@@ -895,7 +837,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # need to cut edges?
             if cut_left or cut_right:
-
                 # set default edge limits as current edges
                 data_left_edge_ind = 0
                 data_right_edge_ind = len(self.previous_time_array)
@@ -911,8 +852,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     monthly_relative_delta = relativedelta(
                         datetime.datetime(int(str_first_relevant_yearmonth[:4]), int(str_first_relevant_yearmonth[4:6]),
                                           1, 0, 0), datetime.datetime(int(str_previous_first_relevant_yearmonth[:4]),
-                                                                      int(str_previous_first_relevant_yearmonth[4:6]), 1,
-                                                                      0, 0))
+                                                                      int(str_previous_first_relevant_yearmonth[4:6]),
+                                                                      1, 0, 0))
                     metadata_left_edge_ind = (monthly_relative_delta.years * 12) + monthly_relative_delta.months
 
                 # need to cut on right data edge?
@@ -924,8 +865,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         datetime.datetime(int(str_previous_last_relevant_yearmonth[:4]),
                                           int(str_previous_last_relevant_yearmonth[4:6]),
                                           1, 0, 0), datetime.datetime(int(str_last_relevant_yearmonth[:4]),
-                                                                      int(str_last_relevant_yearmonth[4:6]),
-                                                                      1, 0, 0))
+                                                                      int(str_last_relevant_yearmonth[4:6]), 1, 0, 0))
                     metadata_right_edge_ind = \
                         metadata_right_edge_ind - ((monthly_relative_delta.years * 12) + monthly_relative_delta.months)
 
@@ -1032,19 +972,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         # self.update_plotting_parameters()
         self.datareader.update_plotting_parameters()
-
         # --------------------------------------------------------------------#
         # run function to filter data outside lower/upper limits, not using desired
         # measurement methods, and < desired minimum data availability
         self.mpl_canvas.handle_data_filter_update()
-
         # --------------------------------------------------------------------#
         # update map z combobox fields based on data in memory
-
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
         self.basic_z_stats = np.array(list(
             OrderedDict(sorted(self.basic_stats_dict.items(), key=lambda x: x[1]['order'])).keys()))
-
         self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
             OrderedDict(sorted(self.expbias_dict.items(), key=lambda x: x[1]['order'])).keys()))
 
@@ -1064,7 +1000,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # --------------------------------------------------------------------#
         # update experiment bias combobox fields based on data in memory
-
         # if have no experiment data, all fields are empty
         if len(list(self.datareader.data_in_memory.keys())) == 1:
             self.experiment_bias_types = np.array([])
@@ -1081,7 +1016,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
         # --------------------------------------------------------------------#
-
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
 
@@ -1103,7 +1037,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set rep fields to empty lists and initialize again
         self.representativity_menu['rangeboxes']['labels'] = []
         self.representativity_menu['rangeboxes']['current_lower'] = []
-        self.update_representativity_fields()
+        aux.representativity_fields(self, self.selected_resolution)
 
         # set period fields to empty and initiliaze them
         self.period_menu['checkboxes']['keep_selected'] = []
@@ -1225,9 +1159,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
     def update_period_fields(self):
         """Update the data period menu -> list of checkboxes
-           dependent on the temporal resolution, some fields will appear or not
-        """
-
+           dependent on the temporal resolution, some fields will appear or not"""
         # hourly temporal resolution?
         if 'hourly' in self.active_resolution:
             self.period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend', 'Spring',
@@ -1247,7 +1179,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # monthly temporal resolution?
         elif self.active_resolution == 'monthly':
             self.period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
-
             # drop selected fields from higher temporal resolutions
             labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend']
             for label in labels_to_remove:

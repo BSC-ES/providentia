@@ -1,16 +1,19 @@
+import sys
+import pandas as pd
 from providentia import aux
 
 
-class GhostStandards:
+class InitStandards:
 
-    def init_standards(self):
+    def __init__(self, obs_root, ghost_version):
         """ Read from ghost standards """
-        sys.path.insert(1, '{}/GHOST_standards/{}'.format(self.obs_root, self.ghost_version))
+        sys.path.insert(1, '{}/GHOST_standards/{}'.format(obs_root, ghost_version))
         from GHOST_standards import standard_parameters, \
             get_standard_metadata, standard_data_flag_name_to_data_flag_code, \
             standard_QA_name_to_QA_code
         # modify standard parameter dictionary to have BSC standard parameter names as
         # keys (rather than GHOST)
+        self.parameter_dictionary = dict()
         for _, param_dict in standard_parameters.items():
             self.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
         # get standard metadata dictionary
