@@ -78,7 +78,6 @@ class Stats(object):
         (i.e. number of measurements exceeding a set threshold)
         """
         n_exceed = len(np.where(data > threshold)[0])
-        # print('n exceed = ', n_exceed, np.max(data), threshold)
         return n_exceed
 
 
