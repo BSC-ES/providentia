@@ -748,16 +748,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     cut_left = True
                     read_right = True
                 # need to read data on left edge of previous date range (i.e. start date earlier)?
-                elif (self.active_start_date < previous_active_start_date):
+                elif self.active_start_date < previous_active_start_date:
                     read_left = True
                 # need to read data on right edge of previous date range (i.e. end date later)?
-                elif (self.active_end_date > previous_active_end_date):
+                elif self.active_end_date > previous_active_end_date:
                     read_right = True
                 # need to cut data on left edge of previous date range (i.e. start date later)?
-                elif (self.active_start_date > previous_active_start_date):
+                elif self.active_start_date > previous_active_start_date:
                     cut_left = True
                 # need to cut data on right edge of previous date range (i.e. end date earlier)?
-                elif (self.active_end_date < previous_active_end_date):
+                elif self.active_end_date < previous_active_end_date:
                     cut_right = True
 
         # determine if any of the active experiments have changed
@@ -771,7 +771,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                experiment not in previous_active_experiment_grids]
 
         # has date range changed?
-        if read_all or read_left or read_right or cut_left or cut_right :
+        if read_all or read_left or read_right or cut_left or cut_right:
 
             # set new active time array/unique station references/longitudes/latitudes
             # adjust data arrays to account for potential changing number of stations
@@ -831,7 +831,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                                       len(self.previous_time_array)),
                                                      np.NaN, dtype=self.datareader.data_dtype[:1])
                         # put the old data into new array in the correct positions
-                        new_data_array[new_station_inds, :] = self.datareader.data_in_memory[data_label][old_station_inds, :]
+                        new_data_array[new_station_inds, :] = self.datareader.data_in_memory[
+                                                                  data_label][old_station_inds, :]
                         # overwrite data array with reshaped version
                         self.datareader.data_in_memory[data_label] = new_data_array
 
