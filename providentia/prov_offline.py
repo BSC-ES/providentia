@@ -45,10 +45,11 @@ class ProvidentiaOffline(ProvConfiguration):
 
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
         # update from config file
-        if ('config' in kwargs) and ('section' in kwargs):
-            self.load_conf(kwargs['section'], kwargs['config'])
-        elif os.path.isfile(dconf_path):
-            self.load_conf('default', dconf_path)
+        if 'config' in kwargs:
+            self.load_conf(kwargs['config'])
+        else:
+            print("No configuration file in arguments. Exiting...")
+            exit()
 
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
@@ -173,24 +174,23 @@ class ProvidentiaOffline(ProvConfiguration):
                               'cldbot', 'vdist', 'ccovmean', 'cfracmean']
         self.specific_qa, self.general_qa, self.qa_diff = aux.get_qa_codes(self)
 
-    def load_conf(self, section=None, fpath=None):
+    def load_conf(self, fpath=None):
         """ Load existing configurations from file. """
 
-        from .config import read_conf
+        from .config import read_offline_conf
 
         if fpath is None:
+            # TODO: print error and terminate
             fpath = parse_path(self.config_dir, self.config_file)
+
+        # if DEFAULT is not present, then return
 
         if not os.path.isfile(fpath):
             print(("Error %s" % fpath))
             return
 
-        opts = read_conf(section, fpath)
-        if section is None:
-            return opts
-
-        self.opts = opts
-        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
+        self.defaults, self.opts = read_offline_conf(fpath)
+        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.defaults.items()})
 
     def start_pdf(self):
         filename = "test_pdf.pdf"
@@ -441,8 +441,6 @@ class ProvidentiaOffline(ProvConfiguration):
 
                 for plot_type in self.summary_plots_to_make:
                     if ('timeseries' not in plot_type) & ('map-' not in plot_type) & ('heatm-' not in plot_type):
-                        # if ('map-' not in plot_type) & ('heatm-' not in plot_type):
-                        # if 'heatm-' not in plot_type:
                         self.harmonise_xy_lims(plot_type)
 
             # save page figures
