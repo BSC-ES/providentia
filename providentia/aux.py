@@ -1,6 +1,7 @@
 import copy
 import json
 import numpy as np
+import pandas as pd
 
 from .config import split_options
 
@@ -232,3 +233,49 @@ def representativity_fields(instance, resolution):
                 previous_lower[previous_labels.index(label)]
 
     return repr_menu
+
+
+def to_pandas_dataframe(instance, species):
+    """Function that takes selected station data within data arrays and puts it into a pandas dataframe"""
+
+    # create new dictionary to store selection station data by data array
+    selected_station_data = {}
+
+    # iterate through data arrays in data in memory filtered dictionary
+    for data_label in list(instance.data_in_memory_filtered.keys()):
+
+        # if colocation is not active, do not convert colocated data arrays to pandas data frames
+        if not self.colocate_active:
+            if 'colocated' in data_label:
+                continue
+        # else, if colocation is active, do not convert non-colocated data arrays to pandas data frames
+        elif self.colocate_active:
+            if 'colocated' not in data_label:
+                continue
+
+        # observational arrays
+        if data_label.split('_')[0] == 'observations':
+            # get data for selected stations
+            data_array = instance.data_in_memory_filtered[data_label][
+                             species][instance.relative_selected_station_inds, :]
+        # experiment arrays
+        else:
+            # get intersect between selected station indices and valid available indices for experiment data array
+            valid_selected_station_indices = np.intersect1d(instance.relative_selected_station_inds,
+                                                            instance.datareader.plotting_params[
+                                                                data_label]['valid_station_inds'])
+            # get data for valid selected stations
+            data_array = instance.data_in_memory_filtered[data_label][species][valid_selected_station_indices, :]
+
+        # if data array has no valid data for selected stations, do not create a pandas dataframe
+        # data array has valid data?
+        if data_array.size:
+            # add nested dictionary for data array name to selection station data dictionary
+            selected_station_data[data_label] = {}
+            # take cross station median of selected data for data array, and place it in a pandas
+            # dataframe -->  add to selected station data dictionary
+            selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0),
+                                                                          index=instance.time_array,
+                                                                          columns=['data'])
+
+    return selected_station_data
