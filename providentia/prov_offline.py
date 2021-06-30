@@ -49,7 +49,6 @@ class ProvidentiaOffline(ProvConfiguration):
             self.load_conf(kwargs['config'])
         else:
             print("No configuration file in arguments. Exiting...")
-            exit()
 
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
@@ -419,8 +418,7 @@ class ProvidentiaOffline(ProvConfiguration):
                                 # iterate number of plots have made for current type of plot
                                 current_plot_ind += 1
 
-                # make individual station pages?
-
+            # make individual station pages?
             # generate colourbars
             if self.summary_pages:
                 relevant_axs = []
@@ -671,6 +669,7 @@ class ProvidentiaOffline(ProvConfiguration):
 
                 # make page title?
                 if 'page_title' in plot_characteristics_vars:
+                    # TODO: not used?
                     st = fig.suptitle(**plot_characteristics['page_title'])
 
                 # iterate through axes (by row, then column)
@@ -762,20 +761,18 @@ class ProvidentiaOffline(ProvConfiguration):
                                         null, max_lat = self.plotcrs.transform_point(0, self.bounding_box[
                                             'latitude']['max'], src_crs=self.datacrs)
                                         ax.set_ylim(top=max_lat)
-
                     else:
                         ax.set_visible(False)
                     plot_ii_per_type += 1
                     col_ii += 1
 
-                    # tight layout?
+                # tight layout?
                 if 'tightlayout' in plot_characteristics_vars:
                     fig.tight_layout()
                 # adjust subplots?
                 if 'subplots_adjust' in plot_characteristics_vars:
                     fig.subplots_adjust(**plot_characteristics['subplots_adjust'])
-
-                    # make legend?
+                # make legend?
                 if 'legend' in plot_characteristics_vars:
                     leg_dict = plot_characteristics['legend']
                     leg_dict['handles'] = self.make_legend_elements()
