@@ -48,7 +48,8 @@ class ProvidentiaOffline(ProvConfiguration):
         if 'config' in kwargs:
             self.load_conf(kwargs['config'])
         else:
-            print("No configuration file in arguments. Exiting...")
+            print("No configuration file found. The path to the config file must be added as an argument.")
+            sys.exit(1)
 
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
@@ -69,6 +70,7 @@ class ProvidentiaOffline(ProvConfiguration):
             CURRENT_PATH, 'conf/experiment_bias_stats_dict.json')))
 
         self.station_subset_names = list('Barcelona')
+        self.station_subset_names = self.sub_opts.keys()
 
         self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
         self.active_qa = aux.which_qa(self)
@@ -188,7 +190,7 @@ class ProvidentiaOffline(ProvConfiguration):
             print(("Error %s" % fpath))
             return
 
-        self.defaults, self.opts = read_offline_conf(fpath)
+        self.defaults, self.sub_opts = read_offline_conf(fpath)
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.defaults.items()})
 
     def start_pdf(self):
@@ -213,16 +215,13 @@ class ProvidentiaOffline(ProvConfiguration):
                 print('Filtering Data for {} Subset'.format(station_subset))
 
                 # filter dataset for current station_subset
-                # filter_instance = DataFilter(self, station_subset=station_subset)
                 DataFilter(self)
 
                 print('Placing Data Arrays in Pandas Dataframes')
-
                 # convert filtered dataset to pandas dataframe
                 self.to_pandas_dataframe()
 
                 print('Doing Temporal Aggregation on Dataframes')
-
                 # temporally aggregate selected data dataframes (by hour, day of week, month)
                 self.pandas_temporal_aggregation()
 
@@ -869,9 +868,9 @@ class ProvidentiaOffline(ProvConfiguration):
                 self.selected_resolution == 'hourly_instantaneous'):
             self.temporal_aggregation_resolutions = ['hour', 'dayofweek', 'month', 'all']
         elif self.selected_resolution == 'daily':
-            self.temporal_aggregation_resolutions = ['dayofweek', 'month','all']
+            self.temporal_aggregation_resolutions = ['dayofweek', 'month', 'all']
         elif self.selected_resolution == 'monthly':
-            self.temporal_aggregation_resolutions = ['month','all']
+            self.temporal_aggregation_resolutions = ['month', 'all']
 
         # iterate through all defined temporal aggregation resolutions
         for temporal_aggregation_resolution in self.temporal_aggregation_resolutions:
@@ -1477,7 +1476,6 @@ class ProvidentiaOffline(ProvConfiguration):
         #make plot
         relevant_axis.plot(x_grid, PDF_sampled, linewidth=1, color=self.datareader.plotting_params[data_label]['colour'])
 
-        print(self.selected_species)
         #make xaxis logged for certain species
         if self.selected_species in ['sconcno', 'sconcno2']:
             relevant_axis.set_xlim(0.01, 10)
