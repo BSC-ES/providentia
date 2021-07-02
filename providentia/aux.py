@@ -173,6 +173,89 @@ def meta_from_conf(instance):
                 instance.metadata_menu[menu_type][label_cap]['checkboxes']['remove_selected'] = removes
 
 
+def update_metadata_fields(instance):
+    """Update the metadata menu object with metadata associated with newly read data
+       for non-numeric metadata gets all the unique fields per metadata variable,
+       and sets the available fields as such, and for numeric gets the minimum and maximum
+       boundaries of each metadata variable.
+
+       If previously metadata settings for a field deviate from the default, then if the same field still
+       exists then the settings (i.e. bounds or checkbox selection) are copied across, rather than setting to the default.
+    """
+
+    # iterate through metadata variables
+    for meta_var in instance.metadata_vars_to_read:
+
+        meta_var_field = instance.datareader.metadata_in_memory[meta_var]
+
+        # get metadata variable type/data type
+        metadata_type = instance.standard_metadata[meta_var]['metadata_type']
+        metadata_data_type = instance.standard_metadata[meta_var]['data_type']
+
+        # remove NaNs from field
+        meta_var_field_nan_removed = meta_var_field[~pd.isnull(meta_var_field)]
+
+        # update pop-up metadata menu object with read metadata values
+        # for non-numeric metadata gets all the unique fields per metadata variable
+        # and sets the available fields as such
+        if metadata_data_type == np.object:
+            # get previous fields
+            previous_fields = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'])
+            # update new labels
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'] = np.unique(
+                meta_var_field_nan_removed)
+            # if field previously existed, then copy across checkbox settings for field
+            # else set initial checkboxes to be all blank
+            previous_keep = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'])
+            previous_remove = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'])
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'] = []
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'] = []
+            for field in instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels']:
+                if field in previous_fields:
+                    if field in previous_keep:
+                        instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'].append(field)
+                    if field in previous_remove:
+                        instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'].append(field)
+            # set defaults to be empty
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []
+        # for numeric fields get the minimum and maximum boundaries of each metadata variable
+        # if previous set values vary from min/max boundaries, copy across the values
+        # set as min/max as nan if have no numeric metadata for variable
+        else:
+            meta_var_index = instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
+            # have some numeric values for metadata variable?
+            if len(meta_var_field_nan_removed) > 0:
+                min_val = str(np.min(meta_var_field_nan_removed))
+                max_val = str(np.max(meta_var_field_nan_removed))
+                # get previous lower/upper extents and defaults
+                previous_lower_default = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
+                previous_upper_default = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
+                previous_lower = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
+                previous_upper = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
+                # if previous lower > previous default lower bound then copy across (and also not 'nan')
+                # initially set as min extent
+                instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = min_val
+                if (previous_lower != 'nan') & (previous_lower_default != 'nan'):
+                    if previous_lower > previous_lower_default:
+                        instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = copy.deepcopy(previous_lower)
+                # if previous upper < previous default upper bound then copy across (and also not 'nan')
+                # initially set as max extent
+                instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = max_val
+                if (previous_upper != 'nan') & (previous_upper_default != 'nan'):
+                    if previous_upper < previous_upper_default:
+                        instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = copy.deepcopy(previous_upper)
+                # set defaults to min/max extents
+                instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
+                instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = max_val
+            # do not have some numeric values for metadata variable so set as 'nan'
+            else:
+                instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = 'nan'
+                instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
+                instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = 'nan'
+                instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
+
+
 def representativity_fields(instance, resolution):
     """Update the data representativity menu -> 1D list of rangebox values
        dependent on the temporal resolution, some fields will appear or not
