@@ -96,7 +96,6 @@ class ProvidentiaOffline(ProvConfiguration):
         aux.representativity_conf(self)
 
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
-        aux.meta_from_conf(self)
 
         # initialize DataReader
         self.datareader = DataReader(self)
@@ -121,7 +120,8 @@ class ProvidentiaOffline(ProvConfiguration):
                                       self.selected_resolution, self.selected_species, self.selected_matrix)
 
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
-        aux.update_metadata_fields(self)
+        # aux.update_metadata_fields(self)
+        # aux.meta_from_conf(self)
         self.datareader.update_plotting_parameters()
 
         print(list(self.datareader.plotting_params.keys()))
@@ -211,7 +211,12 @@ class ProvidentiaOffline(ProvConfiguration):
                 self.setup_summary_plots_geometry()
 
             # iterate through station_subset_names
-            for station_subset_ind, station_subset in enumerate([self.station_subset_names]):
+            for station_subset_ind, station_subset in enumerate(self.station_subset_names):
+                # update the conf options for this subset
+                vars(self).update({(k, self.parse_parameter(k, val)) for k, val in
+                                   self.sub_opts[station_subset].items()})
+                aux.update_metadata_fields(self)
+                aux.meta_from_conf(self)
 
                 print('Filtering Data for {} Subset'.format(station_subset))
 
