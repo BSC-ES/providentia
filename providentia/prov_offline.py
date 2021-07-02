@@ -121,6 +121,7 @@ class ProvidentiaOffline(ProvConfiguration):
                                       self.selected_resolution, self.selected_species, self.selected_matrix)
 
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
+        aux.update_metadata_fields(self)
         self.datareader.update_plotting_parameters()
 
         print(list(self.datareader.plotting_params.keys()))
