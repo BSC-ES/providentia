@@ -24,11 +24,12 @@ from .prov_read import DataReader
 from .filter import DataFilter
 from .configuration import parse_path
 from .configuration import ProvConfiguration
+from .init_standards import InitStandards
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
-class ProvidentiaOffline(ProvConfiguration):
+class ProvidentiaOffline(ProvConfiguration, InitStandards):
     """Run Providentia offline reports"""
 
     def __init__(self, read_type='parallel', **kwargs):
@@ -53,14 +54,9 @@ class ProvidentiaOffline(ProvConfiguration):
 
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
-
-        self.parameter_dictionary = {}
-        self.standard_metadata = {}
-        self.metadata_vars_to_read = {}
-        self.metadata_dtype = {}
-        self.standard_data_flag_name_to_data_flag_code = {}
-        self.standard_QA_name_to_QA_code = {}
-        self.init_standards()
+        # init GHOST standards
+        InitStandards.__init__(self, obs_root=self.obs_root,
+                               ghost_version=self.ghost_version)
         cartopy.config['pre_existing_data_dir'] = self.cartopy_data_dir
 
         # load necessary dictionaries
@@ -69,9 +65,7 @@ class ProvidentiaOffline(ProvConfiguration):
         self.expbias_dict = json.load(open(os.path.join(
             CURRENT_PATH, 'conf/experiment_bias_stats_dict.json')))
 
-        self.station_subset_names = list('Barcelona')
         self.station_subset_names = self.sub_opts.keys()
-
         self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
         self.active_qa = aux.which_qa(self)
         self.active_flags = aux.which_flags(self)
@@ -94,15 +88,12 @@ class ProvidentiaOffline(ProvConfiguration):
         # self.representativity_menu = init_representativity(self.selected_resolution)
         self.representativity_menu = aux.representativity_fields(self, self.selected_resolution)
         aux.representativity_conf(self)
-
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
-
         # initialize DataReader
         self.datareader = DataReader(self)
         # read
         self.datareader.get_valid_obs_files_in_date_range(self.start_date, self.end_date)
         self.datareader.get_valid_experiment_files_in_date_range()
-
         self.datareader.read_setup(self.selected_resolution, self.start_date, self.end_date,
                                    self.selected_network, self.selected_species, self.selected_matrix)
 
@@ -139,42 +130,7 @@ class ProvidentiaOffline(ProvConfiguration):
                       7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
         }
 
-        self.experiments2 = {'cams61_chimere_ph2-eu-000': {'name': 'CHIMERE', 'colour': '#ffcc00'},
-                       'cams61_dehm_ph2-eu-000': {'name': 'DEHM', 'colour': '#ff00ff'},
-                       'cams61_emep_ph2-eu-000': {'name': 'EMEP', 'colour': '#996633'},
-                       'cams61_eurad_ph2-eu-000': {'name': 'EURAD', 'colour': '#00ffff'},
-                       'cams61_lotoseuros_ph2-eu-000': {'name': 'LOTOSEUROS', 'colour': '#940c55'},
-                       'cams61_minni_ph2-eu-000': {'name': 'MINNI', 'colour': '#2BDD53'},
-                       'cams61_monarch_ph2-eu-000': {'name': 'MONARCH', 'colour': '#742BDD'},
-                       'cams61_silam_ph2-eu-000': {'name': 'SILAM', 'colour': '#ff6600'}}
-
         self.start_pdf()
-
-    def init_standards(self):
-        """Read and initialise GHOST standards."""
-        sys.path.insert(1, '{}/GHOST_standards/{}'.
-                        format(self.obs_root, self.ghost_version))
-        from GHOST_standards import standard_parameters, \
-            get_standard_metadata, standard_data_flag_name_to_data_flag_code, \
-            standard_QA_name_to_QA_code
-        # modify standard parameter dictionary to have BSC standard parameter
-        # names as keys (rather than GHOST)
-        for _, param_dict in standard_parameters.items():
-            self.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
-        # get standard metadata dictionary
-        self.standard_metadata = get_standard_metadata({'standard_units':''})
-        # create list of metadata variables to read (make global)
-        self.metadata_vars_to_read = [key for key in self.standard_metadata.keys()
-                                      if pd.isnull(self.standard_metadata[key]['metadata_type'])
-                                      == False]
-        self.metadata_dtype = [(key, self.standard_metadata[key]['data_type'])
-                               for key in self.metadata_vars_to_read]
-        self.standard_data_flag_name_to_data_flag_code = \
-            standard_data_flag_name_to_data_flag_code
-        self.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
-        self.qa_exceptions = ['dir10', 'spd10', 'rho2', 'acprec', 'acsnow', 'si',
-                              'cldbot', 'vdist', 'ccovmean', 'cfracmean']
-        self.specific_qa, self.general_qa, self.qa_diff = aux.get_qa_codes(self)
 
     def load_conf(self, fpath=None):
         """ Load existing configurations from file. """
@@ -186,7 +142,6 @@ class ProvidentiaOffline(ProvConfiguration):
             fpath = parse_path(self.config_dir, self.config_file)
 
         # if DEFAULT is not present, then return
-
         if not os.path.isfile(fpath):
             print(("Error %s" % fpath))
             return
@@ -239,13 +194,10 @@ class ProvidentiaOffline(ProvConfiguration):
                     self.calculate_temporally_aggregated_experiment_bias_statistics()
 
                 print('Making {} Subset Plots'.format(station_subset))
-
                 # make summary plots?
                 if self.summary_pages:
-
                     # iterate through each summary plot to make
                     for plot_type in self.summary_plots_to_make:
-
                         # heatmap plot?
                         if 'heatm-' in plot_type:
                             heatmap_types = plot_type.split('-')[1:]
@@ -255,11 +207,13 @@ class ProvidentiaOffline(ProvConfiguration):
                                     heatmap_dict[heatmap_type] = {}
                                     for original_data_label in self.datareader.data_in_memory.keys():
                                         if original_data_label != 'observations':
-                                            heatmap_dict[heatmap_type][
-                                                self.experiments2[original_data_label]['name']] = []
+                                            # get experiment name
+                                            exp_name = get_exp_name(original_data_label)
+                                            heatmap_dict[heatmap_type][exp_name] = []
                             for heatmap_type in heatmap_types:
                                 for original_data_label in self.datareader.data_in_memory.keys():
                                     if original_data_label != 'observations':
+                                        exp_name = get_exp_name(original_data_label)
                                         if self.temporal_colocation:
                                             data_label = '{}_colocatedto_observations'.format(original_data_label)
                                         else:
@@ -267,20 +221,16 @@ class ProvidentiaOffline(ProvConfiguration):
                                         if data_label in list(self.selected_station_data.keys()):
                                             if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
                                                 if heatmap_type in list(self.basic_stats_dict.keys()):
-                                                    heatmap_dict[heatmap_type][
-                                                        self.experiments2[original_data_label]['name']].append(
+                                                    heatmap_dict[heatmap_type][exp_name].append(
                                                         self.selected_station_data[data_label]['all'][
                                                             '{}_bias'.format(heatmap_type)][0])
                                                 else:
-                                                    heatmap_dict[heatmap_type][
-                                                        self.experiments2[original_data_label]['name']].append(
+                                                    heatmap_dict[heatmap_type][exp_name].append(
                                                         self.selected_station_data[data_label]['all'][heatmap_type][0])
                                             else:
-                                                heatmap_dict[heatmap_type][
-                                                    self.experiments2[original_data_label]['name']].append(np.NaN)
+                                                heatmap_dict[heatmap_type][exp_name].append(np.NaN)
                                         else:
-                                            heatmap_dict[heatmap_type][
-                                                self.experiments2[original_data_label]['name']].append(np.NaN)
+                                            heatmap_dict[heatmap_type][exp_name].append(np.NaN)
 
                             if station_subset_ind == (len(self.station_subset_names) - 1):
                                 for heatmap_type_ii, heatmap_type in enumerate(heatmap_types):
@@ -299,7 +249,6 @@ class ProvidentiaOffline(ProvConfiguration):
                             # iterate through all data arrays
                             original_data_array_labels = list(self.datareader.data_in_memory.keys())
                             for original_data_label in original_data_array_labels:
-
                                 # get zstat for plot type (if exists)
                                 if '-' in plot_type:
                                     zstat = plot_type.split('-')[1]
@@ -313,7 +262,6 @@ class ProvidentiaOffline(ProvConfiguration):
                                 # map plots (1 plot per data array/s (1 array if absolute plot,
                                 # 2 arrays if making bias plot), per subset)
                                 if 'map-' in plot_type:
-
                                     # get necessary data arrays
                                     if '-obs' in plot_type:
                                         if original_data_label != 'observations':
@@ -348,10 +296,8 @@ class ProvidentiaOffline(ProvConfiguration):
                                     # get relevant axis to plot on
                                     relevant_axis = self.get_relevant_axis(plot_type, (current_plot_ind * len(
                                         self.station_subset_names)) + station_subset_ind)
-
                                     # make map plot
                                     n_stations = self.make_map(relevant_axis, z1, z2, zstat)
-
                                     # set axis title
                                     if plot_type == 'map-Data %-obs':
                                         self.characteristics_per_plot_type[plot_type]['axis_title'][
@@ -419,7 +365,6 @@ class ProvidentiaOffline(ProvConfiguration):
                                             'label'] = station_subset
                                         relevant_axis.set_title(
                                             **self.characteristics_per_plot_type[plot_type_split[0]]['axis_title'])
-
                                 # iterate number of plots have made for current type of plot
                                 current_plot_ind += 1
 
@@ -818,7 +763,6 @@ class ProvidentiaOffline(ProvConfiguration):
 
         # iterate through data arrays in data in memory filtered dictionary
         for data_label in self.data_in_memory_filtered.keys():
-
             # if colocation is not active, do not convert colocated data arrays to pandas data frames
             if not self.temporal_colocation:
                 if 'colocated' in data_label:
@@ -967,13 +911,10 @@ class ProvidentiaOffline(ProvConfiguration):
 
         # iterate through all defined temporal aggregation resolutions
         for temporal_aggregation_resolution in self.temporal_aggregation_resolutions:
-
             # iterate through data arrays names in selected station data dictionary
             for data_label in list(self.selected_station_data.keys()):
-
                 # make sure the data array is an experimental one
                 if data_label.split('_')[0] != 'observations':
-
                     # get relevant aggregated observational statistics dictionary (i.e. colocated or not)
                     if not self.temporal_colocation:
                         relevant_aggregated_observations_dict = \
@@ -987,14 +928,11 @@ class ProvidentiaOffline(ProvConfiguration):
                     # calculate temporally aggregated basic statistic differences between experiment and observations
                     # iterate through basic statistics
                     for basic_stat in basic_statistics:
-
                         # create empty array for storing calculated experiment-observations
                         # difference statistic by group
                         stat_diff_by_group = []
-
                         # iterate through aggregated index times
                         for group_ii in range(len(relevant_aggregated_observations_dict[basic_stat])):
-
                             # get observational and experiment group aggregated statistic
                             group_obs_stat = relevant_aggregated_observations_dict[basic_stat][group_ii]
                             group_exp_stat = self.selected_station_data[data_label][
@@ -1014,10 +952,8 @@ class ProvidentiaOffline(ProvConfiguration):
                     # if colocation is active, calculate temporally aggregated experiment bias
                     # statistical differences between experiment and observations
                     if self.temporal_colocation:
-
                         # iterate through bias statistics
                         for bias_stat in bias_statistics:
-
                             # get specific statistic dictionary (containing necessary information
                             # for calculation of selected statistic)
                             stats_dict = self.expbias_dict[bias_stat]
@@ -1049,13 +985,10 @@ class ProvidentiaOffline(ProvConfiguration):
                                 '%s' % (bias_stat)] = stat_output_by_group
 
     def make_map(self, relevant_axis, z1, z2, zstat):
-
         # calculate z statistic
         z_statistic, active_map_valid_station_inds = self.calculate_z_statistic(z1=z1, z2=z2, zstat=zstat)
-
         # get colourmap
         _, _, _, z_colourmap = self.generate_colourbar_detail(zstat, 0, 0)
-
         # plot new station points on map - coloured by currently active z statisitic
         relevant_axis.scatter(self.datareader.station_longitudes[active_map_valid_station_inds],
                               self.datareader.station_latitudes[active_map_valid_station_inds],
@@ -1408,16 +1341,13 @@ class ProvidentiaOffline(ProvConfiguration):
 
                 # set xticks
                 aggregation_dict[temporal_aggregation_resolution]['ax'].xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['xticks']['labelsize'])
-                #set yticks
+                # set yticks
                 aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['yticks']['labelsize'])
-
-                #get base name name of zstat (dropping _bias suffix)
+                # get base name name of zstat (dropping _bias suffix)
                 base_zstat = zstat.split('_bias')[0]
-
-                #get zstat type (basic or expbias)
+                # get zstat type (basic or expbias)
                 z_statistic_type = get_z_statistic_type(self.basic_stats_dict, base_zstat)
-
-                #get zstat sign (absolute or bias)
+                # get zstat sign (absolute or bias)
                 z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
 
                 if z_statistic_sign == 'bias':
@@ -1432,7 +1362,6 @@ class ProvidentiaOffline(ProvConfiguration):
                                                                                         color='black', zorder=0)
 
     def make_timeseries(self, relevant_axis, data_label):
-
         # make time series plot
         relevant_axis.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
                            color=self.datareader.plotting_params[data_label]['colour'],
@@ -1452,7 +1381,6 @@ class ProvidentiaOffline(ProvConfiguration):
         relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['timeseries']['yticks']['labelsize'])
 
     def make_distribution(self, relevant_axis, data_label, bias=False):
-
         # make distribution plot
         minmax_diff = self.selected_station_data_max - self.selected_station_data_min
         if pd.isnull(self.parameter_dictionary[self.selected_species]['minimum_resolution']):
@@ -1479,10 +1407,10 @@ class ProvidentiaOffline(ProvConfiguration):
             PDF = st.gaussian_kde(self.selected_station_data[data_label]['pandas_df']['data'].dropna())
             PDF_sampled = PDF(x_grid)
 
-        #make plot
+        # make plot
         relevant_axis.plot(x_grid, PDF_sampled, linewidth=1, color=self.datareader.plotting_params[data_label]['colour'])
 
-        #make xaxis logged for certain species
+        # make xaxis logged for certain species
         if self.selected_species in ['sconcno', 'sconcno2']:
             relevant_axis.set_xlim(0.01, 10)
 
@@ -1492,7 +1420,6 @@ class ProvidentiaOffline(ProvConfiguration):
         relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['distribution']['yticks']['labelsize'])
 
     def make_heatmap(self, relevant_axis, base_zstat, heatmap_df):
-
         # get zstat type (basic or expbias)
         z_statistic_type = get_z_statistic_type(self.basic_stats_dict, base_zstat)
 
@@ -1534,7 +1461,6 @@ class ProvidentiaOffline(ProvConfiguration):
 
 def get_z_statistic_type(stats_dict, zstat):
     """Function that checks if the z statistic is basic or expbias statistic"""
-
     # check if the chosen statistic is a basic statistic
     if zstat in stats_dict.keys():
         return 'basic'
@@ -1545,13 +1471,22 @@ def get_z_statistic_type(stats_dict, zstat):
 
 def get_z_statistic_sign(zstat, zstat_type):
     """Function that checks if the z statistic is an absolute or bias statistic"""
-
     # statistic is bias?
     if ('_bias' in zstat) or (zstat_type == 'expbias'):
         return 'bias'
     # statistic is bias?
     else:
         return 'absolute'
+
+
+def get_exp_name(fullname):
+    """ Return experiments id/name from its GHOST identifier in /gpfs.
+    For example, a3p1-regional-000 returns a3p1. In the case of cams,
+    e.g. cams61_emep_ph3-eu-000 it returns emep."""
+    short = fullname[:fullname.find('-')]
+    if 'cams' in short:
+        short = fullname.split('_')[1].upper()
+    return short
 
 
 def main_offline(**kwargs):
