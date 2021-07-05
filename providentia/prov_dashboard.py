@@ -28,7 +28,6 @@ from collections import OrderedDict
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
-import pandas as pd
 from dateutil.relativedelta import relativedelta
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
