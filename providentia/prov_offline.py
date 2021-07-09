@@ -22,7 +22,6 @@ from .calculate import Stats
 from .calculate import ExpBias
 from .prov_read import DataReader
 from .filter import DataFilter
-from .configuration import parse_path
 from .configuration import ProvConfiguration
 from .init_standards import InitStandards
 
@@ -38,13 +37,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         self.portrait_figsize = (8.27, 11.69)
         self.landscape_figsize = (11.69, 8.27)
         self.dpi = 200
-        # super(ProvidentiaMainWindow, self).__init__()  # what was that about?
         ProvConfiguration.__init__(self, **kwargs)
 
         # put read_type into self
         self.read_type = read_type
 
-        dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
         # update from config file
         if 'config' in kwargs:
             self.load_conf(kwargs['config'])
@@ -87,7 +84,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # self.representativity_menu = init_representativity(self.selected_resolution)
         self.representativity_menu = aux.representativity_fields(self, self.selected_resolution)
-        aux.representativity_conf(self)
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
         # initialize DataReader
         self.datareader = DataReader(self)
@@ -111,14 +107,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                       self.selected_resolution, self.selected_species, self.selected_matrix)
 
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
-        # aux.update_metadata_fields(self)
-        # aux.meta_from_conf(self)
         self.datareader.update_plotting_parameters()
 
         print(list(self.datareader.plotting_params.keys()))
 
         exceedance_limits = {'sconco3': 90.21, 'sconcno2': 106.38}
-
         if self.selected_species in exceedance_limits.keys():
             self.exceedance_limit = exceedance_limits[self.selected_species]
         else:
@@ -138,8 +131,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         from .config import read_offline_conf
 
         if fpath is None:
-            # TODO: print error and terminate
-            fpath = parse_path(self.config_dir, self.config_file)
+            print("No configuration file found")
+            sys.exit(1)
 
         # if DEFAULT is not present, then return
         if not os.path.isfile(fpath):
@@ -168,10 +161,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # iterate through station_subset_names
             for station_subset_ind, station_subset in enumerate(self.station_subset_names):
                 # update the conf options for this subset
+                if station_subset_ind != 0:
+                    print(prv_station)
+                    for k in self.sub_opts[prv_station]:
+                        vars(self).pop(k)
                 vars(self).update({(k, self.parse_parameter(k, val)) for k, val in
                                    self.sub_opts[station_subset].items()})
+                prv_station = station_subset
                 aux.update_metadata_fields(self)
                 aux.meta_from_conf(self)
+                aux.representativity_conf(self)
 
                 print('Filtering Data for {} Subset'.format(station_subset))
 
