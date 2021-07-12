@@ -82,8 +82,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             self.selected_resolution: {self.selected_matrix: {
                 self.selected_species: species_files_yearmonths}}}}
 
-        # self.representativity_menu = init_representativity(self.selected_resolution)
-        self.representativity_menu = aux.representativity_fields(self, self.selected_resolution)
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
         # initialize DataReader
         self.datareader = DataReader(self)
@@ -162,7 +160,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             for station_subset_ind, station_subset in enumerate(self.station_subset_names):
                 # update the conf options for this subset
                 if station_subset_ind != 0:
-                    print(prv_station)
                     for k in self.sub_opts[prv_station]:
                         vars(self).pop(k)
                 vars(self).update({(k, self.parse_parameter(k, val)) for k, val in
@@ -170,6 +167,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 prv_station = station_subset
                 aux.update_metadata_fields(self)
                 aux.meta_from_conf(self)
+                # create and update the representativity options
+                self.representativity_menu = aux.representativity_fields(self, self.selected_resolution)
                 aux.representativity_conf(self)
 
                 print('Filtering Data for {} Subset'.format(station_subset))
