@@ -3,6 +3,7 @@ from .calculate import Stats
 from .calculate import ExpBias
 from .reading import drop_nans
 from .filter import DataFilter
+from providentia import aux
 
 import copy
 from weakref import WeakKeyDictionary
@@ -113,12 +114,7 @@ class MPLCanvas(FigureCanvas):
 
         # Define dictionary for mapping days of week/months as integers to
         # equivalent strings for writing on axes
-        self.temporal_axis_mapping_dict = {
-            'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6:
-                          'S'},
-            'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J', 7:
-                      'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
-        }
+        self.temporal_axis_mapping_dict = aux.temp_axis_dict()
 
     def update_MPL_canvas(self):
         """Function that updates MPL canvas upon clicking

@@ -97,7 +97,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
     def init_ui(self):
         """Initialise user interface"""
-
         # set window title
         self.window_title = "Providentia"
         self.setWindowTitle(self.window_title)
@@ -695,7 +694,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.active_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
         self.active_flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
 
-        # --------------------------------------------------------------------#
         # determine what data (if any) needs to be read
         # set variables that inform what data needs to be read (set all initially as False)
         read_all = False
@@ -875,7 +873,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 else:
                     self.datareader.metadata_in_memory = \
                         self.datareader.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
-
                 # iterate through all keys in data in memory dictionary and
                 # cut edges of the associated arrays appropriately
                 for data_label in list(self.datareader.data_in_memory.keys()):
@@ -886,7 +883,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if read_left:
                 # get n number of new elements on left edge
                 n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
-
                 # get list of yearmonths to read
                 yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, self.active_start_date,
                                                             previous_active_start_date)
@@ -951,7 +947,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # update menu object fields
             aux.update_metadata_fields(self)
             self.representativity_menu = aux.representativity_fields(self, self.active_resolution)
-            self.update_period_fields()
+            aux.update_period_fields(self.active_resolution, self.period_menu)
 
         # if have new experiments to read, then read them now
         if len(experiments_to_read) > 0:
@@ -968,7 +964,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
 
-        # --------------------------------------------------------------------#
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         # self.update_plotting_parameters()
         self.datareader.update_plotting_parameters()
@@ -1011,7 +1006,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # initialise experiment bias comboboxes
             self.mpl_canvas.handle_experiment_bias_update()
 
-        # --------------------------------------------------------------------#
         # reset station select checkboxes to be unchecked
         self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
@@ -1042,7 +1036,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set period fields to empty and initiliaze them
         self.period_menu['checkboxes']['keep_selected'] = []
         self.period_menu['checkboxes']['remove_selected'] = []
-        self.update_period_fields()
+        aux.update_period_fields(self.active_resolution, self.period_menu)
 
         # reset metadata
         for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
@@ -1074,36 +1068,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
-
-    def update_period_fields(self):
-        """Update the data period menu -> list of checkboxes
-           dependent on the temporal resolution, some fields will appear or not"""
-        # hourly temporal resolution?
-        if 'hourly' in self.active_resolution:
-            self.period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend', 'Spring',
-                                                        'Summer', 'Autumn', 'Winter']
-        # daily temporal resolution?
-        elif self.active_resolution == 'daily':
-            self.period_menu['checkboxes']['labels'] = ['Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
-
-            # drop selected fields from higher temporal resolutions
-            labels_to_remove = ['Daytime', 'Nighttime']
-            for label in labels_to_remove:
-                if label in self.period_menu['checkboxes']['keep_selected']:
-                    self.period_menu['checkboxes']['keep_selected'].remove(label)
-                if label in self.period_menu['checkboxes']['remove_selected']:
-                    self.period_menu['checkboxes']['remove_selected'].remove(label)
-
-        # monthly temporal resolution?
-        elif self.active_resolution == 'monthly':
-            self.period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
-            # drop selected fields from higher temporal resolutions
-            labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend']
-            for label in labels_to_remove:
-                if label in self.period_menu['checkboxes']['keep_selected']:
-                    self.period_menu['checkboxes']['keep_selected'].remove(label)
-                if label in self.period_menu['checkboxes']['remove_selected']:
-                    self.period_menu['checkboxes']['remove_selected'].remove(label)
 
     def load_conf(self, section=None, fpath=None):
         """ Load existing configurations from file. """

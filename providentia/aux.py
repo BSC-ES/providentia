@@ -1,3 +1,10 @@
+"""
+Contains multiple static functions that are shared by
+the dashboard and the offline version. Currently, it
+includes function related to the initialization and update
+of metadata, checks fields coming from conf files etc.
+"""
+
 import copy
 import json
 import numpy as np
@@ -88,6 +95,24 @@ def get_qa_codes(instance):
     qa_diff = list(set(general_qa) - set(specific_qa))
 
     return specific_qa, general_qa, qa_diff
+
+
+def exceedance_lim(species):
+    """Returns the exceedance limit depending on the species input."""
+    exceedance_limits = {'sconco3': 90.21, 'sconcno2': 106.38}
+    if species in exceedance_limits.keys():
+        return exceedance_limits[species]
+    else:
+        return np.NaN
+
+
+def temp_axis_dict():
+    """Returns a temporal mapping as a dictionary used for the plots."""
+    map_dict = {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
+                'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
+                          7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
+                }
+    return map_dict
 
 
 def representativity_conf(instance):
@@ -316,6 +341,38 @@ def representativity_fields(instance, resolution):
                 previous_lower[previous_labels.index(label)]
 
     return repr_menu
+
+
+def update_period_fields(resolution, period_menu):
+    """Update the data period menu -> list of checkboxes
+       dependent on the temporal resolution, some fields will appear or not"""
+    # hourly temporal resolution?
+    if 'hourly' in resolution:
+        period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend',
+                                               'Spring', 'Summer', 'Autumn', 'Winter']
+    # daily temporal resolution?
+    elif resolution == 'daily':
+        period_menu['checkboxes']['labels'] = ['Weekday', 'Weekend', 'Spring',
+                                               'Summer', 'Autumn', 'Winter']
+
+        # drop selected fields from higher temporal resolutions
+        labels_to_remove = ['Daytime', 'Nighttime']
+        for label in labels_to_remove:
+            if label in period_menu['checkboxes']['keep_selected']:
+                period_menu['checkboxes']['keep_selected'].remove(label)
+            if label in period_menu['checkboxes']['remove_selected']:
+                period_menu['checkboxes']['remove_selected'].remove(label)
+
+    # monthly temporal resolution?
+    elif resolution == 'monthly':
+        period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
+        # drop selected fields from higher temporal resolutions
+        labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend']
+        for label in labels_to_remove:
+            if label in period_menu['checkboxes']['keep_selected']:
+                period_menu['checkboxes']['keep_selected'].remove(label)
+            if label in period_menu['checkboxes']['remove_selected']:
+                period_menu['checkboxes']['remove_selected'].remove(label)
 
 
 def to_pandas_dataframe(instance, species):
