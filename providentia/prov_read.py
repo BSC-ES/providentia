@@ -116,7 +116,6 @@ class DataReader:
                                                 self.read_instance.selected_matrix,
                                                 resolution, species, species)
 
-        # TODO: fix this madeness with the indices
         self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[
             network][resolution][matrix][species]])
 
