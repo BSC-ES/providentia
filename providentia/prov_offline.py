@@ -32,14 +32,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
     """Run Providentia offline reports"""
 
     def __init__(self, read_type='parallel', **kwargs):
-        print("starting Providentia offline")
+        print("Starting Providentia offline")
         # portrait/landscape page figsize
         self.portrait_figsize = (8.27, 11.69)
         self.landscape_figsize = (11.69, 8.27)
         self.dpi = 200
         ProvConfiguration.__init__(self, **kwargs)
-
-        # put read_type into self
         self.read_type = read_type
 
         # update from config file
@@ -107,24 +105,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         self.datareader.update_plotting_parameters()
 
-        print(list(self.datareader.plotting_params.keys()))
-
-        exceedance_limits = {'sconco3': 90.21, 'sconcno2': 106.38}
-        if self.selected_species in exceedance_limits.keys():
-            self.exceedance_limit = exceedance_limits[self.selected_species]
-        else:
-            self.exceedance_limit = np.NaN
-
-        self.temporal_axis_mapping_dict = {
-            'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
-            'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
-                      7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
-        }
-
+        self.exceedance_limit = aux.exceedance_lim(self.selected_species)
+        self.temporal_axis_mapping_dict = aux.temp_axis_dict()
         self.start_pdf()
 
     def load_conf(self, fpath=None):
-        """ Load existing configurations from file. """
+        """Load existing configurations from file
+        for running offline Providentia."""
 
         from .config import read_offline_conf
 
@@ -423,12 +410,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                        self.bounding_box['latitude']['min'],
                        self.bounding_box['latitude']['max'])
 
-        """This statement cannot be applied. We do not
-        have a data_availability_filter field nor group"""
-        # if hasattr(self, 'data_availability_filter'):
-        #     txt += 'Data Availability = {}'.format(self.data_availability_filter)
-        # page.text(0.5, 0.82, txt, transform=page.transFigure,
-        #           weight='light', size=15, ha="center", va='top', wrap=True)
+        page.text(0.5, 0.82, txt, transform=page.transFigure,
+                  weight='light', size=15, ha="center", va='top', wrap=True)
 
         self.pdf.savefig(page, dpi=self.dpi)
         plt.close(page)
@@ -450,8 +433,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                facecolor='0.85')
 
         # define plot types per type of report
-        # TODO: to what depend on these plot? what is the name-convention? should they be configurable?
-        # TODO: I think it should be moved to a configuration file. Not everyone will want to make cams50 reports
         plot_types_per_report_type = {
             'cams50': ['map-Data %-obs', 'map-p5', 'map-p50',
                        'map-p95', 'map-p5_bias', 'map-p50_bias',
