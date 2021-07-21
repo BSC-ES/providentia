@@ -385,11 +385,11 @@ def to_pandas_dataframe(instance, species):
     for data_label in list(instance.data_in_memory_filtered.keys()):
 
         # if colocation is not active, do not convert colocated data arrays to pandas data frames
-        if not self.colocate_active:
+        if not instance.colocate_active:
             if 'colocated' in data_label:
                 continue
         # else, if colocation is active, do not convert non-colocated data arrays to pandas data frames
-        elif self.colocate_active:
+        elif instance.colocate_active:
             if 'colocated' not in data_label:
                 continue
 
