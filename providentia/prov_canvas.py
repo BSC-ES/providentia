@@ -306,7 +306,6 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.draw()
 
-
     def update_map_z_statistic(self):
         """Function that updates plotted z statistic on map, with colourbar"""
 
@@ -386,7 +385,6 @@ class MPLCanvas(FigureCanvas):
         # update map selection appropriately for z statistic
         self.update_map_station_selection()
 
-
     def update_map_station_selection(self):
         """Function that updates the visual selection of stations on map"""
 
@@ -420,7 +418,6 @@ class MPLCanvas(FigureCanvas):
                 # increase marker size of selected stations
                 marker_sizes[self.absolute_selected_station_inds] = self.read_instance.sel_station_markersize
                 self.map_points.set_sizes(marker_sizes)
-
 
     def update_associated_selected_station_plots(self):
         """Function that updates all plots associated with selected stations on map"""
@@ -505,7 +502,6 @@ class MPLCanvas(FigureCanvas):
                                        linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
                 # plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
-
 
     def update_legend(self):
         """Function that updates legend"""
@@ -940,7 +936,6 @@ class MPLCanvas(FigureCanvas):
         for temporal_aggregation_resolution in list(aggregation_dict.keys()):
             self.reset_ax_navigation_toolbar_stack(aggregation_dict[temporal_aggregation_resolution]['ax'])
 
-
     def update_experiment_bias_aggregated_plots(self):
         """Function that updates the temporally aggregated experiment bias statistic plots"""
 
@@ -1052,10 +1047,8 @@ class MPLCanvas(FigureCanvas):
 
         # as are re-plotting on experiment bias axes,
         # reset the navigation toolbar stack dictionaries entries associated with each of the axes
-
         for temporal_aggregation_resolution in list(aggregation_dict.keys()):
             self.reset_ax_navigation_toolbar_stack(aggregation_dict[temporal_aggregation_resolution]['ax'])
-
 
     def update_selected_station_metadata(self):
         """Function which updates the plotted metadata
@@ -1139,7 +1132,8 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.datareader.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
                         self.relative_selected_station_inds].astype(np.float32)))
 
-                #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
+                # define other metadata variables to plot, in order to plot
+                # (plotting all unique associated metadata values)
                 metadata_vars_to_plot = ['station_name', 'country', 'area_classification',
                                          'station_classification', 'terrain',
                                          'land_use', 'MODIS_MCD12C1_v6_IGBP_land_use',
@@ -1149,21 +1143,21 @@ class MPLCanvas(FigureCanvas):
                 # iterate through metadata variables
                 for meta_var in metadata_vars_to_plot:
 
-                    #gather all selected station metadata for current meta variable
+                    # gather all selected station metadata for current meta variable
                     all_current_meta = self.read_instance.datareader.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
 
-                    #get counts of all unique metadata elements for selected station
+                    # get counts of all unique metadata elements for selected station
                     unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
-                    #get number of unique metadata elements across selected stations
+                    # get number of unique metadata elements across selected stations
                     n_unique_meta = len(unique_meta)
 
-                    #1 unique metadata element?
+                    # 1 unique metadata element?
                     if n_unique_meta == 1:
                         meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], unique_meta[0])
-                    #elif have > 2 unique metadata elements, just return count of the elements for the selected station
+                    # elif have > 2 unique metadata elements, just return count of the elements for the selected station
                     elif n_unique_meta > 2:
                         meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
-                    #otherwise, get percentage of unique metadata elements across selected stations
+                    # otherwise, get percentage of unique metadata elements across selected stations
                     else:
                         meta_pc = (100./len(all_current_meta))*meta_counts
                         meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
@@ -1219,7 +1213,8 @@ class MPLCanvas(FigureCanvas):
                     # get number of unique metadata elements across selected stations
                     n_unique_meta = len(unique_meta)
 
-                    # if have > 4 unique metadata elements, just return count of the elements across the selected stations
+                    # if have > 4 unique metadata elements, just return count
+                    # of the elements across the selected stations
                     if n_unique_meta > 4:
                         meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
                     # otherwise, get percentage of unique metadata elements across selected stations
@@ -1354,7 +1349,6 @@ class MPLCanvas(FigureCanvas):
             dtype=np.int)
 
         # read z1 data
-        # TODO: check 'data' replaced with self.read_instance.active_species
         z1_array_data = \
             self.read_instance.data_in_memory_filtered[z1_array_to_read][self.read_instance.active_species][self.active_map_valid_station_inds,:]
         # drop NaNs and reshape to object list of station data arrays (if not checking data %)
@@ -1382,7 +1376,6 @@ class MPLCanvas(FigureCanvas):
         # else, read z2 data then calculate 'difference' statistic
         else:
             # read z2 data
-            # TODO: check 'data' replaced with self.read_instance.active_species
             z2_array_data = \
                 self.read_instance.data_in_memory_filtered[z2_array_to_read][self.read_instance.active_species][self.active_map_valid_station_inds,:]
             # drop NaNs and reshape to object list of station data arrays (if not checking data %)
@@ -1747,7 +1740,8 @@ class MPLCanvas(FigureCanvas):
         if event.mouseevent.button == 1:
             self.absolute_selected_station_inds = absolute_selected_station_inds
             self.relative_selected_station_inds = relative_selected_station_inds
-        # if right click (code of 3) --> unselect station (if currently selected), select station (if currently unselected)
+        # if right click (code of 3) --> unselect station (if currently selected),
+        # select station (if currently unselected)
         elif event.mouseevent.button == 3:
             # if len(self.previous_relative_selected_station_inds) > 0:
             relative_index = np.where(self.previous_relative_selected_station_inds == relative_selected_station_inds)[0]
@@ -1778,7 +1772,6 @@ class MPLCanvas(FigureCanvas):
         """Function that handles multiple
         station selection upon lasso drawing
         """
-
         # unselect all/intersect checkboxes
         self.read_instance.block_MPL_canvas_updates = True
         self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
@@ -1825,7 +1818,7 @@ class MPLCanvas(FigureCanvas):
         self.draw()
 
     def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
-        """Function that takes the indices of selected stations on the map
+        """Takes the indices of selected stations on the map
         (potentially a subset of all available stations), and returns the indices
         of the stations inside the full loaded data arrays
         """

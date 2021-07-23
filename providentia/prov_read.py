@@ -98,12 +98,12 @@ class DataReader:
         str_active_start_date = str(start_date)
         str_active_end_date = str(end_date)
         self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str_active_start_date[:4]),
-                                                                int(str_active_start_date[4:6]),
-                                                                int(str_active_start_date[6:8])),
-                                        end=datetime.datetime(int(str_active_end_date[:4]),
-                                                              int(str_active_end_date[4:6]),
-                                                              int(str_active_end_date[6:8])),
-                                        freq=self.active_frequency_code)[:-1]
+                                                                              int(str_active_start_date[4:6]),
+                                                                              int(str_active_start_date[6:8])),
+                                                      end=datetime.datetime(int(str_active_end_date[:4]),
+                                                                            int(str_active_end_date[4:6]),
+                                                                            int(str_active_end_date[6:8])),
+                                                      freq=self.active_frequency_code)[:-1]
 
         if not self.read_instance.reading_nonghost:
             # get all relevant observational files
@@ -178,11 +178,11 @@ class DataReader:
                     (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
                     (resolution == '6hourly_instantaneous'):
                  self.data_vars_to_read = [species, 'daily_native_representativity_percent',
-                                          'monthly_native_representativity_percent',
-                                          'annual_native_representativity_percent',
-                                          'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                          'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                          'season_code', 'time']
+                                           'monthly_native_representativity_percent',
+                                           'annual_native_representativity_percent',
+                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                           'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                           'season_code', 'time']
             elif resolution == 'daily':
                 self.data_vars_to_read = [species, 'daily_native_representativity_percent',
                                           'monthly_native_representativity_percent',
@@ -247,12 +247,12 @@ class DataReader:
                 self.plotting_params['observations'] = {}
                 if not self.read_instance.reading_nonghost:
                     self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                                             len(self.read_instance.time_array)),
-                                                                            np.NaN, dtype=self.data_dtype)
+                                                               len(self.read_instance.time_array)),
+                                                              np.NaN, dtype=self.data_dtype)
                 else:
                     self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                                             len(self.read_instance.time_array)),
-                                                                            np.NaN, dtype=self.data_dtype[:1])
+                                                               len(self.read_instance.time_array)),
+                                                              np.NaN, dtype=self.data_dtype[:1])
                 self.metadata_in_memory = np.full((len(self.read_instance.station_references),
                                                    len(self.read_instance.relevant_yearmonths)),
                                                   np.NaN, dtype=self.read_instance.metadata_dtype)
@@ -270,8 +270,8 @@ class DataReader:
             # first relevant file, and save to data in memory dictionary
             if process_type == 'experiment':
                 self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                                         len(self.read_instance.time_array)),
-                                                                        np.NaN, dtype=self.data_dtype[:1])
+                                                           len(self.read_instance.time_array)),
+                                                          np.NaN, dtype=self.data_dtype[:1])
                 self.plotting_params[data_label] = {}
                 exp_nc_root = Dataset(relevant_files[0])
                 self.plotting_params[data_label]['grid_edge_longitude'] = \
@@ -296,14 +296,12 @@ class DataReader:
                 file_data, time_indices, full_array_station_indices = read_netcdf_data(tuple_arguments)
                 # place read data into big array as appropriate
                 self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis, :],
-                                                                      time_indices[:, np.newaxis]] = file_data
+                                                        time_indices[:, np.newaxis]] = file_data
 
         # read in parallel
         elif self.read_type == 'parallel':
-
             # setup pool of N workers on N CPUs
             pool = multiprocessing.Pool(self.read_instance.n_cpus)
-
             # read netCDF files in parallel
             if not self.read_instance.reading_nonghost:
                 tuple_arguments = [(file_name, self.read_instance.time_array, self.read_instance.station_references,
@@ -319,7 +317,6 @@ class DataReader:
                     file_name in relevant_files]
                 all_file_data = pool.map(read_netcdf_nonghost, tuple_arguments)
 
-            # will not submit more files to pool, so close access to it
             pool.close()
             # wait for worker processes to terminate before continuing
             pool.join()
@@ -352,14 +349,14 @@ class DataReader:
             self.read_instance.date_range_has_changed = True
             self.read_instance.selected_start_date = int(selected_start_date)
             self.read_instance.selected_end_date = int(selected_end_date)
-            self.read_instance.selected_start_date_firstdayofmonth = int(str(self.read_instance.selected_start_date)[:6] + '01')
+            self.read_instance.selected_start_date_firstdayofmonth = \
+                int(str(self.read_instance.selected_start_date)[:6] + '01')
         else:
             return
 
         # check end date is > start date, if not, return with no valid obs. files
         if self.read_instance.selected_start_date >= self.read_instance.selected_end_date:
             return
-
         # check start date and end date are both within if valid date range (19000101 - 20500101),
         # if not, return with no valid obs. files
         if (self.read_instance.selected_start_date < 19000101) or (self.read_instance.selected_end_date < 19000101) or (
@@ -368,11 +365,8 @@ class DataReader:
 
         # iterate through networks
         for network in list(self.read_instance.all_observation_data.keys()):
-            # iterate through resolutions
             for resolution in list(self.read_instance.all_observation_data[network].keys()):
-                # iterate through matrices
                 for matrix in list(self.read_instance.all_observation_data[network][resolution].keys()):
-                    # iterate through species
                     for species in list(self.read_instance.all_observation_data[network][resolution][matrix].keys()):
                         # get all file yearmonths associated with species
                         species_file_yearmonths = self.read_instance.all_observation_data[network][resolution][matrix][species]
@@ -381,16 +375,13 @@ class DataReader:
                                                           (ym >= self.read_instance.selected_start_date_firstdayofmonth) & (
                                                                       ym < self.read_instance.selected_end_date)]
                         if len(valid_species_files_yearmonths) > 0:
-                            # if network not in dictionary yet, add it
+                            # if network/res/matrix/species not in dictionary yet, add it
                             if network not in list(self.available_observation_data.keys()):
                                 self.available_observation_data[network] = {}
-                            # if resolution not in dictionary yet, add it
                             if resolution not in list(self.available_observation_data[network].keys()):
                                 self.available_observation_data[network][resolution] = {}
-                            # if matrix not in dictionary yet, add it
                             if matrix not in list(self.available_observation_data[network][resolution].keys()):
                                 self.available_observation_data[network][resolution][matrix] = {}
-                            # add species with associated list of file start yearmonths
                             self.available_observation_data[network][resolution][matrix][
                                 species] = valid_species_files_yearmonths
 
@@ -449,7 +440,6 @@ class DataReader:
         """
 
         # assign a colour/zorder to all selected data arrays
-
         # define observations colour to be 'black'
         self.plotting_params['observations']['colour'] = 'black'
         # define zorder of observations to be 5
