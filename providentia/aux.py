@@ -14,8 +14,17 @@ from .config import split_options
 
 
 def which_bounds(instance, species):
-    """If there are bounds defined in a config file, fill that value,
-    if it is withing the feasible bounds of the species"""
+    """Returns lower/upper bounds of species selected. If
+    there are bounds defined in a config file, fill that value,
+    if they are within the feasible bounds of the species.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    :param species: The species current selected for evaluation (e.g. sconco3)
+    :type species: str
+    :return: The lower and upper bound
+    :rtype: np.float32
+    """
 
     lower = np.float32(instance.parameter_dictionary[species]['extreme_lower_limit'])
     upper = np.float32(instance.parameter_dictionary[species]['extreme_upper_limit'])
@@ -32,8 +41,18 @@ def which_bounds(instance, species):
 
 
 def which_qa(instance, return_defaults=False):
-    """Checks if the species we currently have selected belongs to the ones
-    that have specific qa flags selected as default"""
+    """Returns QA flags for the species selected. If return_defaults
+    is set to true, it will just return the default values according
+    to GHOST standards. If there is a config file which has QA defined,
+    it will return those.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    :param return_defaults: flag for just returning the default QA
+    :type return_defaults: bool
+    :return: QA flags' codes in list
+    :rtype: list
+    """
 
     if return_defaults or (not hasattr(instance, 'qa')):
         if instance.selected_species in instance.qa_exceptions:
@@ -56,7 +75,14 @@ def which_qa(instance, return_defaults=False):
 
 
 def which_flags(instance):
-    """if there are flags coming from a config file, select those"""
+    """If there are flags coming from a config file,
+    select those. Otherwise, return empty list.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    :return: list of flags' codes
+    :rtype: list
+    """
 
     if hasattr(instance, 'flags'):
         # if conf has only one flag
@@ -75,11 +101,17 @@ def which_flags(instance):
 
 
 def get_qa_codes(instance):
-    """Retrieve QA codes from GHOST_standards using the qa flags' names.
+    """Retrieve QA codes from GHOST_standards using the QA flags' names.
 
     Specific flags are defined for the following species:
     ['WND_DIR_10M','WND_SPD_10M','RH_2M','PREC_ACCUM','SNOW_ACCUM',
-    'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']"""
+    'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    :return: three lists which contain flags' codes
+    :rtype: list
+    """
 
     # get names from json files
     specific_qa_names = json.load(open(
@@ -98,7 +130,14 @@ def get_qa_codes(instance):
 
 
 def exceedance_lim(species):
-    """Returns the exceedance limit depending on the species input."""
+    """Returns the exceedance limit depending on the species input. If
+    species doesn't have a reported limit, returns np.NaN.
+
+    :param species: name of species currently selected (e.g. sconco3)
+    :type species: str
+    :return: value of exceedance limit
+    :rtype: int
+    """
     exceedance_limits = {'sconco3': 90.21, 'sconcno2': 106.38}
     if species in exceedance_limits.keys():
         return exceedance_limits[species]
@@ -107,7 +146,11 @@ def exceedance_lim(species):
 
 
 def temp_axis_dict():
-    """Returns a temporal mapping as a dictionary used for the plots."""
+    """Returns a temporal mapping as a dictionary used for the plots.
+
+    :return: numbering of months/days
+    :rtype: dict
+    """
     map_dict = {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
                 'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
                           7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
@@ -118,14 +161,22 @@ def temp_axis_dict():
 def representativity_conf(instance):
     """Comes here if there is a configuration loaded. Checks if there is a
     representative field loaded in the object from the conf and if there is
-    assigns the value in the representativity menu"""
+    assigns the value in the representativity menu.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    """
     for i, label in enumerate(instance.representativity_menu['rangeboxes']['labels']):
         if hasattr(instance, label):
             instance.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(instance, label))
 
 
 def init_metadata(instance):
-    """Initialise internal structure to store metadata."""
+    """Initialise internal structure to store metadata.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    """
 
     # setup pop-up window menu tree for metadata
     metadata_types = {'STATION POSITION': 'Filter stations by measurement position',
@@ -180,7 +231,12 @@ def init_metadata(instance):
 
 
 def meta_from_conf(instance):
-    """Comes here if there in a loaded configuration there are also metadata fields."""
+    """Comes here if there in a loaded configuration
+    there are also metadata fields.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    """
 
     for menu_type in instance.metadata_types:
         # treat first ranges
@@ -200,12 +256,15 @@ def meta_from_conf(instance):
 
 def update_metadata_fields(instance):
     """Update the metadata menu object with metadata associated with newly read data
-       for non-numeric metadata gets all the unique fields per metadata variable,
-       and sets the available fields as such, and for numeric gets the minimum and maximum
-       boundaries of each metadata variable.
+    for non-numeric metadata gets all the unique fields per metadata variable,
+    and sets the available fields as such, and for numeric gets the minimum and maximum
+    boundaries of each metadata variable.
+    If previously metadata settings for a field deviate from the default,
+    then if the same field still exists then the settings (i.e. bounds or
+    checkbox selection) are copied across, rather than setting to the default.
 
-       If previously metadata settings for a field deviate from the default, then if the same field still
-       exists then the settings (i.e. bounds or checkbox selection) are copied across, rather than setting to the default.
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
     """
 
     # iterate through metadata variables
@@ -283,7 +342,14 @@ def update_metadata_fields(instance):
 
 def representativity_fields(instance, resolution):
     """Update the data representativity menu -> 1D list of rangebox values
-       dependent on the temporal resolution, some fields will appear or not
+    dependent on the temporal resolution, some fields will appear or not.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    :param resolution: selected resolution (e.g. "hourly", "3hourly")
+    :type resolution: str
+    :return: menu of representativity
+    :rtype: dict
     """
 
     # get previous set labels of dashboard
@@ -345,7 +411,15 @@ def representativity_fields(instance, resolution):
 
 def update_period_fields(resolution, period_menu):
     """Update the data period menu -> list of checkboxes
-       dependent on the temporal resolution, some fields will appear or not"""
+    dependent on the temporal resolution, some fields will appear or not.
+
+    :param resolution: selected resolution (e.g. "hourly", "3hourly")
+    :type resolution: str
+    :param period_menu: contains options of period
+    :type period_menu: dict
+    :return: updated menu of period
+    :rtype: dict
+    """
     # hourly temporal resolution?
     if 'hourly' in resolution:
         period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend',
@@ -376,7 +450,16 @@ def update_period_fields(resolution, period_menu):
 
 
 def to_pandas_dataframe(instance, species):
-    """Function that takes selected station data within data arrays and puts it into a pandas dataframe"""
+    """Function that takes selected station data within
+    data arrays and puts it into a pandas dataframe.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    :param species: The species current selected for evaluation (e.g. sconco3)
+    :type species: str
+    :return: station data by data array
+    :rtype: dict
+    """
 
     # create new dictionary to store selection station data by data array
     selected_station_data = {}
