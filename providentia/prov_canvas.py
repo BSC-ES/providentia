@@ -473,7 +473,6 @@ class MPLCanvas(FigureCanvas):
             # update plotted station selected metadata
             self.update_selected_station_metadata()
 
-
     def update_experiment_grid_domain_edges(self):
         """Function that plots grid domain edges of experiments in memory"""
 
@@ -1651,7 +1650,6 @@ class MPLCanvas(FigureCanvas):
             self.draw()
 
     def select_intersect_stations(self):
-
         """Define function that selects/unselects intersection of
         stations and all experiment domains (and associated plots)
         upon ticking of checkbox
@@ -1714,7 +1712,7 @@ class MPLCanvas(FigureCanvas):
     # the selection methods are individual station selection, or multiple selection with lasso
 
     def on_click(self, event):
-        """Function that handles single station selection upon mouse click"""
+        """Function that handles single station selection upon mouse click."""
 
         # update variable to inform lasso handler that map as already been updated (to not redraw map)
         # the on_click function is only called when a station index has been selected

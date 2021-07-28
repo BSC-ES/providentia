@@ -7,6 +7,7 @@ of metadata, checks fields coming from conf files etc.
 
 import copy
 import json
+import datetime
 import numpy as np
 import pandas as pd
 
@@ -502,3 +503,13 @@ def to_pandas_dataframe(instance, species):
                                                                           columns=['data'])
 
     return selected_station_data
+
+
+def valid_date(date_text):
+    """Determines if a date string is in the correct format."""
+
+    try:
+        datetime.datetime.strptime(str(date_text), '%Y%m%d')
+        return True
+    except Exception as e:
+        return False

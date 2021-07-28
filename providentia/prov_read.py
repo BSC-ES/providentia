@@ -1,4 +1,5 @@
 from .reading import get_yearmonths_to_read, read_netcdf_data, read_netcdf_nonghost
+from providentia import aux
 
 import os
 import gc
@@ -44,7 +45,7 @@ class DataReader:
         self.plotting_params = {}
 
     def check_for_ghost(self):
-        """ It checks whether the selected network comes from GHOST or not.
+        """It checks whether the selected network comes from GHOST or not.
         In case of non-ghost, it disables ghost-related fields"""
 
         # if we're reading nonghost files, then disable fields
@@ -55,19 +56,23 @@ class DataReader:
             return False
             # self.enable_ghost_buttons()
 
-    def valid_date(self, date_text):
-        """define function that determines if a date string is in the correct format"""
-
-        try:
-            datetime.datetime.strptime(str(date_text), '%Y%m%d')
-            return True
-        except Exception as e:
-            return False
-
     def read_setup(self, resolution, start_date, end_date, network, species, matrix):
         """Setup key variables for new read of observational/experiment
         data a time array and create arrays of unique station
         references/longitudes/latitudes.
+
+        :param resolution: selected resolution (e.g. "hourly")
+        :type resolution: str
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201231")
+        :type end_date: str
+        :param network: selected network (e.g. "EBAS")
+        :type network: str
+        :param species: selected species (e.g. "sconco3")
+        :type species: str
+        :param matrix: selected matrix (e.g. "gas")
+        :type matrix: str
         """
 
         # force garbage collection (to avoid memory issues)
@@ -201,7 +206,23 @@ class DataReader:
 
     def read_data(self, data_label, start_date, end_date,
                   network, resolution, species, matrix):
-        """Function that handles reading of observational/experiment data"""
+        """Function that handles reading of observational/experiment data.
+
+        :param data_label: can be "observations" or the expid
+        :type data_label: str
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201231")
+        :type end_date: str
+        :param resolution: selected resolution (e.g. "hourly")
+        :type resolution: str
+        :param network: selected network (e.g. "EBAS")
+        :type network: str
+        :param species: selected species (e.g. "sconco3")
+        :type species: str
+        :param matrix: selected matrix (e.g. "gas")
+        :type matrix: str
+        """
 
         # force garbage collection (to avoid memory issues)
         gc.collect()
@@ -339,13 +360,19 @@ class DataReader:
     def get_valid_obs_files_in_date_range(self, selected_start_date, selected_end_date):
         """Define function that iterates through observational dictionary tree
         and returns a dictionary of available data in the selected date
-        range"""
+        range
+
+        :param selected_start_date: start date (e.g. "20201101")
+        :type selected_start_date: str
+        :param selected_end_date: end date (e.g. "20201101")
+        :type selected_end_date: str
+        """
 
         # create dictionary to store available observational data
         self.available_observation_data = {}
 
         # check if start/end date are valid values, if not, return with no valid obs. files
-        if (self.valid_date(selected_start_date)) & (self.valid_date(selected_end_date)):
+        if (aux.valid_date(selected_start_date)) & (aux.valid_date(selected_end_date)):
             self.read_instance.date_range_has_changed = True
             self.read_instance.selected_start_date = int(selected_start_date)
             self.read_instance.selected_end_date = int(selected_end_date)
