@@ -81,6 +81,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 self.selected_species: species_files_yearmonths}}}}
 
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
+        self.reading_nonghost = aux.check_for_ghost(self.selected_network)
         # initialize DataReader
         self.datareader = DataReader(self)
         # read
