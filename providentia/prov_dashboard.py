@@ -772,7 +772,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
             # set new active time array/unique station references/longitudes/latitudes
             # adjust data arrays to account for potential changing number of stations
-            # self.read_setup()
             self.datareader.read_setup(self.active_resolution, self.active_start_date,
                                        self.active_end_date, self.active_network,
                                        self.active_species, self.active_matrix)
@@ -917,7 +916,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 # get n number of new elements on right edge
                 n_new_right_data_inds = (len(self.time_array) - 1) - \
                                         np.where(self.time_array == self.previous_time_array[-1])[0][0]
-
                 # get list of yearmonths to read
                 yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, previous_active_end_date,
                                                             self.active_end_date)
@@ -993,7 +991,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # initialise map z statistic comboboxes
         self.mpl_canvas.handle_map_z_statistic_update()
 
-        # --------------------------------------------------------------------#
         # update experiment bias combobox fields based on data in memory
         # if have no experiment data, all fields are empty
         if len(list(self.datareader.data_in_memory.keys())) == 1:
@@ -1062,10 +1059,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set default limits
         self.le_minimum_value.setText(str(species_lower_limit))
         self.le_maximum_value.setText(str(species_upper_limit))
-
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
-
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 
@@ -1090,7 +1085,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
     def disable_ghost_buttons(self):
         """Disable button related only to ghost data"""
-        # and set to False in a list-comprehension way
         # change background-color to indicate that it's nonusable
         self.bu_flags.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
         self.bu_rep.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
