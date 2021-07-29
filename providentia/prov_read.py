@@ -1,4 +1,5 @@
 from .reading import get_yearmonths_to_read, read_netcdf_data, read_netcdf_nonghost
+from providentia import aux
 
 import os
 import gc
@@ -44,35 +45,35 @@ class DataReader:
         self.plotting_params = {}
 
     def check_for_ghost(self):
-        """ It checks whether the selected network comes from GHOST or not.
-        In case of non-ghost, it disables ghost-related fields"""
+        """It checks whether the selected network comes from GHOST or not.
+        All non-GHOST networks start with an asterisk at their name."""
 
-        # if we're reading nonghost files, then disable fields
         if '*' in self.read_instance.cb_network.currentText():
-            # self.disable_ghost_buttons()
             return True
         else:
-            return False
-            # self.enable_ghost_buttons()
-
-    def valid_date(self, date_text):
-        """define function that determines if a date string is in the correct format"""
-
-        try:
-            datetime.datetime.strptime(str(date_text), '%Y%m%d')
-            return True
-        except Exception as e:
             return False
 
     def read_setup(self, resolution, start_date, end_date, network, species, matrix):
         """Setup key variables for new read of observational/experiment
         data a time array and create arrays of unique station
         references/longitudes/latitudes.
+
+        :param resolution: selected resolution (e.g. "hourly")
+        :type resolution: str
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201231")
+        :type end_date: str
+        :param network: selected network (e.g. "EBAS")
+        :type network: str
+        :param species: selected species (e.g. "sconco3")
+        :type species: str
+        :param matrix: selected matrix (e.g. "gas")
+        :type matrix: str
         """
 
         # force garbage collection (to avoid memory issues)
         gc.collect()
-        self.read_instance.reading_nonghost = False  # TODO: remoe line, was added for testing
         # series of actions not applicable when --offline
         if not self.read_instance.offline:
             self.read_instance.reading_nonghost = self.check_for_ghost()
@@ -98,12 +99,12 @@ class DataReader:
         str_active_start_date = str(start_date)
         str_active_end_date = str(end_date)
         self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str_active_start_date[:4]),
-                                                                int(str_active_start_date[4:6]),
-                                                                int(str_active_start_date[6:8])),
-                                        end=datetime.datetime(int(str_active_end_date[:4]),
-                                                              int(str_active_end_date[4:6]),
-                                                              int(str_active_end_date[6:8])),
-                                        freq=self.active_frequency_code)[:-1]
+                                                                              int(str_active_start_date[4:6]),
+                                                                              int(str_active_start_date[6:8])),
+                                                      end=datetime.datetime(int(str_active_end_date[:4]),
+                                                                            int(str_active_end_date[4:6]),
+                                                                            int(str_active_end_date[6:8])),
+                                                      freq=self.active_frequency_code)[:-1]
 
         if not self.read_instance.reading_nonghost:
             # get all relevant observational files
@@ -178,11 +179,11 @@ class DataReader:
                     (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
                     (resolution == '6hourly_instantaneous'):
                  self.data_vars_to_read = [species, 'daily_native_representativity_percent',
-                                          'monthly_native_representativity_percent',
-                                          'annual_native_representativity_percent',
-                                          'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                          'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                          'season_code', 'time']
+                                           'monthly_native_representativity_percent',
+                                           'annual_native_representativity_percent',
+                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                           'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                           'season_code', 'time']
             elif resolution == 'daily':
                 self.data_vars_to_read = [species, 'daily_native_representativity_percent',
                                           'monthly_native_representativity_percent',
@@ -201,7 +202,23 @@ class DataReader:
 
     def read_data(self, data_label, start_date, end_date,
                   network, resolution, species, matrix):
-        """Function that handles reading of observational/experiment data"""
+        """Function that handles reading of observational/experiment data.
+
+        :param data_label: can be "observations" or the expid
+        :type data_label: str
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201231")
+        :type end_date: str
+        :param resolution: selected resolution (e.g. "hourly")
+        :type resolution: str
+        :param network: selected network (e.g. "EBAS")
+        :type network: str
+        :param species: selected species (e.g. "sconco3")
+        :type species: str
+        :param matrix: selected matrix (e.g. "gas")
+        :type matrix: str
+        """
 
         # force garbage collection (to avoid memory issues)
         gc.collect()
@@ -247,12 +264,12 @@ class DataReader:
                 self.plotting_params['observations'] = {}
                 if not self.read_instance.reading_nonghost:
                     self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                                             len(self.read_instance.time_array)),
-                                                                            np.NaN, dtype=self.data_dtype)
+                                                               len(self.read_instance.time_array)),
+                                                              np.NaN, dtype=self.data_dtype)
                 else:
                     self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                                             len(self.read_instance.time_array)),
-                                                                            np.NaN, dtype=self.data_dtype[:1])
+                                                               len(self.read_instance.time_array)),
+                                                              np.NaN, dtype=self.data_dtype[:1])
                 self.metadata_in_memory = np.full((len(self.read_instance.station_references),
                                                    len(self.read_instance.relevant_yearmonths)),
                                                   np.NaN, dtype=self.read_instance.metadata_dtype)
@@ -270,8 +287,8 @@ class DataReader:
             # first relevant file, and save to data in memory dictionary
             if process_type == 'experiment':
                 self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                                         len(self.read_instance.time_array)),
-                                                                        np.NaN, dtype=self.data_dtype[:1])
+                                                           len(self.read_instance.time_array)),
+                                                          np.NaN, dtype=self.data_dtype[:1])
                 self.plotting_params[data_label] = {}
                 exp_nc_root = Dataset(relevant_files[0])
                 self.plotting_params[data_label]['grid_edge_longitude'] = \
@@ -296,14 +313,12 @@ class DataReader:
                 file_data, time_indices, full_array_station_indices = read_netcdf_data(tuple_arguments)
                 # place read data into big array as appropriate
                 self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis, :],
-                                                                      time_indices[:, np.newaxis]] = file_data
+                                                        time_indices[:, np.newaxis]] = file_data
 
         # read in parallel
         elif self.read_type == 'parallel':
-
             # setup pool of N workers on N CPUs
             pool = multiprocessing.Pool(self.read_instance.n_cpus)
-
             # read netCDF files in parallel
             if not self.read_instance.reading_nonghost:
                 tuple_arguments = [(file_name, self.read_instance.time_array, self.read_instance.station_references,
@@ -319,7 +334,6 @@ class DataReader:
                     file_name in relevant_files]
                 all_file_data = pool.map(read_netcdf_nonghost, tuple_arguments)
 
-            # will not submit more files to pool, so close access to it
             pool.close()
             # wait for worker processes to terminate before continuing
             pool.join()
@@ -342,24 +356,30 @@ class DataReader:
     def get_valid_obs_files_in_date_range(self, selected_start_date, selected_end_date):
         """Define function that iterates through observational dictionary tree
         and returns a dictionary of available data in the selected date
-        range"""
+        range
+
+        :param selected_start_date: start date (e.g. "20201101")
+        :type selected_start_date: str
+        :param selected_end_date: end date (e.g. "20201101")
+        :type selected_end_date: str
+        """
 
         # create dictionary to store available observational data
         self.available_observation_data = {}
 
         # check if start/end date are valid values, if not, return with no valid obs. files
-        if (self.valid_date(selected_start_date)) & (self.valid_date(selected_end_date)):
+        if (aux.valid_date(selected_start_date)) & (aux.valid_date(selected_end_date)):
             self.read_instance.date_range_has_changed = True
             self.read_instance.selected_start_date = int(selected_start_date)
             self.read_instance.selected_end_date = int(selected_end_date)
-            self.read_instance.selected_start_date_firstdayofmonth = int(str(self.read_instance.selected_start_date)[:6] + '01')
+            self.read_instance.selected_start_date_firstdayofmonth = \
+                int(str(self.read_instance.selected_start_date)[:6] + '01')
         else:
             return
 
         # check end date is > start date, if not, return with no valid obs. files
         if self.read_instance.selected_start_date >= self.read_instance.selected_end_date:
             return
-
         # check start date and end date are both within if valid date range (19000101 - 20500101),
         # if not, return with no valid obs. files
         if (self.read_instance.selected_start_date < 19000101) or (self.read_instance.selected_end_date < 19000101) or (
@@ -368,11 +388,8 @@ class DataReader:
 
         # iterate through networks
         for network in list(self.read_instance.all_observation_data.keys()):
-            # iterate through resolutions
             for resolution in list(self.read_instance.all_observation_data[network].keys()):
-                # iterate through matrices
                 for matrix in list(self.read_instance.all_observation_data[network][resolution].keys()):
-                    # iterate through species
                     for species in list(self.read_instance.all_observation_data[network][resolution][matrix].keys()):
                         # get all file yearmonths associated with species
                         species_file_yearmonths = self.read_instance.all_observation_data[network][resolution][matrix][species]
@@ -381,16 +398,13 @@ class DataReader:
                                                           (ym >= self.read_instance.selected_start_date_firstdayofmonth) & (
                                                                       ym < self.read_instance.selected_end_date)]
                         if len(valid_species_files_yearmonths) > 0:
-                            # if network not in dictionary yet, add it
+                            # if network/res/matrix/species not in dictionary yet, add it
                             if network not in list(self.available_observation_data.keys()):
                                 self.available_observation_data[network] = {}
-                            # if resolution not in dictionary yet, add it
                             if resolution not in list(self.available_observation_data[network].keys()):
                                 self.available_observation_data[network][resolution] = {}
-                            # if matrix not in dictionary yet, add it
                             if matrix not in list(self.available_observation_data[network][resolution].keys()):
                                 self.available_observation_data[network][resolution][matrix] = {}
-                            # add species with associated list of file start yearmonths
                             self.available_observation_data[network][resolution][matrix][
                                 species] = valid_species_files_yearmonths
 
@@ -449,7 +463,6 @@ class DataReader:
         """
 
         # assign a colour/zorder to all selected data arrays
-
         # define observations colour to be 'black'
         self.plotting_params['observations']['colour'] = 'black'
         # define zorder of observations to be 5
