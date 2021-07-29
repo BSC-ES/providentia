@@ -23,7 +23,7 @@ class DataReader:
     def read_all(self):
 
         # check if reading GHOST or non-GHOST files
-        self.read_instance.reading_nonghost = self.check_for_ghost()
+        self.read_instance.reading_nonghost = aux.check_for_ghost(self.read_instance.active_network)
 
         # get valid observational files in range
         self.get_valid_obs_files_in_date_range(self.read_instance.le_start_date.text(),
@@ -43,15 +43,6 @@ class DataReader:
     def reset_data_in_memory(self):
         self.data_in_memory = {}
         self.plotting_params = {}
-
-    def check_for_ghost(self):
-        """It checks whether the selected network comes from GHOST or not.
-        All non-GHOST networks start with an asterisk at their name."""
-
-        if '*' in self.read_instance.cb_network.currentText():
-            return True
-        else:
-            return False
 
     def read_setup(self, resolution, start_date, end_date, network, species, matrix):
         """Setup key variables for new read of observational/experiment
@@ -76,7 +67,7 @@ class DataReader:
         gc.collect()
         # series of actions not applicable when --offline
         if not self.read_instance.offline:
-            self.read_instance.reading_nonghost = self.check_for_ghost()
+            self.read_instance.reading_nonghost = aux.check_for_ghost(network)
 
             # set current time array, as previous time array
             self.read_instance.previous_time_array = self.read_instance.time_array
