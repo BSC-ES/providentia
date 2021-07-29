@@ -46,15 +46,12 @@ class DataReader:
 
     def check_for_ghost(self):
         """It checks whether the selected network comes from GHOST or not.
-        In case of non-ghost, it disables ghost-related fields"""
+        All non-GHOST networks start with an asterisk at their name."""
 
-        # if we're reading nonghost files, then disable fields
         if '*' in self.read_instance.cb_network.currentText():
-            # self.disable_ghost_buttons()
             return True
         else:
             return False
-            # self.enable_ghost_buttons()
 
     def read_setup(self, resolution, start_date, end_date, network, species, matrix):
         """Setup key variables for new read of observational/experiment
@@ -77,7 +74,6 @@ class DataReader:
 
         # force garbage collection (to avoid memory issues)
         gc.collect()
-        self.read_instance.reading_nonghost = False  # TODO: remoe line, was added for testing
         # series of actions not applicable when --offline
         if not self.read_instance.offline:
             self.read_instance.reading_nonghost = self.check_for_ghost()
