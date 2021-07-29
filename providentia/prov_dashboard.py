@@ -433,7 +433,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
 
-        self.reading_nonghost = self.datareader.check_for_ghost()
+        self.reading_nonghost = aux.check_for_ghost(self.selected_network)
         if self.reading_nonghost:
             self.disable_ghost_buttons()
         else:
@@ -656,7 +656,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # update configuration bar fields
             self.update_configuration_bar_fields()
             # if we're reading nonghost files, then disable fields again
-            self.datareader.check_for_ghost()
+            if aux.check_for_ghost(self.selected_network):
+                self.disable_ghost_buttons()
+            else:
+                self.enable_ghost_buttons()
 
     def handle_data_selection_update(self):
         """Define function which handles update of data selection

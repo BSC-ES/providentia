@@ -513,3 +513,13 @@ def valid_date(date_text):
         return True
     except Exception as e:
         return False
+
+
+def check_for_ghost(network_name):
+    """It checks whether the selected network comes from GHOST or not.
+    All non-GHOST networks start with an asterisk at their name."""
+
+    if '*' in network_name:
+        return True
+    else:
+        return False
