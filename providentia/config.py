@@ -174,12 +174,12 @@ def write_conf(section, fpath, opts):
         config.write(configfile)
 
 
-def split_options(conf_string):
+def split_options(conf_string, separator="||"):
     """For the options in the configuration that define the keep and remove
     options. Returns the values in two lists, the keeps and removes"""
     keeps, removes = [], []
     if "keep:" in conf_string:
-        keep_start, keep_end = conf_string.find("keep:"), conf_string.find(";")
+        keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)
         keeps = conf_string[keep_start+5:keep_end]
         keeps = keeps.split(",")
         keeps = [k.strip() for k in keeps]
