@@ -174,7 +174,7 @@ def export_netcdf(mpl_canvas, fname):
     fout.close()
 
 
-def export_configuration(prv, cname):
+def export_configuration(prv, cname, separator="||"):
     """
     Create all items to be written in configuration file
     and send them to write_conf
@@ -184,6 +184,9 @@ def export_configuration(prv, cname):
 
     :cname: Name for the configuration file
     :type cname:
+
+    :separator: delimiter for keep/remove fields
+    :type separator: str
     """
 
     # default
@@ -215,8 +218,8 @@ def export_configuration(prv, cname):
 
     # period
     if prv.period_menu['checkboxes']['keep_selected'] or prv.period_menu['checkboxes']['remove_selected']:
-        period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + "; "
-        period_r = "remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + "; "
+        period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + separator
+        period_r = " remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + separator
         options['period'] = period_k + period_r
 
     # bounds
@@ -245,8 +248,8 @@ def export_configuration(prv, cname):
             removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
 
             if keeps or removes:
-                meta_keep = "keep: " + ",".join(str(i) for i in keeps) + "; "
-                meta_remove = "remove: " + ",".join(str(i) for i in removes) + "; "
+                meta_keep = "keep: " + ",".join(str(i) for i in keeps) + separator
+                meta_remove = " remove: " + ",".join(str(i) for i in removes) + separator
                 options[label] = meta_keep + meta_remove
 
     # map z
