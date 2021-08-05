@@ -64,7 +64,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
         self.active_qa = aux.which_qa(self)
         self.active_flags = aux.which_flags(self)
-        self.minimum_value, self.maximum_value = aux.which_bounds(self, self.selected_species)
 
         # get all netCDF monthly files per species
         species_files = os.listdir(
@@ -158,9 +157,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # create and update the representativity options
                 self.representativity_menu = aux.representativity_fields(self, self.selected_resolution)
                 aux.representativity_conf(self)
+                self.minimum_value, self.maximum_value = aux.which_bounds(self, self.selected_species)
 
-                print('Filtering Data for {} Subset'.format(station_subset))
-
+                print('\nFiltering Data for {} Subset'.format(station_subset))
                 # filter dataset for current station_subset
                 DataFilter(self)
 
