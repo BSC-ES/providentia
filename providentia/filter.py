@@ -1,4 +1,5 @@
 from .calculate import Stats
+from .config import split_options
 
 import copy
 import numpy as np
@@ -34,8 +35,14 @@ class DataFilter:
         """Filter out (set to NaN) data which exceed the lower/upper limits"""
 
         # get set lower/upper data bounds
-        selected_lower_bound = self.read_instance.le_minimum_value.text()
-        selected_upper_bound = self.read_instance.le_maximum_value.text()
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+            selected_lower_bound = self.read_instance.minimum_value
+            selected_upper_bound = self.read_instance.maximum_value
+        else:
+            species = self.read_instance.active_species
+            selected_lower_bound = self.read_instance.le_minimum_value.text()
+            selected_upper_bound = self.read_instance.le_maximum_value.text()
 
         # check selected lower/upper bounds are numbers
         try:
@@ -43,94 +50,107 @@ class DataFilter:
             selected_upper_bound = np.float32(selected_upper_bound)
         # if any of the fields are not numbers, return from function
         except ValueError:
-            # # Restore mouse cursor to normal
-            # QtWidgets.QApplication.restoreOverrideCursor()
             return
 
         # filter all observational data out of bounds of lower/upper limits
-        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations'][
-                                               self.read_instance.active_species] < selected_lower_bound,
-                                           self.read_instance.data_in_memory_filtered['observations'][
-                                               self.read_instance.active_species] > selected_upper_bound)
-        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-            inds_out_of_bounds] = np.NaN
+        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered[
+                                               'observations'][species] < selected_lower_bound,
+                                           self.read_instance.data_in_memory_filtered[
+                                               'observations'][species] > selected_upper_bound)
+        self.read_instance.data_in_memory_filtered['observations'][species][inds_out_of_bounds] = np.NaN
 
     def filter_by_period(self):
         """Filters data for selected periods (keeping or removing data, as defined)"""
 
+        keeps, removes = [], []
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+            if hasattr(self.read_instance, 'period'):
+                keeps, removes = split_options(self.read_instance.period)
+                print(keeps, removes)
+        else:
+            species = self.read_instance.active_species
+            keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
+            removes = self.read_instance.period_menu['checkboxes']['remove_selected']
+
         # filter/limit data for periods selected
-        if len(self.read_instance.period_menu['checkboxes']['keep_selected']) > 0:
+        if len(keeps) > 0:
             day_night_codes_to_keep = []
-            if 'Daytime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Daytime' in keeps:
                 day_night_codes_to_keep.append(0)
-            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Nighttime' in keeps:
                 day_night_codes_to_keep.append(1)
             if len(day_night_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'],
                             day_night_codes_to_keep, invert=True)] = np.NaN
 
             weekday_weekend_codes_to_keep = []
-            if 'Weekday' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Weekday' in keeps:
                 weekday_weekend_codes_to_keep.append(0)
-            if 'Weekend' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Weekend' in keeps:
                 weekday_weekend_codes_to_keep.append(1)
             if len(weekday_weekend_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'],
                             weekday_weekend_codes_to_keep, invert=True)] = np.NaN
 
             season_codes_to_keep = []
-            if 'Spring' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Spring' in keeps:
                 season_codes_to_keep.append(0)
-            if 'Summer' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Summer' in keeps:
                 season_codes_to_keep.append(1)
-            if 'Autumn' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Autumn' in keeps:
                 season_codes_to_keep.append(2)
-            if 'Winter' in self.read_instance.period_menu['checkboxes']['keep_selected']:
+            if 'Winter' in keeps:
                 season_codes_to_keep.append(3)
             if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'],
                             season_codes_to_keep, invert=True)] = np.NaN
 
-        if len(self.read_instance.period_menu['checkboxes']['remove_selected']) > 0:
+        if len(removes) > 0:
             day_night_codes_to_remove = []
-            if 'Daytime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Daytime' in removes:
                 day_night_codes_to_remove.append(0)
-            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Nighttime' in removes:
                 day_night_codes_to_remove.append(1)
             if len(day_night_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'],
                             day_night_codes_to_remove)] = np.NaN
 
             weekday_weekend_codes_to_remove = []
-            if 'Weekday' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Weekday' in removes:
                 weekday_weekend_codes_to_remove.append(0)
-            if 'Weekend' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Weekend' in removes:
                 weekday_weekend_codes_to_remove.append(1)
             if len(weekday_weekend_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'],
                             weekday_weekend_codes_to_remove)] = np.NaN
 
             season_codes_to_remove = []
-            if 'Spring' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Spring' in removes:
                 season_codes_to_remove.append(0)
-            if 'Summer' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Summer' in removes:
                 season_codes_to_remove.append(1)
-            if 'Autumn' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Autumn' in removes:
                 season_codes_to_remove.append(2)
-            if 'Winter' in self.read_instance.period_menu['checkboxes']['remove_selected']:
+            if 'Winter' in removes:
                 season_codes_to_remove.append(3)
             if len(season_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                self.read_instance.data_in_memory_filtered['observations'][species][
                     np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'],
                             season_codes_to_remove)] = np.NaN
 
     def filter_by_data_availability(self):
         """Function which filters data by selected data availability variables"""
+
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+        else:
+            species = self.read_instance.active_species
 
         # get set variables names representing percentage data availability (native and non-native)
         active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['labels']
@@ -142,8 +162,6 @@ class DataFilter:
                     np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
         # if any of the fields are not numbers, return from function
         except ValueError:
-            # # Restore mouse cursor to normal
-            # QtWidgets.QApplication.restoreOverrideCursor()
             return
 
         if not self.read_instance.reading_nonghost:
@@ -153,14 +171,14 @@ class DataFilter:
                     if 'max_gap' in var:
                         # bound is < 100?:
                         if data_availability_lower_bounds[var_ii] < 100:
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            self.read_instance.data_in_memory_filtered['observations'][species][
                                 self.read_instance.data_in_memory_filtered['observations'][var] >
                                 data_availability_lower_bounds[var_ii]] = np.NaN
                     # data representativity variable?
                     else:
                         # bound is > 0?
                         if data_availability_lower_bounds[var_ii] > 0:
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                            self.read_instance.data_in_memory_filtered['observations'][species][
                                 self.read_instance.data_in_memory_filtered['observations'][var] <
                                 data_availability_lower_bounds[var_ii]] = np.NaN
 
@@ -181,7 +199,7 @@ class DataFilter:
                 # get period associate with variable
                 period = var.split('_')[0]
                 period_inds = np.arange(
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species].shape[
+                    self.read_instance.data_in_memory_filtered['observations'][species].shape[
                         1])
                 # daily variable?
                 if period == 'daily':
@@ -199,21 +217,24 @@ class DataFilter:
                     if len(period_inds) > 0:
                         # max gap variable?
                         if 'max_gap' in var:
-                            max_gap_percent = Stats.max_repeated_nans_fraction(self.read_instance.data_in_memory_filtered['observations'][
-                                    self.read_instance.active_species][:, period_inds])
-                            self.read_instance.data_in_memory_filtered['observations'][
-                                self.read_instance.active_species][
+                            max_gap_percent = Stats.max_repeated_nans_fraction(
+                                self.read_instance.data_in_memory_filtered['observations'][species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][species][
                                 max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
                         # data representativity variable?
                         else:
-                            data_availability_percent = Stats.calculate_data_avail_fraction(self.read_instance.data_in_memory_filtered['observations'][
-                                    self.read_instance.active_species][:, period_inds])
-                            self.read_instance.data_in_memory_filtered['observations'][
-                                self.read_instance.active_species][
+                            data_availability_percent = Stats.calculate_data_avail_fraction(
+                                self.read_instance.data_in_memory_filtered['observations'][species][:, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][species][
                                 data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
 
     def filter_by_metadata(self):
         """Filters data by selected metadata"""
+
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+        else:
+            species = self.read_instance.active_species
 
         # validate fields before filtering
         if not self.validate_values():
@@ -230,9 +251,9 @@ class DataFilter:
                 current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
                 if len(current_keep) > 0:
                     invalid_keep = np.repeat(
-                        np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_keep, invert=True),
-                        self.read_instance.datareader.N_inds_per_month, axis=1)
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :],
+                                current_keep, invert=True), self.read_instance.datareader.N_inds_per_month, axis=1)
+                    self.read_instance.data_in_memory_filtered['observations'][species][
                         invalid_keep] = np.NaN
                 # if any of the remove checkboxes have been selected, filter out data by these selected fields
                 current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
@@ -241,7 +262,7 @@ class DataFilter:
                     invalid_remove = np.repeat(
                         np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_remove),
                         self.read_instance.datareader.N_inds_per_month, axis=1)
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                    self.read_instance.data_in_memory_filtered['observations'][species][
                         invalid_remove] = np.NaN
             # handle numeric metadata
             else:
@@ -256,9 +277,9 @@ class DataFilter:
                     lower_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
                     if current_lower > lower_default:
-                        invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] < current_lower,
-                                                  self.read_instance.datareader.N_inds_per_month, axis=1)
-                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] <
+                                                  current_lower, self.read_instance.datareader.N_inds_per_month, axis=1)
+                        self.read_instance.data_in_memory_filtered['observations'][species][
                             invalid_below] = np.NaN
                 # if current upper < than the maximum extent, then filter out
                 # data with metadata > current upper value (if this is numeric)
@@ -267,9 +288,9 @@ class DataFilter:
                     upper_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
                     if current_upper < upper_default:
-                        invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] > current_upper,
-                                                  self.read_instance.datareader.N_inds_per_month, axis=1)
-                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                        invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] >
+                                                  current_upper, self.read_instance.datareader.N_inds_per_month, axis=1)
+                        self.read_instance.data_in_memory_filtered['observations'][species][
                             invalid_above] = np.NaN
 
     def validate_values(self):
@@ -281,7 +302,8 @@ class DataFilter:
             metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
 
             if metadata_data_type != np.object:
-                meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
+                meta_var_index = self.read_instance.metadata_menu[metadata_type][
+                    'rangeboxes']['labels'].index(meta_var)
                 try:
                     np.float32(self.read_instance.metadata_menu[metadata_type][
                                    'rangeboxes']['current_lower'][meta_var_index])
@@ -289,15 +311,23 @@ class DataFilter:
                                    'rangeboxes']['current_upper'][meta_var_index])
                     return True
                 except ValueError as e:
-                    # TODO: this cannot be here when we work with offline
-                    QtWidgets.QMessageBox.critical(self.read_instance, "Error in metadata fields",
-                                                   "The field of '{}' should be numeric, \n{}"
-                                                   .format(meta_var, str(e)),
-                                                   QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+                    if self.read_instance.offline:
+                        print("Error in metadata fields. The field of '{}' "
+                              "should be numeric, \n{}".format(meta_var, str(e)))
+                    else:
+                        QtWidgets.QMessageBox.critical(self.read_instance, "Error in metadata fields",
+                                                       "The field of '{}' should be numeric, \n{}"
+                                                       .format(meta_var, str(e)),
+                                                       QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
                     return False
 
     def colocate_data(self):
         """Define function which colocates observational and experiment data"""
+
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+        else:
+            species = self.read_instance.active_species
 
         # if do not have any experiment data loaded, no colocation is possible,
         # therefore return from function
@@ -312,7 +342,7 @@ class DataFilter:
 
             # get all instances observations are NaN
             nan_obs = np.isnan(
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species])
+                self.read_instance.data_in_memory_filtered['observations'][species])
 
             # create array for finding instances where have 0 valid values across all experiments
             # initialise as being all True, set as False on the occasion there is a valid value in an experiment
@@ -326,8 +356,7 @@ class DataFilter:
             exp_nan_dict = {}
             for exp_label in exp_labels:
                 # get all instances experiment are NaN
-                exp_nan_dict[exp_label] = np.isnan(
-                    self.read_instance.data_in_memory_filtered[exp_label][self.read_instance.active_species])
+                exp_nan_dict[exp_label] = np.isnan(self.read_instance.data_in_memory_filtered[exp_label][species])
                 # get all instances where either the observational array or experiment array are NaN at a given time
                 nan_instances = np.any([nan_obs, exp_nan_dict[exp_label]], axis=0)
                 # create new observational array colocated to experiment
@@ -380,6 +409,12 @@ class DataFilter:
                 'zorder': self.read_instance.datareader.plotting_params['observations']['zorder']}
 
     def get_valid_stations_after_filtering(self):
+
+        if self.read_instance.offline:
+            species = self.read_instance.selected_species
+        else:
+            species = self.read_instance.active_species
+
         # get intersect of indices of stations with >= % minimum data availability percent,
         # and with > 1 valid measurements ,in all observational data arrays (colocated and non-colocated)
         # then subset these indices with standard methods == selected methods,
@@ -391,7 +426,7 @@ class DataFilter:
                 # calculate data availability fraction per station in observational data array
                 # get absolute data availability number per station in observational data array
                 station_data_availability_number = Stats.calculate_data_avail_number(
-                    self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])
+                    self.read_instance.data_in_memory_filtered[data_label][species])
 
                 # get indices of stations with > 1 available measurements
                 # save valid station indices with data array
@@ -432,8 +467,7 @@ class DataFilter:
                 # update stats object data and call data availability function
                 station_data_availability_number = \
                     Stats.calculate_data_avail_number(
-                        self.read_instance.data_in_memory_filtered[data_label][
-                            self.read_instance.active_species][valid_station_inds, :])
+                        self.read_instance.data_in_memory_filtered[data_label][species][valid_station_inds, :])
                 # get indices of stations with > 1 available measurements
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[
                     station_data_availability_number > 1]]
