@@ -2,6 +2,7 @@
 import os
 import configparser
 
+from providentia import aux
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 import matplotlib
@@ -123,11 +124,10 @@ def reload_conf(instance, section, fpath):
     # reset the meta fields after loading
     instance.reset_options()
     # set fields from conf as you do in init
-    instance.representativity_conf()
+    aux.representativity_conf(instance)
     if hasattr(instance, 'period'):
         instance.period_conf()
     if set([m.lower() for m in instance.metadata_vars_to_read]).intersection(vars(instance).keys()):
-        instance.meta_from_conf()
+        aux.meta_from_conf(instance)
     # call function to apply changes (filter)
-    # TODO: set cursor to loading before and after
     instance.mpl_canvas.handle_data_filter_update()
