@@ -1,5 +1,6 @@
 """ Module which provides main window """
 from .configuration import ProvConfiguration
+from .init_standards import InitStandards
 from .configuration import parse_path
 from .config import split_options
 from .reading import get_yearmonths_to_read
@@ -12,6 +13,8 @@ from .prov_dashboard_aux import PopUpWindow
 from .prov_dashboard_aux import formatting_dict
 from .prov_dashboard_aux import set_formatting
 from .prov_read import DataReader
+from .prov_offline import ProvidentiaOffline
+from providentia import aux
 
 import copy
 import datetime
@@ -25,7 +28,6 @@ from collections import OrderedDict
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
-import pandas as pd
 from dateutil.relativedelta import relativedelta
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -34,7 +36,7 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
-class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
+class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards):
     """Define class that generates Providentia dashboard"""
 
     # create signals that are fired upon resizing/moving of main Providentia window
@@ -49,7 +51,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.read_type = read_type
 
         # store options to be restored at the end
-        # self.localvars = copy.deepcopy(vars(self))
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
         # update from config file
         if ('config' in kwargs) and ('section' in kwargs):
@@ -61,16 +62,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
         # arguments are only local
-
         self.main_window_geometry = None
-
-        self.parameter_dictionary = {}
-        self.standard_metadata = {}
-        self.metadata_vars_to_read = {}
-        self.metadata_dtype = {}
-        self.standard_data_flag_name_to_data_flag_code = {}
-        self.standard_QA_name_to_QA_code = {}
-        self.init_standards()
+        InitStandards.__init__(self, obs_root=self.obs_root,
+                               ghost_version=self.ghost_version)
 
         # load necessary dictionaries
         self.basic_stats_dict = json.load(open(os.path.join(CURRENT_PATH,
@@ -79,129 +73,30 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                         'conf/experiment_bias_stats_dict.json')))
         # initialize DataReader
         self.datareader = DataReader(self)
-
-        self.init_ui()
-
-        # setup callback events upon resizing/moving of Providentia window
-        self.resized.connect(self.get_geometry)
-        self.move.connect(self.get_geometry)
-
-    def init_standards(self):
-        """ Read from ghost standards """
-        sys.path.insert(1, '{}/GHOST_standards/{}'.format(self.obs_root, self.ghost_version))
-        from GHOST_standards import standard_parameters, \
-            get_standard_metadata, standard_data_flag_name_to_data_flag_code, \
-            standard_QA_name_to_QA_code
-        # modify standard parameter dictionary to have BSC standard parameter names as
-        # keys (rather than GHOST)
-        for _, param_dict in standard_parameters.items():
-            self.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
-        # get standard metadata dictionary
-        self.standard_metadata = get_standard_metadata({'standard_units':''})
-        # create list of metadata variables to read (make global)
-        self.metadata_vars_to_read = [key for key in self.standard_metadata.keys()
-                                      if pd.isnull(self.standard_metadata[key]['metadata_type'])
-                                      == False]
-        self.metadata_dtype = [(key, self.standard_metadata[key]['data_type']) for key in
-                               self.metadata_vars_to_read]
-        self.standard_data_flag_name_to_data_flag_code = \
-            standard_data_flag_name_to_data_flag_code
-        self.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
-        self.qa_exceptions = ['dir10', 'spd10', 'rho2', 'acprec', 'acsnow', 'si',
-                              'cldbot', 'vdist', 'ccovmean', 'cfracmean']
-        self.get_qa_codes()
-
-    def get_qa_codes(self):
-        """Retrieve QA codes from GHOST_standards using the qa flags' names.
-
-        Specific flags are defined for the following species:
-        ['WND_DIR_10M','WND_SPD_10M','RH_2M','PREC_ACCUM','SNOW_ACCUM',
-        'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']"""
-
-        # get names from json files
-        specific_qa_names = json.load(open("providentia/conf/default_flags.json"))['specific_qa']
-        general_qa_names = json.load(open("providentia/conf/default_flags.json"))['general_qa']
-        # get codes
-        self.specific_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in specific_qa_names]
-        self.general_qa = [self.standard_QA_name_to_QA_code[qa_name] for qa_name in general_qa_names]
-        # get difference of flags, needed later for updating default selection
-        self.qa_diff = list(set(self.general_qa) - set(self.specific_qa))
-
-    def which_qa(self, return_defaults=False):
-        """Checks if the species we currently have selected belongs to the ones
-        that have specific qa flags selected as default"""
-
-        if return_defaults or (not hasattr(self, 'qa')):
-            if self.selected_species in self.qa_exceptions:
-                return self.specific_qa
-            else:
-                return self.general_qa
-
-        if hasattr(self, 'qa'):
-            # if conf has only 1 QA
-            if isinstance(self.qa, int):
-                return [self.qa]
-            # if the QAs are written with their names
-            elif self.qa == "":
-                return []
-            elif isinstance(self.qa, str):
-                return [self.standard_QA_name_to_QA_code[q.strip()] for q in self.qa.split(",")]
-            # return subset the user has selected in conf
-            else:
-                return list(self.qa)
-
-    def which_flags(self):
-        """if there are flags coming from a config file, select those"""
-
-        if hasattr(self, 'flags'):
-            # if conf has only one flag
-            if isinstance(self.flags, int):
-                return [self.flags]
-            # if flags are writtern as strings
-            elif self.flags == "":
-                return []
-            elif isinstance(self.flags, str):
-                return [self.standard_data_flag_name_to_data_flag_code[f.strip()] for f in
-                        self.flags.split(",")]
-            else:
-                return list(self.flags)
+        if self.offline:
+            ProvidentiaOffline(self)
         else:
-            return []
-
-    def which_bounds(self):
-        """if there are bounds defined in a config file, fill that value,
-        if it is withing the feasible bounds of the species"""
-
-        lower = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
-        upper = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
-
-        if hasattr(self, 'lower_bound'):
-            if self.lower_bound >= lower:
-                lower = self.lower_bound
-
-        if hasattr(self, 'upper_bound'):
-            if self.upper_bound <= upper:
-                upper = self.upper_bound
-
-        return np.float32(lower), np.float32(upper)
+            self.init_ui()
+            # setup callback events upon resizing/moving of Providentia window
+            self.resized.connect(self.get_geometry)
+            self.move.connect(self.get_geometry)
 
     def resizeEvent(self, event):
-        '''Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry'''
+        """Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry"""
         self.resized.emit()
         return super(ProvidentiaMainWindow, self).resizeEvent(event)
 
     def moveEvent(self, event):
-        '''Function to overwrite default PyQt5 moveEvent function --> for calling get_geometry'''
+        """Function to overwrite default PyQt5 moveEvent function --> for calling get_geometry"""
         self.move.emit()
         return super(ProvidentiaMainWindow, self).moveEvent(event)
 
     def get_geometry(self):
-        '''Get current geometry of main Providentia window'''
+        """Get current geometry of main Providentia window"""
         self.main_window_geometry = copy.deepcopy(self.geometry())
 
     def init_ui(self):
         """Initialise user interface"""
-
         # set window title
         self.window_title = "Providentia"
         self.setWindowTitle(self.window_title)
@@ -215,7 +110,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         parent_layout.setContentsMargins(0, 0, 0, 0)
 
         # define stylesheet for tooltips
-        self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family()))
+        self.setStyleSheet("QToolTip { font: %spt %s}" % (formatting_dict['tooltip']['font'].pointSizeF(),
+                                                          formatting_dict['tooltip']['font'].family()))
 
         # setup configuration bar with combo boxes, input boxes and buttons
         # use a gridded layout to place objects
@@ -226,12 +122,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         config_bar.setVerticalSpacing(1)
         config_bar.setContentsMargins(5, 0, 0, 0)
         config_bar.setAlignment(QtCore.Qt.AlignLeft)
-
         # add one more horizontal layout
         hbox = QtWidgets.QHBoxLayout()
 
         # define all configuration box objects (labels, comboboxes etc.)
-        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"), formatting_dict['title_menu'])
+        self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"),
+                                                formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
         self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
         self.bu_read.setFixedWidth(40)
@@ -241,7 +137,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_network.setFixedWidth(95)
-        self.cb_network.setToolTip('Select providing observational data network. Names starting with * indicate non-GHOST datasets')
+        self.cb_network.setToolTip('Select providing observational data network. '
+                                   'Names starting with * indicate non-GHOST datasets')
         self.cb_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_resolution.setFixedWidth(95)
         self.cb_resolution.setToolTip('Select temporal resolution of data')
@@ -275,7 +172,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
         self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), formatting_dict['button_menu'])
         self.bu_rep.setFixedWidth(46)
-        self.bu_rep.setToolTip('Select % desired representativity in data across whole record and for specific temporal periods')
+        self.bu_rep.setToolTip('Select % desired representativity in data across '
+                               'whole record and for specific temporal periods')
         self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), formatting_dict['button_menu'])
         self.bu_meta.setFixedWidth(46)
         self.bu_meta.setToolTip('Select metadata to filter by')
@@ -314,7 +212,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.cb_z2.setToolTip('Select Z2 dataset')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
-        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp. Bias"), formatting_dict['title_menu'])
+        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp. Bias"),
+                                                 formatting_dict['title_menu'])
         self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
         self.cb_experiment_bias_type = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_experiment_bias_type.setFixedWidth(100)
@@ -324,7 +223,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.cb_experiment_bias_stat.setToolTip('Select experiment bias statistic')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
-        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Select"), formatting_dict['title_menu'])
+        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Select"),
+                                                   formatting_dict['title_menu'])
         self.lb_station_selection.setToolTip('Select stations')
         self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), formatting_dict['checkbox_menu'])
         self.ch_select_all.setToolTip('Select all stations')
@@ -376,7 +276,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.le_start_date.textChanged.connect(self.config_bar_params_change_handler)
         self.le_end_date.textChanged.connect(self.config_bar_params_change_handler)
 
-        #setup pop-up window menu tree for flags
+        # setup pop-up window menu tree for flags
         self.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
         self.flag_menu['checkboxes']['labels'] = np.array(sorted(self.standard_data_flag_name_to_data_flag_code, key=self.standard_data_flag_name_to_data_flag_code.get))
         self.flag_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
@@ -384,7 +284,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.flag_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_data_flag_name_to_data_flag_code.values()))
         self.flag_menu['select_buttons'] = ['all', 'clear', 'default']
 
-        #setup pop-up window menu tree for qa
+        # setup pop-up window menu tree for qa
         self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
         self.qa_menu['checkboxes']['labels'] = np.array(sorted(self.standard_QA_name_to_QA_code, key=self.standard_QA_name_to_QA_code.get))
         self.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
@@ -392,52 +292,27 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.qa_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_QA_name_to_QA_code.values()))
         self.qa_menu['select_buttons'] = ['all', 'clear', 'default']
 
-        #setup pop-up window menu tree for experiments
-        self.experiments_menu = {'window_title':'EXPERIMENTS', 'page_title':'Select Experiment/s', 'checkboxes':{}}
-        self.experiments_menu['checkboxes']['labels'] = []
-        self.experiments_menu['checkboxes']['keep_default'] = []
-        self.experiments_menu['checkboxes']['keep_selected'] = []
-        self.experiments_menu['checkboxes']['map_vars'] = []
-        self.experiments_menu['select_buttons'] = ['all', 'clear']
+        # setup pop-up window menu tree for experiments
+        self.experiments_menu = {'window_title': 'EXPERIMENTS', 'page_title': 'Select Experiment/s',
+                                 'checkboxes': {'labels': [],
+                                                'keep_default': [],
+                                                'keep_selected': [],
+                                                'map_vars': [],
+                                                'select_buttons': ['all', 'clear']}}
 
-        #setup pop-up window menu tree for metadata
-        self.metadata_types =  {'STATION POSITION':'Filter stations by measurement position',
-                                'STATION CLASSIFICATIONS':'Filter stations by station provided classifications',
-                                'STATION MISCELLANEOUS':'Filter stations by miscellaneous station provided metadata',
-                                'GLOBALLY GRIDDED CLASSIFICATIONS':'Filter stations by globally gridded classifications',
-                                'MEASUREMENT PROCESS INFORMATION':'Filter stations by measurement process information'}
-        self.metadata_menu = {'window_title':'METADATA', 'page_title':'Select metadata type to filter stations by', 'navigation_buttons':{}}
-        self.metadata_menu['navigation_buttons']['labels'] = list(self.metadata_types.keys())
-        self.metadata_menu['navigation_buttons']['tooltips'] = [self.metadata_types[key] for key in self.metadata_menu['navigation_buttons']['labels']]
-        for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
-            self.metadata_menu[metadata_type] = {'window_title':metadata_type, 'page_title':self.metadata_menu['navigation_buttons']['tooltips'][metadata_type_ii], 'navigation_buttons':{}, 'rangeboxes':{}}
-            self.metadata_menu[metadata_type]['navigation_buttons']['labels'] = [metadata_name for metadata_name in self.standard_metadata.keys() if (self.standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (self.standard_metadata[metadata_name]['data_type'] == np.object)]
-            self.metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = [self.standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['navigation_buttons']['labels']]
-            for label in self.metadata_menu[metadata_type]['navigation_buttons']['labels']:
-                self.metadata_menu[metadata_type][label] = {'window_title':label, 'page_title':'Filter stations by unique {} metadata'.format(label), 'checkboxes':{}}
-                self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['keep_default'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['remove_default'] = []
-            self.metadata_menu[metadata_type]['rangeboxes']['labels'] = [metadata_name for metadata_name in self.standard_metadata.keys() if (self.standard_metadata[metadata_name]['metadata_type'] == metadata_type) & (self.standard_metadata[metadata_name]['data_type'] != np.object)]
-            self.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = [self.standard_metadata[metadata_name]['description'] for metadata_name in self.metadata_menu[metadata_type]['rangeboxes']['labels']]
-            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = ['nan'] * len(self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-
-        #setup pop-up window menu tree for % data representativity
-        self.representativity_menu = {'window_title':'% DATA REPRESENTATIVITY', 'page_title':'Select % Data Representativity Bounds', 'rangeboxes':{}}
-        self.representativity_menu['rangeboxes']['labels'] = []
-        self.representativity_menu['rangeboxes']['tooltips'] = []
-        self.representativity_menu['rangeboxes']['current_lower'] = []
-
+        # setup pop-up window menu tree for metadata
+        self.metadata_types, self.metadata_menu = aux.init_metadata(self)
+        # setup pop-up window menu tree for % data representativity
+        self.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY',
+                                      'page_title': 'Select % Data Representativity Bounds',
+                                      'rangeboxes': {'labels': [],
+                                                     'tooltips': [],
+                                                     'current_lower': []}}
         # setup pop-up window menu tree for data periods
-        self.period_menu = {'window_title':'DATA PERIOD', 'page_title':'Select Data Periods', 'checkboxes':{}}
-        self.period_menu['checkboxes']['labels'] = []
-        self.period_menu['checkboxes']['keep_selected'] = []
-        self.period_menu['checkboxes']['remove_selected'] = []
+        self.period_menu = {'window_title': 'DATA PERIOD', 'page_title': 'Select Data Periods',
+                            'checkboxes': {'labels': [],
+                                           'keep_selected': [],
+                                           'remove_selected': []}}
 
         # enable pop up configuration windows
         self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
@@ -460,13 +335,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # Enable interactivity of functions which update MPL canvas
         # enable READ button
         self.bu_read.clicked.connect(self.handle_data_selection_update)
-
         # enable RESET button
         self.bu_reset.clicked.connect(self.reset_options)
-
         # enable interactivity of colocation checkbox
         self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_colocate_update)
-
         # enable FILTER button
         self.bu_screen.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
@@ -524,55 +396,26 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         if self.from_conf:
             self.handle_data_selection_update()
             # then see if we have fields that require to be se (meta, rep, period)
-            self.representativity_conf()
+            aux.representativity_conf(self)
             if hasattr(self, 'period'):
                 self.period_conf()
             # if there are there are metadata reported in configuratoin
             if set([m.lower() for m in self.metadata_vars_to_read]).intersection(vars(self).keys()):
-                self.meta_from_conf()
+                aux.meta_from_conf(self)
             # call function to apply changes (filter)
             self.mpl_canvas.handle_data_filter_update()
 
         # set finalised layout
         self.setLayout(parent_layout)
-
         # plot whole dashboard
         self.show()
-
         # maximise window to fit screen
         self.showMaximized()
 
     def period_conf(self):
         keeps, removes = split_options(self.period)
-        # for i, label in enumerate(self.period_menu['checkboxes']['labels']):
         self.period_menu['checkboxes']['keep_selected'] += keeps
         self.period_menu['checkboxes']['remove_selected'] += removes
-
-    def representativity_conf(self):
-        """Comes here if there is a configuration loaded. Checks if there is a
-        representative field loaded in the object from the conf and if there is
-        assigns the value in the representativity menu"""
-        for i, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
-            if hasattr(self, label):
-                self.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(self, label))
-
-    def meta_from_conf(self):
-        """Comes here if there in a loaded configuration there are also metadata fields."""
-
-        for menu_type in self.metadata_types:
-            # treat first ranges
-            for i, label_cap in enumerate(self.metadata_menu[menu_type]['rangeboxes']['labels']):
-                label = label_cap.lower()
-                if hasattr(self, label):
-                    self.metadata_menu[menu_type]['rangeboxes']['current_lower'][i] = str(getattr(self, label)[0])
-                    self.metadata_menu[menu_type]['rangeboxes']['current_upper'][i] = str(getattr(self, label)[1])
-            # and then treat the keep/remove
-            for label_cap in self.metadata_menu[menu_type]['navigation_buttons']['labels']:
-                label = label_cap.lower()
-                if hasattr(self, label):
-                    keeps, removes = split_options(getattr(self, label))
-                    self.metadata_menu[menu_type][label_cap]['checkboxes']['keep_selected'] = keeps
-                    self.metadata_menu[menu_type][label_cap]['checkboxes']['remove_selected'] = removes
 
     def savebutton_func(self):
         save_data(self.mpl_canvas)
@@ -581,8 +424,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         conf_dialogs(self)
 
     def generate_pop_up_window(self, menu_root):
-        """generate pop up window"""
-
+        """Generate pop up window"""
         self.pop_up_window = PopUpWindow(menu_root, [], self.main_window_geometry)
 
     def update_configuration_bar_fields(self):
@@ -591,10 +433,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
 
-        # self.check_for_ghost()
-        # TODO: give this variable another name
-        self.reading_nonghost = self.datareader.check_for_ghost()
-
+        self.reading_nonghost = aux.check_for_ghost(self.selected_network)
         if self.reading_nonghost:
             self.disable_ghost_buttons()
         else:
@@ -613,7 +452,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             self.date_range_has_changed = False
 
             # set selected/active values of other fields to be initially None
-            # self.selected_network = None
             self.active_network = None
             self.active_resolution = None
             self.active_matrix = None
@@ -627,9 +465,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # set initial time array to be None
             self.time_array = None
-
             self.relevant_yearmonths = None
-
             # set initial station references to be empty list
             self.station_references = []
 
@@ -637,17 +473,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # create nested dictionary storing all observational species
             # data by species matrix, by temporal resolution, by network,
             # associated with list of start YYYYMM yearmonths of data files
-
             self.all_observation_data = {}
-
             # set all available networks
             available_networks = eval(self.available_networks)
-
             # set all available temporal resolutions
             available_resolutions = ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                      '3hourly_instantaneous', '6hourly_instantaneous',
                                      'daily', 'monthly']
-
             # iterate through available networks
             for network in available_networks:
 
@@ -655,7 +487,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 # if not, continue
                 if not os.path.exists('%s/%s/%s' % (self.obs_root, network, self.ghost_version)):
                     continue
-
                 # write empty dictionary for network
                 self.all_observation_data[network] = {}
 
@@ -675,18 +506,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
                     # iterate through available files per species
                     for species in available_species:
-
                         # get all netCDF monthly files per species
                         species_files = os.listdir(
                             '%s/%s/%s/%s/%s' % (self.obs_root, network, self.ghost_version, resolution, species))
-
                         # get monthly start date (YYYYMM) of all species files
                         species_files_yearmonths = \
                             [int(f.split('_')[-1][:6]+'01') for f in species_files if f != 'temporary']
-
                         # get matrix for current species
                         matrix = self.parameter_dictionary[species]['matrix']
-
                         if matrix not in list(self.all_observation_data[network][resolution].keys()):
                             # write nested empty dictionary for matrix
                             self.all_observation_data[network][resolution][matrix] = {}
@@ -701,19 +528,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 esarchive_files = self.get_esarchive_yearmonth(esarchive_files_empty)
                 self.all_observation_data = {**self.all_observation_data, **esarchive_files}
             # create dictionary of observational data inside date range
-            # self.get_valid_obs_files_in_date_range()
-            self.datareader.get_valid_obs_files_in_date_range()
+            self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
+                                                              self.le_end_date.text())
 
             # check which flags to select, depending if we have conf file or no
-            self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
+            self.flag_menu['checkboxes']['remove_selected'] = aux.which_flags(self)
 
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
-            # self.get_valid_obs_files_in_date_range()
-            self.datareader.get_valid_obs_files_in_date_range()
+            self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
+                                                              self.le_end_date.text())
 
         # initialise/update fields - maintain previously selected values wherever possible
-
         # clear fields
         self.cb_network.clear()
         self.cb_resolution.clear()
@@ -740,9 +566,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # update resolution field
         available_resolutions = list(self.datareader.available_observation_data[self.cb_network.currentText()].keys())
         # manually force order of available resolutions
-        resolution_order_dict = {'hourly':1, '3hourly':2, '6hourly':3, 'hourly_instantaneous':4,
-                                 '3hourly_instantaneous':5, '6hourly_instantaneous':6,
-                                 'daily':7, 'monthly':8}
+        resolution_order_dict = {'hourly': 1, '3hourly': 2, '6hourly': 3, 'hourly_instantaneous': 4,
+                                 '3hourly_instantaneous': 5, '6hourly_instantaneous': 6,
+                                 'daily': 7, 'monthly': 8}
         available_resolutions = sorted(available_resolutions, key=resolution_order_dict.__getitem__)
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
@@ -770,7 +596,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
         # update available experiment data dictionary
         self.datareader.get_valid_experiment_files_in_date_range()
-        self.datareader.get_valid_obs_files_in_date_range()
+        self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
+                                                          self.le_end_date.text())
         # update selected indices for experiments -- keeping previously selected experiments if available
         # set selected indices as previously selected indices in current available list of experiments
         if self.config_bar_initialisation and hasattr(self, 'experiments'):
@@ -785,8 +612,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                                 self.experiments_menu['checkboxes']['map_vars']]
 
         # since a selection has changed, update also the qa flags
-        qa_to_select = self.which_qa()  # first check which flags
-        self.qa_menu['checkboxes']['remove_default'] = self.which_qa(return_defaults=True)
+        qa_to_select = aux.which_qa(self)  # first check which flags
+        self.qa_menu['checkboxes']['remove_default'] = aux.which_qa(self, return_defaults=True)
         if self.config_bar_initialisation:
             self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
         else:
@@ -795,9 +622,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             if self.selected_species in self.qa_exceptions:
                 self.qa_menu['checkboxes']['remove_selected'] = list(set(
                     self.qa_menu['checkboxes']['remove_selected']) - set(self.qa_diff))
-
-        # if self.config_bar_initialisation:
-        #     self.flag_menu['checkboxes']['remove_selected'] = self.which_flags()
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -809,7 +633,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # get event origin source
             event_source = self.sender()
-
             # if network, resolution, matrix or species have changed then respective
             # current selection for the changed param
             if event_source == self.cb_network:
@@ -826,16 +649,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
-
             # check if start date/end date have changed
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
                 self.date_range_has_changed = True
 
             # update configuration bar fields
             self.update_configuration_bar_fields()
-
             # if we're reading nonghost files, then disable fields again
-            self.datareader.check_for_ghost()
+            if aux.check_for_ghost(self.selected_network):
+                self.disable_ghost_buttons()
+            else:
+                self.enable_ghost_buttons()
 
     def handle_data_selection_update(self):
         """Define function which handles update of data selection
@@ -853,15 +677,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.block_MPL_canvas_updates = True
 
         # set all previously active variables as past_active variables
-        self.previous_active_network = self.active_network
-        self.previous_active_resolution = self.active_resolution
-        self.previous_active_matrix = self.active_matrix
-        self.previous_active_species = self.active_species
-        self.previous_active_start_date = self.active_start_date
-        self.previous_active_end_date = self.active_end_date
-        self.previous_active_experiment_grids = self.active_experiment_grids
-        self.previous_active_qa = self.active_qa
-        self.previous_active_flags = self.active_flags
+        previous_active_network = self.active_network
+        previous_active_resolution = self.active_resolution
+        previous_active_species = self.active_species
+        previous_active_start_date = self.active_start_date
+        previous_active_end_date = self.active_end_date
+        previous_active_experiment_grids = self.active_experiment_grids
+        previous_active_qa = self.active_qa
+        previous_active_flags = self.active_flags
 
         # set all currently selected variables as active variables
         self.active_network = self.selected_network
@@ -874,9 +697,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         self.active_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
         self.active_flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
 
-        # --------------------------------------------------------------------#
         # determine what data (if any) needs to be read
-
         # set variables that inform what data needs to be read (set all initially as False)
         read_all = False
         read_left = False
@@ -887,75 +708,76 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # determine if any of the key variables have changed
         # (network, resolution, species, qa, flags)
         # if any have changed, observations and any selected experiments have to be re-read entirely
-        if (self.active_network != self.previous_active_network) or (
-                self.active_resolution != self.previous_active_resolution) or (
-                self.active_species != self.previous_active_species) or (
-                np.array_equal(self.active_qa, self.previous_active_qa) == False) or (
-                np.array_equal(self.active_flags, self.previous_active_flags) == False):
+        if (self.active_network != previous_active_network) or (
+                self.active_resolution != previous_active_resolution) or (
+                self.active_species != previous_active_species) or (
+                np.array_equal(self.active_qa, previous_active_qa) == False) or (
+                np.array_equal(self.active_flags, previous_active_flags) == False):
             read_all = True
         # key variables have not changed, has start/end date?
         else:
             # determine if start date/end date have changed
-            if (self.active_start_date != self.previous_active_start_date) or (
-                    self.active_end_date != self.previous_active_end_date):
+            if (self.active_start_date != previous_active_start_date) or (
+                    self.active_end_date != previous_active_end_date):
                 # if date range has changed then determine type of overlap with previous date range
                 # no overlap (i.e. start date >= than previous end date, or end date <= than previous start date)?
-                if (self.active_start_date >= self.previous_active_end_date) or (
-                        self.active_end_date <= self.previous_active_start_date):
+                if (self.active_start_date >= previous_active_end_date) or (
+                        self.active_end_date <= previous_active_start_date):
                     read_all = True
                 # data range fully inside previous data range (i.e. start date later and end date earlier)?
-                elif (self.active_start_date > self.previous_active_start_date) & (
-                        self.active_end_date < self.previous_active_end_date):
+                elif (self.active_start_date > previous_active_start_date) & (
+                        self.active_end_date < previous_active_end_date):
                     cut_left = True
                     cut_right = True
                 # need to read data on left edge and right edge of previous date range
                 # (i.e. start date earlier and end date later)?
-                elif (self.active_start_date < self.previous_active_start_date) & (
-                        self.active_end_date > self.previous_active_end_date):
+                elif (self.active_start_date < previous_active_start_date) & (
+                        self.active_end_date > previous_active_end_date):
                     read_left = True
                     read_right = True
                 # need to read data on left edge and cut on right edge of previous date range
                 # (i.e. start date earlier and end date earlier)?
-                elif (self.active_start_date < self.previous_active_start_date) & (
-                        self.active_end_date < self.previous_active_end_date):
+                elif (self.active_start_date < previous_active_start_date) & (
+                        self.active_end_date < previous_active_end_date):
                     read_left = True
                     cut_right = True
                 # need to cut data on left edge and read data on right edge of previous date range
                 # (i.e. start date later and end date later)?
-                elif (self.active_start_date > self.previous_active_start_date) & (
-                        self.active_end_date > self.previous_active_end_date):
+                elif (self.active_start_date > previous_active_start_date) & (
+                        self.active_end_date > previous_active_end_date):
                     cut_left = True
                     read_right = True
                 # need to read data on left edge of previous date range (i.e. start date earlier)?
-                elif (self.active_start_date < self.previous_active_start_date):
+                elif self.active_start_date < previous_active_start_date:
                     read_left = True
                 # need to read data on right edge of previous date range (i.e. end date later)?
-                elif (self.active_end_date > self.previous_active_end_date):
+                elif self.active_end_date > previous_active_end_date:
                     read_right = True
                 # need to cut data on left edge of previous date range (i.e. start date later)?
-                elif (self.active_start_date > self.previous_active_start_date):
+                elif self.active_start_date > previous_active_start_date:
                     cut_left = True
                 # need to cut data on right edge of previous date range (i.e. end date earlier)?
-                elif (self.active_end_date < self.previous_active_end_date):
+                elif self.active_end_date < previous_active_end_date:
                     cut_right = True
 
         # determine if any of the active experiments have changed
         # remove experiments that are no longer selected from data_in_memory dictionary
-        experiments_to_remove = [experiment for experiment in self.previous_active_experiment_grids if
+        experiments_to_remove = [experiment for experiment in previous_active_experiment_grids if
                                  experiment not in self.active_experiment_grids]
         for experiment in experiments_to_remove:
             del self.datareader.data_in_memory[experiment]
         # any new experiments will need completely re-reading
         experiments_to_read = [experiment for experiment in self.active_experiment_grids if
-                               experiment not in self.previous_active_experiment_grids]
+                               experiment not in previous_active_experiment_grids]
 
         # has date range changed?
-        if read_all or read_left or read_right or cut_left or cut_right :
+        if read_all or read_left or read_right or cut_left or cut_right:
 
             # set new active time array/unique station references/longitudes/latitudes
             # adjust data arrays to account for potential changing number of stations
-            # self.read_setup()
-            self.datareader.read_setup()
+            self.datareader.read_setup(self.active_resolution, self.active_start_date,
+                                       self.active_end_date, self.active_network,
+                                       self.active_species, self.active_matrix)
 
             # need to re-read all observations/experiments?
             if read_all:
@@ -965,10 +787,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 if not self.reading_nonghost:
                     self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
                 # read observations
-                self.datareader.read_data('observations', self.active_start_date, self.active_end_date)
+                self.datareader.read_data('observations', self.active_start_date,
+                                          self.active_end_date, self.active_network,
+                                          self.active_resolution, self.active_species,
+                                          self.active_matrix)
                 # read selected experiments (iterate through)
                 for data_label in self.active_experiment_grids:
-                    self.datareader.read_data(data_label, self.active_start_date, self.active_end_date)
+                    self.datareader.read_data(data_label, self.active_start_date,
+                                              self.active_end_date, self.active_network,
+                                              self.active_resolution, self.active_species,
+                                              self.active_matrix)
                     # if experiment in experiments_to_read list, remove it (as no longer need to read it)
                     if data_label in experiments_to_read:
                         experiments_to_read.remove(data_label)
@@ -1002,13 +830,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                                                       len(self.previous_time_array)),
                                                      np.NaN, dtype=self.datareader.data_dtype[:1])
                         # put the old data into new array in the correct positions
-                        new_data_array[new_station_inds, :] = self.datareader.data_in_memory[data_label][old_station_inds, :]
+                        new_data_array[new_station_inds, :] = self.datareader.data_in_memory[
+                                                                  data_label][old_station_inds, :]
                         # overwrite data array with reshaped version
                         self.datareader.data_in_memory[data_label] = new_data_array
 
             # need to cut edges?
             if cut_left or cut_right:
-
                 # set default edge limits as current edges
                 data_left_edge_ind = 0
                 data_right_edge_ind = len(self.previous_time_array)
@@ -1024,8 +852,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     monthly_relative_delta = relativedelta(
                         datetime.datetime(int(str_first_relevant_yearmonth[:4]), int(str_first_relevant_yearmonth[4:6]),
                                           1, 0, 0), datetime.datetime(int(str_previous_first_relevant_yearmonth[:4]),
-                                                                      int(str_previous_first_relevant_yearmonth[4:6]), 1,
-                                                                      0, 0))
+                                                                      int(str_previous_first_relevant_yearmonth[4:6]),
+                                                                      1, 0, 0))
                     metadata_left_edge_ind = (monthly_relative_delta.years * 12) + monthly_relative_delta.months
 
                 # need to cut on right data edge?
@@ -1034,34 +862,34 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                     str_last_relevant_yearmonth = str(self.relevant_yearmonths[-1])
                     str_previous_last_relevant_yearmonth = str(self.previous_relevant_yearmonths[-1])
                     monthly_relative_delta = relativedelta(
-                        datetime.datetime(int(str_previous_last_relevant_yearmonth[:4]), int(str_previous_last_relevant_yearmonth[4:6]),
+                        datetime.datetime(int(str_previous_last_relevant_yearmonth[:4]),
+                                          int(str_previous_last_relevant_yearmonth[4:6]),
                                           1, 0, 0), datetime.datetime(int(str_last_relevant_yearmonth[:4]),
-                                                                      int(str_last_relevant_yearmonth[4:6]),
-                                                                      1, 0, 0))
-                    metadata_right_edge_ind = metadata_right_edge_ind - ((monthly_relative_delta.years * 12) + monthly_relative_delta.months)
+                                                                      int(str_last_relevant_yearmonth[4:6]), 1, 0, 0))
+                    metadata_right_edge_ind = \
+                        metadata_right_edge_ind - ((monthly_relative_delta.years * 12) + monthly_relative_delta.months)
 
                 # do metadata array cut
                 if metadata_left_edge_ind == metadata_right_edge_ind:
                     self.datareader.metadata_in_memory = self.datareader.metadata_in_memory[:, [metadata_left_edge_ind]]
                 else:
-                    self.datareader.metadata_in_memory = self.datareader.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
-
+                    self.datareader.metadata_in_memory = \
+                        self.datareader.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
                 # iterate through all keys in data in memory dictionary and
                 # cut edges of the associated arrays appropriately
                 for data_label in list(self.datareader.data_in_memory.keys()):
-                    self.datareader.data_in_memory[data_label] = self.datareader.data_in_memory[data_label][:,
-                                                      data_left_edge_ind:data_right_edge_ind]
+                    self.datareader.data_in_memory[data_label] = \
+                        self.datareader.data_in_memory[data_label][:, data_left_edge_ind:data_right_edge_ind]
 
             # need to read on left edge?
             if read_left:
                 # get n number of new elements on left edge
                 n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
-
                 # get list of yearmonths to read
                 yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, self.active_start_date,
-                                                            self.previous_active_start_date)
+                                                            previous_active_start_date)
                 # check which yearmonths_to_read in previous matrix
-                yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths)
+                yearmonths_in_old_matrix = np.isin(yearmonths_to_read, self.previous_relevant_yearmonths)
                 # get yearmonths not currently accounted for in matrix
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
@@ -1082,16 +910,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
                             (len(self.station_references), n_new_left_data_inds), np.NaN,
                             dtype=self.datareader.data_dtype[:1]), self.datareader.data_in_memory[data_label]), axis=1)
-                    self.datareader.read_data(data_label, self.active_start_date, self.previous_active_start_date)
+                    self.datareader.read_data(data_label, self.active_start_date, previous_active_start_date,
+                                              self.active_network, self.active_resolution,
+                                              self.active_species, self.active_matrix)
 
             # need to read on right edge?
             if read_right:
                 # get n number of new elements on right edge
                 n_new_right_data_inds = (len(self.time_array) - 1) - \
                                         np.where(self.time_array == self.previous_time_array[-1])[0][0]
-
                 # get list of yearmonths to read
-                yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, self.previous_active_end_date,
+                yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, previous_active_end_date,
                                                             self.active_end_date)
                 # check which yearmonths_to_read in previous matrix
                 yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths)
@@ -1112,46 +941,42 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
                             (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype[:1])),
                                                                          axis=1)
-                    # self.read_data(data_label, self.previous_active_end_date, self.active_end_date)
-                    self.datareader.read_data(data_label, self.previous_active_end_date, self.active_end_date)
+                    self.datareader.read_data(data_label, previous_active_end_date, self.active_end_date,
+                                              self.active_network, self.active_resolution,
+                                              self.active_species, self.active_matrix)
 
             # update menu object fields
-            self.update_metadata_fields()
-            self.update_representativity_fields()
-            self.update_period_fields()
+            aux.update_metadata_fields(self)
+            self.representativity_menu = aux.representativity_fields(self, self.active_resolution)
+            aux.update_period_fields(self.active_resolution, self.period_menu)
 
         # if have new experiments to read, then read them now
         if len(experiments_to_read) > 0:
             for data_label in experiments_to_read:
-                # self.read_data(data_label, self.active_start_date, self.active_end_date)
-                self.datareader.read_data(data_label, self.active_start_date, self.active_end_date)
+                self.datareader.read_data(data_label, self.active_start_date, self.active_end_date,
+                                          self.active_network, self.active_resolution,
+                                          self.active_species, self.active_matrix)
 
-                # --------------------------------------------------------------------#
         # if species has changed, update default species specific lower/upper limits
-        if (self.active_species != self.previous_active_species):
+        if self.active_species != previous_active_species:
             # update default lower/upper species specific limits and filter data outside limits
-            species_lower_limit, species_upper_limit = self.which_bounds()
+            species_lower_limit, species_upper_limit = aux.which_bounds(self, self.active_species)
             # set default limits
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
 
-        # --------------------------------------------------------------------#
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         # self.update_plotting_parameters()
         self.datareader.update_plotting_parameters()
-
         # --------------------------------------------------------------------#
         # run function to filter data outside lower/upper limits, not using desired
         # measurement methods, and < desired minimum data availability
         self.mpl_canvas.handle_data_filter_update()
-
         # --------------------------------------------------------------------#
         # update map z combobox fields based on data in memory
-
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
         self.basic_z_stats = np.array(list(
             OrderedDict(sorted(self.basic_stats_dict.items(), key=lambda x: x[1]['order'])).keys()))
-
         self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
             OrderedDict(sorted(self.expbias_dict.items(), key=lambda x: x[1]['order'])).keys()))
 
@@ -1169,9 +994,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # initialise map z statistic comboboxes
         self.mpl_canvas.handle_map_z_statistic_update()
 
-        # --------------------------------------------------------------------#
         # update experiment bias combobox fields based on data in memory
-
         # if have no experiment data, all fields are empty
         if len(list(self.datareader.data_in_memory.keys())) == 1:
             self.experiment_bias_types = np.array([])
@@ -1183,12 +1006,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
             # initialise experiment bias comboboxes
             self.mpl_canvas.handle_experiment_bias_update()
 
-        # --------------------------------------------------------------------#
         # reset station select checkboxes to be unchecked
         self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
         # --------------------------------------------------------------------#
-
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
 
@@ -1210,12 +1031,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set rep fields to empty lists and initialize again
         self.representativity_menu['rangeboxes']['labels'] = []
         self.representativity_menu['rangeboxes']['current_lower'] = []
-        self.update_representativity_fields()
+        aux.representativity_fields(self, self.selected_resolution)
 
         # set period fields to empty and initiliaze them
         self.period_menu['checkboxes']['keep_selected'] = []
         self.period_menu['checkboxes']['remove_selected'] = []
-        self.update_period_fields()
+        aux.update_period_fields(self.active_resolution, self.period_menu)
 
         # reset metadata
         for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
@@ -1233,7 +1054,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                 self.metadata_menu[metadata_type]['rangeboxes']['labels'])
             self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = ['nan'] * len(
                 self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-        self.update_metadata_fields()
+        aux.update_metadata_fields(self)
 
         # reset bounds
         species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
@@ -1241,182 +1062,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
         # set default limits
         self.le_minimum_value.setText(str(species_lower_limit))
         self.le_maximum_value.setText(str(species_upper_limit))
-
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
-
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
-
-    def update_metadata_fields(self):
-        """Update the metadata menu object with metadata associated with newly read data
-           for non-numeric metadata gets all the unique fields per metadata variable,
-           and sets the available fields as such, and for numeric gets the minimum and maximum
-           boundaries of each metadata variable. 
-
-           If previously metadata settings for a field deviate from the default, then if the same field still 
-           exists then the settings (i.e. bounds or checkbox selection) are copied across, rather than setting to the default.  
-        """
-
-        # iterate through metadata variables
-        for meta_var in self.metadata_vars_to_read:
-
-            meta_var_field = self.datareader.metadata_in_memory[meta_var]
-
-            # get metadata variable type/data type
-            metadata_type = self.standard_metadata[meta_var]['metadata_type']
-            metadata_data_type = self.standard_metadata[meta_var]['data_type']
-
-            # remove NaNs from field
-            meta_var_field_nan_removed = meta_var_field[~pd.isnull(meta_var_field)]
-
-            # update pop-up metadata menu object with read metadata values
-            # for non-numeric metadata gets all the unique fields per metadata variable
-            # and sets the available fields as such
-            if metadata_data_type == np.object:
-                #get previous fields
-                previous_fields = copy.deepcopy(self.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'])
-                #update new labels
-                self.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'] = np.unique(
-                    meta_var_field_nan_removed)
-                #if field previously existed, then copy across checkbox settings for field
-                #else set initial checkboxes to be all blank
-                previous_keep = copy.deepcopy(self.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'])
-                previous_remove = copy.deepcopy(self.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'])
-                self.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'] = []
-                self.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'] = []
-                for field in self.metadata_menu[metadata_type][meta_var]['checkboxes']['labels']:
-                    if field in previous_fields:
-                        if field in previous_keep:
-                            self.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'].append(field)
-                        if field in previous_remove:
-                            self.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'].append(field)
-                #set defaults to be empty
-                self.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
-                self.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []
-            # for numeric fields get the minimum and maximum boundaries of each metadata variable
-            # if previous set values vary from min/max boundaries, copy across the values
-            # set as min/max as nan if have no numeric metadata for variable
-            else:
-                meta_var_index = self.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
-                #have some numeric values for metadata variable?
-                if len(meta_var_field_nan_removed) > 0:
-                    min_val = str(np.min(meta_var_field_nan_removed))
-                    max_val = str(np.max(meta_var_field_nan_removed))
-                    #get previous lower/upper extents and defaults
-                    previous_lower_default = copy.deepcopy(self.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
-                    previous_upper_default = copy.deepcopy(self.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
-                    previous_lower = copy.deepcopy(self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
-                    previous_upper = copy.deepcopy(self.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
-                    #if previous lower > previous default lower bound then copy across (and also not 'nan') 
-                    #initially set as min extent
-                    self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = min_val
-                    if (previous_lower != 'nan') & (previous_lower_default != 'nan'):   
-                        if previous_lower > previous_lower_default:
-                            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = copy.deepcopy(previous_lower)
-                    #if previous upper < previous default upper bound then copy across (and also not 'nan')
-                    #initially set as max extent
-                    self.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = max_val
-                    if (previous_upper != 'nan') & (previous_upper_default != 'nan'):
-                        if previous_upper < previous_upper_default:
-                            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = copy.deepcopy(previous_upper)
-                    #set defaults to min/max extents
-                    self.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
-                    self.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = max_val
-                #do not have some numeric values for metadata variable so set as 'nan'
-                else:
-                    self.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = 'nan'
-                    self.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
-                    self.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = 'nan'
-                    self.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
-
-    def update_representativity_fields(self):
-        """Update the data representativity menu -> 1D list of rangebox values
-           dependent on the temporal resolution, some fields will appear or not
-        """
-
-        # get previous set labels
-        previous_labels = copy.deepcopy(self.representativity_menu['rangeboxes']['labels'])
-
-        # get previously set rangebox values
-        previous_lower = copy.deepcopy(self.representativity_menu['rangeboxes']['current_lower'])
-
-        # hourly temporal resolution?
-        if (self.active_resolution == 'hourly') or (self.active_resolution == 'hourly_instantaneous'):
-            self.representativity_menu['rangeboxes']['labels'] = ['hourly_native_representativity_percent',
-                                                                  'hourly_native_max_gap_percent',
-                                                                  'daily_native_representativity_percent',
-                                                                  'daily_representativity_percent',
-                                                                  'daily_native_max_gap_percent',
-                                                                  'daily_max_gap_percent',
-                                                                  'monthly_native_representativity_percent',
-                                                                  'monthly_representativity_percent',
-                                                                  'monthly_native_max_gap_percent',
-                                                                  'monthly_max_gap_percent',
-                                                                  'all_representativity_percent', 'all_max_gap_percent']
-        # daily temporal resolution?
-        elif (self.active_resolution == 'daily') or (self.active_resolution == '3hourly') or \
-                (self.active_resolution == '6hourly') or (self.active_resolution == '3hourly_instantaneous') or \
-                (self.active_resolution == '6hourly_instantaneous'):
-            self.representativity_menu['rangeboxes']['labels'] = ['daily_native_representativity_percent',
-                                                                  'daily_native_max_gap_percent',
-                                                                  'monthly_native_representativity_percent',
-                                                                  'monthly_representativity_percent',
-                                                                  'monthly_native_max_gap_percent',
-                                                                  'monthly_max_gap_percent',
-                                                                  'all_representativity_percent', 'all_max_gap_percent']
-        # monthly temporal resolution?
-        elif self.active_resolution == 'monthly':
-            self.representativity_menu['rangeboxes']['labels'] = ['monthly_native_representativity_percent',
-                                                                  'monthly_native_max_gap_percent',
-                                                                  'all_representativity_percent', 'all_max_gap_percent']
-
-        # initialise rangebox values --> for data representativity fields
-        # the default is 0%, for max gap fields % the default is 100%
-        self.representativity_menu['rangeboxes']['current_lower'] = []
-        for label_ii, label in enumerate(self.representativity_menu['rangeboxes']['labels']):
-            if 'max_gap' in label:
-                self.representativity_menu['rangeboxes']['current_lower'].append('100')
-            else:
-                self.representativity_menu['rangeboxes']['current_lower'].append('0')
-
-            # label previously existed?
-            if label in previous_labels:
-                self.representativity_menu['rangeboxes']['current_lower'][label_ii] = previous_lower[
-                    previous_labels.index(label)]
-
-    def update_period_fields(self):
-        """Update the data period menu -> list of checkboxes
-           dependent on the temporal resolution, some fields will appear or not
-        """
-
-        # hourly temporal resolution?
-        if 'hourly' in self.active_resolution:
-            self.period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend', 'Spring',
-                                                        'Summer', 'Autumn', 'Winter']
-        # daily temporal resolution?
-        elif self.active_resolution == 'daily':
-            self.period_menu['checkboxes']['labels'] = ['Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
-
-            # drop selected fields from higher temporal resolutions
-            labels_to_remove = ['Daytime', 'Nighttime']
-            for label in labels_to_remove:
-                if label in self.period_menu['checkboxes']['keep_selected']:
-                    self.period_menu['checkboxes']['keep_selected'].remove(label)
-                if label in self.period_menu['checkboxes']['remove_selected']:
-                    self.period_menu['checkboxes']['remove_selected'].remove(label)
-
-        # monthly temporal resolution?
-        elif self.active_resolution == 'monthly':
-            self.period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
-
-            # drop selected fields from higher temporal resolutions
-            labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend']
-            for label in labels_to_remove:
-                if label in self.period_menu['checkboxes']['keep_selected']:
-                    self.period_menu['checkboxes']['keep_selected'].remove(label)
-                if label in self.period_menu['checkboxes']['remove_selected']:
-                    self.period_menu['checkboxes']['remove_selected'].remove(label)
 
     def load_conf(self, section=None, fpath=None):
         """ Load existing configurations from file. """
@@ -1439,8 +1088,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
 
     def disable_ghost_buttons(self):
         """Disable button related only to ghost data"""
-        # TODO: add all ghost related fields to a list
-        # and set to False in a list-comprehension way
         # change background-color to indicate that it's nonusable
         self.bu_flags.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
         self.bu_rep.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
@@ -1483,7 +1130,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration):
                         if os.path.exists(path):
                             species_files = glob(path + '*/*_??????.nc')
                             species_files_yearmonths = [int(f.split('_')[-1][:6] + '01') for f in species_files]
-                            # print(species_files_yearmonths)
                             esfiles[n][r][d][s] = species_files_yearmonths
         return esfiles
 
