@@ -30,6 +30,7 @@ class ProvConfiguration(object):
         self.obs_root = kwargs.get('obs_root', '')
         self.nonghost_root = kwargs.get('nonghost_root', '')
         self.exp_root = kwargs.get('exp_root', '')
+        self.offline = kwargs.get('offline', '')
         self.sequential_colourmap = kwargs.get('sequential_colourmap',
                                                'viridis')
         self.sequential_colourmap_warm = \
