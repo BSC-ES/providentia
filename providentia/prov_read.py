@@ -1,4 +1,5 @@
 from .reading import get_yearmonths_to_read, read_netcdf_data, read_netcdf_nonghost
+from providentia import aux
 
 import os
 import gc
@@ -22,16 +23,19 @@ class DataReader:
     def read_all(self):
 
         # check if reading GHOST or non-GHOST files
-        self.read_instance.reading_nonghost = self.check_for_ghost()
+        self.read_instance.reading_nonghost = aux.check_for_ghost(self.read_instance.active_network)
 
         # get valid observational files in range
-        self.get_valid_obs_files_in_date_range()
+        self.get_valid_obs_files_in_date_range(self.read_instance.le_start_date.text(),
+                                               self.read_instance.le_end_date.text())
 
         # update available experiment data dictionary
         self.get_valid_experiment_files_in_date_range()
 
         # setup read
-        self.read_setup()
+        self.read_setup(self.read_instance.active_resolution, self.read_instance.active_start_date,
+                        self.read_instance.active_end_date, self.read_instance.active_network,
+                        self.read_instance.active_species, self.read_instance.active_matrix)
 
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         self.update_plotting_parameters()
@@ -40,86 +44,75 @@ class DataReader:
         self.data_in_memory = {}
         self.plotting_params = {}
 
-    def check_for_ghost(self):
-        """ It checks whether the selected network comes from GHOST or not.
-        In case of non-ghost, it disables ghost-related fields"""
+    def read_setup(self, resolution, start_date, end_date, network, species, matrix):
+        """Setup key variables for new read of observational/experiment
+        data a time array and create arrays of unique station
+        references/longitudes/latitudes.
 
-        # if we're reading nonghost files, then disable fields
-        if '*' in self.read_instance.cb_network.currentText():
-            # self.disable_ghost_buttons()
-            return True
-        else:
-            return False
-            # self.enable_ghost_buttons()
-
-    def valid_date(self, date_text):
-        """define function that determines if a date string is in the correct format"""
-
-        try:
-            datetime.datetime.strptime(date_text, '%Y%m%d')
-            return True
-        except Exception as e:
-            return False
-
-    def read_setup(self):
-        """Function that setups key variables for new read of
-        observational/experiment data a time array and arrays
-        of unique station references/longitudes/latitudes are created.
+        :param resolution: selected resolution (e.g. "hourly")
+        :type resolution: str
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201231")
+        :type end_date: str
+        :param network: selected network (e.g. "EBAS")
+        :type network: str
+        :param species: selected species (e.g. "sconco3")
+        :type species: str
+        :param matrix: selected matrix (e.g. "gas")
+        :type matrix: str
         """
 
         # force garbage collection (to avoid memory issues)
         gc.collect()
-        self.read_instance.reading_nonghost = self.check_for_ghost()
+        # series of actions not applicable when --offline
+        if not self.read_instance.offline:
+            self.read_instance.reading_nonghost = aux.check_for_ghost(network)
 
-        # set current time array, as previous time array
-        self.read_instance.previous_time_array = self.read_instance.time_array
-        # set current station references, as previous station references
-        self.read_instance.previous_station_references = self.read_instance.station_references
-        # set current relevant yearmonths, as previous relevant yearmonths
-        self.read_instance.previous_relevant_yearmonths = self.read_instance.relevant_yearmonths
+            # set current time array, as previous time array
+            self.read_instance.previous_time_array = self.read_instance.time_array
+            # set current station references, as previous station references
+            self.read_instance.previous_station_references = self.read_instance.station_references
+            # set current relevant yearmonths, as previous relevant yearmonths
+            self.read_instance.previous_relevant_yearmonths = self.read_instance.relevant_yearmonths
 
         # get N time chunks between desired start date and end date to set time array
-        if (self.read_instance.active_resolution == 'hourly') or \
-                (self.read_instance.active_resolution == 'hourly_instantaneous'):
+        if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
             self.active_frequency_code = 'H'
-        elif (self.read_instance.active_resolution == '3hourly') or \
-                (self.read_instance.active_resolution == '3hourly_instantaneous'):
+        elif (resolution == '3hourly') or (resolution == '3hourly_instantaneous'):
             self.active_frequency_code = '3H'
-        elif (self.read_instance.active_resolution == '6hourly') or \
-                (self.read_instance.active_resolution == '6hourly_instantaneous'):
+        elif (resolution == '6hourly') or (resolution == '6hourly_instantaneous'):
             self.active_frequency_code = '6H'
-        elif self.read_instance.active_resolution == 'daily':
+        elif resolution == 'daily':
             self.active_frequency_code = 'D'
-        elif self.read_instance.active_resolution == 'monthly':
+        elif resolution == 'monthly':
             self.active_frequency_code = 'MS'
-        str_active_start_date = str(self.read_instance.active_start_date)
-        str_active_end_date = str(self.read_instance.active_end_date)
+        str_active_start_date = str(start_date)
+        str_active_end_date = str(end_date)
         self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str_active_start_date[:4]),
-                                                                int(str_active_start_date[4:6]),
-                                                                int(str_active_start_date[6:8])),
-                                        end=datetime.datetime(int(str_active_end_date[:4]),
-                                                              int(str_active_end_date[4:6]),
-                                                              int(str_active_end_date[6:8])),
-                                        freq=self.active_frequency_code)[:-1]
+                                                                              int(str_active_start_date[4:6]),
+                                                                              int(str_active_start_date[6:8])),
+                                                      end=datetime.datetime(int(str_active_end_date[:4]),
+                                                                            int(str_active_end_date[4:6]),
+                                                                            int(str_active_end_date[6:8])),
+                                                      freq=self.active_frequency_code)[:-1]
 
         if not self.read_instance.reading_nonghost:
             # get all relevant observational files
-            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, self.read_instance.active_network,
-                                                self.read_instance.ghost_version, self.read_instance.active_resolution,
-                                                self.read_instance.active_species, self.read_instance.active_species)
+            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
+                                                self.read_instance.ghost_version, resolution,
+                                                species, species)
         else:
             # get files from nonghost path
-            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root,
-                                                self.read_instance.active_network[1:].lower(),
+            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network[1:].lower(),
                                                 self.read_instance.selected_matrix,
-                                                self.read_instance.active_resolution, self.read_instance.active_species,
-                                                self.read_instance.active_species)
+                                                resolution, species, species)
 
-        # TODO: fix this madeness with the indices
-        self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[self.read_instance.active_network][self.read_instance.active_resolution][
-                                               self.read_instance.active_matrix][self.read_instance.active_species]])
+        self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[
+            network][resolution][matrix][species]])
 
-        relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc' for yyyymm in self.read_instance.relevant_yearmonths])
+        relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc'
+                                 for yyyymm in self.read_instance.relevant_yearmonths])
         self.N_inds_per_month = np.array([np.count_nonzero(np.all(
             [self.read_instance.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d'),
              self.read_instance.time_array < datetime.datetime.strptime(str(self.read_instance.relevant_yearmonths[month_ii + 1]), '%Y%m%d')],
@@ -145,11 +138,12 @@ class DataReader:
             if os.path.exists(relevant_files[0]):
                 ncdf_root = Dataset(relevant_files[0])
             else:
-                relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm in self.read_instance.relevant_yearmonths])
+                relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc'
+                                         for yyyymm in self.read_instance.relevant_yearmonths])
                 ncdf_root = Dataset(relevant_files[0])
             self.read_instance.station_references = np.array(
-                [st_name.tostring().decode('ascii').replace('\x00', '') for st_name in ncdf_root['station_name'][:]],
-                dtype=np.str)
+                [st_name.tostring().decode('ascii').replace('\x00', '')
+                 for st_name in ncdf_root['station_name'][:]], dtype=np.str)
             # get staion refs
             if "latitude" in ncdf_root.variables:
                 self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
@@ -160,45 +154,62 @@ class DataReader:
             ncdf_root.close()
 
         # update measurement units for species (take standard units from parameter dictionary)
-        self.measurement_units = self.read_instance.parameter_dictionary[self.read_instance.active_species]['standard_units']
+        self.measurement_units = self.read_instance.parameter_dictionary[species]['standard_units']
 
         # set data variables to read (dependent on active data resolution)
         if not self.read_instance.reading_nonghost:
-            if (self.read_instance.active_resolution == 'hourly') or (self.read_instance.active_resolution == 'hourly_instantaneous'):
-                self.data_vars_to_read = [self.read_instance.active_species, 'hourly_native_representativity_percent',
+            if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
+                self.data_vars_to_read = [species, 'hourly_native_representativity_percent',
                                           'daily_native_representativity_percent',
                                           'monthly_native_representativity_percent',
                                           'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                           'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
                                           'season_code', 'time']
-            elif (self.read_instance.active_resolution == '3hourly') or \
-                    (self.read_instance.active_resolution == '6hourly') or (self.read_instance.active_resolution == '3hourly_instantaneous') or \
-                    (self.read_instance.active_resolution == '6hourly_instantaneous'):
-                 self.data_vars_to_read = [self.read_instance.active_species, 'daily_native_representativity_percent',
-                                          'monthly_native_representativity_percent',
-                                          'annual_native_representativity_percent',
-                                          'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                          'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                          'season_code', 'time']
-            elif self.read_instance.active_resolution == 'daily':
-                self.data_vars_to_read = [self.read_instance.active_species, 'daily_native_representativity_percent',
+            elif (resolution == '3hourly') or \
+                    (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
+                    (resolution == '6hourly_instantaneous'):
+                 self.data_vars_to_read = [species, 'daily_native_representativity_percent',
+                                           'monthly_native_representativity_percent',
+                                           'annual_native_representativity_percent',
+                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                           'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                           'season_code', 'time']
+            elif resolution == 'daily':
+                self.data_vars_to_read = [species, 'daily_native_representativity_percent',
                                           'monthly_native_representativity_percent',
                                           'annual_native_representativity_percent',
                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                           'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code', 'time']
-            elif self.read_instance.active_resolution == 'monthly':
-                self.data_vars_to_read = [self.read_instance.active_species, 'monthly_native_representativity_percent',
+            elif resolution == 'monthly':
+                self.data_vars_to_read = [species, 'monthly_native_representativity_percent',
                                           'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
                                           'annual_native_max_gap_percent', 'season_code', 'time']
         else:
-            self.data_vars_to_read = [self.read_instance.active_species]
+            self.data_vars_to_read = [species]
 
         # set data dtype
         self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
 
-    def read_data(self, data_label, start_date_to_read, end_date_to_read):
-        """Function that handles reading of observational/experiment data"""
+    def read_data(self, data_label, start_date, end_date,
+                  network, resolution, species, matrix):
+        """Function that handles reading of observational/experiment data.
+
+        :param data_label: can be "observations" or the expid
+        :type data_label: str
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201231")
+        :type end_date: str
+        :param resolution: selected resolution (e.g. "hourly")
+        :type resolution: str
+        :param network: selected network (e.g. "EBAS")
+        :type network: str
+        :param species: selected species (e.g. "sconco3")
+        :type species: str
+        :param matrix: selected matrix (e.g. "gas")
+        :type matrix: str
+        """
 
         # force garbage collection (to avoid memory issues)
         gc.collect()
@@ -207,39 +218,29 @@ class DataReader:
         if data_label == 'observations':
             process_type = 'observations'
             if not self.read_instance.reading_nonghost:
-                file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, self.read_instance.active_network,
+                file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
                                                     self.read_instance.ghost_version,
-                                                    self.read_instance.active_resolution,
-                                                    self.read_instance.active_species,
-                                                    self.read_instance.active_species)
+                                                    resolution, species, species)
                 relevant_file_start_dates = \
-                    sorted(self.available_observation_data[self.read_instance.active_network]
-                           [self.read_instance.active_resolution][self.read_instance.active_matrix]
-                           [self.read_instance.active_species])
+                    sorted(self.available_observation_data[network][resolution][matrix][species])
             else:
                 # get files from nonghost path
                 file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root,
-                                                    self.read_instance.active_network[1:].lower(),
-                                                    self.read_instance.selected_matrix,
-                                                    self.read_instance.active_resolution,
-                                                    self.read_instance.active_species,
-                                                    self.read_instance.active_species)
+                                                    network[1:].lower(), matrix,
+                                                    resolution, species, species)
                 relevant_file_start_dates = \
-                    sorted(self.available_observation_data[self.read_instance.active_network]
-                           [self.read_instance.active_resolution][self.read_instance.active_matrix]
-                           [self.read_instance.active_species])
+                    sorted(self.available_observation_data[network][resolution][matrix][species])
 
         else:
             process_type = 'experiment'
             file_root = \
                 '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, data_label,
-                                           self.read_instance.active_resolution, self.read_instance.active_species,
-                                           self.read_instance.active_network, self.read_instance.active_species)
+                                           resolution, species, network, species)
 
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 
         # get data files in required date range to read, taking care not to re-read what has already been read
-        yearmonths_to_read = get_yearmonths_to_read(relevant_file_start_dates, start_date_to_read, end_date_to_read)
+        yearmonths_to_read = get_yearmonths_to_read(relevant_file_start_dates, start_date, end_date)
         relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in yearmonths_to_read]
 
         if not os.path.exists(relevant_files[0]):
@@ -254,12 +255,12 @@ class DataReader:
                 self.plotting_params['observations'] = {}
                 if not self.read_instance.reading_nonghost:
                     self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                                             len(self.read_instance.time_array)),
-                                                                            np.NaN, dtype=self.data_dtype)
+                                                               len(self.read_instance.time_array)),
+                                                              np.NaN, dtype=self.data_dtype)
                 else:
                     self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                                             len(self.read_instance.time_array)),
-                                                                            np.NaN, dtype=self.data_dtype[:1])
+                                                               len(self.read_instance.time_array)),
+                                                              np.NaN, dtype=self.data_dtype[:1])
                 self.metadata_in_memory = np.full((len(self.read_instance.station_references),
                                                    len(self.read_instance.relevant_yearmonths)),
                                                   np.NaN, dtype=self.read_instance.metadata_dtype)
@@ -277,8 +278,8 @@ class DataReader:
             # first relevant file, and save to data in memory dictionary
             if process_type == 'experiment':
                 self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                                         len(self.read_instance.time_array)),
-                                                                        np.NaN, dtype=self.data_dtype[:1])
+                                                           len(self.read_instance.time_array)),
+                                                          np.NaN, dtype=self.data_dtype[:1])
                 self.plotting_params[data_label] = {}
                 exp_nc_root = Dataset(relevant_files[0])
                 self.plotting_params[data_label]['grid_edge_longitude'] = \
@@ -295,7 +296,7 @@ class DataReader:
             for relevant_file in relevant_files:
                 # create argument tuple of function
                 tuple_arguments = relevant_file, self.read_instance.time_array, self.read_instance.station_references, \
-                                  self.read_instance.active_species, process_type,\
+                                  species, process_type,\
                                   self.read_instance.active_qa, self.read_instance.active_flags, \
                                   self.data_dtype, self.data_vars_to_read, \
                                   self.read_instance.metadata_dtype, self.read_instance.metadata_vars_to_read
@@ -303,18 +304,16 @@ class DataReader:
                 file_data, time_indices, full_array_station_indices = read_netcdf_data(tuple_arguments)
                 # place read data into big array as appropriate
                 self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis, :],
-                                                                      time_indices[:, np.newaxis]] = file_data
+                                                        time_indices[:, np.newaxis]] = file_data
 
         # read in parallel
         elif self.read_type == 'parallel':
-
             # setup pool of N workers on N CPUs
             pool = multiprocessing.Pool(self.read_instance.n_cpus)
-
             # read netCDF files in parallel
             if not self.read_instance.reading_nonghost:
                 tuple_arguments = [(file_name, self.read_instance.time_array, self.read_instance.station_references,
-                                    self.read_instance.active_species, process_type, self.read_instance.active_qa,
+                                    species, process_type, self.read_instance.active_qa,
                                     self.read_instance.active_flags, self.data_dtype,
                                     self.data_vars_to_read, self.read_instance.metadata_dtype,
                                     self.read_instance.metadata_vars_to_read) for file_name in relevant_files]
@@ -322,11 +321,10 @@ class DataReader:
             else:
                 tuple_arguments = [
                     (file_name, self.read_instance.time_array, self.read_instance.station_references,
-                     self.read_instance.active_species, process_type) for
+                     species, process_type) for
                     file_name in relevant_files]
                 all_file_data = pool.map(read_netcdf_nonghost, tuple_arguments)
 
-            # will not submit more files to pool, so close access to it
             pool.close()
             # wait for worker processes to terminate before continuing
             pool.join()
@@ -346,29 +344,33 @@ class DataReader:
                     else:
                         self.nonghost_metadata[file_data[2][:, np.newaxis]] = file_data[3]
 
-    def get_valid_obs_files_in_date_range(self):
+    def get_valid_obs_files_in_date_range(self, selected_start_date, selected_end_date):
         """Define function that iterates through observational dictionary tree
         and returns a dictionary of available data in the selected date
-        range"""
+        range
+
+        :param selected_start_date: start date (e.g. "20201101")
+        :type selected_start_date: str
+        :param selected_end_date: end date (e.g. "20201101")
+        :type selected_end_date: str
+        """
 
         # create dictionary to store available observational data
         self.available_observation_data = {}
 
         # check if start/end date are valid values, if not, return with no valid obs. files
-        selected_start_date = self.read_instance.le_start_date.text()
-        selected_end_date = self.read_instance.le_end_date.text()
-        if (self.valid_date(selected_start_date)) & (self.valid_date(selected_end_date)):
+        if (aux.valid_date(selected_start_date)) & (aux.valid_date(selected_end_date)):
             self.read_instance.date_range_has_changed = True
             self.read_instance.selected_start_date = int(selected_start_date)
             self.read_instance.selected_end_date = int(selected_end_date)
-            self.read_instance.selected_start_date_firstdayofmonth = int(str(self.read_instance.selected_start_date)[:6] + '01')
+            self.read_instance.selected_start_date_firstdayofmonth = \
+                int(str(self.read_instance.selected_start_date)[:6] + '01')
         else:
             return
 
         # check end date is > start date, if not, return with no valid obs. files
         if self.read_instance.selected_start_date >= self.read_instance.selected_end_date:
             return
-
         # check start date and end date are both within if valid date range (19000101 - 20500101),
         # if not, return with no valid obs. files
         if (self.read_instance.selected_start_date < 19000101) or (self.read_instance.selected_end_date < 19000101) or (
@@ -377,11 +379,8 @@ class DataReader:
 
         # iterate through networks
         for network in list(self.read_instance.all_observation_data.keys()):
-            # iterate through resolutions
             for resolution in list(self.read_instance.all_observation_data[network].keys()):
-                # iterate through matrices
                 for matrix in list(self.read_instance.all_observation_data[network][resolution].keys()):
-                    # iterate through species
                     for species in list(self.read_instance.all_observation_data[network][resolution][matrix].keys()):
                         # get all file yearmonths associated with species
                         species_file_yearmonths = self.read_instance.all_observation_data[network][resolution][matrix][species]
@@ -390,16 +389,13 @@ class DataReader:
                                                           (ym >= self.read_instance.selected_start_date_firstdayofmonth) & (
                                                                       ym < self.read_instance.selected_end_date)]
                         if len(valid_species_files_yearmonths) > 0:
-                            # if network not in dictionary yet, add it
+                            # if network/res/matrix/species not in dictionary yet, add it
                             if network not in list(self.available_observation_data.keys()):
                                 self.available_observation_data[network] = {}
-                            # if resolution not in dictionary yet, add it
                             if resolution not in list(self.available_observation_data[network].keys()):
                                 self.available_observation_data[network][resolution] = {}
-                            # if matrix not in dictionary yet, add it
                             if matrix not in list(self.available_observation_data[network][resolution].keys()):
                                 self.available_observation_data[network][resolution][matrix] = {}
-                            # add species with associated list of file start yearmonths
                             self.available_observation_data[network][resolution][matrix][
                                 species] = valid_species_files_yearmonths
 
@@ -446,10 +442,11 @@ class DataReader:
                     self.available_experiment_data['%s' % (experiment)] = valid_network_files_yearmonths
 
         # get list of available experiment-grid names
-        self.read_instance.experiments_menu['checkboxes']['labels'] = np.array(
-            sorted(list(self.available_experiment_data.keys())))
-        self.read_instance.experiments_menu['checkboxes']['map_vars'] = copy.deepcopy(
-            self.read_instance.experiments_menu['checkboxes']['labels'])
+        if not self.read_instance.offline:
+            self.read_instance.experiments_menu['checkboxes']['labels'] = np.array(
+                sorted(list(self.available_experiment_data.keys())))
+            self.read_instance.experiments_menu['checkboxes']['map_vars'] = copy.deepcopy(
+                self.read_instance.experiments_menu['checkboxes']['labels'])
 
     def update_plotting_parameters(self):
         """Function that updates plotting parameters (colour
@@ -457,7 +454,6 @@ class DataReader:
         """
 
         # assign a colour/zorder to all selected data arrays
-
         # define observations colour to be 'black'
         self.plotting_params['observations']['colour'] = 'black'
         # define zorder of observations to be 5
