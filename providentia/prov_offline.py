@@ -64,11 +64,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
         self.active_qa = aux.which_qa(self)
         self.active_flags = aux.which_flags(self)
+        self.reading_nonghost = aux.check_for_ghost(self.selected_network)
 
         # get all netCDF monthly files per species
-        species_files = os.listdir(
-            '%s/%s/%s/%s/%s' % (self.obs_root, self.selected_network, self.ghost_version,
-                                self.selected_resolution, self.selected_species))
+        if not self.reading_nonghost:
+            species_files = os.listdir('%s/%s/%s/%s/%s' % (self.obs_root, self.selected_network,
+                                                           self.ghost_version, self.selected_resolution,
+                                                           self.selected_species))
+        else:
+            # TODO
+            species_files = []
 
         # get monthly start date (YYYYMM) of all species files
         species_files_yearmonths = \
@@ -80,7 +85,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 self.selected_species: species_files_yearmonths}}}}
 
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
-        self.reading_nonghost = aux.check_for_ghost(self.selected_network)
         # initialize DataReader
         self.datareader = DataReader(self)
         # read
