@@ -72,8 +72,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                            self.ghost_version, self.selected_resolution,
                                                            self.selected_species))
         else:
-            # TODO
-            species_files = []
+            species_files = os.listdir('%s/%s/%s/%s/%s' % (self.nonghost_root, self.selected_network.lower()[1:],
+                                                           self.selected_matrix, self.selected_resolution,
+                                                           self.selected_species))
 
         # get monthly start date (YYYYMM) of all species files
         species_files_yearmonths = \
