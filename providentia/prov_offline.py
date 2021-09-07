@@ -338,7 +338,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                         if len(plot_type_split) > 1:
                                             bias_stat = True
                                         # skip observational array if plotting bias stat
-                                        if (bias_stat) & (original_data_label == 'observations'):
+                                        if bias_stat & (original_data_label == 'observations'):
                                             continue
                                         # make plot
                                         func = getattr(self, 'make_{}'.format(plot_type_split[0]))
@@ -394,8 +394,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         if hasattr(self, 'report_title'):
             txt = self.report_title
         else:
-            txt = 'An example report'
-        # TODO: define default title in case no title in conf
+            txt = 'Providentia Offline Report'
         page.text(0.5, 0.9, txt, transform=page.transFigure,
                   size=20, ha="center", va='top', wrap=True)
 
