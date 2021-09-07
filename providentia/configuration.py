@@ -55,6 +55,12 @@ class ProvConfiguration(object):
                        "['AERONET_v3','EBAS','EEA_AQ_eReporting','MITECO',"
                        "'NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP','NCDC_ISD_NA']")
 
+        # options added if configuration file is used
+        self.selected_species = kwargs.get('selected_species', '')
+        self.selected_network = kwargs.get('selected_network', '')
+        self.selected_matrix = kwargs.get('selected_matrix', '')
+        self.selected_resolution = kwargs.get('selected_resolution', '')
+
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
 
