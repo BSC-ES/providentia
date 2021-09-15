@@ -133,7 +133,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.defaults.items()})
 
     def start_pdf(self):
-        filename = "test_pdf.pdf"
+        if hasattr(self, 'filename'):
+            filename = self.filename + '.pdf'
+        else:
+            filename = "Providentia_offline_report.pdf"
 
         # open new PDF file
         with PdfPages(filename) as pdf:
