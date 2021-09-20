@@ -1194,7 +1194,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     ax_min.append(np.nanmin(ax.collections[0].get_array()))
                     ax_max.append(np.nanmax(ax.collections[0].get_array()))
                 except:
-                    return
+                    continue
 
         plotted_min = np.nanmin(ax_min)
         plotted_max = np.nanmax(ax_max)
