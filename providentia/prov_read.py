@@ -271,6 +271,10 @@ class DataReader:
                                             ('longitude', np.float), ('altitude', np.float)]
                     if "station_code" in tmp_ncdf.variables:
                         nonghost_mdata_dtype.append(('station_reference', np.object))
+                    if "station_type" in tmp_ncdf.variables:
+                        nonghost_mdata_dtype.append(('station_type', np.object))
+                    if "station_area" in tmp_ncdf.variables:
+                        nonghost_mdata_dtype.append(('station_area', np.object))
                     self.nonghost_metadata = np.full((len(self.read_instance.station_references)),
                                                      np.NaN, dtype=nonghost_mdata_dtype)
 
