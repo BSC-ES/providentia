@@ -272,6 +272,10 @@ def update_metadata_fields(instance):
     for meta_var in instance.metadata_vars_to_read:
 
         meta_var_field = instance.datareader.metadata_in_memory[meta_var]
+        if instance.reading_nonghost and meta_var == 'latitude':
+            meta_var_field = instance.datareader.nonghost_metadata[meta_var]
+        if instance.reading_nonghost and meta_var == 'longitude':
+            meta_var_field = instance.datareader.nonghost_metadata[meta_var]
 
         # get metadata variable type/data type
         metadata_type = instance.standard_metadata[meta_var]['metadata_type']
