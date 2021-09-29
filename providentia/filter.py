@@ -242,6 +242,12 @@ class DataFilter:
 
         # iterate through all metadata
         for meta_var in self.read_instance.metadata_vars_to_read:
+
+            if meta_var == 'lat':
+                meta_var = 'latitude'
+            elif meta_var == 'lon':
+                meta_var = 'longitude'
+
             metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
             metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
 
@@ -277,8 +283,12 @@ class DataFilter:
                     lower_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
                     if current_lower > lower_default:
-                        invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] <
-                                                  current_lower, self.read_instance.datareader.N_inds_per_month, axis=1)
+                        if not self.read_instance.reading_nonghost:
+                            invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] <
+                                                      current_lower, self.read_instance.datareader.N_inds_per_month, axis=1)
+                        else:
+                            invalid_below = np.repeat(self.read_instance.datareader.nonghost_metadata[meta_var][:, :] <
+                                                      current_lower, self.read_instance.datareader.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][species][
                             invalid_below] = np.NaN
                 # if current upper < than the maximum extent, then filter out
@@ -288,8 +298,12 @@ class DataFilter:
                     upper_default = np.float32(
                         self.read_instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
                     if current_upper < upper_default:
-                        invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] >
-                                                  current_upper, self.read_instance.datareader.N_inds_per_month, axis=1)
+                        if not self.read_instance.reading_nonghost:
+                            invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] >
+                                                      current_upper, self.read_instance.datareader.N_inds_per_month, axis=1)
+                        else:
+                            invalid_above = np.repeat(self.read_instance.datareader.nonghost_metadata[meta_var][:, :] >
+                                                      current_upper, self.read_instance.datareader.N_inds_per_month, axis=1)
                         self.read_instance.data_in_memory_filtered['observations'][species][
                             invalid_above] = np.NaN
 
