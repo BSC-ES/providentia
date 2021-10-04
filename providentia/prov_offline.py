@@ -64,11 +64,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
         self.active_qa = aux.which_qa(self)
         self.active_flags = aux.which_flags(self)
+        self.reading_nonghost = aux.check_for_ghost(self.selected_network)
 
         # get all netCDF monthly files per species
-        species_files = os.listdir(
-            '%s/%s/%s/%s/%s' % (self.obs_root, self.selected_network, self.ghost_version,
-                                self.selected_resolution, self.selected_species))
+        if not self.reading_nonghost:
+            species_files = os.listdir('%s/%s/%s/%s/%s' % (self.obs_root, self.selected_network,
+                                                           self.ghost_version, self.selected_resolution,
+                                                           self.selected_species))
+        else:
+            species_files = os.listdir('%s/%s/%s/%s/%s' % (self.nonghost_root, self.selected_network.lower()[1:],
+                                                           self.selected_matrix, self.selected_resolution,
+                                                           self.selected_species))
 
         # get monthly start date (YYYYMM) of all species files
         species_files_yearmonths = \
@@ -80,7 +86,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 self.selected_species: species_files_yearmonths}}}}
 
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
-        self.reading_nonghost = aux.check_for_ghost(self.selected_network)
         # initialize DataReader
         self.datareader = DataReader(self)
         # read
@@ -128,7 +133,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.defaults.items()})
 
     def start_pdf(self):
-        filename = "test_pdf.pdf"
+        if hasattr(self, 'filename'):
+            filename = self.filename + '.pdf'
+        else:
+            filename = "Providentia_offline_report.pdf"
 
         # open new PDF file
         with PdfPages(filename) as pdf:
@@ -333,7 +341,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                         if len(plot_type_split) > 1:
                                             bias_stat = True
                                         # skip observational array if plotting bias stat
-                                        if (bias_stat) & (original_data_label == 'observations'):
+                                        if bias_stat & (original_data_label == 'observations'):
                                             continue
                                         # make plot
                                         func = getattr(self, 'make_{}'.format(plot_type_split[0]))
@@ -389,8 +397,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         if hasattr(self, 'report_title'):
             txt = self.report_title
         else:
-            txt = 'An example report'
-        # TODO: define default title in case no title in conf
+            txt = 'Providentia Offline Report'
         page.text(0.5, 0.9, txt, transform=page.transFigure,
                   size=20, ha="center", va='top', wrap=True)
 
@@ -1187,7 +1194,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     ax_min.append(np.nanmin(ax.collections[0].get_array()))
                     ax_max.append(np.nanmax(ax.collections[0].get_array()))
                 except:
-                    return
+                    continue
 
         plotted_min = np.nanmin(ax_min)
         plotted_max = np.nanmax(ax_max)

@@ -271,7 +271,12 @@ class DataReader:
                                             ('longitude', np.float), ('altitude', np.float)]
                     if "station_code" in tmp_ncdf.variables:
                         nonghost_mdata_dtype.append(('station_reference', np.object))
-                    self.nonghost_metadata = np.full((len(self.read_instance.station_references)),
+                    if "station_type" in tmp_ncdf.variables:
+                        nonghost_mdata_dtype.append(('station_type', np.object))
+                    if "station_area" in tmp_ncdf.variables:
+                        nonghost_mdata_dtype.append(('station_area', np.object))
+                    self.nonghost_metadata = np.full((len(self.read_instance.station_references),
+                                                      len(self.read_instance.relevant_yearmonths)),
                                                      np.NaN, dtype=nonghost_mdata_dtype)
 
             # if process_type is experiment, get experiment specific grid edges from
@@ -342,7 +347,8 @@ class DataReader:
                         self.metadata_in_memory[file_data[2][:, np.newaxis],
                                                 self.read_instance.metadata_inds_to_fill[file_data_ii]] = file_data[3]
                     else:
-                        self.nonghost_metadata[file_data[2][:, np.newaxis]] = file_data[3]
+                        self.nonghost_metadata[file_data[2][:, np.newaxis],
+                                               self.read_instance.metadata_inds_to_fill[file_data_ii]] = file_data[3]
 
     def get_valid_obs_files_in_date_range(self, selected_start_date, selected_end_date):
         """Define function that iterates through observational dictionary tree
