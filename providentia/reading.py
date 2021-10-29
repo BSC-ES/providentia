@@ -156,6 +156,12 @@ def read_netcdf_nonghost(tuple_arguments):
         # rename it to station_reference for consistency
         metadata_vars_to_read.append('station_reference')
         metadata_dtype.append(('station_reference', np.object))
+    if "station_type" in ncdf_root.variables:
+        metadata_vars_to_read.append('station_type')
+        metadata_dtype.append(('station_type', np.object))
+    if "station_area" in ncdf_root.variables:
+        metadata_vars_to_read.append('station_area')
+        metadata_dtype.append(('station_area', np.object))
     # get time units
     time_units = ncdf_root['time'].units
 
@@ -212,6 +218,14 @@ def read_netcdf_nonghost(tuple_arguments):
                 codes = np.array([st_code.tostring().decode('ascii').replace('\x00', '')
                                   for st_code in ncdf_root['station_code'][:]], dtype=np.str)
                 file_metadata[meta_var][current_file_station_indices, 0] = codes
+            elif meta_var == "station_type":
+                file_station_types = np.array([st_type.tostring().decode('ascii').replace('\x00', '')
+                                               for st_type in ncdf_root['station_type'][:]], dtype=np.str)
+                file_metadata[meta_var][current_file_station_indices, 0] = file_station_types
+            elif meta_var == "station_area":
+                file_station_areas = np.array([st_area.tostring().decode('ascii').replace('\x00', '')
+                                               for st_area in ncdf_root['station_area'][:]], dtype=np.str)
+                file_metadata[meta_var][current_file_station_indices, 0] = file_station_areas
             else:
                 file_metadata[meta_var][current_file_station_indices, 0] = ncdf_root[meta_var][:]
 
