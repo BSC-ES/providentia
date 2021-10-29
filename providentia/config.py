@@ -60,6 +60,11 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--exp_root",
                                      dest="exp_root",
                                      help="set experiment root data directory")
+            self.parser.add_argument("--offline",
+                                     dest="offline",
+                                     default=False,
+                                     action='store_true',
+                                     help="run Providentia offline")
 #            self.parser.add_argument("--debug",
 #                                dest="debug",
 #                                help="debug (default=False)")
@@ -135,7 +140,7 @@ class ProvArgumentParser(object):
 
 
 def read_conf(section=None, fpath=None):
-    """ Read configuration """
+    """Read configuration"""
 
     config = configparser.RawConfigParser()
     config.read(fpath)
@@ -151,8 +156,35 @@ def read_conf(section=None, fpath=None):
     return res
 
 
+def read_offline_conf(fpath=None):
+    """Read configuration files when running Providentia
+    offline. When running offline, having a 'DEFAULT' section
+    is mandatory. The 'DEFAULT' section contains options that
+    are applied across all remaining sections."""
+
+    config = configparser.RawConfigParser()
+    config.read(fpath)
+
+    # check if Default section has options
+    if not config.defaults():
+        return None
+
+    defaults = {}
+    for k, val in config.items(config.default_section):
+        try:
+            defaults[k] = eval(val)
+        except:
+            defaults[k] = val
+
+    # store remaining sections into dict
+    res = {}
+    for section in config.sections():
+        res[section] = read_conf(section, fpath)
+    return defaults, res
+
+
 def write_conf(section, fpath, opts):
-    """ Write configurations on file. """
+    """Write configurations on file. """
 
     config = configparser.RawConfigParser()
 
@@ -174,12 +206,12 @@ def write_conf(section, fpath, opts):
         config.write(configfile)
 
 
-def split_options(conf_string):
+def split_options(conf_string, separator="||"):
     """For the options in the configuration that define the keep and remove
     options. Returns the values in two lists, the keeps and removes"""
     keeps, removes = [], []
     if "keep:" in conf_string:
-        keep_start, keep_end = conf_string.find("keep:"), conf_string.find(";")
+        keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)
         keeps = conf_string[keep_start+5:keep_end]
         keeps = keeps.split(",")
         keeps = [k.strip() for k in keeps]
