@@ -11,9 +11,9 @@ def export_data_npz(mpl_canvas, fname):
     """Function that writes out current data in memory to .npy file"""
 
     if mpl_canvas.read_instance.reading_nonghost:
-        mdata = mpl_canvas.read_instance.nonghost_metadata
+        mdata = mpl_canvas.read_instance.datareader.nonghost_metadata
     else:
-        mdata = mpl_canvas.read_instance.metadata_in_memory
+        mdata = mpl_canvas.read_instance.datareader.metadata_in_memory
 
     np.savez(fname, data=mpl_canvas.read_instance.data_in_memory_filtered,
              metadata=mdata,
@@ -38,7 +38,7 @@ def export_netcdf(mpl_canvas, fname):
     relevant_yearmonths = instance.relevant_yearmonths
 
     # frequency for pandas
-    fq = instance.active_frequency_code
+    fq = instance.datareader.active_frequency_code
 
     # create time array in selected resolution between start and end date
     pd_time = pd.date_range(start=start, end=end, freq=fq)[:-1]
@@ -54,14 +54,14 @@ def export_netcdf(mpl_canvas, fname):
 
     metadata_keys = instance.metadata_vars_to_read
     data_arr = instance.data_in_memory_filtered['observations'][speci]
-    metadata_arr = instance.metadata_in_memory
+    metadata_arr = instance.datareader.metadata_in_memory
     expids = instance.experiments_menu['checkboxes']['keep_selected']
     exp_to_write = []
     # change some vars if we're treating nonghost
     if instance.reading_nonghost:
         network = instance.active_network.replace("*", "")
         # metadata_keys = ['station_name', 'latitude', 'longitude', 'altitude']
-        metadata_arr = instance.nonghost_metadata
+        metadata_arr = instance.datareader.nonghost_metadata
         metadata_keys = list(metadata_arr.dtype.names)
 
     # start file
@@ -174,7 +174,7 @@ def export_netcdf(mpl_canvas, fname):
     fout.close()
 
 
-def export_configuration(prv, cname):
+def export_configuration(prv, cname, separator="||"):
     """
     Create all items to be written in configuration file
     and send them to write_conf
@@ -184,6 +184,9 @@ def export_configuration(prv, cname):
 
     :cname: Name for the configuration file
     :type cname:
+
+    :separator: delimiter for keep/remove fields
+    :type separator: str
     """
 
     # default
@@ -215,8 +218,8 @@ def export_configuration(prv, cname):
 
     # period
     if prv.period_menu['checkboxes']['keep_selected'] or prv.period_menu['checkboxes']['remove_selected']:
-        period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + "; "
-        period_r = "remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + "; "
+        period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + separator
+        period_r = " remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + separator
         options['period'] = period_k + period_r
 
     # bounds
@@ -245,8 +248,8 @@ def export_configuration(prv, cname):
             removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
 
             if keeps or removes:
-                meta_keep = "keep: " + ",".join(str(i) for i in keeps) + "; "
-                meta_remove = "remove: " + ",".join(str(i) for i in removes) + "; "
+                meta_keep = "keep: " + ",".join(str(i) for i in keeps) + separator
+                meta_remove = " remove: " + ",".join(str(i) for i in removes) + separator
                 options[label] = meta_keep + meta_remove
 
     # map z
