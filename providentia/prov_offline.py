@@ -201,12 +201,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                     for original_data_label in self.datareader.data_in_memory.keys():
                                         if original_data_label != 'observations':
                                             # get experiment name
-                                            exp_name = get_exp_name(original_data_label)
+                                            # exp_name = get_exp_name(original_data_label)  # does not work if expid is same and the domain is different
+                                            exp_name = original_data_label
                                             heatmap_dict[heatmap_type][exp_name] = []
                             for heatmap_type in heatmap_types:
                                 for original_data_label in self.datareader.data_in_memory.keys():
                                     if original_data_label != 'observations':
-                                        exp_name = get_exp_name(original_data_label)
+                                        exp_name = original_data_label
                                         if self.temporal_colocation:
                                             data_label = '{}_colocatedto_observations'.format(original_data_label)
                                         else:
