@@ -1,6 +1,6 @@
 """
 Provides functions for basic statistic
-calculations and experiment bias evaluation
+calculations and experiment bias evaluation.
 
 Mean, Percentile, Standard Deviation
 Variance, Data Availability Fraction
@@ -14,38 +14,81 @@ class Stats(object):
 
     @staticmethod
     def calculate_mean(data):
-        """Calculate mean in a dataset"""
+        """Calculate mean in a dataset.
+
+        :param data: array of data
+        :type data: numpy.ndarray
+        :return: mean value of data
+        :rtype: numpy.float64
+        """
         return np.mean(data)
 
     @staticmethod
     def calculate_percentile(data, percentile=50.0):
-        """Calculate specific percentile in a dataset"""
+        """Calculate specific percentile in a dataset.
+
+        :param data: array of data
+        :type data: numpy.ndarray
+        :param percentile: percentile, default = 50.0
+        :type percentile: float
+        :return: percentile of data
+        :rtype: numpy.float64
+        """
         return np.percentile(data, percentile)
 
     @staticmethod
     def calculate_standard_deviation(data):
-        """Calculate standard deviation in a dataset"""
+        """Calculate standard deviation in a dataset.
+
+        :param data: array of data
+        :type data: numpy.ndarray
+        :return: standard deviation value of data
+        :rtype: numpy.float64
+        """
         return np.std(data)
 
     @staticmethod
     def calculate_variance(data):
-        """Calculate variance in a dataset"""
+        """Calculate variance in a dataset.
+
+        :param data: array of data
+        :type data: numpy.ndarray
+        :return: variance value of data
+        :rtype: numpy.float64
+        """
         return np.var(data)
 
     @staticmethod
     def calculate_minimum(data):
-        """Calculate minimum in a dataset"""
+        """Calculate minimum in a dataset.
+
+        :param data: array of data
+        :type data: numpy.ndarray
+        :return: min value of data
+        :rtype: numpy.float64
+        """
         return np.min(data)
 
     @staticmethod
     def calculate_maximum(data):
-        """Calculate minimum in a dataset"""
+        """Calculate minimum in a dataset.
+
+        :param data: array of data
+        :type data: numpy.ndarray
+        :return: max value of data
+        :rtype: numpy.float64
+        """
         return np.max(data)
 
     @staticmethod
     def calculate_data_avail_fraction(data):
         """Calculate data availability fraction
         (i.e. fraction of total data array not equal to NaN)
+
+        :param data: array of data
+        :type data: numpy.ndarray
+        :return: data availability percent
+        :rtype: numpy.float64
         """
         return (100. / np.array(data).shape[-1]) * \
                (np.count_nonzero(~np.isnan(data), axis=-1))
@@ -78,7 +121,6 @@ class Stats(object):
         (i.e. number of measurements exceeding a set threshold)
         """
         n_exceed = len(np.where(data > threshold)[0])
-        # print('n exceed = ', n_exceed, np.max(data), threshold)
         return n_exceed
 
 
