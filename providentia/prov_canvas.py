@@ -2,6 +2,8 @@
 from .calculate import Stats
 from .calculate import ExpBias
 from .reading import drop_nans
+from .filter import DataFilter
+from providentia import aux
 
 import copy
 from weakref import WeakKeyDictionary
@@ -42,6 +44,7 @@ class MPLCanvas(FigureCanvas):
         self.canvas = FigureCanvas.__init__(self, self.figure)
         self.setParent(parent)
         self.read_instance = read_instance
+        self.filter_data = None
 
         # set cartopy data directory
         cartopy.config['pre_existing_data_dir'] = self.read_instance.cartopy_data_dir
@@ -111,12 +114,7 @@ class MPLCanvas(FigureCanvas):
 
         # Define dictionary for mapping days of week/months as integers to
         # equivalent strings for writing on axes
-        self.temporal_axis_mapping_dict = {
-            'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6:
-                          'S'},
-            'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J', 7:
-                      'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
-        }
+        self.temporal_axis_mapping_dict = aux.temp_axis_dict()
 
     def update_MPL_canvas(self):
         """Function that updates MPL canvas upon clicking
@@ -233,288 +231,27 @@ class MPLCanvas(FigureCanvas):
         """Function which handles updates data filtering by
         selected lower/upper limit bounds, selected measurement
         methods and selected minimum data availability %"""
- 
-        # Update mouse cursor to a waiting cursor
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-        # get set variables names representing percentage data availability (native and non-native)
-        active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['labels']
-
-        # get set lower/upper data bounds
-        selected_lower_bound = self.read_instance.le_minimum_value.text()
-        selected_upper_bound = self.read_instance.le_maximum_value.text()
-
-        # check set data availability percent variable bounds and selected lower/upper bounds are numbers
-        try:
-            data_availability_lower_bounds = []
-            # data_availability_upper_bounds = []
-            for var_ii, var in enumerate(active_data_availablity_vars):
-                data_availability_lower_bounds.append(
-                    np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
-            selected_lower_bound = np.float32(selected_lower_bound)
-            selected_upper_bound = np.float32(selected_upper_bound)
-        # if any of the fields are not numbers, return from function
-        except ValueError:
-            # Restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+        # return if nothing has been loaded yet
+        if not hasattr(self.read_instance.datareader, 'data_in_memory'):
             return
 
-        # reset data arrays to be un-filtered
-        self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
+        check_state = self.read_instance.ch_colocate.checkState()
+        # update variable to inform plotting functions whether to use colocated data/or not
+        if check_state == QtCore.Qt.Checked:
+            self.colocate_active = True
+        else:
+            self.colocate_active = False
 
-        # filter all observational data out of bounds of lower/upper limits
-        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations'][
-                                               self.read_instance.active_species] < selected_lower_bound,
-                                           self.read_instance.data_in_memory_filtered['observations'][
-                                               self.read_instance.active_species] > selected_upper_bound)
-        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-            inds_out_of_bounds] = np.NaN
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        if self.filter_data is None:
+            self.filter_data = DataFilter(self.read_instance)
+        else:
+            self.filter_data.filter_all()
+            self.update_active_map()
+        QtWidgets.QApplication.restoreOverrideCursor()
 
-        # filter/limit data for periods selected
-        if len(self.read_instance.period_menu['checkboxes']['keep_selected']) > 0:
-            day_night_codes_to_keep = []
-            if 'Daytime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                day_night_codes_to_keep.append(0)
-            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                day_night_codes_to_keep.append(1)
-            if len(day_night_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][     
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'], day_night_codes_to_keep, invert=True)] = np.NaN
-
-            weekday_weekend_codes_to_keep = []
-            if 'Weekday' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                weekday_weekend_codes_to_keep.append(0)
-            if 'Weekend' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                weekday_weekend_codes_to_keep.append(1)
-            if len(weekday_weekend_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'], weekday_weekend_codes_to_keep, invert=True)] = np.NaN
-
-            season_codes_to_keep = []
-            if 'Spring' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                season_codes_to_keep.append(0)
-            if 'Summer' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                season_codes_to_keep.append(1)
-            if 'Autumn' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                season_codes_to_keep.append(2)
-            if 'Winter' in self.read_instance.period_menu['checkboxes']['keep_selected']:
-                season_codes_to_keep.append(3)
-            if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'], season_codes_to_keep, invert=True)] = np.NaN           
-
-        if len(self.read_instance.period_menu['checkboxes']['remove_selected']) > 0:
-            day_night_codes_to_remove = []
-            if 'Daytime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                day_night_codes_to_remove.append(0)
-            if 'Nighttime' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                day_night_codes_to_remove.append(1)
-            if len(day_night_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'], day_night_codes_to_remove)] = np.NaN
-
-            weekday_weekend_codes_to_remove = []
-            if 'Weekday' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                weekday_weekend_codes_to_remove.append(0)
-            if 'Weekend' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                weekday_weekend_codes_to_remove.append(1)
-            if len(weekday_weekend_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'], weekday_weekend_codes_to_remove)] = np.NaN
-
-            season_codes_to_remove = []
-            if 'Spring' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                season_codes_to_remove.append(0)
-            if 'Summer' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                season_codes_to_remove.append(1)
-            if 'Autumn' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                season_codes_to_remove.append(2)
-            if 'Winter' in self.read_instance.period_menu['checkboxes']['remove_selected']:
-                season_codes_to_remove.append(3)
-            if len(season_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'], season_codes_to_remove)] = np.NaN            
-
-        # filter all observational data out of set bounds of native percentage data availability variables
-        if not self.read_instance.reading_nonghost:
-            for var_ii, var in enumerate(active_data_availablity_vars):
-                if 'native' in var:
-                    # max gap variable?
-                    if 'max_gap' in var:
-                        #bound is < 100?:
-                        if data_availability_lower_bounds[var_ii] < 100:
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                                self.read_instance.data_in_memory_filtered['observations'][var] >
-                                data_availability_lower_bounds[var_ii]] = np.NaN
-                    # data representativity variable?
-                    else: 
-                        #bound is > 0?
-                        if data_availability_lower_bounds[var_ii] > 0:
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                                self.read_instance.data_in_memory_filtered['observations'][var] <
-                                data_availability_lower_bounds[var_ii]] = np.NaN
-
-        # filter all observational data out of set bounds of non-native percentage data availability variables
-        for var_ii, var in enumerate(active_data_availablity_vars):
-            if 'native' not in var:
-                # max gap variable?
-                if 'max_gap' in var:
-                    #bound is == 100?
-                    if data_availability_lower_bounds[var_ii] == 100:
-                        continue
-                # data representativity variable?
-                else:
-                    #bound == 0?
-                    if data_availability_lower_bounds[var_ii] == 0:
-                        continue
-
-                # get period associate with variable
-                period = var.split('_')[0]
-                period_inds = np.arange(
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species].shape[
-                        1])
-                # daily variable?
-                if period == 'daily':
-                    period_inds_split = np.array_split(period_inds,
-                                                       [24 * i for i in range(1, int(np.ceil(len(period_inds) / 24)))])
-                # monthly variable?
-                elif period == 'monthly':
-                    period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.N_inds_per_month))
-                # whole record variable?
-                else:
-                    period_inds_split = [period_inds]
-
-                # iterate through indices associated with periodic chunks for current period
-                for period_inds in period_inds_split:
-                    if len(period_inds) > 0:
-                        # max gap variable?
-                        if 'max_gap' in var:
-                            max_gap_percent = Stats.max_repeated_nans_fraction(self.read_instance.data_in_memory_filtered['observations'][
-                                    self.read_instance.active_species][:, period_inds])
-                            self.read_instance.data_in_memory_filtered['observations'][
-                                self.read_instance.active_species][
-                                max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
-                        # data representativity variable?
-                        else:
-                            data_availability_percent = Stats.calculate_data_avail_fraction(self.read_instance.data_in_memory_filtered['observations'][
-                                    self.read_instance.active_species][:, period_inds])
-                            self.read_instance.data_in_memory_filtered['observations'][
-                                self.read_instance.active_species][
-                                data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
-
-        # fiter all observational data by selected metadata
-        # iterate through all metadata
-        for meta_var in self.read_instance.metadata_vars_to_read:
-            metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
-            metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
-
-            # handle non-numeric metadata
-            if metadata_data_type == np.object:
-                # if any of the keep checkboxes are selected, filter out data by fields that have not been selected
-                current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
-                if len(current_keep) > 0:
-                    invalid_keep = np.repeat(
-                        np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_keep, invert=True),
-                        self.read_instance.N_inds_per_month, axis=1)
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                        invalid_keep] = np.NaN
-                # if any of the remove checkboxes have been selected, filter out data by these selected fields
-                current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
-                    'remove_selected']
-                if len(current_remove) > 0:
-                    invalid_remove = np.repeat(
-                        np.isin(self.read_instance.metadata_in_memory[meta_var][:, :], current_remove),
-                        self.read_instance.N_inds_per_month, axis=1)
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                        invalid_remove] = np.NaN
-            # handle numeric metadata
-            else:
-                meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
-                # if current lower > than the minimum extent, then filter out data with metadata < current lower value (if this is numeric)
-                current_lower = np.float32(self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
-                # if current lower value is non-NaN, then filter out data with metadata < current lower value
-                if not pd.isnull(current_lower):
-                    lower_default = np.float32(
-                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
-                    if current_lower > lower_default:
-                        invalid_below = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] < current_lower,
-                                                  self.read_instance.N_inds_per_month, axis=1)
-                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                            invalid_below] = np.NaN
-                # if current upper < than the maximum extent, then filter out data with metadata > current upper value (if this is numeric)
-                current_upper = np.float32(self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
-                # if current upper value is non-NaN, then filter out data with metadata > current upper value
-                if not pd.isnull(current_upper):
-                    upper_default = np.float32(
-                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
-                    if current_upper < upper_default:
-                        invalid_above = np.repeat(self.read_instance.metadata_in_memory[meta_var][:, :] > current_upper,
-                                                  self.read_instance.N_inds_per_month, axis=1)
-                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                            invalid_above] = np.NaN
-
-        # colocate data (if necessary)
-        self.colocate_data()
-
-        # get intersect of indices of stations with >= % minimum data availability percent,
-        # and with > 1 valid measurements ,in all observational data arrays (colocated and non-colocated)
-        # then subset these indices with standard methods == selected methods,
-        # iterate through all data arrays
-        for data_label in list(self.read_instance.data_in_memory_filtered.keys()):
-
-            # check if data array is an observational data array
-            if data_label.split('_')[0] == 'observations':
-
-                # calculate data availability fraction per station in observational data array
-                # get absolute data availability number per station in observational data array
-                station_data_availability_number = Stats.calculate_data_avail_number(
-                    self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])
-
-                # get indices of stations with > 1 available measurements
-                # save valid station indices with data array
-                self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
-                np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
-
-        # write valid station indices calculated for observations across to associated experimental data arrays
-        # iterate through all data arrays
-        for data_label in list(self.read_instance.data_in_memory_filtered.keys()):
-
-            # check if data array is not an observational data array
-            if data_label.split('_')[0] != 'observations':
-
-                # handle colocated experimental arrays
-                if '_colocatedto_' in data_label:
-                    exp_name = data_label.split('_colocatedto_')[0]
-                    self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
-                        copy.deepcopy(self.read_instance.plotting_params['observations_colocatedto_{}'.format(exp_name)]['valid_station_inds'])
-                # handle non-colocated experimental arrays
-                else:
-                    self.read_instance.plotting_params[data_label]['valid_station_inds'] = \
-                        copy.deepcopy(self.read_instance.plotting_params['observations']['valid_station_inds'])
-
-        # after subsetting by pre-written associated observational valid stations, get
-        # indices of stations with > 1 valid measurements in all experiment data arrays (colocated and non-colocated)
-        # iterate through all data arrays
-        for data_label in list(self.read_instance.data_in_memory_filtered.keys()):
-
-            # check if data array is not an observational data array
-            if data_label.split('_')[0] != 'observations':
-                # get indices of associated observational data array valid stations
-                # (pre-written to experiment data arrays)
-                valid_station_inds = self.read_instance.plotting_params[data_label]['valid_station_inds']
-                # get absolute data availability number per station in experiment data array
-                # after subsetting valid observational stations (i.e. number of non-NaN measurements)
-                # update stats object data and call data availability function
-                station_data_availability_number = \
-                    Stats.calculate_data_avail_number(
-                        self.read_instance.data_in_memory_filtered[data_label][
-                            self.read_instance.active_species][valid_station_inds, :])
-                # get indices of stations with > 1 available measurements
-                valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
-                # overwrite previous written valid station indices (now at best a subset of those indices)
-                self.read_instance.plotting_params[data_label]['valid_station_inds'] = valid_station_inds
-
-        # update plotted map z statistic (if necessary)
+    def update_active_map(self):
         if not self.read_instance.block_MPL_canvas_updates:
             # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
             self.calculate_z_statistic()
@@ -523,101 +260,12 @@ class MPLCanvas(FigureCanvas):
             self.update_map_z_statistic()
 
             # if selected stations have changed from previous selected, update associated plots
-            if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+            if not np.array_equal(self.previous_relative_selected_station_inds,
+                                  self.relative_selected_station_inds):
                 self.update_associated_selected_station_plots()
 
             # draw changes
             self.draw()
-             
-        # Restore mouse cursor to normal
-        QtWidgets.QApplication.restoreOverrideCursor()
-
-    def colocate_data(self):
-        """Define function which colocates observational and experiment data"""
-
-        # check if colocation is active or not (to inform subsequent plotting
-        # functions whether to use colocated data/or not)
-        check_state = self.read_instance.ch_colocate.checkState()
-        # update variable to inform plotting functions whether to use colocated data/or not
-        if check_state == QtCore.Qt.Checked:
-            self.colocate_active = True
-        else:
-            self.colocate_active = False
-
-        # if do not have any experiment data loaded, no colocation is possible, therefore
-        # return from function (set colocation to be not active, regardless if the checkbox is ticked or not)
-        if len(list(self.read_instance.data_in_memory.keys())) == 1:
-            self.colocate_active = False
-            return
-        else:
-            # otherwise, colocate observational and experiment data, creating new data arrays
-
-            # colocate observational data array to every different experiment array in memory, and vice versa
-            # wherever there is a NaN at one time in one of the observations/experiment arrays,
-            # the other array value is also made NaN
-
-            # get all instances observations are NaN
-            nan_obs = np.isnan(self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species])
-
-            # create array for finding instances where have 0 valid values across all experiments
-            # initialise as being all True, set as False on the occasion there is a valid value in an experiment
-            exps_all_nan = np.full(nan_obs.shape, True)
-
-            #get name of all experiment labels in memory
-            exp_labels = sorted(list(self.read_instance.data_in_memory.keys()))
-            exp_labels.remove('observations')
-
-            # iterate through experiment data arrays in data in memory dictionary
-            exp_nan_dict = {}
-            for exp_label in exp_labels:
-                # get all instances experiment are NaN
-                exp_nan_dict[exp_label] = np.isnan(self.read_instance.data_in_memory_filtered[exp_label][self.read_instance.active_species])
-                # get all instances where either the observational array or experiment array are NaN at a given time
-                nan_instances = np.any([nan_obs, exp_nan_dict[exp_label]], axis=0)
-                # create new observational array colocated to experiment
-                obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
-                obs_data[nan_instances] = np.NaN
-                self.read_instance.data_in_memory_filtered['observations_colocatedto_{}'.format(exp_label)] = obs_data
-                self.read_instance.plotting_params['observations_colocatedto_{}'.format(exp_label)] = {
-                    'colour': self.read_instance.plotting_params['observations']['colour'],
-                    'zorder': self.read_instance.plotting_params['observations']['zorder']}
-                # create new experiment array colocated to observations
-                exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label])
-                exp_data[nan_instances] = np.NaN
-                self.read_instance.data_in_memory_filtered['{}_colocatedto_observations'.format(exp_label)] = exp_data
-                self.read_instance.plotting_params['{}_colocatedto_observations'.format(exp_label)] = {
-                    'colour': self.read_instance.plotting_params[exp_label]['colour'],
-                    'zorder': self.read_instance.plotting_params[exp_label]['zorder']}
-                # update exps_all_nan array, making False all instances where have valid experiment data
-                exps_all_nan = np.all([exps_all_nan, exp_nan_dict[exp_label]], axis=0)
-                
-            #colocate experiments with all other experiments
-            for exp_label_ii, exp_label in enumerate(exp_labels):
-                for exp_label_2 in exp_labels[exp_label_ii+1:]:
-                    # get all instances where either of the experiment arrays are NaN at a given time
-                    nan_instances = np.any([exp_nan_dict[exp_label], exp_nan_dict[exp_label_2]], axis=0) 
-                    # create new experiment array for experiment1 colocated to experiment2
-                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label])
-                    exp_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['{}_colocatedto_{}'.format(exp_label,exp_label_2)] = exp_data
-                    self.read_instance.plotting_params['{}_colocatedto_{}'.format(exp_label,exp_label_2)] = {
-                        'colour': self.read_instance.plotting_params[exp_label]['colour'],
-                        'zorder': self.read_instance.plotting_params[exp_label]['zorder']}
-                    # create new experiment array for experiment2 colocated to experiment1
-                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label_2])
-                    exp_data[nan_instances] = np.NaN
-                    self.read_instance.data_in_memory_filtered['{}_colocatedto_{}'.format(exp_label_2,exp_label)] = exp_data
-                    self.read_instance.plotting_params['{}_colocatedto_{}'.format(exp_label_2,exp_label)] = {
-                        'colour': self.read_instance.plotting_params[exp_label_2]['colour'],
-                        'zorder': self.read_instance.plotting_params[exp_label_2]['zorder']}
-                    
-            # create observational data array colocated to be non-NaN whenever
-            # there is a valid data in at least 1 experiment
-            exps_all_nan = np.any([nan_obs, exps_all_nan], axis=0)
-            obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
-            obs_data[exps_all_nan] = np.NaN
-            self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments'] = obs_data
-            self.read_instance.plotting_params['observations_colocatedto_experiments'] = {'colour':self.read_instance.plotting_params['observations']['colour'], 'zorder':self.read_instance.plotting_params['observations']['zorder']}
 
     def handle_colocate_update(self):
         """Function that handles the update of the MPL canvas
@@ -657,7 +305,6 @@ class MPLCanvas(FigureCanvas):
 
             # draw changes
             self.draw()
-
 
     def update_map_z_statistic(self):
         """Function that updates plotted z statistic on map, with colourbar"""
@@ -703,13 +350,13 @@ class MPLCanvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.map_points = self.map_ax.scatter(self.read_instance.station_longitudes[self.active_map_valid_station_inds],
-                                                  self.read_instance.station_latitudes[self.active_map_valid_station_inds],
+            self.map_points = self.map_ax.scatter(self.read_instance.datareader.station_longitudes[self.active_map_valid_station_inds],
+                                                  self.read_instance.datareader.station_latitudes[self.active_map_valid_station_inds],
                                                   s=self.read_instance.unsel_station_markersize, c=self.z_statistic,
                                                   vmin=self.z_vmin, vmax=self.z_vmax, cmap=self.z_colourmap, picker=1,
                                                   zorder=3, transform=self.datacrs, linewidth=0.0, alpha=None)
             # create 2D numpy array of plotted station coordinates
-            self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.active_map_valid_station_inds], self.read_instance.station_latitudes[self.active_map_valid_station_inds])).T
+            self.map_points_coordinates = np.vstack((self.read_instance.datareader.station_longitudes[self.active_map_valid_station_inds], self.read_instance.datareader.station_latitudes[self.active_map_valid_station_inds])).T
 
             # create colour normalisation instance
             colour_norm = matplotlib.colors.Normalize(vmin=self.z_vmin, vmax=self.z_vmax)
@@ -737,7 +384,6 @@ class MPLCanvas(FigureCanvas):
 
         # update map selection appropriately for z statistic
         self.update_map_station_selection()
-
 
     def update_map_station_selection(self):
         """Function that updates the visual selection of stations on map"""
@@ -772,7 +418,6 @@ class MPLCanvas(FigureCanvas):
                 # increase marker size of selected stations
                 marker_sizes[self.absolute_selected_station_inds] = self.read_instance.sel_station_markersize
                 self.map_points.set_sizes(marker_sizes)
-
 
     def update_associated_selected_station_plots(self):
         """Function that updates all plots associated with selected stations on map"""
@@ -828,7 +473,6 @@ class MPLCanvas(FigureCanvas):
             # update plotted station selected metadata
             self.update_selected_station_metadata()
 
-
     def update_experiment_grid_domain_edges(self):
         """Function that plots grid domain edges of experiments in memory"""
 
@@ -843,21 +487,20 @@ class MPLCanvas(FigureCanvas):
         self.grid_edge_polygons = []
 
         # iterate through read experiments and plot grid domain edges on map
-        for experiment in sorted(list(self.read_instance.data_in_memory.keys())):
+        for experiment in sorted(list(self.read_instance.datareader.data_in_memory.keys())):
             if experiment != 'observations':
                 # compute map projection coordinates for each pair of
                 # longitude/latitude experiment grid edge coordinates
-                # exp_x,exp_y = self.bm(self.read_instance.data_in_memory[experiment]['grid_edge_longitude'],
-                # self.read_instance.data_in_memory[experiment]['grid_edge_latitude'])
+                # exp_x,exp_y = self.bm(self.read_instance.datareader.data_in_memory[experiment]['grid_edge_longitude'],
+                # self.read_instance.datareader.data_in_memory[experiment]['grid_edge_latitude'])
                 # create matplotlib polygon object from experiment grid edge map projection coordinates
                 grid_edge_outline_poly = \
-                    Polygon(np.vstack((self.read_instance.plotting_params[experiment]['grid_edge_longitude'],
-                                       self.read_instance.plotting_params[experiment]['grid_edge_latitude'])).T,
-                                       edgecolor=self.read_instance.plotting_params[experiment]['colour'],
+                    Polygon(np.vstack((self.read_instance.datareader.plotting_params[experiment]['grid_edge_longitude'],
+                                       self.read_instance.datareader.plotting_params[experiment]['grid_edge_latitude'])).T,
+                                       edgecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
                                        linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
                 # plot grid edge polygon on map
                 self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
-
 
     def update_legend(self):
         """Function that updates legend"""
@@ -865,14 +508,14 @@ class MPLCanvas(FigureCanvas):
         # create legend elements
         # add observations element
         legend_elements = [Line2D([0], [0], marker='o', color='white',
-                                  markerfacecolor=self.read_instance.plotting_params['observations']['colour'],
+                                  markerfacecolor=self.read_instance.datareader.plotting_params['observations']['colour'],
                                   markersize=self.read_instance.legend_markersize, label='observations')]
         # add element for each experiment
-        for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.data_in_memory.keys()))):
+        for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.datareader.data_in_memory.keys()))):
             if experiment != 'observations':
                 # add experiment element
                 legend_elements.append(Line2D([0], [0], marker='o', color='white',
-                                              markerfacecolor=self.read_instance.plotting_params[experiment]['colour'],
+                                              markerfacecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
                                               markersize=self.read_instance.legend_markersize, label=experiment))
 
         # plot legend
@@ -899,11 +542,12 @@ class MPLCanvas(FigureCanvas):
             # observational arrays
             if data_label.split('_')[0] == 'observations':
                 # get data for selected stations
-                data_array = self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][self.relative_selected_station_inds,:]
+                data_array = self.read_instance.data_in_memory_filtered[data_label][
+                                 self.read_instance.active_species][self.relative_selected_station_inds,:]
             # experiment arrays
             else:
                 # get intersect between selected station indices and valid available indices for experiment data array
-                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.plotting_params[data_label]['valid_station_inds'])
+                valid_selected_station_indices = np.intersect1d(self.relative_selected_station_inds, self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
                 # get data for valid selected stations
                 data_array = \
                     self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][valid_selected_station_indices,:]
@@ -1103,17 +747,17 @@ class MPLCanvas(FigureCanvas):
             # plot time series data
             self.data_array_ts = \
                 self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
-                                color=self.read_instance.plotting_params[data_label]['colour'],
+                                color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                                 marker='o', markeredgecolor=None, mew=0,
                                 markersize=self.read_instance.time_series_markersize,
                                 linestyle='None',
-                                zorder=self.read_instance.plotting_params[data_label]['zorder'])
+                                zorder=self.read_instance.datareader.plotting_params[data_label]['zorder'])
 
         # set axes labels
-        if self.read_instance.measurement_units == 'unitless':
-            self.ts_ax.set_ylabel('{}'.format(self.read_instance.measurement_units), fontsize=8.0)
+        if self.read_instance.datareader.measurement_units == 'unitless':
+            self.ts_ax.set_ylabel('{}'.format(self.read_instance.datareader.measurement_units), fontsize=8.0)
         else:
-            self.ts_ax.set_ylabel('{} ({})'.format(self.read_instance.parameter_dictionary[self.read_instance.active_species]['axis_label'],self.read_instance.measurement_units), fontsize=8.0)
+            self.ts_ax.set_ylabel('{} ({})'.format(self.read_instance.parameter_dictionary[self.read_instance.active_species]['axis_label'],self.read_instance.datareader.measurement_units), fontsize=8.0)
 
         # plot grid
         self.ts_ax.grid(color='lightgrey', alpha=0.8)
@@ -1225,8 +869,8 @@ class MPLCanvas(FigureCanvas):
 
                 # update plotted objects with necessary colour, zorder and alpha
                 for patch in violin_plot['bodies']:
-                    patch.set_facecolor(self.read_instance.plotting_params[data_label]['colour'])
-                    patch.set_zorder(self.read_instance.plotting_params[data_label]['zorder'])
+                    patch.set_facecolor(self.read_instance.datareader.plotting_params[data_label]['colour'])
+                    patch.set_zorder(self.read_instance.datareader.plotting_params[data_label]['zorder'])
                     if data_label.split('_')[0] == 'observations':
                         patch.set_alpha(0.7)
                     else:
@@ -1247,9 +891,9 @@ class MPLCanvas(FigureCanvas):
                 # overplot time series of medians over boxes in necessary color
 
                 # generate zorder to overplot medians in same order as violin plots are ordered, but on top of them
-                median_zorder = (self.read_instance.plotting_params['observations']['zorder']+len(
+                median_zorder = (self.read_instance.datareader.plotting_params['observations']['zorder']+len(
                     list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys())) - 1) + \
-                                self.read_instance.plotting_params[data_label]['zorder']
+                                self.read_instance.datareader.plotting_params[data_label]['zorder']
 
                 # get xticks (all valid aggregated time indexes) and medians to plot
                 xticks = aggregation_dict[temporal_aggregation_resolution]['xticks']
@@ -1260,7 +904,7 @@ class MPLCanvas(FigureCanvas):
                 if len(inds_to_split) == 0:
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks, medians, marker='o',
-                        color=self.read_instance.plotting_params[data_label]['colour'],
+                        color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                         markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                 else:
                     inds_to_split += 1
@@ -1268,29 +912,28 @@ class MPLCanvas(FigureCanvas):
                     for end_ind in inds_to_split:
                         aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                             xticks[start_ind:end_ind], medians[start_ind:end_ind],
-                            marker='o', color=self.read_instance.plotting_params[data_label]['colour'],
+                            marker='o', color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                             markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
                         start_ind = end_ind
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         xticks[start_ind:], medians[start_ind:], marker='o',
-                        color=self.read_instance.plotting_params[data_label]['colour'],
+                        color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                         markersize=self.read_instance.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
 
         # plot title (with units)
         # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
         if 'hourly' in self.read_instance.active_resolution:
-            self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
+            self.violin_hours_ax.set_title('Temporal Distributions (%s)' % self.read_instance.datareader.measurement_units,
                                            fontsize=8.0, loc='left')
         # otherwise, plot the units on the monthly aggregation axis
         else:
-            self.violin_months_ax.set_title('Temporal Distributions (%s)' % self.read_instance.measurement_units,
+            self.violin_months_ax.set_title('Temporal Distributions (%s)' % self.read_instance.datareader.measurement_units,
                                             fontsize=8.0, loc='left')
 
         # as are re-plotting on violin plot axes, reset the navigation toolbar stack
         # dictionaries entries associated with each of the axes
         for temporal_aggregation_resolution in list(aggregation_dict.keys()):
             self.reset_ax_navigation_toolbar_stack(aggregation_dict[temporal_aggregation_resolution]['ax'])
-
 
     def update_experiment_bias_aggregated_plots(self):
         """Function that updates the temporally aggregated experiment bias statistic plots"""
@@ -1339,7 +982,7 @@ class MPLCanvas(FigureCanvas):
         else:
             stats_dict = self.bstats_dict[selected_stat]
             if selected_stat != 'Data %':
-                title_units = ' (%s)' % self.read_instance.measurement_units
+                title_units = ' (%s)' % self.read_instance.datareader.measurement_units
             else:
                 title_units = ''
             plot_title = 'Experiment %s bias%s' % (stats_dict['label'], title_units)
@@ -1377,8 +1020,8 @@ class MPLCanvas(FigureCanvas):
                             aggregation_dict[temporal_aggregation_resolution]['xticks'],
                             self.selected_station_data[data_label][temporal_aggregation_resolution]
                             [selected_experiment_bias_stat],
-                            color=self.read_instance.plotting_params[data_label]['colour'],
-                            marker='o', zorder=self.read_instance.plotting_params[data_label]['zorder'],
+                            color=self.read_instance.datareader.plotting_params[data_label]['colour'],
+                            marker='o', zorder=self.read_instance.datareader.plotting_params[data_label]['zorder'],
                             markersize=self.read_instance.temp_agg_expbias_markersize, linewidth=0.5)
 
             # set x axis limits
@@ -1403,10 +1046,8 @@ class MPLCanvas(FigureCanvas):
 
         # as are re-plotting on experiment bias axes,
         # reset the navigation toolbar stack dictionaries entries associated with each of the axes
-
         for temporal_aggregation_resolution in list(aggregation_dict.keys()):
             self.reset_ax_navigation_toolbar_stack(aggregation_dict[temporal_aggregation_resolution]['ax'])
-
 
     def update_selected_station_metadata(self):
         """Function which updates the plotted metadata
@@ -1465,32 +1106,33 @@ class MPLCanvas(FigureCanvas):
             if self.read_instance.reading_nonghost:
                 str_to_plot += "%s   " % (selected_station_reference)
                 str_to_plot += "Latitude: {:.4f}   ".format(
-                    self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_latitudes[self.relative_selected_station_inds][0])
                 str_to_plot += "Longitude: {:.4f}\n".format(
-                    self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_longitudes[self.relative_selected_station_inds][0])
 
             else:
                 # add station reference, latitude, longitude, measurement altitude, GSFC coastline proximity,
                 # GPW population density and NOAA-DMSP-OLS nighttime stable lights
                 str_to_plot += "%s   " % (selected_station_reference)
                 str_to_plot += "Latitude: {:.4f}   ".format(
-                    self.read_instance.station_latitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_latitudes[self.relative_selected_station_inds][0])
                 str_to_plot += "Longitude: {:.4f}\n".format(
-                    self.read_instance.station_longitudes[self.relative_selected_station_inds][0])
+                    self.read_instance.datareader.station_longitudes[self.relative_selected_station_inds][0])
                 str_to_plot += "Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['measurement_altitude'][
+                    self.read_instance.datareader.metadata_in_memory['measurement_altitude'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "To Coast: {:.2f}km\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                    self.read_instance.datareader.metadata_in_memory['GSFC_coastline_proximity'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GHSL_population_density'][
+                    self.read_instance.datareader.metadata_in_memory['GHSL_population_density'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 str_to_plot += "Nighttime Lights: {:.1f}\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                    self.read_instance.datareader.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
                         self.relative_selected_station_inds].astype(np.float32)))
 
-                #define other metadata variables to plot, in order to plot (plotting all unique associated metadata values)
+                # define other metadata variables to plot, in order to plot
+                # (plotting all unique associated metadata values)
                 metadata_vars_to_plot = ['station_name', 'country', 'area_classification',
                                          'station_classification', 'terrain',
                                          'land_use', 'MODIS_MCD12C1_v6_IGBP_land_use',
@@ -1500,21 +1142,21 @@ class MPLCanvas(FigureCanvas):
                 # iterate through metadata variables
                 for meta_var in metadata_vars_to_plot:
 
-                    #gather all selected station metadata for current meta variable
-                    all_current_meta = self.read_instance.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
+                    # gather all selected station metadata for current meta variable
+                    all_current_meta = self.read_instance.datareader.metadata_in_memory[meta_var][self.relative_selected_station_inds].flatten().astype(np.str)
 
-                    #get counts of all unique metadata elements for selected station
+                    # get counts of all unique metadata elements for selected station
                     unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
-                    #get number of unique metadata elements across selected stations
+                    # get number of unique metadata elements across selected stations
                     n_unique_meta = len(unique_meta)
 
-                    #1 unique metadata element?
+                    # 1 unique metadata element?
                     if n_unique_meta == 1:
                         meta_string = '{}: {}\n'.format(metadata_variable_naming[meta_var], unique_meta[0])
-                    #elif have > 2 unique metadata elements, just return count of the elements for the selected station
+                    # elif have > 2 unique metadata elements, just return count of the elements for the selected station
                     elif n_unique_meta > 2:
                         meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
-                    #otherwise, get percentage of unique metadata elements across selected stations
+                    # otherwise, get percentage of unique metadata elements across selected stations
                     else:
                         meta_pc = (100./len(all_current_meta))*meta_counts
                         meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
@@ -1537,19 +1179,19 @@ class MPLCanvas(FigureCanvas):
                 str_to_plot += "%s Stations Selected\n" % (len(self.relative_selected_station_inds))
                 # add median measurement altitude
                 str_to_plot += "Median Measurement Altitude: {:.2f}m   ".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['measurement_altitude'][
+                    self.read_instance.datareader.metadata_in_memory['measurement_altitude'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median GSFC coastline proximity
                 str_to_plot += "Median To Coast: {:.2f}km\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GSFC_coastline_proximity'][
+                    self.read_instance.datareader.metadata_in_memory['GSFC_coastline_proximity'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median GPW population density
                 str_to_plot += "Median Population Density: {:.1f} people/km–2\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['GHSL_population_density'][
+                    self.read_instance.datareader.metadata_in_memory['GHSL_population_density'][
                         self.relative_selected_station_inds].astype(np.float32)))
                 # add median NOAA-DMSP-OLS nighttime lights
                 str_to_plot += "Median Nighttime Lights: {:.1f}\n".format(np.nanmedian(
-                    self.read_instance.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
+                    self.read_instance.datareader.metadata_in_memory['NOAA-DMSP-OLS_v4_nighttime_stable_lights'][
                         self.relative_selected_station_inds].astype(np.float32)))
 
                 # get percentage of element occurrences across selected stations, for certain metadata variables
@@ -1562,7 +1204,7 @@ class MPLCanvas(FigureCanvas):
                 for meta_var in metadata_vars_get_pc:
 
                     # gather all selected station metadata for current meta variable
-                    all_current_meta = self.read_instance.metadata_in_memory[meta_var][
+                    all_current_meta = self.read_instance.datareader.metadata_in_memory[meta_var][
                         self.relative_selected_station_inds].flatten().astype(np.str)
 
                     # get counts of all unique metadata elements across selected stations
@@ -1570,7 +1212,8 @@ class MPLCanvas(FigureCanvas):
                     # get number of unique metadata elements across selected stations
                     n_unique_meta = len(unique_meta)
 
-                    # if have > 4 unique metadata elements, just return count of the elements across the selected stations
+                    # if have > 4 unique metadata elements, just return count
+                    # of the elements across the selected stations
                     if n_unique_meta > 4:
                         meta_string = '{}: {} unique elements\n'.format(metadata_variable_naming[meta_var], n_unique_meta)
                     # otherwise, get percentage of unique metadata elements across selected stations
@@ -1597,10 +1240,10 @@ class MPLCanvas(FigureCanvas):
 
         # get relevant observational array (dependent on colocation)
         if not self.colocate_active:
-            obs_array = self.read_instance.plotting_params['observations']['valid_station_inds']
+            obs_array = self.read_instance.datareader.plotting_params['observations']['valid_station_inds']
         else:
             obs_array = \
-                self.read_instance.plotting_params['observations_colocatedto_experiments']['valid_station_inds']
+                self.read_instance.datareader.plotting_params['observations_colocatedto_experiments']['valid_station_inds']
 
         # before doing anything check if have any valid station data for observations,
         # if not update active map valid station indices to be empty list and return
@@ -1625,7 +1268,7 @@ class MPLCanvas(FigureCanvas):
             stats_dict = self.bstats_dict[z_statistic_name]
             # set label units for statistic
             if z_statistic_name != 'Data %':
-                label_units = ' ({})'.format(self.read_instance.measurement_units)
+                label_units = ' ({})'.format(self.read_instance.datareader.measurement_units)
             else:
                 label_units = ''
         # if not a basic statistic, it must be an experiment bias statistic
@@ -1691,12 +1334,12 @@ class MPLCanvas(FigureCanvas):
         # if only have z1, valid map indices are those simply for the z1 array
         if not have_z2:
             self.active_map_valid_station_inds = \
-                self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds']
+                self.read_instance.datareader.plotting_params[z1_array_to_read]['valid_station_inds']
         else:
             # if have z2 array, get intersection of z1 and z2 valid station indices
             self.active_map_valid_station_inds = \
-                np.intersect1d(self.read_instance.plotting_params[z1_array_to_read]['valid_station_inds'],
-                               self.read_instance.plotting_params[z2_array_to_read]['valid_station_inds'])
+                np.intersect1d(self.read_instance.datareader.plotting_params[z1_array_to_read]['valid_station_inds'],
+                               self.read_instance.datareader.plotting_params[z2_array_to_read]['valid_station_inds'])
 
         # update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array(
@@ -1705,7 +1348,6 @@ class MPLCanvas(FigureCanvas):
             dtype=np.int)
 
         # read z1 data
-        # TODO: check 'data' replaced with self.read_instance.active_species
         z1_array_data = \
             self.read_instance.data_in_memory_filtered[z1_array_to_read][self.read_instance.active_species][self.active_map_valid_station_inds,:]
         # drop NaNs and reshape to object list of station data arrays (if not checking data %)
@@ -1733,7 +1375,6 @@ class MPLCanvas(FigureCanvas):
         # else, read z2 data then calculate 'difference' statistic
         else:
             # read z2 data
-            # TODO: check 'data' replaced with self.read_instance.active_species
             z2_array_data = \
                 self.read_instance.data_in_memory_filtered[z2_array_to_read][self.read_instance.active_species][self.active_map_valid_station_inds,:]
             # drop NaNs and reshape to object list of station data arrays (if not checking data %)
@@ -2009,7 +1650,6 @@ class MPLCanvas(FigureCanvas):
             self.draw()
 
     def select_intersect_stations(self):
-
         """Define function that selects/unselects intersection of
         stations and all experiment domains (and associated plots)
         upon ticking of checkbox
@@ -2032,7 +1672,7 @@ class MPLCanvas(FigureCanvas):
             elif check_state == QtCore.Qt.Checked:
 
                 # if have only observations loaded into memory, select all plotted stations
-                if len(list(self.read_instance.data_in_memory.keys())) == 1:
+                if len(list(self.read_instance.datareader.data_in_memory.keys())) == 1:
                     self.relative_selected_station_inds = copy.deepcopy(self.active_map_valid_station_inds)
                     self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
                                                                     dtype=np.int)
@@ -2040,10 +1680,10 @@ class MPLCanvas(FigureCanvas):
                 # valid_station_inds, and valid station indices associated with each loaded experiment array)
                 else:
                     intersect_lists = [self.active_map_valid_station_inds]
-                    for data_label in list(self.read_instance.data_in_memory.keys()):
+                    for data_label in list(self.read_instance.datareader.data_in_memory.keys()):
                         if data_label != 'observations':
                             intersect_lists.append(
-                                self.read_instance.plotting_params[data_label]['valid_station_inds'])
+                                self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
                     # get intersect between active map valid station indices and valid station indices
                     # associated with each loaded experiment array --> relative selected station indcies
                     self.relative_selected_station_inds = np.sort(list(set.intersection(*map(set, intersect_lists))))
@@ -2072,7 +1712,7 @@ class MPLCanvas(FigureCanvas):
     # the selection methods are individual station selection, or multiple selection with lasso
 
     def on_click(self, event):
-        """Function that handles single station selection upon mouse click"""
+        """Function that handles single station selection upon mouse click."""
 
         # update variable to inform lasso handler that map as already been updated (to not redraw map)
         # the on_click function is only called when a station index has been selected
@@ -2098,7 +1738,8 @@ class MPLCanvas(FigureCanvas):
         if event.mouseevent.button == 1:
             self.absolute_selected_station_inds = absolute_selected_station_inds
             self.relative_selected_station_inds = relative_selected_station_inds
-        # if right click (code of 3) --> unselect station (if currently selected), select station (if currently unselected)
+        # if right click (code of 3) --> unselect station (if currently selected),
+        # select station (if currently unselected)
         elif event.mouseevent.button == 3:
             # if len(self.previous_relative_selected_station_inds) > 0:
             relative_index = np.where(self.previous_relative_selected_station_inds == relative_selected_station_inds)[0]
@@ -2129,7 +1770,6 @@ class MPLCanvas(FigureCanvas):
         """Function that handles multiple
         station selection upon lasso drawing
         """
-
         # unselect all/intersect checkboxes
         self.read_instance.block_MPL_canvas_updates = True
         self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
@@ -2176,7 +1816,7 @@ class MPLCanvas(FigureCanvas):
         self.draw()
 
     def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
-        """Function that takes the indices of selected stations on the map
+        """Takes the indices of selected stations on the map
         (potentially a subset of all available stations), and returns the indices
         of the stations inside the full loaded data arrays
         """
