@@ -30,6 +30,7 @@ class ProvConfiguration(object):
         self.obs_root = kwargs.get('obs_root', '')
         self.nonghost_root = kwargs.get('nonghost_root', '')
         self.exp_root = kwargs.get('exp_root', '')
+        self.offline = kwargs.get('offline', '')
         self.sequential_colourmap = kwargs.get('sequential_colourmap',
                                                'viridis')
         self.sequential_colourmap_warm = \
@@ -53,6 +54,12 @@ class ProvConfiguration(object):
             kwargs.get('available_networks',
                        "['AERONET_v3','EBAS','EEA_AQ_eReporting','MITECO',"
                        "'NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP','NCDC_ISD_NA']")
+
+        # options added if configuration file is used
+        self.selected_species = kwargs.get('selected_species', '')
+        self.selected_network = kwargs.get('selected_network', '')
+        self.selected_matrix = kwargs.get('selected_matrix', '')
+        self.selected_resolution = kwargs.get('selected_resolution', '')
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
