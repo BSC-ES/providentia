@@ -144,9 +144,15 @@ def read_conf(section=None, fpath=None):
 
     config = configparser.RawConfigParser()
     config.read(fpath)
+    #if no section defined, but just 1 section in file then set that as section   
+    if (section is None) and (len(config.sections()) == 1):   
+        section = config.sections()[0]
+    #if section is undefined then cannot read
     if section is None:
-        return config.sections()
+        print('*** WARNING!!! CANNOT LOAD CONFIGURATION FILE AS NO SECTION DEFINED.')
+        return None
 
+    #convert numeric information appropriate types
     res = {}
     for k, val in config.items(section):
         try:
@@ -169,6 +175,7 @@ def read_offline_conf(fpath=None):
     if not config.defaults():
         return None
 
+    #convert numeric information to appropriate types
     defaults = {}
     for k, val in config.items(config.default_section):
         try:
