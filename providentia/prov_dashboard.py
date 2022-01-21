@@ -52,12 +52,22 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # store options to be restored at the end
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
-        # update from config file
+
+        #config = configparser.ConfigParser()
+        #config.read(conf_to_load)
+        #all_sections = config.sections()
+
+        # update from config file (if available)
+        #config and section defined 
+        self.from_conf = False
         if ('config' in kwargs) and ('section' in kwargs):
-            self.load_conf(kwargs['section'], kwargs['config'])
-            self.from_conf = True
-        elif os.path.isfile(dconf_path):
-            self.load_conf('default', dconf_path)
+            self.load_conf(section=kwargs['section'], fpath=kwargs['config'])
+        #just config defined (and only 1 section in file)
+        elif 'config' in kwargs: 
+            self.load_conf(section=None, fpath=kwargs['config'])    
+        #if no config has been loaded 
+        if (not self.from_conf) & (os.path.isfile(dconf_path)):
+            self.load_conf(section='default', fpath=dconf_path)
             self.from_conf = False
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
@@ -1080,11 +1090,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             return
 
         opts = read_conf(section, fpath)
-        if section is None:
-            return opts
+        #if were unable to read file then return
+        if opts is None:
+            return
 
         self.opts = opts
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
+        self.from_conf = True
 
     def disable_ghost_buttons(self):
         """Disable button related only to ghost data"""

@@ -65,12 +65,13 @@ def which_qa(instance, return_defaults=False):
         # if conf has only 1 QA
         if isinstance(instance.qa, int):
             return [instance.qa]
-        # if the QAs are written with their names
+        # empty string
         elif instance.qa == "":
             return []
+        # if the QAs are written with their names
         elif isinstance(instance.qa, str):
             return [instance.standard_QA_name_to_QA_code[q.strip()] for q in instance.qa.split(",")]
-        # return subset the user has selected in conf
+        # list of integer codes
         else:
             return list(instance.qa)
 
@@ -89,14 +90,37 @@ def which_flags(instance):
         # if conf has only one flag
         if isinstance(instance.flags, int):
             return [instance.flags]
-        # if flags are writtern as strings
+        # empty string
         elif instance.flags == "":
             return []
+        # if the flags are written with their names
         elif isinstance(instance.flags, str):
             return [instance.standard_data_flag_name_to_data_flag_code[f.strip()]
                     for f in instance.flags.split(",")]
+        # list of integer codes
         else:
             return list(instance.flags)
+    else:
+        return []
+
+
+def get_experiments(instance):
+    """If there are experiments coming from a config file,
+    select those. Otherwise, return empty list.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    :return: list of experiments
+    :rtype: list
+    """
+
+    if hasattr(instance, 'experiments'):
+        # empty string
+        if instance.experiments == "":
+            return []
+        #split experiments
+        else:
+            return [exp.strip() for exp in instance.experiments.split(",")]
     else:
         return []
 
