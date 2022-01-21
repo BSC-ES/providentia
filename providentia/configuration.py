@@ -78,10 +78,10 @@ class ProvConfiguration(object):
             value = int(os.cpu_count())
 
         elif key == 'cartopy_data_dir':
-            # set cartopy data directory (needed on CTE-POWER/MN4 as has no external
+            # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
             # internet connection)
 
-            if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3'):
+            if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3') or (MACHINE == 'nord3v2'):
                 value = '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all machines except CTE-POWER/MN4, pull from internet
 
@@ -99,8 +99,8 @@ class ProvConfiguration(object):
 
             # set observational root data directory if left undefined
             if value == '':
-                # running on CTE-POWER/MN4?
-                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3'):
+                # running on CTE-POWER/MN4/N3?
+                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3') or (MACHINE == 'nord3v2'):
                     value = '/gpfs/projects/bsc32/AC_cache/obs/ghost'
                 else:
                     # running on workstation?
@@ -112,7 +112,7 @@ class ProvConfiguration(object):
 
             # set observational root data directory if left undefined
             if value == '':
-                if (MACHINE == 'power') or (MACHINE == 'nord3'):
+                if (MACHINE == 'power') or (MACHINE == 'nord3') or (MACHINE == 'nord3v2'):
                     value = '/esarchive/obs'
                 elif MACHINE == 'mn4':
                     value = None
@@ -124,8 +124,8 @@ class ProvConfiguration(object):
             # Define experiment root data directory
             # set experiment root data directory if left undefined
             if value == '':
-                # running on CTE-POWER?
-                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3'):
+                # not running on workstation?
+                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3') or (MACHINE == 'nord3v2'):
                     return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
 
                 # running on workstation?
