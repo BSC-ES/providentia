@@ -743,6 +743,9 @@ class MPLCanvas(FigureCanvas):
                 if data_label.split('_')[0] == 'observations':
                     if data_label != 'observations_colocatedto_experiments':
                         continue
+                # print only relevant data, otherwise we get double lines for multiple exps
+                if data_label.split('_')[-1] not in ("observations", "experiments"):
+                    continue
 
             # plot time series data
             self.data_array_ts = \

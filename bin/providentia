@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # init
-cores=16
+cores=1
 jobname="PRV"
 queue="debug"
-mem="50Gb"
+mem="5Gb"
 
 function usage () {
 echo "Usage: providentia [-u|--usage] [-c|--cores NUM_CORES (default=16)]"
@@ -86,14 +86,18 @@ fi
 if [ "${BSC_MACHINE}" == "power" ]; then
     #get allocation of resources on CTE-POWER machine
     eval "${srun_command} ${queue_option} ${memory_option} ${python_command}"
-#Marenustrum4
+#Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     #get allocation of resources on MN4 machine
     eval "${srun_command} ${queue_option} ${python_command}"
 #Nord3
 elif [ "${BSC_MACHINE}" == "nord3" ]; then
-    #get allocation of resources on MN4 machine
+    #get allocation of resources on N3 machine
     eval "${bsub_command} ${python_command}"
+#Nord3v2
+elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
+    #get allocation of resources on N3v2 machine
+    eval "${srun_command} ${queue_option} ${python_command}"
 #Workstations
 elif [ "${HOST}" == "bsceslogin01" ]; then
     echo "Warning: running in Fat Nodes may make Providentia slower ..."

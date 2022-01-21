@@ -1,0 +1,15 @@
+{            
+    "cams50": ["map-Data %-obs", "map-p5", "map-p50",
+               "map-p95", "map-p5_bias", "map-p50_bias",
+               "map-p95_bias", "map-MB", "map-RMSE", "map-MFB",
+               "map-MAFB", "map-r", "timeseries", "distribution",
+               "distribution_bias", "periodic-p5", "periodic-p50",
+               "periodic-p95", "periodic-Min", "periodic-Max",
+               "periodic-p5_bias", "periodic-p50_bias",
+               "periodic-p95_bias", "periodic-Min_bias",
+               "periodic-Max_bias", "periodic-MB", "periodic-RMSE",
+               "periodic-MFB", "periodic-MAFB", "periodic-r",
+               "heatm-p5-p50-p95-Min-Max-MB-RMSE-MFB-MAFB-r"],
+
+    "met":["map-Data %-obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"]
+}

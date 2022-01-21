@@ -40,6 +40,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         ProvConfiguration.__init__(self, **kwargs)
         self.read_type = read_type
 
+        # define projections for map plot and actual geographic coordinates
+        self.datacrs = ccrs.PlateCarree()
+        self.plotcrs = ccrs.Robinson()
+        land_polygon_resolutions = {'low': '110m',
+                                    'medium': '50m',
+                                    'high': '10m'}
+        self.feature = cfeature.NaturalEarthFeature('physical', 'land',
+                                                    land_polygon_resolutions[
+                                                    self.map_coastline_resolution],
+                                                    facecolor='0.85')
+
         # update from config file
         if 'config' in kwargs:
             self.load_conf(kwargs['config'])
@@ -59,12 +70,21 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             CURRENT_PATH, 'conf/basic_stats_dict.json')))
         self.expbias_dict = json.load(open(os.path.join(
             CURRENT_PATH, 'conf/experiment_bias_stats_dict.json')))
-
+        self.plots_per_report_type = json.load(open(os.path.join(
+            CURRENT_PATH, 'conf/plots_per_report_type.json')))
+          
         self.station_subset_names = self.sub_opts.keys()
-        self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
+        #self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
         self.active_qa = aux.which_qa(self)
         self.active_flags = aux.which_flags(self)
         self.reading_nonghost = aux.check_for_ghost(self.selected_network)
+        self.experiments_to_read = aux.get_experiments(self)
+        #if have no experiments, force temporal colocation to be False
+        if len(self.experiments_to_read) == 0:
+            self.temporal_colocation = False
+            self.defaults['temporal_colocation'] = False         
+            for k in self.sub_opts.keys():
+                self.sub_opts[k]['temporal_colocation'] = False
 
         # get all netCDF monthly files per species
         if not self.reading_nonghost:
@@ -103,15 +123,41 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                   self.selected_network, self.selected_resolution,
                                   self.selected_species, self.selected_matrix)
         # read selected experiments (iterate through)
-        for exp in [exp.strip() for exp in self.experiments.split(",")]:
+        for exp in self.experiments_to_read:
             self.datareader.read_data(exp, self.selected_start_date, self.selected_end_date, self.selected_network,
                                       self.selected_resolution, self.selected_species, self.selected_matrix)
 
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
         self.datareader.update_plotting_parameters()
 
+        #load characteristics_per_plot_type dictionary (dependent on read memory)
+        sys.path.insert(1, os.path.join(CURRENT_PATH, 'conf'))
+        from characteristics_per_plot_type import get_characteristics_per_plot_type, get_characteristics_per_plot_type_templates
+        self.characteristics_per_plot_type = get_characteristics_per_plot_type(self)
+        self.characteristics_per_plot_type_templates = get_characteristics_per_plot_type_templates(self)
+        #update characteristics_per_plot_type with all statistic specific dictionaries
+        for bstat in self.basic_stats_dict.keys():
+            for template_name, template_dict in self.characteristics_per_plot_type_templates.items():
+                if 'basicstat' in template_name:
+                    template_name_amended = template_name.replace("basicstat",bstat)
+                elif 'biasstat' in template_name:
+                    template_name_amended = '{}_bias'.format(template_name.replace("biasstat",bstat))
+                self.characteristics_per_plot_type[template_name_amended] = copy.deepcopy(template_dict)
+                if '_bias' in template_name:
+                    page_title = '{} bias'.format(self.basic_stats_dict[bstat]['label'])
+                else: 
+                    page_title = self.basic_stats_dict[bstat]['label']
+                self.characteristics_per_plot_type[template_name_amended]['page_title']['t'] = page_title
+        for estat in self.expbias_dict.keys():
+            for template_name, template_dict in self.characteristics_per_plot_type_templates.items():
+                if 'biasstat' in template_name:
+                    template_name_amended = template_name.replace("biasstat",estat)
+                    self.characteristics_per_plot_type[template_name_amended] = copy.deepcopy(template_dict)
+                    self.characteristics_per_plot_type[template_name_amended]['page_title']['t'] = self.expbias_dict[estat]['label']
+ 
         self.exceedance_limit = aux.exceedance_lim(self.selected_species)
         self.temporal_axis_mapping_dict = aux.temp_axis_dict()
+
         self.start_pdf()
 
     def load_conf(self, fpath=None):
@@ -146,13 +192,21 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # define dictionary to store plot figures
             self.plot_dictionary = {}
 
-            # make summary plots?
-            if self.summary_pages:
-                # setup plotting geometry of summary plots
-                self.setup_summary_plots_geometry()
+            #setup plotting framework
+            self.setup_plot_framework()
+
+            #setup plotting geometry for summary plots if required 
+            if self.summary_plots:   
+                self.setup_plot_geometry('summary')
+        
+            #set station index to be -1 if station plots required
+            if self.station_plots:   
+                self.station_ind = -1
 
             # iterate through station_subset_names
             for station_subset_ind, station_subset in enumerate(self.station_subset_names):
+                self.station_subset_ind = station_subset_ind
+                self.station_subset = station_subset
                 # update the conf options for this subset
                 if station_subset_ind != 0:
                     for k in self.sub_opts[prv_station]:
@@ -171,219 +225,53 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # filter dataset for current station_subset
                 DataFilter(self)
 
-                print('Placing Data Arrays in Pandas Dataframes')
-                # convert filtered dataset to pandas dataframe
-                self.to_pandas_dataframe()
-
-                print('Doing Temporal Aggregation on Dataframes')
-                # temporally aggregate selected data dataframes (by hour, day of week, month)
-                self.pandas_temporal_aggregation()
-
-                # if have some experiment data associated with selected stations, calculate
-                # temporally aggregated basic statistic differences and bias statistics between
-                # observations and experiment data arrays
-                if len(self.experiments) > 0:
-                    print('Calculating Temporally Aggregated Bias Statisitics')
-                    self.calculate_temporally_aggregated_experiment_bias_statistics()
-
-                print('Making {} Subset Plots'.format(station_subset))
-                # make summary plots?
-                if self.summary_pages:
-                    # iterate through each summary plot to make
+                #iterate through all desired plots, making each one (summary or station specific plots)
+                print('Making {} Subset Plots'.format(station_subset))                
+                #make summary plots?
+                if self.summary_plots:
+                    # get median timeseries across data from filtered data, and place it pandas dataframe
+                    self.to_pandas_dataframe()
+                    #iterate through plots and make each one for subset group
                     for plot_type in self.summary_plots_to_make:
-                        # heatmap plot?
-                        if 'heatm-' in plot_type:
-                            heatmap_types = plot_type.split('-')[1:]
-                            if station_subset_ind == 0:
-                                heatmap_dict = {}
-                                for heatmap_type in heatmap_types:
-                                    heatmap_dict[heatmap_type] = {}
-                                    for original_data_label in self.datareader.data_in_memory.keys():
-                                        if original_data_label != 'observations':
-                                            # get experiment name
-                                            # exp_name = get_exp_name(original_data_label)  # does not work if expid is same and the domain is different
-                                            exp_name = original_data_label
-                                            heatmap_dict[heatmap_type][exp_name] = []
-                            for heatmap_type in heatmap_types:
-                                for original_data_label in self.datareader.data_in_memory.keys():
-                                    if original_data_label != 'observations':
-                                        exp_name = original_data_label
-                                        if self.temporal_colocation:
-                                            data_label = '{}_colocatedto_observations'.format(original_data_label)
-                                        else:
-                                            data_label = original_data_label
-                                        if data_label in list(self.selected_station_data.keys()):
-                                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
-                                                if heatmap_type in list(self.basic_stats_dict.keys()):
-                                                    heatmap_dict[heatmap_type][exp_name].append(
-                                                        self.selected_station_data[data_label]['all'][
-                                                            '{}_bias'.format(heatmap_type)][0])
-                                                else:
-                                                    heatmap_dict[heatmap_type][exp_name].append(
-                                                        self.selected_station_data[data_label]['all'][heatmap_type][0])
-                                            else:
-                                                heatmap_dict[heatmap_type][exp_name].append(np.NaN)
-                                        else:
-                                            heatmap_dict[heatmap_type][exp_name].append(np.NaN)
-
-                            if station_subset_ind == (len(self.station_subset_names) - 1):
-                                for heatmap_type_ii, heatmap_type in enumerate(heatmap_types):
-                                    relevant_axis = self.get_relevant_axis('heatm', heatmap_type_ii)
-                                    self.characteristics_per_plot_type['heatm']['axis_title']['label'] = heatmap_type
-                                    relevant_axis.set_title(**self.characteristics_per_plot_type['heatm']['axis_title'])
-                                    if heatmap_dict:
-                                        heatmap_df = pd.DataFrame(data=heatmap_dict[heatmap_type],
-                                                                  index=self.station_subset_names)
-                                        self.make_heatmap(relevant_axis, heatmap_type, heatmap_df)
-                        # other plot type?
-                        else:
-                            # count how many plots are made per plot type
-                            current_plot_ind = 0
-
-                            # iterate through all data arrays
-                            original_data_array_labels = list(self.datareader.data_in_memory.keys())
-                            for original_data_label in original_data_array_labels:
-                                # get zstat for plot type (if exists)
-                                if '-' in plot_type:
-                                    zstat = plot_type.split('-')[1]
-                                    # get base name name of zstat (dropping _bias suffix)
-                                    base_zstat = zstat.split('_bias')[0]
-                                    # get zstat type (basic or expbias)
-                                    z_statistic_type = get_z_statistic_type(self.basic_stats_dict, base_zstat)
-                                    # get zstat sign (absolute or bias)
-                                    z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
-
-                                # map plots (1 plot per data array/s (1 array if absolute plot,
-                                # 2 arrays if making bias plot), per subset)
-                                if 'map-' in plot_type:
-                                    # get necessary data arrays
-                                    if '-obs' in plot_type:
-                                        if original_data_label != 'observations':
-                                            continue
-                                        if self.temporal_colocation:
-                                            z1 = 'observations_colocatedto_experiments'
-                                        else:
-                                            z1 = 'observations'
-                                        z2 = ''
-                                    elif z_statistic_sign == 'bias':
-                                        if original_data_label == 'observations':
-                                            continue
-                                        if self.temporal_colocation:
-                                            z1 = 'observations_colocatedto_{}'.format(original_data_label)
-                                            z2 = '{}_colocatedto_observations'.format(original_data_label)
-                                        else:
-                                            z1 = 'observations'
-                                            z2 = original_data_label
-                                    else:
-                                        if original_data_label == 'observations':
-                                            if self.temporal_colocation:
-                                                z1 = 'observations_colocatedto_experiments'
-                                            else:
-                                                z1 = 'observations'
-                                        else:
-                                            if self.temporal_colocation:
-                                                z1 = '{}_colocatedto_observations'.format(original_data_label)
-                                            else:
-                                                z1 = original_data_label
-                                        z2 = ''
-
-                                    # get relevant axis to plot on
-                                    relevant_axis = self.get_relevant_axis(plot_type, (current_plot_ind * len(
-                                        self.station_subset_names)) + station_subset_ind)
-                                    # make map plot
-                                    n_stations = self.make_map(relevant_axis, z1, z2, zstat)
-                                    # set axis title
-                                    if plot_type == 'map-Data %-obs':
-                                        self.characteristics_per_plot_type[plot_type]['axis_title'][
-                                            'label'] = '{} {}\n({} Stations)'.format(original_data_label,
-                                                                                     station_subset, n_stations)
-                                    else:
-                                        self.characteristics_per_plot_type[plot_type]['axis_title'][
-                                            'label'] = '{}\n{}'.format(original_data_label, station_subset)
-                                    relevant_axis.set_title(
-                                        **self.characteristics_per_plot_type[plot_type]['axis_title'])
-
-                                # other plots (1 plot per subset, with multiple data arrays)
-                                else:
-                                    # get relevant axis to plot on
-                                    relevant_axis = self.get_relevant_axis(plot_type, station_subset_ind)
-
-                                    # get necessary data array to plot
-                                    if original_data_label == 'observations':
-                                        if self.temporal_colocation:
-                                            data_label = 'observations_colocatedto_experiments'
-                                        else:
-                                            data_label = 'observations'
-                                    else:
-                                        if self.temporal_colocation:
-                                            data_label = '{}_colocatedto_observations'.format(original_data_label)
-                                        else:
-                                            data_label = original_data_label
-
-                                    # periodic plots
-                                    if 'periodic-' in plot_type:
-                                        # skip observational array if plotting bias stat
-                                        if (z_statistic_sign == 'bias') & (original_data_label == 'observations'):
-                                            continue
-                                        func = getattr(self, 'make_periodic')
-                                        if data_label in list(self.selected_station_data.keys()):
-                                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
-                                                func(relevant_axis, data_label, zstat)
-                                        # set axis title
-                                        self.characteristics_per_plot_type[plot_type][
-                                            'axis_title']['label'] = station_subset
-                                        relevant_axis['hour'].set_title(
-                                            **self.characteristics_per_plot_type[plot_type]['axis_title'])
-                                    # other plot types (distribution, timeseries etc.)
-                                    else:
-                                        # determine if plotting bias stat
-                                        bias_stat = False
-                                        plot_type_split = plot_type.split('_')
-                                        if len(plot_type_split) > 1:
-                                            bias_stat = True
-                                        # skip observational array if plotting bias stat
-                                        if bias_stat & (original_data_label == 'observations'):
-                                            continue
-                                        # make plot
-                                        func = getattr(self, 'make_{}'.format(plot_type_split[0]))
-
-                                        if data_label in list(self.selected_station_data.keys()):
-                                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
-                                                # bias plot or standard?
-                                                if bias_stat:
-                                                    func(relevant_axis, data_label, bias=True)
-                                                else:
-                                                    func(relevant_axis, data_label)
-                                        # set axis title
-                                        self.characteristics_per_plot_type[plot_type_split[0]]['axis_title'][
-                                            'label'] = station_subset
-                                        relevant_axis.set_title(
-                                            **self.characteristics_per_plot_type[plot_type_split[0]]['axis_title'])
-                                # iterate number of plots have made for current type of plot
-                                current_plot_ind += 1
-
-            # make individual station pages?
-            # generate colourbars
-            if self.summary_pages:
-                relevant_axs = []
-                cb_axs = []
-                previous_plot_type = ''
-                for figure_n in self.plot_dictionary.keys():
-                    plot_type = self.plot_dictionary[figure_n]['plot_type']
-                    if (previous_plot_type != plot_type) & (len(relevant_axs) > 0):
+                        self.make_plot('summary', plot_type)                                                
+                    #generate colourbars for map plots 
+                    relevant_axs = []
+                    cb_axs = []
+                    previous_plot_type = ''
+                    for figure_n in self.plot_dictionary.keys():
+                        plot_type = self.plot_dictionary[figure_n]['plot_type']
+                        if (previous_plot_type != plot_type) & (len(relevant_axs) > 0):
+                            self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
+                            relevant_axs = []
+                            cb_axs = []
+                        if 'cb' in list(self.characteristics_per_plot_type[plot_type].keys()):
+                            relevant_axs.extend(self.plot_dictionary[figure_n]['axs'])
+                            cb_axs.append(self.plot_dictionary[figure_n]['cb_ax'])
+                        previous_plot_type = copy.deepcopy(plot_type)
+                    if len(relevant_axs) > 0:
                         self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
-                        relevant_axs = []
-                        cb_axs = []
-                    if 'cb' in list(self.characteristics_per_plot_type[plot_type].keys()):
-                        relevant_axs.extend(self.plot_dictionary[figure_n]['axs'])
-                        cb_axs.append(self.plot_dictionary[figure_n]['cb_ax'])
-                    previous_plot_type = copy.deepcopy(plot_type)
-                if len(relevant_axs) > 0:
-                    self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
+                    #harmonise xy limits
+                    for plot_type in self.summary_plots_to_make:
+                        if ('timeseries' not in plot_type) & ('map-' not in plot_type) & ('heatm-' not in plot_type):
+                            self.harmonise_xy_lims(plot_type)
 
-                for plot_type in self.summary_plots_to_make:
-                    if ('timeseries' not in plot_type) & ('map-' not in plot_type) & ('heatm-' not in plot_type):
-                        self.harmonise_xy_lims(plot_type)
+                #make station specific plots?
+                if self.station_plots:
+                    #setup plotting geometry for station plots
+                    n_stations = len(self.datareader.plotting_params['observations']['valid_station_inds'])
+                    self.setup_plot_geometry('station',n_stations=n_stations)
+                    for actual_station_ind in self.datareader.plotting_params['observations']['valid_station_inds']:
+                        #gather some information about current station
+                        self.station_ind += 1
+                        self.current_station_reference = self.datareader.metadata_in_memory['station_reference'][actual_station_ind, :][0]
+                        self.current_station_name = self.datareader.metadata_in_memory['station_name'][actual_station_ind, :][0]
+                        self.current_lon = self.datareader.metadata_in_memory['longitude'][actual_station_ind, :][0]
+                        self.current_lat =  self.datareader.metadata_in_memory['latitude'][actual_station_ind, :][0]
+                        #put station data in pandas dataframe
+                        self.to_pandas_dataframe(station_index=actual_station_ind)
+                        #iterate through plots and make each one for subset group
+                        for plot_type in self.station_plots_to_make:
+                            self.make_plot('station', plot_type)
 
             # save page figures
             print('WRITING PDF')
@@ -391,6 +279,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 fig = self.plot_dictionary[figure_n]['fig']
                 self.pdf.savefig(fig, dpi=self.dpi)
                 plt.close(fig)
+
 
     def make_header(self):
         # set tile
@@ -402,14 +291,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         page.text(0.5, 0.9, txt, transform=page.transFigure,
                   size=20, ha="center", va='top', wrap=True)
 
-        experiment_labels = [exp.strip() for exp in self.experiments.split(",")]
         txt = 'Network = {}\nTemporal Resolution = {}\n' \
               'Species = {}\nDate Range = {} - {}\nExperiments = {}\n'\
             .format(self.selected_network,
                     self.selected_resolution,
                     self.selected_species,
                     self.start_date,
-                    self.end_date, experiment_labels)
+                    self.end_date, self.experiments_to_read)
         # txt += 'Station Subset/s = {}\n'.format(self.station_subset_names)
         if hasattr(self, 'bounding_box'):
             txt += 'Bounding Box = [{}E:{}E, {}N:{}N]\n'.\
@@ -424,156 +312,67 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         self.pdf.savefig(page, dpi=self.dpi)
         plt.close(page)
 
-    def setup_summary_plots_geometry(self):
-        """setup summary plots geometry"""
+    def setup_plot_framework(self):
+        """setup plotting framework for PDF"""
 
-        # define projections for map plot and actual geographic coordinates
-        self.datacrs = ccrs.PlateCarree()
-        self.plotcrs = ccrs.Robinson()
+        #set plots that need to be made (summary and station specific)
+        self.summary_plots_to_make = self.plots_per_report_type[self.report_type]
+        self.station_plots_to_make = []
+        for plot_type in self.summary_plots_to_make: 
+            if ('map-' not in plot_type) & ('heatm-' not in plot_type):
+                self.station_plots_to_make.append(plot_type)
+    
+        #if no experiments are defined, remove all bias statistic plots and notify user of this
+        if len(list(self.datareader.data_in_memory.keys())) == 1:
+            print('*** WARNING!!! NO EXPERIMENTS DEFINED, SO NO BIAS PLOTS WILL BE MADE')
+            plot_types_to_remove = []
+            for plot_type in self.summary_plots_to_make:
+                if 'heatm-' in plot_type:
+                    plot_types_to_remove.append(plot_type)
+                elif '_bias' in plot_type:
+                    plot_types_to_remove.append(plot_type) 
+                elif '-' in plot_type:
+                    #get zstat 
+                    zstat = plot_type.split('-')[1]
+                    # get zstat type (basic or expbias) and sign (absolute or bias)
+                    z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat) 
+                    #if zstat sign is bias but have 0 models, remove plot
+                    if z_statistic_sign == 'bias':
+                        plot_types_to_remove.append(plot_type)          
+            self.summary_plots_to_make = [plot_type for plot_type in self.summary_plots_to_make if plot_type not in plot_types_to_remove]
+            self.station_plots_to_make = [plot_type for plot_type in self.station_plots_to_make if plot_type not in plot_types_to_remove]
 
-        land_polygon_resolutions = {'low': '110m',
-                                    'medium': '50m',
-                                    'high': '10m'}
+        #initialise first page number to plot
+        self.current_page_n = 1
 
-        feature = cfeature.NaturalEarthFeature('physical', 'land',
-                                               land_polygon_resolutions[
-                                                   self.map_coastline_resolution],
-                                               facecolor='0.85')
+    def setup_plot_geometry(self, plotting_paradigm, n_stations=0):
+        """setup plotting geometry for summary or station specific plots"""
 
-        # define plot types per type of report
-        plot_types_per_report_type = {
-            'cams50': ['map-Data %-obs', 'map-p5', 'map-p50',
-                       'map-p95', 'map-p5_bias', 'map-p50_bias',
-                       'map-p95_bias', 'map-MB', 'map-RMSE', 'map-MFB',
-                       'map-MAFB', 'map-r', 'timeseries', 'distribution',
-                       'distribution_bias', 'periodic-p5', 'periodic-p50',
-                       'periodic-p95', 'periodic-Min', 'periodic-Max',
-                       'periodic-p5_bias', 'periodic-p50_bias',
-                       'periodic-p95_bias', 'periodic-Min_bias',
-                       'periodic-Max_bias', 'periodic-MB', 'periodic-RMSE',
-                       'periodic-MFB', 'periodic-MAFB', 'periodic-r',
-                       'heatm-p5-p50-p95-Min-Max-MB-RMSE-MFB-MAFB-r']}
-
-        # define characteristics per plot type
-        self.characteristics_per_plot_type = {
-            'timeseries': {'pages': [], 'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 3},
-                           'xtick_share': True, 'grid': {'axis': 'both', 'color': 'lightgrey', 'alpha': 0.8},
-                           'page_title': {'t': 'Time Series', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                           'axis_title': {'label': '', 'fontsize': 8}, 'axis_xlabel': {'xlabel': 'Time', 'fontsize': 8},
-                           'axis_ylabel': {'ylabel': '{}'.format(self.datareader.measurement_units), 'fontsize': 8},
-                           'xticks': {'labelsize': 7, 'rotation': 0}, 'yticks': {'labelsize': 7},
-                           'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 'tightlayout': True,
-                           'subplots_adjust': {'top': 0.90, 'bottom': 0.08}},
-            'distribution': {'pages': [], 'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 4},
-                             'grid': {'axis': 'both', 'color': 'lightgrey', 'alpha': 0.8},
-                             'page_title': {'t': 'Distribution', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                             'axis_title': {'label': '', 'fontsize': 10},
-                             'axis_xlabel': {'xlabel': '{}'.format(self.datareader.measurement_units), 'fontsize': 8},
-                             'axis_ylabel': {'ylabel': 'Density', 'fontsize': 8}, 'xticks': {'labelsize': 7},
-                             'yticks': {'labelsize': 7}, 'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0},
-                             'tightlayout': True, 'subplots_adjust': {'top': 0.90}},
-            'distribution_bias': {'pages': [], 'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 4},
-                                  'grid': {'axis': 'both', 'color': 'lightgrey', 'alpha': 0.8},
-                                  'page_title': {'t': 'Distributional bias', 'fontsize': 18, 'ha': 'left', 'x': 0.05,
-                                                 'y': 0.98}, 'axis_title': {'label': '', 'fontsize': 10},
-                                  'axis_xlabel': {'xlabel': '{}'.format(self.datareader.measurement_units), 'fontsize': 8},
-                                  'axis_ylabel': {'ylabel': 'Density', 'fontsize': 8}, 'xticks': {'labelsize': 7},
-                                  'yticks': {'labelsize': 7},
-                                  'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 'tightlayout': True,
-                                  'subplots_adjust': {'top': 0.90}},
-
-            'heatm': {'pages': [], 'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 1},
-                      'page_title': {'t': 'Statistical Heatmap', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                      'axis_title': {'label': '', 'fontsize': 8}, 'xticks': {'labelsize': 7, 'rotation': -270},
-                      'yticks': {'labelsize': 7, 'rotation': -315}, 'tightlayout': True,
-                      'subplots_adjust': {'top': 0.90}, 'cb_xlabel': {'xlabel': '', 'fontsize': 8},
-                      'cb_xticks': {'labelsize': 8}, 'annot': True}
-        }
-        # add all types of map plot types
-        map_basicstat_obs_template = {'pages': [], 'figure': {'figsize': self.landscape_figsize, 'ncols': 4, 'nrows': 4,
-                                                              'subplot_kw': {'projection': self.plotcrs}},
-                                      'page_title': {'t': '', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                                      'axis_title': {'label': '', 'fontsize': 8},
-                                      'subplots_adjust': {'top': 0.85, 'hspace': 0.28, 'wspace': 0.28},
-                                      'cb': {'position': [0.5, 0.95, 0.4, 0.04]},
-                                      'cb_xlabel': {'xlabel': '', 'fontsize': 8}, 'cb_xticks': {'labelsize': 8}}
-        map_basicstat_template = {'pages': [], 'figure': {'figsize': self.landscape_figsize, 'ncols': 4, 'nrows': 4,
-                                                          'subplot_kw': {'projection': self.plotcrs}},
-                                  'page_title': {'t': '', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                                  'axis_title': {'label': '', 'fontsize': 8},
-                                  'subplots_adjust': {'top': 0.85, 'hspace': 0.28, 'wspace': 0.28},
-                                  'cb': {'position': [0.5, 0.95, 0.4, 0.04]},
-                                  'cb_xlabel': {'xlabel': '', 'fontsize': 8}, 'cb_xticks': {'labelsize': 8}}
-        map_biasstat_template = {'pages': [], 'figure': {'figsize': self.landscape_figsize, 'ncols': 4, 'nrows': 4,
-                                                         'subplot_kw': {'projection': self.plotcrs}},
-                                 'page_title': {'t': '', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                                 'axis_title': {'label': '', 'fontsize': 8},
-                                 'subplots_adjust': {'top': 0.85, 'hspace': 0.28, 'wspace': 0.28},
-                                 'cb': {'position': [0.5, 0.95, 0.4, 0.04]}, 'cb_xlabel': {'xlabel': '', 'fontsize': 8},
-                                 'cb_xticks': {'labelsize': 8}}
-        periodic_basicstat_template = {'pages': [],
-                                       'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 2},
-                                       'page_title': {'t': '', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                                       'axis_title': {'label': '', 'fontsize': 8},
-                                       'axis_ylabel': {'ylabel': '', 'fontsize': 8}, 'xticks': {'labelsize': 7},
-                                       'yticks': {'labelsize': 7},
-                                       'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0},
-                                       'subplots_adjust': {'top': 0.85}}
-        periodic_biasstat_template = {'pages': [],
-                                      'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 2},
-                                      'page_title': {'t': '', 'fontsize': 18, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                                      'axis_title': {'label': '', 'fontsize': 8},
-                                      'axis_ylabel': {'ylabel': '', 'fontsize': 8}, 'xticks': {'labelsize': 7},
-                                      'yticks': {'labelsize': 7},
-                                      'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0},
-                                      'subplots_adjust': {'top': 0.85}}
-
-        for bstat in self.basic_stats_dict.keys():
-            self.characteristics_per_plot_type['map-{}-obs'.format(bstat)] = copy.deepcopy(map_basicstat_obs_template)
-            self.characteristics_per_plot_type['map-{}'.format(bstat)] = copy.deepcopy(map_basicstat_template)
-            self.characteristics_per_plot_type['map-{}_bias'.format(bstat)] = copy.deepcopy(map_biasstat_template)
-            self.characteristics_per_plot_type['periodic-{}'.format(bstat)] = copy.deepcopy(periodic_basicstat_template)
-            self.characteristics_per_plot_type['periodic-{}_bias'.format(bstat)] = copy.deepcopy(
-                periodic_biasstat_template)
-            self.characteristics_per_plot_type['map-{}-obs'.format(bstat)]['page_title']['t'] = \
-            self.basic_stats_dict[bstat]['label']
-            self.characteristics_per_plot_type['map-{}'.format(bstat)]['page_title']['t'] = \
-            self.basic_stats_dict[bstat]['label']
-            self.characteristics_per_plot_type['map-{}_bias'.format(bstat)]['page_title']['t'] = '{} bias'.format(
-                self.basic_stats_dict[bstat]['label'])
-            self.characteristics_per_plot_type['periodic-{}'.format(bstat)]['page_title']['t'] = \
-            self.basic_stats_dict[bstat]['label']
-            self.characteristics_per_plot_type['periodic-{}_bias'.format(bstat)]['page_title']['t'] = '{} bias'.format(
-                self.basic_stats_dict[bstat]['label'])
-
-        for estat in self.expbias_dict.keys():
-            self.characteristics_per_plot_type['map-{}'.format(estat)] = copy.deepcopy(map_biasstat_template)
-            self.characteristics_per_plot_type['periodic-{}'.format(estat)] = copy.deepcopy(periodic_biasstat_template)
-            self.characteristics_per_plot_type['map-{}'.format(estat)]['page_title']['t'] = self.expbias_dict[estat][
-                'label']
-            self.characteristics_per_plot_type['periodic-{}'.format(estat)]['page_title']['t'] = \
-            self.expbias_dict[estat]['label']
-
-        # iterate through needed plot types, creating
-        self.summary_plots_to_make = plot_types_per_report_type[self.report_type]
-        current_page_n = 1
+        #depending on plot type set plots to make
+        if plotting_paradigm == 'summary':
+            plots_to_make = self.summary_plots_to_make
+        elif plotting_paradigm == 'station':
+            plots_to_make = self.station_plots_to_make
 
         # iterate through plot types to make
-        for plot_type in self.summary_plots_to_make:
+        for plot_type in plots_to_make:
+            n_plots_per_plot_type = False
             if 'heatm-' in plot_type:
                 n_plots_per_plot_type = len(plot_type.split('-')) - 1
                 plot_type = 'heatm'
-            plot_characteristics = self.characteristics_per_plot_type[plot_type]
+            plot_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type])
             plot_characteristics_vars = list(plot_characteristics.keys())
+
+            #update page title depending on plot paradigm
+            if plotting_paradigm == 'summary':
+                plot_characteristics['page_title']['t'] = '{} (Summary)'.format(plot_characteristics['page_title']['t']) 
+            elif plotting_paradigm == 'station':
+                plot_characteristics['page_title']['t'] = '{} (Per Station)'.format(plot_characteristics['page_title']['t']) 
 
             if '-' in plot_type:
                 zstat = plot_type.split('-')[1]
-                # get base name name of zstat (dropping _bias suffix)
-                base_zstat = zstat.split('_bias')[0]
-                # get zstat type (basic or expbias)
-                z_statistic_type = get_z_statistic_type(self.basic_stats_dict, base_zstat)
-                # get zstat sign (absolute or bias)
-                z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
+                # get zstat type (basic or expbias) and sign (absolute or bias)
+                z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
 
             if 'map-' in plot_type:
                 if '-obs' in plot_type:
@@ -587,13 +386,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             elif 'periodic-' in plot_type:
                 if z_statistic_type == 'basic':
                     if base_zstat not in ['Data %', 'Exceedances']:
-                        plot_characteristics['axis_ylabel']['ylabel'] = self.datareader.measurement_units  # 'µg m⁻³'
+                        plot_characteristics['axis_ylabel']['ylabel'] = self.datareader.measurement_units 
                     else:
                         plot_characteristics['axis_ylabel']['ylabel'] = self.basic_stats_dict[base_zstat]['label']
                 else:
                     plot_characteristics['axis_ylabel']['ylabel'] = self.expbias_dict[base_zstat]['label']
-            elif plot_type != 'heatm':
-                n_plots_per_plot_type = len(self.station_subset_names)
+            
+            if not n_plots_per_plot_type:
+                if plotting_paradigm == 'summary':
+                    n_plots_per_plot_type = len(self.station_subset_names)
+                elif plotting_paradigm == 'station':
+                    n_plots_per_plot_type = n_stations
 
             # get n pages per plot type
             n_pages_per_plot_type = int(np.ceil(n_plots_per_plot_type / (
@@ -602,11 +405,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # iterate through n pages per plot
             for page_n in range(n_pages_per_plot_type):
                 fig, axs = plt.subplots(**plot_characteristics['figure'])
-                self.plot_dictionary[current_page_n] = {'fig': fig, 'axs': [], 'plot_type': plot_type}
+                #each page is handled as 1 figure, with multiple axes
+                plot_reference = ''
+                self.plot_dictionary[self.current_page_n] = {'fig': fig, 'axs': [], 'plot_type': plot_type}
 
                 # make page title?
                 if 'page_title' in plot_characteristics_vars:
-                    # TODO: not used?
                     st = fig.suptitle(**plot_characteristics['page_title'])
 
                 # iterate through axes (by row, then column)
@@ -637,7 +441,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             grid_dict['hour'] = fig.add_subplot(gs[:9, :])
                             grid_dict['month'] = fig.add_subplot(gs[11:, :11])
                             grid_dict['dayofweek'] = fig.add_subplot(gs[11:, 13:])
-                            self.plot_dictionary[current_page_n]['axs'].append(grid_dict)
+                            self.plot_dictionary[self.current_page_n]['axs'].append(grid_dict)
                             ax.spines['top'].set_color('none')
                             ax.spines['bottom'].set_color('none')
                             ax.spines['left'].set_color('none')
@@ -645,7 +449,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             ax.tick_params(labelcolor='w', top=False, bottom=False, left=False, right=False)
                             ax.set_ylabel(**plot_characteristics['axis_ylabel'])
                         else:
-                            self.plot_dictionary[current_page_n]['axs'].append(ax)
+                            self.plot_dictionary[self.current_page_n]['axs'].append(ax)
 
                             # make axis title?
                         if 'axis_title' in plot_characteristics_vars:
@@ -675,7 +479,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                         # add coastlines/gridlines to map?
                         if 'map-' in plot_type:
-                            ax.add_feature(feature)
+                            ax.add_feature(self.feature)
                             ax.gridlines(linestyle='-', alpha=0.4)
                             if hasattr(self, 'bounding_box'):
                                 if 'longitude' in self.bounding_box.keys():
@@ -717,12 +521,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                 # add colourbar axis to plot dictionary?
                 if 'cb' in plot_characteristics_vars:
-                    self.plot_dictionary[current_page_n]['cb_ax'] = fig.add_axes(plot_characteristics['cb']['position'])
-                    self.plot_dictionary[current_page_n]['cb_ax'].set_rasterized(True)
+                    self.plot_dictionary[self.current_page_n]['cb_ax'] = fig.add_axes(plot_characteristics['cb']['position'])
+                    self.plot_dictionary[self.current_page_n]['cb_ax'].set_rasterized(True)
 
                 # add current page number
-                self.characteristics_per_plot_type[plot_type]['pages'].append(current_page_n)
-                current_page_n += 1
+                if plotting_paradigm == 'summary':
+                    self.characteristics_per_plot_type[plot_type]['summary_pages'].append(self.current_page_n)
+                elif plotting_paradigm == 'station':
+                    self.characteristics_per_plot_type[plot_type]['station_pages'].append(self.current_page_n)
+                
+                self.current_page_n += 1
 
     def make_legend_elements(self):
         """Function that makes legend elements"""
@@ -742,8 +550,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                               label=experiment))
         return legend_elements
 
-    def to_pandas_dataframe(self):
-        """Function that takes data in memory and puts it into a pandas dataframe"""
+
+    def to_pandas_dataframe(self,station_index=False):
+        """Function that takes data in memory puts it in a pandas dataframe.
+        For summary plots this involves take the median timeseries across the timeseries.
+        For station plots it is just the station in question.
+        Also temporally aggregate selected data dataframes (by hour, day of week, month),
+        and if have some experiment data associated with selected stations, calculate
+        temporally aggregated basic statistic differences and bias statistics between
+        observations and experiment data arrays.
+        """
 
         # create new dictionary to store selection station data by data array
         self.selected_station_data = {}
@@ -759,16 +575,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 if 'colocated' not in data_label:
                     continue
 
-            # observational arrays
-            if data_label.split('_')[0] == 'observations':
-                # get data for selected stations
-                data_array = self.data_in_memory_filtered[data_label][self.selected_species][
-                             self.datareader.plotting_params[data_label]['valid_station_inds'], :]
-
-            # experiment arrays
+            # get data for selected stations
+            if station_index:
+                data_array = self.data_in_memory_filtered[data_label][self.selected_species][station_index, :]
             else:
-                # get intersect between selected station indices and valid available indices for experiment data array
-                # get data for valid selected stations
                 data_array = self.data_in_memory_filtered[data_label][self.selected_species][
                              self.datareader.plotting_params[data_label]['valid_station_inds'], :]
 
@@ -778,17 +588,32 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                 # add nested dictionary for data array name to selection station data dictionary
                 self.selected_station_data[data_label] = {}
-                # take cross station median of selected data for data array, and place it in a pandas
+                # if making summary plots, take cross station median of selected data for data array, and place it in a pandas
                 # dataframe -->  add to selected station data dictionary
-                self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0),
+                if station_index:
+                    self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(data_array, index=self.time_array, columns=['data'])
+                else:
+                    self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0),
                                                                                    index=self.time_array,
                                                                                    columns=['data'])
+
         # get min/max across all selected station data
         selected_station_data_all = [self.selected_station_data[data_label]['pandas_df']['data'] for data_label in self.selected_station_data.keys()]
         selected_station_data_all_flat = [item for items in selected_station_data_all for item in items]
         if len(selected_station_data_all_flat) > 0:
             self.selected_station_data_min = np.nanmin(selected_station_data_all_flat)
             self.selected_station_data_max = np.nanmax(selected_station_data_all_flat)
+
+        # temporally aggregate selected data dataframes (by hour, day of week, month)
+        self.pandas_temporal_aggregation()
+
+        # if have some experiment data associated with selected stations, calculate
+        # temporally aggregated basic statistic differences and bias statistics between
+        # observations and experiment data arrays
+        if len(self.experiments_to_read) > 0:
+            self.calculate_temporally_aggregated_experiment_bias_statistics()
+
+
 
     def pandas_temporal_aggregation(self):
         """Function that aggregates pandas dataframe data, for all data arrays,
@@ -883,6 +708,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     # save statistical output by group to selected station data dictionary
                     self.selected_station_data[data_label][temporal_aggregation_resolution][stat] = stat_output_by_group
 
+
     def calculate_temporally_aggregated_experiment_bias_statistics(self):
         """Function that calculates temporally aggregated basic statistic
         differences and bias statistics between observations and experiment
@@ -971,7 +797,187 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             self.selected_station_data[data_label][temporal_aggregation_resolution][
                                 '%s' % (bias_stat)] = stat_output_by_group
 
+
+    def make_plot(self, plotting_paradigm, plot_type):
+        """Function that calls making of any type of plot"""
+
+        # heatmap plot?
+        if 'heatm-' in plot_type:
+            heatmap_types = plot_type.split('-')[1:]
+            if self.station_subset_ind == 0:
+                heatmap_dict = {}
+                for heatmap_type in heatmap_types:
+                    heatmap_dict[heatmap_type] = {}
+                    for original_data_label in self.datareader.data_in_memory.keys():
+                        if original_data_label != 'observations':
+                            # get experiment name
+                            # exp_name = get_exp_name(original_data_label)  # does not work if expid is same and the domain is different
+                            exp_name = original_data_label
+                            heatmap_dict[heatmap_type][exp_name] = []
+            for heatmap_type in heatmap_types:
+                for original_data_label in self.datareader.data_in_memory.keys():
+                    if original_data_label != 'observations':
+                        exp_name = original_data_label
+                        if self.temporal_colocation:
+                            data_label = '{}_colocatedto_observations'.format(original_data_label)
+                        else:
+                            data_label = original_data_label
+                        if data_label in list(self.selected_station_data.keys()):
+                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
+                                if heatmap_type in list(self.basic_stats_dict.keys()):
+                                    heatmap_dict[heatmap_type][exp_name].append(
+                                        self.selected_station_data[data_label]['all'][
+                                            '{}_bias'.format(heatmap_type)][0])
+                                else:
+                                    heatmap_dict[heatmap_type][exp_name].append(
+                                        self.selected_station_data[data_label]['all'][heatmap_type][0])
+                            else:
+                                heatmap_dict[heatmap_type][exp_name].append(np.NaN)
+                        else:
+                            heatmap_dict[heatmap_type][exp_name].append(np.NaN)
+
+            if self.station_subset_ind == (len(self.station_subset_names) - 1):
+                for heatmap_type_ii, heatmap_type in enumerate(heatmap_types):
+                    relevant_axis = self.get_relevant_axis(plotting_paradigm, 'heatm', heatmap_type_ii)
+                    axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type['heatm']['axis_title'])
+                    axis_title_characteristics['label'] = heatmap_type
+                    relevant_axis.set_title(**axis_title_characteristics)
+                    if heatmap_dict:
+                        heatmap_df = pd.DataFrame(data=heatmap_dict[heatmap_type],
+                                                  index=self.station_subset_names)
+                        self.make_heatmap(relevant_axis, heatmap_type, heatmap_df)
+        # other plot type?
+        else:
+            # count how many plots are made per plot type
+            current_plot_ind = 0
+
+            # iterate through all data arrays
+            original_data_array_labels = list(self.datareader.data_in_memory.keys())
+            for original_data_label in original_data_array_labels:
+                # get zstat for plot type (if exists)
+                if '-' in plot_type:
+                    zstat = plot_type.split('-')[1]
+                    # get zstat type (basic or expbias) and sign (absolute or bias)
+                    z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
+
+                # map plots (1 plot per data array/s (1 array if absolute plot,
+                # 2 arrays if making bias plot), per subset)
+                if 'map-' in plot_type:
+                    # get necessary data arrays
+                    if '-obs' in plot_type:
+                        if original_data_label != 'observations':
+                            continue
+                        if self.temporal_colocation:
+                            z1 = 'observations_colocatedto_experiments'
+                        else:
+                            z1 = 'observations'
+                        z2 = ''
+                    elif z_statistic_sign == 'bias':
+                        if original_data_label == 'observations':
+                            continue
+                        if self.temporal_colocation:
+                            z1 = 'observations_colocatedto_{}'.format(original_data_label)
+                            z2 = '{}_colocatedto_observations'.format(original_data_label)
+                        else:
+                            z1 = 'observations'
+                            z2 = original_data_label
+                    else:
+                        if original_data_label == 'observations':
+                            if self.temporal_colocation:
+                                z1 = 'observations_colocatedto_experiments'
+                            else:
+                                z1 = 'observations'
+                        else:
+                            if self.temporal_colocation:
+                                z1 = '{}_colocatedto_observations'.format(original_data_label)
+                            else:
+                                z1 = original_data_label
+                        z2 = ''
+
+                    # get relevant axis to plot on
+                    relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, (current_plot_ind * len(
+                        self.station_subset_names)) + self.station_subset_ind)
+                    # make map plot
+                    n_stations = self.make_map(relevant_axis, z1, z2, zstat)
+                    # set axis title
+                    axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
+                    if plot_type == 'map-Data %-obs':
+                        axis_title_characteristics['label'] = '{} {}\n({} Stations)'.format(original_data_label,self.station_subset, n_stations)
+                    else:
+                        axis_title_characteristics['label'] = '{}\n{}'.format(original_data_label, self.station_subset)
+                    relevant_axis.set_title(**axis_title_characteristics)
+
+                # other plots (1 plot per subset with multiple data arrays for summary paradigm, 1 plot per subset per station for station paradigm)
+                else:
+                    # get relevant axis to plot on
+                    if plotting_paradigm == 'summary':
+                        relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, self.station_subset_ind)
+                    elif plotting_paradigm == 'station':
+                        relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, self.station_ind)
+
+                    # get necessary data array to plot
+                    if original_data_label == 'observations':
+                        if self.temporal_colocation:
+                            data_label = 'observations_colocatedto_experiments'
+                        else:
+                            data_label = 'observations'
+                    else:
+                        if self.temporal_colocation:
+                            data_label = '{}_colocatedto_observations'.format(original_data_label)
+                        else:
+                            data_label = original_data_label
+
+                    # periodic plots
+                    if 'periodic-' in plot_type:
+                        # skip observational array if plotting bias stat
+                        if (z_statistic_sign == 'bias') & (original_data_label == 'observations'):
+                            continue
+                        func = getattr(self, 'make_periodic')
+                        if data_label in list(self.selected_station_data.keys()):
+                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
+                                func(relevant_axis, data_label, zstat)
+                        # set axis title
+                        axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
+                        if plotting_paradigm == 'summary':
+                            axis_title_characteristics['label'] = self.station_subset
+                        elif plotting_paradigm == 'station':
+                            axis_title_characteristics['label'] = '{}, {}, {}, {}'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
+                        relevant_axis['hour'].set_title(**axis_title_characteristics)
+
+                    # other plot types (distribution, timeseries etc.)
+                    else:
+                        # determine if plotting bias stat
+                        bias_stat = False
+                        plot_type_split = plot_type.split('_')
+                        if len(plot_type_split) > 1:
+                            bias_stat = True
+                        # skip observational array if plotting bias stat
+                        if bias_stat & (original_data_label == 'observations'):
+                            continue
+                        # make plot
+                        func = getattr(self, 'make_{}'.format(plot_type_split[0]))
+
+                        if data_label in list(self.selected_station_data.keys()):
+                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
+                                # bias plot or standard?
+                                if bias_stat:
+                                    func(relevant_axis, data_label, bias=True)
+                                else:
+                                    func(relevant_axis, data_label)
+                        # set axis title
+                        axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type_split[0]]['axis_title'])
+                        if plotting_paradigm == 'summary':
+                            axis_title_characteristics['label'] = self.station_subset
+                        elif plotting_paradigm == 'station':
+                            axis_title_characteristics['label'] = '{}, {}, {}, {}'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
+                        relevant_axis.set_title(**axis_title_characteristics)
+                # iterate number of plots have made for current type of plot
+                current_plot_ind += 1
+
+
     def make_map(self, relevant_axis, z1, z2, zstat):
+        """plot map"""
+
         # calculate z statistic
         z_statistic, active_map_valid_station_inds = self.calculate_z_statistic(z1=z1, z2=z2, zstat=zstat)
         # get colourmap
@@ -985,10 +991,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         return len(active_map_valid_station_inds)
 
-    def get_relevant_axis(self, plot_type, current_plot_ind):
+    def get_relevant_axis(self, plotting_paradigm, plot_type, current_plot_ind):
+        """get relevant axis for current plot type/subset/index"""
 
         # get axes associated with plot type
-        relevant_pages = self.characteristics_per_plot_type[plot_type]['pages']
+        if plotting_paradigm == 'summary':
+            relevant_pages = self.characteristics_per_plot_type[plot_type]['summary_pages']
+        elif plotting_paradigm == 'station':
+            relevant_pages = self.characteristics_per_plot_type[plot_type]['station_pages']
+
         relevant_axes = []
         for relevant_page in relevant_pages:
             relevant_axes.extend(self.plot_dictionary[relevant_page]['axs'])
@@ -998,11 +1009,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
     def calculate_z_statistic(self,z1='',z2='',zstat=''):
         """Function that calculates selected z statistic for map"""
 
-        # get base name name of zstat (dropping _bias suffix)
-        base_zstat = zstat.split('_bias')[0]
-
-        # get zstat type (basic or expbias)
-        z_statistic_type = get_z_statistic_type(self.basic_stats_dict, base_zstat)
+        # get zstat type (basic or expbias) and sign (absolute or bias)
+        z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
 
         # get dictionary containing necessary information for calculation of selected statistic
         if z_statistic_type == 'basic':
@@ -1102,14 +1110,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
     def generate_colourbar_detail(self, zstat, plotted_min, plotted_max):
 
-        # get base name name of zstat (dropping _bias suffix)
-        base_zstat = zstat.split('_bias')[0]
-
-        # get zstat type (basic or expbias)
-        z_statistic_type = get_z_statistic_type(self.basic_stats_dict, base_zstat)
-
-        # get zstat sign (absolute or bias)
-        z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
+        # get zstat type (basic or expbias) and sign (absolute or bias)
+        z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
 
         # get dictionary containing necessary information for calculation of selected statistic
         # also set label for colourbar
@@ -1230,7 +1232,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 return
 
         # get axes associated with plot type
-        relevant_pages = self.characteristics_per_plot_type[plot_type]['pages']
+        relevant_pages = self.characteristics_per_plot_type[plot_type]['summary_pages']
+        relevant_pages.extend(self.characteristics_per_plot_type[plot_type]['station_pages'])
         if 'periodic-' in plot_type:
             ax_types = ['hour','month','dayofweek']
         else:
@@ -1330,12 +1333,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 aggregation_dict[temporal_aggregation_resolution]['ax'].xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['xticks']['labelsize'])
                 # set yticks
                 aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['yticks']['labelsize'])
-                # get base name name of zstat (dropping _bias suffix)
-                base_zstat = zstat.split('_bias')[0]
-                # get zstat type (basic or expbias)
-                z_statistic_type = get_z_statistic_type(self.basic_stats_dict, base_zstat)
-                # get zstat sign (absolute or bias)
-                z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
+                # get zstat type (basic or expbias) and sign (absolute or bias)
+                z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
 
                 if z_statistic_sign == 'bias':
                     # get value/s of minimum bias for statistic
@@ -1465,6 +1464,17 @@ def get_z_statistic_sign(zstat, zstat_type):
     else:
         return 'absolute'
 
+def get_z_statistic_type_sign(stats_dict, zstat):
+    """Function that gets z statistic type and sign"""                    
+    # get base name name of zstat (dropping _bias suffix)
+    base_zstat = zstat.split('_bias')[0]
+    # get zstat type (basic or expbias)
+    z_statistic_type = get_z_statistic_type(stats_dict, base_zstat)
+    # get zstat sign (absolute or bias)
+    z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
+    return z_statistic_type, z_statistic_sign, base_zstat
+    
+
 
 def get_exp_name(fullname):
     """ Return experiments id/name from its GHOST identifier in /gpfs.
@@ -1479,3 +1489,4 @@ def get_exp_name(fullname):
 def main_offline(**kwargs):
     """Main function when running offine reports"""
     ProvidentiaOffline(**kwargs)
+
