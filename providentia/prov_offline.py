@@ -629,7 +629,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         if (self.selected_resolution == 'hourly') or (
                 self.selected_resolution == 'hourly_instantaneous'):
             self.temporal_aggregation_resolutions = ['hour', 'dayofweek', 'month', 'all']
-        elif self.selected_resolution == 'daily':
+        elif (self.selected_resolution == 'daily') or (
+                  self.selected_resolution == '3hourly') or (
+                      self.selected_resolution == '3hourly_instantaneous') or (
+                          self.selected_resolution == '6hourly') or (
+                              self.selected_resolution == '6hourly_instantaneous'):
             self.temporal_aggregation_resolutions = ['dayofweek', 'month', 'all']
         elif self.selected_resolution == 'monthly':
             self.temporal_aggregation_resolutions = ['month', 'all']
@@ -1280,7 +1284,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         if (self.selected_resolution == 'hourly') or (self.selected_resolution == 'hourly_instantaneous'):
             aggregation_dict = {
                 'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
-        elif self.selected_resolution == 'daily':
+        elif (self.selected_resolution == 'daily') or (
+                  self.selected_resolution == '3hourly') or (
+                      self.selected_resolution == '3hourly_instantaneous') or (
+                          self.selected_resolution == '6hourly') or (
+                              self.selected_resolution == '6hourly_instantaneous'):
             aggregation_dict = {'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
         elif self.selected_resolution == 'monthly':
             aggregation_dict = {'month': month_aggregation_dict}
