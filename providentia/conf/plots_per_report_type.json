@@ -9,7 +9,7 @@
                "periodic-p95_bias", "periodic-Min_bias",
                "periodic-Max_bias", "periodic-MB", "periodic-RMSE",
                "periodic-MFB", "periodic-MAFB", "periodic-r",
-               "heatm-p5-p50-p95-Min-Max-MB-RMSE-MFB-MAFB-r"],
+               "heatmap-p5-p50-p95-Min-Max-MB-RMSE-MFB-MAFB-r"],
 
     "met":["map-Data %-obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"]
 }
