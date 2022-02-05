@@ -29,12 +29,12 @@ def get_characteristics_per_plot_type(self):
                               'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 'tightlayout': True,
                               'subplots_adjust': {'top': 0.90}},
 
-        'heatm': {'summary_pages':[], 'station_pages':[], 'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 1},
-                  'page_title': {'t': 'Statistical Heatmap', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                  'axis_title': {'label': '', 'fontsize': 8}, 'xticks': {'labelsize': 7, 'rotation': -270},
-                  'yticks': {'labelsize': 7, 'rotation': -315}, 'tightlayout': True,
-                  'subplots_adjust': {'top': 0.90}, 'cb_xlabel': {'xlabel': '', 'fontsize': 8},
-                  'cb_xticks': {'labelsize': 8}, 'annot': True}
+        'heatmap': {'summary_pages':[], 'station_pages':[], 'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 1},
+                    'page_title': {'t': 'Statistical Heatmap', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98},
+                     'axis_title': {'label': '', 'fontsize': 8}, 'xticks': {'labelsize': 7, 'rotation': -270},
+                     'yticks': {'labelsize': 7, 'rotation': -315}, 'tightlayout': True,
+                     'subplots_adjust': {'top': 0.90}, 'cb_xlabel': {'xlabel': '', 'fontsize': 8},
+                     'cb_xticks': {'labelsize': 8}, 'annot': True}
     }
     return characteristics_per_plot_type
 
