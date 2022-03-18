@@ -10,7 +10,7 @@ by using the version's tag. For example, if the latest version is 1.2.1,
 you can run:
 
 ```
-git checkout v1.2.1
+git checkout v1.3.2
 ```
 
 Using this command, you can use whichever version you want.
