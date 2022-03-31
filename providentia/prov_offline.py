@@ -1,3 +1,4 @@
+from ast import If
 import os
 import sys
 import json
@@ -32,6 +33,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
     """Run Providentia offline reports"""
 
     def __init__(self, read_type='parallel', **kwargs):
+        
         print("Starting Providentia offline")
         # portrait/landscape page figsize
         self.portrait_figsize = (8.27, 11.69)
@@ -357,10 +359,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # iterate through plot types to make
         for plot_type in plots_to_make:
+
             n_plots_per_plot_type = False
+
             if 'heatmap-' in plot_type:
                 n_plots_per_plot_type = len(plot_type.split('-')) - 1
                 plot_type = 'heatmap'
+
             plot_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type])
             plot_characteristics_vars = list(plot_characteristics.keys())
 
@@ -384,7 +389,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 else:
                     n_plots_per_plot_type = len(self.station_subset_names) * \
                                             len(list(self.datareader.data_in_memory.keys()))
-            elif 'periodic-' in plot_type:
+            elif 'periodic-' in plot_type and 'violin' not in plot_type:
                 if z_statistic_type == 'basic':
                     if base_zstat not in ['Data %', 'Exceedances']:
                         plot_characteristics['axis_ylabel']['ylabel'] = self.datareader.measurement_units 
@@ -392,7 +397,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         plot_characteristics['axis_ylabel']['ylabel'] = self.basic_stats_dict[base_zstat]['label']
                 else:
                     plot_characteristics['axis_ylabel']['ylabel'] = self.expbias_dict[base_zstat]['label']
-            
+
             if not n_plots_per_plot_type:
                 if plotting_paradigm == 'summary':
                     n_plots_per_plot_type = len(self.station_subset_names)
@@ -403,6 +408,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             n_pages_per_plot_type = int(np.ceil(n_plots_per_plot_type / (
                         plot_characteristics['figure']['ncols'] * plot_characteristics['figure']['nrows'])))
             plot_ii_per_type = 0
+
             # iterate through n pages per plot
             for page_n in range(n_pages_per_plot_type):
                 fig, axs = plt.subplots(**plot_characteristics['figure'])
@@ -846,6 +852,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         heatmap_df = pd.DataFrame(data=self.heatmap_dict[heatmap_type],
                                                   index=self.station_subset_names)
                         self.make_heatmap(relevant_axis, heatmap_type, heatmap_df)
+
         # other plot type?
         else:
             # count how many plots are made per plot type
@@ -927,24 +934,27 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         else:
                             data_label = original_data_label
 
-                    # periodic plots
+                    # Periodic plots
                     if 'periodic-' in plot_type:
-                        # skip observational array if plotting bias stat
-                        if (z_statistic_sign == 'bias') & (original_data_label == 'observations'):
-                            continue
-                        func = getattr(self, 'make_periodic')
-                        if data_label in list(self.selected_station_data.keys()):
-                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
-                                func(relevant_axis, data_label, zstat)
-                        # set axis title
-                        axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
-                        if plotting_paradigm == 'summary':
-                            axis_title_characteristics['label'] = self.station_subset
-                        elif plotting_paradigm == 'station':
-                            axis_title_characteristics['label'] = '{}, {}, {}, {}'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
-                        relevant_axis['hour'].set_title(**axis_title_characteristics)
+                        if 'violin' in plot_type:
+                            self.make_periodic(relevant_axis, data_label, plot_type, zstat = None)
+                        else:
+                            # skip observational array if plotting bias stat
+                            if (z_statistic_sign == 'bias') & (original_data_label == 'observations'):
+                                continue
+                            func = getattr(self, 'make_periodic')
+                            if data_label in list(self.selected_station_data.keys()):
+                                if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
+                                    func(relevant_axis, data_label, plot_type, zstat)
+                            # set axis title
+                            axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
+                            if plotting_paradigm == 'summary':
+                                axis_title_characteristics['label'] = self.station_subset
+                            elif plotting_paradigm == 'station':
+                                axis_title_characteristics['label'] = '{}, {}, {}, {}'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
+                            relevant_axis['hour'].set_title(**axis_title_characteristics)
 
-                    # other plot types (distribution, timeseries etc.)
+                    # Other plot types (distribution, timeseries etc.)
                     else:
                         # determine if plotting bias stat
                         bias_stat = False
@@ -971,9 +981,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         elif plotting_paradigm == 'station':
                             axis_title_characteristics['label'] = '{}, {}, {}, {}'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
                         relevant_axis.set_title(**axis_title_characteristics)
+
                 # iterate number of plots have made for current type of plot
                 current_plot_ind += 1
-
 
     def make_map(self, relevant_axis, z1, z2, zstat):
         """plot map"""
@@ -1059,6 +1069,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # else, read z2 data then calculate 'difference' statistic
         else:
+
             # read z2 data
             z2_array_data = \
                 self.data_in_memory_filtered[z2][self.selected_species][active_map_valid_station_inds,:]
@@ -1264,7 +1275,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 ax.set_xlim(np.min(all_xlim_lower), np.max(all_xlim_upper))
                 ax.set_ylim(np.min(all_ylim_lower), np.max(all_ylim_upper))
 
-    def make_periodic(self, relevant_axis, data_label, zstat):
+    def make_periodic(self, relevant_axis, data_label, plot_type, zstat):
         """Function that makes the temporally aggregated experiment bias statistic plots"""
 
         # define dictionaries defining the relevant axis, axis titles, x axis ticks
@@ -1297,54 +1308,178 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # change axis tick labels
             aggregation_dict[temporal_aggregation_resolution]['ax'].tick_params(labelsize=8.0)
 
-        # ------------------------------------------------------------------------------------------------#
-        # now, make experiment bias plots for active bias statistic for all relevant temporal aggregation resolutions
+        if 'violin' in plot_type:
 
-        # iterate through all defined temporal aggregation resolutions
-        for temporal_aggregation_resolution in self.temporal_aggregation_resolutions:
-            if temporal_aggregation_resolution != 'all':
+            # iterate through all defined temporal aggregation resolutions
+            for temporal_aggregation_resolution in self.temporal_aggregation_resolutions:
+                
+                if temporal_aggregation_resolution != 'all':
 
-                #aggregation_dict[temporal_aggregation_resolution]['plots'][data_label] = \
-                aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
-                    aggregation_dict[temporal_aggregation_resolution]['xticks'],
-                    self.selected_station_data[data_label][temporal_aggregation_resolution]
-                    [zstat],
-                    color=self.datareader.plotting_params[data_label]['colour'],
-                    marker='o', zorder=self.datareader.plotting_params[data_label]['zorder'],
-                    markersize=self.temp_agg_expbias_markersize, linewidth=0.5)
+                    # create arrays for storing all calculated aggregated p5 and p95
+                    # (across all data arrays) for later limiting ylim
+                    all_p5 = []
+                    all_p95 = []
 
-                # set x axis limits
-                aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(
-                    np.min(aggregation_dict[temporal_aggregation_resolution]['xticks'])-0.5,
-                    np.max(aggregation_dict[temporal_aggregation_resolution]['xticks'])+0.5)
-                # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
-                if temporal_aggregation_resolution == 'hour':
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticks(
-                        aggregation_dict[temporal_aggregation_resolution]['xticks'][::3])
-                else:
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticks(
-                        aggregation_dict[temporal_aggregation_resolution]['xticks'])
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticklabels(
-                        [self.temporal_axis_mapping_dict[temporal_aggregation_resolution][xtick] for xtick
-                            in aggregation_dict[temporal_aggregation_resolution]['xticks']])
+                    # iterate through data array names in selected station data dictionary
+                    for data_label in list(self.selected_station_data.keys()):
+            
+                        # if colocation is active, for plotting observational aggregated data,
+                        # use the 'observations_colocatedto_experiments' array
+                        if self.temporal_colocation:
+                            if data_label.split('_')[0] == 'observations':
+                                if data_label != 'observations_colocatedto_experiments':
+                                    continue
+                            # print only relevant data, otherwise we get double lines for multiple exps
+                            if data_label.split('_')[-1] not in ("observations", "experiments"):
+                                continue
 
-                # set xticks
-                aggregation_dict[temporal_aggregation_resolution]['ax'].xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['xticks']['labelsize'])
-                # set yticks
-                aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['yticks']['labelsize'])
-                # get zstat type (basic or expbias) and sign (absolute or bias)
-                z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
+                        # get grouped data for current temporal aggregation resolution
+                        grouped_data = self.selected_station_data[data_label][temporal_aggregation_resolution]['grouped_data']
+                        # drop any groups which have no data
+                        grouped_data = [group for group in grouped_data if len(group) > 0]
 
-                if z_statistic_sign == 'bias':
-                    # get value/s of minimum bias for statistic
-                    if z_statistic_type == 'basic':
-                        minimum_bias = self.basic_stats_dict[base_zstat]['minimum_bias']
+                        # make violin plot --> add plotted object to aggregation dictionary
+                        aggregation_dict[temporal_aggregation_resolution]['plots'][data_label] = \
+                            aggregation_dict[temporal_aggregation_resolution]['ax'].violinplot(grouped_data, positions=self.selected_station_data[data_label][temporal_aggregation_resolution]['valid_xticks'], points=100, widths=0.85, showmeans=False, showmedians=False, showextrema=False)
+
+                        # append aggregated p5/p95 for data array, to all_p5/all_p95 arrays
+                        all_p5 = np.append(
+                            all_p5, self.selected_station_data[data_label][temporal_aggregation_resolution]['p5'])
+                        all_p95 = np.append(
+                            all_p95, self.selected_station_data[data_label][temporal_aggregation_resolution]['p95'])
+
+                    # set x axis limits
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(np.min(aggregation_dict[temporal_aggregation_resolution]['xticks'])-0.5, np.max(aggregation_dict[temporal_aggregation_resolution]['xticks'])+0.5)
+                    # set y axis limits (use minimum p5 and maximum p95 across aggregations, across all data arrays)
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].set_ylim(np.nanmin(all_p5), np.nanmax(all_p95))
+                    # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
+                    if temporal_aggregation_resolution == 'hour':
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticks(aggregation_dict[temporal_aggregation_resolution]['xticks'][::3])
                     else:
-                        minimum_bias = self.expbias_dict[base_zstat]['minimum_bias']
-                    # plot horizontal line/s across x axis at value/s of minimum experiment bias
-                    for mb in minimum_bias:
-                        aggregation_dict[temporal_aggregation_resolution]['ax'].axhline(y=mb, linestyle='--', linewidth=1.0,
-                                                                                        color='black', zorder=0)
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].\
+                            set_xticks(aggregation_dict[temporal_aggregation_resolution]['xticks'])
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].\
+                            set_xticklabels([self.temporal_axis_mapping_dict[temporal_aggregation_resolution][xtick]
+                                            for xtick in aggregation_dict[temporal_aggregation_resolution]['xticks']])
+                    
+                    # iterate through data arrays have plotted data
+                    for data_label in list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys()):
+
+                        # get plotted object per data array
+                        violin_plot = aggregation_dict[temporal_aggregation_resolution]['plots'][data_label]
+
+                        # update plotted objects with necessary colour, zorder and alpha
+                        for patch in violin_plot['bodies']:
+
+                            patch.set_facecolor(self.datareader.plotting_params[data_label]['colour'])
+                            patch.set_zorder(self.datareader.plotting_params[data_label]['zorder'])
+                            if data_label.split('_')[0] == 'observations':
+                                patch.set_alpha(0.5)
+                            else:
+                                patch.set_alpha(0.3)
+                            # if have at least 1 experiment data array, split the violin plot across the horizontal
+                            # (observations on left, experiments on right)
+                            if len(list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys())) > 1:
+                                m = np.mean(patch.get_paths()[0].vertices[:, 0])
+                                # observations on left
+                                if data_label.split('_')[0] == 'observations':
+                                    patch.get_paths()[0].vertices[:, 0] = np.clip(
+                                        patch.get_paths()[0].vertices[:, 0], -np.inf, m)
+                                # experiments on right
+                                else:
+                                    patch.get_paths()[0].vertices[:, 0] = np.clip(
+                                        patch.get_paths()[0].vertices[:, 0], m, np.inf)
+
+                        # overplot time series of medians over boxes in necessary color
+
+                        # generate zorder to overplot medians in same order as violin plots are ordered, but on top of them
+                        median_zorder = (self.datareader.plotting_params['observations']['zorder']+len(
+                            list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys())) - 1) + \
+                                        self.datareader.plotting_params[data_label]['zorder']
+
+                        # get xticks (all valid aggregated time indexes) and medians to plot
+                        xticks = aggregation_dict[temporal_aggregation_resolution]['xticks']
+                        medians = self.selected_station_data[data_label][temporal_aggregation_resolution]['p50']
+                        # split arrays if there are any temporal gaps to avoid
+                        # line drawn being interpolated across missing values
+                        inds_to_split = np.where(np.diff(xticks) > 1)[0]
+                        if len(inds_to_split) == 0:
+                            aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
+                                xticks, medians, marker='o',
+                                color=self.datareader.plotting_params[data_label]['colour'],
+                                markersize=self.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
+                        else:
+                            inds_to_split += 1
+                            start_ind = 0
+                            for end_ind in inds_to_split:
+                                aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
+                                    xticks[start_ind:end_ind], medians[start_ind:end_ind],
+                                    marker='o', color=self.datareader.plotting_params[data_label]['colour'],
+                                    markersize=self.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
+                                start_ind = end_ind
+                            aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
+                                xticks[start_ind:], medians[start_ind:], marker='o',
+                                color=self.datareader.plotting_params[data_label]['colour'],
+                                markersize=self.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
+
+                    # plot title (with units)
+                    # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
+                    if 'hourly' in self.selected_resolution:
+                        aggregation_dict['hour']['ax'].set_title('Temporal Distributions (%s)' % self.datareader.measurement_units,
+                                                                                                fontsize=8.0, loc='left')
+                    # otherwise, plot the units on the monthly aggregation axis
+                    else:
+                        aggregation_dict['month']['ax'].set_title('Temporal Distributions (%s)' % self.datareader.measurement_units,
+                                                                                                fontsize=8.0, loc='left')
+
+        else:
+
+            # Make experiment bias plots for active bias statistic for all relevant temporal aggregation resolutions
+
+            # iterate through all defined temporal aggregation resolutions
+            for temporal_aggregation_resolution in self.temporal_aggregation_resolutions:
+                if temporal_aggregation_resolution != 'all':
+                    #aggregation_dict[temporal_aggregation_resolution]['plots'][data_label] = \
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
+                        aggregation_dict[temporal_aggregation_resolution]['xticks'],
+                        self.selected_station_data[data_label][temporal_aggregation_resolution]
+                        [zstat],
+                        color=self.datareader.plotting_params[data_label]['colour'],
+                        marker='o', zorder=self.datareader.plotting_params[data_label]['zorder'],
+                        markersize=self.temp_agg_expbias_markersize, linewidth=0.5)
+
+                    # set x axis limits
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(
+                        np.min(aggregation_dict[temporal_aggregation_resolution]['xticks'])-0.5,
+                        np.max(aggregation_dict[temporal_aggregation_resolution]['xticks'])+0.5)
+                    # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
+                    if temporal_aggregation_resolution == 'hour':
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticks(
+                            aggregation_dict[temporal_aggregation_resolution]['xticks'][::3])
+                    else:
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticks(
+                            aggregation_dict[temporal_aggregation_resolution]['xticks'])
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticklabels(
+                            [self.temporal_axis_mapping_dict[temporal_aggregation_resolution][xtick] for xtick
+                                in aggregation_dict[temporal_aggregation_resolution]['xticks']])
+
+                    # set xticks
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['xticks']['labelsize'])
+                    # set yticks
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['yticks']['labelsize'])
+                    # get zstat type (basic or expbias) and sign (absolute or bias)
+                    z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
+
+                    if z_statistic_sign == 'bias':
+                        # get value/s of minimum bias for statistic
+                        if z_statistic_type == 'basic':
+                            minimum_bias = self.basic_stats_dict[base_zstat]['minimum_bias']
+                        else:
+                            minimum_bias = self.expbias_dict[base_zstat]['minimum_bias']
+                        # plot horizontal line/s across x axis at value/s of minimum experiment bias
+                        for mb in minimum_bias:
+                            aggregation_dict[temporal_aggregation_resolution]['ax'].axhline(y=mb, linestyle='--', linewidth=1.0,
+                                                                                            color='black', zorder=0)
 
     def make_timeseries(self, relevant_axis, data_label):
         # make time series plot
@@ -1443,7 +1578,33 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # set cb ticks
         cb.ax.tick_params(labelsize=self.characteristics_per_plot_type['heatmap']['cb_xticks']['labelsize'])
 
+    def make_scatter(self, relevant_axis, data_label):
+        
+        # Get observations data
+        observations_data = self.selected_station_data['observations_colocatedto_experiments']['pandas_df'].dropna()['data']
 
+        # Create scatter plot for each observation vs. experiment pair (all in one plot)
+        if ((self.temporal_colocation == True and 'observations_colocatedto_experiments' not in data_label) or
+            (self.temporal_colocation == False and 'observations' not in data_label)):
+
+            # Get experiment data
+            experiment_data = self.selected_station_data[data_label]['pandas_df'].dropna()['data']
+
+            # Create scatter plot
+            ax = relevant_axis
+            ax.plot(observations_data, experiment_data, linestyle = 'None',
+                    marker = self.characteristics_per_plot_type['scatter']['markers']['character'],
+                    markersize = self.characteristics_per_plot_type['scatter']['markers']['size'],
+                    color = self.datareader.plotting_params[data_label]['colour'])
+            
+            # Set ticks
+            relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['scatter']['xticks']['labelsize'])
+            relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['scatter']['yticks']['labelsize'])
+
+            # Set labels
+            relevant_axis.set_xlabel(xlabel=self.characteristics_per_plot_type['scatter']['axis_xlabel']['xlabel'])
+            relevant_axis.set_ylabel(ylabel=self.characteristics_per_plot_type['scatter']['axis_ylabel']['ylabel'])
+            
 def get_z_statistic_type(stats_dict, zstat):
     """Function that checks if the z statistic is basic or expbias statistic"""
     # check if the chosen statistic is a basic statistic
