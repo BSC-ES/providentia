@@ -8,3 +8,7 @@ providentia.egg-info
 .coverage
 __pycache__
 dist
+data
+configurations
+PROVIDENTIA_Report_Test.pdf
+PROVIDENTIA_Report_New_Plots.pdf
