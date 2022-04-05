@@ -163,8 +163,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         for plot_type in self.plots_per_report_type[self.report_type]:
             if '_individual' in plot_type:
                 if self.station_plots:
-                        print(f'It is not possible to create the individual plot {plot_type} for each station. Use the summary plots instead.')
-                        self.plots_per_report_type[self.report_type].remove(plot_type)
+                    print(f'It is not possible to create the individual plot {plot_type} for each station. Use the summary plots instead.')
+                    self.plots_per_report_type[self.report_type].remove(plot_type)
                 else:
                     if 'periodic-violin' in plot_type or "timeseries" in plot_type or 'distribution' in plot_type or 'scatter' in plot_type:
                         self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
