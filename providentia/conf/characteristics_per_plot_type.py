@@ -43,14 +43,14 @@ def get_characteristics_per_plot_type(self):
                             'axis_ylabel': {'ylabel': '', 'fontsize': 8}, 'xticks': {'labelsize': 7},
                             'yticks': {'labelsize': 7},
                             'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0},
-                            'subplots_adjust': {'top': 0.85}},    
+                            'subplots_adjust': {'top': 0.80, 'hspace': 0.30}},    
 
         'scatter': {'summary_pages':[], 'station_pages':[],'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 4},
                     'page_title': {'t': 'Scatter plots', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98},
                     'axis_title': {'label': '', 'fontsize': 8}, 'xticks': {'labelsize': 7}, 'yticks': {'labelsize': 7},
                     'axis_xlabel': {'xlabel': 'Observations', 'fontsize': 8}, 'axis_ylabel': {'ylabel': 'Experiment', 'fontsize': 8},
                     'markers': {'character': 'o', 'size': 2},
-                    'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0}}
+                    'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0}, 'subplots_adjust': {'top': 0.90, 'hspace': 0.40}}
     }
 
     return characteristics_per_plot_type

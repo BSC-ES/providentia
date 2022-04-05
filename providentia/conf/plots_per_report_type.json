@@ -9,10 +9,12 @@
                "periodic-p95_bias", "periodic-Min_bias",
                "periodic-Max_bias", "periodic-MB", "periodic-RMSE",
                "periodic-MFB", "periodic-MAFB", "periodic-r",
-               "heatmap-p5-p50-p95-Min-Max-MB-RMSE-MFB-MAFB-r",
-               "periodic-violin"
+               "heatmap-p5-p50-p95-Min-Max-MB-RMSE-MFB-MAFB-r"
               ],
 
     "met":["map-Data %-obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"],
-    "new":["distribution", "periodic-violin", "scatter"]
+    "new":["distribution", "distribution_individual", 
+           "scatter", "scatter_individual", 
+           "periodic-violin", "periodic-violin_individual",
+           "timeseries", "timeseries_individual"]
 }
