@@ -139,38 +139,52 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         self.characteristics_per_plot_type = get_characteristics_per_plot_type(self)
         self.characteristics_per_plot_type_templates = get_characteristics_per_plot_type_templates(self)
 
-        # update characteristics_per_plot_type with all statistic specific dictionaries
-        for bstat in self.basic_stats_dict.keys():
-            for template_name, template_dict in self.characteristics_per_plot_type_templates.items():
-                if 'basicstat' in template_name:
-                    template_name_amended = template_name.replace("basicstat",bstat)
-                elif 'biasstat' in template_name:
-                    template_name_amended = '{}_bias'.format(template_name.replace("biasstat",bstat))
-                self.characteristics_per_plot_type[template_name_amended] = copy.deepcopy(template_dict)
-                if '_bias' in template_name:
-                    page_title = '{} bias'.format(self.basic_stats_dict[bstat]['label'])
-                else: 
-                    page_title = self.basic_stats_dict[bstat]['label']
-                self.characteristics_per_plot_type[template_name_amended]['page_title']['t'] = page_title
-        for estat in self.expbias_dict.keys():
-            for template_name, template_dict in self.characteristics_per_plot_type_templates.items():
-                if 'biasstat' in template_name:
-                    template_name_amended = template_name.replace("biasstat",estat)
-                    self.characteristics_per_plot_type[template_name_amended] = copy.deepcopy(template_dict)
-                    self.characteristics_per_plot_type[template_name_amended]['page_title']['t'] = self.expbias_dict[estat]['label']
-
-        # add new keys to make individual plots
+        # update characteristics_per_plot_type
+        plot_types_to_remove = []
         for plot_type in self.plots_per_report_type[self.report_type]:
-            if '_individual' in plot_type:
-                if self.station_plots:
-                    print(f'It is not possible to create the individual plot {plot_type} for each station. Use the summary plots instead.')
-                    self.plots_per_report_type[self.report_type].remove(plot_type)
+        
+            # add new keys to make maps and periodic plots (with or without bias)
+            if '-' in plot_type and 'violin' not in plot_type:
+         
+                if '_' in plot_type:
+                    stat = plot_type.split('-')[1].split('_')[0]
                 else:
-                    if 'periodic-violin' in plot_type or "timeseries" in plot_type or 'distribution' in plot_type or 'scatter' in plot_type:
-                        self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
+                    stat = plot_type.split('-')[1]
+
+                self.stats_dict = {**self.basic_stats_dict, **self.expbias_dict}
+                
+                if stat in self.stats_dict:
+                   
+                    # add new keys from templates
+                    if plot_type[:4] == 'map-':
+                        if '_individual' not in plot_type:
+                            self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type_templates['map'])
+                        else:
+                            print(f'It is not possible to create the individual plot {plot_type}.')
+                            plot_types_to_remove.append(plot_type)
+                            continue
+                    elif 'periodic-' in plot_type:
+                        self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type_templates['periodic'])
+
+                    # change title for new keys 
+                    if '_bias' in plot_type:            
+                        page_title = '{} bias'.format(self.stats_dict[stat]['label'])
+                        self.characteristics_per_plot_type[plot_type]['page_title']['t'] = page_title
                     else:
-                        print(f'It is not possible to create the individual plot {plot_type}.')
-                        self.plots_per_report_type[self.report_type].remove(plot_type)
+                        page_title = self.stats_dict[stat]['label']
+                        self.characteristics_per_plot_type[plot_type]['page_title']['t'] = page_title
+
+            # add new keys to make individual plots
+            if '_individual' in plot_type:
+                if ('periodic-violin' in plot_type) or ('timeseries' in plot_type) or ('distribution' in plot_type) or ('scatter' in plot_type):
+                    self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
+                elif 'periodic-' in plot_type and 'violin' not in plot_type:
+                    continue
+                else:
+                    print(f'It is not possible to create the individual plot {plot_type}.')
+                    plot_types_to_remove.append(plot_type)
+
+        self.plots_per_report_type[self.report_type] = [plot_type for plot_type in self.plots_per_report_type[self.report_type] if plot_type not in plot_types_to_remove]
 
         self.exceedance_limit = aux.exceedance_lim(self.selected_species)
         self.temporal_axis_mapping_dict = aux.temp_axis_dict()
@@ -222,6 +236,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             for station_subset_ind, station_subset in enumerate(self.station_subset_names):
                 self.station_subset_ind = station_subset_ind
                 self.station_subset = station_subset
+
                 # update the conf options for this subset
                 if station_subset_ind != 0:
                     for k in self.sub_opts[prv_station]:
@@ -231,6 +246,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 prv_station = station_subset
                 aux.update_metadata_fields(self)
                 aux.meta_from_conf(self)
+
                 # create and update the representativity options
                 self.representativity_menu = aux.representativity_fields(self, self.selected_resolution)
                 aux.representativity_conf(self)
@@ -241,52 +257,57 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 DataFilter(self)
 
                 #iterate through all desired plots, making each one (summary or station specific plots)
-                print('Making {} Subset Plots'.format(station_subset))                
-                #make summary plots?
+                print('Making {} Subset Plots'.format(station_subset))  
+
+                # get number of stations
+                n_stations = len(self.datareader.plotting_params['observations']['valid_station_inds'])              
+                
+                # make summary plots?
                 if self.summary_plots:
                     # get median timeseries across data from filtered data, and place it pandas dataframe
                     self.to_pandas_dataframe()
-                    #iterate through plots and make each one for subset group
-                    for plot_type in self.summary_plots_to_make:
-                        self.make_plot('summary', plot_type)
-                    #generate colourbars for map plots 
-                    relevant_axs = []
-                    cb_axs = []
-                    previous_plot_type = ''
-                    for figure_n in self.plot_dictionary.keys():
-                        plot_type = self.plot_dictionary[figure_n]['plot_type']
-                        if (previous_plot_type != plot_type) & (len(relevant_axs) > 0):
+                    if self.selected_station_data:
+                        #iterate through plots and make each one for subset group
+                        for plot_type in self.summary_plots_to_make:
+                            self.make_plot('summary', plot_type, n_stations)
+                        #generate colourbars for map plots 
+                        relevant_axs = []
+                        cb_axs = []
+                        previous_plot_type = ''
+                        for figure_n in self.plot_dictionary.keys():
+                            plot_type = self.plot_dictionary[figure_n]['plot_type']
+                            if (previous_plot_type != plot_type) & (len(relevant_axs) > 0):
+                                self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
+                                relevant_axs = []
+                                cb_axs = []
+                            if 'cb' in list(self.characteristics_per_plot_type[plot_type].keys()):
+                                relevant_axs.extend(self.plot_dictionary[figure_n]['axs'])
+                                cb_axs.append(self.plot_dictionary[figure_n]['cb_ax'])
+                            previous_plot_type = copy.deepcopy(plot_type)
+                        if len(relevant_axs) > 0:
                             self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
-                            relevant_axs = []
-                            cb_axs = []
-                        if 'cb' in list(self.characteristics_per_plot_type[plot_type].keys()):
-                            relevant_axs.extend(self.plot_dictionary[figure_n]['axs'])
-                            cb_axs.append(self.plot_dictionary[figure_n]['cb_ax'])
-                        previous_plot_type = copy.deepcopy(plot_type)
-                    if len(relevant_axs) > 0:
-                        self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
-                    #harmonise xy limits (not for timeseries, map, or heatmap plot types)
-                    for plot_type in self.summary_plots_to_make:
-                        if ('timeseries' not in plot_type) & ('map-' not in plot_type):
-                            self.harmonise_xy_lims(plot_type)
+                        #harmonise xy limits (not for timeseries, map, or heatmap plot types)
+                        for plot_type in self.summary_plots_to_make:
+                            if ('timeseries' not in plot_type) & ('map-' not in plot_type):
+                                self.harmonise_xy_lims(plot_type)
 
-                #make station specific plots?
+                # make station specific plots?
                 if self.station_plots:
                     #setup plotting geometry for station plots
-                    n_stations = len(self.datareader.plotting_params['observations']['valid_station_inds'])
-                    self.setup_plot_geometry('station',n_stations=n_stations)
+                    self.setup_plot_geometry('station', n_stations=n_stations)
                     for actual_station_ind in self.datareader.plotting_params['observations']['valid_station_inds']:
                         #gather some information about current station
                         self.station_ind += 1
                         self.current_station_reference = self.datareader.metadata_in_memory['station_reference'][actual_station_ind, :][0]
                         self.current_station_name = self.datareader.metadata_in_memory['station_name'][actual_station_ind, :][0]
-                        self.current_lon = self.datareader.metadata_in_memory['longitude'][actual_station_ind, :][0]
-                        self.current_lat =  self.datareader.metadata_in_memory['latitude'][actual_station_ind, :][0]
+                        self.current_lon = round(self.datareader.metadata_in_memory['longitude'][actual_station_ind, :][0], 2)
+                        self.current_lat = round(self.datareader.metadata_in_memory['latitude'][actual_station_ind, :][0], 2)
                         #put station data in pandas dataframe
                         self.to_pandas_dataframe(station_index=actual_station_ind)
-                        #iterate through plots and make each one for subset group
-                        for plot_type in self.station_plots_to_make:
-                            self.make_plot('station', plot_type)
+                        if self.selected_station_data:
+                            #iterate through plots and make each one for subset group
+                            for plot_type in self.station_plots_to_make:
+                                self.make_plot('station', plot_type, n_stations)
 
             # save page figures
             print('WRITING PDF')
@@ -350,7 +371,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     plot_types_to_remove.append(plot_type) 
                 elif '-' in plot_type:
                     #get zstat 
-                    zstat = plot_type.split('-')[1]
+                    if '_individual':
+                        zstat = plot_type.split('-')[1].split('_individual')[0]
+                    else:
+                        zstat = plot_type.split('-')[1]
                     # get zstat type (basic or expbias) and sign (absolute or bias)
                     z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat) 
                     #if zstat sign is bias but have 0 models, remove plot
@@ -373,7 +397,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # iterate through plot types to make
         for plot_type in plots_to_make:
-      
+
             # get plot characteristics
             plot_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type])
             plot_characteristics_vars = list(plot_characteristics.keys())
@@ -385,7 +409,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 plot_characteristics['page_title']['t'] = '{} (Per Station)'.format(plot_characteristics['page_title']['t']) 
 
             if '-' in plot_type:
-                zstat = plot_type.split('-')[1]
+                if '_individual':
+                    zstat = plot_type.split('-')[1].split('_individual')[0]
+                else:
+                    zstat = plot_type.split('-')[1]
                 # get zstat type (basic or expbias) and sign (absolute or bias)
                 z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
 
@@ -401,7 +428,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # define number of plots per type
             n_plots_per_plot_type = False
 
-            if 'map-' in plot_type:
+            if 'heatmap-' in plot_type:
+                n_plots_per_plot_type = len(plot_type.split('-')) - 1
+
+            elif plot_type[:4] == 'map-':
                 if '-obs' in plot_type:
                     n_plots_per_plot_type = len(self.station_subset_names)
                 elif z_statistic_sign == 'bias':
@@ -410,9 +440,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 else:
                     n_plots_per_plot_type = len(self.station_subset_names) * \
                                             len(list(self.datareader.data_in_memory.keys()))
-
-            elif 'heatmap-' in plot_type:
-                n_plots_per_plot_type = len(plot_type.split('-')) - 1
 
             else:
                 if plotting_paradigm == 'summary':
@@ -426,7 +453,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     else:
                         n_plots_per_plot_type = len(self.station_subset_names)
                 elif plotting_paradigm == 'station':
-                    n_plots_per_plot_type = n_stations
+                    if '_individual' in plot_type:
+                        if 'scatter' in plot_type:
+                            n_plots_per_plot_type = n_stations * \
+                                                    (len(list(self.datareader.data_in_memory.keys())) - 1)
+                        else:
+                            n_plots_per_plot_type = n_stations * \
+                                                    len(list(self.datareader.data_in_memory.keys()))
+                    else:
+                        n_plots_per_plot_type = n_stations
 
             # get n pages per plot type
             n_pages_per_plot_type = int(np.ceil(n_plots_per_plot_type / (
@@ -533,11 +568,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                         null, max_lat = self.plotcrs.transform_point(0, self.bounding_box[
                                             'latitude']['max'], src_crs=self.datacrs)
                                         ax.set_ylim(top=max_lat)
+
                     else:
                         ax.set_visible(False)
+                    
                     plot_ii_per_type += 1
                     col_ii += 1
-
+                    
                 # tight layout?
                 if 'tightlayout' in plot_characteristics_vars:
                     fig.tight_layout()
@@ -584,7 +621,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         return legend_elements
 
 
-    def to_pandas_dataframe(self,station_index=False):
+    def to_pandas_dataframe(self, station_index=False):
         """Function that takes data in memory puts it in a pandas dataframe.
         For summary plots this involves take the median timeseries across the timeseries.
         For station plots it is just the station in question.
@@ -599,6 +636,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # iterate through data arrays in data in memory filtered dictionary
         for data_label in self.data_in_memory_filtered.keys():
+
             # if colocation is not active, do not convert colocated data arrays to pandas data frames
             if not self.temporal_colocation:
                 if 'colocated' in data_label:
@@ -616,8 +654,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                              self.datareader.plotting_params[data_label]['valid_station_inds'], :]
 
             # if data array has no valid data for selected stations, do not create a pandas dataframe
-            # data array has valid data?
-            if data_array.size:
+            # data array has valid data and?
+            if data_array.size and np.isnan(data_array).all() == False:
 
                 # add nested dictionary for data array name to selection station data dictionary
                 self.selected_station_data[data_label] = {}
@@ -627,24 +665,25 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(data_array, index=self.time_array, columns=['data'])
                 else:
                     self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0),
-                                                                                   index=self.time_array,
-                                                                                   columns=['data'])
+                                                                                       index=self.time_array,
+                                                                                       columns=['data'])
+        
+                # get min/max across all selected station data
+                selected_station_data_all = [self.selected_station_data[data_label]['pandas_df']['data'] for data_label in self.selected_station_data.keys()]
+                selected_station_data_all_flat = [item for items in selected_station_data_all for item in items]
+                
+                if len(selected_station_data_all_flat) > 0:
+                    self.selected_station_data_min = np.nanmin(selected_station_data_all_flat)
+                    self.selected_station_data_max = np.nanmax(selected_station_data_all_flat)
+                
+                # temporally aggregate selected data dataframes (by hour, day of week, month)
+                self.pandas_temporal_aggregation()
 
-        # get min/max across all selected station data
-        selected_station_data_all = [self.selected_station_data[data_label]['pandas_df']['data'] for data_label in self.selected_station_data.keys()]
-        selected_station_data_all_flat = [item for items in selected_station_data_all for item in items]
-        if len(selected_station_data_all_flat) > 0:
-            self.selected_station_data_min = np.nanmin(selected_station_data_all_flat)
-            self.selected_station_data_max = np.nanmax(selected_station_data_all_flat)
-
-        # temporally aggregate selected data dataframes (by hour, day of week, month)
-        self.pandas_temporal_aggregation()
-
-        # if have some experiment data associated with selected stations, calculate
-        # temporally aggregated basic statistic differences and bias statistics between
-        # observations and experiment data arrays
-        if len(self.experiments_to_read) > 0:
-            self.calculate_temporally_aggregated_experiment_bias_statistics()
+                # if have some experiment data associated with selected stations, calculate
+                # temporally aggregated basic statistic differences and bias statistics between
+                # observations and experiment data arrays
+                if len(self.experiments_to_read) > 0:
+                    self.calculate_temporally_aggregated_experiment_bias_statistics()
 
     def pandas_temporal_aggregation(self):
         """Function that aggregates pandas dataframe data, for all data arrays,
@@ -826,7 +865,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             self.selected_station_data[data_label][temporal_aggregation_resolution][
                                 '%s' % (bias_stat)] = stat_output_by_group
 
-    def make_plot(self, plotting_paradigm, plot_type):
+    def make_plot(self, plotting_paradigm, plot_type, n_stations=0):
         """Function that calls making of any type of plot"""
 
         # heatmap plot?
@@ -882,10 +921,14 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # iterate through all data arrays
             original_data_array_labels = list(self.datareader.data_in_memory.keys())
+            
             for original_data_label in original_data_array_labels:
                 # get zstat for plot type (if exists)
                 if '-' in plot_type:
-                    zstat = plot_type.split('-')[1]
+                    if '_individual':
+                        zstat = plot_type.split('-')[1].split('_individual')[0]
+                    else:
+                        zstat = plot_type.split('-')[1]
                     # get zstat type (basic or expbias) and sign (absolute or bias)
                     z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
 
@@ -926,8 +969,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     # get relevant axis to plot on
                     relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, (current_plot_ind * len(
                         self.station_subset_names)) + self.station_subset_ind)
+                    
                     # make map plot
                     n_stations = self.make_map(relevant_axis, z1, z2, zstat)
+                    
                     # set axis title
                     axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
                     if plot_type == 'map-Data %-obs':
@@ -953,13 +998,27 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                     # get relevant axis to plot on
                     if plotting_paradigm == 'summary':
-                        if '_individual' in plot_type:
-                            relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, (current_plot_ind * len(
-                                                                   self.station_subset_names)) + self.station_subset_ind)
+                        if 'scatter_individual' in plot_type:
+                            relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, 
+                                                                   (current_plot_ind + self.station_subset_ind + 
+                                                                   (len(self.experiments_to_read) - 1) * self.station_subset_ind))
+                        elif '_individual' in plot_type:
+                            relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, 
+                                                                   (current_plot_ind + self.station_subset_ind + 
+                                                                   len(self.experiments_to_read) * self.station_subset_ind))
                         else:
                             relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, self.station_subset_ind)
                     elif plotting_paradigm == 'station':
-                        relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, self.station_ind)
+                        if 'scatter_individual' in plot_type:
+                            relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, 
+                                                                   (current_plot_ind + self.station_ind + 
+                                                                   (len(self.experiments_to_read) - 1) * self.station_ind))
+                        elif '_individual' in plot_type:
+                            relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, 
+                                                                   (current_plot_ind + self.station_ind + 
+                                                                   len(self.experiments_to_read) * self.station_ind))
+                        else:
+                            relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, self.station_ind)
 
                     # Periodic plots
                     if 'periodic-' in plot_type:
@@ -979,7 +1038,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         if plotting_paradigm == 'summary':
                             axis_title_characteristics['label'] = self.station_subset
                         elif plotting_paradigm == 'station':
-                            axis_title_characteristics['label'] = '{}, {}, {}, {}'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
+                            axis_title_characteristics['label'] = '{}, {}, ({}, {})'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
                         relevant_axis['hour'].set_title(**axis_title_characteristics, y = 1.15)
 
                     # Other plot types (distribution, timeseries etc.)
@@ -997,12 +1056,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         # do not make (scatter) plot when the data label corresponds to the observations
                         if ('scatter' in plot_type and 
                             ((self.temporal_colocation == True and 'observations_colocatedto_experiments' in data_label) or
-                            (self.temporal_colocation == False and 'observations' in data_label))):
+                             (self.temporal_colocation == False and 'observations' in data_label))):
                             continue
                         # get plot type
                         else:
                             func = getattr(self, 'make_{}'.format(plot_type.split('_')[0]))
-
+                            
                         if data_label in list(self.selected_station_data.keys()):
                             if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
                                 # make standard plot, without bias
@@ -1010,14 +1069,14 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                     func(relevant_axis, data_label, bias=True)
                                 # make plot without bias
                                 else:
-                                    func(relevant_axis, data_label)
+                                    func(relevant_axis, data_label)                           
 
                         # set axis title
                         axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
                         if plotting_paradigm == 'summary':
                             axis_title_characteristics['label'] = self.station_subset
                         elif plotting_paradigm == 'station':
-                            axis_title_characteristics['label'] = '{}, {}, {}, {}'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
+                            axis_title_characteristics['label'] = '{}, {}, ({}, {})'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
                         relevant_axis.set_title(**axis_title_characteristics)
 
                 # iterate number of plots have made for current type of plot
@@ -1498,9 +1557,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 in aggregation_dict[temporal_aggregation_resolution]['xticks']])
 
                     # set xticks
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['xticks']['labelsize'])
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type[plot_type]['xticks']['labelsize'])
                     # set yticks
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['periodic-{}'.format(zstat)]['yticks']['labelsize'])
+                    aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type[plot_type]['yticks']['labelsize'])
                     # get zstat type (basic or expbias) and sign (absolute or bias)
                     z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
 
@@ -1516,6 +1575,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                                                             color='black', zorder=0)
 
     def make_timeseries(self, relevant_axis, data_label):
+        
         # make time series plot
         relevant_axis.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
                            color=self.datareader.plotting_params[data_label]['colour'],
@@ -1536,6 +1596,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['timeseries']['yticks']['labelsize'])
 
     def make_distribution(self, relevant_axis, data_label, bias=False):
+        
         # make distribution plot
         minmax_diff = self.selected_station_data_max - self.selected_station_data_min
         if pd.isnull(self.parameter_dictionary[self.selected_species]['minimum_resolution']):
@@ -1575,6 +1636,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['distribution']['yticks']['labelsize'])
 
     def make_heatmap(self, relevant_axis, base_zstat, heatmap_df):
+        
         # get zstat type (basic or expbias)
         z_statistic_type = get_z_statistic_type(self.basic_stats_dict, base_zstat)
 
@@ -1585,7 +1647,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             zstat = copy.deepcopy(base_zstat)
 
         # get colourbar limits/colourmap
-        z_vmin, z_vmax, _, z_colourmap = self.generate_colourbar_detail(zstat,heatmap_df.min().min(),heatmap_df.max().max())
+        z_vmin, z_vmax, _, z_colourmap = self.generate_colourbar_detail(zstat, heatmap_df.min().min(), heatmap_df.max().max())
 
         # get colorbar label
         if z_statistic_type == 'basic':
@@ -1614,32 +1676,28 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         cb.ax.tick_params(labelsize=self.characteristics_per_plot_type['heatmap']['cb_xticks']['labelsize'])
 
     def make_scatter(self, relevant_axis, data_label):
-        
+
         # Get observations data
         observations_data = self.selected_station_data['observations_colocatedto_experiments']['pandas_df'].dropna()['data']
 
-        # Create scatter plot for each observation vs. experiment pair (all in one plot)
-        if ((self.temporal_colocation == True and 'observations_colocatedto_experiments' not in data_label) or
-            (self.temporal_colocation == False and 'observations' not in data_label)):
+        # Get experiment data
+        experiment_data = self.selected_station_data[data_label]['pandas_df'].dropna()['data']
 
-            # Get experiment data
-            experiment_data = self.selected_station_data[data_label]['pandas_df'].dropna()['data']
+        # Create scatter plot
+        relevant_axis.plot(observations_data, experiment_data, linestyle = 'None',
+                           marker = self.characteristics_per_plot_type['scatter']['markers']['character'],
+                           markersize = self.characteristics_per_plot_type['scatter']['markers']['size'],
+                           color = self.datareader.plotting_params[data_label]['colour'])
+        
+        # Set ticks
+        relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['scatter']['xticks']['labelsize'])
+        relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['scatter']['yticks']['labelsize'])
 
-            # Create scatter plot
-            relevant_axis.plot(observations_data, experiment_data, linestyle = 'None',
-                               marker = self.characteristics_per_plot_type['scatter']['markers']['character'],
-                               markersize = self.characteristics_per_plot_type['scatter']['markers']['size'],
-                               color = self.datareader.plotting_params[data_label]['colour'])
-            
-            # Set ticks
-            relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['scatter']['xticks']['labelsize'])
-            relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['scatter']['yticks']['labelsize'])
-
-            # Set labels
-            relevant_axis.set_xlabel(xlabel=self.characteristics_per_plot_type['scatter']['axis_xlabel']['xlabel'], 
-                                     fontsize=self.characteristics_per_plot_type['scatter']['axis_xlabel']['fontsize'])
-            relevant_axis.set_ylabel(ylabel=self.characteristics_per_plot_type['scatter']['axis_ylabel']['ylabel'], 
-                                     fontsize=self.characteristics_per_plot_type['scatter']['axis_ylabel']['fontsize'])
+        # Set labels
+        relevant_axis.set_xlabel(xlabel=self.characteristics_per_plot_type['scatter']['axis_xlabel']['xlabel'], 
+                                 fontsize=self.characteristics_per_plot_type['scatter']['axis_xlabel']['fontsize'])
+        relevant_axis.set_ylabel(ylabel=self.characteristics_per_plot_type['scatter']['axis_ylabel']['ylabel'], 
+                                 fontsize=self.characteristics_per_plot_type['scatter']['axis_ylabel']['fontsize'])
             
 def get_z_statistic_type(stats_dict, zstat):
     """Function that checks if the z statistic is basic or expbias statistic"""
