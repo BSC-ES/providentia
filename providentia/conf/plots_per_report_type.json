@@ -16,5 +16,6 @@
     "new":["distribution", "distribution_individual", 
            "scatter", "scatter_individual", 
            "periodic-violin", "periodic-violin_individual",
-           "timeseries", "timeseries_individual"]
+           "timeseries", "timeseries_individual",
+           "periodic-p95", "periodic-p95_individual"]
 }
