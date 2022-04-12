@@ -12,6 +12,7 @@ import cartopy.feature as cfeature
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import matplotlib.patches as patches
 from matplotlib.lines import Line2D
 from matplotlib.backends.backend_pdf import PdfPages
 from providentia import aux
@@ -432,7 +433,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 n_plots_per_plot_type = len(plot_type.split('-')) - 1
 
             elif plot_type[:4] == 'map-':
-                if '-obs' in plot_type:
+                if '_obs' in plot_type:
                     n_plots_per_plot_type = len(self.station_subset_names)
                 elif z_statistic_sign == 'bias':
                     n_plots_per_plot_type = len(self.station_subset_names) * \
@@ -593,7 +594,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 if 'cb' in plot_characteristics_vars:
                     self.plot_dictionary[self.current_page_n]['cb_ax'] = fig.add_axes(plot_characteristics['cb']['position'])
                     self.plot_dictionary[self.current_page_n]['cb_ax'].set_rasterized(True)
-
+                            
                 # add current page number
                 if plotting_paradigm == 'summary':
                     self.characteristics_per_plot_type[plot_type]['summary_pages'].append(self.current_page_n)
@@ -865,6 +866,32 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             self.selected_station_data[data_label][temporal_aggregation_resolution][
                                 '%s' % (bias_stat)] = stat_output_by_group
 
+    def make_annotation(self, relevant_axis, data_label, plot_type):
+        """Function to add annotation in plot showing the stats"""
+        
+        stats_to_annotate = self.characteristics_per_plot_type[plot_type]['annotate_stats']
+
+        if '_annotate' in plot_type and stats_to_annotate:
+        
+            # create text to add
+            str_to_annotate = []
+            self.stats_dict = {**self.basic_stats_dict, **self.expbias_dict}
+            for stat in stats_to_annotate:               
+                if stat in self.stats_dict:
+                    str_to_annotate.append(stat + ': ' + str(round(self.selected_station_data[data_label]['all'][stat][0], 2)))
+                else:
+                    print(f'Warning: {stat} could not be annotated on {plot_type}.')
+                    stats_to_annotate.remove(stat)
+            self.characteristics_per_plot_type[plot_type]['annotate_text']['s'] = '\n'.join(str_to_annotate)
+
+            # create annotation on plot
+            relevant_axis.text(**self.characteristics_per_plot_type[plot_type]['annotate_text'], 
+                                transform=relevant_axis.transAxes, 
+                                bbox=self.characteristics_per_plot_type[plot_type]['annotate_bbox'])
+
+        elif '_annotate' in plot_type and not stats_to_annotate:
+            print(f'The annotation statistics have not been defined for {plot_type} in characteristics_per_plot_type.py')
+
     def make_plot(self, plotting_paradigm, plot_type, n_stations=0):
         """Function that calls making of any type of plot"""
 
@@ -936,7 +963,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # 2 arrays if making bias plot), per subset)
                 if plot_type[:4] == 'map-':
                     # get necessary data arrays
-                    if '-obs' in plot_type:
+                    if '_obs' in plot_type:
                         if original_data_label != 'observations':
                             continue
                         if self.temporal_colocation:
@@ -975,7 +1002,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     
                     # set axis title
                     axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
-                    if plot_type == 'map-Data %-obs':
+                    if plot_type == 'map-Data %_obs':
                         axis_title_characteristics['label'] = '{} {}\n({} Stations)'.format(original_data_label,self.station_subset, n_stations)
                     else:
                         axis_title_characteristics['label'] = '{}\n{}'.format(original_data_label, self.station_subset)
@@ -1041,6 +1068,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             axis_title_characteristics['label'] = '{}, {}, ({}, {})'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
                         relevant_axis['hour'].set_title(**axis_title_characteristics, y = 1.15)
 
+                        # add annotation
+                        self.make_annotation(relevant_axis['hour'], data_label, plot_type)
+
                     # Other plot types (distribution, timeseries etc.)
                     else:
                         # determine if plotting bias stat
@@ -1078,6 +1108,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         elif plotting_paradigm == 'station':
                             axis_title_characteristics['label'] = '{}, {}, ({}, {})'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
                         relevant_axis.set_title(**axis_title_characteristics)
+
+                        # add annotation
+                        self.make_annotation(relevant_axis, data_label, plot_type)
 
                 # iterate number of plots have made for current type of plot
                 current_plot_ind += + 1

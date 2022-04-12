@@ -1,5 +1,5 @@
 {            
-    "cams50": ["map-Data %-obs", "map-p5", "map-p50",
+    "cams50": ["map-Data %_obs", "map-p5", "map-p50",
                "map-p95", "map-p5_bias", "map-p50_bias",
                "map-p95_bias", "map-MB", "map-RMSE", "map-MFB",
                "map-MAFB", "map-r", "timeseries", "distribution",
@@ -11,11 +11,13 @@
                "periodic-MFB", "periodic-MAFB", "periodic-r",
                "heatmap-p5-p50-p95-Min-Max-MB-RMSE-MFB-MAFB-r"
               ],
+              
+    "met":["map-Data %_obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"],
 
-    "met":["map-Data %-obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"],
     "new":["distribution", "distribution_individual", 
-           "scatter", "scatter_individual", 
+           "scatter", "scatter_individual", "scatter_individual_annotate",
            "periodic-violin", "periodic-violin_individual",
            "timeseries", "timeseries_individual",
            "periodic-p95", "periodic-p95_individual"]
+        
 }
