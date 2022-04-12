@@ -10,7 +10,9 @@ def get_characteristics_per_plot_type(self):
                        'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 
                        'tightlayout': True, 'subplots_adjust': {'top': 0.90, 'bottom': 0.08}, 
                        'bias': {'title': 'Timeseries bias'},
-                       'annotate': {'stats': ('r2', 'r'), 'position': 'top-left'}},
+                       'annotate_stats': [],
+                       'annotate_text': {'x': 0.04, 'y': 0.825, 's': '', 'color': 'black', 'fontsize': 7},
+                       'annotate_bbox': {'facecolor': 'gainsboro', 'edgecolor': 'lightgrey', 'pad': 5}},
         
         'distribution': {'summary_pages':[], 'station_pages':[], 'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 4},
                          'grid': {'axis': 'both', 'color': 'lightgrey', 'alpha': 0.8},
@@ -21,7 +23,9 @@ def get_characteristics_per_plot_type(self):
                          'yticks': {'labelsize': 7}, 'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0},
                          'tightlayout': True, 'subplots_adjust': {'top': 0.90},
                          'bias': {'title': 'Distributional bias'},
-                         'annotate': {'stats': ('r2', 'r'), 'position': 'top-left'}},
+                         'annotate_stats': [],
+                         'annotate_text': {'x': 0.04, 'y': 0.825, 's': '', 'color': 'black', 'fontsize': 7},
+                         'annotate_bbox': {'facecolor': 'gainsboro', 'edgecolor': 'lightgrey', 'pad': 5}},
 
         'heatmap': {'summary_pages':[], 'station_pages':[], 'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 1},
                     'page_title': {'t': 'Statistical Heatmap', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98},
@@ -39,7 +43,9 @@ def get_characteristics_per_plot_type(self):
                             'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0},
                             'subplots_adjust': {'top': 0.80, 'hspace': 0.30},
                             'bias': {'title': 'Timeseries bias'},
-                            'annotate': {'stats': ('r2', 'r'), 'position': 'top-left'}},    
+                            'annotate_stats': [],
+                            'annotate_text': {'x': 0.04, 'y': 0.825, 's': '', 'color': 'black', 'fontsize': 7},
+                            'annotate_bbox': {'facecolor': 'gainsboro', 'edgecolor': 'lightgrey', 'pad': 5}},    
 
         'scatter': {'summary_pages':[], 'station_pages':[],'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 4},
                     'page_title': {'t': 'Scatter plots', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98},
@@ -50,7 +56,9 @@ def get_characteristics_per_plot_type(self):
                     'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0}, 
                     'subplots_adjust': {'top': 0.90, 'hspace': 0.40},
                     'bias': {'title': 'Timeseries bias'},
-                    'annotate': {'stats': ('r2', 'r'), 'position': 'top-left'}}
+                    'annotate_stats': ['r2', 'r'],
+                    'annotate_text': {'x': 0.04, 'y': 0.825, 's': '', 'color': 'black', 'fontsize': 7},
+                    'annotate_bbox': {'facecolor': 'gainsboro', 'edgecolor': 'lightgrey', 'pad': 5}}
     }
 
     return characteristics_per_plot_type
@@ -66,7 +74,10 @@ def get_characteristics_per_plot_type_templates(self):
                      'axis_ylabel': {'ylabel': '', 'fontsize': 8}, 'xticks': {'labelsize': 7},
                      'yticks': {'labelsize': 7},
                      'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0},
-                     'subplots_adjust': {'top': 0.85}},
+                     'subplots_adjust': {'top': 0.85},
+                     'annotate_stats': [],
+                     'annotate_text': {'x': 0.04, 'y': 0.825, 's': '', 'color': 'black', 'fontsize': 7},
+                     'annotate_bbox': {'facecolor': 'gainsboro', 'edgecolor': 'lightgrey', 'pad': 5}},
 
         'map': {'summary_pages':[], 'station_pages':[], 'figure': {'figsize': self.landscape_figsize, 'ncols': 4, 'nrows': 4,
                 'subplot_kw': {'projection': self.plotcrs}},
@@ -75,7 +86,6 @@ def get_characteristics_per_plot_type_templates(self):
                 'subplots_adjust': {'top': 0.85, 'hspace': 0.28, 'wspace': 0.28},
                 'cb': {'position': [0.5, 0.95, 0.4, 0.04]},
                 'cb_xlabel': {'xlabel': '', 'fontsize': 8}, 'cb_xticks': {'labelsize': 8}},
-    
     }
     
     return characteristics_per_plot_type_templates
