@@ -14,10 +14,11 @@
               
     "met":["map-Data %_obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"],
 
-    "new":["distribution", "distribution_individual", 
-           "scatter", "scatter_individual", "scatter_individual_annotate",
-           "periodic-violin", "periodic-violin_individual",
-           "timeseries", "timeseries_individual",
-           "periodic-p95", "periodic-p95_individual"]
+    "new":["timeseries_annotate", "timeseries_individual_annotate",
+           "distribution_annotate", "distribution_individual_annotate",
+           "periodic-p95_annotate", "periodic-p95_individual_annotate",
+           "periodic-violin_annotate", "periodic-violin_individual_annotate",
+           "scatter_annotate", "scatter_individual_annotate"
+           ]
         
 }
