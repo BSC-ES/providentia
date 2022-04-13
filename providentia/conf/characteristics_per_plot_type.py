@@ -10,8 +10,8 @@ def get_characteristics_per_plot_type(self):
                        'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 
                        'tightlayout': True, 'subplots_adjust': {'top': 0.90, 'bottom': 0.08}, 
                        'bias': {'title': 'Timeseries bias'},
-                       'annotate_stats': ['Mean', 'Min'],
-                       'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 7},
+                       'annotate_stats': ['Mean', 'StdDev', 'r2', 'RMSE', 'MB'],
+                       'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 7, 'n_stations': True},
                        'annotate_bbox': {'facecolor': 'white', 'edgecolor': 'gainsboro', 'alpha': 1}},
         
         'distribution': {'summary_pages':[], 'station_pages':[], 'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 4},
@@ -23,8 +23,8 @@ def get_characteristics_per_plot_type(self):
                          'yticks': {'labelsize': 7}, 'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0},
                          'tightlayout': True, 'subplots_adjust': {'top': 0.90},
                          'bias': {'title': 'Distributional bias'},
-                         'annotate_stats': ['Max', 'Min'],
-                         'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 7},
+                         'annotate_stats': ['Min', 'Max'],
+                         'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 7, 'n_stations': False},
                          'annotate_bbox': {'facecolor': 'white', 'edgecolor': 'gainsboro', 'alpha': 1}},
 
         'heatmap': {'summary_pages':[], 'station_pages':[], 'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 1},
@@ -43,8 +43,8 @@ def get_characteristics_per_plot_type(self):
                             'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0},
                             'subplots_adjust': {'top': 0.80, 'hspace': 0.30},
                             'bias': {'title': 'Periodic violin bias'},
-                            'annotate_stats': ['Max', 'Min'],
-                            'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 7},
+                            'annotate_stats': ['Min', 'Max'],
+                            'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 7, 'n_stations': False},
                             'annotate_bbox': {'facecolor': 'white', 'edgecolor': 'gainsboro', 'alpha': 1}},    
 
         'scatter': {'summary_pages':[], 'station_pages':[],'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 4},
@@ -58,7 +58,7 @@ def get_characteristics_per_plot_type(self):
                     'subplots_adjust': {'top': 0.90, 'hspace': 0.40},
                     'bias': {'title': 'Scatter plot bias'},
                     'annotate_stats': ['r2', 'RMSE'],
-                    'annotate_text': {'s': '', 'loc': 'upper left', 'fontsize': 7},
+                    'annotate_text': {'s': '', 'loc': 'upper left', 'fontsize': 7, 'n_stations': False},
                     'annotate_bbox': {'facecolor': 'white', 'edgecolor': 'gainsboro', 'alpha': 1}}
     }
 
@@ -76,8 +76,8 @@ def get_characteristics_per_plot_type_templates(self):
                      'yticks': {'labelsize': 7},
                      'legend': {'loc': 'upper right', 'ncol': 4, 'fontsize': 8.0},
                      'subplots_adjust': {'top': 0.85},
-                     'annotate_stats': ['Max', 'Min'],
-                     'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 7},
+                     'annotate_stats': ['Min', 'Max'],
+                     'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 7, 'n_stations': False},
                      'annotate_bbox': {'facecolor': 'white', 'edgecolor': 'gainsboro', 'alpha': 1}},
 
         'map': {'summary_pages':[], 'station_pages':[], 'figure': {'figsize': self.landscape_figsize, 'ncols': 4, 'nrows': 4,
