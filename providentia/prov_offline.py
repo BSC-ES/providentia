@@ -13,6 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.patches as patches
+from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 from matplotlib.lines import Line2D
 from matplotlib.backends.backend_pdf import PdfPages
 from providentia import aux
@@ -176,13 +177,21 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         self.characteristics_per_plot_type[plot_type]['page_title']['t'] = page_title
 
             # add new keys to make individual plots
-            if '_individual' in plot_type:
+            elif '_individual' in plot_type:
                 if ('periodic-violin' in plot_type) or ('timeseries' in plot_type) or ('distribution' in plot_type) or ('scatter' in plot_type):
                     self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
                 elif 'periodic-' in plot_type and 'violin' not in plot_type:
                     continue
                 else:
                     print(f'It is not possible to create the individual plot {plot_type}.')
+                    plot_types_to_remove.append(plot_type)
+
+            # add new keys to make plots with annotations
+            elif '_annotate' in plot_type:
+                if 'map-' not in plot_type:
+                    self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
+                else:
+                    print('It is not possible to add annotations to maps and heatmaps.')
                     plot_types_to_remove.append(plot_type)
 
         self.plots_per_report_type[self.report_type] = [plot_type for plot_type in self.plots_per_report_type[self.report_type] if plot_type not in plot_types_to_remove]
@@ -346,7 +355,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         page.text(0.5, 0.82, txt, transform=page.transFigure,
                   weight='light', size=15, ha="center", va='top', wrap=True)
 
-        self.pdf.savefig(page, dpi=self.dpi)
+        self.pdf.savefig(page, dpi=self.dpi, backend='pgf')
         plt.close(page)
 
     def setup_plot_framework(self):
@@ -372,8 +381,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     plot_types_to_remove.append(plot_type) 
                 elif '-' in plot_type:
                     #get zstat 
-                    if '_individual':
+                    if '_individual' in plot_type:
                         zstat = plot_type.split('-')[1].split('_individual')[0]
+                    elif '_annotate':
+                        zstat = plot_type.split('-')[1].split('_annotate')[0]
                     else:
                         zstat = plot_type.split('-')[1]
                     # get zstat type (basic or expbias) and sign (absolute or bias)
@@ -410,8 +421,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 plot_characteristics['page_title']['t'] = '{} (Per Station)'.format(plot_characteristics['page_title']['t']) 
 
             if '-' in plot_type:
-                if '_individual':
+                if '_individual' in plot_type:
                     zstat = plot_type.split('-')[1].split('_individual')[0]
+                elif '_annotate':
+                    zstat = plot_type.split('-')[1].split('_annotate')[0]
                 else:
                     zstat = plot_type.split('-')[1]
                 # get zstat type (basic or expbias) and sign (absolute or bias)
@@ -869,27 +882,55 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
     def make_annotation(self, relevant_axis, data_label, plot_type):
         """Function to add annotation in plot showing the stats"""
         
-        stats_to_annotate = self.characteristics_per_plot_type[plot_type]['annotate_stats']
+        data_label_annotate = data_label.split('_colocated')[0]
+        stats = self.characteristics_per_plot_type[plot_type]['annotate_stats']
 
-        if '_annotate' in plot_type and stats_to_annotate:
-        
-            # create text to add
-            str_to_annotate = []
+        if '_annotate' in plot_type and stats:
+            # reset string in box only if plots are aggregated
+            if '_individual' not in plot_type:
+                if len(list(self.datareader.data_in_memory.keys())) == 2:
+                    self.str_to_annotate = []
+                    self.colors = []
+                else:
+                    # for more than one experiment, initialize str only once, at first iteration
+                    if ((data_label_annotate == list(self.datareader.data_in_memory.keys())[0]) or
+                        ('scatter' in plot_type and data_label_annotate == list(self.datareader.data_in_memory.keys())[1])):
+                        self.str_to_annotate = []
+                        self.colors = []
+            else:
+                self.str_to_annotate = []
+                self.colors = []
+
+            # get stats
             self.stats_dict = {**self.basic_stats_dict, **self.expbias_dict}
-            for stat in stats_to_annotate:               
+            stats_annotate = []
+            for stat in stats:
                 if stat in self.stats_dict:
-                    str_to_annotate.append(stat + ': ' + str(round(self.selected_station_data[data_label]['all'][stat][0], 2)))
+                    stats_annotate.append(stat + ': ' + str(round(self.selected_station_data[data_label]['all'][stat][0], 2)))
                 else:
                     print(f'Warning: {stat} could not be annotated on {plot_type}.')
-                    stats_to_annotate.remove(stat)
-            self.characteristics_per_plot_type[plot_type]['annotate_text']['s'] = '\n'.join(str_to_annotate)
+                    stats.remove(stat)
+            
+            # get colors
+            self.colors.append(self.datareader.plotting_params[data_label]['colour'])
 
-            # create annotation on plot
-            relevant_axis.text(**self.characteristics_per_plot_type[plot_type]['annotate_text'], 
-                                transform=relevant_axis.transAxes, 
-                                bbox=self.characteristics_per_plot_type[plot_type]['annotate_bbox'])
+            # generate annotation
+            self.str_to_annotate.append(data_label_annotate + ' (' + (', ').join(stats_annotate) + ')')
 
-        elif '_annotate' in plot_type and not stats_to_annotate:
+            # add annotation to plot
+            # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
+            if (('_individual' in plot_type) or 
+                ('_individual' not in plot_type and data_label_annotate == list(self.datareader.data_in_memory.keys())[-1])):
+                
+                lines = [TextArea(line, textprops=dict(color=color, size=self.characteristics_per_plot_type[plot_type]['annotate_text']['fontsize'])) 
+                                  for line, color in zip(self.str_to_annotate, self.colors)]
+                bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
+                                         loc=self.characteristics_per_plot_type[plot_type]['annotate_text']['loc'],
+                                         bbox_transform=relevant_axis.transAxes)
+                bbox.patch.set(**self.characteristics_per_plot_type[plot_type]['annotate_bbox']) 
+                relevant_axis.add_artist(bbox)
+
+        elif '_annotate' in plot_type and not stats_annotate:
             print(f'The annotation statistics have not been defined for {plot_type} in characteristics_per_plot_type.py')
 
     def make_plot(self, plotting_paradigm, plot_type, n_stations=0):
@@ -952,8 +993,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             for original_data_label in original_data_array_labels:
                 # get zstat for plot type (if exists)
                 if '-' in plot_type:
-                    if '_individual':
+                    if '_individual' in plot_type:
                         zstat = plot_type.split('-')[1].split('_individual')[0]
+                    elif '_annotate' in plot_type:
+                        zstat = plot_type.split('-')[1].split('_annotate')[0]
                     else:
                         zstat = plot_type.split('-')[1]
                     # get zstat type (basic or expbias) and sign (absolute or bias)
@@ -1352,7 +1395,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         tick_array = np.linspace(z_vmin, z_vmax, 5, endpoint=True)
 
         # plot colourbar
-        norm = matplotlib.colors.Normalize(vmin=z_vmin, vmax=z_vmax)
+        norm = matplotlib.self.colors.Normalize(vmin=z_vmin, vmax=z_vmax)
         for cb_ax in cb_axs:
             cb = matplotlib.colorbar.ColorbarBase(cb_ax, cmap=axs[0].collections[0].get_cmap(),
                                                   norm=norm, orientation='horizontal',ticks=tick_array)
@@ -1429,10 +1472,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # turn on all axes that will be plotted on, and add yaxis grid to each axis, and change axis label tick sizes
         for temporal_aggregation_resolution in list(aggregation_dict.keys()):
-            # turn on axis
-            #aggregation_dict[temporal_aggregation_resolution]['ax'].axis('on')
             # add yaxis grid
-            aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.grid(color='lightgrey',alpha=0.8)
+            aggregation_dict[temporal_aggregation_resolution]['ax'].set_axisbelow(True)
+            aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.grid(color='lightgrey', alpha=0.8, zorder=0)
             # add axis aggregation resolution label
             aggregation_dict[temporal_aggregation_resolution]['ax'].annotate(
                 aggregation_dict[temporal_aggregation_resolution]['title'], (0, 1),
@@ -1494,11 +1536,35 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     # get plotted object per data array
                     violin_plot = aggregation_dict[temporal_aggregation_resolution]['plots'][data_label]
 
-                    # update plotted objects with necessary colour, zorder and alpha
+                    # get xticks (all valid aggregated time indexes) and medians to plot
+                    xticks = aggregation_dict[temporal_aggregation_resolution]['xticks']
+                    medians = self.selected_station_data[data_label][temporal_aggregation_resolution]['p50']
+                    # split arrays if there are any temporal gaps to avoid
+                    # line drawn being interpolated across missing values
+                    inds_to_split = np.where(np.diff(xticks) > 1)[0]
+                    if len(inds_to_split) == 0:
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
+                            xticks, medians, marker='o',
+                            color=self.datareader.plotting_params[data_label]['colour'],
+                            markersize=self.temp_agg_markersize, linewidth=0.5)
+                    else:
+                        inds_to_split += 1
+                        start_ind = 0
+                        for end_ind in inds_to_split:
+                            aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
+                                xticks[start_ind:end_ind], medians[start_ind:end_ind],
+                                marker='o', color=self.datareader.plotting_params[data_label]['colour'],
+                                markersize=self.temp_agg_markersize, linewidth=0.5)
+                            start_ind = end_ind
+                        aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
+                            xticks[start_ind:], medians[start_ind:], marker='o',
+                            color=self.datareader.plotting_params[data_label]['colour'],
+                            markersize=self.temp_agg_markersize, linewidth=0.5)
+
+                    # update plotted objects with necessary colour and alpha
                     for patch in violin_plot['bodies']:
                         
                         patch.set_facecolor(self.datareader.plotting_params[data_label]['colour'])
-                        patch.set_zorder(self.datareader.plotting_params[data_label]['zorder'])
                         if data_label.split('_')[0] == 'observations':
                             patch.set_alpha(0.7)
                         else:
@@ -1515,39 +1581,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             else:
                                 patch.get_paths()[0].vertices[:, 0] = np.clip(
                                     patch.get_paths()[0].vertices[:, 0], m, np.inf)
-
-                    # overplot time series of medians over boxes in necessary color
-
-                    # generate zorder to overplot medians in same order as violin plots are ordered, but on top of them
-                    median_zorder = (self.datareader.plotting_params['observations']['zorder']+len(
-                        list(aggregation_dict[temporal_aggregation_resolution]['plots'].keys())) - 1) + \
-                                    self.datareader.plotting_params[data_label]['zorder']
-
-                    # get xticks (all valid aggregated time indexes) and medians to plot
-                    xticks = aggregation_dict[temporal_aggregation_resolution]['xticks']
-                    medians = self.selected_station_data[data_label][temporal_aggregation_resolution]['p50']
-                    # split arrays if there are any temporal gaps to avoid
-                    # line drawn being interpolated across missing values
-                    inds_to_split = np.where(np.diff(xticks) > 1)[0]
-                    if len(inds_to_split) == 0:
-                        aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
-                            xticks, medians, marker='o',
-                            color=self.datareader.plotting_params[data_label]['colour'],
-                            markersize=self.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
-                    else:
-                        inds_to_split += 1
-                        start_ind = 0
-                        for end_ind in inds_to_split:
-                            aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
-                                xticks[start_ind:end_ind], medians[start_ind:end_ind],
-                                marker='o', color=self.datareader.plotting_params[data_label]['colour'],
-                                markersize=self.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
-                            start_ind = end_ind
-                        aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
-                            xticks[start_ind:], medians[start_ind:], marker='o',
-                            color=self.datareader.plotting_params[data_label]['colour'],
-                            markersize=self.temp_agg_markersize, linewidth=0.5, zorder=median_zorder)
-
+         
                     # plot title (with units)
                     # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
                     if 'hourly' in self.selected_resolution:
@@ -1568,12 +1602,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     #aggregation_dict[temporal_aggregation_resolution]['plots'][data_label] = \
                     aggregation_dict[temporal_aggregation_resolution]['ax'].plot(
                         aggregation_dict[temporal_aggregation_resolution]['xticks'],
-                        self.selected_station_data[data_label][temporal_aggregation_resolution]
-                        [zstat],
+                        self.selected_station_data[data_label][temporal_aggregation_resolution][zstat],
                         color=self.datareader.plotting_params[data_label]['colour'],
-                        marker='o', zorder=self.datareader.plotting_params[data_label]['zorder'],
+                        marker='o',
                         markersize=self.temp_agg_expbias_markersize, linewidth=0.5)
-
                     # set x axis limits
                     aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(
                         np.min(aggregation_dict[temporal_aggregation_resolution]['xticks'])-0.5,
@@ -1613,8 +1645,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         relevant_axis.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
                            color=self.datareader.plotting_params[data_label]['colour'],
                            marker='o', markeredgecolor=None, mew=0,
-                           markersize=self.time_series_markersize, linestyle='None',
-                           zorder=self.datareader.plotting_params[data_label]['zorder'])
+                           markersize=self.time_series_markersize, linestyle='None')
+
         # plot trend line?
         if 'trend' in self.characteristics_per_plot_type['timeseries'].keys():
             relevant_axis.plot(self.selected_station_data[data_label]['pandas_df'].rolling(self.characteristics_per_plot_type['timeseries']['trend']['n_points'], min_periods=self.characteristics_per_plot_type['timeseries']['trend']['min_points']).mean().dropna(),
@@ -1718,9 +1750,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # Create scatter plot
         relevant_axis.plot(observations_data, experiment_data, linestyle = 'None',
-                           marker = self.characteristics_per_plot_type['scatter']['markers']['character'],
-                           markersize = self.characteristics_per_plot_type['scatter']['markers']['size'],
-                           color = self.datareader.plotting_params[data_label]['colour'])
+                           marker=self.characteristics_per_plot_type['scatter']['markers']['character'],
+                           markersize=self.characteristics_per_plot_type['scatter']['markers']['size'],
+                           color=self.datareader.plotting_params[data_label]['colour'])
         
         # Set ticks
         relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['scatter']['xticks']['labelsize'])
@@ -1731,7 +1763,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                  fontsize=self.characteristics_per_plot_type['scatter']['axis_xlabel']['fontsize'])
         relevant_axis.set_ylabel(ylabel=self.characteristics_per_plot_type['scatter']['axis_ylabel']['ylabel'], 
                                  fontsize=self.characteristics_per_plot_type['scatter']['axis_ylabel']['fontsize'])
-            
+        
+        # Add line 1:1
+        line = Line2D([0, 1], [0, 1], color='lightgrey', linewidth=1, linestyle='--')
+        line.set_transform(relevant_axis.transAxes)
+        relevant_axis.add_line(line)
+
 def get_z_statistic_type(stats_dict, zstat):
     """Function that checks if the z statistic is basic or expbias statistic"""
     # check if the chosen statistic is a basic statistic
