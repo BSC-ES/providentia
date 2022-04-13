@@ -902,26 +902,26 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 self.colors = []
 
             # get stats
-            self.stats_dict = {**self.basic_stats_dict, **self.expbias_dict}
             stats_annotate = []
             for stat in stats:
-                if stat in self.stats_dict:
+                if stat in list(self.selected_station_data[data_label]['all']):
                     stats_annotate.append(stat + ': ' + str(round(self.selected_station_data[data_label]['all'][stat][0], 2)))
-                else:
-                    print(f'Warning: {stat} could not be annotated on {plot_type}.')
-                    stats.remove(stat)
-            
+
+            # show number of stations if defined
+            if self.characteristics_per_plot_type[plot_type]['annotate_text']['n_stations'] == True and not self.str_to_annotate:
+                self.colors.append('black')
+                self.str_to_annotate.append('Stations: ' + str(len(self.datareader.plotting_params['observations']['valid_station_inds'])))
+
             # get colors
             self.colors.append(self.datareader.plotting_params[data_label]['colour'])
 
             # generate annotation
-            self.str_to_annotate.append(data_label_annotate + ' (' + (', ').join(stats_annotate) + ')')
+            self.str_to_annotate.append(', '.join(stats_annotate))
 
             # add annotation to plot
             # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
             if (('_individual' in plot_type) or 
                 ('_individual' not in plot_type and data_label_annotate == list(self.datareader.data_in_memory.keys())[-1])):
-                
                 lines = [TextArea(line, textprops=dict(color=color, size=self.characteristics_per_plot_type[plot_type]['annotate_text']['fontsize'])) 
                                   for line, color in zip(self.str_to_annotate, self.colors)]
                 bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
