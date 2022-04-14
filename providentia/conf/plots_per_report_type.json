@@ -14,11 +14,19 @@
               
     "met":["map-Data %_obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"],
 
-    "new":["timeseries_annotate", "timeseries_individual_annotate",
-           "distribution_annotate", "distribution_individual_annotate",
-           "periodic-p95_annotate", "periodic-p95_individual_annotate",
-           "periodic-violin_annotate", "periodic-violin_individual_annotate",
-           "scatter_annotate", "scatter_individual_annotate"
+    "new":["timeseries", "timeseries_obs", "timeseries_annotate", "timeseries_individual", "timeseries_individual_annotate", 
+           "distribution", "distribution_obs", "distribution_annotate", "distribution_individual", "distribution_individual_annotate", 
+           "distribution_bias", "distribution_bias_obs", "distribution_bias_annotate", "distribution_bias_individual", "distribution_bias_individual_annotate",
+           "periodic-p95", "periodic-p95_obs", "periodic-p95_annotate",  "periodic-p95_individual", "periodic-p95_individual_annotate",
+           "periodic-p95_bias", "periodic-p95_bias_obs", "periodic-p95_bias_annotate",  "periodic-p95_bias_individual", "periodic-p95_bias_individual_annotate",
+           "periodic-r2", "periodic-r2_obs", "periodic-r2_annotate",  "periodic-r2_individual", "periodic-r2_individual_annotate",
+           "periodic-violin", "periodic-violin_obs", "periodic-violin_annotate", "periodic-violin_individual", "periodic-violin_individual_annotate",
+           "scatter", "scatter_obs", "scatter_annotate", "scatter_individual", "scatter_individual_annotate",
+           "map-p95", "map-p95_obs", "map-p95_annotate",
+           "map-p95_bias", "map-p95_bias_annotate",
+           "map-r2", "map-r2_annotate",
+           "map-r2_bias", "map-r2_bias_annotate",
+           "heatmap-p95-r2"
            ]
         
 }
