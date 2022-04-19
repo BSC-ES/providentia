@@ -214,7 +214,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 if not any(invalid_plot in plot_type for invalid_plot in ('heatmap', 'scatter', '_bias')):
                     self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
                 else:
-                    # it is not possible to show only observational data in heatmaps, scatter plots, bias plots and periodic plots with experiment biases
+                    # it is not possible to show only observational data in heatmaps, scatter plots, bias plots and plots with exp stats
                     print(f'Warning: {plot_type} could not be created.')
                     plot_types_to_remove.append(plot_type)
 
@@ -409,12 +409,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     plot_types_to_remove.append(plot_type) 
                 # get zstat
                 elif '-' in plot_type:
-                    if '_individual' in plot_type:
-                        zstat = plot_type.split('_individual')[0].split('-')[1]
-                    elif '_annotate' in plot_type:
-                        zstat = plot_type.split('_annotate')[0].split('-')[1]
-                    elif '_obs' in plot_type:
-                        zstat = plot_type.split('_obs')[0].split('-')[1]
+                    if ('_individual' in plot_type) or ('_annotate' in plot_type) or ('_obs' in plot_type):
+                        if '_bias' not in plot_type:
+                            zstat = plot_type.split('_')[0].split('-')[1]
+                        else:
+                            zstat = plot_type.split('_')[0].split('-')[1] + '_bias'
                     else:
                         zstat = plot_type.split('-')[1]
                     # get zstat type (basic or expbias) and sign (absolute or bias)
@@ -455,12 +454,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     plot_characteristics['bias_title']['t'] = '{} (Summary)'.format(plot_characteristics['bias_title']['t']) 
             # get zstat
             if '-' in plot_type:
-                if '_individual' in plot_type:
-                    zstat = plot_type.split('_individual')[0].split('-')[1]
-                elif '_annotate' in plot_type:
-                    zstat = plot_type.split('_annotate')[0].split('-')[1]
-                elif '_obs' in plot_type:
-                    zstat = plot_type.split('_obs')[0].split('-')[1]
+                if ('_individual' in plot_type) or ('_annotate' in plot_type) or ('_obs' in plot_type):
+                    if '_bias' not in plot_type:
+                        zstat = plot_type.split('_')[0].split('-')[1]
+                    else:
+                        zstat = plot_type.split('_')[0].split('-')[1] + '_bias'
                 else:
                     zstat = plot_type.split('-')[1]
                 # get zstat type (basic or expbias) and sign (absolute or bias)
@@ -1043,12 +1041,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                 # get zstat
                 if '-' in plot_type:
-                    if '_individual' in plot_type:
-                        zstat = plot_type.split('_individual')[0].split('-')[1]
-                    elif '_annotate' in plot_type:
-                        zstat = plot_type.split('_annotate')[0].split('-')[1]
-                    elif '_obs' in plot_type:
-                        zstat = plot_type.split('_obs')[0].split('-')[1]
+                    if ('_individual' in plot_type) or ('_annotate' in plot_type) or ('_obs' in plot_type):
+                        if '_bias' not in plot_type:
+                            zstat = plot_type.split('_')[0].split('-')[1]
+                        else:
+                            zstat = plot_type.split('_')[0].split('-')[1] + '_bias'
                     else:
                         zstat = plot_type.split('-')[1]
                     # get zstat type (basic or expbias) and sign (absolute or bias)
@@ -1061,8 +1058,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 if plot_type[:4] == 'map-':
                     # get necessary data arrays
                     if '_obs' in plot_type:
-                        if original_data_label != 'observations':
-                            continue
                         if self.temporal_colocation:
                             z1 = 'observations_colocatedto_experiments'
                         else:
@@ -1460,12 +1455,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         #get zstat 
         if '-' in plot_type:
-            if '_individual' in plot_type:
-                zstat = plot_type.split('_individual')[0].split('-')[1]
-            elif '_annotate' in plot_type:
-                zstat = plot_type.split('_annotate')[0].split('-')[1]
-            elif '_obs' in plot_type:
-                zstat = plot_type.split('_obs')[0].split('-')[1]
+            if ('_individual' in plot_type) or ('_annotate' in plot_type) or ('_obs' in plot_type):
+                if '_bias' not in plot_type:
+                    zstat = plot_type.split('_')[0].split('-')[1]
+                else:
+                    zstat = plot_type.split('_')[0].split('-')[1] + '_bias'
             else:
                 zstat = plot_type.split('-')[1]
         else:
