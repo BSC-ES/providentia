@@ -304,30 +304,29 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 if self.summary_plots:
                     # get median timeseries across data from filtered data, and place it pandas dataframe
                     self.to_pandas_dataframe()
-                    if self.selected_station_data:
-                        #iterate through plots and make each one for subset group
-                        for plot_type in self.summary_plots_to_make:
-                            self.make_plot('summary', plot_type, n_stations)
-                        #generate colourbars for map plots 
-                        relevant_axs = []
-                        cb_axs = []
-                        previous_plot_type = ''
-                        for figure_n in self.plot_dictionary.keys():
-                            plot_type = self.plot_dictionary[figure_n]['plot_type']
-                            if (previous_plot_type != plot_type) & (len(relevant_axs) > 0):
-                                self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
-                                relevant_axs = []
-                                cb_axs = []
-                            if 'cb' in list(self.characteristics_per_plot_type[plot_type].keys()):
-                                relevant_axs.extend(self.plot_dictionary[figure_n]['axs'])
-                                cb_axs.append(self.plot_dictionary[figure_n]['cb_ax'])
-                            previous_plot_type = copy.deepcopy(plot_type)
-                        if len(relevant_axs) > 0:
+                    #iterate through plots and make each one for subset group
+                    for plot_type in self.summary_plots_to_make:
+                        self.make_plot('summary', plot_type, n_stations)
+                    #generate colourbars for map plots 
+                    relevant_axs = []
+                    cb_axs = []
+                    previous_plot_type = ''
+                    for figure_n in self.plot_dictionary.keys():
+                        plot_type = self.plot_dictionary[figure_n]['plot_type']
+                        if (previous_plot_type != plot_type) & (len(relevant_axs) > 0):
                             self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
-                        #harmonise xy limits (not for timeseries, map, or heatmap plot types)
-                        for plot_type in self.summary_plots_to_make:
-                            if ('timeseries' not in plot_type) & ('map-' not in plot_type):
-                                self.harmonise_xy_lims(plot_type)
+                            relevant_axs = []
+                            cb_axs = []
+                        if 'cb' in list(self.characteristics_per_plot_type[plot_type].keys()):
+                            relevant_axs.extend(self.plot_dictionary[figure_n]['axs'])
+                            cb_axs.append(self.plot_dictionary[figure_n]['cb_ax'])
+                        previous_plot_type = copy.deepcopy(plot_type)
+                    if len(relevant_axs) > 0:
+                        self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
+                    #harmonise xy limits (not for timeseries, map, or heatmap plot types)
+                    for plot_type in self.summary_plots_to_make:
+                        if ('timeseries' not in plot_type) & ('map-' not in plot_type):
+                            self.harmonise_xy_lims(plot_type)
 
                 # make station specific plots?
                 if self.station_plots:
@@ -342,10 +341,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         self.current_lat = round(self.datareader.metadata_in_memory['latitude'][actual_station_ind, :][0], 2)
                         #put station data in pandas dataframe
                         self.to_pandas_dataframe(station_index=actual_station_ind)
-                        if self.selected_station_data:
-                            #iterate through plots and make each one for subset group
-                            for plot_type in self.station_plots_to_make:
-                                self.make_plot('station', plot_type, n_stations)
+                        #iterate through plots and make each one for subset group
+                        for plot_type in self.station_plots_to_make:
+                            self.make_plot('station', plot_type, n_stations)
 
             # save page figures
             print('WRITING PDF')
@@ -953,7 +951,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # show number of stations if defined
             if self.characteristics_per_plot_type[plot_type]['annotate_text']['n_stations'] == True and not self.str_to_annotate:
                 self.colors.append('black')
-                self.str_to_annotate.append('Stations: ' + str(len(self.datareader.plotting_params['observations']['valid_station_inds'])))
+                if '_individual' in plot_type:
+                    self.str_to_annotate.append('Stations: 1')
+                else:
+                    self.str_to_annotate.append('Stations: ' + str(len(self.datareader.plotting_params['observations']['valid_station_inds'])))
 
             # get colors
             self.colors.append(self.datareader.plotting_params[data_label]['colour'])
@@ -1017,13 +1018,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             if self.station_subset_ind == (len(self.station_subset_names) - 1):
                 for heatmap_type_ii, heatmap_type in enumerate(heatmap_types):
                     relevant_axis = self.get_relevant_axis(plotting_paradigm, 'heatmap', heatmap_type_ii)
-                    axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type['heatmap']['axis_title'])
-                    axis_title_characteristics['label'] = heatmap_type
-                    relevant_axis.set_title(**axis_title_characteristics)
-                    if self.heatmap_dict:
-                        heatmap_df = pd.DataFrame(data=self.heatmap_dict[heatmap_type],
-                                                  index=self.station_subset_names)
-                        self.make_heatmap(relevant_axis, heatmap_type, heatmap_df)
+                    # make heatmap if there are data
+                    if not self.selected_station_data:
+                        relevant_axis.set_visible(False)
+                    else:
+                        axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type['heatmap']['axis_title'])
+                        axis_title_characteristics['label'] = heatmap_type
+                        relevant_axis.set_title(**axis_title_characteristics)
+                        if self.heatmap_dict:
+                            heatmap_df = pd.DataFrame(data=self.heatmap_dict[heatmap_type],
+                                                    index=self.station_subset_names)
+                            self.make_heatmap(relevant_axis, heatmap_type, heatmap_df)
 
         # other plot type?
         else:
@@ -1101,19 +1106,23 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, (current_plot_ind * len(
                         self.station_subset_names)) + self.station_subset_ind)
                     
-                    # make map plot
-                    n_stations = self.make_map(relevant_axis, z1, z2, zstat)
-                    
-                    # set axis title
-                    axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
-                    if plot_type == 'map-Data %_obs':
-                        axis_title_characteristics['label'] = '{} {}\n({} Stations)'.format(original_data_label, self.station_subset, n_stations)
+                    # make map if there are data
+                    if not self.selected_station_data:
+                        relevant_axis.set_visible(False)
                     else:
-                        axis_title_characteristics['label'] = '{}\n{}'.format(original_data_label, self.station_subset)
-                    relevant_axis.set_title(**axis_title_characteristics)
+                        # make map plot
+                        n_stations = self.make_map(relevant_axis, z1, z2, zstat)
+                        
+                        # set axis title
+                        axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
+                        if plot_type == 'map-Data %_obs':
+                            axis_title_characteristics['label'] = '{} {}\n({} Stations)'.format(original_data_label, self.station_subset, n_stations)
+                        else:
+                            axis_title_characteristics['label'] = '{}\n{}'.format(original_data_label, self.station_subset)
+                        relevant_axis.set_title(**axis_title_characteristics)
 
-                    # add annotation
-                    self.make_annotation(relevant_axis, data_label, plot_type, base_zstat)
+                        # add annotation
+                        self.make_annotation(relevant_axis, data_label, plot_type, base_zstat)
 
                 # other plots (1 plot per subset with multiple data arrays for summary paradigm, 1 plot per subset per station for station paradigm)
                 else:
@@ -1158,67 +1167,71 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         else:
                             relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, self.station_ind)
 
-                    # Periodic plots
-                    if 'periodic-' in plot_type:
-                        if 'violin' in plot_type:
-                            self.make_periodic(relevant_axis, data_label, plot_type, zstat = None)
+                    # make plot if there are data
+                    if not self.selected_station_data:
+                        relevant_axis.set_visible(False)
+                    else:
+                        # Periodic plots
+                        if 'periodic-' in plot_type:
+                            if 'violin' in plot_type:
+                                self.make_periodic(relevant_axis, data_label, plot_type, zstat = None)
+                            else:
+                                # skip observational array if plotting bias stat
+                                if (z_statistic_sign == 'bias') & (original_data_label == 'observations'):
+                                    continue
+                                func = getattr(self, 'make_periodic')
+                                if data_label in list(self.selected_station_data.keys()):
+                                    if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
+                                        func(relevant_axis, data_label, plot_type, zstat)
+                                        
+                            # set axis title
+                            axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
+                            if plotting_paradigm == 'summary':
+                                axis_title_characteristics['label'] = self.station_subset
+                            elif plotting_paradigm == 'station':
+                                axis_title_characteristics['label'] = '{}, {} ({}, {})'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
+                            relevant_axis['hour'].set_title(**axis_title_characteristics, y = 1.15)
+
+                            # add annotation
+                            self.make_annotation(relevant_axis['hour'], data_label, plot_type, base_zstat)
+
+                        # Other plot types (distribution, timeseries etc.)
                         else:
+                            # determine if plotting bias stat
+                            bias_stat = False
+                            if '_bias' in plot_type:
+                                bias_stat = True
+
                             # skip observational array if plotting bias stat
-                            if (z_statistic_sign == 'bias') & (original_data_label == 'observations'):
+                            if bias_stat and (original_data_label == 'observations'):
                                 continue
-                            func = getattr(self, 'make_periodic')
+
+                            # do not make (scatter) plot when the data label corresponds to the observations
+                            if ('scatter' in plot_type) and (original_data_label == 'observations'):
+                                continue
+                            # get plot type
+                            else:
+                                func = getattr(self, 'make_{}'.format(plot_type.split('_')[0]))
+                                
                             if data_label in list(self.selected_station_data.keys()):
                                 if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
-                                    func(relevant_axis, data_label, plot_type, zstat)
-                                    
-                        # set axis title
-                        axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
-                        if plotting_paradigm == 'summary':
-                            axis_title_characteristics['label'] = self.station_subset
-                        elif plotting_paradigm == 'station':
-                            axis_title_characteristics['label'] = '{}, {}, ({}, {})'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
-                        relevant_axis['hour'].set_title(**axis_title_characteristics, y = 1.15)
+                                    # make standard plot, without bias
+                                    if bias_stat:
+                                        func(relevant_axis, data_label, bias=True)
+                                    # make plot without bias
+                                    else:
+                                        func(relevant_axis, data_label)                           
 
-                        # add annotation
-                        self.make_annotation(relevant_axis['hour'], data_label, plot_type, base_zstat)
+                            # set axis title
+                            axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
+                            if plotting_paradigm == 'summary':
+                                axis_title_characteristics['label'] = self.station_subset
+                            elif plotting_paradigm == 'station':
+                                axis_title_characteristics['label'] = '{}, {} ({}, {})'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
+                            relevant_axis.set_title(**axis_title_characteristics)
 
-                    # Other plot types (distribution, timeseries etc.)
-                    else:
-                        # determine if plotting bias stat
-                        bias_stat = False
-                        if '_bias' in plot_type:
-                            bias_stat = True
-
-                        # skip observational array if plotting bias stat
-                        if bias_stat and (original_data_label == 'observations'):
-                            continue
-
-                        # do not make (scatter) plot when the data label corresponds to the observations
-                        if ('scatter' in plot_type) and (original_data_label == 'observations'):
-                            continue
-                        # get plot type
-                        else:
-                            func = getattr(self, 'make_{}'.format(plot_type.split('_')[0]))
-                            
-                        if data_label in list(self.selected_station_data.keys()):
-                            if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
-                                # make standard plot, without bias
-                                if bias_stat:
-                                    func(relevant_axis, data_label, bias=True)
-                                # make plot without bias
-                                else:
-                                    func(relevant_axis, data_label)                           
-
-                        # set axis title
-                        axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
-                        if plotting_paradigm == 'summary':
-                            axis_title_characteristics['label'] = self.station_subset
-                        elif plotting_paradigm == 'station':
-                            axis_title_characteristics['label'] = '{}, {}, ({}, {})'.format(self.station_subset, self.current_station_name, self.current_lon, self.current_lat)
-                        relevant_axis.set_title(**axis_title_characteristics)
-
-                        # add annotation
-                        self.make_annotation(relevant_axis, data_label, plot_type, base_zstat)
+                            # add annotation
+                            self.make_annotation(relevant_axis, data_label, plot_type, base_zstat)
 
                 # iterate number of plots have made for current type of plot
                 current_plot_ind += + 1
