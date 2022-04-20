@@ -1550,7 +1550,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         dayofweek_aggregation_dict = {
             'ax': relevant_axis['dayofweek'], 'title': 'DoW', 'xticks': np.arange(7, dtype=np.int), 'plots': {}}
         month_aggregation_dict = {
-            'ax': relevant_axis['month'], 'title': 'M',   'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
+            'ax': relevant_axis['month'], 'title': 'M', 'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
 
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
         if 'hourly' in self.selected_resolution:
@@ -1579,11 +1579,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 
                 if temporal_aggregation_resolution != 'all':
 
-                    # create arrays for storing all calculated aggregated p5 and p95
-                    # (across all data arrays) for later limiting ylim
-                    all_p5 = []
-                    all_p95 = []
-
                     # if colocation is active, for plotting observational aggregated data,
                     # use the 'observations_colocatedto_experiments' array
                     if self.temporal_colocation:
@@ -1603,16 +1598,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     aggregation_dict[temporal_aggregation_resolution]['plots'][data_label] = \
                         aggregation_dict[temporal_aggregation_resolution]['ax'].violinplot(grouped_data, positions=self.selected_station_data[data_label][temporal_aggregation_resolution]['valid_xticks'], points=100, widths=0.85, showmeans=False, showmedians=False, showextrema=False)
 
-                    # append aggregated p5/p95 for data array, to all_p5/all_p95 arrays
-                    all_p5 = np.append(
-                        all_p5, self.selected_station_data[data_label][temporal_aggregation_resolution]['p5'])
-                    all_p95 = np.append(
-                        all_p95, self.selected_station_data[data_label][temporal_aggregation_resolution]['p95'])
-
                     # set x axis limits
                     aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(np.min(aggregation_dict[temporal_aggregation_resolution]['xticks'])-0.5, np.max(aggregation_dict[temporal_aggregation_resolution]['xticks'])+0.5)
-                    # set y axis limits (use minimum p5 and maximum p95 across aggregations, across all data arrays)
-                    aggregation_dict[temporal_aggregation_resolution]['ax'].set_ylim(np.nanmin(all_p5), np.nanmax(all_p95))
                     # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
                     if temporal_aggregation_resolution == 'hour':
                         aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticks(aggregation_dict[temporal_aggregation_resolution]['xticks'][::3])
@@ -1858,7 +1845,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                  fontsize=self.characteristics_per_plot_type['scatter']['axis_xlabel']['fontsize'])
         relevant_axis.set_ylabel(ylabel=self.characteristics_per_plot_type['scatter']['axis_ylabel']['ylabel'], 
                                  fontsize=self.characteristics_per_plot_type['scatter']['axis_ylabel']['fontsize'])
-        
+
         # Add line 1:1
         line = Line2D([0, 1], [0, 1], color='lightgrey', linewidth=1, linestyle='--')
         line.set_transform(relevant_axis.transAxes)
