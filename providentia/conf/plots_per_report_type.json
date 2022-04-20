@@ -27,5 +27,7 @@
             "map-r2", "map-r2_annotate",
             "map-r2_bias", "map-r2_bias_annotate",
             "heatmap-p95-r2"
-           ]
+           ],
+
+    "test2":["timeseries_annotate"]
 }
