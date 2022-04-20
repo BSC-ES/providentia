@@ -353,6 +353,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 plt.close(fig)
 
     def make_header(self):
+        
         # set tile
         page = plt.figure(figsize=self.portrait_figsize)
         if hasattr(self, 'report_title'):
@@ -391,15 +392,23 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         self.summary_plots_to_make = self.plots_per_report_type[self.report_type]
         self.station_plots_to_make = []
 
-        #for station specific plots, there can be no specific plots for map/heatmap
+        # initialize array with plots to be removed
+        plot_types_to_remove = []
+        
         for plot_type in self.summary_plots_to_make: 
+            
+            #for station specific plots, there can be no specific plots for map/heatmap
             if 'map-' not in plot_type:
                 self.station_plots_to_make.append(plot_type)
     
+            # do not create scatter plot if the temporal colocation is not active
+            if ('scatter' in plot_type) and (self.temporal_colocation == False):
+                plot_types_to_remove.append(plot_type)
+                print(f'Warning: {plot_type} could not be created.')
+
         #if no experiments are defined, remove all bias statistic plots and notify user of this
         if len(list(self.datareader.data_in_memory.keys())) == 1:
             print('*** WARNING!!! NO EXPERIMENTS DEFINED, SO NO BIAS PLOTS WILL BE MADE')
-            plot_types_to_remove = []
             for plot_type in self.summary_plots_to_make:
                 if 'heatmap-' in plot_type:
                     plot_types_to_remove.append(plot_type)
@@ -418,9 +427,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat) 
                     #if zstat sign is bias but have 0 models, remove plot
                     if z_statistic_sign == 'bias':
-                        plot_types_to_remove.append(plot_type)          
-            self.summary_plots_to_make = [plot_type for plot_type in self.summary_plots_to_make if plot_type not in plot_types_to_remove]
-            self.station_plots_to_make = [plot_type for plot_type in self.station_plots_to_make if plot_type not in plot_types_to_remove]
+                        plot_types_to_remove.append(plot_type)
+
+        self.summary_plots_to_make = [plot_type for plot_type in self.summary_plots_to_make if plot_type not in plot_types_to_remove]
+        self.station_plots_to_make = [plot_type for plot_type in self.station_plots_to_make if plot_type not in plot_types_to_remove]
 
         #initialise first page number to plot
         self.current_page_n = 1
@@ -433,7 +443,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             plots_to_make = self.summary_plots_to_make
         elif plotting_paradigm == 'station':
             plots_to_make = self.station_plots_to_make
-
+        
         # iterate through plot types to make
         for plot_type in plots_to_make:
 
@@ -450,6 +460,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 plot_characteristics['page_title']['t'] = '{} (Per Station)'.format(plot_characteristics['page_title']['t']) 
                 if 'bias_title' in list(plot_characteristics.keys()):
                     plot_characteristics['bias_title']['t'] = '{} (Summary)'.format(plot_characteristics['bias_title']['t']) 
+
             # get zstat
             if '-' in plot_type:
                 if ('_individual' in plot_type) or ('_annotate' in plot_type) or ('_obs' in plot_type):
@@ -475,11 +486,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # define number of plots per type
             n_plots_per_plot_type = False
-
             if 'heatmap-' in plot_type:
                 n_plots_per_plot_type = len(plot_type.split('-')) - 1
                 plot_type = 'heatmap'
-
             elif plot_type[:4] == 'map-':
                 if '_obs' in plot_type:
                     n_plots_per_plot_type = len(self.station_subset_names)
@@ -489,7 +498,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 else:
                     n_plots_per_plot_type = len(self.station_subset_names) * \
                                             len(list(self.datareader.data_in_memory.keys()))
-
             else:
                 if plotting_paradigm == 'summary':
                     if '_individual' in plot_type:
@@ -1206,7 +1214,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             if bias_stat and (original_data_label == 'observations'):
                                 continue
 
-                            # do not make (scatter) plot when the data label corresponds to the observations
+                            # do not make scatter plot when the data label corresponds to the observations
                             if ('scatter' in plot_type) and (original_data_label == 'observations'):
                                 continue
                             # get plot type

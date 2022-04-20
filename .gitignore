@@ -8,6 +8,5 @@ providentia.egg-info
 .coverage
 __pycache__
 data
-PROVIDENTIA_Report_Test.pdf
-PROVIDENTIA_Report_New.pdf
-PROVIDENTIA_Report_Old.pdf
+PROVIDENTIA_Report_Colocation.pdf
+PROVIDENTIA_Report_No_Colocation.pdf
