@@ -26,5 +26,5 @@
                "heatmap-p95"
               ],
 
-    "debug":["timeseries", "timeseries_individual", "distribution", "distribution_individual", "periodic-violin", "periodic-violin_individual"]
+    "debug":["scatter", "scatter_individual"]
 }
