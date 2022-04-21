@@ -47,7 +47,7 @@ def get_characteristics_per_plot_type(self):
                             'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 6, 'n_stations': False},
                             'annotate_bbox': {'facecolor': 'white', 'edgecolor': 'gainsboro', 'alpha': 1}},    
 
-        'scatter': {'summary_pages':[], 'station_pages':[],'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 4},
+        'scatter': {'summary_pages':[], 'station_pages':[],'figure': {'figsize': self.portrait_figsize, 'ncols': 2, 'nrows': 3},
                     'grid': {'axis': 'both', 'color': 'lightgrey', 'alpha': 0.8},
                     'page_title': {'t': 'Scatter plot', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98},
                     'axis_title': {'label': '', 'fontsize': 8}, 
@@ -59,7 +59,10 @@ def get_characteristics_per_plot_type(self):
                     'bias_title': {'t': 'Scatter plot bias', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98},
                     'annotate_stats': ['r2', 'RMSE'],
                     'annotate_text': {'s': '', 'loc': 'upper left', 'fontsize': 6, 'n_stations': False},
-                    'annotate_bbox': {'facecolor': 'white', 'edgecolor': 'gainsboro', 'alpha': 1}}
+                    'annotate_bbox': {'facecolor': 'white', 'edgecolor': 'gainsboro', 'alpha': 1}},
+
+        'table': {'summary_pages':[], 'station_pages':[], 'figure': {'figsize': self.landscape_figsize, 'ncols': 2, 'nrows': 1},
+                  'page_title': {'t': 'Statistical heatmap', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98}}
     }
 
     return characteristics_per_plot_type

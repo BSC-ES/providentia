@@ -988,8 +988,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
     def make_plot(self, plotting_paradigm, plot_type, n_stations=0):
         """Function that calls making of any type of plot"""
         
+        # table?
+        if 'table' in plot_type:
+            self.make_table()
+
         # heatmap plot?
-        if 'heatmap-' in plot_type:
+        elif 'heatmap-' in plot_type:
             heatmap_types = plot_type.split('-')[1:]
             if self.station_subset_ind == 0:
                 self.heatmap_dict = {}
@@ -1854,10 +1858,20 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         relevant_axis.set_ylabel(ylabel=self.characteristics_per_plot_type['scatter']['axis_ylabel']['ylabel'], 
                                  fontsize=self.characteristics_per_plot_type['scatter']['axis_ylabel']['fontsize'])
 
+        # Define limits
+        lim_min = min(np.nanmin(observations_data), np.nanmin(experiment_data))
+        lim_max = max(np.nanmax(observations_data), np.nanmax(experiment_data))
+        relevant_axis.set_xlim([lim_min, lim_max])
+        relevant_axis.set_ylim([lim_min, lim_max])
+        relevant_axis.set_aspect('equal', adjustable='box')
+
         # Add line 1:1
         line = Line2D([0, 1], [0, 1], color='lightgrey', linewidth=1, linestyle='--')
         line.set_transform(relevant_axis.transAxes)
         relevant_axis.add_line(line)
+
+    def make_table(self):
+        pass
 
 def get_z_statistic_type(stats_dict, zstat):
     """Function that checks if the z statistic is basic or expbias statistic"""
