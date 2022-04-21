@@ -36,7 +36,8 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
      geopandas/0.7.0-foss-2019b-Python-3.7.4 \
      PyQt5/5.13.1-GCCcore-8.3.0-Python-3.7.4 \
      Qt5/5.14.1-GCCcore-8.3.0 \
-     OpenMPI/4.0.5-GCC-8.3.0-nord3-v2
+     OpenMPI/4.0.5-GCC-8.3.0-nord3-v2 \
+     memray/1.0.3-foss-2019b-Python-3.7.4
 #Workstations/fatnodes
 else
     module load Python/3.7.3-foss-2015a \
