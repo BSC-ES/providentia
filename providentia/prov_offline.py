@@ -544,6 +544,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # iterate through axes (by row, then column)
                 row_ii = -1
                 col_ii = copy.deepcopy(plot_characteristics['figure']['ncols'])
+               
                 for ax in axs.flatten():
                     if col_ii == plot_characteristics['figure']['ncols']:
                         row_ii += 1
@@ -630,7 +631,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                         null, max_lat = self.plotcrs.transform_point(0, self.bounding_box[
                                             'latitude']['max'], src_crs=self.datacrs)
                                         ax.set_ylim(top=max_lat)
-
                     else:
                         ax.set_visible(False)
                     
@@ -987,7 +987,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
     def make_plot(self, plotting_paradigm, plot_type, n_stations=0):
         """Function that calls making of any type of plot"""
-        
+
         # table?
         if 'table' in plot_type:
             self.make_table()
@@ -1049,9 +1049,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # iterate through all data arrays
             original_data_array_labels = list(self.datareader.data_in_memory.keys())
-
+            
             for original_data_label in original_data_array_labels:
-                
+
                 # do not show experiment data with _obs configuration (if possible)
                 if '_obs' in plot_type and original_data_label != 'observations':
                     continue
@@ -1181,7 +1181,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                     # make plot if there are data
                     if not self.selected_station_data:
-                        relevant_axis.set_visible(False)
+                        # relevant axis is a dict of the different temporal aggregations in some cases (e.g. periodic plots)
+                        if isinstance(relevant_axis, dict):
+                            for temporal_aggregation_resolution, temporal_aggregation_relevant_axis in relevant_axis.items():
+                                temporal_aggregation_relevant_axis.set_visible(False)
+                        else:
+                            relevant_axis.set_visible(False)
                     else:
                         # Periodic plots
                         if 'periodic-' in plot_type:
@@ -1209,26 +1214,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                         # Other plot types (distribution, timeseries etc.)
                         else:
-                            # determine if plotting bias stat
-                            bias_stat = False
-                            if '_bias' in plot_type:
-                                bias_stat = True
-
-                            # skip observational array if plotting bias stat
-                            if bias_stat and (original_data_label == 'observations'):
+                            # skip observational array
+                            if original_data_label == 'observations' and ('_bias' in plot_type or 'scatter' in plot_type):
                                 continue
-
-                            # do not make scatter plot when the data label corresponds to the observations
-                            if ('scatter' in plot_type) and (original_data_label == 'observations'):
-                                continue
-                            # get plot type
                             else:
                                 func = getattr(self, 'make_{}'.format(plot_type.split('_')[0]))
                                 
                             if data_label in list(self.selected_station_data.keys()):
                                 if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
                                     # make standard plot, without bias
-                                    if bias_stat:
+                                    if '_bias' in plot_type:
                                         func(relevant_axis, data_label, bias=True)
                                     # make plot without bias
                                     else:
@@ -1245,8 +1240,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             # add annotation
                             self.make_annotation(relevant_axis, data_label, plot_type, base_zstat)
 
-                # iterate number of plots have made for current type of plot
-                current_plot_ind += + 1
+                # iterate number of plots made for current type of plot 
+                # skip when there is no data and we work only with experiment data to avoid empty plots
+                if ((not self.selected_station_data) and 
+                    (original_data_label == original_data_array_labels[-2]) and
+                    (('scatter' in plot_type) or ('_bias' in plot_type) or 
+                    ('-' in plot_type and base_zstat in list(self.expbias_dict.keys())))):
+                    pass
+                else:
+                    current_plot_ind += 1
 
     def make_map(self, relevant_axis, z1, z2, zstat):
         """plot map"""
@@ -1278,7 +1280,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         relevant_axes = [] 
         for relevant_page in relevant_pages:
             relevant_axes.extend(self.plot_dictionary[relevant_page]['axs'])
-        
+
         return relevant_axes[current_plot_ind]
 
     def calculate_z_statistic(self, z1, z2, zstat):
