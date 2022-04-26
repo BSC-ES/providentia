@@ -1,5 +1,6 @@
 from ast import If
 import os
+from select import POLLOUT
 import sys
 import json
 import copy
@@ -323,11 +324,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         previous_plot_type = copy.deepcopy(plot_type)
                     if len(relevant_axs) > 0:
                         self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
-                    #harmonise xy limits (not for timeseries, map, or heatmap plot types)
-                    for plot_type in self.summary_plots_to_make:
-                        if ('timeseries' not in plot_type) & ('map-' not in plot_type):
-                            self.harmonise_xy_lims(plot_type)
-
+                    
                 # make station specific plots?
                 if self.station_plots:
                     #setup plotting geometry for station plots
@@ -344,6 +341,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         #iterate through plots and make each one for subset group
                         for plot_type in self.station_plots_to_make:
                             self.make_plot('station', plot_type, n_stations)
+
+            #harmonise xy limits (not for maps and heatmaps)
+            for plot_type in self.station_plots_to_make:
+                if 'map-' not in plot_type:
+                    self.harmonise_xy_lims(plot_type)
 
             # save page figures
             print('WRITING PDF')
@@ -576,7 +578,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             ax.spines['left'].set_color('none')
                             ax.spines['right'].set_color('none')
                             ax.tick_params(labelcolor='w', top=False, bottom=False, left=False, right=False)
-                            ax.set_ylabel(**plot_characteristics['axis_ylabel'])
                         else:
                             self.plot_dictionary[self.current_page_n]['axs'].append(ax)
 
@@ -682,7 +683,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                               label=experiment))
         return legend_elements
 
-
     def to_pandas_dataframe(self, station_index=False):
         """Function that takes data in memory puts it in a pandas dataframe.
         For summary plots this involves take the median timeseries across the timeseries.
@@ -733,7 +733,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # get min/max across all selected station data
                 selected_station_data_all = [self.selected_station_data[data_label]['pandas_df']['data'] for data_label in self.selected_station_data.keys()]
                 selected_station_data_all_flat = [item for items in selected_station_data_all for item in items]
-                
                 if len(selected_station_data_all_flat) > 0:
                     self.selected_station_data_min = np.nanmin(selected_station_data_all_flat)
                     self.selected_station_data_max = np.nanmax(selected_station_data_all_flat)
@@ -1032,7 +1031,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     relevant_axis = self.get_relevant_axis(plotting_paradigm, 'heatmap', heatmap_type_ii)
                     # make heatmap if there are data
                     if not self.selected_station_data:
-                        relevant_axis.set_visible(False)
+                        relevant_axis.set_axis_off()
                     else:
                         axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type['heatmap']['axis_title'])
                         axis_title_characteristics['label'] = heatmap_type
@@ -1116,11 +1115,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                     # get relevant axis to plot on
                     relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, (current_plot_ind * len(
-                        self.station_subset_names)) + self.station_subset_ind)
+                                                           self.station_subset_names)) + self.station_subset_ind)
                     
                     # make map if there are data
                     if not self.selected_station_data:
-                        relevant_axis.set_visible(False)
+                        relevant_axis.set_axis_off()
                     else:
                         # make map plot
                         n_stations = self.make_map(relevant_axis, z1, z2, zstat)
@@ -1178,15 +1177,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                                        len(self.experiments_to_read) * self.station_ind))
                         else:
                             relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, self.station_ind)
-
+                    
                     # make plot if there are data
                     if not self.selected_station_data:
                         # relevant axis is a dict of the different temporal aggregations in some cases (e.g. periodic plots)
                         if isinstance(relevant_axis, dict):
                             for temporal_aggregation_resolution, temporal_aggregation_relevant_axis in relevant_axis.items():
-                                temporal_aggregation_relevant_axis.set_visible(False)
+                                temporal_aggregation_relevant_axis.set_axis_off()
                         else:
-                            relevant_axis.set_visible(False)
+                            relevant_axis.set_axis_off()
                     else:
                         # Periodic plots
                         if 'periodic-' in plot_type:
@@ -1524,6 +1523,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # get axes associated with plot type
         relevant_pages = self.characteristics_per_plot_type[plot_type]['summary_pages']
         relevant_pages.extend(self.characteristics_per_plot_type[plot_type]['station_pages'])
+
+        # initialize arrays to save lower and upper limits in all axes
+        all_xlim_lower = []
+        all_xlim_upper = []
+        all_ylim_lower = []
+        all_ylim_upper = []
+
         if 'periodic-' in plot_type:
             ax_types = ['hour','month','dayofweek']
         else:
@@ -1536,23 +1542,39 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         relevant_axes.append(axs[ax_type])
                 else:
                     relevant_axes.extend(self.plot_dictionary[relevant_page]['axs'])
-
-            # get xlims/ylims
-            all_xlim_lower = []
-            all_xlim_upper = []
-            all_ylim_lower = []
-            all_ylim_upper = []
+            
+            # get lower and upper limits in all axes and save in array
             for ax in relevant_axes:
-                xlim_lower, xlim_upper = ax.get_xlim()
-                ylim_lower, ylim_upper = ax.get_ylim()
-                all_xlim_lower.append(xlim_lower)
-                all_xlim_upper.append(xlim_upper)
-                all_ylim_lower.append(ylim_lower)
-                all_ylim_upper.append(ylim_upper)
+                if ax.lines:
+                    xlim_lower, xlim_upper = ax.get_xlim()
+                    ylim_lower, ylim_upper = ax.get_ylim()
+                    all_xlim_lower.append(xlim_lower)
+                    all_xlim_upper.append(xlim_upper)
+                    all_ylim_lower.append(ylim_lower)
+                    all_ylim_upper.append(ylim_upper)
 
+            # get minimum and maximum from all axes and set limits
             for ax in relevant_axes:
-                ax.set_xlim(np.min(all_xlim_lower), np.max(all_xlim_upper))
-                ax.set_ylim(np.min(all_ylim_lower), np.max(all_ylim_upper))
+                if ax.lines:
+                    if ('distribution_bias' in plot_type) or ('_bias' not in plot_type):
+                        if 'periodic-' not in plot_type:
+                            ax.set_xlim(np.min(all_xlim_lower), np.max(all_xlim_upper))
+                        ax.set_ylim(np.min(all_ylim_lower), np.max(all_ylim_upper))
+                    elif 'scatter' in plot_type:
+                        lim_min = min(xlim_lower, ylim_lower)
+                        lim_max = max(xlim_upper, ylim_upper)
+                        ax.set_xlim([lim_min, lim_max])
+                        ax.set_ylim([lim_min, lim_max])
+                        ax.set_aspect('equal', adjustable='box')
+                    else:
+                        # if there is bias center plots y limits around 0
+                        if np.abs(np.max(all_xlim_upper)) >= np.abs(np.min(all_xlim_lower)):
+                            ylim_min = -np.abs(np.max(all_xlim_upper))
+                            ylim_max = np.abs(np.max(all_xlim_upper))
+                        elif np.abs(np.max(all_xlim_upper)) < np.abs(np.min(all_xlim_lower)):
+                            ylim_min = -np.abs(np.min(all_xlim_lower))
+                            ylim_max = np.abs(np.min(all_xlim_lower))
+                        ax.set_ylim(ylim_min, ylim_max)
 
     def make_periodic(self, relevant_axis, data_label, plot_type, zstat):
         """Function that makes the temporally aggregated experiment bias statistic plots"""
@@ -1686,7 +1708,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         else:
 
             # Make experiment bias plots for active bias statistic for all relevant temporal aggregation resolutions
-
+            
             # iterate through all defined temporal aggregation resolutions
             for temporal_aggregation_resolution in self.temporal_aggregation_resolutions:
                 if temporal_aggregation_resolution != 'all':
@@ -1697,10 +1719,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         color=self.datareader.plotting_params[data_label]['colour'],
                         marker='o',
                         markersize=self.temp_agg_expbias_markersize, linewidth=0.5)
+
                     # set x axis limits
                     aggregation_dict[temporal_aggregation_resolution]['ax'].set_xlim(
                         np.min(aggregation_dict[temporal_aggregation_resolution]['xticks'])-0.5,
                         np.max(aggregation_dict[temporal_aggregation_resolution]['xticks'])+0.5)
+
                     # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
                     if temporal_aggregation_resolution == 'hour':
                         aggregation_dict[temporal_aggregation_resolution]['ax'].set_xticks(
@@ -1714,8 +1738,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                     # set xticks
                     aggregation_dict[temporal_aggregation_resolution]['ax'].xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type[plot_type]['xticks']['labelsize'])
+                    
                     # set yticks
                     aggregation_dict[temporal_aggregation_resolution]['ax'].yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type[plot_type]['yticks']['labelsize'])
+                    
                     # get zstat type (basic or expbias) and sign (absolute or bias)
                     z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
 
@@ -1745,10 +1771,19 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                linewidth=self.time_series_markersize,
                                zorder=self.datareader.plotting_params[data_label]['zorder']+len(list(self.datareader.plotting_params.keys())))
 
-        # set xticks (rotating ticks)
+        # set xticks
+        slices = int((len(self.selected_station_data[data_label]['pandas_df'].dropna().index.values) /
+                      self.characteristics_per_plot_type['timeseries']['xticks']['n_slices']))
+        steps = self.selected_station_data[data_label]['pandas_df'].dropna().index.values[0::slices]
+        last_step = self.selected_station_data[data_label]['pandas_df'].dropna().index.values[-1]
+        if last_step not in steps:
+            steps = np.append(steps, last_step)
+        relevant_axis.xaxis.set_ticks(steps)
+
+        # set xticks size and rotation
         relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['timeseries']['xticks']['labelsize'], 
                                             rotation=self.characteristics_per_plot_type['timeseries']['xticks']['rotation'])
-        # set yticks
+        # set yticks size
         relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['timeseries']['yticks']['labelsize'])
 
     def make_distribution(self, relevant_axis, data_label, bias=False):
@@ -1761,7 +1796,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             n_samples = int(np.around(minmax_diff/(self.parameter_dictionary[self.selected_species]['minimum_resolution']/4.0),0))
             if n_samples < 2000:
                 n_samples = 2000
-        x_grid = np.linspace(self.selected_station_data_min,self.selected_station_data_max,n_samples,endpoint=True)
+        x_grid = np.linspace(self.selected_station_data_min, self.selected_station_data_max, n_samples, endpoint=True)
 
         # setup bias plot
         if bias:
@@ -1859,13 +1894,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                  fontsize=self.characteristics_per_plot_type['scatter']['axis_xlabel']['fontsize'])
         relevant_axis.set_ylabel(ylabel=self.characteristics_per_plot_type['scatter']['axis_ylabel']['ylabel'], 
                                  fontsize=self.characteristics_per_plot_type['scatter']['axis_ylabel']['fontsize'])
-
-        # Define limits
-        lim_min = min(np.nanmin(observations_data), np.nanmin(experiment_data))
-        lim_max = max(np.nanmax(observations_data), np.nanmax(experiment_data))
-        relevant_axis.set_xlim([lim_min, lim_max])
-        relevant_axis.set_ylim([lim_min, lim_max])
-        relevant_axis.set_aspect('equal', adjustable='box')
 
         # Add line 1:1
         line = Line2D([0, 1], [0, 1], color='lightgrey', linewidth=1, linestyle='--')
