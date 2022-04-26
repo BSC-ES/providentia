@@ -26,5 +26,5 @@
                "heatmap-p95"
               ],
 
-    "debug":["periodic-p95"]
+    "debug":["scatter"]
 }
