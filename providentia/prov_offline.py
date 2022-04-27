@@ -1782,8 +1782,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             relevant_axis.xaxis.set_ticks(steps)
         else:
             if data_label.split('_')[0] == 'observations':
-                print('Warning: Number of time slices (n_slices) has to be equal or higher than the number of timesteps.')  
-                
+                print('Warning: Number of time slices (n_slices) has to be equal or lower than the number of timesteps.')  
+
         # set xticks size and rotation
         relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['timeseries']['xticks']['labelsize'], 
                                             rotation=self.characteristics_per_plot_type['timeseries']['xticks']['rotation'])
