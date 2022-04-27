@@ -1772,14 +1772,18 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                zorder=self.datareader.plotting_params[data_label]['zorder']+len(list(self.datareader.plotting_params.keys())))
 
         # set xticks
-        slices = int((len(self.selected_station_data[data_label]['pandas_df'].dropna().index.values) /
-                      self.characteristics_per_plot_type['timeseries']['xticks']['n_slices']))
-        steps = self.selected_station_data[data_label]['pandas_df'].dropna().index.values[0::slices]
-        last_step = self.selected_station_data[data_label]['pandas_df'].dropna().index.values[-1]
-        if last_step not in steps:
-            steps = np.append(steps, last_step)
-        relevant_axis.xaxis.set_ticks(steps)
-
+        slices = (len(self.selected_station_data[data_label]['pandas_df'].dropna().index.values) /
+                  self.characteristics_per_plot_type['timeseries']['xticks']['n_slices'])
+        if slices >= 1:
+            steps = self.selected_station_data[data_label]['pandas_df'].dropna().index.values[0::int(slices)]
+            last_step = self.selected_station_data[data_label]['pandas_df'].dropna().index.values[-1]
+            if last_step not in steps:
+                steps = np.append(steps, last_step)
+            relevant_axis.xaxis.set_ticks(steps)
+        else:
+            if data_label.split('_')[0] == 'observations':
+                print('Warning: Number of time slices (n_slices) has to be equal or higher than the number of timesteps.')  
+                
         # set xticks size and rotation
         relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['timeseries']['xticks']['labelsize'], 
                                             rotation=self.characteristics_per_plot_type['timeseries']['xticks']['rotation'])
