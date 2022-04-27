@@ -1,8 +1,8 @@
 import datetime
 import pandas as pd
 
-start_date = '20120101'
-end_date = '20120220'
+start_date = '20180101'
+end_date = '20180202'
 resolution = 'monthly'
 
 if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):

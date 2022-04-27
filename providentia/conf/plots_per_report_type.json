@@ -26,5 +26,5 @@
                "heatmap-p95"
               ],
 
-    "debug":["timeseries"]
+    "debug":["periodic-p95_obs", "periodic-violin_obs", "distribution_obs", "map-p95_annotate"]
 }
