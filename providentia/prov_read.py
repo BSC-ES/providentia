@@ -96,7 +96,7 @@ class DataReader:
                                                                             int(str_active_end_date[4:6]),
                                                                             int(str_active_end_date[6:8])),
                                                       freq=self.active_frequency_code)[:-1]
-        
+
         if not self.read_instance.reading_nonghost:
             # get all relevant observational files
             file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
