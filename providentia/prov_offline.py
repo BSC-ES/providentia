@@ -1520,61 +1520,60 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             if hasattr(self, 'bounding_box'):
                 return
 
-        # get axes associated with plot type
-        relevant_pages = self.characteristics_per_plot_type[plot_type]['summary_pages']
-        relevant_pages.extend(self.characteristics_per_plot_type[plot_type]['station_pages'])
+        for relevant_pages in (self.characteristics_per_plot_type[plot_type]['summary_pages'],
+                               self.characteristics_per_plot_type[plot_type]['station_pages']):
 
-        # initialize arrays to save lower and upper limits in all axes
-        all_xlim_lower = []
-        all_xlim_upper = []
-        all_ylim_lower = []
-        all_ylim_upper = []
+            # initialize arrays to save lower and upper limits in all axes
+            all_xlim_lower = []
+            all_xlim_upper = []
+            all_ylim_lower = []
+            all_ylim_upper = []
 
-        if 'periodic-' in plot_type:
-            ax_types = ['hour','month','dayofweek']
-        else:
-            ax_types = ['']
-        for ax_type in ax_types:
-            relevant_axes = []
-            for relevant_page in relevant_pages:
-                if 'periodic-' in plot_type:
-                    for axs in self.plot_dictionary[relevant_page]['axs']:
-                        relevant_axes.append(axs[ax_type])
-                else:
-                    relevant_axes.extend(self.plot_dictionary[relevant_page]['axs'])
-            
-            # get lower and upper limits in all axes and save in array
-            for ax in relevant_axes:
-                if ax.lines:
-                    xlim_lower, xlim_upper = ax.get_xlim()
-                    ylim_lower, ylim_upper = ax.get_ylim()
-                    all_xlim_lower.append(xlim_lower)
-                    all_xlim_upper.append(xlim_upper)
-                    all_ylim_lower.append(ylim_lower)
-                    all_ylim_upper.append(ylim_upper)
-
-            # get minimum and maximum from all axes and set limits
-            for ax in relevant_axes:
-                if ax.lines:
-                    if ('distribution_bias' in plot_type) or ('_bias' not in plot_type):
-                        if 'periodic-' not in plot_type:
-                            ax.set_xlim(np.min(all_xlim_lower), np.max(all_xlim_upper))
-                        ax.set_ylim(np.min(all_ylim_lower), np.max(all_ylim_upper))
-                    elif 'scatter' in plot_type:
-                        lim_min = min(xlim_lower, ylim_lower)
-                        lim_max = max(xlim_upper, ylim_upper)
-                        ax.set_xlim([lim_min, lim_max])
-                        ax.set_ylim([lim_min, lim_max])
-                        ax.set_aspect('equal', adjustable='box')
+            if 'periodic-' in plot_type:
+                ax_types = ['hour','month','dayofweek']
+            else:
+                ax_types = ['']
+            for ax_type in ax_types:
+                relevant_axes = []
+                for relevant_page in relevant_pages:
+                    if 'periodic-' in plot_type:
+                        for axs in self.plot_dictionary[relevant_page]['axs']:
+                            relevant_axes.append(axs[ax_type])
                     else:
-                        # if there is bias center plots y limits around 0
-                        if np.abs(np.max(all_xlim_upper)) >= np.abs(np.min(all_xlim_lower)):
-                            ylim_min = -np.abs(np.max(all_xlim_upper))
-                            ylim_max = np.abs(np.max(all_xlim_upper))
-                        elif np.abs(np.max(all_xlim_upper)) < np.abs(np.min(all_xlim_lower)):
-                            ylim_min = -np.abs(np.min(all_xlim_lower))
-                            ylim_max = np.abs(np.min(all_xlim_lower))
-                        ax.set_ylim(ylim_min, ylim_max)
+                        relevant_axes.extend(self.plot_dictionary[relevant_page]['axs'])
+                
+                # get lower and upper limits in all axes and save in array
+                for ax in relevant_axes:
+                    if ax.lines:
+                        xlim_lower, xlim_upper = ax.get_xlim()
+                        ylim_lower, ylim_upper = ax.get_ylim()
+                        all_xlim_lower.append(xlim_lower)
+                        all_xlim_upper.append(xlim_upper)
+                        all_ylim_lower.append(ylim_lower)
+                        all_ylim_upper.append(ylim_upper)
+
+                # get minimum and maximum from all axes and set limits
+                for ax in relevant_axes:
+                    if ax.lines:
+                        if ('distribution_bias' in plot_type) or ('_bias' not in plot_type):
+                            if 'periodic-' not in plot_type:
+                                ax.set_xlim(np.min(all_xlim_lower), np.max(all_xlim_upper))
+                            ax.set_ylim(np.min(all_ylim_lower), np.max(all_ylim_upper))
+                        elif 'scatter' in plot_type:
+                            lim_min = min(xlim_lower, ylim_lower)
+                            lim_max = max(xlim_upper, ylim_upper)
+                            ax.set_xlim([lim_min, lim_max])
+                            ax.set_ylim([lim_min, lim_max])
+                            ax.set_aspect('equal', adjustable='box')
+                        else:
+                            # if there is bias center plots y limits around 0
+                            if np.abs(np.max(all_xlim_upper)) >= np.abs(np.min(all_xlim_lower)):
+                                ylim_min = -np.abs(np.max(all_xlim_upper))
+                                ylim_max = np.abs(np.max(all_xlim_upper))
+                            elif np.abs(np.max(all_xlim_upper)) < np.abs(np.min(all_xlim_lower)):
+                                ylim_min = -np.abs(np.min(all_xlim_lower))
+                                ylim_max = np.abs(np.min(all_xlim_lower))
+                            ax.set_ylim(ylim_min, ylim_max)
 
     def make_periodic(self, relevant_axis, data_label, plot_type, zstat):
         """Function that makes the temporally aggregated experiment bias statistic plots"""
