@@ -2,7 +2,7 @@ import datetime
 import pandas as pd
 
 start_date = '20120101'
-end_date = '20120202'
+end_date = '20120220'
 resolution = 'monthly'
 
 if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
