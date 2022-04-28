@@ -23,7 +23,7 @@ class ProvConfiguration(object):
     def __init__(self, **kwargs):
         self.config_dir = kwargs.get('config_dir',
                                      os.path.join(os.environ['HOME'], '.providentia'))
-        self.ghost_version = kwargs.get('ghost_version', '1.3.3')
+        self.ghost_version = kwargs.get('ghost_version', '1.4')
         self.cartopy_data_dir = kwargs.get('cartopy_data_dir', '')
         self.available_cpus = kwargs.get('available_cpus', '')
         self.n_cpus = kwargs.get('n_cpus', '')
@@ -52,8 +52,10 @@ class ProvConfiguration(object):
             kwargs.get('map_coastline_resolution', 'low')
         self.available_networks =\
             kwargs.get('available_networks',
-                       "['AERONET_v3','EBAS','EEA_AQ_eReporting','MITECO',"
-                       "'NCDC_ISD','NCDC_ISD_EU','NCDC_ISD_IP','NCDC_ISD_NA']")
+                       "['AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN','CHILE_SINCA',"
+                       "'EANET','EBAS','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MECICO_CDMX',"
+                       "'MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA'," 
+                       "'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG']")
 
         # options added if configuration file is used
         self.selected_species = kwargs.get('selected_species', '')

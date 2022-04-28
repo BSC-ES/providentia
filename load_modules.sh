@@ -50,3 +50,5 @@ else
      seaborn/0.9.0-foss-2015a-Python-3.7.3 \
      scipy/1.3.0-foss-2015a-Python-3.7.3
 fi
+
+export HDF5_USE_FILE_LOCKING=FALSE
