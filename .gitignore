@@ -7,4 +7,6 @@ providentia.egg-info
 .eggs
 .coverage
 __pycache__
-dist
+data
+PROVIDENTIA_Report.pdf
+test.py
