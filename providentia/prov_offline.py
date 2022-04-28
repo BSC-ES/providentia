@@ -1781,7 +1781,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         if bias:
             #observations and experiment must be colocated for this
             ts_obs = self.selected_station_data['observations_colocatedto_experiments']['pandas_df']
-            original_data_label = data_label.split('_')[0]
+            original_data_label = data_label.split('_colocatedto')[0]
             ts_model = self.selected_station_data['{}_colocatedto_observations'.format(original_data_label)]['pandas_df'] 
             ts = ts_model - ts_obs
         else:
