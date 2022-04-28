@@ -793,7 +793,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if read_all:
                 # reset data in memory dictionary
                 self.datareader.reset_data_in_memory()
-
                 if not self.reading_nonghost:
                     self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
                 # read observations
@@ -801,15 +800,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                           self.active_end_date, self.active_network,
                                           self.active_resolution, self.active_species,
                                           self.active_matrix)
+                # print(self.data_in_memory['observations'])
                 # read selected experiments (iterate through)
                 for data_label in self.active_experiment_grids:
                     self.datareader.read_data(data_label, self.active_start_date,
                                               self.active_end_date, self.active_network,
                                               self.active_resolution, self.active_species,
                                               self.active_matrix)
+
                     # if experiment in experiments_to_read list, remove it (as no longer need to read it)
                     if data_label in experiments_to_read:
                         experiments_to_read.remove(data_label)
+
             else:
                 # if station references array has changed then as cutting/appending to
                 # existing data need to rearrange existing data arrays accordingly
@@ -966,7 +968,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.datareader.read_data(data_label, self.active_start_date, self.active_end_date,
                                           self.active_network, self.active_resolution,
                                           self.active_species, self.active_matrix)
-
+            
         # if species has changed, update default species specific lower/upper limits
         if self.active_species != previous_active_species:
             # update default lower/upper species specific limits and filter data outside limits
