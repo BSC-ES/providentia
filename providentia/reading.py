@@ -254,7 +254,7 @@ def read_netcdf_nonghost(tuple_arguments):
         return file_data, full_array_time_indices, full_array_station_indices
 
 
-def get_yearmonths_to_read(yearmonths, start_date_to_read, end_date_to_read):
+def get_yearmonths_to_read(yearmonths, start_date_to_read, end_date_to_read, resolution):
     """Function that returns the yearmonths of the files needed to be read.
        This is done by limiting a list of relevant yearmonths by a start/end date
     """
@@ -263,6 +263,11 @@ def get_yearmonths_to_read(yearmonths, start_date_to_read, end_date_to_read):
     if first_valid_file_ind != 0:
         first_valid_file_ind = first_valid_file_ind - 1
     last_valid_file_ind = bisect.bisect_left(yearmonths, int(end_date_to_read))
+
+    # read only complete months
+    if (resolution == 'monthly') and (str(end_date_to_read)[6:8] != '01'):
+        last_valid_file_ind -= 1
+
     if first_valid_file_ind == last_valid_file_ind:
         return [yearmonths[first_valid_file_ind]]
     else:

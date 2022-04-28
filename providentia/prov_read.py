@@ -240,7 +240,7 @@ class DataReader:
             relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
 
         # get data files in required date range to read, taking care not to re-read what has already been read
-        yearmonths_to_read = get_yearmonths_to_read(relevant_file_start_dates, start_date, end_date)
+        yearmonths_to_read = get_yearmonths_to_read(relevant_file_start_dates, start_date, end_date, resolution)
         relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in yearmonths_to_read]
        
         if not os.path.exists(relevant_files[0]):
