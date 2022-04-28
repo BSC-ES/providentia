@@ -47,8 +47,8 @@ setup(
     version=__version__,
 
     # Application author details:
-    author="Dene Bowdalo, Amalia Vradi",
-    author_email="dene.bowdalo@bsc.es, amalia.vradi@bsc.es",
+    author="Dene Bowdalo, Amalia Vradi, Alba Vilanova",
+    author_email="dene.bowdalo@bsc.es, amalia.vradi@bsc.es, alba.vilanova@bsc.es",
 
     # Packages
     packages=['providentia', 'providentia.interpolation'],
@@ -62,7 +62,7 @@ setup(
 
     keywords=['earth sciences', 'evaluation', 'verification', 'observations', 'NWP models',
               'air quality'],
-    description="Providentia is designed to allow on-the-fly analysis of experiment outputs, with respect to processed observational data.",
+    description="Providentia is designed to allow on-the-fly and offline analysis of experiment outputs, with respect to processed observational data.",
     #    long_description=open("README.rst").read(),
     #    long_description_content_type='text/x-rst',
 
