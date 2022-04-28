@@ -250,9 +250,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         previous_plot_type = copy.deepcopy(plot_type)
                     if len(relevant_axs) > 0:
                         self.generate_colourbar(cb_axs, relevant_axs, previous_plot_type)
-                    #harmonise xy limits
+                    #harmonise xy limits (not for timeseries, map, or heatmap plot types)
                     for plot_type in self.summary_plots_to_make:
-                        if ('timeseries' not in plot_type) & ('map-' not in plot_type) & ('heatm-' not in plot_type):
+                        if ('timeseries' not in plot_type) & ('map-' not in plot_type):
                             self.harmonise_xy_lims(plot_type)
 
                 #make station specific plots?
@@ -318,8 +318,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         #set plots that need to be made (summary and station specific)
         self.summary_plots_to_make = self.plots_per_report_type[self.report_type]
         self.station_plots_to_make = []
+        #for station specific plots, there can be no specific plots for map/heatmap
         for plot_type in self.summary_plots_to_make: 
-            if ('map-' not in plot_type) & ('heatm-' not in plot_type):
+            if 'map-' not in plot_type:
                 self.station_plots_to_make.append(plot_type)
     
         #if no experiments are defined, remove all bias statistic plots and notify user of this
@@ -327,7 +328,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             print('*** WARNING!!! NO EXPERIMENTS DEFINED, SO NO BIAS PLOTS WILL BE MADE')
             plot_types_to_remove = []
             for plot_type in self.summary_plots_to_make:
-                if 'heatm-' in plot_type:
+                if 'heatmap-' in plot_type:
                     plot_types_to_remove.append(plot_type)
                 elif '_bias' in plot_type:
                     plot_types_to_remove.append(plot_type) 
@@ -357,9 +358,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # iterate through plot types to make
         for plot_type in plots_to_make:
             n_plots_per_plot_type = False
-            if 'heatm-' in plot_type:
+            if 'heatmap-' in plot_type:
                 n_plots_per_plot_type = len(plot_type.split('-')) - 1
-                plot_type = 'heatm'
+                plot_type = 'heatmap'
             plot_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type])
             plot_characteristics_vars = list(plot_characteristics.keys())
 
@@ -374,7 +375,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # get zstat type (basic or expbias) and sign (absolute or bias)
                 z_statistic_type, z_statistic_sign, base_zstat = get_z_statistic_type_sign(self.basic_stats_dict, zstat)
 
-            if 'map-' in plot_type:
+            if plot_type[:4] == 'map-':
                 if '-obs' in plot_type:
                     n_plots_per_plot_type = len(self.station_subset_names)
                 elif z_statistic_sign == 'bias':
@@ -478,7 +479,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             ax.grid(**plot_characteristics['grid'])
 
                         # add coastlines/gridlines to map?
-                        if 'map-' in plot_type:
+                        if plot_type[:4] == 'map-':
                             ax.add_feature(self.feature)
                             ax.gridlines(linestyle='-', alpha=0.4)
                             if hasattr(self, 'bounding_box'):
@@ -626,14 +627,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # define all temporal aggregation resolutions that will be used to aggregate data
         # (variable by temporal resolution of data in memory)
-        if (self.selected_resolution == 'hourly') or (
-                self.selected_resolution == 'hourly_instantaneous'):
+        if 'hourly' in self.selected_resolution:
             self.temporal_aggregation_resolutions = ['hour', 'dayofweek', 'month', 'all']
-        elif (self.selected_resolution == 'daily') or (
-                  self.selected_resolution == '3hourly') or (
-                      self.selected_resolution == '3hourly_instantaneous') or (
-                          self.selected_resolution == '6hourly') or (
-                              self.selected_resolution == '6hourly_instantaneous'):
+        elif self.selected_resolution == 'daily':
             self.temporal_aggregation_resolutions = ['dayofweek', 'month', 'all']
         elif self.selected_resolution == 'monthly':
             self.temporal_aggregation_resolutions = ['month', 'all']
@@ -806,18 +802,18 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         """Function that calls making of any type of plot"""
 
         # heatmap plot?
-        if 'heatm-' in plot_type:
+        if 'heatmap-' in plot_type:
             heatmap_types = plot_type.split('-')[1:]
             if self.station_subset_ind == 0:
-                heatmap_dict = {}
+                self.heatmap_dict = {}
                 for heatmap_type in heatmap_types:
-                    heatmap_dict[heatmap_type] = {}
+                    self.heatmap_dict[heatmap_type] = {}
                     for original_data_label in self.datareader.data_in_memory.keys():
                         if original_data_label != 'observations':
                             # get experiment name
                             # exp_name = get_exp_name(original_data_label)  # does not work if expid is same and the domain is different
                             exp_name = original_data_label
-                            heatmap_dict[heatmap_type][exp_name] = []
+                            self.heatmap_dict[heatmap_type][exp_name] = []
             for heatmap_type in heatmap_types:
                 for original_data_label in self.datareader.data_in_memory.keys():
                     if original_data_label != 'observations':
@@ -829,25 +825,25 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         if data_label in list(self.selected_station_data.keys()):
                             if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
                                 if heatmap_type in list(self.basic_stats_dict.keys()):
-                                    heatmap_dict[heatmap_type][exp_name].append(
+                                    self.heatmap_dict[heatmap_type][exp_name].append(
                                         self.selected_station_data[data_label]['all'][
                                             '{}_bias'.format(heatmap_type)][0])
                                 else:
-                                    heatmap_dict[heatmap_type][exp_name].append(
+                                    self.heatmap_dict[heatmap_type][exp_name].append(
                                         self.selected_station_data[data_label]['all'][heatmap_type][0])
                             else:
-                                heatmap_dict[heatmap_type][exp_name].append(np.NaN)
+                                self.heatmap_dict[heatmap_type][exp_name].append(np.NaN)
                         else:
-                            heatmap_dict[heatmap_type][exp_name].append(np.NaN)
+                            self.heatmap_dict[heatmap_type][exp_name].append(np.NaN)
 
             if self.station_subset_ind == (len(self.station_subset_names) - 1):
                 for heatmap_type_ii, heatmap_type in enumerate(heatmap_types):
-                    relevant_axis = self.get_relevant_axis(plotting_paradigm, 'heatm', heatmap_type_ii)
-                    axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type['heatm']['axis_title'])
+                    relevant_axis = self.get_relevant_axis(plotting_paradigm, 'heatmap', heatmap_type_ii)
+                    axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type['heatmap']['axis_title'])
                     axis_title_characteristics['label'] = heatmap_type
                     relevant_axis.set_title(**axis_title_characteristics)
-                    if heatmap_dict:
-                        heatmap_df = pd.DataFrame(data=heatmap_dict[heatmap_type],
+                    if self.heatmap_dict:
+                        heatmap_df = pd.DataFrame(data=self.heatmap_dict[heatmap_type],
                                                   index=self.station_subset_names)
                         self.make_heatmap(relevant_axis, heatmap_type, heatmap_df)
         # other plot type?
@@ -866,7 +862,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                 # map plots (1 plot per data array/s (1 array if absolute plot,
                 # 2 arrays if making bias plot), per subset)
-                if 'map-' in plot_type:
+                if plot_type[:4] == 'map-':
                     # get necessary data arrays
                     if '-obs' in plot_type:
                         if original_data_label != 'observations':
@@ -1231,7 +1227,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
     def harmonise_xy_lims(self, plot_type):
 
-        if 'map-' in plot_type:
+        if plot_type[:4] == 'map-':
             if hasattr(self, 'bounding_box'):
                 return
 
@@ -1281,14 +1277,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             'ax': relevant_axis['month'], 'title': 'M',   'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
 
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
-        if (self.selected_resolution == 'hourly') or (self.selected_resolution == 'hourly_instantaneous'):
-            aggregation_dict = {
-                'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
-        elif (self.selected_resolution == 'daily') or (
-                  self.selected_resolution == '3hourly') or (
-                      self.selected_resolution == '3hourly_instantaneous') or (
-                          self.selected_resolution == '6hourly') or (
-                              self.selected_resolution == '6hourly_instantaneous'):
+        if 'hourly' in self.selected_resolution:
+            aggregation_dict = {'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
+        elif self.selected_resolution == 'daily':
             aggregation_dict = {'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
         elif self.selected_resolution == 'monthly':
             aggregation_dict = {'month': month_aggregation_dict}
@@ -1429,28 +1420,28 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # get colorbar label
         if z_statistic_type == 'basic':
             if base_zstat not in ['Data %','Exceedances']:
-                self.characteristics_per_plot_type['heatm']['cb_xlabel']['xlabel'] = self.datareader.measurement_units
+                self.characteristics_per_plot_type['heatmap']['cb_xlabel']['xlabel'] = self.datareader.measurement_units
             else:
-                self.characteristics_per_plot_type['heatm']['cb_xlabel']['xlabel'] = self.basic_stats_dict[base_zstat]['label']
+                self.characteristics_per_plot_type['heatmap']['cb_xlabel']['xlabel'] = self.basic_stats_dict[base_zstat]['label']
         else:
-            self.characteristics_per_plot_type['heatm']['cb_xlabel']['xlabel'] = self.expbias_dict[base_zstat]['label']
+            self.characteristics_per_plot_type['heatmap']['cb_xlabel']['xlabel'] = self.expbias_dict[base_zstat]['label']
 
         # plot heatmap
-        ax = sns.heatmap(heatmap_df, vmin=z_vmin, vmax=z_vmax, cmap=z_colourmap, xticklabels=1, yticklabels=1, square=True, annot=self.characteristics_per_plot_type['heatm']['annot'], cbar_kws = {'use_gridspec':False,'orientation':'horizontal'}, ax=relevant_axis)
+        ax = sns.heatmap(heatmap_df, vmin=z_vmin, vmax=z_vmax, cmap=z_colourmap, xticklabels=1, yticklabels=1, square=True, annot=self.characteristics_per_plot_type['heatmap']['annot'], cbar_kws = {'use_gridspec':False,'orientation':'horizontal'}, ax=relevant_axis)
 
         # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
         bottom, top = relevant_axis.get_ylim()
         relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
 
         # set xticks (rotating ticks)
-        relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['heatm']['xticks']['labelsize'], rotation=self.characteristics_per_plot_type['heatm']['xticks']['rotation'])
+        relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['heatmap']['xticks']['labelsize'], rotation=self.characteristics_per_plot_type['heatmap']['xticks']['rotation'])
         # set yticks (rotating ticks)
-        relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['heatm']['yticks']['labelsize'], rotation=self.characteristics_per_plot_type['heatm']['yticks']['rotation'])
+        relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['heatmap']['yticks']['labelsize'], rotation=self.characteristics_per_plot_type['heatmap']['yticks']['rotation'])
         # set colorbar label
         cb = ax.collections[0].colorbar
-        cb.ax.set_xlabel(self.characteristics_per_plot_type['heatm']['cb_xlabel']['xlabel'], size=self.characteristics_per_plot_type['heatm']['cb_xlabel']['fontsize'])
+        cb.ax.set_xlabel(self.characteristics_per_plot_type['heatmap']['cb_xlabel']['xlabel'], size=self.characteristics_per_plot_type['heatmap']['cb_xlabel']['fontsize'])
         # set cb ticks
-        cb.ax.tick_params(labelsize=self.characteristics_per_plot_type['heatm']['cb_xticks']['labelsize'])
+        cb.ax.tick_params(labelsize=self.characteristics_per_plot_type['heatmap']['cb_xticks']['labelsize'])
 
 
 def get_z_statistic_type(stats_dict, zstat):
