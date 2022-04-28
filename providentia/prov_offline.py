@@ -219,9 +219,18 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     print(f'Warning: {plot_type} could not be created.')
                     plot_types_to_remove.append(plot_type)
 
-            # add new keys to make no stats map that include bias (e.g. distribution_bias)
+            # add new keys to make plots which show experiment bias (i.e. exp - obs) (e.g. distribution_bias)
             elif '_bias' in plot_type:
                 self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
+
+            #add new keys to make plots with trends
+            elif '_trend' in plot_type:
+                #trend only currently possible for timeseries
+                if 'timeseries' in plot_type:
+                    self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
+                else:
+                    print(f'Warning: {plot_type} could not be created.')
+                    plot_types_to_remove.append(plot_type)
 
         self.plots_per_report_type[self.report_type] = [plot_type for plot_type in self.plots_per_report_type[self.report_type] if plot_type not in plot_types_to_remove]
 
@@ -1049,7 +1058,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # iterate through all data arrays
             original_data_array_labels = list(self.datareader.data_in_memory.keys())
             
-            for original_data_label in original_data_array_labels:
+            for n_data_label, original_data_label in enumerate(original_data_array_labels):
 
                 # do not show experiment data with _obs configuration (if possible)
                 if '_obs' in plot_type and original_data_label != 'observations':
@@ -1211,7 +1220,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             # add annotation
                             self.make_annotation(relevant_axis['hour'], data_label, plot_type, base_zstat)
 
-                        # Other plot types (distribution, timeseries etc.)
+                        # Other plot types (distribution, timeseries, scatter)
                         else:
                             # skip observational array
                             if original_data_label == 'observations' and ('_bias' in plot_type or 'scatter' in plot_type):
@@ -1223,10 +1232,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 if len(self.selected_station_data[data_label]['pandas_df']['data']) > 0:
                                     # make standard plot, without bias
                                     if '_bias' in plot_type:
-                                        func(relevant_axis, data_label, bias=True)
+                                        func(relevant_axis, data_label, plot_type, bias=True)
                                     # make plot without bias
                                     else:
-                                        func(relevant_axis, data_label)                           
+                                        func(relevant_axis, data_label, plot_type)                           
 
                             # set axis title
                             axis_title_characteristics = copy.deepcopy(self.characteristics_per_plot_type[plot_type]['axis_title'])
@@ -1755,27 +1764,42 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             aggregation_dict[temporal_aggregation_resolution]['ax'].axhline(y=mb, linestyle='--', linewidth=1.0,
                                                                                             color='black', zorder=0)
 
-    def make_timeseries(self, relevant_axis, data_label):
+    def make_timeseries(self, relevant_axis, data_label, plot_type, bias=False):
         
+        #bias plot?
+        if bias:
+            #observations and experiment must be colocated for this
+            ts_obs = self.selected_station_data['observations_colocatedto_experiments']['pandas_df']
+            original_data_label = data_label.split('_')[0]
+            ts_model = self.selected_station_data['{}_colocatedto_observations'.format(original_data_label)]['pandas_df'] 
+            ts = ts_model - ts_obs
+        else:
+            ts = self.selected_station_data[data_label]['pandas_df']
+
+        #configure size of plots if have very few points
+        if (data_label.split('_')[0] == 'observations') or (bias):
+            if len(ts.dropna().index) < 200:
+                self.time_series_markersize = 4.0 
+
         # make time series plot
-        relevant_axis.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
+        relevant_axis.plot(ts.dropna(),
                            color=self.datareader.plotting_params[data_label]['colour'],
                            marker='o', markeredgecolor=None, mew=0,
                            markersize=self.time_series_markersize, linestyle='None')
 
         # plot trend line?
-        if 'trend' in self.characteristics_per_plot_type['timeseries'].keys():
-            relevant_axis.plot(self.selected_station_data[data_label]['pandas_df'].rolling(self.characteristics_per_plot_type['timeseries']['trend']['n_points'], min_periods=self.characteristics_per_plot_type['timeseries']['trend']['min_points']).mean().dropna(),
+        if '_trend' in plot_type:
+            relevant_axis.plot(ts.rolling(self.characteristics_per_plot_type['timeseries']['trend']['window'], min_periods=self.characteristics_per_plot_type['timeseries']['trend']['min_points'], center=True).mean().dropna(),
                                color=self.datareader.plotting_params[data_label]['colour'],
-                               linewidth=self.time_series_markersize,
+                               linewidth=1.0,
                                zorder=self.datareader.plotting_params[data_label]['zorder']+len(list(self.datareader.plotting_params.keys())))
 
         # set xticks
-        slices = (len(self.selected_station_data[data_label]['pandas_df'].dropna().index.values) /
-                  self.characteristics_per_plot_type['timeseries']['xticks']['n_slices'])
+        slices = (len(ts.dropna().index.values) /
+                self.characteristics_per_plot_type['timeseries']['xticks']['n_slices'])
         if slices >= 1:
-            steps = self.selected_station_data[data_label]['pandas_df'].dropna().index.values[0::int(slices)]
-            last_step = self.selected_station_data[data_label]['pandas_df'].dropna().index.values[-1]
+            steps = ts.dropna().index.values[0::int(slices)]
+            last_step = ts.dropna().index.values[-1]
             if last_step not in steps:
                 steps = np.append(steps, last_step)
             relevant_axis.xaxis.set_ticks(steps)
@@ -1789,7 +1813,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # set yticks size
         relevant_axis.yaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['timeseries']['yticks']['labelsize'])
 
-    def make_distribution(self, relevant_axis, data_label, bias=False):
+
+    def make_distribution(self, relevant_axis, data_label, plot_type, bias=False):
         
         # make distribution plot
         minmax_diff = self.selected_station_data_max - self.selected_station_data_min
@@ -1874,7 +1899,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # set cb ticks
         cb.ax.tick_params(labelsize=self.characteristics_per_plot_type['heatmap']['cb_xticks']['labelsize'])
 
-    def make_scatter(self, relevant_axis, data_label):
+    def make_scatter(self, relevant_axis, data_label, plot_type):
 
         # Get observations data
         observations_data = self.selected_station_data['observations_colocatedto_experiments']['pandas_df'].dropna()['data']
