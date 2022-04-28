@@ -20,6 +20,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from providentia import aux
 import scipy.stats as st
 import seaborn as sns
+from datetime import datetime
 
 from .reading import drop_nans
 from .calculate import Stats
@@ -600,16 +601,19 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 ax.set_xlabel(**plot_characteristics['axis_xlabel'])
 
                         # make axis ylabel (only on leftmost column of visible axes)?
-                        if ('axis_ylabel' in plot_characteristics_vars) & (col_ii == 0):
-                            ax.set_ylabel(**plot_characteristics['axis_ylabel'])
+                        if ('axis_ylabel' in plot_characteristics_vars) and (col_ii == 0):
+                            if ('periodic' in plot_type) and (self.selected_resolution != 'hourly'):
+                                pass
+                            else:
+                                ax.set_ylabel(**plot_characteristics['axis_ylabel'])
 
                         # if are sharing xticks, and not on last row on page/last
                         # valid row, then ensure current axis xticks are hidden
-                        if ('xtick_share' in plot_characteristics_vars) & (not last_valid_row) & (not last_row_on_page):
+                        if ('xtick_share' in plot_characteristics_vars) and (not last_valid_row) and (not last_row_on_page):
                             plt.setp(ax.get_xticklabels(), visible=False)
 
                         # if are sharing yticks, and not on left column, then ensure current axis yticks are hidden
-                        if ('ytick_share' in plot_characteristics_vars) & (col_ii != 0):
+                        if ('ytick_share' in plot_characteristics_vars) and (col_ii != 0):
                             plt.setp(ax.get_yticklabels(), visible=False)
 
                         # add gridlines?
@@ -1564,7 +1568,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # get minimum and maximum from all axes and set limits
                 for ax in relevant_axes:
                     if ax.lines:
-                        if ('distribution_bias' in plot_type) or ('_bias' not in plot_type):
+                        if ((('_bias' in plot_type) and (('distribution_' in plot_type) or ('timeseries' in plot_type))) or 
+                            ('_bias' not in plot_type)):
                             if 'periodic-' not in plot_type:
                                 ax.set_xlim(np.min(all_xlim_lower), np.max(all_xlim_upper))
                             ax.set_ylim(np.min(all_ylim_lower), np.max(all_ylim_upper))
@@ -1597,12 +1602,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             'ax': relevant_axis['month'], 'title': 'M', 'xticks': np.arange(1, 13, dtype=np.int), 'plots': {}}
 
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
-        if 'hourly' in self.selected_resolution:
-            aggregation_dict = {'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
-        elif self.selected_resolution == 'daily':
-            aggregation_dict = {'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
-        elif self.selected_resolution == 'monthly':
-            aggregation_dict = {'month': month_aggregation_dict}
+        aggregation_dict = {'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
+        aggregation_dict_to_remove = {}
+        if self.selected_resolution == 'daily':
+            aggregation_dict_to_remove = {'hour': hour_aggregation_dict}
+            hour_aggregation_dict['title'] = ''
+        if self.selected_resolution == 'monthly':
+            aggregation_dict_to_remove = {'dayofweek': dayofweek_aggregation_dict, 'hour': hour_aggregation_dict}
 
         # turn on all axes that will be plotted on, and add yaxis grid to each axis, and change axis label tick sizes
         for temporal_aggregation_resolution in list(aggregation_dict.keys()):
@@ -1616,6 +1622,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # change axis tick labels
             aggregation_dict[temporal_aggregation_resolution]['ax'].tick_params(labelsize=8)
 
+        # remove plots if there is no aggregation dict for them
+        if aggregation_dict_to_remove:
+            for temporal_aggregation_resolution in list(aggregation_dict_to_remove.keys()):
+                aggregation_dict[temporal_aggregation_resolution]['ax'].set_axis_off()
+        
         if 'violin' in plot_type:
 
             # iterate through all defined temporal aggregation resolutions
@@ -1794,18 +1805,39 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                linewidth=1.0,
                                zorder=self.datareader.plotting_params[data_label]['zorder']+len(list(self.datareader.plotting_params.keys())))
 
-        # set xticks
-        slices = (len(ts.dropna().index.values) /
-                self.characteristics_per_plot_type['timeseries']['xticks']['n_slices'])
-        if slices >= 1:
-            steps = ts.dropna().index.values[0::int(slices)]
-            last_step = ts.dropna().index.values[-1]
-            if last_step not in steps:
-                steps = np.append(steps, last_step)
-            relevant_axis.xaxis.set_ticks(steps)
-        else:
-            if data_label.split('_')[0] == 'observations':
-                print('Warning: Number of time slices (n_slices) has to be equal or lower than the number of timesteps.')  
+        # get user-defined characteristics for xticks
+        n_slices = self.characteristics_per_plot_type['timeseries']['xticks']['n_slices']
+        last_step = self.characteristics_per_plot_type['timeseries']['xticks']['last_step']
+        define = self.characteristics_per_plot_type['timeseries']['xticks']['define']
+
+        # get number of months and days
+        timeseries_start_date = datetime.strptime(str(self.start_date), '%Y%m%d')
+        timeseries_end_date = datetime.strptime(str(self.end_date), '%Y%m%d')
+        n_months = (timeseries_end_date.year - timeseries_start_date.year) * 12 + (timeseries_end_date.month - timeseries_start_date.month)
+        n_days = (timeseries_end_date - timeseries_start_date).days
+        
+        # get months and days (steps)
+        label = list(self.selected_station_data.keys())[-1]
+        steps = self.selected_station_data[label]['pandas_df'].dropna().index.values
+        months = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
+        # drop last month if it is not complete
+        if months[-1] != steps[-1]:
+            months = months[:-1]
+
+        # define time slices
+        if define:
+            if n_months >= 3:
+                steps = months
+            elif n_days < 7:
+                relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+            slices = int(np.ceil(len(steps) / n_slices))
+
+            # use default axes if slices is below 1 (do not define)
+            if slices >= 1:
+                xticks = steps[0::slices]
+                if last_step and (steps[-1] not in xticks):
+                    xticks = np.append(xticks, steps[-1])
+                relevant_axis.xaxis.set_ticks(xticks) 
 
         # set xticks size and rotation
         relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['timeseries']['xticks']['labelsize'], 
