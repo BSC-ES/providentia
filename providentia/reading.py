@@ -48,6 +48,7 @@ def read_netcdf_data(tuple_arguments):
         file_time = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
     else:
         file_time = num2date(ncdf_root['time'][:], time_units)
+
         # remove microseconds
         file_time = pd.to_datetime([t.replace(microsecond=0) for t in file_time])
 
@@ -56,17 +57,21 @@ def read_netcdf_data(tuple_arguments):
         np.array([i for i, val in enumerate(file_time)
                   if (val >= time_array[0]) & (val <= time_array[-1])],
                  dtype=np.int)
+
     # cut file time for valid indices
     file_time = file_time[valid_file_time_indices]
+
     # get indices relative to active full time array
     full_array_time_indices = np.searchsorted(time_array, file_time)
 
     # get all station references in file
     file_station_references = ncdf_root['station_reference'][:]
+
     # get indices of all unique station references that are contained
     # within file station references array
     full_array_station_indices = \
         np.where(np.in1d(station_references, file_station_references))[0]
+
     # get indices of file station station references that are
     # contained in all unique station references array
     current_file_station_indices = \
