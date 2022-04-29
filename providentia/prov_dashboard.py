@@ -813,6 +813,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                         experiments_to_read.remove(data_label)
 
             else:
+
+                # remove incomplete months
+                if ((self.active_resolution == 'monthly') and (str(self.active_end_date)[6:8] != '01')):
+                    self.previous_relevant_yearmonths = self.previous_relevant_yearmonths[:-1]
+                    self.relevant_yearmonths = self.relevant_yearmonths[:-1]
+                
                 # if station references array has changed then as cutting/appending to
                 # existing data need to rearrange existing data arrays accordingly
                 if not np.array_equal(self.previous_station_references, self.station_references):
@@ -887,6 +893,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 else:
                     self.datareader.metadata_in_memory = \
                         self.datareader.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
+
                 # iterate through all keys in data in memory dictionary and
                 # cut edges of the associated arrays appropriately
                 for data_label in list(self.datareader.data_in_memory.keys()):
@@ -895,67 +902,83 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
             # need to read on left edge?
             if read_left:
+
                 # get n number of new elements on left edge
                 n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
+
                 # get list of yearmonths to read
                 yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, self.active_start_date,
-                                                            previous_active_start_date)
+                                                            previous_active_start_date, self.active_resolution)
+                                                        
                 # check which yearmonths_to_read in previous matrix
                 yearmonths_in_old_matrix = np.isin(yearmonths_to_read, self.previous_relevant_yearmonths)
+
                 # get yearmonths not currently accounted for in matrix
+                if isinstance(yearmonths_to_read, list):
+                    yearmonths_to_read = np.asarray(yearmonths_to_read)
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
-                self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
-                self.datareader.metadata_in_memory = np.concatenate((np.full(
-                    (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
-                                                          self.datareader.metadata_in_memory), axis=1)
+                if new_yearmonths:
 
-                # iterate through all keys in data in memory dictionary and
-                # insert read data on left edge of the associated arrays
-                for data_label in list(self.datareader.data_in_memory.keys()):
-                    # add space on left edge to insert new read data
-                    if data_label == 'observations':
-                        self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
-                            (len(self.station_references), n_new_left_data_inds), np.NaN,
-                            dtype=self.datareader.data_dtype), self.datareader.data_in_memory[data_label]), axis=1)
-                    else:
-                        self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
-                            (len(self.station_references), n_new_left_data_inds), np.NaN,
-                            dtype=self.datareader.data_dtype[:1]), self.datareader.data_in_memory[data_label]), axis=1)
-                    self.datareader.read_data(data_label, self.active_start_date, previous_active_start_date,
-                                              self.active_network, self.active_resolution,
-                                              self.active_species, self.active_matrix)
+                    self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
+                    self.datareader.metadata_in_memory = np.concatenate((np.full(
+                        (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
+                                                            self.datareader.metadata_in_memory), axis=1)
+
+                    # iterate through all keys in data in memory dictionary and
+                    # insert read data on left edge of the associated arrays
+                    for data_label in list(self.datareader.data_in_memory.keys()):
+                        # add space on left edge to insert new read data
+                        if data_label == 'observations':
+                            self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
+                                (len(self.station_references), n_new_left_data_inds), np.NaN,
+                                dtype=self.datareader.data_dtype), self.datareader.data_in_memory[data_label]), axis=1)
+                        else:
+                            self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
+                                (len(self.station_references), n_new_left_data_inds), np.NaN,
+                                dtype=self.datareader.data_dtype[:1]), self.datareader.data_in_memory[data_label]), axis=1)
+                        self.datareader.read_data(data_label, self.active_start_date, previous_active_start_date,
+                                                self.active_network, self.active_resolution,
+                                                self.active_species, self.active_matrix)
 
             # need to read on right edge?
             if read_right:
+
                 # get n number of new elements on right edge
                 n_new_right_data_inds = (len(self.time_array) - 1) - \
                                         np.where(self.time_array == self.previous_time_array[-1])[0][0]
+
                 # get list of yearmonths to read
                 yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, previous_active_end_date,
-                                                            self.active_end_date)
+                                                            self.active_end_date, self.active_resolution)
+
                 # check which yearmonths_to_read in previous matrix
-                yearmonths_in_old_matrix = np.isin(yearmonths_to_read,self.previous_relevant_yearmonths)
+                yearmonths_in_old_matrix = np.isin(yearmonths_to_read, self.previous_relevant_yearmonths)
+
                 # get yearmonths not currently accounted for in matrix
+                if isinstance(yearmonths_to_read, list):
+                    yearmonths_to_read = np.asarray(yearmonths_to_read)
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
-                self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
-                self.datareader.metadata_in_memory = np.concatenate((self.datareader.metadata_in_memory, np.full(
-                    (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
+                if new_yearmonths:
 
-                # iterate through all keys in data in memory dictionary and
-                # insert read data on right edge of the associated arrays
-                for data_label in list(self.datareader.data_in_memory.keys()):
-                    if data_label == 'observations':
-                        self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
-                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype)), axis=1)
-                    else:
-                        self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
-                            (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype[:1])),
-                                                                         axis=1)
-                    self.datareader.read_data(data_label, previous_active_end_date, self.active_end_date,
-                                              self.active_network, self.active_resolution,
-                                              self.active_species, self.active_matrix)
+                    self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
+                    self.datareader.metadata_in_memory = np.concatenate((self.datareader.metadata_in_memory, np.full(
+                        (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
+
+                    # iterate through all keys in data in memory dictionary and
+                    # insert read data on right edge of the associated arrays
+                    for data_label in list(self.datareader.data_in_memory.keys()):
+                        if data_label == 'observations':
+                            self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
+                                (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype)), axis=1)
+                        else:
+                            self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
+                                (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype[:1])),
+                                                                            axis=1)
+                            self.datareader.read_data(data_label, previous_active_end_date, self.active_end_date,
+                                                    self.active_network, self.active_resolution,
+                                                    self.active_species, self.active_matrix)
 
             # update menu object fields
             aux.update_metadata_fields(self)
@@ -968,7 +991,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.datareader.read_data(data_label, self.active_start_date, self.active_end_date,
                                           self.active_network, self.active_resolution,
                                           self.active_species, self.active_matrix)
-            
+
         # if species has changed, update default species specific lower/upper limits
         if self.active_species != previous_active_species:
             # update default lower/upper species specific limits and filter data outside limits
