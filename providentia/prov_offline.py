@@ -1790,13 +1790,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         #configure size of plots if have very few points
         if (data_label.split('_')[0] == 'observations') or (bias):
             if len(ts.dropna().index) < 200:
-                self.time_series_markersize = 4.0 
+                self.timeseries_markersize = 4.0 
 
         # make time series plot
         relevant_axis.plot(ts.dropna(),
                            color=self.datareader.plotting_params[data_label]['colour'],
                            marker='o', markeredgecolor=None, mew=0,
-                           markersize=self.time_series_markersize, linestyle='None')
+                           markersize=self.timeseries_markersize, linestyle='None')
 
         # plot trend line?
         if '_trend' in plot_type:
@@ -1806,23 +1806,27 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                zorder=self.datareader.plotting_params[data_label]['zorder']+len(list(self.datareader.plotting_params.keys())))
 
         # get user-defined characteristics for xticks
-        n_slices = self.characteristics_per_plot_type['timeseries']['xticks']['n_slices']
-        last_step = self.characteristics_per_plot_type['timeseries']['xticks']['last_step']
         define = self.characteristics_per_plot_type['timeseries']['xticks']['define']
+        n_slices = self.characteristics_per_plot_type['timeseries']['xticks']['n_slices']
+        add_last_step = self.characteristics_per_plot_type['timeseries']['xticks']['last_step']
 
-        # get number of months and days
-        timeseries_start_date = datetime.strptime(str(self.start_date), '%Y%m%d')
-        timeseries_end_date = datetime.strptime(str(self.end_date), '%Y%m%d')
-        n_months = (timeseries_end_date.year - timeseries_start_date.year) * 12 + (timeseries_end_date.month - timeseries_start_date.month)
-        n_days = (timeseries_end_date - timeseries_start_date).days
-        
-        # get months and days (steps)
+        # get steps in days or months
         label = list(self.selected_station_data.keys())[-1]
         steps = self.selected_station_data[label]['pandas_df'].dropna().index.values
+        last_step = self.selected_station_data[label]['pandas_df'].dropna().index.values[-1]
+
+        # get start and end dates
+        timeseries_start_date = pd.to_datetime(steps[0])
+        timeseries_end_date = pd.to_datetime(steps[-1])
+
+        # get months that are complete
         months = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
-        # drop last month if it is not complete
         if months[-1] != steps[-1]:
             months = months[:-1]
+
+        # get number of months and days
+        n_months = (timeseries_end_date.year - timeseries_start_date.year) * 12 + (timeseries_end_date.month - timeseries_start_date.month)
+        n_days = (timeseries_end_date - timeseries_start_date).days
 
         # define time slices
         if define:
@@ -1832,12 +1836,18 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
             slices = int(np.ceil(len(steps) / n_slices))
 
-            # use default axes if slices is below 1 (do not define)
+            # use default axes if the number of timesteps is lower than the number of slices
             if slices >= 1:
                 xticks = steps[0::slices]
-                if last_step and (steps[-1] not in xticks):
-                    xticks = np.append(xticks, steps[-1])
-                relevant_axis.xaxis.set_ticks(xticks) 
+            else:
+                xticks = relevant_axis.xaxis.get_ticks()
+            
+            # add last step to xticks
+            if add_last_step and (xticks[-1] != last_step):
+                xticks = np.append(xticks, last_step)
+            
+            # set xticks
+            relevant_axis.xaxis.set_ticks(xticks) 
 
         # set xticks size and rotation
         relevant_axis.xaxis.set_tick_params(labelsize=self.characteristics_per_plot_type['timeseries']['xticks']['labelsize'], 
