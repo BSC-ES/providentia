@@ -42,8 +42,12 @@ class ProvConfiguration(object):
         self.sel_station_markersize = \
             kwargs.get('sel_station_markersize', 8)
         self.legend_markersize = kwargs.get('legend_markersize', 11)
-        self.time_series_markersize = \
-            kwargs.get('time_series_markersize', 1.1)
+        self.timeseries_markersize = \
+            kwargs.get('timeseries_markersize', 1.1)
+        self.timeseries_n_slices = \
+            kwargs.get('timeseries_n_slices', 6)
+        self.timeseries_last_step = \
+            kwargs.get('timeseries_last_step', True)
         self.temp_agg_markersize = \
             kwargs.get('temp_agg_markersize', 3)
         self.temp_agg_expbias_markersize = \

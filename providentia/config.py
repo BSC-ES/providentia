@@ -86,9 +86,15 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--legend_markersize",
                                      dest="legend_markersize",
                                      help="define marker sizes on legend")
-            self.parser.add_argument("--time_series_markersize",
-                                     dest="time_series_markersize",
+            self.parser.add_argument("--timeseries_markersize",
+                                     dest="timeseries_markersize",
                                      help="define marker sizes on time series plot")
+            self.parser.add_argument("--timeseries_n_slices",
+                                     dest="timeseries_n_slices",
+                                     help="define number of slices in data labels")
+            self.parser.add_argument("--timeseries_last_step",
+                                     dest="timeseries_last_step",
+                                     help="define if data labels will include end date")
             self.parser.add_argument("--temp_aggregated_markersize",
                                      dest="temp_aggregated_markersize",
                                      help="define marker sizes on temporally aggregated plot")
@@ -118,8 +124,7 @@ class ProvArgumentParser(object):
                                      help="define start date in format as 20160101")
             self.parser.add_argument("--end_date",
                                      dest="end_date",
-                                     help="define ned date in format as 20170101")
-
+                                     help="define end date in format as 20170101")
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
