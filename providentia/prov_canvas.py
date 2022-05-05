@@ -767,7 +767,7 @@ class MPLCanvas(FigureCanvas):
 
         # get months that are complete
         months = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
-        if months[-1] != steps[-1]:
+        if months.size > 0 and (months[-1] != steps[-1]):
             months = months[:-1]
 
         # get number of months and days
