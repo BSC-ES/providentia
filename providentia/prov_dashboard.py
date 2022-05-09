@@ -726,7 +726,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             read_all = True
         # key variables have not changed, has start/end date?
         else:
-            # determine if start date/end date have changed
             if (self.active_start_date != previous_active_start_date) or (
                     self.active_end_date != previous_active_end_date):
                 # if date range has changed then determine type of overlap with previous date range
@@ -781,6 +780,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                experiment not in previous_active_experiment_grids]
 
         # has date range changed?
+        # print('Previous dates:', previous_active_start_date, '-', previous_active_end_date)
+        # print('Current dates:', self.active_start_date, '-', self.active_end_date)
+        # print('All:', read_all, '- Left:', read_left, '- Right:', read_right)
         if read_all or read_left or read_right or cut_left or cut_right:
 
             # set new active time array/unique station references/longitudes/latitudes
@@ -815,10 +817,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             else:
 
                 # remove incomplete months
-                if ((self.active_resolution == 'monthly') and (str(self.active_end_date)[6:8] != '01')):
-                    self.previous_relevant_yearmonths = self.previous_relevant_yearmonths[:-1]
-                    self.relevant_yearmonths = self.relevant_yearmonths[:-1]
-                
+                if self.active_resolution == 'monthly':
+                    if str(self.active_end_date)[6:8] != '01':
+                        if str(self.active_end_date)[0:6] == str(self.relevant_yearmonths[-1])[0:6]:
+                            self.relevant_yearmonths = self.relevant_yearmonths[:-1]
+                    if str(self.active_start_date)[6:8] != '01':
+                        if str(self.active_start_date)[0:6] == str(self.relevant_yearmonths[0])[0:6]:
+                            self.relevant_yearmonths = self.relevant_yearmonths[1:]
+
                 # if station references array has changed then as cutting/appending to
                 # existing data need to rearrange existing data arrays accordingly
                 if not np.array_equal(self.previous_station_references, self.station_references):
@@ -833,6 +839,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     new_metadata_array = np.full((len(self.station_references),
                                                   len(self.previous_relevant_yearmonths)),
                                                  np.NaN, dtype=self.metadata_dtype)
+
+                    # self.datareader.metadata_in_memory = self.datareader.metadata_in_memory[:,:-1]
                     new_metadata_array[new_station_inds, :] = self.datareader.metadata_in_memory[old_station_inds, :]
                     self.datareader.metadata_in_memory = new_metadata_array
 
@@ -852,7 +860,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                                                   data_label][old_station_inds, :]
                         # overwrite data array with reshaped version
                         self.datareader.data_in_memory[data_label] = new_data_array
-
+            
             # need to cut edges?
             if cut_left or cut_right:
 
@@ -949,7 +957,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 # get n number of new elements on right edge
                 n_new_right_data_inds = (len(self.time_array) - 1) - \
                                         np.where(self.time_array == self.previous_time_array[-1])[0][0]
-
                 # get list of yearmonths to read
                 yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, previous_active_end_date,
                                                             self.active_end_date, self.active_resolution)
@@ -979,8 +986,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                 (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype[:1])),
                                                                             axis=1)
                         self.datareader.read_data(data_label, previous_active_end_date, self.active_end_date,
-                                                self.active_network, self.active_resolution,
-                                                self.active_species, self.active_matrix)
+                                                  self.active_network, self.active_resolution,
+                                                  self.active_species, self.active_matrix)
 
             # update menu object fields
             aux.update_metadata_fields(self)
