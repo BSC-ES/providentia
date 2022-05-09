@@ -1568,11 +1568,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # get minimum and maximum from all axes and set limits
                 for ax in relevant_axes:
                     if ax.lines:
-                        if ((('_bias' in plot_type) and (('distribution_' in plot_type) or ('timeseries' in plot_type))) or 
-                            ('_bias' not in plot_type)):
-                            if 'periodic-' not in plot_type:
-                                ax.set_xlim(np.min(all_xlim_lower), np.max(all_xlim_upper))
-                            ax.set_ylim(np.min(all_ylim_lower), np.max(all_ylim_upper))
+                        if '_bias' in plot_type:
+                            # if there is bias center plots y limits around 0
+                            if np.abs(np.max(all_ylim_upper)) >= np.abs(np.min(all_ylim_lower)):
+                                ylim_min = -np.abs(np.max(all_ylim_upper))
+                                ylim_max = np.abs(np.max(all_ylim_upper))
+                            elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
+                                ylim_min = -np.abs(np.min(all_ylim_lower))
+                                ylim_max = np.abs(np.min(all_ylim_lower))
+                            ax.set_ylim(ylim_min, ylim_max)
                         elif 'scatter' in plot_type:
                             lim_min = min(xlim_lower, ylim_lower)
                             lim_max = max(xlim_upper, ylim_upper)
@@ -1580,14 +1584,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             ax.set_ylim([lim_min, lim_max])
                             ax.set_aspect('equal', adjustable='box')
                         else:
-                            # if there is bias center plots y limits around 0
-                            if np.abs(np.max(all_xlim_upper)) >= np.abs(np.min(all_xlim_lower)):
-                                ylim_min = -np.abs(np.max(all_xlim_upper))
-                                ylim_max = np.abs(np.max(all_xlim_upper))
-                            elif np.abs(np.max(all_xlim_upper)) < np.abs(np.min(all_xlim_lower)):
-                                ylim_min = -np.abs(np.min(all_xlim_lower))
-                                ylim_max = np.abs(np.min(all_xlim_lower))
-                            ax.set_ylim(ylim_min, ylim_max)
+                            if 'periodic-' not in plot_type:
+                                ax.set_xlim(np.min(all_xlim_lower), np.max(all_xlim_upper))
+                            ax.set_ylim(np.min(all_ylim_lower), np.max(all_ylim_upper))
 
     def make_periodic(self, relevant_axis, data_label, plot_type, zstat):
         """Function that makes the temporally aggregated experiment bias statistic plots"""

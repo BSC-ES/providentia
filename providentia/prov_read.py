@@ -462,6 +462,7 @@ class DataReader:
         # assign a colour/zorder to all selected data arrays
         # define observations colour to be 'black'
         self.plotting_params['observations']['colour'] = 'black'
+
         # define zorder of observations to be 5
         self.plotting_params['observations']['zorder'] = 5
 

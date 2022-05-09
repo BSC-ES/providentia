@@ -265,8 +265,13 @@ def get_yearmonths_to_read(yearmonths, start_date_to_read, end_date_to_read, res
     last_valid_file_ind = bisect.bisect_left(yearmonths, int(end_date_to_read))
 
     # read only complete months
-    if (resolution == 'monthly') and (str(end_date_to_read)[6:8] != '01'):
-        last_valid_file_ind -= 1
+    if resolution == 'monthly':
+        if str(end_date_to_read)[6:8] != '01':
+            if str(end_date_to_read)[0:6] == str(yearmonths[-1])[0:6]:
+                last_valid_file_ind -= 1
+        if str(start_date_to_read)[6:8] != '01':
+            if str(start_date_to_read)[0:6] == str(yearmonths[0])[0:6]:
+                first_valid_file_ind += 1
 
     if first_valid_file_ind == last_valid_file_ind:
         return [yearmonths[first_valid_file_ind]]
