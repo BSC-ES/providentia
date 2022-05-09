@@ -97,6 +97,11 @@ class DataReader:
                                                                             int(str_active_end_date[6:8])),
                                                       freq=self.active_frequency_code)[:-1]
 
+        # show warning when the data consists only of one timestep
+        if len(self.read_instance.time_array) == 1:
+            print('Warning: Extend the time range or decrease the resolution (e.g. from monthly to daily) to create plots.')
+        
+        # get file paths
         if not self.read_instance.reading_nonghost:
             # get all relevant observational files
             file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
