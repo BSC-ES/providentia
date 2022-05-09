@@ -26,5 +26,5 @@
                "heatmap-p95"
               ],
 
-    "debug":["timeseries_bias"]
+    "debug":["periodic-p95"]
 }
