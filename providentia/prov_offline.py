@@ -1568,7 +1568,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # get minimum and maximum from all axes and set limits
                 for ax in relevant_axes:
                     if ax.lines:
-                        if ('_bias' in plot_type) and ('distribution_' not in plot_type):
+                        if '_bias' in plot_type:
                             # if there is bias center plots y limits around 0
                             if np.abs(np.max(all_ylim_upper)) >= np.abs(np.min(all_ylim_lower)):
                                 ylim_min = -np.abs(np.max(all_ylim_upper))
