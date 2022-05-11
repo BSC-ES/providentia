@@ -780,9 +780,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                experiment not in previous_active_experiment_grids]
 
         # has date range changed?
-        # print('Previous dates:', previous_active_start_date, '-', previous_active_end_date)
-        # print('Current dates:', self.active_start_date, '-', self.active_end_date)
-        # print('All:', read_all, '- Left:', read_left, '- Right:', read_right)
         if read_all or read_left or read_right or cut_left or cut_right:
 
             # set new active time array/unique station references/longitudes/latitudes
@@ -819,16 +816,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                         experiments_to_read.remove(data_label)
 
             else:
-
-                # remove incomplete months
-                if self.active_resolution == 'monthly':
-                    if str(self.active_end_date)[6:8] != '01':
-                        if str(self.active_end_date)[0:6] == str(self.relevant_yearmonths[-1])[0:6]:
-                            self.relevant_yearmonths = self.relevant_yearmonths[:-1]
-                    if str(self.active_start_date)[6:8] != '01':
-                        if str(self.active_start_date)[0:6] == str(self.relevant_yearmonths[0])[0:6]:
-                            self.relevant_yearmonths = self.relevant_yearmonths[1:]
-
+                
                 # if station references array has changed then as cutting/appending to
                 # existing data need to rearrange existing data arrays accordingly
                 if not np.array_equal(self.previous_station_references, self.station_references):

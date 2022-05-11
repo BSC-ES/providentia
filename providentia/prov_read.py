@@ -119,6 +119,15 @@ class DataReader:
             self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[
                 network][resolution][matrix][species]])
 
+            # remove incomplete months
+            if resolution == 'monthly':
+                if str_active_end_date[6:8] != '01':
+                    if str_active_end_date[0:6] == str(self.read_instance.relevant_yearmonths[-1])[0:6]:
+                        self.read_instance.relevant_yearmonths = self.read_instance.relevant_yearmonths[:-1]
+                if str_active_start_date[6:8] != '01':
+                    if str_active_start_date[0:6] == str(self.read_instance.relevant_yearmonths[0])[0:6]:
+                        self.read_instance.relevant_yearmonths = self.read_instance.relevant_yearmonths[1:]
+
             relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc'
                                     for yyyymm in self.read_instance.relevant_yearmonths])
             self.N_inds_per_month = np.array([np.count_nonzero(np.all(
