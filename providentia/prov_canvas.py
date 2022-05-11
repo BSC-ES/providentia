@@ -1828,3 +1828,40 @@ class MPLCanvas(FigureCanvas):
         # all available stations), with the absolute indices of the subset of plotted selected stations
         return self.active_map_valid_station_inds[selected_map_inds]
 
+    def clear_canvas(self):
+        
+        # clear all axes (except map)
+        self.legend_ax.cla()
+        self.ts_ax.cla()
+        self.violin_hours_ax.cla()
+        self.violin_months_ax.cla()
+        self.violin_days_ax.cla()
+        self.exp_bias_hours_ax.cla()
+        self.exp_bias_months_ax.cla()
+        self.exp_bias_days_ax.cla()
+        self.station_metadata_ax.cla()
+
+        # hide all axes (except map)
+        self.legend_ax.axis('off')
+        self.ts_ax.axis('off')
+        self.violin_hours_ax.axis('off')
+        self.violin_months_ax.axis('off')
+        self.violin_days_ax.axis('off')
+        self.exp_bias_hours_ax.axis('off')
+        self.exp_bias_months_ax.axis('off')
+        self.exp_bias_days_ax.axis('off')
+        self.station_metadata_ax.axis('off')
+
+        # reset relative index lists of selected station on map as empty lists
+        self.relative_selected_station_inds = np.array([], dtype=np.int)
+        self.absolute_selected_station_inds = np.array([], dtype=np.int)
+        self.active_map_valid_station_inds = np.array([], dtype=np.int)
+
+        # clear previously plotted station points
+        try:
+            self.map_points.remove()
+        except:
+            pass
+
+        # draw changes
+        self.draw()

@@ -791,6 +791,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                        self.active_end_date, self.active_network,
                                        self.active_species, self.active_matrix)
 
+            if self.datareader.clear_canvas:
+                self.mpl_canvas.clear_canvas()
+                return
+
             # need to re-read all observations/experiments?
             if read_all:
 

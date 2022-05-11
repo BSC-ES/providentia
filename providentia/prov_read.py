@@ -97,104 +97,107 @@ class DataReader:
                                                                             int(str_active_end_date[6:8])),
                                                       freq=self.active_frequency_code)[:-1]
 
-        # show warning when the data consists only of one timestep
-        if len(self.read_instance.time_array) == 1:
-            print('Warning: Extend the time range or decrease the resolution (e.g. from monthly to daily) to create plots.')
-        
-        # get file paths
-        if not self.read_instance.reading_nonghost:
-            # get all relevant observational files
-            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
-                                                self.read_instance.ghost_version, resolution,
-                                                species, species)
+        self.clear_canvas = False
+
+        # show warning when the data consists only of less than 2 timesteps
+        if len(self.read_instance.time_array) < 2:
+            self.clear_canvas = True
+            print('Warning: Extend the time range or increase the resolution (e.g. from monthly to daily) to create plots.')   
         else:
-            # get files from nonghost path
-            file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network[1:].lower(),
-                                                self.read_instance.selected_matrix,
-                                                resolution, species, species)
+            # get file paths
+            if not self.read_instance.reading_nonghost:
+                # get all relevant observational files
+                file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
+                                                    self.read_instance.ghost_version, resolution,
+                                                    species, species)
+            else:
+                # get files from nonghost path
+                file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network[1:].lower(),
+                                                    self.read_instance.selected_matrix,
+                                                    resolution, species, species)
 
-        self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[
-            network][resolution][matrix][species]])
+            self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[
+                network][resolution][matrix][species]])
 
-        relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc'
-                                 for yyyymm in self.read_instance.relevant_yearmonths])
-        self.N_inds_per_month = np.array([np.count_nonzero(np.all(
-            [self.read_instance.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d'),
-             self.read_instance.time_array < datetime.datetime.strptime(str(self.read_instance.relevant_yearmonths[month_ii + 1]), '%Y%m%d')],
-            axis=0)) if month_ii != (len(self.read_instance.relevant_yearmonths) - 1) else np.count_nonzero(
-            self.read_instance.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d')) for month_ii, start_yyyymm in
-                                          enumerate(self.read_instance.relevant_yearmonths)])
+            relevant_files = sorted([file_root+str(yyyymm)[:6]+'.nc'
+                                    for yyyymm in self.read_instance.relevant_yearmonths])
+            self.N_inds_per_month = np.array([np.count_nonzero(np.all(
+                [self.read_instance.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d'),
+                self.read_instance.time_array < datetime.datetime.strptime(str(self.read_instance.relevant_yearmonths[month_ii + 1]), '%Y%m%d')],
+                axis=0)) if month_ii != (len(self.read_instance.relevant_yearmonths) - 1) else np.count_nonzero(
+                self.read_instance.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d')) for month_ii, start_yyyymm in
+                                            enumerate(self.read_instance.relevant_yearmonths)])
 
-        self.read_instance.station_references = []
-        self.station_longitudes = []
-        self.station_latitudes = []
-        if not self.read_instance.reading_nonghost:
-            for relevant_file in relevant_files:
-                ncdf_root = Dataset(relevant_file)
-                self.read_instance.station_references = np.append(self.read_instance.station_references, ncdf_root['station_reference'][:])
-                self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
-                self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
+            self.read_instance.station_references = []
+            self.station_longitudes = []
+            self.station_latitudes = []
+            if not self.read_instance.reading_nonghost:
+                for relevant_file in relevant_files:
+                    ncdf_root = Dataset(relevant_file)
+                    self.read_instance.station_references = np.append(self.read_instance.station_references, ncdf_root['station_reference'][:])
+                    self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
+                    self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
+                    ncdf_root.close()
+                self.read_instance.station_references, station_unique_indices = np.unique(self.read_instance.station_references, return_index=True)
+                self.station_longitudes = self.station_longitudes[station_unique_indices]
+                self.station_latitudes = self.station_latitudes[station_unique_indices]
+            else:
+                # first, try to take the data files and handle in case of daily files
+                if os.path.exists(relevant_files[0]):
+                    ncdf_root = Dataset(relevant_files[0])
+                else:
+                    relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc'
+                                            for yyyymm in self.read_instance.relevant_yearmonths])
+                    ncdf_root = Dataset(relevant_files[0])
+                self.read_instance.station_references = np.array(
+                    [st_name.tostring().decode('ascii').replace('\x00', '')
+                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+                # get staion refs
+                if "latitude" in ncdf_root.variables:
+                    self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
+                    self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
+                else:
+                    self.station_longitudes = np.append(self.station_longitudes, ncdf_root['lon'][:])
+                    self.station_latitudes = np.append(self.station_latitudes, ncdf_root['lat'][:])
                 ncdf_root.close()
-            self.read_instance.station_references, station_unique_indices = np.unique(self.read_instance.station_references, return_index=True)
-            self.station_longitudes = self.station_longitudes[station_unique_indices]
-            self.station_latitudes = self.station_latitudes[station_unique_indices]
-        else:
-            # first, try to take the data files and handle in case of daily files
-            if os.path.exists(relevant_files[0]):
-                ncdf_root = Dataset(relevant_files[0])
+
+            # update measurement units for species (take standard units from parameter dictionary)
+            self.measurement_units = self.read_instance.parameter_dictionary[species]['standard_units']
+
+            # set data variables to read (dependent on active data resolution)
+            if not self.read_instance.reading_nonghost:
+                if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
+                    self.data_vars_to_read = [species, 'hourly_native_representativity_percent',
+                                            'daily_native_representativity_percent',
+                                            'monthly_native_representativity_percent',
+                                            'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
+                                            'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                            'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                            'season_code', 'time']
+                elif (resolution == '3hourly') or \
+                        (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
+                        (resolution == '6hourly_instantaneous'):
+                    self.data_vars_to_read = [species, 'daily_native_representativity_percent',
+                                            'monthly_native_representativity_percent',
+                                            'annual_native_representativity_percent',
+                                            'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                            'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                            'season_code', 'time']
+                elif resolution == 'daily':
+                    self.data_vars_to_read = [species, 'daily_native_representativity_percent',
+                                            'monthly_native_representativity_percent',
+                                            'annual_native_representativity_percent',
+                                            'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                            'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code', 'time']
+                elif resolution == 'monthly':
+                    self.data_vars_to_read = [species, 'monthly_native_representativity_percent',
+                                            'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
+                                            'annual_native_max_gap_percent', 'season_code', 'time']
             else:
-                relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc'
-                                         for yyyymm in self.read_instance.relevant_yearmonths])
-                ncdf_root = Dataset(relevant_files[0])
-            self.read_instance.station_references = np.array(
-                [st_name.tostring().decode('ascii').replace('\x00', '')
-                 for st_name in ncdf_root['station_name'][:]], dtype=np.str)
-            # get staion refs
-            if "latitude" in ncdf_root.variables:
-                self.station_longitudes = np.append(self.station_longitudes, ncdf_root['longitude'][:])
-                self.station_latitudes = np.append(self.station_latitudes, ncdf_root['latitude'][:])
-            else:
-                self.station_longitudes = np.append(self.station_longitudes, ncdf_root['lon'][:])
-                self.station_latitudes = np.append(self.station_latitudes, ncdf_root['lat'][:])
-            ncdf_root.close()
+                self.data_vars_to_read = [species]
 
-        # update measurement units for species (take standard units from parameter dictionary)
-        self.measurement_units = self.read_instance.parameter_dictionary[species]['standard_units']
-
-        # set data variables to read (dependent on active data resolution)
-        if not self.read_instance.reading_nonghost:
-            if (resolution == 'hourly') or (resolution == 'hourly_instantaneous'):
-                self.data_vars_to_read = [species, 'hourly_native_representativity_percent',
-                                          'daily_native_representativity_percent',
-                                          'monthly_native_representativity_percent',
-                                          'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
-                                          'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                          'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                          'season_code', 'time']
-            elif (resolution == '3hourly') or \
-                    (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
-                    (resolution == '6hourly_instantaneous'):
-                 self.data_vars_to_read = [species, 'daily_native_representativity_percent',
-                                           'monthly_native_representativity_percent',
-                                           'annual_native_representativity_percent',
-                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                           'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                           'season_code', 'time']
-            elif resolution == 'daily':
-                self.data_vars_to_read = [species, 'daily_native_representativity_percent',
-                                          'monthly_native_representativity_percent',
-                                          'annual_native_representativity_percent',
-                                          'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                          'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code', 'time']
-            elif resolution == 'monthly':
-                self.data_vars_to_read = [species, 'monthly_native_representativity_percent',
-                                          'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
-                                          'annual_native_max_gap_percent', 'season_code', 'time']
-        else:
-            self.data_vars_to_read = [species]
-
-        # set data dtype
-        self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
+            # set data dtype
+            self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
 
     def read_data(self, data_label, start_date, end_date,
                   network, resolution, species, matrix):
