@@ -315,7 +315,7 @@ class MPLCanvas(FigureCanvas):
         except:
             pass
 
-        # clear/hide current colourbar axis
+        # clear current colourbar axis
         self.cbar_ax.cla()
         self.cbar_ax.axis('off')
 
@@ -422,7 +422,7 @@ class MPLCanvas(FigureCanvas):
     def update_associated_selected_station_plots(self):
         """Function that updates all plots associated with selected stations on map"""
 
-        # clear/hide relevant axes
+        # clear relevant axes
         # clear axes
         self.ts_ax.cla()
         self.violin_hours_ax.cla()
@@ -1862,6 +1862,10 @@ class MPLCanvas(FigureCanvas):
             self.map_points.remove()
         except:
             pass
+
+        # clear current colourbar axis
+        self.cbar_ax.cla()
+        self.cbar_ax.axis('off')
 
         # draw changes
         self.draw()
