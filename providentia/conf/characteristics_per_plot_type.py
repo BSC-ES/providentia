@@ -11,7 +11,7 @@ def get_characteristics_per_plot_type(self):
                        'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 
                        'tightlayout': True, 'subplots_adjust': {'top': 0.90, 'bottom': 0.08}, 
                        'bias_title': {'t': 'Timeseries bias', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98},
-                       'annotate_stats': ['Mean', 'StdDev', 'r2', 'RMSE', 'MB'],
+                       'annotate_stats': ['Min','Max'],
                        'annotate_text': {'s': '', 'loc': 'upper right', 'fontsize': 6, 'n_stations': True},
                        'annotate_bbox': {'facecolor': 'white', 'edgecolor': 'gainsboro', 'alpha': 1},
                        'trend': {'window':6, 'min_points':1}},

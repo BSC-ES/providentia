@@ -26,5 +26,5 @@
                "heatmap-p95"
               ],
 
-    "debug":["periodic-p95"]
+    "debug":["timeseries_annotate", "timeseries_bias_annotate", "map-p95_annotate", "map-p95_bias_annotate"]
 }

@@ -261,9 +261,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             filename = self.filename + '.pdf'
         else:
             filename = "Providentia_offline_report.pdf"
+        
+        # get path where reports will be saved
+        reports_path = (os.path.join(CURRENT_PATH, '../reports/'))
 
         # open new PDF file
-        with PdfPages(filename) as pdf:
+        with PdfPages(reports_path + filename) as pdf:
             self.pdf = pdf
             self.make_header()
 
@@ -1115,16 +1118,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         z2 = ''
 
                     # get data label to create annotations
-                    if original_data_label == 'observations':
-                        if self.temporal_colocation:
-                            data_label = 'observations_colocatedto_experiments'
-                        else:
-                            data_label = 'observations'
+                    if not z2:
+                        data_label = z1
                     else:
-                        if self.temporal_colocation:
-                            data_label = '{}_colocatedto_observations'.format(original_data_label)
-                        else:
-                            data_label = original_data_label
+                        data_label = z2
 
                     # get relevant axis to plot on
                     relevant_axis = self.get_relevant_axis(plotting_paradigm, plot_type, (current_plot_ind * len(

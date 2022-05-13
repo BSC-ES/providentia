@@ -53,8 +53,8 @@ class MPLCanvas(FigureCanvas):
         self.gridspec = GridSpec(100, 100)
         self.gridspec.update(left=0.01, right=0.99, top=0.96, bottom=0.04, wspace=0.00, hspace=0.00)
 
-        # map_ax =              gridspec.new_subplotspec((0, 0),   rowspan=45, colspan=45)
-        legend_ax = self.gridspec.new_subplotspec((0, 46),  rowspan=8,  colspan=54)
+        # map_ax = self.gridspec.new_subplotspec((0, 0), rowspan=45, colspan=45)
+        legend_ax = self.gridspec.new_subplotspec((0, 46), rowspan=8, colspan=54)
         ts_ax = self.gridspec.new_subplotspec((12, 54), rowspan=34, colspan=46)
         violin_hours_ax = self.gridspec.new_subplotspec((57, 70), rowspan=19, colspan=30)
         violin_months_ax = self.gridspec.new_subplotspec((81, 70), rowspan=19, colspan=18)
@@ -65,7 +65,7 @@ class MPLCanvas(FigureCanvas):
         station_metadata_ax = self.gridspec.new_subplotspec((55, 0),  rowspan=45, colspan=30)
 
         # create subplot axes on grid
-        # self.map_ax =              self.figure.add_subplot(map_ax)
+        # self.map_ax = self.figure.add_subplot(map_ax)
         self.legend_ax = self.figure.add_subplot(legend_ax)
         self.ts_ax = self.figure.add_subplot(ts_ax)
         self.violin_hours_ax = self.figure.add_subplot(violin_hours_ax)
@@ -151,14 +151,15 @@ class MPLCanvas(FigureCanvas):
             self.map_ax = self.figure.add_subplot(map_ax, projection=self.plotcrs)
             # set map extents
             self.map_ax.set_global()
+            self.map_ax.outline_patch.set_visible(True)
 
             # add coastlines and gridelines
             land_polygon_resolutions = {'low': '110m', 'medium': '50m', 'high': '10m'}
             feature = cfeature.NaturalEarthFeature('physical', 'land',
                                                    land_polygon_resolutions[self.read_instance.map_coastline_resolution],
                                                    facecolor='0.85')
-            self.map_ax.add_feature(feature)
-            self.map_ax.gridlines(linestyle='-', alpha=0.4)
+            self.feature_earth = self.map_ax.add_feature(feature)
+            self.gl = self.map_ax.gridlines(linestyle='-', alpha=0.4)
 
             # reset the navigation toolbar stack for the map axis with the current view limits
             self.reset_ax_navigation_toolbar_stack(self.map_ax)
@@ -390,11 +391,11 @@ class MPLCanvas(FigureCanvas):
 
         # update map title
         if len(self.relative_selected_station_inds) == 1:
-            self.map_ax.set_title('%s Selected' % (
-                self.read_instance.station_references[self.relative_selected_station_inds][0]), fontsize=8.5, pad=3)
+            self.map_title = self.map_ax.set_title('%s Selected' % (
+                                self.read_instance.station_references[self.relative_selected_station_inds][0]), fontsize=8.5, pad=3)
         else:
-            self.map_ax.set_title('%s Stations Selected of %s Available' % (len(
-                self.relative_selected_station_inds), len(self.active_map_valid_station_inds)), fontsize=8.5, pad=3)
+            self.map_title = self.map_ax.set_title('%s Stations Selected of %s Available' % (len(
+                                self.relative_selected_station_inds), len(self.active_map_valid_station_inds)), fontsize=8.5, pad=3)
 
         # reset alphas of all plotted stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
@@ -1852,20 +1853,47 @@ class MPLCanvas(FigureCanvas):
         self.exp_bias_days_ax.axis('off')
         self.station_metadata_ax.axis('off')
 
-        # reset relative index lists of selected station on map as empty lists
-        self.relative_selected_station_inds = np.array([], dtype=np.int)
-        self.absolute_selected_station_inds = np.array([], dtype=np.int)
-        self.active_map_valid_station_inds = np.array([], dtype=np.int)
-
         # clear previously plotted station points
         try:
             self.map_points.remove()
         except:
             pass
 
+        # iterate through previously plotted experiment domain edge polygons, clearing them
+        try:
+            for grid_edge_polygon in self.grid_edge_polygons:
+                grid_edge_polygon.set_visible(False)
+        except:
+            pass
+
         # clear current colourbar axis
         self.cbar_ax.cla()
         self.cbar_ax.axis('off')
+
+        # hide map
+        self.map_ax.axis('off')
+        self.map_ax.outline_patch.set_visible(False)  
+        self.feature_earth.set_visible(False)
+
+        # hide title
+        self.map_title.set_visible(False)  
+
+        # clear lists of artists
+        for lines in [*self.gl.xline_artists, *self.gl.yline_artists]:
+            lines.remove()
+        self.gl.xline_artists.clear()
+        self.gl.yline_artists.clear()
+        
+        # reset relative index lists of selected station on map as empty lists
+        self.previous_relative_selected_station_inds = np.array([], dtype=np.int)
+        self.relative_selected_station_inds = np.array([], dtype=np.int)
+        self.absolute_selected_station_inds = np.array([], dtype=np.int)
+
+        # initialise variable of valid station indices plotted on map as empty list
+        self.active_map_valid_station_inds = np.array([], dtype=np.int)
+
+        # update variable to indicate map is now not initialised
+        self.map_initialised = False
 
         # draw changes
         self.draw()
