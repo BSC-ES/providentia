@@ -51,7 +51,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.read_type = read_type
 
         # store options to be restored at the end
-        dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
+        dconf_path = (os.path.join(CURRENT_PATH, '../configurations/default.conf'))
 
         #config = configparser.ConfigParser()
         #config.read(conf_to_load)
@@ -791,7 +791,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if self.datareader.clear_canvas:
                 self.mpl_canvas.clear_canvas()
                 return
-
+        
             # need to re-read all observations/experiments?
             if read_all:
 
@@ -905,7 +905,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if read_left:
 
                 # get n number of new elements on left edge
-                n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
+                if self.previous_time_array.size > 0:
+                    n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
+                else:
+                    n_new_left_data_inds = len(self.time_array)
 
                 # get list of yearmonths to read
                 yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, self.active_start_date,
@@ -947,8 +950,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if read_right:
             
                 # get n number of new elements on right edge
-                n_new_right_data_inds = (len(self.time_array) - 1) - \
-                                        np.where(self.time_array == self.previous_time_array[-1])[0][0]
+                if self.previous_time_array.size > 0:
+                    n_new_right_data_inds = (len(self.time_array) - 1) - \
+                                            np.where(self.time_array == self.previous_time_array[-1])[0][0]
+                else:
+                    n_new_right_data_inds = (len(self.time_array))
                 # get list of yearmonths to read
                 yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, previous_active_end_date,
                                                             self.active_end_date, self.active_resolution)
