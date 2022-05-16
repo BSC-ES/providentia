@@ -1841,6 +1841,7 @@ class MPLCanvas(FigureCanvas):
         
         # remove remaining elements in map
         if len(self.active_map_valid_station_inds) == 0:
+            
             # hide map
             self.map_ax.axis('off')
             self.map_ax.outline_patch.set_visible(False)  
