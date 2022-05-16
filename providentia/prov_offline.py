@@ -260,7 +260,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         if hasattr(self, 'filename'):
             filename = self.filename + '.pdf'
         else:
-            filename = "Providentia_offline_report.pdf"
+            filename = "PROVIDENTIA_Report.pdf"
         
         # get path where reports will be saved
         reports_path = (os.path.join(CURRENT_PATH, '../reports/'))
@@ -1819,6 +1819,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         months = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
         if months.size > 0 and (months[-1] != steps[-1]):
             months = months[:-1]
+            n_months -= 1
 
         # get number of months and days
         n_months = (timeseries_end_date.year - timeseries_start_date.year) * 12 + (timeseries_end_date.month - timeseries_start_date.month)
