@@ -260,7 +260,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         if hasattr(self, 'filename'):
             filename = self.filename + '.pdf'
         else:
-            filename = "Providentia_offline_report.pdf"
+            filename = "PROVIDENTIA_Report.pdf"
         
         # get path where reports will be saved
         reports_path = (os.path.join(CURRENT_PATH, '../reports/'))
@@ -1819,6 +1819,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # drop last month if it is not complete
         if months[-1] != steps[-1]:
             months = months[:-1]
+            n_months -= 1
 
         # define time slices
         if define:

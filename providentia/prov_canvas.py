@@ -149,16 +149,17 @@ class MPLCanvas(FigureCanvas):
             # create map axis
             map_ax = self.gridspec.new_subplotspec((0, 0), rowspan=45, colspan=45)
             self.map_ax = self.figure.add_subplot(map_ax, projection=self.plotcrs)
+
             # set map extents
             self.map_ax.set_global()
-            self.map_ax.outline_patch.set_visible(True)
+            self.map_ax.outline_patch.set_visible(True)  
 
             # add coastlines and gridelines
             land_polygon_resolutions = {'low': '110m', 'medium': '50m', 'high': '10m'}
-            feature = cfeature.NaturalEarthFeature('physical', 'land',
+            earth_layer = cfeature.NaturalEarthFeature('physical', 'land',
                                                    land_polygon_resolutions[self.read_instance.map_coastline_resolution],
                                                    facecolor='0.85')
-            self.feature_earth = self.map_ax.add_feature(feature)
+            self.map_feature = self.map_ax.add_feature(earth_layer)
             self.gl = self.map_ax.gridlines(linestyle='-', alpha=0.4)
 
             # reset the navigation toolbar stack for the map axis with the current view limits
@@ -168,6 +169,7 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.mpl_connect('pick_event', self.on_click)
             self.lasso = LassoSelector(self.map_ax, onselect=self.onlassoselect,
                                        useblit=True, lineprops=dict(alpha=0.5, color='hotpink', linewidth=1))
+
             # initialise variable that informs whether to use picker/lasso for updates
             self.map_already_updated = False
 
@@ -203,9 +205,12 @@ class MPLCanvas(FigureCanvas):
         # update legend
         self.update_legend()
 
+        # update map
+        self.update_map()
+
         # draw changes
         self.draw()
-
+  
     def reset_ax_navigation_toolbar_stack(self, ax):
         """Function which resets the navigation toolbar stack
         for a given axis with the current view limits"""
@@ -488,39 +493,41 @@ class MPLCanvas(FigureCanvas):
         self.grid_edge_polygons = []
 
         # iterate through read experiments and plot grid domain edges on map
-        for experiment in sorted(list(self.read_instance.datareader.data_in_memory.keys())):
-            if experiment != 'observations':
-                # compute map projection coordinates for each pair of
-                # longitude/latitude experiment grid edge coordinates
-                # exp_x,exp_y = self.bm(self.read_instance.datareader.data_in_memory[experiment]['grid_edge_longitude'],
-                # self.read_instance.datareader.data_in_memory[experiment]['grid_edge_latitude'])
-                # create matplotlib polygon object from experiment grid edge map projection coordinates
-                grid_edge_outline_poly = \
-                    Polygon(np.vstack((self.read_instance.datareader.plotting_params[experiment]['grid_edge_longitude'],
-                                       self.read_instance.datareader.plotting_params[experiment]['grid_edge_latitude'])).T,
-                                       edgecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
-                                       linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
-                # plot grid edge polygon on map
-                self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
+        if len(self.active_map_valid_station_inds) != 0:
+            for experiment in sorted(list(self.read_instance.datareader.data_in_memory.keys())):
+                if experiment != 'observations':
+                    # compute map projection coordinates for each pair of
+                    # longitude/latitude experiment grid edge coordinates
+                    # exp_x,exp_y = self.bm(self.read_instance.datareader.data_in_memory[experiment]['grid_edge_longitude'],
+                    # self.read_instance.datareader.data_in_memory[experiment]['grid_edge_latitude'])
+                    # create matplotlib polygon object from experiment grid edge map projection coordinates
+                    grid_edge_outline_poly = \
+                        Polygon(np.vstack((self.read_instance.datareader.plotting_params[experiment]['grid_edge_longitude'],
+                                        self.read_instance.datareader.plotting_params[experiment]['grid_edge_latitude'])).T,
+                                        edgecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
+                                        linewidth=1, linestyle='--', fill=False, zorder=2, transform=self.datacrs)
+                    # plot grid edge polygon on map
+                    self.grid_edge_polygons.append(self.map_ax.add_patch(grid_edge_outline_poly))
 
     def update_legend(self):
         """Function that updates legend"""
 
         # create legend elements
         # add observations element
-        legend_elements = [Line2D([0], [0], marker='o', color='white',
-                                  markerfacecolor=self.read_instance.datareader.plotting_params['observations']['colour'],
-                                  markersize=self.read_instance.legend_markersize, label='observations')]
-        # add element for each experiment
-        for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.datareader.data_in_memory.keys()))):
-            if experiment != 'observations':
-                # add experiment element
-                legend_elements.append(Line2D([0], [0], marker='o', color='white',
-                                              markerfacecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
-                                              markersize=self.read_instance.legend_markersize, label=experiment))
+        if len(self.active_map_valid_station_inds) != 0:
+            legend_elements = [Line2D([0], [0], marker='o', color='white',
+                                    markerfacecolor=self.read_instance.datareader.plotting_params['observations']['colour'],
+                                    markersize=self.read_instance.legend_markersize, label='observations')]
+            # add element for each experiment
+            for experiment_ind, experiment in enumerate(sorted(list(self.read_instance.datareader.data_in_memory.keys()))):
+                if experiment != 'observations':
+                    # add experiment element
+                    legend_elements.append(Line2D([0], [0], marker='o', color='white',
+                                                markerfacecolor=self.read_instance.datareader.plotting_params[experiment]['colour'],
+                                                markersize=self.read_instance.legend_markersize, label=experiment))
 
-        # plot legend
-        self.legend_ax.legend(handles=legend_elements, loc='best', mode='expand', ncol=4, fontsize=9.0)
+            # plot legend
+            self.legend_ax.legend(handles=legend_elements, loc='best', mode='expand', ncol=4, fontsize=9.0)
 
     def to_pandas_dataframe(self):
         """Function that takes selected station data within data arrays and puts it into a pandas dataframe"""
@@ -1244,17 +1251,18 @@ class MPLCanvas(FigureCanvas):
 
         # get relevant observational array (dependent on colocation)
         if not self.colocate_active:
-            obs_array = self.read_instance.datareader.plotting_params['observations']['valid_station_inds']
+            obs_label = 'observations'
         else:
-            obs_array = \
-                self.read_instance.datareader.plotting_params['observations_colocatedto_experiments']['valid_station_inds']
+            obs_label = 'observations_colocatedto_experiments'
+        obs_array = self.read_instance.data_in_memory_filtered[obs_label][self.read_instance.active_species]
 
         # before doing anything check if have any valid station data for observations,
         # if not update active map valid station indices to be empty list and return
-        if len(obs_array) == 0:
+        if ((obs_array.shape[0] == 0) or 
+            (obs_array.shape[1] != len(self.read_instance.time_array))):
             self.active_map_valid_station_inds = np.array([], dtype=np.int)
             return
-
+        
         # get selected z1/z2 data arrays
         z1_selected_name = self.read_instance.cb_z1.currentText()
         z2_selected_name = self.read_instance.cb_z2.currentText()
@@ -1829,71 +1837,26 @@ class MPLCanvas(FigureCanvas):
         # all available stations), with the absolute indices of the subset of plotted selected stations
         return self.active_map_valid_station_inds[selected_map_inds]
 
-    def clear_canvas(self):
+    def update_map(self):
         
-        # clear all axes (except map)
-        self.legend_ax.cla()
-        self.ts_ax.cla()
-        self.violin_hours_ax.cla()
-        self.violin_months_ax.cla()
-        self.violin_days_ax.cla()
-        self.exp_bias_hours_ax.cla()
-        self.exp_bias_months_ax.cla()
-        self.exp_bias_days_ax.cla()
-        self.station_metadata_ax.cla()
+        # remove remaining elements in map
+        if len(self.active_map_valid_station_inds) == 0:
+            # hide map
+            self.map_ax.axis('off')
+            self.map_ax.outline_patch.set_visible(False)  
+            self.map_feature.set_visible(False)
 
-        # hide all axes (except map)
-        self.legend_ax.axis('off')
-        self.ts_ax.axis('off')
-        self.violin_hours_ax.axis('off')
-        self.violin_months_ax.axis('off')
-        self.violin_days_ax.axis('off')
-        self.exp_bias_hours_ax.axis('off')
-        self.exp_bias_months_ax.axis('off')
-        self.exp_bias_days_ax.axis('off')
-        self.station_metadata_ax.axis('off')
+            # hide title
+            self.map_title.set_visible(False)  
 
-        # clear previously plotted station points
-        try:
-            self.map_points.remove()
-        except:
-            pass
+            # clear grid
+            for line_artists in [*self.gl.xline_artists, *self.gl.yline_artists]:
+                line_artists.remove()
+            self.gl.xlines = False
+            self.gl.ylines = False
 
-        # iterate through previously plotted experiment domain edge polygons, clearing them
-        try:
-            for grid_edge_polygon in self.grid_edge_polygons:
-                grid_edge_polygon.set_visible(False)
-        except:
-            pass
+            # update variable to indicate map is now not initialised
+            self.map_initialised = False
 
-        # clear current colourbar axis
-        self.cbar_ax.cla()
-        self.cbar_ax.axis('off')
-
-        # hide map
-        self.map_ax.axis('off')
-        self.map_ax.outline_patch.set_visible(False)  
-        self.feature_earth.set_visible(False)
-
-        # hide title
-        self.map_title.set_visible(False)  
-
-        # clear lists of artists
-        for lines in [*self.gl.xline_artists, *self.gl.yline_artists]:
-            lines.remove()
-        self.gl.xline_artists.clear()
-        self.gl.yline_artists.clear()
-        
-        # reset relative index lists of selected station on map as empty lists
-        self.previous_relative_selected_station_inds = np.array([], dtype=np.int)
-        self.relative_selected_station_inds = np.array([], dtype=np.int)
-        self.absolute_selected_station_inds = np.array([], dtype=np.int)
-
-        # initialise variable of valid station indices plotted on map as empty list
-        self.active_map_valid_station_inds = np.array([], dtype=np.int)
-
-        # update variable to indicate map is now not initialised
-        self.map_initialised = False
-
-        # draw changes
-        self.draw()
+            # draw changes
+            self.draw()
