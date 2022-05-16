@@ -6,7 +6,7 @@ def get_characteristics_per_plot_type(self):
                        'page_title': {'t': 'Timeseries', 'fontsize': 15, 'ha': 'left', 'x': 0.05, 'y': 0.98},
                        'axis_title': {'label': '', 'fontsize': 8}, 'axis_xlabel': {'xlabel': 'Time', 'fontsize': 8},
                        'axis_ylabel': {'ylabel': '{}'.format(self.datareader.measurement_units), 'fontsize': 8},
-                       'xticks': {'labelsize': 7, 'rotation': 0, 'define': True, 'n_slices': 5, 'last_step': False},
+                       'xticks': {'labelsize': 7, 'rotation': 0, 'define': True, 'n_slices': 6, 'last_step': True},
                        'yticks': {'labelsize': 7},
                        'legend': {'loc': 'upper right', 'ncol': 3, 'fontsize': 8.0}, 
                        'tightlayout': True, 'subplots_adjust': {'top': 0.90, 'bottom': 0.08}, 

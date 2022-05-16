@@ -8,3 +8,4 @@ providentia.egg-info
 __pycache__
 reports/*
 configurations/idea.conf
+!reports/PROVIDENTIA_Report.pdf

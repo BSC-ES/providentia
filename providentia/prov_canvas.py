@@ -87,7 +87,7 @@ class MPLCanvas(FigureCanvas):
         self.datacrs = ccrs.PlateCarree()
         self.plotcrs = ccrs.Robinson()
 
-        # Turning off specific spines of time series axis
+        # Turning off specific spines of timeseries axis
         self.ts_ax.spines["top"].set_visible(False)
         self.ts_ax.spines["right"].set_visible(False)
 
@@ -464,8 +464,8 @@ class MPLCanvas(FigureCanvas):
             if len(list(self.selected_station_data.keys())) > 1:
                 self.calculate_temporally_aggregated_experiment_bias_statistics()
 
-            # update time series plot
-            self.update_time_series_plot()
+            # update timeseries plot
+            self.update_timeseries_plot()
 
             # update violin plots for temporally aggregated data
             self.update_violin_plots()
@@ -737,8 +737,8 @@ class MPLCanvas(FigureCanvas):
                             self.selected_station_data[data_label][temporal_aggregation_resolution][
                                 '%s_bias' % (bias_stat)] = stat_output_by_group
 
-    def update_time_series_plot(self):
-        """Function that updates time series plot upon selection of station/s"""
+    def update_timeseries_plot(self):
+        """Function that updates timeseries plot upon selection of station/s"""
 
         # turn axis on
         self.ts_ax.axis('on')
@@ -755,14 +755,53 @@ class MPLCanvas(FigureCanvas):
                 if data_label.split('_')[-1] not in ("observations", "experiments"):
                     continue
 
-            # plot time series data
+            # plot timeseries data
             self.data_array_ts = \
                 self.ts_ax.plot(self.selected_station_data[data_label]['pandas_df'].dropna(),
                                 color=self.read_instance.datareader.plotting_params[data_label]['colour'],
                                 marker='o', markeredgecolor=None, mew=0,
-                                markersize=self.read_instance.time_series_markersize,
+                                markersize=self.read_instance.timeseries_markersize,
                                 linestyle='None',
                                 zorder=self.read_instance.datareader.plotting_params[data_label]['zorder'])
+        
+        # get steps in days or months
+        label = list(self.selected_station_data.keys())[-1]
+        steps = self.selected_station_data[label]['pandas_df'].dropna().index.values
+        last_step = self.selected_station_data[label]['pandas_df'].dropna().index.values[-1]
+
+        # get start and end dates
+        timeseries_start_date = pd.to_datetime(steps[0])
+        timeseries_end_date = pd.to_datetime(steps[-1])
+
+        # get months that are complete
+        months = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
+        if months.size > 0 and (months[-1] != steps[-1]):
+            months = months[:-1]
+
+        # get number of months and days
+        n_months = (timeseries_end_date.year - timeseries_start_date.year) * 12 + (timeseries_end_date.month - timeseries_start_date.month)
+        n_days = (timeseries_end_date - timeseries_start_date).days
+
+        # define time slices
+        if n_months >= 3:
+            steps = months
+            self.ts_ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
+        elif n_days < 7:
+            self.ts_ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+        slices = int(np.ceil(len(steps) / int(self.read_instance.timeseries_n_slices)))
+
+        # use default axes if the number of timesteps is lower than the number of slices
+        if slices >= 1:
+            xticks = steps[0::slices]
+        else:
+            xticks = self.ts_ax.xaxis.get_ticks()
+
+        # add last step to xticks
+        if self.read_instance.timeseries_last_step and (xticks[-1] != last_step):
+            xticks = np.append(xticks, last_step)
+
+        # set xticks
+        self.ts_ax.xaxis.set_ticks(xticks) 
 
         # set axes labels
         if self.read_instance.datareader.measurement_units == 'unitless':
@@ -776,8 +815,8 @@ class MPLCanvas(FigureCanvas):
         # set axis tick label sizes
         self.ts_ax.tick_params(labelsize=8.0)
 
-        # as are re-plotting on time series axis, reset the navigation
-        # toolbar stack dictionaries entries associated with time series axis
+        # as are re-plotting on timeseries axis, reset the navigation
+        # toolbar stack dictionaries entries associated with timeseries axis
         self.reset_ax_navigation_toolbar_stack(self.ts_ax)
 
     def update_violin_plots(self):
@@ -899,7 +938,7 @@ class MPLCanvas(FigureCanvas):
                             patch.get_paths()[0].vertices[:, 0] = np.clip(
                                 patch.get_paths()[0].vertices[:, 0], m, np.inf)
 
-                # overplot time series of medians over boxes in necessary color
+                # overplot timeseries of medians over boxes in necessary color
 
                 # generate zorder to overplot medians in same order as violin plots are ordered, but on top of them
                 median_zorder = (self.read_instance.datareader.plotting_params['observations']['zorder']+len(
