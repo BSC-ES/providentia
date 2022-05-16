@@ -51,7 +51,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.read_type = read_type
 
         # store options to be restored at the end
-        dconf_path = (os.path.join(CURRENT_PATH, '../configurations/default.conf'))
+        dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
 
         #config = configparser.ConfigParser()
         #config.read(conf_to_load)
@@ -789,7 +789,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                        self.active_species, self.active_matrix)
 
             if self.datareader.clear_canvas:
-                self.mpl_canvas.clear_canvas()
+                self.mpl_canvas.update_MPL_canvas()
                 return
         
             # need to re-read all observations/experiments?

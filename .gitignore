@@ -7,4 +7,5 @@ providentia.egg-info
 .coverage
 __pycache__
 reports/*
+configurations/idea.conf
 !reports/PROVIDENTIA_Report.pdf
