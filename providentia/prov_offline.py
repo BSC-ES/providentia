@@ -1815,15 +1815,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         timeseries_start_date = pd.to_datetime(steps[0])
         timeseries_end_date = pd.to_datetime(steps[-1])
 
+        # get number of months and days
+        n_months = (timeseries_end_date.year - timeseries_start_date.year) * 12 + (timeseries_end_date.month - timeseries_start_date.month)
+        n_days = (timeseries_end_date - timeseries_start_date).days
+
         # get months that are complete
         months = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
         if months.size > 0 and (months[-1] != steps[-1]):
             months = months[:-1]
             n_months -= 1
-
-        # get number of months and days
-        n_months = (timeseries_end_date.year - timeseries_start_date.year) * 12 + (timeseries_end_date.month - timeseries_start_date.month)
-        n_days = (timeseries_end_date - timeseries_start_date).days
 
         # define time slices
         if define:
