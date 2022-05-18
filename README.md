@@ -14,7 +14,7 @@ You can use the latest stable version of Providentia
 by accessing the production branch:
 
 ```
-git checkout master
+git checkout production
 ```
 
 You can also access the master branch to test new features,
