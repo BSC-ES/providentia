@@ -402,8 +402,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
 
+        # update variable to inform plotting functions whether to use colocated data/or not
+        check_state = self.ch_colocate.checkState()
+        if check_state == QtCore.Qt.Checked:
+            self.colocate_active = True
+        else:
+            self.colocate_active = False
+
         # if we're starting from a configuration file, read first the setup
-        if self.from_conf:
+        if self.from_conf: 
             self.handle_data_selection_update()
             # then see if we have fields that require to be se (meta, rep, period)
             aux.representativity_conf(self)
@@ -787,11 +794,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.datareader.read_setup(self.active_resolution, self.active_start_date,
                                        self.active_end_date, self.active_network,
                                        self.active_species, self.active_matrix)
-
+                                       
+            # clear all elements in dashboard if there are less than 2 timesteps
             if self.datareader.clear_canvas:
                 self.mpl_canvas.update_MPL_canvas()
+                self.active_network = None
                 return
-        
+
             # need to re-read all observations/experiments?
             if read_all:
 
