@@ -242,13 +242,6 @@ class MPLCanvas(FigureCanvas):
         if not hasattr(self.read_instance.datareader, 'data_in_memory'):
             return
 
-        check_state = self.read_instance.ch_colocate.checkState()
-        # update variable to inform plotting functions whether to use colocated data/or not
-        if check_state == QtCore.Qt.Checked:
-            self.colocate_active = True
-        else:
-            self.colocate_active = False
-
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         if self.filter_data is None:
             self.filter_data = DataFilter(self.read_instance)
@@ -282,16 +275,16 @@ class MPLCanvas(FigureCanvas):
             # if only have 1 data array in memory (i.e. observations), no colocation is possible,
             # therefore set colocation_active to be False, and return
             if len(list(self.read_instance.data_in_memory_filtered.keys())) == 1:
-                self.colocate_active = False
+                self.read_instance.colocate_active = False
                 return
 
             # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
             check_state = self.read_instance.ch_colocate.checkState()
             # update variable to inform plotting functions whether to use colocated data/or not
             if check_state == QtCore.Qt.Checked:
-                self.colocate_active = True
+                self.read_instance.colocate_active = True
             else:
-                self.colocate_active = False
+                self.read_instance.colocate_active = False
 
             # update z statistic/experiment bias comboboxes (without updating canvas)
             self.read_instance.block_MPL_canvas_updates = True
@@ -539,11 +532,11 @@ class MPLCanvas(FigureCanvas):
         for data_label in list(self.read_instance.data_in_memory_filtered.keys()):
 
             # if colocation is not active, do not convert colocated data arrays to pandas data frames
-            if not self.colocate_active:
+            if not self.read_instance.colocate_active:
                 if 'colocated' in data_label:
                     continue
             # else, if colocation is active, do not convert non-colocated data arrays to pandas data frames
-            elif self.colocate_active:
+            elif self.read_instance.colocate_active:
                 if 'colocated' not in data_label:
                     continue
 
@@ -664,7 +657,7 @@ class MPLCanvas(FigureCanvas):
                 if data_label.split('_')[0] != 'observations':
 
                     # get relevant aggregated observational statistics dictionary (i.e. colocated or not)
-                    if not self.colocate_active:
+                    if not self.read_instance.colocate_active:
                         relevant_aggregated_observations_dict = \
                             self.selected_station_data['observations'][temporal_aggregation_resolution]
                     else:
@@ -702,7 +695,7 @@ class MPLCanvas(FigureCanvas):
 
                     # if colocation is active, calculate temporally aggregated experiment bias
                     # statistical differences between experiment and observations
-                    if self.colocate_active:
+                    if self.read_instance.colocate_active:
 
                         # iterate through bias statistics
                         for bias_stat in bias_statistics:
@@ -747,7 +740,7 @@ class MPLCanvas(FigureCanvas):
         for data_label in list(self.selected_station_data.keys()):
 
             # if colocation is active, for observations use the 'observations_colocatedto_experiments',
-            if self.colocate_active:
+            if self.read_instance.colocate_active:
                 if data_label.split('_')[0] == 'observations':
                     if data_label != 'observations_colocatedto_experiments':
                         continue
@@ -870,7 +863,7 @@ class MPLCanvas(FigureCanvas):
 
                 # if colocation is active, for plotting observational aggregated data,
                 # use the 'observations_colocatedto_experiments' array
-                if self.colocate_active:
+                if self.read_instance.colocate_active:
                     if data_label.split('_')[0] == 'observations':
                         if data_label != 'observations_colocatedto_experiments':
                             continue
@@ -1057,7 +1050,7 @@ class MPLCanvas(FigureCanvas):
             for data_label in list(self.selected_station_data.keys()):
                 # if colocation is selected, print only relevant labels
                 # to avoid double lines being printed
-                if self.colocate_active:
+                if self.read_instance.colocate_active:
                     if data_label.split('_')[-1] != 'observations':
                         continue
                 # if data array is observational, continue to next experiment data array
@@ -1289,11 +1282,16 @@ class MPLCanvas(FigureCanvas):
         """Function that calculates selected z statistic for map"""
 
         # get relevant observational array (dependent on colocation)
-        if not self.colocate_active:
+        if not self.read_instance.colocate_active:
             obs_label = 'observations'
         else:
-            obs_label = 'observations_colocatedto_experiments'
-        obs_array = self.read_instance.data_in_memory_filtered[obs_label][self.read_instance.active_species]
+            obs_label = 'observations_colocatedto_experiments'\
+        
+        # try to read observations array
+        try:
+            obs_array = self.read_instance.data_in_memory_filtered[obs_label][self.read_instance.active_species]
+        except:
+            obs_array = np.array([])
 
         # before doing anything check if have any valid station data for observations,
         # if not update active map valid station indices to be empty list and return
@@ -1348,7 +1346,7 @@ class MPLCanvas(FigureCanvas):
             self.z_label = '{} - {}\n{} {}'.format(z2_selected_name, z1_selected_name, stats_dict['label'], label_units)
 
         # if colocation is active, set appropriate z1/z2 arrays to read to get colocated data arrays
-        if self.colocate_active:
+        if self.read_instance.colocate_active:
             # don't have z2 array?
             if not have_z2:
                 if z1_selected_name == 'observations':
@@ -1542,7 +1540,7 @@ class MPLCanvas(FigureCanvas):
 
             # update z statistic field to all basic stats if colocation not-active OR z2
             # array not selected, else select basic+bias stats
-            if (not self.colocate_active) or (selected_z2_array == ''):
+            if (not self.read_instance.colocate_active) or (selected_z2_array == ''):
                 z_stat_items = copy.deepcopy(self.read_instance.basic_z_stats)
             else:
                 z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
@@ -1605,7 +1603,7 @@ class MPLCanvas(FigureCanvas):
 
                 # update experiment bias statistics (used for Aggregated field), to all basic stats
                 # if colocation not-active, and basic+bias stats if colocation active
-                if not self.colocate_active:
+                if not self.read_instance.colocate_active:
                     available_experiment_bias_stats = copy.deepcopy(self.read_instance.basic_z_stats)
                 else:
                     available_experiment_bias_stats = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
