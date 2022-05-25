@@ -3,8 +3,7 @@
                  "periodic-p5", "periodic-p5_bias", "periodic-p50", "periodic-p50_bias",
                  "periodic-p95", "periodic-p95_bias", "periodic-MB", "periodic-r2",
                  "map-p5", "map-p5_bias", "map-p50", "map-p50_bias",
-                 "map-p95", "map-p95_bias", "map-MB", "map-r2",
-                 "heatmap-p5", "heatmap-p50", "heatmap-p95", "heatmap-MB", "heatmap-r2"
+                 "map-p95", "map-p95_bias", "map-MB", "map-r2"
                 ],
             
     "cams50": ["map-Data %_obs", "map-p5", "map-p50",
@@ -22,9 +21,9 @@
               
     "met": ["map-Data %_obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"],
 
-    "test-debug": ["heatmap-r2"],
+    "test_debug": ["timeseries"],
 
-    "test-options": ["timeseries", "timeseries_obs", "timeseries_annotate", 
+    "test_options": ["timeseries", "timeseries_obs", "timeseries_annotate", 
                      "timeseries_individual", "timeseries_individual_annotate", 
                      "distribution", "distribution_obs", "distribution_annotate", 
                      "distribution_individual", "distribution_individual_annotate", 

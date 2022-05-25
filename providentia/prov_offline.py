@@ -29,7 +29,7 @@ from .prov_read import DataReader
 from .filter import DataFilter
 from .configuration import ProvConfiguration
 from .init_standards import InitStandards
-from .config import read_offline_conf
+from .config import read_conf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -67,6 +67,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
+        
         # init GHOST standards
         InitStandards.__init__(self, obs_root=self.obs_root,
                                ghost_version=self.ghost_version)
@@ -79,166 +80,172 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             CURRENT_PATH, 'conf/experiment_bias_stats_dict.json')))
         self.plots_per_report_type = json.load(open(os.path.join(
             CURRENT_PATH, 'conf/plots_per_report_type.json')))
-          
-        self.station_subset_names = self.sub_opts.keys()
-        #self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
-        self.active_qa = aux.which_qa(self)
-        self.active_flags = aux.which_flags(self)
-        self.reading_nonghost = aux.check_for_ghost(self.selected_network)
-        self.experiments_to_read = aux.get_experiments(self)
-        #if have no experiments, force temporal colocation to be False
-        if len(self.experiments_to_read) == 0:
-            self.temporal_colocation = False
-            self.defaults['temporal_colocation'] = False         
-            for k in self.sub_opts.keys():
-                self.sub_opts[k]['temporal_colocation'] = False
 
-        # get all netCDF monthly files per species
-        if not self.reading_nonghost:
-            species_files = os.listdir('%s/%s/%s/%s/%s' % (self.obs_root, self.selected_network,
-                                                           self.ghost_version, self.selected_resolution,
-                                                           self.selected_species))
-        else:
-            species_files = os.listdir('%s/%s/%s/%s/%s' % (self.nonghost_root, self.selected_network.lower()[1:],
-                                                           self.selected_matrix, self.selected_resolution,
-                                                           self.selected_species))
-
-        # get monthly start date (YYYYMM) of all species files
-        species_files_yearmonths = \
-            [int(f.split('_')[-1][:6] + '01') for f in species_files if f != 'temporary']
-
-        # initialize structure to store all obs
-        self.all_observation_data = {self.selected_network: {
-            self.selected_resolution: {self.selected_matrix: {
-                self.selected_species: species_files_yearmonths}}}}
-
-        self.metadata_types, self.metadata_menu = aux.init_metadata(self)
-        # initialize DataReader
-        self.datareader = DataReader(self)
-        # read
-        self.datareader.get_valid_obs_files_in_date_range(self.start_date, self.end_date)
-        self.datareader.get_valid_experiment_files_in_date_range()
-        self.datareader.read_setup(self.selected_resolution, self.start_date, self.end_date,
-                                   self.selected_network, self.selected_species, self.selected_matrix)
-
-        # create data dictionaries to fill
-        self.datareader.reset_data_in_memory()
-        self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
-
-        # read observations
-        self.datareader.read_data('observations', self.start_date, self.end_date,
-                                  self.selected_network, self.selected_resolution,
-                                  self.selected_species, self.selected_matrix)
-        # read selected experiments (iterate through)
-        for exp in self.experiments_to_read:
-            self.datareader.read_data(exp, self.selected_start_date, self.selected_end_date, self.selected_network,
-                                      self.selected_resolution, self.selected_species, self.selected_matrix)
-
-        # update dictionary of plotting parameters (colour and zorder etc.) for each data array
-        self.datareader.update_plotting_parameters()
-
-        #load characteristics_per_plot_type dictionary (dependent on read memory)
-        sys.path.insert(1, os.path.join(CURRENT_PATH, 'conf'))
-        from characteristics_per_plot_type import get_characteristics_per_plot_type, get_characteristics_per_plot_type_templates
-        self.characteristics_per_plot_type = get_characteristics_per_plot_type(self)
-        self.characteristics_per_plot_type_templates = get_characteristics_per_plot_type_templates(self)
-
-        # update characteristics_per_plot_type
-        plot_types_to_remove = []
-        for plot_type in self.plots_per_report_type[self.report_type]:
+        # get config parameters as variables
+        for section in self.parent_section_names:
             
-            # get base zstat
-            if '-' in plot_type:
-                if '_' in plot_type:
-                    base_zstat = plot_type.split('-')[1].split('_')[0]
-                else:
-                    base_zstat = plot_type.split('-')[1]
+            self.section = section
+            self.section_opts = self.sub_opts[section]
+            vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.section_opts.items()})
+
+            #self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
+            self.active_qa = aux.which_qa(self)
+            self.active_flags = aux.which_flags(self)
+            self.reading_nonghost = aux.check_for_ghost(self.selected_network)
+            self.experiments_to_read = aux.get_experiments(self)
+            #if have no experiments, force temporal colocation to be False
+            if len(self.experiments_to_read) == 0:
+                self.temporal_colocation = False    
+                for k in self.sub_opts.keys():
+                    self.sub_opts[k]['temporal_colocation'] = False
+
+            # get all netCDF monthly files per species
+            if not self.reading_nonghost:
+                species_files = os.listdir('%s/%s/%s/%s/%s' % (self.obs_root, self.selected_network,
+                                                            self.ghost_version, self.selected_resolution,
+                                                            self.selected_species))
             else:
-                base_zstat = None
+                species_files = os.listdir('%s/%s/%s/%s/%s' % (self.nonghost_root, self.selected_network.lower()[1:],
+                                                            self.selected_matrix, self.selected_resolution,
+                                                            self.selected_species))
 
-            # add new keys to make maps and periodic plots (with or without bias)
-            if '-' in plot_type and 'violin' not in plot_type:
+            # get monthly start date (YYYYMM) of all species files
+            species_files_yearmonths = \
+                [int(f.split('_')[-1][:6] + '01') for f in species_files if f != 'temporary']
 
-                self.stats_dict = {**self.basic_stats_dict, **self.expbias_dict}
+            # initialize structure to store all obs
+            self.all_observation_data = {self.selected_network: {
+                self.selected_resolution: {self.selected_matrix: {
+                    self.selected_species: species_files_yearmonths}}}}
+
+            self.metadata_types, self.metadata_menu = aux.init_metadata(self)
+
+            # initialize DataReader
+            self.datareader = DataReader(self)
+            # read
+            self.datareader.get_valid_obs_files_in_date_range(self.start_date, self.end_date)
+            self.datareader.get_valid_experiment_files_in_date_range()
+            self.datareader.read_setup(self.selected_resolution, self.start_date, self.end_date,
+                                    self.selected_network, self.selected_species, self.selected_matrix)
+
+            # create data dictionaries to fill
+            self.datareader.reset_data_in_memory()
+            self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
+
+            # read observations
+            self.datareader.read_data('observations', self.start_date, self.end_date,
+                                      self.selected_network, self.selected_resolution,
+                                      self.selected_species, self.selected_matrix)
+            # read selected experiments (iterate through)
+            for exp in self.experiments_to_read:
+                self.datareader.read_data(exp, self.selected_start_date, self.selected_end_date, self.selected_network,
+                                          self.selected_resolution, self.selected_species, self.selected_matrix)
+
+            # update dictionary of plotting parameters (colour and zorder etc.) for each data array
+            self.datareader.update_plotting_parameters()
+
+            #load characteristics_per_plot_type dictionary (dependent on read memory)
+            sys.path.insert(1, os.path.join(CURRENT_PATH, 'conf'))
+            from characteristics_per_plot_type import get_characteristics_per_plot_type, get_characteristics_per_plot_type_templates
+            self.characteristics_per_plot_type = get_characteristics_per_plot_type(self)
+            self.characteristics_per_plot_type_templates = get_characteristics_per_plot_type_templates(self)
+
+            # update characteristics_per_plot_type
+            plot_types_to_remove = []
+            for plot_type in self.plots_per_report_type[self.report_type]:
                 
-                if base_zstat in self.stats_dict:
-                    # add new keys from templates
-                    if plot_type[:4] == 'map-':
-                        if '_individual' not in plot_type:
-                            self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type_templates['map'])
-                        else:
-                            # it is not possible to create individual plots for maps
+                # get base zstat
+                if '-' in plot_type:
+                    if '_' in plot_type:
+                        base_zstat = plot_type.split('-')[1].split('_')[0]
+                    else:
+                        base_zstat = plot_type.split('-')[1]
+                else:
+                    base_zstat = None
+
+                # add new keys to make maps and periodic plots (with or without bias)
+                if '-' in plot_type and 'violin' not in plot_type:
+
+                    self.stats_dict = {**self.basic_stats_dict, **self.expbias_dict}
+                    
+                    if base_zstat in self.stats_dict:
+                        # add new keys from templates
+                        if plot_type[:4] == 'map-':
+                            if '_individual' not in plot_type:
+                                self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type_templates['map'])
+                            else:
+                                # it is not possible to create individual plots for maps
+                                print(f'Warning: {plot_type} could not be created.')
+                                plot_types_to_remove.append(plot_type)
+                                continue
+                        elif 'periodic-' in plot_type:
+                            self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type_templates['periodic'])
+                        elif 'heatmap-' in plot_type:
+                            self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type['heatmap'])
+                        
+                        # remove periodic plots from list when there is no observations data to show
+                        if (('_obs' in plot_type and '_bias' in plot_type) or 
+                            ('_obs' in plot_type and '_bias' not in plot_type and base_zstat in list(self.expbias_dict.keys()))):
                             print(f'Warning: {plot_type} could not be created.')
                             plot_types_to_remove.append(plot_type)
                             continue
-                    elif 'periodic-' in plot_type:
-                        self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type_templates['periodic'])
-                    elif 'heatmap-' in plot_type:
-                        self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type['heatmap'])
-                    
-                    # remove periodic plots from list when there is no observations data to show
-                    if (('_obs' in plot_type and '_bias' in plot_type) or 
-                        ('_obs' in plot_type and '_bias' not in plot_type and base_zstat in list(self.expbias_dict.keys()))):
+
+                        # change title for new keys 
+                        if '_bias' in plot_type:
+                            page_title = '{} bias'.format(self.stats_dict[base_zstat]['label'])
+                            self.characteristics_per_plot_type[plot_type]['page_title']['t'] = page_title
+                        else:
+                            page_title = self.stats_dict[base_zstat]['label']
+                            self.characteristics_per_plot_type[plot_type]['page_title']['t'] = page_title
+
+                # add new keys to make individual plots
+                elif '_individual' in plot_type:
+                    if any(valid_plot in plot_type for valid_plot in ('periodic-violin', 'timeseries', 'distribution', 'scatter')):
+                        self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
+                    elif 'periodic-' in plot_type and 'violin' not in plot_type:
+                        continue
+                    else:
+                        # it is not possible to create individual plots for heatmaps and maps
                         print(f'Warning: {plot_type} could not be created.')
                         plot_types_to_remove.append(plot_type)
-                        continue
 
-                    # change title for new keys 
-                    if '_bias' in plot_type:
-                        page_title = '{} bias'.format(self.stats_dict[base_zstat]['label'])
-                        self.characteristics_per_plot_type[plot_type]['page_title']['t'] = page_title
+                # add new keys to make plots with annotations
+                elif '_annotate' in plot_type:
+                    if 'heatmap-' not in plot_type:
+                        self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
                     else:
-                        page_title = self.stats_dict[base_zstat]['label']
-                        self.characteristics_per_plot_type[plot_type]['page_title']['t'] = page_title
+                        # it is not possible to add annotations to heatmaps
+                        print(f'Warning: {plot_type} could not be created.')
+                        plot_types_to_remove.append(plot_type)
 
-            # add new keys to make individual plots
-            elif '_individual' in plot_type:
-                if any(valid_plot in plot_type for valid_plot in ('periodic-violin', 'timeseries', 'distribution', 'scatter')):
+                # add new keys to make plots only showing observations data
+                elif '_obs' in plot_type:
+                    if not any(invalid_plot in plot_type for invalid_plot in ('heatmap', 'scatter', '_bias')):
+                        self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
+                    else:
+                        # it is not possible to show only observational data in heatmaps, scatter plots, bias plots and plots with exp stats
+                        print(f'Warning: {plot_type} could not be created.')
+                        plot_types_to_remove.append(plot_type)
+
+                # add new keys to make plots which show experiment bias (i.e. exp - obs) (e.g. distribution_bias)
+                elif '_bias' in plot_type:
                     self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
-                elif 'periodic-' in plot_type and 'violin' not in plot_type:
-                    continue
-                else:
-                    # it is not possible to create individual plots for heatmaps and maps
-                    print(f'Warning: {plot_type} could not be created.')
-                    plot_types_to_remove.append(plot_type)
 
-            # add new keys to make plots with annotations
-            elif '_annotate' in plot_type:
-                if 'heatmap-' not in plot_type:
-                    self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
-                else:
-                    # it is not possible to add annotations to heatmaps
-                    print(f'Warning: {plot_type} could not be created.')
-                    plot_types_to_remove.append(plot_type)
+                #add new keys to make plots with trends
+                elif '_trend' in plot_type:
+                    #trend only currently possible for timeseries
+                    if 'timeseries' in plot_type:
+                        self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
+                    else:
+                        print(f'Warning: {plot_type} could not be created.')
+                        plot_types_to_remove.append(plot_type)
 
-            # add new keys to make plots only showing observations data
-            elif '_obs' in plot_type:
-                if not any(invalid_plot in plot_type for invalid_plot in ('heatmap', 'scatter', '_bias')):
-                    self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
-                else:
-                    # it is not possible to show only observational data in heatmaps, scatter plots, bias plots and plots with exp stats
-                    print(f'Warning: {plot_type} could not be created.')
-                    plot_types_to_remove.append(plot_type)
+            self.plots_per_report_type[self.report_type] = [plot_type for plot_type in self.plots_per_report_type[self.report_type] if plot_type not in plot_types_to_remove]
 
-            # add new keys to make plots which show experiment bias (i.e. exp - obs) (e.g. distribution_bias)
-            elif '_bias' in plot_type:
-                self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
+            self.exceedance_limit = aux.exceedance_lim(self.selected_species)
+            self.temporal_axis_mapping_dict = aux.temp_axis_dict()
 
-            #add new keys to make plots with trends
-            elif '_trend' in plot_type:
-                #trend only currently possible for timeseries
-                if 'timeseries' in plot_type:
-                    self.characteristics_per_plot_type[plot_type] = copy.deepcopy(self.characteristics_per_plot_type[plot_type.split('_')[0]])
-                else:
-                    print(f'Warning: {plot_type} could not be created.')
-                    plot_types_to_remove.append(plot_type)
-
-        self.plots_per_report_type[self.report_type] = [plot_type for plot_type in self.plots_per_report_type[self.report_type] if plot_type not in plot_types_to_remove]
-
-        self.exceedance_limit = aux.exceedance_lim(self.selected_species)
-        self.temporal_axis_mapping_dict = aux.temp_axis_dict()
-
-        self.start_pdf()
+            self.start_pdf()
 
     def load_conf(self, fpath=None):
         """Load existing configurations from file
@@ -253,10 +260,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             print(("Error %s" % fpath))
             return
 
-        self.defaults, self.sub_opts = read_offline_conf(fpath)
-        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.defaults.items()})
-
+        self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names = read_conf(fpath)
+        
     def start_pdf(self):
+
+        # define file name
         if hasattr(self, 'filename'):
             filename = self.filename + '.pdf'
         else:
@@ -267,12 +275,21 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # open new PDF file
         with PdfPages(reports_path + filename) as pdf:
+
             self.pdf = pdf
             self.make_header()
 
             # define dictionary to store plot figures
             self.plot_dictionary = {}
 
+            # iterate through subsets
+            self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
+                                           if self.section == subsection_name.split('-')[0]]
+            if len(self.child_subsection_names) > 0:
+                self.station_subset_names = self.child_subsection_names
+            else:
+                self.station_subset_names = self.section
+        
             #setup plotting framework
             self.setup_plot_framework()
 
@@ -284,18 +301,21 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             if self.station_plots:   
                 self.station_ind = -1
 
-            # iterate through station_subset_names
             for station_subset_ind, station_subset in enumerate(self.station_subset_names):
+
                 self.station_subset_ind = station_subset_ind
                 self.station_subset = station_subset
 
                 # update the conf options for this subset
-                if station_subset_ind != 0:
-                    for k in self.sub_opts[prv_station]:
-                        vars(self).pop(k)
-                vars(self).update({(k, self.parse_parameter(k, val)) for k, val in
-                                   self.sub_opts[station_subset].items()})
-                prv_station = station_subset
+                if len(self.child_subsection_names) > 0:
+                    for section in self.all_sections:
+                        for k in self.sub_opts[section]:
+                            try:
+                                vars(self).pop(k)
+                            except:
+                                continue
+                    vars(self).update({(k, self.parse_parameter(k, val)) for k, val in
+                                      self.sub_opts[station_subset].items()})
                 aux.update_metadata_fields(self)
                 aux.meta_from_conf(self)
 
@@ -313,7 +333,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                 # get number of stations
                 n_stations = len(self.datareader.plotting_params['observations']['valid_station_inds'])              
-                
+
                 # make summary plots?
                 if self.summary_plots:
                     # get median timeseries across data from filtered data, and place it pandas dataframe
@@ -711,7 +731,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # create new dictionary to store selection station data by data array
         self.selected_station_data = {}
-
+       
         # iterate through data arrays in data in memory filtered dictionary
         for data_label in self.data_in_memory_filtered.keys():
 
