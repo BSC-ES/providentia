@@ -1,5 +1,4 @@
 *.pyc
-.idea
 providentia.egg-info
 .vscode
 .pytest_cache

@@ -6,7 +6,7 @@ from .config import split_options
 from .reading import get_yearmonths_to_read
 from .prov_canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .toolbar import save_data, conf_dialogs
+from .toolbar import save_data, conf_dialogs, reload_conf
 from .prov_dashboard_aux import ComboBox
 from .prov_dashboard_aux import QVLine
 from .prov_dashboard_aux import PopUpWindow
@@ -53,24 +53,33 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # store options to be restored at the end
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
 
-        #config = configparser.ConfigParser()
-        #config.read(conf_to_load)
-        #all_sections = config.sections()
-
-        # update from config file (if available)
-        #config and section defined 
-        self.from_conf = False
-        if ('config' in kwargs) and ('section' in kwargs):
-            self.load_conf(section=kwargs['section'], fpath=kwargs['config'])
-        #just config defined (and only 1 section in file)
-        elif 'config' in kwargs: 
-            self.load_conf(section=None, fpath=kwargs['config'])    
-        #if no config has been loaded 
-        if (not self.from_conf) & (os.path.isfile(dconf_path)):
-            self.load_conf(section='default', fpath=dconf_path)
+        # update from kwargs in command line
+        if 'config' in kwargs:
+            self.from_conf = True
+        else:
             self.from_conf = False
-        # update from command line
+        if 'section' in kwargs:
+            self.from_section = True
+        else:
+            self.from_section = False
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
+
+        # initialize dashboard
+        if self.from_section:
+            # initialize dashboard with selected section information (with map)
+            self.load_conf(fpath=self.config)
+            try:
+                vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[self.section].items()})
+            except:
+                print('Error: The section specified in the command line does not exist.')
+                print('Tip: For subsections, add the name of the parent section followed by a hyphen before the subsection name.')
+                sys.exit()
+        else:
+             if os.path.isfile(dconf_path):
+                # initialize dashboard with default.conf information (without map)
+                self.load_conf(fpath=dconf_path)
+                vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts['default'].items()})
+                
         # arguments are only local
         self.main_window_geometry = None
         InitStandards.__init__(self, obs_root=self.obs_root,
@@ -408,11 +417,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.colocate_active = True
         else:
             self.colocate_active = False
-
+        
         # if we're starting from a configuration file, read first the setup
-        if self.from_conf: 
+        if self.from_conf and self.from_section: 
             self.handle_data_selection_update()
-            # then see if we have fields that require to be se (meta, rep, period)
+            # then see if we have fields that require to be set (meta, rep, period)
             aux.representativity_conf(self)
             if hasattr(self, 'period'):
                 self.period_conf()
@@ -428,6 +437,27 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.show()
         # maximise window to fit screen
         self.showMaximized()
+
+        # get pop up to select the section when the config file is an input in the command line
+        if self.from_conf and (not self.from_section):
+            self.load_conf(fpath=self.config)
+            all_sections = self.sub_opts.keys()
+            section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
+                                                                'Select section to load',  
+                                                                all_sections, 0, False)
+            if okpressed:
+                reload_conf(self, section, self.config)
+
+            self.handle_data_selection_update()
+            # then see if we have fields that require to be set (meta, rep, period)
+            aux.representativity_conf(self)
+            if hasattr(self, 'period'):
+                self.period_conf()
+            # if there are there are metadata reported in configuratoin
+            if set([m.lower() for m in self.metadata_vars_to_read]).intersection(vars(self).keys()):
+                aux.meta_from_conf(self)
+            # call function to apply changes (filter)
+            self.mpl_canvas.handle_data_filter_update()
 
     def period_conf(self):
         keeps, removes = split_options(self.period)
@@ -1118,7 +1148,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 
-    def load_conf(self, section=None, fpath=None):
+    def load_conf(self, fpath=None):
         """ Load existing configurations from file. """
 
         from .config import read_conf
@@ -1130,14 +1160,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             print(("Error %s" % fpath))
             return
 
-        opts = read_conf(section, fpath)
-        #if were unable to read file then return
-        if opts is None:
-            return
-
-        self.opts = opts
-        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
-        self.from_conf = True
+        self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names = read_conf(fpath)
 
     def disable_ghost_buttons(self):
         """Disable button related only to ghost data"""

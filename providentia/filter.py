@@ -67,12 +67,11 @@ class DataFilter:
             species = self.read_instance.selected_species
             if hasattr(self.read_instance, 'period'):
                 keeps, removes = split_options(self.read_instance.period)
-                print(keeps, removes)
         else:
             species = self.read_instance.active_species
             keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
             removes = self.read_instance.period_menu['checkboxes']['remove_selected']
-
+        
         # filter/limit data for periods selected
         if len(keeps) > 0:
             day_night_codes_to_keep = []
@@ -242,7 +241,7 @@ class DataFilter:
 
         # iterate through all metadata
         for meta_var in self.read_instance.metadata_vars_to_read:
-
+            
             if meta_var == 'lat':
                 meta_var = 'latitude'
             elif meta_var == 'lon':
@@ -250,11 +249,12 @@ class DataFilter:
 
             metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
             metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
-
+            
             # handle non-numeric metadata
             if metadata_data_type == np.object:
                 # if any of the keep checkboxes are selected, filter out data by fields that have not been selected
                 current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
+                
                 if len(current_keep) > 0:
                     invalid_keep = np.repeat(
                         np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :],
@@ -428,7 +428,7 @@ class DataFilter:
             species = self.read_instance.selected_species
         else:
             species = self.read_instance.active_species
-
+        
         # get intersect of indices of stations with >= % minimum data availability percent,
         # and with > 1 valid measurements ,in all observational data arrays (colocated and non-colocated)
         # then subset these indices with standard methods == selected methods,
@@ -441,7 +441,7 @@ class DataFilter:
                 # get absolute data availability number per station in observational data array
                 station_data_availability_number = Stats.calculate_data_avail_number(
                     self.read_instance.data_in_memory_filtered[data_label][species])
-
+               
                 # get indices of stations with > 1 available measurements
                 # save valid station indices with data array
                 self.read_instance.datareader.plotting_params[data_label]['valid_station_inds'] = \
