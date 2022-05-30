@@ -246,11 +246,8 @@ def read_conf(fpath=None):
         
                     if copy:
                         if line.strip() != '':
-                            key = line.strip().replace(' ', '').split('=')[0]
-                            if key == 'report_title':
-                                value = line.strip().split('=')[1]
-                            else:
-                                value = line.strip().replace(' ', '').split('=')[1]
+                            key = line.split('=')[0].strip()
+                            value = line.split('=')[1].strip()
                             config[section_modified][key] = value
 
         # regenerate sections (e.g. add SECTIONA values to SECTIONA-Spain)
@@ -287,28 +284,22 @@ def read_conf(fpath=None):
     
     return res, all_sections_modified, parent_sections, subsections_modified
             
-def write_conf(section, fpath, opts):
+def write_conf(section, subsection, fpath, opts):
     """Write configurations on file. """
 
     config = configparser.RawConfigParser()
 
-    # check if file exists
-    if os.path.exists(fpath):
-        config.read(fpath)
-
-    # check if section exists
-    if not config.has_section(section):
-        config.add_section(section)
-
     # update configuration
-    for item in opts:
-        val = opts[item]
-        config.set(section, item, val)
-
+    for section, section_name in zip(['section', 'subsection'], [section, subsection]):
+        if opts[section]:
+            config.add_section(section_name)
+            for item in opts[section]:
+                val = opts[section][item]
+                config.set(section_name, item, val)
+            
     # write configuration
     with open(fpath, 'w') as configfile:
         config.write(configfile)
-
 
 def split_options(conf_string, separator="||"):
     """For the options in the configuration that define the keep and remove

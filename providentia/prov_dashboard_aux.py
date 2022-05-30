@@ -127,13 +127,12 @@ class PopUpWindow(QtWidgets.QWidget):
 
         #generate GUI window for root page in menu
         self.generate_window()
-
+        
         #define stylesheet for tooltips
         self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family()))
 
     def generate_window(self):
-
-        """generate GUI window for current menu level"""
+        """Generate GUI window for current menu level"""
 
         #get current menu level keys
         menu_current_keys = list(self.menu_current.keys())
@@ -250,7 +249,7 @@ class PopUpWindow(QtWidgets.QWidget):
         horizontal_parent.setSpacing(25)
         #align grids to centre and top
         horizontal_parent.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
-
+        
         #order appearance of menu types grids in menu (from left to right)
         menu_type_order_dict = {'navigation_buttons':1, 'rangeboxes':2, 'checkboxes':3}
         menu_types = sorted(menu_types, key=menu_type_order_dict.__getitem__)

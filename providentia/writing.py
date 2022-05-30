@@ -189,72 +189,101 @@ def export_configuration(prv, cname, separator="||"):
     :type separator: str
     """
 
-    # default
-    options = {'selected_network': prv.selected_network,
-               'selected_resolution': prv.selected_resolution,
-               'selected_matrix': prv.selected_matrix,
-               'selected_species': prv.selected_species,
-               'start_date': prv.selected_start_date,
-               'end_date': prv.selected_end_date}
+    # set section and subsection names in config file
+    if prv.section == None:
+        section = 'SECTION1'
+        subsection = '[SUBSECTION1]'
+    else:
+        if '-' in prv.section:
+            section = prv.section.split('-')[0]
+            subsection = '[' + prv.section.split('-')[1] + ']'
+        else:
+            section = prv.section
+            subsection = None
 
-    # QA
-    if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):
-        options['QA'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
-    # flags
-    if prv.flag_menu['checkboxes']['remove_selected']:
-        options['flags'] = ",".join(str(i) for i in prv.flag_menu['checkboxes']['remove_selected'])
+    options = {}
+    options['section'] = {}
+    options['subsection'] = {}
+
+    # default
+    options['section'] = {'selected_network': prv.selected_network,
+                         'selected_resolution': prv.selected_resolution,
+                         'selected_matrix': prv.selected_matrix,
+                         'selected_species': prv.selected_species,
+                         'start_date': prv.selected_start_date,
+                         'end_date': prv.selected_end_date,
+                         'temporal_colocation': prv.temporal_colocation
+                         }
+
     # experiments
     if prv.experiments_menu['checkboxes']['keep_selected']:
-        options['experiments'] = ",".join(str(i) for i in prv.experiments_menu['checkboxes']['keep_selected'])
+        options['section']['experiments'] = ",".join(str(i) for i in prv.experiments_menu['checkboxes']['keep_selected'])
 
-    # representativity
-    for i, label in enumerate(prv.representativity_menu['rangeboxes']['labels']):
-        if 'max_gap' in label:
-            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '100':
-                options[label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
-        else:
-            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '0':
-                options[label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
+    # add information about report
+    options['section'].update({'filename': prv.filename, 
+                               'report_title': prv.report_title,
+                               'report_type': prv.report_type,
+                               'summary_plots': prv.summary_plots,
+                               'station_plots': prv.station_plots
+                              })
+    
+    if subsection != None:
 
-    # period
-    if prv.period_menu['checkboxes']['keep_selected'] or prv.period_menu['checkboxes']['remove_selected']:
-        period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + separator
-        period_r = " remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + separator
-        options['period'] = period_k + period_r
+        # QA
+        if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):
+            options['subsection']['QA'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
+            
+        # flags
+        if prv.flag_menu['checkboxes']['remove_selected']:
+            options['subsection']['flags'] = ",".join(str(i) for i in prv.flag_menu['checkboxes']['remove_selected'])
 
-    # bounds
-    if np.float32(prv.le_minimum_value.text()) != \
-            np.float32(prv.parameter_dictionary[prv.active_species]['extreme_lower_limit']):
-        options['lower_bound'] = prv.le_minimum_value.text()
-    if np.float32(prv.le_maximum_value.text()) != \
-            np.float32(prv.parameter_dictionary[prv.active_species]['extreme_upper_limit']):
-        options['upper_bound'] = prv.le_maximum_value.text()
+        # representativity
+        for i, label in enumerate(prv.representativity_menu['rangeboxes']['labels']):
+            if 'max_gap' in label:
+                if prv.representativity_menu['rangeboxes']['current_lower'][i] != '100':
+                    options['subsection'][label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
+            else:
+                if prv.representativity_menu['rangeboxes']['current_lower'][i] != '0':
+                    options['subsection'][label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
 
-    # metadata
-    for menu_type in prv.metadata_types:
-        # treat ranges first
-        for i, label in enumerate(prv.metadata_menu[menu_type]['rangeboxes']['labels']):
-            lower_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_lower'][i]
-            lower_def = prv.metadata_menu[menu_type]['rangeboxes']['lower_default'][i]
-            upper_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_upper'][i]
-            upper_def = prv.metadata_menu[menu_type]['rangeboxes']['upper_default'][i]
-            if (lower_cur != lower_def) or (upper_cur != upper_def):
-                options[label] = lower_cur + ", " + upper_cur
+        # period
+        if prv.period_menu['checkboxes']['keep_selected'] or prv.period_menu['checkboxes']['remove_selected']:
+            period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + separator
+            period_r = " remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + separator
+            options['subsection']['period'] = period_k + period_r
 
-        # and then treat the keep/remove
-        for label in prv.metadata_menu[menu_type]['navigation_buttons']['labels']:
-            #         keeps, removes = split_options(getattr(self, label))
-            keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
-            removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
+        # bounds
+        if np.float32(prv.le_minimum_value.text()) != \
+                np.float32(prv.parameter_dictionary[prv.active_species]['extreme_lower_limit']):
+            options['subsection']['lower_bound'] = prv.le_minimum_value.text()
+        if np.float32(prv.le_maximum_value.text()) != \
+                np.float32(prv.parameter_dictionary[prv.active_species]['extreme_upper_limit']):
+            options['subsection']['upper_bound'] = prv.le_maximum_value.text()
 
-            if keeps or removes:
-                meta_keep = "keep: " + ",".join(str(i) for i in keeps) + separator
-                meta_remove = " remove: " + ",".join(str(i) for i in removes) + separator
-                options[label] = meta_keep + meta_remove
+        # metadata
+        for menu_type in prv.metadata_types:
+            # treat ranges first
+            for i, label in enumerate(prv.metadata_menu[menu_type]['rangeboxes']['labels']):
+                lower_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_lower'][i]
+                lower_def = prv.metadata_menu[menu_type]['rangeboxes']['lower_default'][i]
+                upper_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_upper'][i]
+                upper_def = prv.metadata_menu[menu_type]['rangeboxes']['upper_default'][i]
+                if (lower_cur != lower_def) or (upper_cur != upper_def):
+                    options['subsection'][label] = lower_cur + ", " + upper_cur
 
-    # map z
-    if prv.cb_z_stat.currentText() != prv.basic_z_stats[0]:
-        options['map_z'] = prv.cb_z_stat.currentText()
+            # and then treat the keep/remove
+            for label in prv.metadata_menu[menu_type]['navigation_buttons']['labels']:
+                #         keeps, removes = split_options(getattr(self, label))
+                keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
+                removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
 
-    section_name = cname[cname.rfind("/")+1:]
-    write_conf(section_name, cname+".conf", options)
+                if keeps or removes:
+                    meta_keep = "keep: " + ",".join(str(i) for i in keeps) + separator
+                    meta_remove = " remove: " + ",".join(str(i) for i in removes) + separator
+                    options['subsection'][label] = meta_keep + meta_remove
+
+        # map z
+        if prv.cb_z_stat.currentText() != prv.basic_z_stats[0]:
+            options['subsection']['map_z'] = prv.cb_z_stat.currentText()
+
+    write_conf(section, subsection, cname+".conf", options)

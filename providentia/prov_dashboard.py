@@ -22,6 +22,7 @@ import os
 import os.path
 import json
 import sys
+import pandas as pd
 from glob import glob
 from functools import partial
 from collections import OrderedDict
@@ -431,15 +432,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # call function to apply changes (filter)
             self.mpl_canvas.handle_data_filter_update()
 
-        # set finalised layout
-        self.setLayout(parent_layout)
-        # plot whole dashboard
-        self.show()
-        # maximise window to fit screen
-        self.showMaximized()
-
         # get pop up to select the section when the config file is an input in the command line
         if self.from_conf and (not self.from_section):
+
             self.load_conf(fpath=self.config)
             all_sections = self.sub_opts.keys()
             section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
@@ -459,10 +454,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # call function to apply changes (filter)
             self.mpl_canvas.handle_data_filter_update()
 
+        # set finalised layout
+        self.setLayout(parent_layout)
+        # plot whole dashboard
+        self.show()
+        # maximise window to fit screen
+        self.showMaximized()
+
     def period_conf(self):
         keeps, removes = split_options(self.period)
-        self.period_menu['checkboxes']['keep_selected'] += keeps
-        self.period_menu['checkboxes']['remove_selected'] += removes
+        self.period_menu['checkboxes']['keep_selected'] = keeps
+        self.period_menu['checkboxes']['remove_selected'] = removes
 
     def savebutton_func(self):
         save_data(self.mpl_canvas)
@@ -509,6 +511,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.active_experiment_grids = []
             self.active_qa = []
             self.active_flags = []
+            self.all_metadata = []
 
             # set initial time array to be None
             self.time_array = None
@@ -732,6 +735,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         previous_active_experiment_grids = self.active_experiment_grids
         previous_active_qa = self.active_qa
         previous_active_flags = self.active_flags
+        previous_all_metadata = self.all_metadata
 
         # set all currently selected variables as active variables
         self.active_network = self.selected_network
@@ -743,6 +747,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.active_experiment_grids = copy.deepcopy(self.experiments_menu['checkboxes']['keep_selected'])
         self.active_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
         self.active_flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
+        self.all_metadata = pd.io.json.json_normalize(self.metadata_menu, sep='_').to_dict(orient='records')[0]
 
         # determine what data (if any) needs to be read
         # set variables that inform what data needs to be read (set all initially as False)
@@ -759,7 +764,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.active_resolution != previous_active_resolution) or (
                 self.active_species != previous_active_species) or (
                 np.array_equal(self.active_qa, previous_active_qa) == False) or (
-                np.array_equal(self.active_flags, previous_active_flags) == False):
+                np.array_equal(self.active_flags, previous_active_flags) == False) or (
+                np.array_equal(self.all_metadata, previous_all_metadata) == False):
             read_all = True
         # key variables have not changed, has start/end date?
         else:
@@ -818,6 +824,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # has date range changed?
         if read_all or read_left or read_right or cut_left or cut_right:
+            
+            if self.mpl_canvas.map_initialised:
+                self.section = None
 
             # set new active time array/unique station references/longitudes/latitudes
             # adjust data arrays to account for potential changing number of stations

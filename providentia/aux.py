@@ -449,6 +449,7 @@ def update_period_fields(resolution, period_menu):
     :return: updated menu of period
     :rtype: dict
     """
+
     # hourly temporal resolution?
     if 'hourly' in resolution:
         period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend',
