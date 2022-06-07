@@ -82,8 +82,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             CURRENT_PATH, 'conf/plots_per_report_type.json')))
 
         # get config parameters as variables
-        for section in self.parent_section_names:
+        for filename, section in zip(self.filenames, self.parent_section_names):
             
+            self.filename = filename
             self.section = section
             self.section_opts = self.sub_opts[section]
             vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.section_opts.items()})
@@ -260,22 +261,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             print(("Error %s" % fpath))
             return
 
-        self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names = read_conf(fpath)
-        
+        self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(fpath)
+
     def start_pdf(self):
 
-        # define file name
-        if hasattr(self, 'filename'):
-            filename = self.filename + '.pdf'
-        else:
-            filename = "PROVIDENTIA_Report.pdf"
-        
         # get path where reports will be saved
         reports_path = (os.path.join(CURRENT_PATH, '../reports/'))
 
         # open new PDF file
-        with PdfPages(reports_path + filename) as pdf:
-
+        with PdfPages(reports_path + self.filename + '.pdf') as pdf:
+            
             self.pdf = pdf
             self.make_header()
 
@@ -284,7 +279,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # iterate through subsets
             self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
-                                           if self.section == subsection_name.split('-')[0]]
+                                           if self.section == subsection_name.split('|')[0]]
             if len(self.child_subsection_names) > 0:
                 self.station_subset_names = self.child_subsection_names
             else:

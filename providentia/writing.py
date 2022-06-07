@@ -194,9 +194,9 @@ def export_configuration(prv, cname, separator="||"):
         section = 'SECTION1'
         subsection = '[SUBSECTION1]'
     else:
-        if '-' in prv.section:
-            section = prv.section.split('-')[0]
-            subsection = '[' + prv.section.split('-')[1] + ']'
+        if '|' in prv.section:
+            section = prv.section.split('|')[0]
+            subsection = '[' + prv.section.split('|')[1] + ']'
         else:
             section = prv.section
             subsection = None
@@ -286,4 +286,4 @@ def export_configuration(prv, cname, separator="||"):
         if prv.cb_z_stat.currentText() != prv.basic_z_stats[0]:
             options['subsection']['map_z'] = prv.cb_z_stat.currentText()
 
-    write_conf(section, subsection, cname+".conf", options)
+    write_conf(section, subsection, cname + '.conf', options)

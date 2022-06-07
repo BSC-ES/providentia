@@ -165,7 +165,7 @@ def read_conf(fpath=None):
                 res_sub[k] = val
 
         res['default'] = res_sub
-        all_sections_modified, parent_sections, subsections_modified = None, None, None
+        all_sections_modified, parent_sections, subsections_modified, filenames = None, None, None, None
         
     else:
         config = {}
@@ -176,6 +176,7 @@ def read_conf(fpath=None):
         subsections = []
         subsections_modified = []
         parent_sections = []
+        filenames = []
 
         # get section names (e.g. [SECTIONA], [[Spain]]) and modified names (e.g. SECTIONA, SECTIONA-Spain)
         with open(fpath) as file:
@@ -191,7 +192,7 @@ def read_conf(fpath=None):
                         sys.exit()
                 elif '[[' in line and ']]' in line:
                     subsection = line.strip()
-                    subsection_modified = par_section + '-' + line.split('[[')[1].split(']]')[0]
+                    subsection_modified = par_section + '|' + line.split('[[')[1].split(']]')[0]
                     subsections.append(subsection)
                     subsections_modified.append(subsection_modified)
                     all_sections_modified.append(subsection_modified)
@@ -255,7 +256,7 @@ def read_conf(fpath=None):
         for section_modified in all_sections_modified:
 
             # get parent section
-            if '-' in section_modified:
+            if '|' in section_modified:
                 is_subsection = True
             else:
                 is_subsection = False
@@ -270,6 +271,11 @@ def read_conf(fpath=None):
                             res_sub[par_k] = eval(par_val)
                         except:
                             res_sub[par_k] = par_val
+                else:
+                    # store filename
+                    if k == 'filename':
+                        filenames.append(val)
+                        
                 # store pairs from current section
                 try:
                     res_sub[k] = eval(val)
@@ -281,8 +287,8 @@ def read_conf(fpath=None):
 
             # reset res variable
             res_sub = {}
-    
-    return res, all_sections_modified, parent_sections, subsections_modified
+
+    return res, all_sections_modified, parent_sections, subsections_modified, filenames
             
 def write_conf(section, subsection, fpath, opts):
     """Write configurations on file. """

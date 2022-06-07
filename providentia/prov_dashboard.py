@@ -1169,7 +1169,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             print(("Error %s" % fpath))
             return
 
-        self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names = read_conf(fpath)
+        self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, _ = read_conf(fpath)
 
     def disable_ghost_buttons(self):
         """Disable button related only to ghost data"""
