@@ -289,7 +289,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 self.station_subset_names = self.child_subsection_names
             else:
                 self.station_subset_names = self.section
-        
+
+            if isinstance(self.station_subset_names, str):
+                self.station_subset_names = [self.station_subset_names]
+
             #setup plotting framework
             self.setup_plot_framework()
 
