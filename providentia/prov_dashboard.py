@@ -846,8 +846,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 # reset data in memory dictionary
                 self.datareader.reset_data_in_memory()
 
-                if not self.reading_nonghost:
-                    self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
+                self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
+
                 # read observations
                 self.datareader.read_data('observations', self.active_start_date,
                                           self.active_end_date, self.active_network,
