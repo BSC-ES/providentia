@@ -1980,10 +1980,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         relevant_axis.set_ylabel(ylabel=self.characteristics_per_plot_type['scatter']['axis_ylabel']['ylabel'], 
                                  fontsize=self.characteristics_per_plot_type['scatter']['axis_ylabel']['fontsize'])
 
-        # Add line 1:1
-        line = Line2D([0, 1], [0, 1], color='lightgrey', linewidth=1, linestyle='--')
-        line.set_transform(relevant_axis.transAxes)
-        relevant_axis.add_line(line)
+        # Add line 1:1 (central)
+        line_11 = Line2D([0, 1], [0, 1], color='lightgrey', linewidth=1, linestyle='--', transform=relevant_axis.transAxes)
+        relevant_axis.add_line(line_11)
+
+        # Add line 1:2 (bottom)
+        line_12 = Line2D([0, 1], [0, 0.5], color='lightgrey', linewidth=1, linestyle='--', transform=relevant_axis.transAxes)
+        relevant_axis.add_line(line_12)
+
+        # Add line 2:1 (top)
+        line_21 = Line2D([0, 0.5], [0, 1], color='lightgrey', linewidth=1, linestyle='--', transform=relevant_axis.transAxes)
+        relevant_axis.add_line(line_21)
 
     def make_table(self):
         pass
