@@ -65,9 +65,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             print("No configuration file found. The path to the config file must be added as an argument.")
             sys.exit(1)
 
-        # update from command line
-        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
-        
         # init GHOST standards
         InitStandards.__init__(self, obs_root=self.obs_root,
                                ghost_version=self.ghost_version)
@@ -89,10 +86,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             self.section_opts = self.sub_opts[section]
             vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.section_opts.items()})
 
+            # update from command line
+            vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
+
             #self.bounding_box = {'longitude': {'min': -12, 'max': 34}, 'latitude': {'min': 30, 'max': 46}}
             self.active_qa = aux.which_qa(self)
             self.active_flags = aux.which_flags(self)
-            self.reading_nonghost = aux.check_for_ghost(self.selected_network)
+            self.reading_nonghost = aux.check_for_ghost(self.network)
             self.experiments_to_read = aux.get_experiments(self)
             #if have no experiments, force temporal colocation to be False
             if len(self.experiments_to_read) == 0:
@@ -102,22 +102,22 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # get all netCDF monthly files per species
             if not self.reading_nonghost:
-                species_files = os.listdir('%s/%s/%s/%s/%s' % (self.obs_root, self.selected_network,
-                                                            self.ghost_version, self.selected_resolution,
-                                                            self.selected_species))
+                species_files = os.listdir('%s/%s/%s/%s/%s' % (self.obs_root, self.network,
+                                                            self.ghost_version, self.resolution,
+                                                            self.species))
             else:
-                species_files = os.listdir('%s/%s/%s/%s/%s' % (self.nonghost_root, self.selected_network.lower()[1:],
-                                                            self.selected_matrix, self.selected_resolution,
-                                                            self.selected_species))
+                species_files = os.listdir('%s/%s/%s/%s/%s' % (self.nonghost_root, self.network.lower()[1:],
+                                                            self.matrix, self.resolution,
+                                                            self.species))
 
             # get monthly start date (YYYYMM) of all species files
             species_files_yearmonths = \
                 [int(f.split('_')[-1][:6] + '01') for f in species_files if f != 'temporary']
 
             # initialize structure to store all obs
-            self.all_observation_data = {self.selected_network: {
-                self.selected_resolution: {self.selected_matrix: {
-                    self.selected_species: species_files_yearmonths}}}}
+            self.all_observation_data = {self.network: {
+                self.resolution: {self.matrix: {
+                    self.species: species_files_yearmonths}}}}
 
             self.metadata_types, self.metadata_menu = aux.init_metadata(self)
 
@@ -126,8 +126,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # read
             self.datareader.get_valid_obs_files_in_date_range(self.start_date, self.end_date)
             self.datareader.get_valid_experiment_files_in_date_range()
-            self.datareader.read_setup(self.selected_resolution, self.start_date, self.end_date,
-                                    self.selected_network, self.selected_species, self.selected_matrix)
+            self.datareader.read_setup(self.resolution, self.start_date, self.end_date,
+                                       self.network, self.species, self.matrix)
 
             # create data dictionaries to fill
             self.datareader.reset_data_in_memory()
@@ -135,13 +135,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # read observations
             self.datareader.read_data('observations', self.start_date, self.end_date,
-                                      self.selected_network, self.selected_resolution,
-                                      self.selected_species, self.selected_matrix)
+                                      self.network, self.resolution,
+                                      self.species, self.matrix)
             # read selected experiments (iterate through)
             for exp in self.experiments_to_read:
-                self.datareader.read_data(exp, self.selected_start_date, self.selected_end_date, self.selected_network,
-                                          self.selected_resolution, self.selected_species, self.selected_matrix)
-
+                self.datareader.read_data(exp, self.start_date, self.end_date, self.network,
+                                          self.resolution, self.species, self.matrix)
+            
             # update dictionary of plotting parameters (colour and zorder etc.) for each data array
             self.datareader.update_plotting_parameters()
 
@@ -243,7 +243,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             self.plots_per_report_type[self.report_type] = [plot_type for plot_type in self.plots_per_report_type[self.report_type] if plot_type not in plot_types_to_remove]
 
-            self.exceedance_limit = aux.exceedance_lim(self.selected_species)
+            self.exceedance_limit = aux.exceedance_lim(self.species)
             self.temporal_axis_mapping_dict = aux.temp_axis_dict()
 
             self.start_pdf()
@@ -318,9 +318,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 aux.meta_from_conf(self)
 
                 # create and update the representativity options
-                self.representativity_menu = aux.representativity_fields(self, self.selected_resolution)
+                self.representativity_menu = aux.representativity_fields(self, self.resolution)
                 aux.representativity_conf(self)
-                self.minimum_value, self.maximum_value = aux.which_bounds(self, self.selected_species)
+                self.minimum_value, self.maximum_value = aux.which_bounds(self, self.species)
 
                 print('\nFiltering Data for {} Subset'.format(station_subset))
                 # filter dataset for current station_subset
@@ -398,9 +398,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         txt = 'Network = {}\nTemporal Resolution = {}\n' \
               'Species = {}\nDate Range = {} - {}\nExperiments = {}\n'\
-            .format(self.selected_network,
-                    self.selected_resolution,
-                    self.selected_species,
+            .format(self.network,
+                    self.resolution,
+                    self.species,
                     self.start_date,
                     self.end_date, self.experiments_to_read)
 
@@ -623,7 +623,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                         # make axis ylabel (only on leftmost column of visible axes)?
                         if ('axis_ylabel' in plot_characteristics_vars) and (col_ii == 0):
-                            if ('periodic' in plot_type) and (self.selected_resolution != 'hourly'):
+                            if ('periodic' in plot_type) and (self.resolution != 'hourly'):
                                 pass
                             else:
                                 ax.set_ylabel(**plot_characteristics['axis_ylabel'])
@@ -744,9 +744,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # get data for selected stations
             if station_index:
-                data_array = self.data_in_memory_filtered[data_label][self.selected_species][station_index, :]
+                data_array = self.data_in_memory_filtered[data_label][self.species][station_index, :]
             else:
-                data_array = self.data_in_memory_filtered[data_label][self.selected_species][
+                data_array = self.data_in_memory_filtered[data_label][self.species][
                              self.datareader.plotting_params[data_label]['valid_station_inds'], :]
 
             # if data array has no valid data for selected stations, do not create a pandas dataframe
@@ -791,11 +791,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # define all temporal aggregation resolutions that will be used to aggregate data
         # (variable by temporal resolution of data in memory)
-        if 'hourly' in self.selected_resolution:
+        if 'hourly' in self.resolution:
             self.temporal_aggregation_resolutions = ['hour', 'dayofweek', 'month', 'all']
-        elif self.selected_resolution == 'daily':
+        elif self.resolution == 'daily':
             self.temporal_aggregation_resolutions = ['dayofweek', 'month', 'all']
-        elif self.selected_resolution == 'monthly':
+        elif self.resolution == 'monthly':
             self.temporal_aggregation_resolutions = ['month', 'all']
 
         # iterate through all defined temporal aggregation resolutions
@@ -1338,7 +1338,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # read z1 data
         z1_array_data = \
-            self.data_in_memory_filtered[z1][self.selected_species][active_map_valid_station_inds,:]
+            self.data_in_memory_filtered[z1][self.species][active_map_valid_station_inds,:]
         # drop NaNs and reshape to object list of station data arrays (if not checking data %)
         if base_zstat != 'Data %':
             z1_array_data = drop_nans(z1_array_data)
@@ -1366,7 +1366,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # read z2 data
             z2_array_data = \
-                self.data_in_memory_filtered[z2][self.selected_species][active_map_valid_station_inds,:]
+                self.data_in_memory_filtered[z2][self.species][active_map_valid_station_inds,:]
             # drop NaNs and reshape to object list of station data arrays (if not checking data %)
             if base_zstat != 'Data %':
                 z2_array_data = drop_nans(z2_array_data)
@@ -1618,10 +1618,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # based on the temporal resolution of the data, combine the relevant temporal aggregation dictionaries
         aggregation_dict = {'hour': hour_aggregation_dict, 'dayofweek': dayofweek_aggregation_dict, 'month': month_aggregation_dict}
         aggregation_dict_to_remove = {}
-        if self.selected_resolution == 'daily':
+        if self.resolution == 'daily':
             aggregation_dict_to_remove = {'hour': hour_aggregation_dict}
             hour_aggregation_dict['title'] = ''
-        if self.selected_resolution == 'monthly':
+        if self.resolution == 'monthly':
             aggregation_dict_to_remove = {'dayofweek': dayofweek_aggregation_dict, 'hour': hour_aggregation_dict}
 
         # turn on all axes that will be plotted on, and add yaxis grid to each axis, and change axis label tick sizes
@@ -1730,7 +1730,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
          
                     # plot title (with units)
                     # if selected data resolution is 'hourly', plot the title on off the hourly aggregation axis
-                    if 'hourly' in self.selected_resolution:
+                    if 'hourly' in self.resolution:
                         aggregation_dict['hour']['ax'].set_title('Temporal Distributions (%s)' % self.datareader.measurement_units,
                                                                                                 fontsize=8.0, loc='left')
                     # otherwise, plot the units on the monthly aggregation axis
@@ -1875,10 +1875,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         
         # make distribution plot
         minmax_diff = self.selected_station_data_max - self.selected_station_data_min
-        if pd.isnull(self.parameter_dictionary[self.selected_species]['minimum_resolution']):
+        if pd.isnull(self.parameter_dictionary[self.species]['minimum_resolution']):
             n_samples = 2000
         else:
-            n_samples = int(np.around(minmax_diff/(self.parameter_dictionary[self.selected_species]['minimum_resolution']/4.0),0))
+            n_samples = int(np.around(minmax_diff/(self.parameter_dictionary[self.species]['minimum_resolution']/4.0),0))
             if n_samples < 2000:
                 n_samples = 2000
         x_grid = np.linspace(self.selected_station_data_min, self.selected_station_data_max, n_samples, endpoint=True)
@@ -1903,7 +1903,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         relevant_axis.plot(x_grid, PDF_sampled, linewidth=1, color=self.datareader.plotting_params[data_label]['colour'])
 
         # make xaxis logged for certain species
-        if self.selected_species in ['sconcno', 'sconcno2']:
+        if self.species in ['sconcno', 'sconcno2']:
             relevant_axis.set_xlim(0.01, 10)
 
         # set xticks

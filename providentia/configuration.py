@@ -62,10 +62,12 @@ class ProvConfiguration(object):
                        "'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG']")
 
         # options added if configuration file is used
-        self.selected_species = kwargs.get('selected_species', '')
-        self.selected_network = kwargs.get('selected_network', '')
-        self.selected_matrix = kwargs.get('selected_matrix', '')
-        self.selected_resolution = kwargs.get('selected_resolution', '')
+        self.species = kwargs.get('species', '')
+        self.network = kwargs.get('network', '')
+        self.matrix = kwargs.get('matrix', '')
+        self.resolution = kwargs.get('resolution', '')
+        self.start_date = kwargs.get('start_date', '')
+        self.end_date = kwargs.get('end_date', '')
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))

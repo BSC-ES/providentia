@@ -206,12 +206,12 @@ def export_configuration(prv, cname, separator="||"):
     options['subsection'] = {}
 
     # default
-    options['section'] = {'selected_network': prv.selected_network,
-                         'selected_resolution': prv.selected_resolution,
-                         'selected_matrix': prv.selected_matrix,
-                         'selected_species': prv.selected_species,
-                         'start_date': prv.selected_start_date,
-                         'end_date': prv.selected_end_date,
+    options['section'] = {'network': prv.network,
+                         'resolution': prv.resolution,
+                         'matrix': prv.matrix,
+                         'species': prv.species,
+                         'start_date': prv.start_date,
+                         'end_date': prv.end_date,
                          'temporal_colocation': prv.temporal_colocation
                          }
 

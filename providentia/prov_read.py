@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from netCDF4 import Dataset
+import sys
 
 
 class DataReader:
@@ -113,7 +114,7 @@ class DataReader:
             else:
                 # get files from nonghost path
                 file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network[1:].lower(),
-                                                    self.read_instance.selected_matrix,
+                                                    self.read_instance.matrix,
                                                     resolution, species, species)
 
             self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[
@@ -233,28 +234,44 @@ class DataReader:
 
         # get relevant file start dates
         if data_label == 'observations':
+
             process_type = 'observations'
             if not self.read_instance.reading_nonghost:
                 file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
                                                     self.read_instance.ghost_version,
                                                     resolution, species, species)
-                relevant_file_start_dates = \
-                    sorted(self.available_observation_data[network][resolution][matrix][species])
+                try:
+                    relevant_file_start_dates = \
+                        sorted(self.available_observation_data[network][resolution][matrix][species])
+                except KeyError:
+                    print('Error: The folder {0} does not exist.'.format(file_root[:-1]))
+                    print('Consider interpolating the network data for the given configuration using Providentia Interpolation.')
+                    sys.exit()
             else:
                 # get files from nonghost path
                 file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root,
                                                     network[1:].lower(), matrix,
                                                     resolution, species, species)
-                relevant_file_start_dates = \
-                    sorted(self.available_observation_data[network][resolution][matrix][species])
+                try:
+                    relevant_file_start_dates = \
+                        sorted(self.available_observation_data[network][resolution][matrix][species])
+                except KeyError:
+                    print('Error: The folder {0} does not exist.'.format(file_root[:-1]))
+                    print('Consider interpolating the network data for the given configuration using Providentia Interpolation.')
+                    sys.exit()
 
         else:
+
             process_type = 'experiment'
             file_root = \
                 '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, data_label,
                                            resolution, species, network, species)
-
-            relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
+            try:
+                relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
+            except KeyError:
+                print('Error: The folder {0} does not exist.'.format(file_root[:-1]))
+                print('Consider interpolating the network data for the given configuration using Providentia Interpolation.')
+                sys.exit()
 
         # get data files in required date range to read, taking care not to re-read what has already been read
         yearmonths_to_read = get_yearmonths_to_read(relevant_file_start_dates, start_date, end_date, resolution)
@@ -367,37 +384,37 @@ class DataReader:
                         self.nonghost_metadata[file_data[2][:, np.newaxis],
                                                self.read_instance.metadata_inds_to_fill[file_data_ii]] = file_data[3]
 
-    def get_valid_obs_files_in_date_range(self, selected_start_date, selected_end_date):
+    def get_valid_obs_files_in_date_range(self, start_date, end_date):
         """Define function that iterates through observational dictionary tree
         and returns a dictionary of available data in the selected date
         range
 
-        :param selected_start_date: start date (e.g. "20201101")
-        :type selected_start_date: str
-        :param selected_end_date: end date (e.g. "20201101")
-        :type selected_end_date: str
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201101")
+        :type end_date: str
         """
 
         # create dictionary to store available observational data
         self.available_observation_data = {}
 
         # check if start/end date are valid values, if not, return with no valid obs. files
-        if (aux.valid_date(selected_start_date)) & (aux.valid_date(selected_end_date)):
+        if (aux.valid_date(start_date)) & (aux.valid_date(end_date)):
             self.read_instance.date_range_has_changed = True
-            self.read_instance.selected_start_date = int(selected_start_date)
-            self.read_instance.selected_end_date = int(selected_end_date)
-            self.read_instance.selected_start_date_firstdayofmonth = \
-                int(str(self.read_instance.selected_start_date)[:6] + '01')
+            self.read_instance.start_date = int(start_date)
+            self.read_instance.end_date = int(end_date)
+            self.read_instance.start_date_firstdayofmonth = \
+                int(str(self.read_instance.start_date)[:6] + '01')
         else:
             return
 
         # check end date is > start date, if not, return with no valid obs. files
-        if self.read_instance.selected_start_date >= self.read_instance.selected_end_date:
+        if self.read_instance.start_date >= self.read_instance.end_date:
             return
         # check start date and end date are both within if valid date range (19000101 - 20500101),
         # if not, return with no valid obs. files
-        if (self.read_instance.selected_start_date < 19000101) or (self.read_instance.selected_end_date < 19000101) or (
-                self.read_instance.selected_start_date >= 20500101) or (self.read_instance.selected_end_date >= 20500101):
+        if (self.read_instance.start_date < 19000101) or (self.read_instance.end_date < 19000101) or (
+                self.read_instance.start_date >= 20500101) or (self.read_instance.end_date >= 20500101):
             return
 
         # iterate through networks
@@ -409,8 +426,8 @@ class DataReader:
                         species_file_yearmonths = self.read_instance.all_observation_data[network][resolution][matrix][species]
                         # get file yearmonths within date range
                         valid_species_files_yearmonths = [ym for ym in species_file_yearmonths if
-                                                          (ym >= self.read_instance.selected_start_date_firstdayofmonth) & (
-                                                                      ym < self.read_instance.selected_end_date)]
+                                                          (ym >= self.read_instance.start_date_firstdayofmonth) & (
+                                                                      ym < self.read_instance.end_date)]
                         if len(valid_species_files_yearmonths) > 0:
                             # if network/res/matrix/species not in dictionary yet, add it
                             if network not in list(self.available_observation_data.keys()):
@@ -442,22 +459,22 @@ class DataReader:
             # if it does not exit, continue
             if not os.path.exists(
                     '%s/%s/%s/%s/%s/%s' % (self.read_instance.exp_root, self.read_instance.ghost_version, experiment,
-                                           self.read_instance.selected_resolution, self.read_instance.selected_species,
-                                           self.read_instance.selected_network)):
+                                           self.read_instance.resolution, self.read_instance.species,
+                                           self.read_instance.network)):
                 continue
             else:
                 # get all experiment netCDF files by experiment/grid/selected
                 # resolution/selected species/selected network
                 network_files = os.listdir(
                     '%s/%s/%s/%s/%s/%s' % (self.read_instance.exp_root, self.read_instance.ghost_version,
-                                           experiment, self.read_instance.selected_resolution,
-                                           self.read_instance.selected_species, self.read_instance.selected_network))
+                                           experiment, self.read_instance.resolution,
+                                           self.read_instance.species, self.read_instance.network))
                 # get start YYYYMM yearmonths of data files
                 network_files_yearmonths = [int(f.split('_')[-1][:6] + '01') for f in network_files]
                 # limit data files to just those within date range
                 valid_network_files_yearmonths = \
-                    [ym for ym in network_files_yearmonths if (ym >= self.read_instance.selected_start_date_firstdayofmonth) &
-                     (ym < self.read_instance.selected_end_date)]
+                    [ym for ym in network_files_yearmonths if (ym >= self.read_instance.start_date_firstdayofmonth) &
+                     (ym < self.read_instance.end_date)]
 
                 # if have some valid data files for experiment, add experiment key
                 # (with associated yearmonths) to dictionary

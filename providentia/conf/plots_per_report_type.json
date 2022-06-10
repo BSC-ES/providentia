@@ -21,7 +21,7 @@
               
     "met": ["map-Data %_obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"],
 
-    "test_debug": ["timeseries"],
+    "test_debug": ["scatter"],
 
     "test_options": ["timeseries", "timeseries_obs", "timeseries_annotate", 
                      "timeseries_individual", "timeseries_individual_annotate", 

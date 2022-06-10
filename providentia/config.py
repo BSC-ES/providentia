@@ -71,39 +71,6 @@ class ProvArgumentParser(object):
 #            self.parser.add_argument("--debug",
 #                                     dest="debug",
 #                                     help="debug (default=False)")
-            self.parser.add_argument("--sequential_colourmap",
-                                     dest="sequential_colourmap",
-                                     help="perceptually uniform sequential colourmap (default='viridis')")
-            self.parser.add_argument("--sequential_colourmap_warm",
-                                     dest="sequential_colourmap_warm",
-                                     help="warm sequential colourmap (default='Reds')")
-            self.parser.add_argument("--diverging_colourmap",
-                                     dest="diverging_colourmap",
-                                     help="diverging colourmap (default='bwr')")
-            self.parser.add_argument("--unsel_station_markersize",
-                                     dest="unsel_station_markersize",
-                                     help="define marker sizes for unselected stations on map")
-            self.parser.add_argument("--sel_station_markersize",
-                                     dest="sel_station_markersize",
-                                     help="define marker sizes for selected stations on map")
-            self.parser.add_argument("--legend_markersize",
-                                     dest="legend_markersize",
-                                     help="define marker sizes on legend")
-            self.parser.add_argument("--timeseries_markersize",
-                                     dest="timeseries_markersize",
-                                     help="define marker sizes on time series plot")
-            self.parser.add_argument("--timeseries_n_slices",
-                                     dest="timeseries_n_slices",
-                                     help="define number of slices in data labels")
-            self.parser.add_argument("--timeseries_last_step",
-                                     dest="timeseries_last_step",
-                                     help="define if data labels will include end date")
-            self.parser.add_argument("--temp_aggregated_markersize",
-                                     dest="temp_aggregated_markersize",
-                                     help="define marker sizes on temporally aggregated plot")
-            self.parser.add_argument("--temp_agg_expbias_markersize",
-                                     dest="temp_agg_expbias_markersize",
-                                     help="define marker sizes on temporally aggregated experiment bias plot")
             self.parser.add_argument("--map_coastline_resolution",
                                      dest="map_coastline_resolution",
                                      help="define coastlines resolution")

@@ -36,7 +36,7 @@ class DataFilter:
 
         # get set lower/upper data bounds
         if self.read_instance.offline:
-            species = self.read_instance.selected_species
+            species = self.read_instance.species
             selected_lower_bound = self.read_instance.minimum_value
             selected_upper_bound = self.read_instance.maximum_value
         else:
@@ -64,7 +64,7 @@ class DataFilter:
 
         keeps, removes = [], []
         if self.read_instance.offline:
-            species = self.read_instance.selected_species
+            species = self.read_instance.species
             if hasattr(self.read_instance, 'period'):
                 keeps, removes = split_options(self.read_instance.period)
         else:
@@ -147,7 +147,7 @@ class DataFilter:
         """Function which filters data by selected data availability variables"""
 
         if self.read_instance.offline:
-            species = self.read_instance.selected_species
+            species = self.read_instance.species
         else:
             species = self.read_instance.active_species
 
@@ -231,7 +231,7 @@ class DataFilter:
         """Filters data by selected metadata"""
 
         if self.read_instance.offline:
-            species = self.read_instance.selected_species
+            species = self.read_instance.species
         else:
             species = self.read_instance.active_species
 
@@ -339,7 +339,7 @@ class DataFilter:
         """Define function which colocates observational and experiment data"""
 
         if self.read_instance.offline:
-            species = self.read_instance.selected_species
+            species = self.read_instance.species
         else:
             species = self.read_instance.active_species
 
@@ -425,7 +425,7 @@ class DataFilter:
     def get_valid_stations_after_filtering(self):
 
         if self.read_instance.offline:
-            species = self.read_instance.selected_species
+            species = self.read_instance.species
         else:
             species = self.read_instance.active_species
         

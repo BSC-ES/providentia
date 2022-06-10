@@ -56,7 +56,7 @@ def which_qa(instance, return_defaults=False):
     """
 
     if return_defaults or (not hasattr(instance, 'qa')):
-        if instance.selected_species in instance.qa_exceptions:
+        if instance.species in instance.qa_exceptions:
             return instance.specific_qa
         else:
             return instance.general_qa

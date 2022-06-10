@@ -30,7 +30,7 @@ IFS=$'\n\t'
 # optional.
 # See `man getopt'.
 SHORT=uc:J:q:m:
-LONG=usage,cores:,jobname:,queue:,mem:,sequential_colourmap::,help::,version::,config::,section::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,obs_root::,nonghost_root::,exp_root::,offline::,sequential_colourmap::,sequential_colourmap_warm::,diverging_colourmap::,unsel_station_markersize::,sel_station_markersize::,legend_markersize::,timeseries_markersize::,timeseries_n_slices::,timeseries_last_step::,temp_agg_markersize::,temp_agg_expbias_markersize::,available_networks::
+LONG=usage,cores:,jobname:,queue:,mem:,help::,version::,config::,section::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,obs_root::,nonghost_root::,exp_root::,offline::,available_networks::,network::,start_date::,end_date::,species::,matrix::,resolution::
 
 # - Temporarily store output to be able to check for errors.
 # - Activate advanced mode getopt quoting e.g. via "--options".
