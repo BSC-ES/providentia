@@ -35,7 +35,6 @@ class ProvConfiguration(object):
                                                'viridis')
         self.sequential_colourmap_warm = \
             kwargs.get('sequential_colourmap_warm', 'Reds')
-
         self.diverging_colourmap = kwargs.get('diverging_colourmap', 'bwr')
         self.unsel_station_markersize = \
             kwargs.get('unsel_station_markersize', 3)
