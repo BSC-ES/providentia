@@ -71,9 +71,6 @@ class ProvArgumentParser(object):
 #            self.parser.add_argument("--debug",
 #                                     dest="debug",
 #                                     help="debug (default=False)")
-            self.parser.add_argument("--map_coastline_resolution",
-                                     dest="map_coastline_resolution",
-                                     help="define coastlines resolution")
             self.parser.add_argument("--available_networks",
                                      dest="available_networks",
                                      help="define available networks (default=['EBAS', 'EEA_AQ_eReporting'])")
