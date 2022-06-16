@@ -73,38 +73,32 @@ echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem
 
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
-srun_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
+load_command="source load_modules.sh"
+salloc_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
 bsub_command="bsub -W 2:00 -n 12 -M 3000 -q x11 xterm -T Providentia -e"
 python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $@"
+
+# load modules
+eval "${load_command}"
 
 # set QT scale to avoid magnifying issues
 if [ "${BSC_MACHINE}" != "nord3" ]; then
     export QT_AUTO_SCREEN_SCALE_FACTOR=0
 fi
 
-# load modules
-eval "source load_modules.sh"
-
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
     #get allocation of resources on CTE-POWER machine
-    eval "${srun_command} ${queue_option} ${memory_option} ${python_command}"
+    eval "${salloc_command} ${queue_option} ${memory_option} ${python_command}"
 # Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     #get allocation of resources on MN4 machine
-    eval "${srun_command} ${queue_option} ${python_command}"
-# Nord3
-elif [ "${BSC_MACHINE}" == "nord3" ]; then
-    #get allocation of resources on N3 machine
-    eval "${bsub_command} ${python_command}"
+    eval "${salloc_command} ${queue_option} ${python_command}"
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
-    #get allocation of resources on N3v2 machine
-    eval "${srun_command} ${queue_option} ${python_command}"
+    #get allocation of resources on Nord3v2 machine
+    eval "${salloc_command} ${queue_option} ${python_command}"
 # Workstations
-elif [ "${HOST}" == "bsceslogin01" ]; then
-    echo "Warning: running in Fat Nodes may make Providentia slower ..."
-    eval "${srun_command} ${python_command}"
 else
     echo "Warning: running in your workstation/laptop may make Providentia slower ..."
     eval "${python_command}"

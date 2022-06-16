@@ -38,7 +38,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
      Qt5/5.14.1-GCCcore-8.3.0 \
      OpenMPI/4.0.5-GCC-8.3.0-nord3-v2 \
      memray/1.0.3-foss-2019b-Python-3.7.4
-# Workstations/fatnodes
+# Workstations
 else
     module load Python/3.7.3-foss-2015a \
      ConfigArgParse/0.14.0-foss-2015a-Python-3.7.3 \
