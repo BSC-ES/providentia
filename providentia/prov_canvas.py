@@ -447,7 +447,7 @@ class MPLCanvas(FigureCanvas):
 
             # put selected data for each data array into pandas dataframes
             self.to_pandas_dataframe()
-
+            
             # temporally aggregate selected data dataframes (by hour, day of week, month)
             self.pandas_temporal_aggregation()
 
@@ -555,7 +555,7 @@ class MPLCanvas(FigureCanvas):
 
             # if data array has no valid data for selected stations, do not create a pandas dataframe
             # data array has valid data?
-            if data_array.size:
+            if data_array.size and not np.isnan(data_array).all():
                 # add nested dictionary for data array name to selection station data dictionary
                 self.selected_station_data[data_label] = {}
                 # take cross station median of selected data for data array, and place it in a pandas
@@ -563,7 +563,7 @@ class MPLCanvas(FigureCanvas):
                 self.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0),
                                                                                    index=self.read_instance.time_array,
                                                                                    columns=['data'])
-
+                
     def pandas_temporal_aggregation(self):
         """Function that aggregates pandas dataframe data, for all data arrays,
         into desired temporal groupings also calculates all defined basic

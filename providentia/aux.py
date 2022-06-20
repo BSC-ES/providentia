@@ -522,7 +522,7 @@ def to_pandas_dataframe(instance, species):
 
         # if data array has no valid data for selected stations, do not create a pandas dataframe
         # data array has valid data?
-        if data_array.size:
+        if data_array.size and not np.isnan(data_array).all():
             # add nested dictionary for data array name to selection station data dictionary
             selected_station_data[data_label] = {}
             # take cross station median of selected data for data array, and place it in a pandas
