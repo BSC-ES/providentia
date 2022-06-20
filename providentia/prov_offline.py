@@ -760,7 +760,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # if data array has no valid data for selected stations, do not create a pandas dataframe
             # data array has valid data and?
-            if data_array.size and np.isnan(data_array).all() == False:
+            if data_array.size:
 
                 # add nested dictionary for data array name to selection station data dictionary
                 self.selected_station_data[data_label] = {}
