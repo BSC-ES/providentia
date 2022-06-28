@@ -1,9 +1,9 @@
 """ Providentia Configuration Module """
 
+import configparser
 import os
 import re
 import subprocess
-
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 
@@ -13,7 +13,6 @@ def parse_path(dir, f):
     if os.path.isabs(f):
         return f
     else:
-        # log.info("Input: %s", f)
         return os.path.join(dir, f)
 
 
@@ -31,37 +30,18 @@ class ProvConfiguration(object):
         self.nonghost_root = kwargs.get('nonghost_root', '')
         self.exp_root = kwargs.get('exp_root', '')
         self.offline = kwargs.get('offline', '')
-        self.sequential_colourmap = kwargs.get('sequential_colourmap',
-                                               'viridis')
-        self.sequential_colourmap_warm = \
-            kwargs.get('sequential_colourmap_warm', 'Reds')
-
-        self.diverging_colourmap = kwargs.get('diverging_colourmap', 'bwr')
-        self.unsel_station_markersize = \
-            kwargs.get('unsel_station_markersize', 3)
-        self.sel_station_markersize = \
-            kwargs.get('sel_station_markersize', 8)
-        self.legend_markersize = kwargs.get('legend_markersize', 11)
-        self.time_series_markersize = \
-            kwargs.get('time_series_markersize', 1.1)
-        self.temp_agg_markersize = \
-            kwargs.get('temp_agg_markersize', 3)
-        self.temp_agg_expbias_markersize = \
-            kwargs.get('temp_agg_expbias_markersize', 3)
-        self.map_coastline_resolution = \
-            kwargs.get('map_coastline_resolution', 'low')
         self.available_networks =\
             kwargs.get('available_networks',
                        "['AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN','CHILE_SINCA',"
-                       "'EANET','EBAS','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MECICO_CDMX',"
+                       "'EANET','EBAS','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX',"
                        "'MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA'," 
                        "'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG']")
-
-        # options added if configuration file is used
-        self.selected_species = kwargs.get('selected_species', '')
-        self.selected_network = kwargs.get('selected_network', '')
-        self.selected_matrix = kwargs.get('selected_matrix', '')
-        self.selected_resolution = kwargs.get('selected_resolution', '')
+        self.selected_species = kwargs.get('species', '')
+        self.selected_network = kwargs.get('network', '')
+        self.selected_matrix = kwargs.get('matrix', '')
+        self.selected_resolution = kwargs.get('resolution', '')
+        self.start_date = kwargs.get('start_date', '')
+        self.end_date = kwargs.get('end_date', '')
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
@@ -134,3 +114,96 @@ class ProvConfiguration(object):
                 value = '/esarchive/recon/ghost_interp_new'
 
         return value
+
+
+def read_conf(section=None, fpath=None):
+    """Read configuration"""
+
+    config = configparser.RawConfigParser()
+    config.read(fpath)
+    #if no section defined, but just 1 section in file then set that as section   
+    if (section is None) and (len(config.sections()) == 1):   
+        section = config.sections()[0]
+    #if section is undefined then cannot read
+    if section is None:
+        print('*** WARNING!!! CANNOT LOAD CONFIGURATION FILE AS NO SECTION DEFINED.')
+        return None
+
+    #convert numeric information appropriate types
+    res = {}
+    for k, val in config.items(section):
+        try:
+            res[k] = eval(val)
+        except:
+            res[k] = val
+    return res
+
+
+def read_offline_conf(fpath=None):
+    """Read configuration files when running Providentia
+    offline. When running offline, having a 'DEFAULT' section
+    is mandatory. The 'DEFAULT' section contains options that
+    are applied across all remaining sections."""
+
+    config = configparser.RawConfigParser()
+    config.read(fpath)
+
+    # check if Default section has options
+    if not config.defaults():
+        return None
+
+    #convert numeric information to appropriate types
+    defaults = {}
+    for k, val in config.items(config.default_section):
+        try:
+            defaults[k] = eval(val)
+        except:
+            defaults[k] = val
+
+    # store remaining sections into dict
+    res = {}
+    for section in config.sections():
+        res[section] = read_conf(section, fpath)
+    return defaults, res
+
+
+def write_conf(section, fpath, opts):
+    """Write configurations on file. """
+
+    config = configparser.RawConfigParser()
+
+    # check if file exists
+    if os.path.exists(fpath):
+        config.read(fpath)
+
+    # check if section exists
+    if not config.has_section(section):
+        config.add_section(section)
+
+    # update configuration
+    for item in opts:
+        val = opts[item]
+        config.set(section, item, val)
+
+    # write configuration
+    with open(fpath, 'w') as configfile:
+        config.write(configfile)
+
+
+def split_options(conf_string, separator="||"):
+    """For the options in the configuration that define the keep and remove
+    options. Returns the values in two lists, the keeps and removes"""
+    keeps, removes = [], []
+    if "keep:" in conf_string:
+        keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)
+        keeps = conf_string[keep_start+5:keep_end]
+        keeps = keeps.split(",")
+        keeps = [k.strip() for k in keeps]
+
+    if "remove:" in conf_string:
+        remove_start = conf_string.find("remove:")
+        removes = conf_string[remove_start+7:-1]
+        removes = removes.split(",")
+        removes = [r.strip() for r in removes]
+
+    return keeps, removes
