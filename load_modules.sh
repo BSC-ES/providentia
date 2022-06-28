@@ -31,7 +31,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
     module load Python/3.7.4-GCCcore-8.3.0 \
      matplotlib/3.1.1-foss-2019b-Python-3.7.4 \
      seaborn/0.9.0-foss-2019b-Python-3.7.4 \
-     Cartopy/0.17.0-foss-2019b-Python-3.7.4 \
+     Cartopy/0.18.0-foss-2019b-Python-3.7.4 \
      netcdf4-python/1.5.3-foss-2019b-Python-3.7.4 \
      geopandas/0.7.0-foss-2019b-Python-3.7.4 \
      PyQt5/5.13.1-GCCcore-8.3.0-Python-3.7.4 \

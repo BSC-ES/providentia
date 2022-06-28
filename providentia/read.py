@@ -1,4 +1,4 @@
-from .reading import get_yearmonths_to_read, read_netcdf_data, read_netcdf_nonghost
+from .read_aux import get_yearmonths_to_read, read_netcdf_data, read_netcdf_nonghost
 from providentia import aux
 
 import os
@@ -14,31 +14,11 @@ from netCDF4 import Dataset
 
 
 class DataReader:
-    """Class that reads observational/experiment data in memory."""
+    """Class that reads observational/experiment data into memory."""
 
     def __init__(self, read_instance, read_type='parallel'):
         self.read_instance = read_instance
         self.read_type = read_type
-
-    def read_all(self):
-
-        # check if reading GHOST or non-GHOST files
-        self.read_instance.reading_nonghost = aux.check_for_ghost(self.read_instance.active_network)
-
-        # get valid observational files in range
-        self.get_valid_obs_files_in_date_range(self.read_instance.le_start_date.text(),
-                                               self.read_instance.le_end_date.text())
-
-        # update available experiment data dictionary
-        self.get_valid_experiment_files_in_date_range()
-
-        # setup read
-        self.read_setup(self.read_instance.active_resolution, self.read_instance.active_start_date,
-                        self.read_instance.active_end_date, self.read_instance.active_network,
-                        self.read_instance.active_species, self.read_instance.active_matrix)
-
-        # update dictionary of plotting parameters (colour and zorder etc.) for each data array
-        self.update_plotting_parameters()
 
     def reset_data_in_memory(self):
         self.data_in_memory = {}
@@ -49,17 +29,17 @@ class DataReader:
         data a time array and create arrays of unique station
         references/longitudes/latitudes.
 
-        :param resolution: selected resolution (e.g. "hourly")
+        :param resolution: resolution (e.g. "hourly")
         :type resolution: str
         :param start_date: start date (e.g. "20201101")
         :type start_date: str
         :param end_date: end date (e.g. "20201231")
         :type end_date: str
-        :param network: selected network (e.g. "EBAS")
+        :param network: network (e.g. "EBAS")
         :type network: str
-        :param species: selected species (e.g. "sconco3")
+        :param species: species (e.g. "sconco3")
         :type species: str
-        :param matrix: selected matrix (e.g. "gas")
+        :param matrix: matrix (e.g. "gas")
         :type matrix: str
         """
 
@@ -105,8 +85,7 @@ class DataReader:
         else:
             # get files from nonghost path
             file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network[1:].lower(),
-                                                self.read_instance.selected_matrix,
-                                                resolution, species, species)
+                                                matrix, resolution, species, species)
 
         self.read_instance.relevant_yearmonths = np.sort([yyyymm for yyyymm in self.available_observation_data[
             network][resolution][matrix][species]])
@@ -201,15 +180,17 @@ class DataReader:
         :type start_date: str
         :param end_date: end date (e.g. "20201231")
         :type end_date: str
-        :param resolution: selected resolution (e.g. "hourly")
+        :param resolution: resolution (e.g. "hourly")
         :type resolution: str
-        :param network: selected network (e.g. "EBAS")
+        :param network: network (e.g. "EBAS")
         :type network: str
-        :param species: selected species (e.g. "sconco3")
+        :param species: species (e.g. "sconco3")
         :type species: str
-        :param matrix: selected matrix (e.g. "gas")
+        :param matrix: matrix (e.g. "gas")
         :type matrix: str
         """
+
+        print('READ DATA START')
 
         # force garbage collection (to avoid memory issues)
         gc.collect()
@@ -313,6 +294,7 @@ class DataReader:
 
         # read in parallel
         elif self.read_type == 'parallel':
+            print('PARALLEL')
             # setup pool of N workers on N CPUs
             pool = multiprocessing.Pool(self.read_instance.n_cpus)
             # read netCDF files in parallel
@@ -350,38 +332,37 @@ class DataReader:
                         self.nonghost_metadata[file_data[2][:, np.newaxis],
                                                self.read_instance.metadata_inds_to_fill[file_data_ii]] = file_data[3]
 
-    def get_valid_obs_files_in_date_range(self, selected_start_date, selected_end_date):
+        print('READ DATA END')
+
+    def get_valid_obs_files_in_date_range(self, start_date, end_date):
         """Define function that iterates through observational dictionary tree
         and returns a dictionary of available data in the selected date
         range
 
-        :param selected_start_date: start date (e.g. "20201101")
-        :type selected_start_date: str
-        :param selected_end_date: end date (e.g. "20201101")
-        :type selected_end_date: str
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201101")
+        :type end_date: str
         """
 
         # create dictionary to store available observational data
         self.available_observation_data = {}
 
         # check if start/end date are valid values, if not, return with no valid obs. files
-        if (aux.valid_date(selected_start_date)) & (aux.valid_date(selected_end_date)):
-            self.read_instance.date_range_has_changed = True
-            self.read_instance.selected_start_date = int(selected_start_date)
-            self.read_instance.selected_end_date = int(selected_end_date)
-            self.read_instance.selected_start_date_firstdayofmonth = \
-                int(str(self.read_instance.selected_start_date)[:6] + '01')
-        else:
-            return
+        if (not aux.valid_date(start_date)) or (not aux.valid_date(end_date)):
+            return False
 
         # check end date is > start date, if not, return with no valid obs. files
-        if self.read_instance.selected_start_date >= self.read_instance.selected_end_date:
-            return
+        if start_date >= end_date:
+            return False
+
         # check start date and end date are both within if valid date range (19000101 - 20500101),
         # if not, return with no valid obs. files
-        if (self.read_instance.selected_start_date < 19000101) or (self.read_instance.selected_end_date < 19000101) or (
-                self.read_instance.selected_start_date >= 20500101) or (self.read_instance.selected_end_date >= 20500101):
-            return
+        if (int(start_date) < 19000101) or (int(end_date) < 19000101) or (int(start_date) >= 20500101) or (int(end_date) >= 20500101):
+            return False
+
+        #get start date at first of month
+        start_date_firstdayofmonth = int(start_date[:6] + '01')
 
         # iterate through networks
         for network in list(self.read_instance.all_observation_data.keys()):
@@ -392,8 +373,7 @@ class DataReader:
                         species_file_yearmonths = self.read_instance.all_observation_data[network][resolution][matrix][species]
                         # get file yearmonths within date range
                         valid_species_files_yearmonths = [ym for ym in species_file_yearmonths if
-                                                          (ym >= self.read_instance.selected_start_date_firstdayofmonth) & (
-                                                                      ym < self.read_instance.selected_end_date)]
+                                                          (ym >= start_date_firstdayofmonth) & (ym < int(end_date))]
                         if len(valid_species_files_yearmonths) > 0:
                             # if network/res/matrix/species not in dictionary yet, add it
                             if network not in list(self.available_observation_data.keys()):
@@ -405,11 +385,24 @@ class DataReader:
                             self.available_observation_data[network][resolution][matrix][
                                 species] = valid_species_files_yearmonths
 
-    def get_valid_experiment_files_in_date_range(self):
+        return True
+
+    def get_valid_experiment_files_in_date_range(self, start_date, end_date, resolution, network, species):
         """Define function which gathers available experiment
         data for selected network/resolution/species.
-        A dictionary is created storing available experiment-grid
+        A dictionary is created storing available experiment
         names associated with valid files in set date range.
+
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201231")
+        :type end_date: str
+        :param resolution: resolution (e.g. "hourly")
+        :type resolution: str
+        :param network: network (e.g. "EBAS")
+        :type network: str
+        :param species: species (e.g. "sconco3")
+        :type species: str
         """
 
         # create dictionary to store available experiment information
@@ -418,36 +411,37 @@ class DataReader:
         # get all different experiment names
         available_experiments = os.listdir('%s/%s' % (self.read_instance.exp_root, self.read_instance.ghost_version))
 
+        #get start date at first of month
+        start_date_firstdayofmonth = int(start_date[:6] + '01')
+
         # iterate through available experiments
         for experiment in available_experiments:
 
             # test first if interpolated directory exists before trying to get files from it
             # if it does not exit, continue
             if not os.path.exists(
-                    '%s/%s/%s/%s/%s/%s' % (self.read_instance.exp_root, self.read_instance.ghost_version, experiment,
-                                           self.read_instance.selected_resolution, self.read_instance.selected_species,
-                                           self.read_instance.selected_network)):
+                    '%s/%s/%s/%s/%s/%s' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                                           experiment, resolution, species, network)):
                 continue
             else:
                 # get all experiment netCDF files by experiment/grid/selected
                 # resolution/selected species/selected network
                 network_files = os.listdir(
                     '%s/%s/%s/%s/%s/%s' % (self.read_instance.exp_root, self.read_instance.ghost_version,
-                                           experiment, self.read_instance.selected_resolution,
-                                           self.read_instance.selected_species, self.read_instance.selected_network))
+                                           experiment, resolution, species, network))
+
                 # get start YYYYMM yearmonths of data files
                 network_files_yearmonths = [int(f.split('_')[-1][:6] + '01') for f in network_files]
                 # limit data files to just those within date range
                 valid_network_files_yearmonths = \
-                    [ym for ym in network_files_yearmonths if (ym >= self.read_instance.selected_start_date_firstdayofmonth) &
-                     (ym < self.read_instance.selected_end_date)]
+                    [ym for ym in network_files_yearmonths if (ym >= start_date_firstdayofmonth) & (ym < int(end_date))]
 
                 # if have some valid data files for experiment, add experiment key
                 # (with associated yearmonths) to dictionary
                 if len(valid_network_files_yearmonths) > 0:
                     self.available_experiment_data['%s' % (experiment)] = valid_network_files_yearmonths
 
-        # get list of available experiment-grid names
+        # get list of available experiment names
         if not self.read_instance.offline:
             self.read_instance.experiments_menu['checkboxes']['labels'] = np.array(
                 sorted(list(self.available_experiment_data.keys())))
@@ -460,14 +454,14 @@ class DataReader:
         """
 
         # assign a colour/zorder to all selected data arrays
-        # define observations colour to be 'black'
-        self.plotting_params['observations']['colour'] = 'black'
-        # define zorder of observations to be 5
-        self.plotting_params['observations']['zorder'] = 5
+        # define observations colour
+        self.plotting_params['observations']['colour'] = self.read_instance.plot_characteristics_templates['general']['obs_markerfacecolor']
+        # define zorder 
+        self.plotting_params['observations']['zorder'] = self.read_instance.plot_characteristics_templates['general']['obs_zorder']
 
         # generate a list of RGB tuples for number of experiments there are
         sns.reset_orig()
-        clrs = sns.color_palette('husl', n_colors=len(list(self.data_in_memory.keys()))-1)
+        clrs = sns.color_palette(self.read_instance.plot_characteristics_templates['general']['legend_color_palette'], n_colors=len(list(self.data_in_memory.keys()))-1)
 
         # iterate through sorted experiment names, assigning each experiment a new RGB colour tuple, and zorder
         experiment_ind = 1
