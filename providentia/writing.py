@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset, num2date
-from .config import write_conf
+from .configuration import write_conf
 
 
 def export_data_npz(mpl_canvas, fname):
@@ -105,7 +105,7 @@ def export_netcdf(mpl_canvas, fname):
             var.calendar = 'standard'
             var.tz = 'UTC'
 
-    if mpl_canvas.colocate_active:
+    if mpl_canvas.temporal_colocation:
         for k in instance.data_in_memory_filtered.keys():
             if 'colocatedto' in k:
                 expids.append(k)
@@ -113,7 +113,7 @@ def export_netcdf(mpl_canvas, fname):
     # create vars for exps
     if expids:
         for exp in expids:
-            if mpl_canvas.colocate_active:
+            if mpl_canvas.temporal_colocation:
                 key = speci + "_" + exp
             else:
                 if 'colocatedto' not in exp:
@@ -190,16 +190,16 @@ def export_configuration(prv, cname, separator="||"):
     """
 
     # default
-    options = {'selected_network': prv.selected_network,
-               'selected_resolution': prv.selected_resolution,
-               'selected_matrix': prv.selected_matrix,
-               'selected_species': prv.selected_species,
+    options = {'network': prv.selected_network,
+               'resolution': prv.selected_resolution,
+               'matrix': prv.selected_matrix,
+               'species': prv.selected_species,
                'start_date': prv.selected_start_date,
                'end_date': prv.selected_end_date}
 
     # QA
     if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):
-        options['QA'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
+        options['qa'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
     # flags
     if prv.flag_menu['checkboxes']['remove_selected']:
         options['flags'] = ",".join(str(i) for i in prv.flag_menu['checkboxes']['remove_selected'])
@@ -243,7 +243,6 @@ def export_configuration(prv, cname, separator="||"):
 
         # and then treat the keep/remove
         for label in prv.metadata_menu[menu_type]['navigation_buttons']['labels']:
-            #         keeps, removes = split_options(getattr(self, label))
             keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
             removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
 

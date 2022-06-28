@@ -1,4 +1,4 @@
-""" Module storing reading functions """
+""" Module storing static reading functions """
 from netCDF4 import num2date
 from netCDF4 import Dataset
 import numpy as np
@@ -31,6 +31,8 @@ def read_netcdf_data(tuple_arguments):
     relevant_file, time_array, station_references, active_species, process_type, \
     selected_qa, selected_flags, data_dtype, data_vars_to_read, \
     metadata_dtype, metadata_vars_to_read = tuple_arguments
+
+    print(relevant_file)
 
     # read netCDF frame, if files doesn't exist, return with None
     try:
@@ -84,6 +86,8 @@ def read_netcdf_data(tuple_arguments):
         file_data = np.full((len(current_file_station_indices),
                              len(valid_file_time_indices)), np.NaN,
                             dtype=data_dtype)
+
+        print(1)
         for data_var in data_vars_to_read:
             if data_var == 'time':
                 # len(len(file_data)) = number of stations
@@ -95,6 +99,7 @@ def read_netcdf_data(tuple_arguments):
                 file_data[data_var][:, :] = ncdf_root[data_var][current_file_station_indices,
                                                                 valid_file_time_indices]
 
+        print(2)
         # if some qa flags selected then screen
         if len(selected_qa) > 0:
             # screen out observations which are associated with any of the selected qa flags
@@ -102,6 +107,7 @@ def read_netcdf_data(tuple_arguments):
                     [np.isin(ncdf_root['qa'][:, valid_file_time_indices, :],
                              selected_qa).any(axis=2)] = np.NaN
 
+        print(3)
         # if some data provider flags selected then screen
         if len(selected_flags) > 0:
             # screen out observations which are associated with any of the
@@ -110,10 +116,13 @@ def read_netcdf_data(tuple_arguments):
                     [np.isin(ncdf_root['flag'][:, valid_file_time_indices, :],
                              selected_flags).any(axis=2)] = np.NaN
 
+        print(4)
         # get file metadata
         file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
         for meta_var in metadata_vars_to_read:
             file_metadata[meta_var][current_file_station_indices, 0] = ncdf_root[meta_var][:]
+        
+        print(5)
 
     else:
         file_data = np.full((len(current_file_station_indices),
