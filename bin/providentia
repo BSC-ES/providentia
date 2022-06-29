@@ -69,8 +69,6 @@ while [[ $# -gt 0 ]]; do
     shift  # Expose the next argument
 done
 
-echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
-
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 load_command="source load_modules.sh"
@@ -81,22 +79,20 @@ python_command="python3 -u -Wi -c 'from providentia import providentia;provident
 # load modules
 eval "${load_command}"
 
-# set QT scale to avoid magnifying issues
-if [ "${BSC_MACHINE}" != "nord3" ]; then
-    export QT_AUTO_SCREEN_SCALE_FACTOR=0
-fi
-
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
-    #get allocation of resources on CTE-POWER machine
+    #get allocation of resources on CTE-POWER 
+    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
     eval "${salloc_command} ${queue_option} ${memory_option} ${python_command}"
 # Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     #get allocation of resources on MN4 machine
+    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
     eval "${salloc_command} ${queue_option} ${python_command}"
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
     #get allocation of resources on Nord3v2 machine
+    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
     eval "${salloc_command} ${queue_option} ${python_command}"
 # Workstations
 else
