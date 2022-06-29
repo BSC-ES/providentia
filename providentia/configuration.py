@@ -136,6 +136,6 @@ class ProvConfiguration(object):
                     return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
 
                 # running on workstation?
-                value = '/esarchive/recon/ghost_interp_new'
+                value = '/esarchive/recon/prov_interp'
 
         return value
