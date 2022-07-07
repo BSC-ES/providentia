@@ -39,7 +39,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
     def __init__(self, read_type='parallel', **kwargs):
         
-        print("Starting Providentia offline")
+        print("Starting Providentia offline...")
         # portrait/landscape page figsize
         self.portrait_figsize = (8.27, 11.69)
         self.landscape_figsize = (11.69, 8.27)
@@ -60,7 +60,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # update from config file
         if 'config' in kwargs:
-            self.load_conf(kwargs['config'])
+            aux.load_conf(kwargs['config'])
         else:
             print("No configuration file found. The path to the config file must be added as an argument.")
             sys.exit(1)
@@ -256,21 +256,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             self.temporal_axis_mapping_dict = aux.temp_axis_dict()
 
             self.start_pdf()
-
-    def load_conf(self, fpath=None):
-        """Load existing configurations from file
-        for running offline Providentia."""
-
-        if fpath is None:
-            print("No configuration file found")
-            sys.exit(1)
-
-        # if DEFAULT is not present, then return
-        if not os.path.isfile(fpath):
-            print(("Error %s" % fpath))
-            return
-
-        self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(fpath)
 
     def start_pdf(self):
 

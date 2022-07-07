@@ -79,13 +79,13 @@ def conf_dialogs(instance):
         return
 
     try:
-        instance.load_conf(fpath=conf_to_load)
+        aux.load_conf(instance, fpath=conf_to_load)
         all_sections = instance.sub_opts.keys()
-        section, okpressed = QtWidgets.QInputDialog.getItem(instance, 'Sections',
-                                                            'Select section to load',  
-                                                            all_sections, 0, False)
+        selected_section, okpressed = QtWidgets.QInputDialog.getItem(instance, 'Sections',
+                                                                     'Select section to load',  
+                                                                     all_sections, 0, False)
         if okpressed:
-            reload_conf(instance, section, conf_to_load)
+            reload_conf(instance, selected_section, conf_to_load)
     except Exception as e:
         QtWidgets.QMessageBox.critical(instance, "Error loading configuration file",
                                        str(e), QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
