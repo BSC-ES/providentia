@@ -54,32 +54,40 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # store options to be restored at the end
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
 
-        # update from kwargs in command line
+        # update from config file (if available)
         if 'config' in kwargs:
-            self.from_conf = True
-        else:
-            self.from_conf = False
-        if 'section' in kwargs:
-            self.from_section = True
-        else:
-            self.from_section = False
+            if 'section' in kwargs:
+                # config and section defined 
+                self.from_conf = True
+                self.from_section = True
+                aux.load_conf(self, fpath=kwargs['config'])
+                if kwargs['section'] in self.all_sections:
+                    vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[kwargs['section']].items()})
+                else:
+                    print('Error: The section specified in the command line does not exist.')
+                    print('Tip: For subsections, add the name of the parent section followed by a hyphen before the subsection name.')
+                    sys.exit()
 
-        # initialize dashboard
-        if self.from_section:
-            # initialize dashboard with selected section information (with map)
-            self.load_conf(fpath=self.config)
-            try:
-                vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[self.section].items()})
-            except:
-                print('Error: The section specified in the command line does not exist.')
-                print('Tip: For subsections, add the name of the parent section followed by a hyphen before the subsection name.')
-                sys.exit()
+            elif 'section' not in kwargs:
+                # config defined, section undefined
+                self.from_conf = True
+                self.from_section = False
+                aux.load_conf(self, fpath=kwargs['config'])    
+                all_sections = self.sub_opts.keys()
+                selected_section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
+                                                                             'Select section to load',  
+                                                                             all_sections, 0, False)
+                if okpressed:
+                    vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[selected_section].items()})
+                  
         else:
-            # initialize dashboard with default.conf information (without map)
             if os.path.isfile(dconf_path):
-                self.load_conf(fpath=dconf_path)
+                # config undefined
+                self.from_conf = False
+                self.from_section = False
+                aux.load_conf(self, fpath=dconf_path)
                 vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts['default'].items()})
-        
+            
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
 
@@ -119,6 +127,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
     def init_ui(self, **kwargs):
         """Initialise user interface"""
+
+        print("Starting Providentia online...")
+
         # set window title
         self.window_title = "Providentia"
         self.setWindowTitle(self.window_title)
@@ -344,6 +355,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
         self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
 
+        # initialise configuration bar fields
+        self.config_bar_initialisation = True
+        self.update_configuration_bar_fields()
+        self.config_bar_initialisation = False
+
         # Setup MPL canvas of plots
         # set variable that blocks updating of MPL canvas until some data has been read
         self.block_MPL_canvas_updates = True
@@ -417,7 +433,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.colocate_active = False
         
         # if we're starting from a configuration file, read first the setup
-        if self.from_conf and self.from_section: 
+        if self.from_conf:
             self.handle_data_selection_update()
             # then see if we have fields that require to be set (meta, rep, period)
             aux.representativity_conf(self)
@@ -428,36 +444,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 aux.meta_from_conf(self)
             # call function to apply changes (filter)
             self.mpl_canvas.handle_data_filter_update()
-
-        # get pop up to select the section when the config file is an input in the command line
-        if self.from_conf and (not self.from_section):
-
-            self.load_conf(fpath=self.config)
-            all_sections = self.sub_opts.keys()
-            section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
-                                                                'Select section to load',  
-                                                                all_sections, 0, False)
-            if okpressed:
-                # reload configuration
-                reload_conf(self, section, self.config)
-                # update from command line
-                vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
-
-            self.handle_data_selection_update()
-            # then see if we have fields that require to be set (meta, rep, period)
-            aux.representativity_conf(self)
-            if hasattr(self, 'period'):
-                self.period_conf()
-            # if there are there are metadata reported in configuratoin
-            if set([m.lower() for m in self.metadata_vars_to_read]).intersection(vars(self).keys()):
-                aux.meta_from_conf(self)
-            # call function to apply changes (filter)
-            self.mpl_canvas.handle_data_filter_update()
-
-        # initialise configuration bar fields
-        self.config_bar_initialisation = True
-        self.update_configuration_bar_fields()
-        self.config_bar_initialisation = False
 
         # set finalised layout
         self.setLayout(parent_layout)
@@ -1134,13 +1120,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         aux.update_period_fields(self.active_resolution, self.period_menu)
 
         # reset metadata
-        for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
+        for metadata_type in self.metadata_menu['navigation_buttons']['labels']:
             for label in self.metadata_menu[metadata_type]['navigation_buttons']['labels']:
                 self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['keep_default'] = []
+                self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['remove_default'] = []
+                self.metadata_menu[metadata_type]['rangeboxes']['apply_selected'] = []
+                self.metadata_menu[metadata_type]['rangeboxes']['apply_default'] = []
             self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = ['nan'] * len(
                 self.metadata_menu[metadata_type]['rangeboxes']['labels'])
             self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = ['nan'] * len(
@@ -1154,27 +1142,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # reset bounds
         species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
         species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
+        
         # set default limits
         self.le_minimum_value.setText(str(species_lower_limit))
         self.le_maximum_value.setText(str(species_upper_limit))
+        
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
+        
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
-
-    def load_conf(self, fpath=None):
-        """ Load existing configurations from file. """
-
-        from .config import read_conf
-
-        if fpath is None:
-            fpath = parse_path(self.config_dir, self.config_file)
-
-        if not os.path.isfile(fpath):
-            print(("Error %s" % fpath))
-            return
-
-        self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, _ = read_conf(fpath)
 
     def disable_ghost_buttons(self):
         """Disable button related only to ghost data"""
