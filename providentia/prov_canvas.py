@@ -115,7 +115,7 @@ class MPLCanvas(FigureCanvas):
         # Define dictionary for mapping days of week/months as integers to
         # equivalent strings for writing on axes
         self.temporal_axis_mapping_dict = aux.temp_axis_dict()
-
+   
     def update_MPL_canvas(self):
         """Function that updates MPL canvas upon clicking
         the 'READ' button, and when colocating data
@@ -169,6 +169,9 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.mpl_connect('pick_event', self.on_click)
             self.lasso = LassoSelector(self.map_ax, onselect=self.onlassoselect,
                                        useblit=True, lineprops=dict(alpha=0.5, color='hotpink', linewidth=1))
+
+            # show pop-ups
+            # self.hover_cid = self.figure.canvas.mpl_connect('motion_notify_event', self.hover)
 
             # initialise variable that informs whether to use picker/lasso for updates
             self.map_already_updated = False
@@ -756,7 +759,7 @@ class MPLCanvas(FigureCanvas):
                                 markersize=self.read_instance.timeseries_markersize,
                                 linestyle='None',
                                 zorder=self.read_instance.datareader.plotting_params[data_label]['zorder'])
-        
+
         # get steps in days or months
         label = list(self.selected_station_data.keys())[-1]
         steps = self.selected_station_data[label]['pandas_df'].dropna().index.values
@@ -1864,6 +1867,21 @@ class MPLCanvas(FigureCanvas):
         # draw changes
         self.draw()
 
+    """
+    def hover(self, event):
+        if event.inaxes in [self.map_ax]:
+            x = event.xdata
+            y = event.ydata
+            print(x, y)
+            global coords
+            coords.append((x, y))
+            if len(coords) == 2:
+                self.figure.canvas.mpl_disconnect(self.hover_cid)
+            event.inaxes.plot(x,y,'ro')
+            event.canvas.draw()
+            #print('Points: ', *zip(self.map_points_coordinates[ind, 0], self.map_points_coordinates[ind, 1]))
+    """
+    
     def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
         """Takes the indices of selected stations on the map
         (potentially a subset of all available stations), and returns the indices

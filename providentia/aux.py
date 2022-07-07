@@ -5,6 +5,7 @@ includes function related to the initialization and update
 of metadata, checks fields coming from conf files etc.
 """
 
+import os
 import copy
 import json
 import datetime
@@ -12,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 from .config import split_options
-
+from .configuration import parse_path
 
 def which_bounds(instance, species):
     """Returns lower/upper bounds of species selected. If
@@ -232,9 +233,9 @@ def init_metadata(instance):
             metadata_menu[metadata_type][label] = {'window_title': label,
                                                    'page_title': 'Filter stations by unique {} metadata'.format(
                                                        label), 'checkboxes': {}}
-            metadata_menu[metadata_type][label]['checkboxes'] = {'labels': [], 'keep_selected': [],
-                                                                 'remove_selected': [], 'keep_default': [],
-                                                                 'remove_default': []}
+            metadata_menu[metadata_type][label]['checkboxes'] = {'labels': [], 
+                                                                 'keep_selected': [], 'keep_default': [],
+                                                                 'remove_selected': [], 'remove_default': []}
 
         metadata_menu[metadata_type]['rangeboxes']['labels'] = \
             [metadata_name for metadata_name in instance.standard_metadata.keys()
@@ -251,6 +252,8 @@ def init_metadata(instance):
             ['nan'] * len(metadata_menu[metadata_type]['rangeboxes']['labels'])
         metadata_menu[metadata_type]['rangeboxes']['upper_default'] = \
             ['nan'] * len(metadata_menu[metadata_type]['rangeboxes']['labels'])
+        metadata_menu[metadata_type]['rangeboxes']['apply_default'] = []
+        metadata_menu[metadata_type]['rangeboxes']['apply_selected'] = []
 
     return metadata_types, metadata_menu
 
@@ -313,7 +316,7 @@ def update_metadata_fields(instance):
         # and sets the available fields as such
         if metadata_data_type == np.object:
             # get previous fields
-            previous_fields = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'])
+            previous_fields = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels']) 
             # update new labels
             instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'] = np.unique(
                 meta_var_field_nan_removed)
@@ -328,7 +331,7 @@ def update_metadata_fields(instance):
                     if field in previous_keep:
                         instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'].append(field)
                     if field in previous_remove:
-                        instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'].append(field)
+                        instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'].append(field)    
             # set defaults to be empty
             instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
             instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []
@@ -367,7 +370,6 @@ def update_metadata_fields(instance):
                 instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
                 instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = 'nan'
                 instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
-
 
 def representativity_fields(instance, resolution):
     """Update the data representativity menu -> 1D list of rangebox values
@@ -552,3 +554,19 @@ def check_for_ghost(network_name):
         return True
     else:
         return False
+
+
+def load_conf(instance, fpath=None):
+    """ Load existing configurations from file. """
+
+    from .config import read_conf
+
+    if fpath is None:
+        fpath = parse_path(instance.config_dir, instance.config_file)
+
+    if not os.path.isfile(fpath):
+        print(("Error %s" % fpath))
+        return
+
+    instance.sub_opts, instance.all_sections, instance.parent_section_names, instance.subsection_names, _ = read_conf(fpath)
+    
