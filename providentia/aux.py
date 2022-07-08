@@ -1,7 +1,6 @@
 """
-Contains multiple static functions that are shared by
-the dashboard and the offline version. Currently, it
-includes function related to the initialization and update
+Contains functions that are shared by the dashboard and the offline version. 
+Currently, it includes function related to the initialization and update
 of metadata, checks fields coming from conf files etc.
 """
 
@@ -11,7 +10,7 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from .config import split_options
+from .configuration import split_options
 
 
 def which_bounds(instance, species):
@@ -55,11 +54,11 @@ def which_qa(instance, return_defaults=False):
     :rtype: list
     """
 
-    if return_defaults or (not hasattr(instance, 'qa')):
-        if instance.selected_species in instance.qa_exceptions:
-            return instance.specific_qa
+    if (return_defaults) or (not hasattr(instance, 'qa')):
+        if instance.selected_species in instance.met_parameters:
+            return sorted(instance.default_qa_met)
         else:
-            return instance.general_qa
+            return sorted(instance.default_qa_standard)
 
     if hasattr(instance, 'qa'):
         # if conf has only 1 QA
@@ -70,10 +69,10 @@ def which_qa(instance, return_defaults=False):
             return []
         # if the QAs are written with their names
         elif isinstance(instance.qa, str):
-            return [instance.standard_QA_name_to_QA_code[q.strip()] for q in instance.qa.split(",")]
+            return sorted([instance.standard_QA_name_to_QA_code[q.strip()] for q in instance.qa.split(",")])
         # list of integer codes
         else:
-            return list(instance.qa)
+            return sorted(list(instance.qa))
 
 
 def which_flags(instance):
@@ -106,31 +105,37 @@ def which_flags(instance):
 
 def get_experiments(instance):
     """If there are experiments coming from a config file,
-    select those. Otherwise, return empty list.
+    select those. Otherwise, return empty dict.
 
     :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
     :type instance: object
-    :return: list of experiments
-    :rtype: list
+    :return: dict (exp:exp_legend_name)
+    :rtype: dict
     """
 
     if hasattr(instance, 'experiments'):
         # empty string
         if instance.experiments == "":
-            return []
+            return {}
         #split experiments
         else:
-            return [exp.strip() for exp in instance.experiments.split(",")]
+            #have alternative experiment names for the legend, then parse them?
+            if ('[' in instance.experiments) & (']' in instance.experiments):
+                exps = [exp.strip() for exp in instance.experiments.split('[')[0].strip().split(",")]
+                exps_legend = [exp_legend.strip() for exp_legend in instance.experiments.split('[')[1].split(']')[0].strip().split(",")]
+            #otherwise set legend names as given experiment names in full
+            else: 
+                exps = [exp.strip() for exp in instance.experiments.split(",")]
+                exps_legend = copy.deepcopy(exps)
+            return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
     else:
-        return []
+        return {}
 
 
-def get_qa_codes(instance):
-    """Retrieve QA codes from GHOST_standards using the QA flags' names.
+def get_default_qa_codes(instance):
+    """Retrieve default QA codes from GHOST_standards using the QA flags' names.
 
-    Specific flags are defined for the following species:
-    ['WND_DIR_10M','WND_SPD_10M','RH_2M','PREC_ACCUM','SNOW_ACCUM',
-    'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']
+    A specific selection of qa are defined for met. parameters
 
     :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
     :type instance: object
@@ -138,20 +143,18 @@ def get_qa_codes(instance):
     :rtype: list
     """
 
-    # get names from json files
-    specific_qa_names = json.load(open(
-        "providentia/conf/default_flags.json"))['specific_qa']
-    general_qa_names = json.load(open(
-        "providentia/conf/default_flags.json"))['general_qa']
-    # get codes
-    specific_qa = [instance.standard_QA_name_to_QA_code[qa_name]
-                   for qa_name in specific_qa_names]
-    general_qa = [instance.standard_QA_name_to_QA_code[qa_name]
-                  for qa_name in general_qa_names]
-    # get difference of flags, needed later for updating default selection
-    qa_diff = list(set(general_qa) - set(specific_qa))
+    # get defaukt names from json files
+    standard_qa_names = json.load(open(
+        "providentia/conf/default_qa.json"))['standard']
+    met_qa_names = json.load(open(
+        "providentia/conf/default_qa.json"))['met']
+    # get qa codes
+    standard_qa = [instance.standard_QA_name_to_QA_code[qa_name]
+                   for qa_name in standard_qa_names]
+    met_qa = [instance.standard_QA_name_to_QA_code[qa_name]
+              for qa_name in met_qa_names]
 
-    return specific_qa, general_qa, qa_diff
+    return standard_qa, met_qa
 
 
 def exceedance_lim(species):
@@ -169,7 +172,6 @@ def exceedance_lim(species):
     else:
         return np.NaN
 
-
 def temp_axis_dict():
     """Returns a temporal mapping as a dictionary used for the plots.
 
@@ -182,6 +184,52 @@ def temp_axis_dict():
                 }
     return map_dict
 
+def periodic_xticks():
+    """Returns xticks for periodic subplots.
+
+    :return dictionary of xticks per temporal resolution
+    :rtype dict
+    """
+
+    return {'hour':np.arange(24, dtype=np.int), 'dayofweek':np.arange(7, dtype=np.int), 'month':np.arange(1, 13, dtype=np.int)}
+
+def periodic_labels():
+    """Return axes labels for periodic subplots.
+
+    :return: axes labels
+    :rtype: dict
+    """
+
+    return {'hour':'H', 'dayofweek':'DoW', 'month':'M'}
+
+def get_relevant_temporal_resolutions(selected_resolution):        
+    """Get relevant temporal reolsutions for periodic plots, by selected temporal resolution.
+
+    :param selected_resolution: name of selected temporal resolution
+    :type selected_resolution: str
+    :return: relevant temporal resolutions
+    :rtype: list
+    """
+
+    if 'hourly' in selected_resolution:
+        relevant_temporal_resolutions = ['hour', 'dayofweek', 'month']
+    elif selected_resolution == 'daily':
+        relevant_temporal_resolutions = ['dayofweek', 'month']
+    elif selected_resolution == 'monthly':
+        relevant_temporal_resolutions = ['month']
+    return relevant_temporal_resolutions
+
+def get_land_polygon_resolution(selection):
+    """get resolution of land polygons to plot on map.
+
+        :param selection: name of selected temporal resolution
+    :type selected_resolution: str
+    :return: selected land polygon resolution
+    :rtype: list
+    """
+    
+    land_polygon_resolutions = {'low': '110m','medium': '50m','high': '10m'}
+    return land_polygon_resolutions[selection]
 
 def representativity_conf(instance):
     """Comes here if there is a configuration loaded. Checks if there is a
@@ -296,10 +344,6 @@ def update_metadata_fields(instance):
     for meta_var in instance.metadata_vars_to_read:
 
         meta_var_field = instance.datareader.metadata_in_memory[meta_var]
-        if instance.reading_nonghost and meta_var == 'latitude':
-            meta_var_field = instance.datareader.nonghost_metadata[meta_var]
-        if instance.reading_nonghost and meta_var == 'longitude':
-            meta_var_field = instance.datareader.nonghost_metadata[meta_var]
 
         # get metadata variable type/data type
         metadata_type = instance.standard_metadata[meta_var]['metadata_type']
@@ -477,62 +521,6 @@ def update_period_fields(resolution, period_menu):
             if label in period_menu['checkboxes']['remove_selected']:
                 period_menu['checkboxes']['remove_selected'].remove(label)
 
-
-def to_pandas_dataframe(instance, species):
-    """Function that takes selected station data within
-    data arrays and puts it into a pandas dataframe.
-
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :param species: The species current selected for evaluation (e.g. sconco3)
-    :type species: str
-    :return: station data by data array
-    :rtype: dict
-    """
-
-    # create new dictionary to store selection station data by data array
-    selected_station_data = {}
-
-    # iterate through data arrays in data in memory filtered dictionary
-    for data_label in list(instance.data_in_memory_filtered.keys()):
-
-        # if colocation is not active, do not convert colocated data arrays to pandas data frames
-        if not instance.colocate_active:
-            if 'colocated' in data_label:
-                continue
-        # else, if colocation is active, do not convert non-colocated data arrays to pandas data frames
-        elif instance.colocate_active:
-            if 'colocated' not in data_label:
-                continue
-
-        # observational arrays
-        if data_label.split('_')[0] == 'observations':
-            # get data for selected stations
-            data_array = instance.data_in_memory_filtered[data_label][
-                             species][instance.relative_selected_station_inds, :]
-        # experiment arrays
-        else:
-            # get intersect between selected station indices and valid available indices for experiment data array
-            valid_selected_station_indices = np.intersect1d(instance.relative_selected_station_inds,
-                                                            instance.datareader.plotting_params[
-                                                                data_label]['valid_station_inds'])
-            # get data for valid selected stations
-            data_array = instance.data_in_memory_filtered[data_label][species][valid_selected_station_indices, :]
-
-        # if data array has no valid data for selected stations, do not create a pandas dataframe
-        # data array has valid data?
-        if data_array.size:
-            # add nested dictionary for data array name to selection station data dictionary
-            selected_station_data[data_label] = {}
-            # take cross station median of selected data for data array, and place it in a pandas
-            # dataframe -->  add to selected station data dictionary
-            selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0),
-                                                                          index=instance.time_array,
-                                                                          columns=['data'])
-
-    return selected_station_data
-
-
 def valid_date(date_text):
     """Determines if a date string is in the correct format."""
 
@@ -551,3 +539,21 @@ def check_for_ghost(network_name):
         return True
     else:
         return False
+
+def get_data_label(temporal_colocation, data_label):
+    """Get appropriate data label for plotting"""
+
+    if temporal_colocation:
+        if data_label == 'observations':
+            data_label = 'observations_colocatedto_experiments'
+        elif data_label != '':
+            data_label = '{}_colocatedto_observations'.format(data_label)
+
+    return data_label
+
+
+
+
+
+
+        

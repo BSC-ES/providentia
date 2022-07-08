@@ -1,10 +1,13 @@
-""" Module storing reading functions """
+""" Module storing static reading functions """
 from netCDF4 import num2date
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
 import bisect
+import time
 
+#initialise dictionary for storing pointers to shared memory variables in read step 
+shared_memory_vars = {}
 
 def drop_nans(data):
     """Function that returns numpy object of lists
@@ -19,6 +22,18 @@ def drop_nans(data):
     # return numpy object of lists of station data with NaNs removed
     return np.array(data)
 
+def init_shared_vars_read_netcdf_data(file_data, file_data_shape, timestamp_array, qa, flags):
+    """Function which called before netCDF read function,
+       to initialise each worker process.
+       Purpose of this function is to access shared memory variables  
+    """
+
+    shared_memory_vars['file_data'] = file_data
+    shared_memory_vars['file_data_shape'] = file_data_shape
+    shared_memory_vars['timestamp_array'] = timestamp_array
+    shared_memory_vars['qa'] = qa
+    shared_memory_vars['flag'] = flags
+
 
 def read_netcdf_data(tuple_arguments):
     """Function that handles reading of observational/experiment
@@ -28,9 +43,11 @@ def read_netcdf_data(tuple_arguments):
     """
 
     # assign arguments from tuple to variables
-    relevant_file, time_array, station_references, active_species, process_type, \
-    selected_qa, selected_flags, data_dtype, data_vars_to_read, \
-    metadata_dtype, metadata_vars_to_read = tuple_arguments
+    relevant_file, station_references, active_species, process_type, \
+    data_vars_to_read, metadata_dtype, metadata_vars_to_read = tuple_arguments
+
+    #wrap shared arrays as numpy arrays to more easily manipulate the data
+    file_data_shared = np.frombuffer(shared_memory_vars['file_data'], dtype=np.float32).reshape(shared_memory_vars['file_data_shape'])
 
     # read netCDF frame, if files doesn't exist, return with None
     try:
@@ -48,21 +65,16 @@ def read_netcdf_data(tuple_arguments):
         file_time = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
     else:
         file_time = num2date(ncdf_root['time'][:], time_units)
-
-        # remove microseconds
+        # remove microseconds and convert to integer
         file_time = pd.to_datetime([t.replace(microsecond=0) for t in file_time])
+    #get file time as integer timestamp
+    file_timestamp = file_time.asi8
 
     # get valid file time indices (i.e. those times in active full time array)
-    valid_file_time_indices = \
-        np.array([i for i, val in enumerate(file_time)
-                  if (val >= time_array[0]) & (val <= time_array[-1])],
-                 dtype=np.int)
+    valid_file_time_indices = np.where(np.logical_and(file_timestamp>=shared_memory_vars['timestamp_array'][0], file_timestamp<=shared_memory_vars['timestamp_array'][-1]))[0]
 
-    # cut file time for valid indices
-    file_time = file_time[valid_file_time_indices]
-
-    # get indices relative to active full time array
-    full_array_time_indices = np.searchsorted(time_array, file_time)
+    # get indices relative to active full timestamp array
+    full_array_time_indices = np.searchsorted(shared_memory_vars['timestamp_array'], file_timestamp[valid_file_time_indices])
 
     # get all station references in file
     file_station_references = ncdf_root['station_reference'][:]
@@ -79,51 +91,44 @@ def read_netcdf_data(tuple_arguments):
 
     # for observations, set species data based on selected qa flags/standard data provider
     # flags/classifications to retain or remove as NaN
+    s = time.time()
     if process_type == 'observations':
-
-        file_data = np.full((len(current_file_station_indices),
-                             len(valid_file_time_indices)), np.NaN,
-                            dtype=data_dtype)
-        for data_var in data_vars_to_read:
-            if data_var == 'time':
-                # len(len(file_data)) = number of stations
-                # save time as unix time to avoid dtype issues
-                unix_time = np.array([t.value // 10**9 for t in file_time])
-                file_data['time'] = unix_time.repeat(len(file_data))\
-                    .reshape(file_time.shape[0], len(file_data)).T
+        for data_var_ii, data_var in enumerate(data_vars_to_read):
+            #if species variable, then if need to filter by qa load non-filtered array, otherwise load prefiltered array (if available)
+            if data_var == active_species:
+                if (not shared_memory_vars['qa']) & ('{}_prefiltered_defaultqa'.format(data_var) in list(ncdf_root.variables.keys())):
+                    species_data = ncdf_root['{}_prefiltered_defaultqa'.format(data_var)][current_file_station_indices, valid_file_time_indices]
+                else:
+                    species_data = ncdf_root[data_var][current_file_station_indices, valid_file_time_indices]
             else:
-                file_data[data_var][:, :] = ncdf_root[data_var][current_file_station_indices,
-                                                                valid_file_time_indices]
+                file_data_shared[data_var_ii,full_array_station_indices[:, np.newaxis],full_array_time_indices[np.newaxis, :]] =\
+                    ncdf_root[data_var][current_file_station_indices, valid_file_time_indices]
 
         # if some qa flags selected then screen
-        if len(selected_qa) > 0:
+        if shared_memory_vars['qa']:
             # screen out observations which are associated with any of the selected qa flags
-            file_data[active_species]\
-                    [np.isin(ncdf_root['qa'][:, valid_file_time_indices, :],
-                             selected_qa).any(axis=2)] = np.NaN
+            species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['qa']).any(axis=2)] = np.NaN
 
         # if some data provider flags selected then screen
-        if len(selected_flags) > 0:
-            # screen out observations which are associated with any of the
-            # selected data provider flags
-            file_data[active_species]\
-                    [np.isin(ncdf_root['flag'][:, valid_file_time_indices, :],
-                             selected_flags).any(axis=2)] = np.NaN
+        if shared_memory_vars['flag']:
+            # screen out observations which are associated with any of the selected data provider flags
+            species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['flag']).any(axis=2)] = np.NaN
+
+        #write filtered species data to shared file data
+        file_data_shared[data_vars_to_read.index(active_species),full_array_station_indices[:, np.newaxis],full_array_time_indices[np.newaxis, :]] =\
+            species_data
 
         # get file metadata
         file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
-        for meta_var in metadata_vars_to_read:
-            file_metadata[meta_var][current_file_station_indices, 0] = ncdf_root[meta_var][:]
+        for meta_var_ii, meta_var in enumerate(metadata_vars_to_read):
+            file_metadata[meta_var][current_file_station_indices,0] = ncdf_root[meta_var][:]
 
+    #experiment data
     else:
-        file_data = np.full((len(current_file_station_indices),
-                             len(valid_file_time_indices)), np.NaN,
-                            dtype=data_dtype[:1])
-        
-        relevant_data = ncdf_root[data_vars_to_read[0]][current_file_station_indices, valid_file_time_indices]
+        relevant_data = ncdf_root[active_species][current_file_station_indices, valid_file_time_indices]
         # mask out fill values for parameter field
         relevant_data[relevant_data.mask] = np.NaN
-        file_data[data_vars_to_read[0]][:, :] = relevant_data
+        file_data_shared[data_vars_to_read.index(active_species),full_array_station_indices[:, np.newaxis],full_array_time_indices[np.newaxis, :]] = relevant_data
 
     # close netCDF
     ncdf_root.close()
@@ -131,9 +136,9 @@ def read_netcdf_data(tuple_arguments):
     # return valid species data, time indices relative to active full time array,
     # file station indices relative to all unique station references array
     if process_type == 'observations':
-        return file_data, full_array_time_indices, full_array_station_indices, file_metadata
+        return full_array_station_indices, file_metadata
     else:
-        return file_data, full_array_time_indices, full_array_station_indices
+        return full_array_station_indices
 
 
 def read_netcdf_nonghost(tuple_arguments):
@@ -141,7 +146,7 @@ def read_netcdf_nonghost(tuple_arguments):
     does not exist, returns None"""
 
     # assign arguments from tuple to variables
-    relevant_file, time_array, station_references, active_species, process_type = tuple_arguments
+    relevant_file, station_references, active_species, process_type = tuple_arguments
     # nonghost have separate metadata to read
     # read netCDF frame, if files doesn't exist, return with None
     try:
@@ -179,17 +184,18 @@ def read_netcdf_nonghost(tuple_arguments):
         file_time = num2date(ncdf_root['time'][:], time_units)
         # remove microseconds
         file_time = pd.to_datetime([t.replace(microsecond=0) for t in file_time])
+    
 
     # get valid file time indices (i.e. those times in active full time array)
     valid_file_time_indices = \
         np.array([i for i, val in enumerate(file_time)
-                  if (val >= time_array[0]) & (val <= time_array[-1])],
+                  if (val >= shared_memory_vars['time_array'][0]) & (val <= shared_memory_vars['time_array'][-1])],
                  dtype=np.int)
     # cut file time for valid indices
     file_time = file_time[valid_file_time_indices]
 
     # get indices relative to active full time array
-    full_array_time_indices = np.searchsorted(time_array, file_time)
+    full_array_time_indices = np.searchsorted(shared_memory_vars['time_array'], file_time)
 
     # get all station references in file
     # file_station_references = station_references  #ncdf_root['station_name'][:]

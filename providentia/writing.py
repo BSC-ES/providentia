@@ -4,19 +4,14 @@ import sys
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset, num2date
-from .config import write_conf
+from .configuration import write_conf
 
 
 def export_data_npz(mpl_canvas, fname):
     """Function that writes out current data in memory to .npy file"""
 
-    if mpl_canvas.read_instance.reading_nonghost:
-        mdata = mpl_canvas.read_instance.datareader.nonghost_metadata
-    else:
-        mdata = mpl_canvas.read_instance.datareader.metadata_in_memory
-
     np.savez(fname, data=mpl_canvas.read_instance.data_in_memory_filtered,
-             metadata=mdata,
+             metadata=mpl_canvas.read_instance.datareader.metadata_in_memory,
              data_resolution=mpl_canvas.read_instance.active_resolution)
 
 
@@ -53,16 +48,14 @@ def export_netcdf(mpl_canvas, fname):
     data_format_dict = get_standard_data(parameter_details)
 
     metadata_keys = instance.metadata_vars_to_read
-    data_arr = instance.data_in_memory_filtered['observations'][speci]
+    data_arr = instance.data_in_memory_filtered['observations'][
+                   instance.datareader.data_vars_to_read.index(speci),:,:]
     metadata_arr = instance.datareader.metadata_in_memory
     expids = instance.experiments_menu['checkboxes']['keep_selected']
     exp_to_write = []
     # change some vars if we're treating nonghost
     if instance.reading_nonghost:
         network = instance.active_network.replace("*", "")
-        # metadata_keys = ['station_name', 'latitude', 'longitude', 'altitude']
-        metadata_arr = instance.datareader.nonghost_metadata
-        metadata_keys = list(metadata_arr.dtype.names)
 
     # start file
     fout = Dataset(fname+".nc", 'w', format="NETCDF4")
@@ -105,7 +98,7 @@ def export_netcdf(mpl_canvas, fname):
             var.calendar = 'standard'
             var.tz = 'UTC'
 
-    if mpl_canvas.colocate_active:
+    if mpl_canvas.temporal_colocation:
         for k in instance.data_in_memory_filtered.keys():
             if 'colocatedto' in k:
                 expids.append(k)
@@ -113,7 +106,7 @@ def export_netcdf(mpl_canvas, fname):
     # create vars for exps
     if expids:
         for exp in expids:
-            if mpl_canvas.colocate_active:
+            if mpl_canvas.temporal_colocation:
                 key = speci + "_" + exp
             else:
                 if 'colocatedto' not in exp:
@@ -135,7 +128,8 @@ def export_netcdf(mpl_canvas, fname):
             fout[data_key+"_"+network][:, :] = data_arr
 
     for exp in exp_to_write:
-        fout[speci+"_"+exp][:, :] = instance.data_in_memory_filtered[exp][speci]
+        fout[speci+"_"+exp][:, :] = instance.data_in_memory_filtered[exp][
+                                    instance.datareader.data_vars_to_read.index(speci),:,:]
 
     # metadata variables
     for metadata_key in metadata_keys:
@@ -190,16 +184,16 @@ def export_configuration(prv, cname, separator="||"):
     """
 
     # default
-    options = {'selected_network': prv.selected_network,
-               'selected_resolution': prv.selected_resolution,
-               'selected_matrix': prv.selected_matrix,
-               'selected_species': prv.selected_species,
+    options = {'network': prv.selected_network,
+               'resolution': prv.selected_resolution,
+               'matrix': prv.selected_matrix,
+               'species': prv.selected_species,
                'start_date': prv.selected_start_date,
                'end_date': prv.selected_end_date}
 
     # QA
     if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):
-        options['QA'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
+        options['qa'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
     # flags
     if prv.flag_menu['checkboxes']['remove_selected']:
         options['flags'] = ",".join(str(i) for i in prv.flag_menu['checkboxes']['remove_selected'])
@@ -243,7 +237,6 @@ def export_configuration(prv, cname, separator="||"):
 
         # and then treat the keep/remove
         for label in prv.metadata_menu[menu_type]['navigation_buttons']['labels']:
-            #         keeps, removes = split_options(getattr(self, label))
             keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
             removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
 

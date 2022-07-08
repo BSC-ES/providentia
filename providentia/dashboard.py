@@ -1,19 +1,18 @@
 """ Module which provides main window """
 from .configuration import ProvConfiguration
-from .init_standards import InitStandards
 from .configuration import parse_path
-from .config import split_options
-from .reading import get_yearmonths_to_read
-from .prov_canvas import MPLCanvas
+from .configuration import split_options
+from .init_standards import InitStandards
+from .read_aux import get_yearmonths_to_read
+from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
 from .toolbar import save_data, conf_dialogs
-from .prov_dashboard_aux import ComboBox
-from .prov_dashboard_aux import QVLine
-from .prov_dashboard_aux import PopUpWindow
-from .prov_dashboard_aux import formatting_dict
-from .prov_dashboard_aux import set_formatting
-from .prov_read import DataReader
-from .prov_offline import ProvidentiaOffline
+from .dashboard_aux import ComboBox
+from .dashboard_aux import QVLine
+from .dashboard_aux import PopUpWindow
+from .dashboard_aux import formatting_dict
+from .dashboard_aux import set_formatting
+from .read import DataReader
 from providentia import aux
 
 import copy
@@ -34,7 +33,8 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
 class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards):
     """Define class that generates Providentia dashboard"""
@@ -43,19 +43,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
     resized = QtCore.pyqtSignal()
     move = QtCore.pyqtSignal()
 
-    def __init__(self, read_type='parallel', **kwargs):
+    def __init__(self, **kwargs):
         super(ProvidentiaMainWindow, self).__init__()
         ProvConfiguration.__init__(self, **kwargs)
 
-        # put read_type into self
-        self.read_type = read_type
-
         # store options to be restored at the end
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
-
-        #config = configparser.ConfigParser()
-        #config.read(conf_to_load)
-        #all_sections = config.sections()
 
         # update from config file (if available)
         #config and section defined 
@@ -73,23 +66,26 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
         # arguments are only local
         self.main_window_geometry = None
+        
+        # init GHOST standards
         InitStandards.__init__(self, obs_root=self.obs_root,
                                ghost_version=self.ghost_version)
 
-        # load necessary dictionaries
-        self.basic_stats_dict = json.load(open(os.path.join(CURRENT_PATH,
-                                                            'conf/basic_stats_dict.json')))
-        self.expbias_dict = json.load(open(os.path.join(CURRENT_PATH,
-                                                        'conf/experiment_bias_stats_dict.json')))
+        # load characteristics per plot type
+        #check for self defined plot characteristics file
+        if hasattr(self, 'plot_characteristics_filename'):
+            self.plot_characteristics_templates = json.load(self.plot_characteristics_filename)
+        else:
+            self.plot_characteristics_templates = json.load(open(os.path.join(
+                CURRENT_PATH, 'conf/plot_characteristics_dashboard.json')))
+
         # initialize DataReader
         self.datareader = DataReader(self)
-        if self.offline:
-            ProvidentiaOffline(self)
-        else:
-            self.init_ui()
-            # setup callback events upon resizing/moving of Providentia window
-            self.resized.connect(self.get_geometry)
-            self.move.connect(self.get_geometry)
+        #initialise UI
+        self.init_ui()
+        # setup callback events upon resizing/moving of Providentia window
+        self.resized.connect(self.get_geometry)
+        self.move.connect(self.get_geometry)
 
     def resizeEvent(self, event):
         """Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry"""
@@ -209,20 +205,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
-        self.lb_z = set_formatting(QtWidgets.QLabel(self, text="Map Z"), formatting_dict['title_menu'])
-        self.lb_z.setToolTip('Set map Z statistic')
+        self.lb_z = set_formatting(QtWidgets.QLabel(self, text="Map Stat"), formatting_dict['title_menu'])
+        self.lb_z.setToolTip('Set plotted map statistic')
         self.cb_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_z_stat.setFixedWidth(80)
-        self.cb_z_stat.setToolTip('Select map Z statistic')
+        self.cb_z_stat.setToolTip('Select map statistic')
         self.cb_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z1.setFixedWidth(125)
-        self.cb_z1.setToolTip('Select Z1 dataset')
+        self.cb_z1.setFixedWidth(140)
+        self.cb_z1.setToolTip('Select map dataset 1')
         self.cb_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z2.setFixedWidth(125)
-        self.cb_z2.setToolTip('Select Z2 dataset')
+        self.cb_z2.setFixedWidth(140)
+        self.cb_z2.setToolTip('Select map dataset 2')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
-        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp. Bias"),
+        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp Bias"),
                                                  formatting_dict['title_menu'])
         self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
         self.cb_experiment_bias_type = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
@@ -309,6 +305,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                                 'keep_selected': [],
                                                 'map_vars': [],
                                                 'select_buttons': ['all', 'clear']}}
+        self.experiments_legend = {}
 
         # setup pop-up window menu tree for metadata
         self.metadata_types, self.metadata_menu = aux.init_metadata(self)
@@ -405,7 +402,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # if we're starting from a configuration file, read first the setup
         if self.from_conf:
             self.handle_data_selection_update()
-            # then see if we have fields that require to be se (meta, rep, period)
+            # then see if we have fields that require to be set (meta, rep, period)
             aux.representativity_conf(self)
             if hasattr(self, 'period'):
                 self.period_conf()
@@ -451,7 +448,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
-            # set initially selected/active start-end date as default 201601-201701
+            # set initially selected/active start-end date as default
             self.le_start_date.setText(str(self.start_date))
             self.le_end_date.setText(str(self.end_date))
             self.selected_start_date = int(self.le_start_date.text())
@@ -469,7 +466,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
             # set selected/active values of variables associated
             # with pop up windows to be empty lists
-            self.active_experiment_grids = []
+            self.active_experiments = []
             self.active_qa = []
             self.active_flags = []
 
@@ -538,16 +535,24 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 esarchive_files = self.get_esarchive_yearmonth(esarchive_files_empty)
                 self.all_observation_data = {**self.all_observation_data, **esarchive_files}
             # create dictionary of observational data inside date range
-            self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
-                                                              self.le_end_date.text())
+            valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
+                                                                                self.le_end_date.text())
+            if valid_obs_files:              
+                self.selected_start_date = int(self.le_start_date.text())
+                self.selected_end_date = int(self.le_end_date.text())
+                self.selected_start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
 
             # check which flags to select, depending if we have conf file or no
             self.flag_menu['checkboxes']['remove_selected'] = aux.which_flags(self)
 
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
-            self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
-                                                              self.le_end_date.text())
+            valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
+                                                                                self.le_end_date.text())
+            if valid_obs_files:              
+                self.selected_start_date = int(self.le_start_date.text())
+                self.selected_end_date = int(self.le_end_date.text())
+                self.selected_start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
 
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
@@ -604,34 +609,41 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         else:
             self.selected_species = self.cb_species.currentText()
 
-        # update available experiment data dictionary
-        self.datareader.get_valid_experiment_files_in_date_range()
-        self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
-                                                          self.le_end_date.text())
+        # update available obs/experiment data dictionaries
+        self.datareader.get_valid_experiment_files_in_date_range(self.le_start_date.text(), self.le_end_date.text(), 
+                                                                 self.selected_resolution, self.selected_network, 
+                                                                 self.selected_species)
+        valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(), 
+                                                                            self.le_end_date.text())
+        if valid_obs_files:
+            self.selected_start_date = int(self.le_start_date.text())
+            self.selected_end_date = int(self.le_end_date.text())
+            self.selected_start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
+
         # update selected indices for experiments -- keeping previously selected experiments if available
         # set selected indices as previously selected indices in current available list of experiments
-        if self.config_bar_initialisation and hasattr(self, 'experiments'):
-            conf_experiments = [exp.strip() for exp in self.experiments.split(",")]
-            self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in conf_experiments
-                                                                    if experiment in
-                                                                    self.experiments_menu['checkboxes']['map_vars']]
+        if hasattr(self, 'experiments'):
+            #update experiments from config file
+            if self.config_bar_initialisation:
+                experiments_legend = get_experiments(instance)
+                self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in experiments_legend.keys()
+                                                                        if experiment in self.experiments_menu['checkboxes']['map_vars']]
+                self.experiments_legend = {experiment:experiment_legend for experiment, experiment_legend  in experiments_legend.items()
+                                          if experiment in self.experiments_menu['checkboxes']['map_vars']}
+
         self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for
                                                                 previous_selected_experiment in
                                                                 self.experiments_menu['checkboxes']['keep_selected']
                                                                 if previous_selected_experiment in
                                                                 self.experiments_menu['checkboxes']['map_vars']]
-
+        previous_experiments_legend = copy.deepcopy(self.experiments_legend)
+        self.experiments_legend = {exp:previous_experiments_legend[exp] if exp in previous_experiments_legend else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
+        
         # since a selection has changed, update also the qa flags
         qa_to_select = aux.which_qa(self)  # first check which flags
-        self.qa_menu['checkboxes']['remove_default'] = aux.which_qa(self, return_defaults=True)
-        if self.config_bar_initialisation:
-            self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
-        else:
-            # if the selected species has specific qa flags, ensure that none of the
-            # inapplicable is selected
-            if self.selected_species in self.qa_exceptions:
-                self.qa_menu['checkboxes']['remove_selected'] = list(set(
-                    self.qa_menu['checkboxes']['remove_selected']) - set(self.qa_diff))
+        self.default_qa = aux.which_qa(self, return_defaults=True)
+        self.qa_menu['checkboxes']['remove_default'] = self.default_qa
+        self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -692,7 +704,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         previous_active_species = self.active_species
         previous_active_start_date = self.active_start_date
         previous_active_end_date = self.active_end_date
-        previous_active_experiment_grids = self.active_experiment_grids
+        previous_active_experiments = self.active_experiments
+        previous_experiments_legend = self.experiments_legend
         previous_active_qa = self.active_qa
         previous_active_flags = self.active_flags
 
@@ -703,7 +716,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.active_species = self.selected_species
         self.active_start_date = self.selected_start_date
         self.active_end_date = self.selected_end_date
-        self.active_experiment_grids = copy.deepcopy(self.experiments_menu['checkboxes']['keep_selected'])
+        self.active_experiments = copy.deepcopy(self.experiments_menu['checkboxes']['keep_selected'])
+        self.experiments_legend = {exp:previous_experiments_legend[exp] if exp in previous_experiments_legend else exp for exp in self.active_experiments}
         self.active_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
         self.active_flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
 
@@ -772,13 +786,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # determine if any of the active experiments have changed
         # remove experiments that are no longer selected from data_in_memory dictionary
-        experiments_to_remove = [experiment for experiment in previous_active_experiment_grids if
-                                 experiment not in self.active_experiment_grids]
+        experiments_to_remove = [experiment for experiment in previous_active_experiments if
+                                 experiment not in self.active_experiments]
         for experiment in experiments_to_remove:
             del self.datareader.data_in_memory[experiment]
         # any new experiments will need completely re-reading
-        experiments_to_read = [experiment for experiment in self.active_experiment_grids if
-                               experiment not in previous_active_experiment_grids]
+        experiments_to_read = [experiment for experiment in self.active_experiments if
+                               experiment not in previous_active_experiments]
 
         # has date range changed?
         if read_all or read_left or read_right or cut_left or cut_right:
@@ -793,16 +807,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if read_all:
                 # reset data in memory dictionary
                 self.datareader.reset_data_in_memory()
-                if not self.reading_nonghost:
-                    self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
+                self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
                 # read observations
                 self.datareader.read_data('observations', self.active_start_date,
                                           self.active_end_date, self.active_network,
                                           self.active_resolution, self.active_species,
                                           self.active_matrix)
-                # print(self.data_in_memory['observations'])
                 # read selected experiments (iterate through)
-                for data_label in self.active_experiment_grids:
+                for data_label in self.active_experiments:
                     self.datareader.read_data(data_label, self.active_start_date,
                                               self.active_end_date, self.active_network,
                                               self.active_resolution, self.active_species,
@@ -812,6 +824,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     if data_label in experiments_to_read:
                         experiments_to_read.remove(data_label)
 
+            #read/cut on left/right
             else:
 
                 # remove incomplete months
@@ -820,7 +833,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     self.relevant_yearmonths = self.relevant_yearmonths[:-1]
                 
                 # if station references array has changed then as cutting/appending to
-                # existing data need to rearrange existing data arrays accordingly
+                # need to rearrange existing metadata/data arrays accordingly
                 if not np.array_equal(self.previous_station_references, self.station_references):
                     # get indices of stations in previous station references array in current station references array
                     old_station_inds = np.where(np.in1d(self.previous_station_references,
@@ -830,26 +843,24 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     new_station_inds = np.where(np.in1d(self.station_references,
                                                         self.previous_station_references))[0]
 
+                    #rearrange metadata station dimension
                     new_metadata_array = np.full((len(self.station_references),
                                                   len(self.previous_relevant_yearmonths)),
-                                                 np.NaN, dtype=self.metadata_dtype)
+                                                  np.NaN, dtype=self.metadata_dtype)
                     new_metadata_array[new_station_inds, :] = self.datareader.metadata_in_memory[old_station_inds, :]
                     self.datareader.metadata_in_memory = new_metadata_array
 
-                    # iterate through all keys in data in memory dictionary
+                    # iterate through all keys in data in memory dictionary, and rearrage data array station dimensions
                     for data_label in list(self.datareader.data_in_memory.keys()):
-                        # create new data array in shape of current station references array
-                        if data_label == 'observations':
-                            new_data_array = np.full((len(self.station_references),
-                                                      len(self.previous_time_array)),
-                                                     np.NaN, dtype=self.datareader.data_dtype)
-                        else:
-                            new_data_array = np.full((len(self.station_references),
-                                                      len(self.previous_time_array)),
-                                                     np.NaN, dtype=self.datareader.data_dtype[:1])
+
+                        new_data_array = np.full((len(self.data_vars_to_read),
+                                                  len(self.station_references),
+                                                  len(self.previous_time_array)),
+                                                  np.NaN, dtype=np.float32)
+
                         # put the old data into new array in the correct positions
-                        new_data_array[new_station_inds, :] = self.datareader.data_in_memory[
-                                                                  data_label][old_station_inds, :]
+                        new_data_array[: ,new_station_inds, :] = self.datareader.data_in_memory[
+                                                                 data_label][:, old_station_inds, :]
                         # overwrite data array with reshaped version
                         self.datareader.data_in_memory[data_label] = new_data_array
 
@@ -918,8 +929,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     yearmonths_to_read = np.asarray(yearmonths_to_read)
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
+                #need to read new yearmonths?
                 if new_yearmonths:
 
+                    #add space on left edge to add data to metadata array
                     self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
                     self.datareader.metadata_in_memory = np.concatenate((np.full(
                         (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
@@ -929,17 +942,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     # insert read data on left edge of the associated arrays
                     for data_label in list(self.datareader.data_in_memory.keys()):
                         # add space on left edge to insert new read data
-                        if data_label == 'observations':
-                            self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
-                                (len(self.station_references), n_new_left_data_inds), np.NaN,
-                                dtype=self.datareader.data_dtype), self.datareader.data_in_memory[data_label]), axis=1)
-                        else:
-                            self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
-                                (len(self.station_references), n_new_left_data_inds), np.NaN,
-                                dtype=self.datareader.data_dtype[:1]), self.datareader.data_in_memory[data_label]), axis=1)
+                        self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
+                            (len(self.data_vars_to_read), len(self.station_references), n_new_left_data_inds), np.NaN,
+                            dtype=np.float32), self.datareader.data_in_memory[data_label]), axis=1)
+                        #read data
                         self.datareader.read_data(data_label, self.active_start_date, previous_active_start_date,
-                                                self.active_network, self.active_resolution,
-                                                self.active_species, self.active_matrix)
+                                                  self.active_network, self.active_resolution,
+                                                  self.active_species, self.active_matrix)
 
             # need to read on right edge?
             if read_right:
@@ -960,8 +969,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     yearmonths_to_read = np.asarray(yearmonths_to_read)
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
+                #need to read new yearmonths?
                 if new_yearmonths:
 
+                    #add space on right edge to add data to metadata array
                     self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
                     self.datareader.metadata_in_memory = np.concatenate((self.datareader.metadata_in_memory, np.full(
                         (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
@@ -969,14 +980,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     # iterate through all keys in data in memory dictionary and
                     # insert read data on right edge of the associated arrays
                     for data_label in list(self.datareader.data_in_memory.keys()):
-                        if data_label == 'observations':
-                            self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
-                                (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype)), axis=1)
-                        else:
-                            self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
-                                (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype[:1])),
-                                                                            axis=1)
-                            self.datareader.read_data(data_label, previous_active_end_date, self.active_end_date,
+                        self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
+                            (len(self.data_vars_to_read), len(self.station_references), n_new_right_data_inds), np.NaN, dtype=np.float32)),
+                                                                        axis=1)
+                        self.datareader.read_data(data_label, previous_active_end_date, self.active_end_date,
                                                     self.active_network, self.active_resolution,
                                                     self.active_species, self.active_matrix)
 
@@ -984,6 +991,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             aux.update_metadata_fields(self)
             self.representativity_menu = aux.representativity_fields(self, self.active_resolution)
             aux.update_period_fields(self.active_resolution, self.period_menu)
+            #update relevant temporal resolutions 
+            self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.active_resolution)
 
         # if have new experiments to read, then read them now
         if len(experiments_to_read) > 0:
@@ -1001,7 +1010,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.le_maximum_value.setText(str(species_upper_limit))
 
         # update dictionary of plotting parameters (colour and zorder etc.) for each data array
-        # self.update_plotting_parameters()
         self.datareader.update_plotting_parameters()
         # --------------------------------------------------------------------#
         # run function to filter data outside lower/upper limits, not using desired
@@ -1011,9 +1019,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # update map z combobox fields based on data in memory
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
         self.basic_z_stats = np.array(list(
-            OrderedDict(sorted(self.basic_stats_dict.items(), key=lambda x: x[1]['order'])).keys()))
+            OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
         self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-            OrderedDict(sorted(self.expbias_dict.items(), key=lambda x: x[1]['order'])).keys()))
+            OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
 
         # generate list of sorted z1/z2 data arrays names in memory, putting observations
         # before experiments, and empty string item as first element in z2 array list
@@ -1105,7 +1113,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
     def load_conf(self, section=None, fpath=None):
         """ Load existing configurations from file. """
 
-        from .config import read_conf
+        from .configuration import read_conf
 
         if fpath is None:
             fpath = parse_path(self.config_dir, self.config_file)
