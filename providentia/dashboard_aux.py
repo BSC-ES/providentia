@@ -509,3 +509,4 @@ class PopUpWindow(QtWidgets.QWidget):
                         self.menu_current[menu_type]['previous_upper'] = copy.deepcopy(self.menu_current[menu_type]['current_upper'])
                     #update set value
                     self.menu_current[menu_type][element] = set_vals
+

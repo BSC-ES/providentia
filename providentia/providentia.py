@@ -13,9 +13,9 @@
 # along with Providentia. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-from .config import ProvArgumentParser
-from . import prov_dashboard as dashboard
-from . import prov_offline as offline
+from .argument_parser import ProvArgumentParser
+from . import dashboard as dashboard
+from . import offline as offline
 
 import sys
 import logging
@@ -54,9 +54,8 @@ class Providentia(object):
 
             LOG.info(res)
 
-            # call dashboard
             if args.offline:
-                offline.main_offline(**res)
+                offline.main(**res)
             else:
                 dashboard.main(**res)
 
