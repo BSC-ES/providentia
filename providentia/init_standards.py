@@ -26,6 +26,6 @@ class InitStandards:
         self.standard_data_flag_name_to_data_flag_code = \
             standard_data_flag_name_to_data_flag_code
         self.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
-        self.qa_exceptions = ['dir10', 'spd10', 'rho2', 'acprec', 'acsnow', 'si',
-                              'cldbot', 'vdist', 'ccovmean', 'cfracmean']
-        self.specific_qa, self.general_qa, self.qa_diff = aux.get_qa_codes(self)
+        self.met_parameters = ['dir10', 'spd10', 't2', 'rh2', 'sst', 'td2', 'pshltr',
+                               'slp', 'acprec', 'acsnow', 'si', 'cldbot', 'vdist', 'cfracmax']
+        self.default_qa_standard, self.default_qa_met = aux.get_default_qa_codes(self)
