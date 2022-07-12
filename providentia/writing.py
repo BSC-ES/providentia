@@ -184,12 +184,12 @@ def export_configuration(prv, cname, separator="||"):
     """
 
     # default
-    options = {'network': prv.selected_network,
-               'resolution': prv.selected_resolution,
-               'matrix': prv.selected_matrix,
-               'species': prv.selected_species,
-               'start_date': prv.selected_start_date,
-               'end_date': prv.selected_end_date}
+    options = {'network': prv.network,
+               'resolution': prv.resolution,
+               'matrix': prv.matrix,
+               'species': prv.species,
+               'start_date': prv.start_date,
+               'end_date': prv.end_date}
 
     # QA
     if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):

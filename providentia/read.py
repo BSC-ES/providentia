@@ -1,6 +1,7 @@
 from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_nonghost
 from providentia import aux
 
+import sys
 import os
 import copy
 import ctypes
@@ -75,7 +76,7 @@ class DataReader:
                                                                             int(str_active_end_date[4:6]),
                                                                             int(str_active_end_date[6:8])),
                                                       freq=self.active_frequency_code)[:-1]
-        #get time array as integer timestamps
+        # get time array as integer timestamps
         self.read_instance.timestamp_array = self.read_instance.time_array.asi8
 
         #get relevant observational files
@@ -315,7 +316,6 @@ class DataReader:
                     self.metadata_in_memory[full_array_station_indices[:, np.newaxis],
                                            self.read_instance.metadata_inds_to_fill[relevant_file_ii]] = file_metadata
 
-        # read in parallel
         elif self.read_type == 'parallel':
 
             # setup pool of N workers on N CPUs
@@ -348,6 +348,20 @@ class DataReader:
 
         #overwrite data in memory
         self.data_in_memory[data_label] = file_data_shared_np
+
+        # check if datasets consist of arrays full of -9999.0 or nan values or if they are empty
+        if (self.data_in_memory[data_label].size == 0 or
+            np.isin(self.data_in_memory[data_label].flatten(), [-9999.0, np.nan]).all()):
+
+            if self.data_in_memory[data_label].size == 0:
+                print('Error: The observation or experiment datasets are empty.')
+            
+            elif np.isin(self.data_in_memory[data_label].flatten(), [-9999.0, np.nan]).all():
+                print('Error: The observation or experiment datasets are void.')
+
+            print('Check if the data from the observations was downloaded correctly and')
+            print('if the experiments were interpolated at the stations of the network of interest.')
+            sys.exit()
 
         print('READ DATA END', time.time() - s)
 

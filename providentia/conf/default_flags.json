@@ -1,0 +1,22 @@
+{
+"general_qa": ["Missing Measurement", "Infinite Value", "Negative Measurement", "Zero Measurement",
+"Invalid Data Provider Flags - GHOST Decreed", "Erroneous Primary Sampling", "Erroneous Sample Preparation",
+"Erroneous Measurement Methodology", "Below Preferential Lower Limit of Detection",
+"Above Preferential Upper Limit of Detection", "Insufficient Measurement Resolution - Preferential",
+"Insufficient Measurement Resolution - Empirical", "Persistent Recurring Values - 5/6",
+"Persistent Recurring Values - 9/12", "Persistent Recurring Values - 16/24",
+"Data Outlier - Exceeds Scientifically Decreed Lower/Upper Limit",
+"Data Outlier - Monthly Median Exceeds Scientifically Decreed Upper Limit", "Data Outlier - Network Decreed",
+"Data Outlier - Manually Decreed", "Probable Data Outlier - Monthly Adjusted Boxplot"],
+"specific_qa": ["Missing Measurement", "Infinite Value", "Negative Measurement",
+"Invalid Data Provider Flags - GHOST Decreed", "Erroneous Primary Sampling",
+"Erroneous Sample Preparation", "Erroneous Measurement Methodology",
+"Below Preferential Lower Limit of Detection", "Above Preferential Upper Limit of Detection",
+"Insufficient Measurement Resolution - Preferential", "Insufficient Measurement Resolution - Empirical",
+"Data Outlier - Exceeds Scientifically Decreed Lower/Upper Limit",
+"Data Outlier - Monthly Median Exceeds Scientifically Decreed Upper Limit",
+"Data Outlier - Network Decreed", "Data Outlier - Manually Decreed",
+"Probable Data Outlier - Monthly Adjusted Boxplot"]
+}
+
+
