@@ -1,12 +1,14 @@
-from .read_aux import get_yearmonths_to_read, read_netcdf_data, read_netcdf_nonghost
+from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_nonghost
 from providentia import aux
 
 import sys
 import os
 import gc
 import copy
+import ctypes
 import datetime
 import multiprocessing
+import time
 
 import numpy as np
 import pandas as pd
@@ -77,6 +79,8 @@ class DataReader:
                                                                             int(str_active_end_date[4:6]),
                                                                             int(str_active_end_date[6:8])),
                                                       freq=self.active_frequency_code)[:-1]
+        # get time array as integer timestamps
+        self.read_instance.timestamp_array = self.read_instance.time_array.asi8
 
         if not self.read_instance.reading_nonghost:
             # get all relevant observational files
@@ -145,7 +149,7 @@ class DataReader:
                                           'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                           'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                          'season_code', 'time']
+                                          'season_code']
             elif (resolution == '3hourly') or \
                     (resolution == '6hourly') or (resolution == '3hourly_instantaneous') or \
                     (resolution == '6hourly_instantaneous'):
@@ -154,22 +158,19 @@ class DataReader:
                                            'annual_native_representativity_percent',
                                            'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
                                            'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                           'season_code', 'time']
+                                           'season_code']
             elif resolution == 'daily':
                 self.data_vars_to_read = [species, 'daily_native_representativity_percent',
                                           'monthly_native_representativity_percent',
                                           'annual_native_representativity_percent',
                                           'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                          'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code', 'time']
+                                          'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code']
             elif resolution == 'monthly':
                 self.data_vars_to_read = [species, 'monthly_native_representativity_percent',
                                           'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
-                                          'annual_native_max_gap_percent', 'season_code', 'time']
+                                          'annual_native_max_gap_percent', 'season_code']
         else:
             self.data_vars_to_read = [species]
-
-        # set data dtype
-        self.data_dtype = [(key, np.float32) for key in self.data_vars_to_read]
 
     def read_data(self, data_label, start_date, end_date,
                   network, resolution, species, matrix):
@@ -191,7 +192,7 @@ class DataReader:
         :type matrix: str
         """
 
-        print('READ DATA START')
+        print('READ DATA START', data_label)
 
         # force garbage collection (to avoid memory issues)
         gc.collect()
@@ -229,127 +230,137 @@ class DataReader:
             relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm
                                      in self.read_instance.relevant_yearmonths])
 
-        # check if data label in data in memory dictionary
+        # check if data label in data in memory dictionary (if fully re-reading all data)
         if data_label not in list(self.data_in_memory.keys()):
-            # if not create empty array (filled with NaNs) to store species data and place it in the dictionary
-
+                  
+            #create new data AND metadata arrays if reading observations
             if process_type == 'observations':
                 self.plotting_params['observations'] = {}
-                if not self.read_instance.reading_nonghost:
-                    self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                               len(self.read_instance.time_array)),
-                                                              np.NaN, dtype=self.data_dtype)
-                else:
-                    self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                               len(self.read_instance.time_array)),
-                                                              np.NaN, dtype=self.data_dtype[:1])
-                self.metadata_in_memory = np.full((len(self.read_instance.station_references),
-                                                   len(self.read_instance.relevant_yearmonths)),
-                                                  np.NaN, dtype=self.read_instance.metadata_dtype)
+                self.data_in_memory[data_label] = np.full((len(self.data_vars_to_read),
+                                                           len(self.read_instance.station_references),
+                                                           len(self.read_instance.time_array)),
+                                                           np.NaN, dtype=np.float32)
+
+                # create separate structure of nonghost metadata
                 if self.read_instance.reading_nonghost:
                     tmp_ncdf = Dataset(relevant_files[0])
-                    # create separate structure of nonghost metadata
-                    nonghost_mdata_dtype = [('station_name', np.object), ('latitude', np.float),
-                                            ('longitude', np.float), ('altitude', np.float)]
+                    meta_dtype = [('station_name', np.object), ('latitude', np.float32),
+                                  ('longitude', np.float32), ('altitude', np.float32)]
                     if "station_code" in tmp_ncdf.variables:
-                        nonghost_mdata_dtype.append(('station_reference', np.object))
+                        meta_dtype.append(('station_reference', np.object))
                     if "station_type" in tmp_ncdf.variables:
-                        nonghost_mdata_dtype.append(('station_type', np.object))
+                        meta_dtype.append(('station_type', np.object))
                     if "station_area" in tmp_ncdf.variables:
-                        nonghost_mdata_dtype.append(('station_area', np.object))
-                    self.nonghost_metadata = np.full((len(self.read_instance.station_references),
-                                                      len(self.read_instance.relevant_yearmonths)),
-                                                     np.NaN, dtype=nonghost_mdata_dtype)
+                        meta_dtype.append(('station_area', np.object))
+                else:
+                    meta_dtype = self.read_instance.metadata_dtype
+                self.metadata_in_memory = np.full((len(self.read_instance.station_references),
+                                                   len(self.read_instance.relevant_yearmonths)),
+                                                   np.NaN, dtype=meta_dtype)
 
-            # if process_type is experiment, get experiment specific grid edges from
-            # first relevant file, and save to data in memory dictionary
-            if process_type == 'experiment':
-                self.data_in_memory[data_label] = np.full((len(self.read_instance.station_references),
-                                                           len(self.read_instance.time_array)),
-                                                          np.NaN, dtype=self.data_dtype[:1])
+            # elif process_type is experiment, create new data array, and 
+            # get experiment specific grid edges from first relevant file, and save to data in memory dictionary
+            elif process_type == 'experiment':
                 self.plotting_params[data_label] = {}
+                self.data_in_memory[data_label] = np.full((len(self.data_vars_to_read),
+                                                           len(self.read_instance.station_references),
+                                                           len(self.read_instance.time_array)),
+                                                           np.NaN, dtype=np.float32)
                 exp_nc_root = Dataset(relevant_files[0])
                 self.plotting_params[data_label]['grid_edge_longitude'] = \
                     exp_nc_root['grid_edge_longitude'][:]
                 self.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
                 exp_nc_root.close()
 
-        # iterate and read species data in all relevant netCDF files (either in serial/parallel)
+        #if active selected qa == default qa, no need to screen by qa, so set selected qa to None
+        if self.read_instance.active_qa == self.read_instance.default_qa:
+            qa_to_filter = []
+        else:
+            qa_to_filter = self.read_instance.active_qa  
 
+        #create arrays to share across processes (for parallel multiprocessing use)
+        #this only works for numerical dtypes, i.e. not strings
+        file_data_shared_shape = (len(self.data_vars_to_read),len(self.read_instance.station_references),len(self.read_instance.time_array))
+        file_data_shared = multiprocessing.RawArray(ctypes.c_float, file_data_shared_shape[0] * file_data_shared_shape[1] * file_data_shared_shape[2])  
+        timestamp_array_shared = multiprocessing.RawArray(ctypes.c_int64, len(self.read_instance.timestamp_array))
+        qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(qa_to_filter))
+        flags_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.active_flags))
+        # Wrap file_data_shared as an numpy array so we can easily manipulates its data.
+        file_data_shared_np = np.frombuffer(file_data_shared, dtype=np.float32).reshape(file_data_shared_shape)
+        #fill arrays
+        np.copyto(file_data_shared_np, self.data_in_memory[data_label])
+        timestamp_array_shared[:] = self.read_instance.timestamp_array
+        qa_shared[:] = qa_to_filter
+        flags_shared[:] = self.read_instance.active_flags
+
+        # iterate and read species data in all relevant netCDF files (either in serial/parallel)
+        s = time.time()
         # read serially
         if self.read_type == 'serial':
-
+            
             # iterate through relevant netCDF files
-            for relevant_file in relevant_files:
+            for relevant_file_ii, relevant_file in enumerate(relevant_files):
                 # create argument tuple of function
-                tuple_arguments = relevant_file, self.read_instance.time_array, self.read_instance.station_references, \
-                                  species, process_type,\
-                                  self.read_instance.active_qa, self.read_instance.active_flags, \
-                                  self.data_dtype, self.data_vars_to_read, \
-                                  self.read_instance.metadata_dtype, self.read_instance.metadata_vars_to_read
+                tuple_arguments = relevant_file, self.read_instance.station_references, species, process_type, \
+                                  self.data_vars_to_read, self.read_instance.metadata_dtype, self.read_instance.metadata_vars_to_read
                 # read file
-                file_data, time_indices, full_array_station_indices = read_netcdf_data(tuple_arguments)
+                file_data, time_indices, full_array_station_indices, file_metadata = read_netcdf_data(tuple_arguments)
                 # place read data into big array as appropriate
-                self.data_in_memory[data_label]['data'][full_array_station_indices[np.newaxis, :],
-                                                        time_indices[:, np.newaxis]] = file_data
+                self.data_in_memory[data_label][full_array_station_indices[:, np.newaxis],
+                                                time_indices[np.newaxis, :]] = file_data
+                #place metadata
+                if process_type == 'observations':
+                    self.metadata_in_memory[full_array_station_indices[:, np.newaxis],
+                                           self.read_instance.metadata_inds_to_fill[relevant_file_ii]] = file_metadata
 
-        # read in parallel
         elif self.read_type == 'parallel':
-            print('PARALLEL')
+
             # setup pool of N workers on N CPUs
-            pool = multiprocessing.Pool(self.read_instance.n_cpus)
+            pool = multiprocessing.Pool(self.read_instance.n_cpus, initializer=init_shared_vars_read_netcdf_data, initargs=(file_data_shared, file_data_shared_shape, timestamp_array_shared, qa_shared, flags_shared))
             # read netCDF files in parallel
             if not self.read_instance.reading_nonghost:
-                tuple_arguments = [(file_name, self.read_instance.time_array, self.read_instance.station_references,
-                                    species, process_type, self.read_instance.active_qa,
-                                    self.read_instance.active_flags, self.data_dtype,
-                                    self.data_vars_to_read, self.read_instance.metadata_dtype,
-                                    self.read_instance.metadata_vars_to_read) for file_name in relevant_files]
-                all_file_data = pool.map(read_netcdf_data, tuple_arguments)
+                tuple_arguments = [(file_name, self.read_instance.station_references, species, process_type, 
+                                    self.data_vars_to_read, self.read_instance.metadata_dtype, self.read_instance.metadata_vars_to_read) for file_name in relevant_files]
+                print('POOLING', time.time() - s)
+                returned_data = pool.map(read_netcdf_data, tuple_arguments)
             else:
                 tuple_arguments = [
-                    (file_name, self.read_instance.time_array, self.read_instance.station_references,
+                    (file_name, self.read_instance.station_references,
                      species, process_type) for
                     file_name in relevant_files]
-                all_file_data = pool.map(read_netcdf_nonghost, tuple_arguments)
+                returned_data = pool.map(read_netcdf_nonghost, tuple_arguments)
 
             pool.close()
             # wait for worker processes to terminate before continuing
             pool.join()
-
-            # iterate through read file data and place data into data array as appropriate
-            for file_data_ii, file_data in enumerate(all_file_data):
-                try:
-                    # some file_data might be none, in case the file did not exist
-                    self.data_in_memory[data_label][file_data[2][:, np.newaxis], file_data[1][np.newaxis, :]] = \
-                        file_data[0]
-                except Exception as e:
-                    continue
-                if process_type == 'observations':
-                    if not self.read_instance.reading_nonghost:
-                        self.metadata_in_memory[file_data[2][:, np.newaxis],
-                                                self.read_instance.metadata_inds_to_fill[file_data_ii]] = file_data[3]
-                    else:
-                        self.nonghost_metadata[file_data[2][:, np.newaxis],
-                                               self.read_instance.metadata_inds_to_fill[file_data_ii]] = file_data[3]
             
+            print('READY TO JOIN', time.time() - s)
+            # iterate through read file data and place metadata into full array as appropriate
+            for returned_data_ii, returned_data_per_month in enumerate(returned_data):
+                if process_type == 'observations':
+                    self.metadata_in_memory[returned_data_per_month[0][:, np.newaxis],
+                                            self.read_instance.metadata_inds_to_fill[returned_data_ii]] = returned_data_per_month[1]
+
+            print('METADATA PLACED', time.time() - s)
+
+        #overwrite data in memory
+        self.data_in_memory[data_label] = file_data_shared_np
+
         # check if datasets consist of arrays full of -9999.0 or nan values or if they are empty
         if (self.data_in_memory[data_label].size == 0 or
-            np.isin([value[0] for value in self.data_in_memory[data_label].flatten()], 
-                    [-9999.0, np.nan]).all()):
+            np.isin(self.data_in_memory[data_label].flatten(), [-9999.0, np.nan]).all()):
 
             if self.data_in_memory[data_label].size == 0:
                 print('Error: The observation or experiment datasets are empty.')
             
-            elif np.isin([value[0] for value in self.data_in_memory[data_label].flatten()], 
-                            [-9999.0, np.nan]).all():
+            elif np.isin(self.data_in_memory[data_label].flatten(), [-9999.0, np.nan]).all():
                 print('Error: The observation or experiment datasets are void.')
 
             print('Check if the data from the observations was downloaded correctly and')
             print('if the experiments were interpolated at the stations of the network of interest.')
             sys.exit()
 
-        print('READ DATA END')
+        print('READ DATA END', time.time() - s)
 
     def get_valid_obs_files_in_date_range(self, start_date, end_date):
         """Define function that iterates through observational dictionary tree

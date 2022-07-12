@@ -174,7 +174,7 @@ class Plot:
                     self.canvas_instance.plot_characteristics[plot_type]['ylabel']['ylabel'] = self.read_instance.datareader.measurement_units
 
 
-    def format_axis(self, ax, base_plot_type, plot_characteristics, relevant_temporal_resolution='hour', relevant_temporal_resolution_ii=0, col_ii=0, last_valid_row=True, last_row_on_page=True):
+    def format_axis(self, ax, base_plot_type, plot_characteristics, relevant_temporal_resolution='hour', col_ii=0, last_valid_row=True, last_row_on_page=True):
         """Format a plotting axis.
         
         :param ax: axis object
@@ -185,8 +185,6 @@ class Plot:
         :type plot_characteristics: dict
         :param relevant_temporal_resolution: the relevant temporal resolution of axis (for periodic plots) 
         :type relevant_temporal_resolution: str 
-        :param relevant_temporal_resolution_ii: the relevant temporal resolution axis index (for periodic plots) 
-        :type relevant_temporal_resolution_ii: int
         :param col_ii: column index (for offline report)
         :type col_ii: int
         :param last_valid_row: boolean informing if last valid row to plot on (for offline report)
@@ -212,8 +210,8 @@ class Plot:
             if last_valid_row or last_row_on_page:
                 ax.set_xlabel(**plot_characteristics['xlabel'])
 
-        # make axis ylabel (only on leftmost column of visible axes, and for first resolution ind)?
-        if ('ylabel' in plot_characteristics_vars) & (col_ii == 0) & (relevant_temporal_resolution_ii == 0):
+        # make axis ylabel (only on leftmost column of visible axes)?
+        if ('ylabel' in plot_characteristics_vars) & (col_ii == 0):
             ax.set_ylabel(**plot_characteristics['ylabel'])
 
         #set xtick params ?
@@ -569,8 +567,6 @@ class Plot:
                            color=self.read_instance.datareader.plotting_params[data_label]['colour'], 
                            markersize=markersize,
                            **plot_characteristics['plot'])
-
-
 
         # get user-defined characteristics for xticks
         n_slices = plot_characteristics['xtick_alteration']['n_slices']
@@ -946,7 +942,7 @@ class Plot:
         bbox.patch.set(**plot_characteristics['annotate_bbox']) 
         relevant_axis.add_artist(bbox)
 
-    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options):
+    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, xlim=None, ylim=None, relim=False):
         """Harmonises xy limits across paradigm of plot type, unless axis limits have been defined
         
         :param relevant_axs: relevant axes
@@ -957,6 +953,12 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
+        :param plot_characteristics: xlim  
+        :type plot_characteristics: list
+        :param plot_characteristics: ylim  
+        :type plot_characteristics: list
+        :param plot_characteristics: relim  
+        :type plot_characteristics: boolean
         """
 
         # initialise arrays to save lower and upper limits in all axes
@@ -973,24 +975,29 @@ class Plot:
 
         # get lower and upper limits across all relevant axes
         for ax in relevant_axs:
-            if ax.lines:
+            if relim:
+                ax.relim()
+                ax.autoscale()
+            if not xlim and ('xlim' not in plot_characteristics):
                 xlim_lower, xlim_upper = ax.get_xlim()
-                ylim_lower, ylim_upper = ax.get_ylim()
                 all_xlim_lower.append(xlim_lower)
                 all_xlim_upper.append(xlim_upper)
+            if not ylim and ('ylim' not in plot_characteristics):
+                ylim_lower, ylim_upper = ax.get_ylim()
                 all_ylim_lower.append(ylim_lower)
                 all_ylim_upper.append(ylim_upper)
 
         # get minimum and maximum from all axes and set limits
         for ax in relevant_axs:
-            if ax.lines:
 
-                #get xlims
+            #get xlims
+            if not xlim and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic','periodic-violin']:
                     xlim_min = np.min(all_xlim_lower)
                     xlim_max = np.max(all_xlim_upper)
 
-                #get ylims
+            #get ylims
+            if not ylim and ('ylim' not in plot_characteristics):
                 if 'bias' in plot_options:
                     # if there is bias center plots y limits around 0
                     if np.abs(np.max(all_ylim_upper)) >= np.abs(np.min(all_ylim_lower)):
@@ -1004,11 +1011,15 @@ class Plot:
                     ylim_max = np.max(all_ylim_upper)
             
             #set xlim
-            if (xlim_min) & (xlim_max) & ('xlim' not in plot_characteristics):
+            if xlim:
+                ax.set_xlim(xlim)
+            elif xlim_min and xlim_max and ('xlim' not in plot_characteristics):
                 ax.set_xlim(xlim_min, xlim_max)
 
             #set ylim
-            if (ylim_min) & (ylim_max) & ('ylim' not in plot_characteristics):
+            if ylim:
+                ax.set_ylim(ylim)
+            elif ylim_min and ylim_max and ('ylim' not in plot_characteristics):
                 ax.set_ylim(ylim_min, ylim_max)
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics):
@@ -1021,6 +1032,16 @@ class Plot:
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
         """    
+
+        #return if title is empty str
+        if title == '':
+            return
+
+        #get appropriate axis for plotting label for plots with multiple sub-axes (first available)
+        if type(relevant_axis) == dict:
+            for sub_ax in relevant_axis.values():
+                relevant_axis = sub_ax
+                break
 
         axis_title_characteristics = copy.deepcopy(plot_characteristics['axis_title'])
         axis_title_characteristics['label'] = title

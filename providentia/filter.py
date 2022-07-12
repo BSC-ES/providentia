@@ -15,6 +15,16 @@ class DataFilter:
 
     def __init__(self, read_instance):
         self.read_instance = read_instance
+
+        # get indices of key data variables
+        resolution = self.read_instance.active_resolution
+        self.speci_index = self.read_instance.datareader.data_vars_to_read.index(self.read_instance.active_species)
+        if resolution != 'daily' and resolution != 'monthly':
+            self.day_night_index = self.read_instance.datareader.data_vars_to_read.index('day_night_code')
+        if resolution != 'monthly':
+            self.weekday_weekend_index = self.read_instance.datareader.data_vars_to_read.index('weekday_weekend_code')
+        self.season_index = self.read_instance.datareader.data_vars_to_read.index('season_code')
+
         self.filter_all()
 
     def filter_all(self):
@@ -51,11 +61,11 @@ class DataFilter:
             return
 
         # filter all observational data out of bounds of lower/upper limits
-        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered[
-                                               'observations'][self.read_instance.active_species] < selected_lower_bound,
-                                           self.read_instance.data_in_memory_filtered[
-                                               'observations'][self.read_instance.active_species] > selected_upper_bound)
-        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][inds_out_of_bounds] = np.NaN
+        inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered['observations'][
+                                           self.speci_index,:,:] < selected_lower_bound,
+                                           self.read_instance.data_in_memory_filtered['observations'][
+                                           self.speci_index,:,:] > selected_upper_bound)
+        self.read_instance.data_in_memory_filtered['observations'][self.speci_index,inds_out_of_bounds] = np.NaN
 
     def filter_by_period(self):
         """Filters data for selected periods (keeping or removing data, as defined)"""
@@ -69,6 +79,8 @@ class DataFilter:
             keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
             removes = self.read_instance.period_menu['checkboxes']['remove_selected']
 
+        resolution = self.read_instance.active_resolution
+
         # filter/limit data for periods selected
         if len(keeps) > 0:
             day_night_codes_to_keep = []
@@ -77,9 +89,10 @@ class DataFilter:
             if 'Nighttime' in keeps:
                 day_night_codes_to_keep.append(1)
             if len(day_night_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'],
-                            day_night_codes_to_keep, invert=True)] = np.NaN
+                if resolution != 'daily' and resolution != 'monthly':
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                        np.isin(self.read_instance.data_in_memory_filtered['observations'][self.day_night_index,:,:],
+                                day_night_codes_to_keep, invert=True)] = np.NaN
 
             weekday_weekend_codes_to_keep = []
             if 'Weekday' in keeps:
@@ -87,9 +100,10 @@ class DataFilter:
             if 'Weekend' in keeps:
                 weekday_weekend_codes_to_keep.append(1)
             if len(weekday_weekend_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'],
-                            weekday_weekend_codes_to_keep, invert=True)] = np.NaN
+                if resolution != 'monthly':
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                        np.isin(self.read_instance.data_in_memory_filtered['observations'][self.weekday_weekend_index,:,:],
+                                weekday_weekend_codes_to_keep, invert=True)] = np.NaN
 
             season_codes_to_keep = []
             if 'Spring' in keeps:
@@ -101,8 +115,8 @@ class DataFilter:
             if 'Winter' in keeps:
                 season_codes_to_keep.append(3)
             if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'],
+                self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                    np.isin(self.read_instance.data_in_memory_filtered['observations'][self.season_index,:,:],
                             season_codes_to_keep, invert=True)] = np.NaN
 
         if len(removes) > 0:
@@ -112,9 +126,10 @@ class DataFilter:
             if 'Nighttime' in removes:
                 day_night_codes_to_remove.append(1)
             if len(day_night_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['day_night_code'],
-                            day_night_codes_to_remove)] = np.NaN
+                if resolution != 'daily' and resolution != 'monthly':
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                        np.isin(self.read_instance.data_in_memory_filtered['observations'][self.day_night_index,:,:],
+                                day_night_codes_to_remove)] = np.NaN
 
             weekday_weekend_codes_to_remove = []
             if 'Weekday' in removes:
@@ -122,9 +137,10 @@ class DataFilter:
             if 'Weekend' in removes:
                 weekday_weekend_codes_to_remove.append(1)
             if len(weekday_weekend_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['weekday_weekend_code'],
-                            weekday_weekend_codes_to_remove)] = np.NaN
+                if resolution != 'monthly':
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                        np.isin(self.read_instance.data_in_memory_filtered['observations'][self.weekday_weekend_index,:,:],
+                                weekday_weekend_codes_to_remove)] = np.NaN
 
             season_codes_to_remove = []
             if 'Spring' in removes:
@@ -136,8 +152,8 @@ class DataFilter:
             if 'Winter' in removes:
                 season_codes_to_remove.append(3)
             if len(season_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                    np.isin(self.read_instance.data_in_memory_filtered['observations']['season_code'],
+                self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                    np.isin(self.read_instance.data_in_memory_filtered['observations'][self.season_index,:,:],
                             season_codes_to_remove)] = np.NaN
 
     def filter_by_data_availability(self):
@@ -158,22 +174,24 @@ class DataFilter:
         if not self.read_instance.reading_nonghost:
             for var_ii, var in enumerate(active_data_availablity_vars):
                 if 'native' in var:
+                    var_index = self.read_instance.datareader.data_vars_to_read.index(var)
                     # max gap variable?
                     if 'max_gap' in var:
                         # bound is < 100?:
                         if data_availability_lower_bounds[var_ii] < 100:
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                                self.read_instance.data_in_memory_filtered['observations'][var] >
+                            self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                                self.read_instance.data_in_memory_filtered['observations'][var_index,:,:] >
                                 data_availability_lower_bounds[var_ii]] = np.NaN
                     # data representativity variable?
                     else:
                         # bound is > 0?
                         if data_availability_lower_bounds[var_ii] > 0:
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
-                                self.read_instance.data_in_memory_filtered['observations'][var] <
+                            self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                                self.read_instance.data_in_memory_filtered['observations'][var_index,:,:] <
                                 data_availability_lower_bounds[var_ii]] = np.NaN
 
-        # filter all observational data out of set bounds of non-native percentage data availability variables
+        # filter all observational data out of set bounds of non-native percentage data availability variables,
+        # which all calculated on the fly
         for var_ii, var in enumerate(active_data_availablity_vars):
             if 'native' not in var:
                 # max gap variable?
@@ -189,9 +207,7 @@ class DataFilter:
 
                 # get period associate with variable
                 period = var.split('_')[0]
-                period_inds = np.arange(
-                    self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species].shape[
-                        1])
+                period_inds = np.arange(self.read_instance.data_in_memory_filtered['observations'].shape[2])
                 # daily variable?
                 if period == 'daily':
                     period_inds_split = np.array_split(period_inds,
@@ -209,23 +225,18 @@ class DataFilter:
                         # max gap variable?
                         if 'max_gap' in var:
                             max_gap_percent = Stats.max_repeated_nans_fraction(
-                                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][:, period_inds])
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                                self.read_instance.data_in_memory_filtered['observations'][self.speci_index, :, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
                                 max_gap_percent > data_availability_lower_bounds[var_ii]] = np.NaN
                         # data representativity variable?
                         else:
                             data_availability_percent = Stats.calculate_data_avail_fraction(
-                                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][:, period_inds])
-                            self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][
+                                self.read_instance.data_in_memory_filtered['observations'][self.speci_index, :, period_inds])
+                            self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
                                 data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
     
     def filter_by_metadata(self):
         """Filters data by selected metadata"""
-
-        if self.read_instance.offline:
-            species = self.read_instance.species
-        else:
-            species = self.read_instance.active_species
 
         # validate fields before filtering
         if not self.validate_values():
@@ -251,9 +262,7 @@ class DataFilter:
                     invalid_keep = np.repeat(
                         np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :],
                                 current_keep, invert=True), self.read_instance.datareader.N_inds_per_month, axis=1)
-                    self.read_instance.data_in_memory_filtered['observations'][species][
-                        invalid_keep] = np.NaN
-                
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_keep] = np.NaN
                 # if any of the remove checkboxes have been selected, filter out data by these selected fields
                 current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
                     'remove_selected']
@@ -262,9 +271,7 @@ class DataFilter:
                     invalid_remove = np.repeat(
                         np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_remove),
                         self.read_instance.datareader.N_inds_per_month, axis=1)
-                    self.read_instance.data_in_memory_filtered['observations'][species][
-                        invalid_remove] = np.NaN
-
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_remove] = np.NaN
             # handle numeric metadata
             else:
                 meta_var_index = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
@@ -290,8 +297,7 @@ class DataFilter:
                                 else:
                                     invalid_below = np.repeat(self.read_instance.datareader.nonghost_metadata[meta_var][:, :] <
                                                             current_lower, self.read_instance.datareader.N_inds_per_month, axis=1)
-                                self.read_instance.data_in_memory_filtered['observations'][species][
-                                    invalid_below] = np.NaN
+                                self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_below] = np.NaN
 
                         # if current upper < than the maximum extent, then filter out
                         # data with metadata > current upper value (if this is numeric)
@@ -306,13 +312,12 @@ class DataFilter:
                                 else:
                                     invalid_above = np.repeat(self.read_instance.datareader.nonghost_metadata[meta_var][:, :] >
                                                             current_upper, self.read_instance.datareader.N_inds_per_month, axis=1)
-                                self.read_instance.data_in_memory_filtered['observations'][species][
-                                    invalid_above] = np.NaN
+                                self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_above] = np.NaN
 
                         # remove nans
                         invalid_nan = np.repeat(pd.isnull(self.read_instance.datareader.metadata_in_memory[meta_var][:, :]), 
                                                 self.read_instance.datareader.N_inds_per_month, axis=1)
-                        self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species][invalid_nan] = np.NaN
+                        self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_nan] = np.NaN
 
     def validate_values(self):
         """Validates that field inserted by user is float"""
@@ -358,7 +363,7 @@ class DataFilter:
 
             # get all instances observations are NaN
             nan_obs = np.isnan(
-                self.read_instance.data_in_memory_filtered['observations'][self.read_instance.active_species])
+                self.read_instance.data_in_memory_filtered['observations'][self.speci_index,:,:])
 
             # create array for finding instances where have 0 valid values across all experiments
             # initialise as being all True, set as False on the occasion there is a valid value in an experiment
@@ -369,56 +374,26 @@ class DataFilter:
             exp_labels.remove('observations')
 
             # iterate through experiment data arrays in data in memory dictionary
-            exp_nan_dict = {}
             for exp_label in exp_labels:
                 # get all instances experiment are NaN
-                exp_nan_dict[exp_label] = np.isnan(self.read_instance.data_in_memory_filtered[exp_label][self.read_instance.active_species])
+                nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[exp_label][self.speci_index,:,:])
                 # get all instances where either the observational array or experiment array are NaN at a given time
-                nan_instances = np.any([nan_obs, exp_nan_dict[exp_label]], axis=0)
-                # create new observational array colocated to experiment
-                #obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
-                #obs_data[nan_instances] = np.NaN
-                #self.read_instance.data_in_memory_filtered['observations_colocatedto_{}'.format(exp_label)] = obs_data
-                #self.read_instance.datareader.plotting_params['observations_colocatedto_{}'.format(exp_label)] = {
-                #    'colour': self.read_instance.datareader.plotting_params['observations']['colour'],
-                #    'zorder': self.read_instance.datareader.plotting_params['observations']['zorder']}
+                nan_instances = np.any([nan_obs, nan_exp], axis=0)
                 # create new experiment array colocated to observations
                 exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label])
-                exp_data[nan_instances] = np.NaN
+                exp_data[self.speci_index, nan_instances] = np.NaN
                 self.read_instance.data_in_memory_filtered['{}_colocatedto_observations'.format(exp_label)] = exp_data
                 self.read_instance.datareader.plotting_params['{}_colocatedto_observations'.format(exp_label)] = {
                     'colour': self.read_instance.datareader.plotting_params[exp_label]['colour'],
                     'zorder': self.read_instance.datareader.plotting_params[exp_label]['zorder']}
                 # update exps_all_nan array, making False all instances where have valid experiment data
-                exps_all_nan = np.all([exps_all_nan, exp_nan_dict[exp_label]], axis=0)
-
-            # colocate experiments with all other experiments
-            #for exp_label_ii, exp_label in enumerate(exp_labels):
-            #    for exp_label_2 in exp_labels[exp_label_ii + 1:]:
-            #        # get all instances where either of the experiment arrays are NaN at a given time
-            #        nan_instances = np.any([exp_nan_dict[exp_label], exp_nan_dict[exp_label_2]], axis=0)
-            #        # create new experiment array for experiment1 colocated to experiment2
-            #        exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label])
-            #        exp_data[nan_instances] = np.NaN
-            #        self.read_instance.data_in_memory_filtered[
-            #            '{}_colocatedto_{}'.format(exp_label, exp_label_2)] = exp_data
-            #        self.read_instance.datareader.plotting_params['{}_colocatedto_{}'.format(exp_label, exp_label_2)] = {
-            #            'colour': self.read_instance.datareader.plotting_params[exp_label]['colour'],
-            #            'zorder': self.read_instance.datareader.plotting_params[exp_label]['zorder']}
-            #        # create new experiment array for experiment2 colocated to experiment1
-            #        exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[exp_label_2])
-            #        exp_data[nan_instances] = np.NaN
-            #        self.read_instance.data_in_memory_filtered[
-            #            '{}_colocatedto_{}'.format(exp_label_2, exp_label)] = exp_data
-            #        self.read_instance.datareader.plotting_params['{}_colocatedto_{}'.format(exp_label_2, exp_label)] = {
-            #            'colour': self.read_instance.datareader.plotting_params[exp_label_2]['colour'],
-            #            'zorder': self.read_instance.datareader.plotting_params[exp_label_2]['zorder']}
+                exps_all_nan = np.all([exps_all_nan, nan_exp], axis=0)
 
             # create observational data array colocated to be non-NaN whenever
             # there is a valid data in at least 1 experiment
             exps_all_nan = np.any([nan_obs, exps_all_nan], axis=0)
             obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered['observations'])
-            obs_data[exps_all_nan] = np.NaN
+            obs_data[self.speci_index, exps_all_nan] = np.NaN
             self.read_instance.data_in_memory_filtered['observations_colocatedto_experiments'] = obs_data
             self.read_instance.datareader.plotting_params['observations_colocatedto_experiments'] = {
                 'colour': self.read_instance.datareader.plotting_params['observations']['colour'],
@@ -437,7 +412,7 @@ class DataFilter:
                 # calculate data availability fraction per station in observational data array
                 # get absolute data availability number per station in observational data array
                 station_data_availability_number = Stats.calculate_data_avail_number(
-                    self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species])
+                    self.read_instance.data_in_memory_filtered[data_label][self.speci_index,:,:])
 
                 # get indices of stations with > 1 available measurements
                 # save valid station indices with data array
@@ -478,7 +453,7 @@ class DataFilter:
                 # update stats object data and call data availability function
                 station_data_availability_number = \
                     Stats.calculate_data_avail_number(
-                        self.read_instance.data_in_memory_filtered[data_label][self.read_instance.active_species][valid_station_inds, :])
+                        self.read_instance.data_in_memory_filtered[data_label][self.speci_index, valid_station_inds, :])
                 # get indices of stations with > 1 available measurements
                 valid_station_inds = valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[
                     station_data_availability_number > 1]]

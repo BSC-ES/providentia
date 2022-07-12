@@ -56,11 +56,11 @@ def which_qa(instance, return_defaults=False):
     :rtype: list
     """
 
-    if return_defaults or (not hasattr(instance, 'qa')):
-        if instance.species in instance.qa_exceptions:
-            return instance.specific_qa
+    if (return_defaults) or (not hasattr(instance, 'qa')):
+        if instance.species in instance.met_parameters:
+            return sorted(instance.default_qa_met)
         else:
-            return instance.general_qa
+            return sorted(instance.default_qa_standard)
 
     if hasattr(instance, 'qa'):
         # if conf has only 1 QA
@@ -71,10 +71,10 @@ def which_qa(instance, return_defaults=False):
             return []
         # if the QAs are written with their names
         elif isinstance(instance.qa, str):
-            return [instance.standard_QA_name_to_QA_code[q.strip()] for q in instance.qa.split(",")]
+            return sorted([instance.standard_QA_name_to_QA_code[q.strip()] for q in instance.qa.split(",")])
         # list of integer codes
         else:
-            return list(instance.qa)
+            return sorted(list(instance.qa))
 
 
 def which_flags(instance):
@@ -134,12 +134,10 @@ def get_experiments(instance):
         return {}
 
 
-def get_qa_codes(instance):
-    """Retrieve QA codes from GHOST_standards using the QA flags' names.
+def get_default_qa_codes(instance):
+    """Retrieve default QA codes from GHOST_standards using the QA flags' names.
 
-    Specific flags are defined for the following species:
-    ['WND_DIR_10M','WND_SPD_10M','RH_2M','PREC_ACCUM','SNOW_ACCUM',
-    'SNOW_DEPTH','CEILING_HEIGHT','VIS_DIST','CLOUD_CVG','CLOUD_CVG_FRAC']
+    A specific selection of qa are defined for met. parameters
 
     :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
     :type instance: object
@@ -147,20 +145,18 @@ def get_qa_codes(instance):
     :rtype: list
     """
 
-    # get names from json files
-    specific_qa_names = json.load(open(
-        "providentia/conf/default_flags.json"))['specific_qa']
-    general_qa_names = json.load(open(
-        "providentia/conf/default_flags.json"))['general_qa']
-    # get codes
-    specific_qa = [instance.standard_QA_name_to_QA_code[qa_name]
-                   for qa_name in specific_qa_names]
-    general_qa = [instance.standard_QA_name_to_QA_code[qa_name]
-                  for qa_name in general_qa_names]
-    # get difference of flags, needed later for updating default selection
-    qa_diff = list(set(general_qa) - set(specific_qa))
+    # get defaukt names from json files
+    standard_qa_names = json.load(open(
+        "providentia/conf/default_qa.json"))['standard']
+    met_qa_names = json.load(open(
+        "providentia/conf/default_qa.json"))['met']
+    # get qa codes
+    standard_qa = [instance.standard_QA_name_to_QA_code[qa_name]
+                   for qa_name in standard_qa_names]
+    met_qa = [instance.standard_QA_name_to_QA_code[qa_name]
+              for qa_name in met_qa_names]
 
-    return specific_qa, general_qa, qa_diff
+    return standard_qa, met_qa
 
 
 def exceedance_lim(species):
@@ -352,10 +348,6 @@ def update_metadata_fields(instance):
     for meta_var in instance.metadata_vars_to_read:
 
         meta_var_field = instance.datareader.metadata_in_memory[meta_var]
-        if instance.reading_nonghost and meta_var == 'latitude':
-            meta_var_field = instance.datareader.nonghost_metadata[meta_var]
-        if instance.reading_nonghost and meta_var == 'longitude':
-            meta_var_field = instance.datareader.nonghost_metadata[meta_var]
 
         # get metadata variable type/data type
         metadata_type = instance.standard_metadata[meta_var]['metadata_type']
@@ -551,7 +543,6 @@ def check_for_ghost(network_name):
         return True
     else:
         return False
-
 
 def get_data_label(temporal_colocation, data_label):
     """Get appropriate data label for plotting"""
