@@ -2,11 +2,13 @@
 
 import configparser
 import os
+import sys
 import re
 import subprocess
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 def parse_path(dir, f):
     # print "Opening data file", f
@@ -35,11 +37,12 @@ class ProvConfiguration(object):
                        "['AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN','CHILE_SINCA',"
                        "'EANET','EBAS','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX',"
                        "'MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA'," 
-                       "'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG']")
-        self.selected_species = kwargs.get('species', '')
-        self.selected_network = kwargs.get('network', '')
-        self.selected_matrix = kwargs.get('matrix', '')
-        self.selected_resolution = kwargs.get('resolution', '')
+                       "'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG',"
+                       "'PORT_BARCELONA']")
+        self.species = kwargs.get('species', '')
+        self.network = kwargs.get('network', '')
+        self.matrix = kwargs.get('matrix', '')
+        self.resolution = kwargs.get('resolution', '')
         self.start_date = kwargs.get('start_date', '')
         self.end_date = kwargs.get('end_date', '')
 
@@ -63,7 +66,7 @@ class ProvConfiguration(object):
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
             # internet connection)
 
-            if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3') or (MACHINE == 'nord3v2'):
+            if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3v2'):
                 value = '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all machines except CTE-POWER/MN4, pull from internet
 
@@ -82,7 +85,7 @@ class ProvConfiguration(object):
             # set observational root data directory if left undefined
             if value == '':
                 # running on CTE-POWER/MN4/N3?
-                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3') or (MACHINE == 'nord3v2'):
+                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3v2'):
                     value = '/gpfs/projects/bsc32/AC_cache/obs/ghost'
                 else:
                     # running on workstation?
@@ -94,7 +97,7 @@ class ProvConfiguration(object):
 
             # set observational root data directory if left undefined
             if value == '':
-                if (MACHINE == 'power') or (MACHINE == 'nord3') or (MACHINE == 'nord3v2'):
+                if (MACHINE == 'power') or (MACHINE == 'nord3v2'):
                     value = '/esarchive/obs'
                 elif MACHINE == 'mn4':
                     value = None
@@ -107,84 +110,173 @@ class ProvConfiguration(object):
             # set experiment root data directory if left undefined
             if value == '':
                 # not running on workstation?
-                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3') or (MACHINE == 'nord3v2'):
+                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3v2'):
                     return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
 
                 # running on workstation?
-                value = '/esarchive/recon/ghost_interp_new'
+                value = '/esarchive/recon/prov_interp'
 
         return value
 
 
-def read_conf(section=None, fpath=None):
+def read_conf(fpath=None):
     """Read configuration"""
 
-    config = configparser.RawConfigParser()
-    config.read(fpath)
-    #if no section defined, but just 1 section in file then set that as section   
-    if (section is None) and (len(config.sections()) == 1):   
-        section = config.sections()[0]
-    #if section is undefined then cannot read
-    if section is None:
-        print('*** WARNING!!! CANNOT LOAD CONFIGURATION FILE AS NO SECTION DEFINED.')
-        return None
+    dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
 
-    #convert numeric information appropriate types
     res = {}
-    for k, val in config.items(section):
-        try:
-            res[k] = eval(val)
-        except:
-            res[k] = val
-    return res
+    res_sub = {}
 
+    if fpath == dconf_path:
+        config = configparser.RawConfigParser(empty_lines_in_values=False)
+        config.read(fpath) 
 
-def read_offline_conf(fpath=None):
-    """Read configuration files when running Providentia
-    offline. When running offline, having a 'DEFAULT' section
-    is mandatory. The 'DEFAULT' section contains options that
-    are applied across all remaining sections."""
+        for k, val in config.items('default'):
+            try:
+                res_sub[k] = eval(val)
+            except:
+                res_sub[k] = val
 
-    config = configparser.RawConfigParser()
-    config.read(fpath)
+        res['default'] = res_sub
+        all_sections_modified, parent_sections, subsections_modified, filenames = None, None, None, None
+        
+    else:
+        config = {}
+        all_sections = []
+        all_sections_modified = []
+        repeated_subsections = []
+        repeated_subsections_modified = {}
+        subsections = []
+        subsections_modified = []
+        parent_sections = []
+        filenames = []
 
-    # check if Default section has options
-    if not config.defaults():
-        return None
+        # get section names (e.g. [SECTIONA], [[Spain]]) and modified names (e.g. SECTIONA, SECTIONA-Spain)
+        with open(fpath) as file:
+            for line in file:
+                if '[' in line and ']' in line and '[[' not in line and ']]' not in line:
+                    section = line.strip()
+                    section_modified = par_section = section.split('[')[1].split(']')[0]
+                    if section_modified not in all_sections_modified:
+                        parent_sections.append(section_modified)
+                        all_sections_modified.append(section_modified)
+                    else:
+                        print('Error: It is not possible to have two sections with the same name.')
+                        sys.exit()
+                elif '[[' in line and ']]' in line:
+                    subsection = line.strip()
+                    subsection_modified = par_section + '|' + line.split('[[')[1].split(']]')[0]
+                    subsections.append(subsection)
+                    subsections_modified.append(subsection_modified)
+                    all_sections_modified.append(subsection_modified)
 
-    #convert numeric information to appropriate types
-    defaults = {}
-    for k, val in config.items(config.default_section):
-        try:
-            defaults[k] = eval(val)
-        except:
-            defaults[k] = val
+                if '[' in line and ']' in line:
+                    all_sections.append(line.strip())
+        
+        # get repeated elements
+        repetition_counts = {section:subsections.count(section) for section in subsections}
+        for section, counts in repetition_counts.items():
+            if counts > 1:
+                repeated_subsections.append(section)
+                repeated_subsections_modified[section] = [x for x in all_sections_modified 
+                                                          if section.split('[[')[1].split(']]')[0] in x]
 
-    # store remaining sections into dict
-    res = {}
-    for section in config.sections():
-        res[section] = read_conf(section, fpath)
-    return defaults, res
+        # get attributes for each section and store in dict
+        for (i, section), section_modified in zip(enumerate(all_sections), all_sections_modified):
+            
+            repetition = 0
+            copy = False
+            config[section_modified] = {}
+            
+            with open(fpath) as file:
+                for line in file:
+                    if section_modified != all_sections_modified[-1]:
+                        if line.strip() == all_sections[i]:
+                            if line.strip() in repeated_subsections:
+                                position = repeated_subsections_modified[section].index(section_modified)
+                                if position == repetition:
+                                    copy = True
+                                else:
+                                    copy = False
+                                repetition += 1
+                            else:
+                                copy = True
+                            continue
+                        elif line.strip() == all_sections[i+1]:
+                            copy = False
+                            continue
+                    else:
+                        if line.strip() == all_sections[-1]:
+                            if line.strip() in repeated_subsections:
+                                position = repeated_subsections_modified[section].index(section_modified)
+                                if position == repetition:
+                                    copy = True
+                                else:
+                                    copy = False
+                                repetition += 1
+                            else:
+                                copy = True
+                            continue
+        
+                    if copy:
+                        if line.strip() != '':
+                            key = line.split('=')[0].strip()
+                            value = line.split('=')[1].strip()
+                            config[section_modified][key] = value
 
+        # regenerate sections (e.g. add SECTIONA values to SECTIONA-Spain)
+        par_section = all_sections_modified[0]
+        for section_modified in all_sections_modified:
 
-def write_conf(section, fpath, opts):
+            # get parent section
+            if '|' in section_modified:
+                is_subsection = True
+            else:
+                is_subsection = False
+                par_section = section_modified
+
+            # store key-values pairs
+            for k, val in config[section_modified].items():
+                if is_subsection:
+                    # store pairs from parent section
+                    for par_k, par_val in config[par_section].items():
+                        try:
+                            res_sub[par_k] = eval(par_val)
+                        except:
+                            res_sub[par_k] = par_val
+                else:
+                    # store filename
+                    if k == 'filename':
+                        filenames.append(val)
+                        
+                # store pairs from current section
+                try:
+                    res_sub[k] = eval(val)
+                except:
+                    res_sub[k] = val
+
+            # store pairs into res variable
+            res[section_modified] = res_sub
+
+            # reset res variable
+            res_sub = {}
+
+    return res, all_sections_modified, parent_sections, subsections_modified, filenames
+
+          
+def write_conf(section, subsection, fpath, opts):
     """Write configurations on file. """
 
     config = configparser.RawConfigParser()
 
-    # check if file exists
-    if os.path.exists(fpath):
-        config.read(fpath)
-
-    # check if section exists
-    if not config.has_section(section):
-        config.add_section(section)
-
     # update configuration
-    for item in opts:
-        val = opts[item]
-        config.set(section, item, val)
-
+    for section, section_name in zip(['section', 'subsection'], [section, subsection]):
+        if opts[section]:
+            config.add_section(section_name)
+            for item in opts[section]:
+                val = opts[section][item]
+                config.set(section_name, item, val)
+            
     # write configuration
     with open(fpath, 'w') as configfile:
         config.write(configfile)
@@ -193,17 +285,33 @@ def write_conf(section, fpath, opts):
 def split_options(conf_string, separator="||"):
     """For the options in the configuration that define the keep and remove
     options. Returns the values in two lists, the keeps and removes"""
+    
     keeps, removes = [], []
-    if "keep:" in conf_string:
-        keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)
-        keeps = conf_string[keep_start+5:keep_end]
-        keeps = keeps.split(",")
-        keeps = [k.strip() for k in keeps]
 
-    if "remove:" in conf_string:
-        remove_start = conf_string.find("remove:")
-        removes = conf_string[remove_start+7:-1]
-        removes = removes.split(",")
-        removes = [r.strip() for r in removes]
-
+    if separator not in conf_string:
+        if ("keep:" in conf_string) and ("remove:" not in conf_string):
+            keep_start = conf_string.find("keep:")
+            keeps = conf_string[keep_start+5:]
+            keeps = keeps.split(",")
+            keeps = [k.strip() for k in keeps]
+        elif ("keep:" not in conf_string) and ("remove:" in conf_string):
+            remove_start = conf_string.find("remove:")
+            removes = conf_string[remove_start+7:]
+            removes = removes.split(",")
+            removes = [r.strip() for r in removes]
+        elif ("keep:" in conf_string) and ("remove:" in conf_string):
+            print('Warning!!!')
+            print('In order to define the keep and remove options, these must be separated by ||.')
+    else:
+        if "keep:" in conf_string:
+            keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)
+            keeps = conf_string[keep_start+5:keep_end]
+            keeps = keeps.split(",")
+            keeps = [k.strip() for k in keeps]
+        if "remove:" in conf_string:
+            remove_start = conf_string.find("remove:")
+            removes = conf_string[remove_start+7:]
+            removes = removes.split(",")
+            removes = [r.strip() for r in removes]
+    
     return keeps, removes

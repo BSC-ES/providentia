@@ -69,7 +69,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, station_index = False):
 
         # if data array has no valid data for selected stations, do not create a pandas dataframe
         # data array has valid data and is not all nan?
-        if not np.isnan(data_array).all():
+        if data_array.size and not np.isnan(data_array).all():
 
             # add nested dictionary for data array name to selection station data dictionary
             canvas_instance.selected_station_data[data_label] = {}
@@ -473,18 +473,17 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     set_label = False
     #1. check configuration file
     if 'cb_label' in plot_characteristics:
-        if plot_characteristics['cb_label'] != '':
-            z_label = plot_characteristics['cb_label']
+        if plot_characteristics['cb_label']['xlabel'] != '':
             set_label = True
     #2. get label specific for z statistic
     if not set_label:
         if z_statistic_sign == 'absolute':
-            z_label = '{} {}'.format(stats_dict['label'], label_units)
+            plot_characteristics['cb_label']['xlabel'] = '{}{}'.format(stats_dict['label'], label_units)
         else:
             if z_statistic_type == 'basic':
-                z_label = '{} bias {}'.format(stats_dict['label'], label_units)
+                plot_characteristics['cb_label']['xlabel'] = '{}bias{}'.format(stats_dict['label'], label_units)
             else:
-                z_label = '{} {}'.format(stats_dict['label'], label_units)
+                plot_characteristics['cb_label']['xlabel'] = '{}{}'.format(stats_dict['label'], label_units)
 
     # set cmap for z statistic
     # first check if have defined cmap (in this order: 1. configuration file 2. specific for z statistic)
@@ -553,7 +552,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         z_vmin = -limit_stat
         z_vmax = limit_stat
 
-    return z_vmin, z_vmax, z_label, z_colourmap
+    return z_vmin, z_vmax, z_colourmap
 
 def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics):
     """Function that generates colourbar.
@@ -574,8 +573,8 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics):
     plotted_min, plotted_max = get_axes_minmax(axs)
 
     # get colourbar limits/label
-    z_vmin, z_vmax, z_label, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics)
-
+    z_vmin, z_vmax, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics)
+    
     # generate colourbar tick array
     tick_array = np.linspace(z_vmin, z_vmax, plot_characteristics['cb']['n_ticks'], endpoint=True)
 
@@ -599,10 +598,10 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics):
         # set colorbar label
         if 'cb_label' in plot_characteristics:
             if plot_characteristics['cb']['orientation'] == 'horizontal':
-                cb_ax.set_xlabel(z_label, **plot_characteristics['cb_label'])
+                cb_ax.set_xlabel(**plot_characteristics['cb_label'])
             else:
                 cb_ax.yaxis.set_label_position("right")
-                cb_ax.set_ylabel(z_label, **plot_characteristics['cb_label'])
+                cb_ax.set_ylabel(**plot_characteristics['cb_label'])
 
         # set cb tick params
         if 'cb_tick_params' in plot_characteristics:
