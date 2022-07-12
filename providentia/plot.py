@@ -637,6 +637,7 @@ class Plot:
                 violin_plot = relevant_subplot_axis.violinplot(grouped_data, positions=self.canvas_instance.selected_station_data[data_label][relevant_temporal_resolution]['valid_xticks'], **plot_characteristics['plot_violin'])
 
                 #plot p50
+
                 xticks = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
                 medians = self.canvas_instance.selected_station_data[data_label][relevant_temporal_resolution]['p50']
                 median_zorder = self.read_instance.datareader.plotting_params[data_label]['zorder']+len(list(self.read_instance.datareader.plotting_params.keys()))
@@ -915,7 +916,9 @@ class Plot:
             # get stats
             stats_annotate = []
             for zstat in stats:
-                if zstat in list(self.canvas_instance.selected_station_data[data_label]['all']):
+                #calculate stat
+                
+                #if zstat in list(self.canvas_instance.selected_station_data[data_label]['all']):
                     stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[data_label]['all'][zstat][0], plot_characteristics['annotate_text']['round_decimal_places'])))
 
             # show number of stations if defined
@@ -942,7 +945,7 @@ class Plot:
         bbox.patch.set(**plot_characteristics['annotate_bbox']) 
         relevant_axis.add_artist(bbox)
 
-    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, xlim=None, ylim=None, relim=False):
+    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, xlim=None, ylim=None, relim=False, bias_centre=False):
         """Harmonises xy limits across paradigm of plot type, unless axis limits have been defined
         
         :param relevant_axs: relevant axes
@@ -953,12 +956,14 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
-        :param plot_characteristics: xlim  
-        :type plot_characteristics: list
-        :param plot_characteristics: ylim  
-        :type plot_characteristics: list
-        :param plot_characteristics: relim  
-        :type plot_characteristics: boolean
+        :param xlim: xlimits to set
+        :type xlim: list
+        :param ylim: ylimits to set
+        :type ylim: list
+        :param relim: turn relimiting of axes on or off (when updating plotted data on axis)
+        :type relim: boolean
+        :param bias_centre: centre bias plots at 0 on the y axis
+        :type bias_centre: boolean   
         """
 
         # initialise arrays to save lower and upper limits in all axes
@@ -998,18 +1003,18 @@ class Plot:
 
             #get ylims
             if not ylim and ('ylim' not in plot_characteristics):
-                if 'bias' in plot_options:
-                    # if there is bias center plots y limits around 0
+                ylim_min = np.min(all_ylim_lower) 
+                ylim_max = np.max(all_ylim_upper)
+
+                # if have bias_centre option, centre around zero
+                if ('bias' in plot_options) & (bias_centre):                    
                     if np.abs(np.max(all_ylim_upper)) >= np.abs(np.min(all_ylim_lower)):
                         ylim_min = -np.abs(np.max(all_ylim_upper))
                         ylim_max = np.abs(np.max(all_ylim_upper))
                     elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
                         ylim_min = -np.abs(np.min(all_ylim_lower))
                         ylim_max = np.abs(np.min(all_ylim_lower))
-                else:
-                    ylim_min = np.min(all_ylim_lower) 
-                    ylim_max = np.max(all_ylim_upper)
-            
+
             #set xlim
             if xlim:
                 ax.set_xlim(xlim)
@@ -1037,16 +1042,20 @@ class Plot:
         if title == '':
             return
 
-        #get appropriate axis for plotting label for plots with multiple sub-axes (first available)
+        #get appropriate axis for plotting label for plots with multiple sub-axes (hour axis)
+        axs_to_set_title = []
         if type(relevant_axis) == dict:
-            for sub_ax in relevant_axis.values():
-                relevant_axis = sub_ax
-                break
+            for relevant_temporal_resolution, sub_ax in relevant_axis.items():
+                if relevant_temporal_resolution in ['hour']:
+                    axs_to_set_title.append(sub_ax)
+        else:
+            axs_to_set_title.append(relevant_axis)
 
+        #set title for appropriate axes
         axis_title_characteristics = copy.deepcopy(plot_characteristics['axis_title'])
         axis_title_characteristics['label'] = title
-
-        relevant_axis.set_title(**axis_title_characteristics)
+        for relevant_axis in axs_to_set_title:
+            relevant_axis.set_title(**axis_title_characteristics)
 
     def set_axis_label(self, relevant_axis, label_ax, label, plot_characteristics):
         """Set label of plot axis
@@ -1065,18 +1074,22 @@ class Plot:
         if label == '':
             return
 
-        #get appropriate axis for plotting label for plots with multiple sub-axes
+        #get appropriate axis for plotting label for plots with multiple sub-axes (hour and month axes)
+        axs_to_set_label = []
         if type(relevant_axis) == dict:
-            for sub_ax in relevant_axis.values():
-                relevant_axis = sub_ax
-                break
+            for relevant_temporal_resolution, sub_ax in relevant_axis.items():
+                if relevant_temporal_resolution in ['hour','month']:
+                    axs_to_set_label.append(sub_ax)
+        else:
+            axs_to_set_label.append(relevant_axis)
 
-        #set label
-        if label_ax == 'x':
-            axis_label_characteristics = copy.deepcopy(plot_characteristics['xlabel'])
-            axis_label_characteristics['xlabel'] = label
-            relevant_axis.set_xlabel(**axis_label_characteristics) 
-        elif label_ax == 'y':
-            axis_label_characteristics = copy.deepcopy(plot_characteristics['ylabel'])
-            axis_label_characteristics['ylabel'] = label
-            relevant_axis.set_ylabel(**axis_label_characteristics) 
+        #set label for appropriate axes
+        for relevant_axis in axs_to_set_label:
+            if label_ax == 'x':
+                axis_label_characteristics = copy.deepcopy(plot_characteristics['xlabel'])
+                axis_label_characteristics['xlabel'] = label
+                relevant_axis.set_xlabel(**axis_label_characteristics) 
+            elif label_ax == 'y':
+                axis_label_characteristics = copy.deepcopy(plot_characteristics['ylabel'])
+                axis_label_characteristics['ylabel'] = label
+                relevant_axis.set_ylabel(**axis_label_characteristics) 

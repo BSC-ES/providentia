@@ -357,8 +357,6 @@ class MPLCanvas(FigureCanvas):
         # reset alphas and marker sizes of all plotted stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
             # reset alphas
-            #c_vals = self.plot_axes['map'].collections[-1].get_array()
-            #rgba_tuples = self.plot_axes['map'].collections[-1].to_rgba(c_vals)
             rgba_tuples = self.plot_axes['map'].collections[-1].get_facecolor()
             rgba_tuples[:, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
             self.plot_axes['map'].collections[-1].set_facecolor(rgba_tuples)
@@ -446,7 +444,7 @@ class MPLCanvas(FigureCanvas):
 
                 #add title for plot
                 if plot_type in ['periodic']:
-                    ax_title = '{} {}'.format(plot_type, zstat)
+                    ax_title = '{}-{}'.format(plot_type, zstat)
                 else:
                     ax_title = plot_type
                 self.plot.set_axis_title(ax, ax_title, self.plot_characteristics[plot_type])
@@ -666,7 +664,7 @@ class MPLCanvas(FigureCanvas):
                         self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ax_label, self.plot_characteristics['periodic'])
 
                         #update axis title
-                        self.plot.set_axis_title(self.plot_axes['periodic'], 'periodic {}'.format(zstat), self.plot_characteristics['periodic'])
+                        self.plot.set_axis_title(self.plot_axes['periodic'], 'periodic-{}'.format(zstat), self.plot_characteristics['periodic'])
 
                         # if experiment bias type == 'Aggregated' --> update plotted experiment bias plots
                         if selected_experiment_bias_type == 'Aggregated':
