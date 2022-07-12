@@ -55,5 +55,12 @@
                 "pm10du": []
             }
         }
+    },
+    "*PORT_BARCELONA": {
+        "hourly": {
+            "port-barcelona": {
+                "sconcno2": []
+            }
+        }
     }
 }
