@@ -18,7 +18,6 @@ from .statistics import to_pandas_dataframe
 from .statistics import generate_colourbar
 from .statistics import get_z_statistic_info
 from .configuration import ProvConfiguration
-from .configuration import read_offline_conf
 from .init_standards import InitStandards
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -145,22 +144,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         #start making PDF
         self.start_pdf()
-
-    def load_conf(self, fpath=None):
-        """Load existing configurations from file
-        for running offline Providentia."""
-
-        if fpath is None:
-            print("No configuration file found")
-            sys.exit(1)
-
-        # if DEFAULT is not present, then return
-        if not os.path.isfile(fpath):
-            print(("Error %s" % fpath))
-            return
-
-        self.defaults, self.sub_opts = read_offline_conf(fpath)
-        vars(self).update({(k.replace('selected_','active_'), self.parse_parameter(k, val)) if 'selected_' in k else ('active_{}'.format(k), self.parse_parameter(k, val)) if k in ['start_date','end_date'] else (k, self.parse_parameter(k, val)) for k, val in self.defaults.items()})
 
     def start_pdf(self):
 

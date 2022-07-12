@@ -28,7 +28,11 @@
 
 "debug":["map-p50","timeseries_trend","periodic-r2","periodic-violin","distribution","scatter_regression","heatmap-p5_bias_annotate","table-p5"],
 
-"dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "heatmap-r", "heatmap-MB", "heatmap-RMSE", "heatmap-MFB", "scatter", "scatter_logx_logy", "timeseries"]
+"dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "heatmap-r", "heatmap-MB", "heatmap-RMSE", "heatmap-MFB", "scatter", "scatter_logx_logy", "timeseries"],
 
+"operational": ["timeseries_annotate", "periodic-violin_annotate", "scatter",
+                "map-MB_annotate", "map-RMSE_annotate", "map-r_annotate", "map-r2_annotate",
+                "heatmap-MB, heatmap-RMSE, heatmap-r, heatmap-r2"
+                ]
 
 }
