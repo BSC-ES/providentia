@@ -238,7 +238,7 @@ class PopUpWindow(QtWidgets.QWidget):
         #setup event to get selected checkbox indices when closing window
         quit_event = QtWidgets.QAction("Quit", self)
         quit_event.triggered.connect(self.closeEvent)
-
+        
     def create_grid(self, menu_types):
         """create grid for each needed checkbox/rangebox/navigation button menu types, that wrap vertically
            and concatenate them horizontally together
@@ -250,7 +250,7 @@ class PopUpWindow(QtWidgets.QWidget):
         horizontal_parent.setSpacing(25)
         #align grids to centre and top
         horizontal_parent.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
-
+        
         #order appearance of menu types grids in menu (from left to right)
         menu_type_order_dict = {'navigation_buttons':1, 'rangeboxes':2, 'checkboxes':3}
         menu_types = sorted(menu_types, key=menu_type_order_dict.__getitem__)
@@ -283,24 +283,44 @@ class PopUpWindow(QtWidgets.QWidget):
                 row_format_dict = formatting_dict['checkbox_popup']
                 grid_vertical_spacing = 0
                 if ('keep_selected' in current_menu_keys) & ('remove_selected' in current_menu_keys):
-                    self.page_memory['checkboxes'] = {'keep_selected':[], 'remove_selected':[], 'n_column_consumed':3, 'ordered_elements':['keep_selected','remove_selected'], 'widget':QtWidgets.QCheckBox}
+                    self.page_memory['checkboxes'] = {'keep_selected':[], 'remove_selected':[], 'n_column_consumed':3, 
+                                                      'ordered_elements':['keep_selected', 'remove_selected'], 
+                                                      'widget':[QtWidgets.QCheckBox,
+                                                                QtWidgets.QCheckBox]}
                 elif 'keep_selected' in current_menu_keys:
-                    self.page_memory['checkboxes'] = {'keep_selected':[], 'n_column_consumed':2, 'ordered_elements':['keep_selected'], 'widget':QtWidgets.QCheckBox}
+                    self.page_memory['checkboxes'] = {'keep_selected':[], 'n_column_consumed':2, 
+                                                      'ordered_elements':['keep_selected'], 
+                                                      'widget':[QtWidgets.QCheckBox]}
                 elif 'remove_selected' in current_menu_keys:
-                    self.page_memory['checkboxes'] = {'remove_selected':[], 'n_column_consumed':2, 'ordered_elements':['remove_selected'], 'widget':QtWidgets.QCheckBox}
+                    self.page_memory['checkboxes'] = {'remove_selected':[], 'n_column_consumed':2, 
+                                                      'ordered_elements':['remove_selected'], 
+                                                      'widget':[QtWidgets.QCheckBox]}
             elif menu_type == 'rangeboxes':
                 row_format_dict = formatting_dict['rangebox_popup']
                 grid_vertical_spacing = 3
                 if ('current_lower' in current_menu_keys) & ('current_upper' in current_menu_keys):
-                    self.page_memory['rangeboxes'] = {'current_lower':[], 'current_upper':[], 'n_column_consumed':3, 'ordered_elements':['current_lower','current_upper'], 'widget':QtWidgets.QLineEdit}
+                    self.page_memory['rangeboxes'] = {'current_lower':[], 'current_upper':[], 'apply_selected': [],
+                                                      'n_column_consumed':4, 
+                                                      'ordered_elements':['current_lower','current_upper', 'apply_selected'], 
+                                                      'widget':[QtWidgets.QLineEdit, 
+                                                                QtWidgets.QLineEdit, 
+                                                                QtWidgets.QCheckBox]}
                 elif 'current_lower' in current_menu_keys:
-                    self.page_memory['rangeboxes'] = {'current_lower':[], 'n_column_consumed':2, 'ordered_elements':['current_lower'], 'widget':QtWidgets.QLineEdit}
+                    self.page_memory['rangeboxes'] = {'current_lower':[], 'apply_selected': [], 'n_column_consumed':3, 
+                                                      'ordered_elements':['current_lower', 'apply_selected'], 
+                                                      'widget':[QtWidgets.QLineEdit,
+                                                                QtWidgets.QCheckBox]}
                 elif 'current_upper' in current_menu_keys:
-                    self.page_memory['rangeboxes'] = {'current_upper':[], 'n_column_consumed':2, 'ordered_elements':['current_upper'], 'widget':QtWidgets.QLineEdit}
+                    self.page_memory['rangeboxes'] = {'current_upper':[], 'apply_selected': [], 'n_column_consumed':3, 
+                                                      'ordered_elements':['current_upper', 'apply_selected'], 
+                                                      'widget':[QtWidgets.QLineEdit,
+                                                                QtWidgets.QCheckBox]}
             elif menu_type == 'navigation_buttons':
                 row_format_dict = formatting_dict['navigation_button_popup']
                 grid_vertical_spacing = 3
-                self.page_memory['navigation_buttons'] = {'buttons':[], 'n_column_consumed':1, 'ordered_elements':['buttons'], 'widget':QtWidgets.QPushButton}
+                self.page_memory['navigation_buttons'] = {'buttons':[], 'n_column_consumed':1, 
+                                                          'ordered_elements':['buttons'], 
+                                                          'widget':[QtWidgets.QPushButton]}
 
             #if have more than 1 column per label, need column headers
             if len(self.page_memory[menu_type]['ordered_elements']) > 1:
@@ -343,7 +363,9 @@ class PopUpWindow(QtWidgets.QWidget):
                     grid.addWidget(rangebox_label, start_row_n+row_n, column_n, QtCore.Qt.AlignLeft)
 
                 #create all elements in column, per row
-                for element_ii, element in enumerate(self.page_memory[menu_type]['ordered_elements']):
+                for (element_ii, element), widget in zip(enumerate(self.page_memory[menu_type]['ordered_elements']),
+                                                         self.page_memory[menu_type]['widget']):
+
                     #if menu type == 'rangeboxes' then add 1 to element ii, because placed a label in first column
                     if (menu_type == 'checkboxes') or (menu_type == 'rangeboxes'):
                         element_label = ''
@@ -352,7 +374,7 @@ class PopUpWindow(QtWidgets.QWidget):
                         element_label = label
 
                     #append widget to page memory dictionary
-                    self.page_memory[menu_type][element].append(set_formatting(self.page_memory[menu_type]['widget'](element_label), row_format_dict))
+                    self.page_memory[menu_type][element].append(set_formatting(widget(element_label), row_format_dict))
 
                     #put text label to left of keep checkbox/rangebox (rather than to right)
                     if menu_type in ['checkboxes','rangeboxes']:
@@ -367,8 +389,14 @@ class PopUpWindow(QtWidgets.QWidget):
                                 self.page_memory[menu_type][element][label_ii].setCheckState(QtCore.Qt.Checked)
                         #set rangeboxes to previous set value (if any)
                         elif menu_type == 'rangeboxes':
-                            self.page_memory[menu_type][element][label_ii].setText(menu_current_type[element][label_ii])
-
+                            if element != 'apply_selected':
+                                self.page_memory[menu_type][element][label_ii].setText(menu_current_type[element][label_ii])
+                                self.page_memory[menu_type][element][label_ii].setFixedWidth(75)
+                            else:
+                                var_to_check = copy.deepcopy(label)
+                                if var_to_check in menu_current_type[element]:
+                                    self.page_memory[menu_type][element][label_ii].setCheckState(QtCore.Qt.Checked)
+                            
                     #if menu type == navigation_buttons, add connectivity to buttons, and also add tooltip
                     elif menu_type == 'navigation_buttons':
                         if len(menu_current_type['tooltips']) > 0:
@@ -391,8 +419,9 @@ class PopUpWindow(QtWidgets.QWidget):
                         grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='K'), formatting_dict['column_header_label_popup']), 0, column_number+1, QtCore.Qt.AlignCenter)
                         grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='R'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)
                     elif menu_type == 'rangeboxes':
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Lower Bound'), formatting_dict['column_header_label_popup']), 0, column_number+1, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Upper Bound'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Min'), formatting_dict['column_header_label_popup']), 0, column_number+1, QtCore.Qt.AlignCenter)
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Max'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='A'), formatting_dict['column_header_label_popup']), 0, column_number+3, QtCore.Qt.AlignCenter)
 
             #add menu type grid to horizontal layout
             horizontal_parent.addLayout(grid)
@@ -470,7 +499,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
-
+    
     def closeEvent(self, event):
 
         """function to get status of current page upon closing of pop-up window"""
@@ -480,7 +509,6 @@ class PopUpWindow(QtWidgets.QWidget):
         #iterate through menu types
         for menu_type in list(self.page_memory.keys()):
             for element in self.page_memory[menu_type]['ordered_elements']:
-                #if menu type == 'checkboxes', get variable names of all checkboxes ticked
                 if menu_type == 'checkboxes':
                     selected_vars = []
                     for checkbox_ii, checkbox in enumerate(self.page_memory[menu_type][element]):
@@ -494,19 +522,30 @@ class PopUpWindow(QtWidgets.QWidget):
                     if element == 'keep_selected':
                         self.menu_current[menu_type]['previous_keep_selected'] = copy.deepcopy(self.menu_current[menu_type]['keep_selected'])
                     elif element == 'remove_selected':
-                        self.menu_current[menu_type]['previous_keep_selected'] = copy.deepcopy(self.menu_current[menu_type]['remove_selected'])
+                        self.menu_current[menu_type]['previous_remove_selected'] = copy.deepcopy(self.menu_current[menu_type]['remove_selected'])
                     #update selected variable
                     self.menu_current[menu_type][element] = selected_vars
-                #if menu type == 'rangeboxes', get current values of all rangeboxes
+                
                 if menu_type == 'rangeboxes':
                     set_vals = []
-                    for rangebox in self.page_memory[menu_type][element]:
-                        set_vals.append(rangebox.text())
+                    selected_vars = []
+                    for rangebox_ii, rangebox in enumerate(self.page_memory[menu_type][element]):
+                        if element != 'apply_selected':
+                            set_vals.append(rangebox.text())
+                        else:
+                            if rangebox.checkState() == QtCore.Qt.Checked:
+                                selected_vars.append(self.menu_current[menu_type]['labels'][rangebox_ii])
+                               
                     #update previous set variable
                     if element == 'current_lower':
                         self.menu_current[menu_type]['previous_lower'] = copy.deepcopy(self.menu_current[menu_type]['current_lower'])
                     elif element == 'current_upper':
                         self.menu_current[menu_type]['previous_upper'] = copy.deepcopy(self.menu_current[menu_type]['current_upper'])
+                    elif element == 'apply_selected':
+                        self.menu_current[menu_type]['previous_apply'] = copy.deepcopy(self.menu_current[menu_type]['apply_selected'])
+                    
                     #update set value
-                    self.menu_current[menu_type][element] = set_vals
-
+                    if element != 'apply_selected':
+                        self.menu_current[menu_type][element] = set_vals
+                    else:
+                        self.menu_current[menu_type][element] = selected_vars

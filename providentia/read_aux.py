@@ -103,11 +103,13 @@ def read_netcdf_data(tuple_arguments):
                 file_data_shared[data_var_ii,full_array_station_indices[:, np.newaxis],full_array_time_indices[np.newaxis, :]] =\
                     ncdf_root[data_var][current_file_station_indices, valid_file_time_indices]
 
+        print(2)
         # if some qa flags selected then screen
         if shared_memory_vars['qa']:
             # screen out observations which are associated with any of the selected qa flags
             species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['qa']).any(axis=2)] = np.NaN
 
+        print(3)
         # if some data provider flags selected then screen
         if shared_memory_vars['flag']:
             # screen out observations which are associated with any of the selected data provider flags
@@ -117,6 +119,7 @@ def read_netcdf_data(tuple_arguments):
         file_data_shared[data_vars_to_read.index(active_species),full_array_station_indices[:, np.newaxis],full_array_time_indices[np.newaxis, :]] =\
             species_data
 
+        print(4)
         # get file metadata
         file_metadata = np.full((len(file_station_references), 1), np.NaN, dtype=metadata_dtype)
         for meta_var_ii, meta_var in enumerate(metadata_vars_to_read):

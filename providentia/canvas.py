@@ -362,7 +362,9 @@ class MPLCanvas(FigureCanvas):
             self.plot_axes['map'].collections[-1].set_facecolor(rgba_tuples)
             # reset marker sizes
             marker_sizes = np.full(len(self.active_map_valid_station_inds), self.plot_characteristics['map']['marker_unselected']['s'])
-            self.plot_axes['map'].collections[-1].set_sizes(marker_sizes)
+            for collection in self.plot_axes['map'].collections:
+                if isinstance(collection, matplotlib.collections.PathCollection):
+                    collection.set_sizes(marker_sizes)
 
             # if have some selected stations, update map plot with station selection
             # (reducing alpha of non-selected stations, and increasing marker size of selected stations)
@@ -378,8 +380,10 @@ class MPLCanvas(FigureCanvas):
 
                 # increase marker size of selected stations
                 marker_sizes[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['s']
-                self.plot_axes['map'].collections[-1].set_sizes(marker_sizes)
-        
+                for collection in self.plot_axes['map'].collections:
+                    if isinstance(collection, matplotlib.collections.PathCollection):
+                        collection.set_sizes(marker_sizes)
+
         #redraw points
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()

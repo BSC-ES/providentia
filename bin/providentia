@@ -21,7 +21,7 @@ if [[ $? -ne 4 ]]; then
     exit 1
 fi
 
-#bash strict mode: see http://redsymbol.net/articles/unofficial-bash-strict-mode/ for info
+# bash strict mode: see http://redsymbol.net/articles/unofficial-bash-strict-mode/ for info
 set -eo pipefail
 IFS=$'\n\t'
 
@@ -30,7 +30,7 @@ IFS=$'\n\t'
 # optional.
 # See `man getopt'.
 SHORT=uc:J:q:m:
-LONG=usage,cores:,jobname:,queue:,mem:,help::,version::,config::,section::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,obs_root::,nonghost_root::,exp_root::,offline::,available_networks::
+LONG=usage,cores:,jobname:,queue:,mem:,help::,version::,config::,section::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,obs_root::,nonghost_root::,exp_root::,offline::,available_networks::,network::,start_date::,end_date::,species::,matrix::,resolution::
 
 # - Temporarily store output to be able to check for errors.
 # - Activate advanced mode getopt quoting e.g. via "--options".
@@ -40,7 +40,7 @@ LONG=usage,cores:,jobname:,queue:,mem:,help::,version::,config::,section::,confi
 PARSED=$(getopt --options ${SHORT} \
                 --longoptions ${LONG} \
                 --name "$0" \
-                -- "$@")         #Pass all the args to this script to getopt
+                -- "$@")         # pass all the args to this script to getopt
 
 if [[ $? -ne 0 ]]; then
     # e.g. $? == 1
@@ -73,32 +73,30 @@ echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem
 
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
-srun_command="srun -t 02:00:00 -n 1 -c $cores -J $jobname --x11=first"
-bsub_command="bsub -W 2:00 -n 12 -M 3000 -q x11 xterm -T Providentia -e"
+srun_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
 python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $@"
 
-#set QT scale to avoid magnifying issues
+# set QT scale to avoid magnifying issues
 if [ "${BSC_MACHINE}" != "nord3" ]; then
     export QT_AUTO_SCREEN_SCALE_FACTOR=0
 fi
 
-#CTE POWER
+# load modules
+eval "source load_modules.sh"
+
+# CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
     #get allocation of resources on CTE-POWER machine
     eval "${srun_command} ${queue_option} ${memory_option} ${python_command}"
-#Marenostrum4
+# Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     #get allocation of resources on MN4 machine
     eval "${srun_command} ${queue_option} ${python_command}"
-#Nord3
-elif [ "${BSC_MACHINE}" == "nord3" ]; then
-    #get allocation of resources on N3 machine
-    eval "${bsub_command} ${python_command}"
-#Nord3v2
+# Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
     #get allocation of resources on N3v2 machine
     eval "${srun_command} ${queue_option} ${python_command}"
-#Workstations
+# Workstations
 elif [ "${HOST}" == "bsceslogin01" ]; then
     echo "Warning: running in Fat Nodes may make Providentia slower ..."
     eval "${srun_command} ${python_command}"
