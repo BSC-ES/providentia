@@ -77,19 +77,19 @@ class MPLCanvas(FigureCanvas):
 
         #create plot axes on grid
         self.plot_axes = {}
-        self.plot_axes['map'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 0),   rowspan=45, colspan=45), projection=self.plotcrs)
-        self.plot_axes['legend'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 47),  rowspan=8,  colspan=53))
-        self.plot_axes['timeseries'] = self.figure.add_subplot(self.gridspec.new_subplotspec((12, 50), rowspan=36, colspan=50))
+        self.plot_axes['map'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 0), rowspan=44, colspan=45), projection=self.plotcrs)
+        self.plot_axes['legend'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 47), rowspan=8,  colspan=53))
+        self.plot_axes['timeseries'] = self.figure.add_subplot(self.gridspec.new_subplotspec((12, 50), rowspan=35, colspan=50))
         self.plot_axes['periodic-violin'] = {}
-        self.plot_axes['periodic-violin']['hour'] = self.figure.add_subplot(self.gridspec.new_subplotspec((55, 70), rowspan=20, colspan=30))
+        self.plot_axes['periodic-violin']['hour'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=30))
         self.plot_axes['periodic-violin']['dayofweek'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 91), rowspan=20, colspan=9))
         self.plot_axes['periodic-violin']['month'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
         self.plot_axes['periodic'] = {}
-        self.plot_axes['periodic']['hour'] = self.figure.add_subplot(self.gridspec.new_subplotspec((55, 35), rowspan=20, colspan=30))
+        self.plot_axes['periodic']['hour'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 35), rowspan=20, colspan=30))
         self.plot_axes['periodic']['dayofweek'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 56), rowspan=20, colspan=9))
         self.plot_axes['periodic']['month'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 35), rowspan=20, colspan=18))
-        self.plot_axes['metadata'] = self.figure.add_subplot(self.gridspec.new_subplotspec((55, 0),  rowspan=45, colspan=30))
-        self.plot_axes['cb'] = self.figure.add_axes([0.0553, 0.52, 0.35, 0.02])
+        self.plot_axes['metadata'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=30))
+        self.plot_axes['cb'] = self.figure.add_axes([0.0553, 0.53, 0.35, 0.02])
 
         # setup interactive picker/lasso on map
         self.figure.canvas.mpl_connect('pick_event', self.on_click)
@@ -111,8 +111,12 @@ class MPLCanvas(FigureCanvas):
         #Format and then hide all axes
         for plot_type, ax in self.plot_axes.items():
             if type(ax) == dict:
-                for relevant_temporal_resolution_ii, (relevant_temporal_resolution, sub_ax) in enumerate(ax.items()):
-                    self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], relevant_temporal_resolution=relevant_temporal_resolution, relevant_temporal_resolution_ii=relevant_temporal_resolution_ii)
+                for relevant_temporal_resolution, sub_ax in ax.items():
+                    if relevant_temporal_resolution in ['hour','month']:
+                        col_ii = 0
+                    else:
+                        col_ii = 1
+                    self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], relevant_temporal_resolution=relevant_temporal_resolution, col_ii=col_ii)
                     self.remove_axis_elements(sub_ax, plot_type)
             else:
                 if plot_type != 'cb':
@@ -154,7 +158,7 @@ class MPLCanvas(FigureCanvas):
         self.update_legend()
 
         # draw changes
-        self.draw()
+        self.figure.canvas.draw()
 
     def reset_ax_navigation_toolbar_stack(self, ax):
         """Function which resets the navigation toolbar stack
@@ -180,8 +184,9 @@ class MPLCanvas(FigureCanvas):
 
     def handle_data_filter_update(self):
         """Function which handles updates data filtering by
-        selected lower/upper limit bounds, selected measurement
-        methods and selected minimum data availability %"""
+        selected lower/upper limit bounds, selected metadata, period codes, 
+        and selected minimum data availability %
+        """
 
         print('UPDATE DATA FILTER')
 
@@ -207,28 +212,28 @@ class MPLCanvas(FigureCanvas):
     def update_active_map(self):
         """Function that updates plotted map z statistic and updates associated plots"""
 
-        print('UPDATE ACTIVE MAP')
-
         if not self.read_instance.block_MPL_canvas_updates:
+
+            print('UPDATE ACTIVE MAP')
+
             # update plotted map z statistic
             self.update_map_z_statistic()
 
             # if selected stations have changed from previous selected, update associated plots
             if not np.array_equal(self.previous_relative_selected_station_inds,
                                   self.relative_selected_station_inds):
-                print('map')
                 self.update_associated_selected_station_plots()
 
             # draw changes
-            self.draw()
+            self.figure.canvas.draw()
 
     def handle_colocate_update(self):
         """Function that handles the update of the MPL canvas
         with colocated data upon checking of the colocate checkbox"""
 
-        print('COLOCATE UPDATE')
-
         if not self.read_instance.block_MPL_canvas_updates:
+
+            print('COLOCATE UPDATE')
 
             # if only have 1 data array in memory (i.e. observations), no colocation is possible,
             # therefore set colocation_active to be False, and return
@@ -254,11 +259,10 @@ class MPLCanvas(FigureCanvas):
             self.update_map_z_statistic()
 
             # update associated plots with selected stations
-            print('colocate')
             self.update_associated_selected_station_plots()
 
             # draw changes
-            self.draw()
+            self.figure.canvas.draw()
 
     def update_map_z_statistic(self):
         """Function that updates plotted z statistic on map, with colourbar"""
@@ -318,27 +322,20 @@ class MPLCanvas(FigureCanvas):
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            #print('map before',self.plot_axes['map'].artists, self.plot_axes['map'].patches, self.plot_axes['map'].collections, self.plot_axes['map'].lines, self.plot_axes['map'].texts)
             self.plot.make_map(self.plot_axes['map'], z_statistic, self.plot_characteristics['map'])
-            #print('map after',self.plot_axes['map'].artists, self.plot_axes['map'].patches, self.plot_axes['map'].collections, self.plot_axes['map'].lines, self.plot_axes['map'].texts)
-            #print()
 
             # create 2D numpy array of plotted station coordinates
             self.map_points_coordinates = np.vstack((self.read_instance.datareader.station_longitudes[self.active_map_valid_station_inds], self.read_instance.datareader.station_latitudes[self.active_map_valid_station_inds])).T
 
             #generate colourbar
-            #print('cb before',self.plot_axes['cb'].artists, self.plot_axes['cb'].patches, self.plot_axes['cb'].collections, self.plot_axes['cb'].lines, self.plot_axes['cb'].texts)
             generate_colourbar(self.read_instance, [self.plot_axes['map']], [self.plot_axes['cb']], zstat, self.plot_characteristics['map'])
-            #print('cb after',self.plot_axes['cb'].artists, self.plot_axes['cb'].patches, self.plot_axes['cb'].collections, self.plot_axes['cb'].lines, self.plot_axes['cb'].texts)
-            #print()
 
             #activate map/cb axes
             self.activate_axis(self.plot_axes['map'], 'map')
             self.activate_axis(self.plot_axes['cb'], 'cb')
 
-            # call update of map drawing (this is a hack to force map plot object to be updated
-            # correctly --> only done when draw is called)
-            self.draw()
+        #re-draw (needed to update plotted colours before update_map_station_selection)
+        self.figure.canvas.draw()
 
         # update map selection appropriately for z statistic
         self.update_map_station_selection()
@@ -357,24 +354,28 @@ class MPLCanvas(FigureCanvas):
                 len(self.relative_selected_station_inds), len(self.active_map_valid_station_inds))
         self.plot.set_axis_title(self.plot_axes['map'], axis_title_label, self.plot_characteristics['map'])
 
-        # reset alphas of all plotted stations (if have some stations on map)
+        # reset alphas and marker sizes of all plotted stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
+            # reset alphas
+            #c_vals = self.plot_axes['map'].collections[-1].get_array()
+            #rgba_tuples = self.plot_axes['map'].collections[-1].to_rgba(c_vals)
             rgba_tuples = self.plot_axes['map'].collections[-1].get_facecolor()
             rgba_tuples[:, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
+            self.plot_axes['map'].collections[-1].set_facecolor(rgba_tuples)
+            # reset marker sizes
             marker_sizes = np.full(len(self.active_map_valid_station_inds), self.plot_characteristics['map']['marker_unselected']['s'])
             for collection in self.plot_axes['map'].collections:
                 if isinstance(collection, matplotlib.collections.PathCollection):
-                    collection.set_facecolor(rgba_tuples)
-                    # reset marker sizes of all plotted stations
                     collection.set_sizes(marker_sizes)
 
             # if have some selected stations, update map plot with station selection
             # (reducing alpha of non-selected stations, and increasing marker size of selected stations)
             if len(self.relative_selected_station_inds) > 0:
 
-                # decrease alpha of non-selected stations
                 absolute_non_selected_stations = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                                      self.absolute_selected_station_inds))[0]
+                
+                # decrease alpha of non-selected stations
                 if len(absolute_non_selected_stations) > 0:
                     rgba_tuples[absolute_non_selected_stations, -1] = self.plot_characteristics['map']['marker_unselected']['alpha']
                     self.plot_axes['map'].collections[-1].set_facecolor(rgba_tuples)
@@ -384,15 +385,13 @@ class MPLCanvas(FigureCanvas):
                 for collection in self.plot_axes['map'].collections:
                     if isinstance(collection, matplotlib.collections.PathCollection):
                         collection.set_sizes(marker_sizes)
-        
+
         #redraw points
-        print('WHY NOT EN SEGUIDA')
-        renderer = self.figure.canvas.renderer
-        self.plot_axes['map'].draw(renderer)
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
 
     def update_associated_selected_station_plots(self):
         """Function that updates all plots associated with selected stations on map"""
-
 
         print('UPDATE SELECTED STATION PLOTS')
 
@@ -408,13 +407,8 @@ class MPLCanvas(FigureCanvas):
         # if have selected stations on map, then now remake plots
         if len(self.relative_selected_station_inds) > 0:
 
-
-            print('WAIT')
-
             # put selected data for each data array into pandas dataframes
             to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self)
-
-            print('HERE')
 
             #iterate through selected_station_plots
             for plot_type in self.selected_station_plots:
@@ -438,6 +432,9 @@ class MPLCanvas(FigureCanvas):
                     zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
                     # get zstat information 
                     zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
+                    #add bias to plot options if stat is bias
+                    if z_statistic_sign == 'bias':
+                        plot_options.append('bias')      
                     if z_statistic_type == 'basic':
                         if base_zstat not in ['Data %', 'Exceedances']:
                             ax_label = self.read_instance.datareader.measurement_units 
@@ -451,18 +448,18 @@ class MPLCanvas(FigureCanvas):
                     ax_label = self.read_instance.datareader.measurement_units
                 self.plot.set_axis_label(ax, 'y', ax_label, self.plot_characteristics[plot_type])
 
+                #add title for plot
+                if plot_type in ['periodic']:
+                    ax_title = '{} {}'.format(plot_type, zstat)
+                else:
+                    ax_title = plot_type
+                self.plot.set_axis_title(ax, ax_title, self.plot_characteristics[plot_type])
+
                 # iterate through data array names in selected station data dictionary
                 for data_label in list(self.selected_station_data.keys()):
 
                     #get original data label
                     original_data_label = data_label.split('_')[0]
-
-                    #if type(ax) == dict:
-                    #    for sub_ax in ax.values():
-                    #        print('{} before'.format(plot_type), sub_ax.artists, sub_ax.patches, sub_ax.collections, sub_ax.lines, sub_ax.texts)
-                    #else:
-                    #    print('{} before'.format(plot_type), ax.artists, ax.patches, ax.collections, ax.lines, ax.texts)
-
 
                     #call function to update plot
                     if plot_type in ['periodic']:
@@ -477,24 +474,19 @@ class MPLCanvas(FigureCanvas):
                     else:
                         func(ax, data_label, self.plot_characteristics[plot_type], plot_options=plot_options)
 
-                #if type(ax) == dict:
-                #    for sub_ax in ax.values():
-                #        print('{} after'.format(plot_type), sub_ax.artists, sub_ax.patches, sub_ax.collections, sub_ax.lines, sub_ax.texts)
-                #else:
-                #    print('{} after'.format(plot_type), ax.artists, ax.patches, ax.collections, ax.lines, ax.texts)
-                #print()
-
-                # un-hide axes, reset axes limits, and reset navigation toolbar stack
+                # un-hide axes, reset axes limits (harmonise across subplots for perioduc plots), and reset navigation toolbar stack
                 if type(ax) == dict:
+                    if plot_type == 'periodic-violin':
+                        self.plot.harmonise_xy_lims_paradigm(list(ax.values()), plot_type, self.plot_characteristics[plot_type], plot_options, ylim=[self.selected_station_data_min, self.selected_station_data_max])
+                    else:
+                        self.plot.harmonise_xy_lims_paradigm(list(ax.values()), plot_type, self.plot_characteristics[plot_type], plot_options, relim=True)
                     for sub_ax in ax.values():
                         self.activate_axis(sub_ax, plot_type)
-                        sub_ax.relim()
-                        sub_ax.autoscale()
                         self.reset_ax_navigation_toolbar_stack(sub_ax)
                 else:    
-                    self.activate_axis(ax, plot_type)
                     ax.relim()
                     ax.autoscale()
+                    self.activate_axis(ax, plot_type)
                     self.reset_ax_navigation_toolbar_stack(ax)
 
 
@@ -520,20 +512,17 @@ class MPLCanvas(FigureCanvas):
         legend_plot_characteristics = self.plot.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
 
         # plot legend
-        #print('legend before', self.plot_axes['legend'].artists, self.plot_axes['legend'].patches, self.plot_axes['legend'].collections, self.plot_axes['legend'].lines, self.plot_axes['legend'].texts, self.plot_axes['legend'].legend)
         self.plot_axes['legend'].legend(**legend_plot_characteristics['plot'])
-        #print('legend after', self.plot_axes['legend'].artists, self.plot_axes['legend'].patches, self.plot_axes['legend'].collections, self.plot_axes['legend'].lines, self.plot_axes['legend'].texts, self.plot_axes['legend'].legend)
-        #print()
 
         #un-hide legend
         self.activate_axis(self.plot_axes['legend'], 'legend')
 
     def handle_map_z_statistic_update(self):
-        """Define function which handles update of map z statistic"""
-
-        print('UPDATE MAP Z STAT')
+        """Define function which handles update of map z statistic upon interaction with map comboboxes"""
 
         if not self.read_instance.block_config_bar_handling_updates:
+
+            print('MAP Z COMBOBOX UPDATE')
 
             # update map z statistic comboboxes
             # set variable that blocks configuration bar handling updates until all
@@ -595,15 +584,12 @@ class MPLCanvas(FigureCanvas):
                 # update plotted map z statistic
                 self.update_map_z_statistic()
 
-                # draw changes
-                self.draw()
-
     def handle_experiment_bias_update(self):
         """Define function that handles update of plotted experiment bias statistics"""
 
-        print('UPDATE EXP BIAS')
-
         if not self.read_instance.block_config_bar_handling_updates:
+
+            print('UPDATE EXP BIAS')
 
             # if no experiment data loaded, do not update
             if len(self.read_instance.experiment_bias_types) > 0:
@@ -669,6 +655,10 @@ class MPLCanvas(FigureCanvas):
                         zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
                         # get zstat information 
                         zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
+                        #add bias to plot options if stat is bias
+                        plot_options = []
+                        if z_statistic_sign == 'bias':
+                            plot_options.append('bias')  
                         #update ylabel text
                         if z_statistic_type == 'basic':
                             if base_zstat not in ['Data %', 'Exceedances']:
@@ -679,6 +669,9 @@ class MPLCanvas(FigureCanvas):
                             ax_label = expbias_stats[base_zstat]['label']
                         self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ax_label, self.plot_characteristics['periodic'])
 
+                        #update axis title
+                        self.plot.set_axis_title(self.plot_axes['periodic'], 'periodic {}'.format(zstat), self.plot_characteristics['periodic'])
+
                         # if experiment bias type == 'Aggregated' --> update plotted experiment bias plots
                         if selected_experiment_bias_type == 'Aggregated':
 
@@ -688,15 +681,14 @@ class MPLCanvas(FigureCanvas):
                                     continue
                                 self.plot.make_periodic(self.plot_axes['periodic'], data_label, self.plot_characteristics['periodic'], zstat=zstat)
 
-                        # un-hide axes, reset axes limits, and reset navigation toolbar stack
+                        # un-hide axes, harmonise axes limits across subplots, and reset navigation toolbar stack
+                        self.plot.harmonise_xy_lims_paradigm(list(self.plot_axes['periodic'].values()), 'periodic', self.plot_characteristics['periodic'], plot_options, relim=True)
                         for sub_ax in self.plot_axes['periodic'].values():
                             self.activate_axis(sub_ax, 'periodic')
-                            sub_ax.relim()
-                            sub_ax.autoscale()
                             self.reset_ax_navigation_toolbar_stack(sub_ax)
 
                         # draw changes
-                        self.draw()
+                        self.figure.canvas.draw()
 
     def select_all_stations(self):
         """Define function that selects/unselects all plotted stations
@@ -732,11 +724,10 @@ class MPLCanvas(FigureCanvas):
 
             # if selected stations have changed from previous selected, update associated plots
             if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
-                print('all')
                 self.update_associated_selected_station_plots()
 
             # draw changes
-            self.draw()
+            self.figure.canvas.draw()
 
     def select_intersect_stations(self):
         """Define function that selects/unselects intersection of
@@ -792,11 +783,10 @@ class MPLCanvas(FigureCanvas):
 
             # if selected stations have changed from previous selected, update associated plots
             if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
-                print('intersect')
                 self.update_associated_selected_station_plots()
 
             # draw changes
-            self.draw()
+            self.figure.canvas.draw()
 
     # define functions that handle interactive station selection on map
     # the selection methods are individual station selection, or multiple selection with lasso
@@ -850,11 +840,10 @@ class MPLCanvas(FigureCanvas):
 
         # if selected stations have changed from previous selected, update associated plots
         if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
-            print('click')
             self.update_associated_selected_station_plots()
 
         # draw changes
-        self.draw()
+        self.figure.canvas.draw()
 
     def onlassoselect(self, verts):
         """Function that handles multiple
@@ -900,11 +889,10 @@ class MPLCanvas(FigureCanvas):
 
         # if selected stations have changed from previous selected, update associated plots
         if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
-            print('lasso')
             self.update_associated_selected_station_plots()
 
         # draw changes
-        self.draw()
+        self.figure.canvas.draw()
 
     def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
         """Takes the indices of selected stations on the map

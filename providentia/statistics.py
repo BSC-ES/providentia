@@ -42,6 +42,9 @@ def to_pandas_dataframe(read_instance, canvas_instance, station_index = False):
     # create new dictionary to store selection station data by data array
     canvas_instance.selected_station_data = {}
 
+    #get index of active species data
+    speci_index = read_instance.datareader.data_vars_to_read.index(read_instance.active_species)
+
     # iterate through data arrays in data in memory filtered dictionary
     for data_label in read_instance.data_in_memory_filtered.keys():
 
@@ -56,7 +59,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, station_index = False):
 
         # get data for selected stations
         if station_index:
-            data_array = read_instance.data_in_memory_filtered[data_label][read_instance.active_species][station_index, :]
+            data_array = read_instance.data_in_memory_filtered[data_label][speci_index, station_index, :]
         else:
             if read_instance.offline:
                 relevant_inds = read_instance.datareader.plotting_params[data_label]['valid_station_inds']
@@ -65,11 +68,11 @@ def to_pandas_dataframe(read_instance, canvas_instance, station_index = False):
                     relevant_inds = canvas_instance.relative_selected_station_inds
                 else:
                     relevant_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
-            data_array = read_instance.data_in_memory_filtered[data_label][read_instance.active_species][relevant_inds,:]
+            data_array = read_instance.data_in_memory_filtered[data_label][speci_index, relevant_inds, :]
 
         # if data array has no valid data for selected stations, do not create a pandas dataframe
         # data array has valid data and is not all nan?
-        if data_array.size and not np.isnan(data_array).all():
+        if not np.isnan(data_array).all():
 
             # add nested dictionary for data array name to selection station data dictionary
             canvas_instance.selected_station_data[data_label] = {}
@@ -338,7 +341,7 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, temporal_colocation):
 
     # read z1 data
     z1_array_data = \
-        read_instance.data_in_memory_filtered[z1][read_instance.active_species][active_map_valid_station_inds,:]
+        read_instance.data_in_memory_filtered[z1][read_instance.datareader.data_vars_to_read.index(read_instance.active_species), active_map_valid_station_inds, :]
     # drop NaNs and reshape to object list of station data arrays (if not checking data %)
     if base_zstat != 'Data %':
         z1_array_data = drop_nans(z1_array_data)
@@ -366,7 +369,7 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, temporal_colocation):
 
         # read z2 data
         z2_array_data = \
-            read_instance.data_in_memory_filtered[z2][read_instance.active_species][active_map_valid_station_inds,:]
+            read_instance.data_in_memory_filtered[z2][read_instance.datareader.data_vars_to_read.index(read_instance.active_species), active_map_valid_station_inds, :]
         # drop NaNs and reshape to object list of station data arrays (if not checking data %)
         if base_zstat != 'Data %':
             z2_array_data = drop_nans(z2_array_data)
@@ -484,7 +487,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                 plot_characteristics['cb_label']['xlabel'] = '{}bias{}'.format(stats_dict['label'], label_units)
             else:
                 plot_characteristics['cb_label']['xlabel'] = '{}{}'.format(stats_dict['label'], label_units)
-
+    
     # set cmap for z statistic
     # first check if have defined cmap (in this order: 1. configuration file 2. specific for z statistic)
     set_cmap = False
@@ -602,10 +605,13 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics):
             else:
                 cb_ax.yaxis.set_label_position("right")
                 cb_ax.set_ylabel(**plot_characteristics['cb_label'])
-
+           
         # set cb tick params
         if 'cb_tick_params' in plot_characteristics:
             cb.ax.tick_params(**plot_characteristics['cb_tick_params'])
+
+    # remove xlabel so it can update properly
+    plot_characteristics['cb_label']['xlabel'] = ''
 
     # update plot axes (to take account of new colourbar vmin/vmax/cmap)
     for ax in axs:

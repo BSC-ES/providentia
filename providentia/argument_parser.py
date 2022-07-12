@@ -65,16 +65,16 @@ class ProvArgumentParser(object):
                                      dest="available_networks",
                                      help="define available networks (default=['EBAS', 'EEA_AQ_eReporting'])")
             self.parser.add_argument("--network",
-                                     dest="network",
+                                     dest="selected_network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
             self.parser.add_argument("--resolution",
-                                     dest="resolution",
+                                     dest="selected_resolution",
                                      help="define data resolution (e.g. 'hourly', '3hourly', 'daily'")
             self.parser.add_argument("--matrix",
-                                     dest="matrix",
+                                     dest="selected_matrix",
                                      help="define species matrix (e.g. 'gas', 'aerosol'")
             self.parser.add_argument("--species",
-                                     dest="species",
+                                     dest="selected_species",
                                      help="define species to load (e.g. 'sconco3', 'pm10'")
             self.parser.add_argument("--start_date",
                                      dest="start_date",

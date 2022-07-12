@@ -6,7 +6,7 @@ from .init_standards import InitStandards
 from .read_aux import get_yearmonths_to_read
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .toolbar import save_data, conf_dialogs, reload_conf
+from .toolbar import save_data, conf_dialogs
 from .dashboard_aux import ComboBox
 from .dashboard_aux import QVLine
 from .dashboard_aux import PopUpWindow
@@ -43,18 +43,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
     resized = QtCore.pyqtSignal()
     move = QtCore.pyqtSignal()
 
-    def __init__(self, read_type='parallel', **kwargs):
+    def __init__(self, **kwargs):
         super(ProvidentiaMainWindow, self).__init__()
         ProvConfiguration.__init__(self, **kwargs)
-
-        # put read_type into self
-        self.read_type = read_type
 
         # store options to be restored at the end
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
 
         # update from config file (if available)
-        if 'config' in kwargs:
+        if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             if 'section' in kwargs:
                 # config and section defined 
                 self.from_conf = True
@@ -64,7 +61,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[kwargs['section']].items()})
                 else:
                     print('Error: The section specified in the command line does not exist.')
-                    print('Tip: For subsections, add the name of the parent section followed by a hyphen before the subsection name.')
+                    print('Tip: For subsections, add the name of the parent section followed by a vertical bar (|) before the subsection name (e.g. SECTIONA|Spain).')
                     sys.exit()
 
             elif 'section' not in kwargs:
@@ -78,7 +75,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                                                              all_sections, 0, False)
                 if okpressed:
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[selected_section].items()})
-                  
+        elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
+            print('Error: The configuration path specified in the command line does not exist.')
+            sys.exit()
         else:
             if os.path.isfile(dconf_path):
                 # config undefined
@@ -236,20 +235,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
-        self.lb_z = set_formatting(QtWidgets.QLabel(self, text="Map Z"), formatting_dict['title_menu'])
-        self.lb_z.setToolTip('Set map Z statistic')
+        self.lb_z = set_formatting(QtWidgets.QLabel(self, text="Map Stat"), formatting_dict['title_menu'])
+        self.lb_z.setToolTip('Set plotted map statistic')
         self.cb_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_z_stat.setFixedWidth(80)
-        self.cb_z_stat.setToolTip('Select map Z statistic')
+        self.cb_z_stat.setToolTip('Select map statistic')
         self.cb_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z1.setFixedWidth(125)
-        self.cb_z1.setToolTip('Select Z1 dataset')
+        self.cb_z1.setFixedWidth(140)
+        self.cb_z1.setToolTip('Select map dataset 1')
         self.cb_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z2.setFixedWidth(125)
-        self.cb_z2.setToolTip('Select Z2 dataset')
+        self.cb_z2.setFixedWidth(140)
+        self.cb_z2.setToolTip('Select map dataset 2')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
-        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp. Bias"),
+        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp Bias"),
                                                  formatting_dict['title_menu'])
         self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
         self.cb_experiment_bias_type = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
@@ -433,7 +432,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # if we're starting from a configuration file, read first the setup
         if self.from_conf:
             self.handle_data_selection_update()
-            # then see if we have fields that require to be se (meta, rep, period)
+            # then see if we have fields that require to be set (meta, rep, period)
             aux.representativity_conf(self)
             if hasattr(self, 'period'):
                 self.period_conf()
@@ -479,7 +478,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
-            # set initially selected/active start-end date as default 201601-201701
+            # set initially selected/active start-end date as default
             self.le_start_date.setText(str(self.start_date))
             self.le_end_date.setText(str(self.end_date))
             self.start_date = int(self.le_start_date.text())
@@ -651,6 +650,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.end_date = int(self.le_end_date.text())
             self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
 
+        # update available obs/experiment data dictionaries
+        self.datareader.get_valid_experiment_files_in_date_range(self.le_start_date.text(), self.le_end_date.text(), 
+                                                                 self.resolution, self.network, 
+                                                                 self.species)
+        valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(), 
+                                                                            self.le_end_date.text())
+        if valid_obs_files:
+            self.start_date = int(self.le_start_date.text())
+            self.end_date = int(self.le_end_date.text())
+            self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
+
         # update selected indices for experiments -- keeping previously selected experiments if available
         # set selected indices as previously selected indices in current available list of experiments
         if hasattr(self, 'experiments'):
@@ -672,15 +682,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         
         # since a selection has changed, update also the qa flags
         qa_to_select = aux.which_qa(self)  # first check which flags
-        self.qa_menu['checkboxes']['remove_default'] = aux.which_qa(self, return_defaults=True)
-        if self.config_bar_initialisation:
-            self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
-        else:
-            # if the selected species has specific qa flags, ensure that none of the
-            # inapplicable is selected
-            if self.species in self.qa_exceptions:
-                self.qa_menu['checkboxes']['remove_selected'] = list(set(
-                    self.qa_menu['checkboxes']['remove_selected']) - set(self.qa_diff))
+        self.default_qa = aux.which_qa(self, return_defaults=True)
+        self.qa_menu['checkboxes']['remove_default'] = self.default_qa
+        self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -861,6 +865,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     if data_label in experiments_to_read:
                         experiments_to_read.remove(data_label)
 
+            #read/cut on left/right
             else:
 
                 # remove incomplete months
@@ -869,7 +874,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     self.relevant_yearmonths = self.relevant_yearmonths[:-1]
                 
                 # if station references array has changed then as cutting/appending to
-                # existing data need to rearrange existing data arrays accordingly
+                # need to rearrange existing metadata/data arrays accordingly
                 if not np.array_equal(self.previous_station_references, self.station_references):
                     # get indices of stations in previous station references array in current station references array
                     old_station_inds = np.where(np.in1d(self.previous_station_references,
@@ -879,26 +884,24 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     new_station_inds = np.where(np.in1d(self.station_references,
                                                         self.previous_station_references))[0]
 
+                    #rearrange metadata station dimension
                     new_metadata_array = np.full((len(self.station_references),
                                                   len(self.previous_relevant_yearmonths)),
-                                                 np.NaN, dtype=self.metadata_dtype)
+                                                  np.NaN, dtype=self.metadata_dtype)
                     new_metadata_array[new_station_inds, :] = self.datareader.metadata_in_memory[old_station_inds, :]
                     self.datareader.metadata_in_memory = new_metadata_array
 
-                    # iterate through all keys in data in memory dictionary
+                    # iterate through all keys in data in memory dictionary, and rearrage data array station dimensions
                     for data_label in list(self.datareader.data_in_memory.keys()):
-                        # create new data array in shape of current station references array
-                        if data_label == 'observations':
-                            new_data_array = np.full((len(self.station_references),
-                                                      len(self.previous_time_array)),
-                                                     np.NaN, dtype=self.datareader.data_dtype)
-                        else:
-                            new_data_array = np.full((len(self.station_references),
-                                                      len(self.previous_time_array)),
-                                                     np.NaN, dtype=self.datareader.data_dtype[:1])
+
+                        new_data_array = np.full((len(self.data_vars_to_read),
+                                                  len(self.station_references),
+                                                  len(self.previous_time_array)),
+                                                  np.NaN, dtype=np.float32)
+
                         # put the old data into new array in the correct positions
-                        new_data_array[new_station_inds, :] = self.datareader.data_in_memory[
-                                                                  data_label][old_station_inds, :]
+                        new_data_array[: ,new_station_inds, :] = self.datareader.data_in_memory[
+                                                                 data_label][:, old_station_inds, :]
                         # overwrite data array with reshaped version
                         self.datareader.data_in_memory[data_label] = new_data_array
 
@@ -967,8 +970,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     yearmonths_to_read = np.asarray(yearmonths_to_read)
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
+                #need to read new yearmonths?
                 if new_yearmonths:
 
+                    #add space on left edge to add data to metadata array
                     self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
                     self.datareader.metadata_in_memory = np.concatenate((np.full(
                         (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
@@ -978,17 +983,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     # insert read data on left edge of the associated arrays
                     for data_label in list(self.datareader.data_in_memory.keys()):
                         # add space on left edge to insert new read data
-                        if data_label == 'observations':
-                            self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
-                                (len(self.station_references), n_new_left_data_inds), np.NaN,
-                                dtype=self.datareader.data_dtype), self.datareader.data_in_memory[data_label]), axis=1)
-                        else:
-                            self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
-                                (len(self.station_references), n_new_left_data_inds), np.NaN,
-                                dtype=self.datareader.data_dtype[:1]), self.datareader.data_in_memory[data_label]), axis=1)
+                        self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
+                            (len(self.data_vars_to_read), len(self.station_references), n_new_left_data_inds), np.NaN,
+                            dtype=np.float32), self.datareader.data_in_memory[data_label]), axis=1)
+                        #read data
                         self.datareader.read_data(data_label, self.active_start_date, previous_active_start_date,
-                                                self.active_network, self.active_resolution,
-                                                self.active_species, self.active_matrix)
+                                                  self.active_network, self.active_resolution,
+                                                  self.active_species, self.active_matrix)
 
             # need to read on right edge?
             if read_right:
@@ -1009,8 +1010,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     yearmonths_to_read = np.asarray(yearmonths_to_read)
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
+                #need to read new yearmonths?
                 if new_yearmonths:
 
+                    #add space on right edge to add data to metadata array
                     self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
                     self.datareader.metadata_in_memory = np.concatenate((self.datareader.metadata_in_memory, np.full(
                         (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
@@ -1018,14 +1021,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     # iterate through all keys in data in memory dictionary and
                     # insert read data on right edge of the associated arrays
                     for data_label in list(self.datareader.data_in_memory.keys()):
-                        if data_label == 'observations':
-                            self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
-                                (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype)), axis=1)
-                        else:
-                            self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
-                                (len(self.station_references), n_new_right_data_inds), np.NaN, dtype=self.datareader.data_dtype[:1])),
-                                                                            axis=1)
-                            self.datareader.read_data(data_label, previous_active_end_date, self.active_end_date,
+                        self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
+                            (len(self.data_vars_to_read), len(self.station_references), n_new_right_data_inds), np.NaN, dtype=np.float32)),
+                                                                        axis=1)
+                        self.datareader.read_data(data_label, previous_active_end_date, self.active_end_date,
                                                     self.active_network, self.active_resolution,
                                                     self.active_species, self.active_matrix)
 

@@ -10,13 +10,8 @@ from .configuration import write_conf
 def export_data_npz(mpl_canvas, fname):
     """Function that writes out current data in memory to .npy file"""
 
-    if mpl_canvas.read_instance.reading_nonghost:
-        mdata = mpl_canvas.read_instance.datareader.nonghost_metadata
-    else:
-        mdata = mpl_canvas.read_instance.datareader.metadata_in_memory
-
     np.savez(fname, data=mpl_canvas.read_instance.data_in_memory_filtered,
-             metadata=mdata,
+             metadata=mpl_canvas.read_instance.datareader.metadata_in_memory,
              data_resolution=mpl_canvas.read_instance.active_resolution)
 
 
@@ -53,16 +48,14 @@ def export_netcdf(mpl_canvas, fname):
     data_format_dict = get_standard_data(parameter_details)
 
     metadata_keys = instance.metadata_vars_to_read
-    data_arr = instance.data_in_memory_filtered['observations'][speci]
+    data_arr = instance.data_in_memory_filtered['observations'][
+                   instance.datareader.data_vars_to_read.index(speci),:,:]
     metadata_arr = instance.datareader.metadata_in_memory
     expids = instance.experiments_menu['checkboxes']['keep_selected']
     exp_to_write = []
     # change some vars if we're treating nonghost
     if instance.reading_nonghost:
         network = instance.active_network.replace("*", "")
-        # metadata_keys = ['station_name', 'latitude', 'longitude', 'altitude']
-        metadata_arr = instance.datareader.nonghost_metadata
-        metadata_keys = list(metadata_arr.dtype.names)
 
     # start file
     fout = Dataset(fname+".nc", 'w', format="NETCDF4")
@@ -135,7 +128,8 @@ def export_netcdf(mpl_canvas, fname):
             fout[data_key+"_"+network][:, :] = data_arr
 
     for exp in exp_to_write:
-        fout[speci+"_"+exp][:, :] = instance.data_in_memory_filtered[exp][speci]
+        fout[speci+"_"+exp][:, :] = instance.data_in_memory_filtered[exp][
+                                    instance.datareader.data_vars_to_read.index(speci),:,:]
 
     # metadata variables
     for metadata_key in metadata_keys:
