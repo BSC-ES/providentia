@@ -25,12 +25,9 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 class ProvidentiaOffline(ProvConfiguration, InitStandards):
     """Run Providentia offline reports"""
 
-    def __init__(self, read_type='parallel', **kwargs):
+    def __init__(self, **kwargs):
         
         print("Starting Providentia offline")
-
-        #add passed arguments to self
-        self.read_type = read_type
 
         #load configuration 
         ProvConfiguration.__init__(self, **kwargs)
@@ -460,7 +457,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 #turn axis on
                                 grid_dict[relevant_temporal_resolution].set_axis_on()
                                 #format axis
-                                self.plot.format_axis(grid_dict[relevant_temporal_resolution], base_plot_type, plot_characteristics, relevant_temporal_resolution=relevant_temporal_resolution, relevant_temporal_resolution_ii=relevant_temporal_resolution_ii, col_ii=col_ii, last_valid_row=last_valid_row, last_row_on_page=last_row_on_page)
+                                self.plot.format_axis(grid_dict[relevant_temporal_resolution], base_plot_type, plot_characteristics, relevant_temporal_resolution=relevant_temporal_resolution, col_ii=col_ii, last_valid_row=last_valid_row, last_row_on_page=last_row_on_page)
 
                         #rest of plot types
                         else:
