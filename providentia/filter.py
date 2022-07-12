@@ -16,10 +16,13 @@ class DataFilter:
     def __init__(self, read_instance):
         self.read_instance = read_instance
 
-        #get indices of key data variables
+        # get indices of key data variables
+        resolution = self.read_instance.active_resolution
         self.speci_index = self.read_instance.datareader.data_vars_to_read.index(self.read_instance.active_species)
-        self.day_night_index = self.read_instance.datareader.data_vars_to_read.index('day_night_code')
-        self.weekday_weekend_index = self.read_instance.datareader.data_vars_to_read.index('weekday_weekend_code')
+        if resolution != 'daily' and resolution != 'monthly':
+            self.day_night_index = self.read_instance.datareader.data_vars_to_read.index('day_night_code')
+        if resolution != 'monthly':
+            self.weekday_weekend_index = self.read_instance.datareader.data_vars_to_read.index('weekday_weekend_code')
         self.season_index = self.read_instance.datareader.data_vars_to_read.index('season_code')
 
         self.filter_all()
@@ -76,6 +79,8 @@ class DataFilter:
             keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
             removes = self.read_instance.period_menu['checkboxes']['remove_selected']
 
+        resolution = self.read_instance.active_resolution
+
         # filter/limit data for periods selected
         if len(keeps) > 0:
             day_night_codes_to_keep = []
@@ -84,9 +89,10 @@ class DataFilter:
             if 'Nighttime' in keeps:
                 day_night_codes_to_keep.append(1)
             if len(day_night_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
-                    np.isin(self.read_instance.data_in_memory_filtered['observations'][self.day_night_index,:,:],
-                            day_night_codes_to_keep, invert=True)] = np.NaN
+                if resolution != 'daily' and resolution != 'monthly':
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                        np.isin(self.read_instance.data_in_memory_filtered['observations'][self.day_night_index,:,:],
+                                day_night_codes_to_keep, invert=True)] = np.NaN
 
             weekday_weekend_codes_to_keep = []
             if 'Weekday' in keeps:
@@ -94,9 +100,10 @@ class DataFilter:
             if 'Weekend' in keeps:
                 weekday_weekend_codes_to_keep.append(1)
             if len(weekday_weekend_codes_to_keep) == 1:
-                self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
-                    np.isin(self.read_instance.data_in_memory_filtered['observations'][self.weekday_weekend_index,:,:],
-                            weekday_weekend_codes_to_keep, invert=True)] = np.NaN
+                if resolution != 'monthly':
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                        np.isin(self.read_instance.data_in_memory_filtered['observations'][self.weekday_weekend_index,:,:],
+                                weekday_weekend_codes_to_keep, invert=True)] = np.NaN
 
             season_codes_to_keep = []
             if 'Spring' in keeps:
@@ -119,9 +126,10 @@ class DataFilter:
             if 'Nighttime' in removes:
                 day_night_codes_to_remove.append(1)
             if len(day_night_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
-                    np.isin(self.read_instance.data_in_memory_filtered['observations'][self.day_night_index,:,:],
-                            day_night_codes_to_remove)] = np.NaN
+                if resolution != 'daily' and resolution != 'monthly':
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                        np.isin(self.read_instance.data_in_memory_filtered['observations'][self.day_night_index,:,:],
+                                day_night_codes_to_remove)] = np.NaN
 
             weekday_weekend_codes_to_remove = []
             if 'Weekday' in removes:
@@ -129,9 +137,10 @@ class DataFilter:
             if 'Weekend' in removes:
                 weekday_weekend_codes_to_remove.append(1)
             if len(weekday_weekend_codes_to_remove) > 0:
-                self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
-                    np.isin(self.read_instance.data_in_memory_filtered['observations'][self.weekday_weekend_index,:,:],
-                            weekday_weekend_codes_to_remove)] = np.NaN
+                if resolution != 'monthly':
+                    self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
+                        np.isin(self.read_instance.data_in_memory_filtered['observations'][self.weekday_weekend_index,:,:],
+                                weekday_weekend_codes_to_remove)] = np.NaN
 
             season_codes_to_remove = []
             if 'Spring' in removes:
@@ -225,7 +234,7 @@ class DataFilter:
                                 self.read_instance.data_in_memory_filtered['observations'][self.speci_index, :, period_inds])
                             self.read_instance.data_in_memory_filtered['observations'][self.speci_index,
                                 data_availability_percent < data_availability_lower_bounds[var_ii]] = np.NaN
-
+    
     def filter_by_metadata(self):
         """Filters data by selected metadata"""
 
@@ -235,7 +244,7 @@ class DataFilter:
 
         # iterate through all metadata
         for meta_var in self.read_instance.metadata_vars_to_read:
-
+            
             if meta_var == 'lat':
                 meta_var = 'latitude'
             elif meta_var == 'lon':
@@ -248,6 +257,7 @@ class DataFilter:
             if metadata_data_type == np.object:
                 # if any of the keep checkboxes are selected, filter out data by fields that have not been selected
                 current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
+                
                 if len(current_keep) > 0:
                     invalid_keep = np.repeat(
                         np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :],
@@ -256,6 +266,7 @@ class DataFilter:
                 # if any of the remove checkboxes have been selected, filter out data by these selected fields
                 current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
                     'remove_selected']
+                
                 if len(current_remove) > 0:
                     invalid_remove = np.repeat(
                         np.isin(self.read_instance.datareader.metadata_in_memory[meta_var][:, :], current_remove),
@@ -268,25 +279,45 @@ class DataFilter:
                     self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
                 current_upper = np.float32(
                     self.read_instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
+                
+                # get array with selected filters (those with the check Apply on)
+                current_apply = self.read_instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected']
 
-                # if current lower value is non-NaN, then filter out data with metadata < current lower value
-                if not pd.isnull(current_lower):
-                    lower_default = np.float32(
-                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
-                    if current_lower > lower_default:
-                        invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] <
-                                                current_lower, self.read_instance.datareader.N_inds_per_month, axis=1)
-                        self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_below] = np.NaN
-                # if current upper < than the maximum extent, then filter out
-                # data with metadata > current upper value (if this is numeric)
-                # if current upper value is non-NaN, then filter out data with metadata > current upper value                
-                if not pd.isnull(current_upper):
-                    upper_default = np.float32(
-                        self.read_instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
-                    if current_upper < upper_default:
-                        invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] >
-                                                current_upper, self.read_instance.datareader.N_inds_per_month, axis=1)
-                        self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_above] = np.NaN
+                if len(current_apply) > 0:
+                    # apply bounds and remove nans if variable has been selected
+                    if meta_var in current_apply:
+                        # if current lower value is non-NaN, then filter out data with metadata < current lower value
+                        if not pd.isnull(current_lower):
+                            lower_default = np.float32(
+                                self.read_instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
+                            if current_lower >= lower_default:
+                                if not self.read_instance.reading_nonghost:
+                                    invalid_below = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] <
+                                                            current_lower, self.read_instance.datareader.N_inds_per_month, axis=1)
+                                else:
+                                    invalid_below = np.repeat(self.read_instance.datareader.nonghost_metadata[meta_var][:, :] <
+                                                            current_lower, self.read_instance.datareader.N_inds_per_month, axis=1)
+                                self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_below] = np.NaN
+
+                        # if current upper < than the maximum extent, then filter out
+                        # data with metadata > current upper value (if this is numeric)
+                        # if current upper value is non-NaN, then filter out data with metadata > current upper value
+                        if not pd.isnull(current_upper):
+                            upper_default = np.float32(
+                                self.read_instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
+                            if current_upper <= upper_default:
+                                if not self.read_instance.reading_nonghost:
+                                    invalid_above = np.repeat(self.read_instance.datareader.metadata_in_memory[meta_var][:, :] >
+                                                            current_upper, self.read_instance.datareader.N_inds_per_month, axis=1)
+                                else:
+                                    invalid_above = np.repeat(self.read_instance.datareader.nonghost_metadata[meta_var][:, :] >
+                                                            current_upper, self.read_instance.datareader.N_inds_per_month, axis=1)
+                                self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_above] = np.NaN
+
+                        # remove nans
+                        invalid_nan = np.repeat(pd.isnull(self.read_instance.datareader.metadata_in_memory[meta_var][:, :]), 
+                                                self.read_instance.datareader.N_inds_per_month, axis=1)
+                        self.read_instance.data_in_memory_filtered['observations'][self.speci_index, invalid_nan] = np.NaN
 
     def validate_values(self):
         """Validates that field inserted by user is float"""

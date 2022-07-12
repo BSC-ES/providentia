@@ -4,6 +4,7 @@ Currently, it includes function related to the initialization and update
 of metadata, checks fields coming from conf files etc.
 """
 
+import os
 import copy
 import json
 import datetime
@@ -11,7 +12,8 @@ import numpy as np
 import pandas as pd
 
 from .configuration import split_options
-
+from .configuration import parse_path
+from .configuration import read_conf
 
 def which_bounds(instance, species):
     """Returns lower/upper bounds of species selected. If
@@ -55,7 +57,7 @@ def which_qa(instance, return_defaults=False):
     """
 
     if (return_defaults) or (not hasattr(instance, 'qa')):
-        if instance.selected_species in instance.met_parameters:
+        if instance.species in instance.met_parameters:
             return sorted(instance.default_qa_met)
         else:
             return sorted(instance.default_qa_standard)
@@ -202,20 +204,20 @@ def periodic_labels():
 
     return {'hour':'H', 'dayofweek':'DoW', 'month':'M'}
 
-def get_relevant_temporal_resolutions(selected_resolution):        
+def get_relevant_temporal_resolutions(resolution):        
     """Get relevant temporal reolsutions for periodic plots, by selected temporal resolution.
 
-    :param selected_resolution: name of selected temporal resolution
-    :type selected_resolution: str
+    :param resolution: name of selected temporal resolution
+    :type resolution: str
     :return: relevant temporal resolutions
     :rtype: list
     """
 
-    if 'hourly' in selected_resolution:
+    if 'hourly' in resolution:
         relevant_temporal_resolutions = ['hour', 'dayofweek', 'month']
-    elif selected_resolution == 'daily':
+    elif resolution == 'daily':
         relevant_temporal_resolutions = ['dayofweek', 'month']
-    elif selected_resolution == 'monthly':
+    elif resolution == 'monthly':
         relevant_temporal_resolutions = ['month']
     return relevant_temporal_resolutions
 
@@ -223,7 +225,7 @@ def get_land_polygon_resolution(selection):
     """get resolution of land polygons to plot on map.
 
         :param selection: name of selected temporal resolution
-    :type selected_resolution: str
+    :type resolution: str
     :return: selected land polygon resolution
     :rtype: list
     """
@@ -280,9 +282,9 @@ def init_metadata(instance):
             metadata_menu[metadata_type][label] = {'window_title': label,
                                                    'page_title': 'Filter stations by unique {} metadata'.format(
                                                        label), 'checkboxes': {}}
-            metadata_menu[metadata_type][label]['checkboxes'] = {'labels': [], 'keep_selected': [],
-                                                                 'remove_selected': [], 'keep_default': [],
-                                                                 'remove_default': []}
+            metadata_menu[metadata_type][label]['checkboxes'] = {'labels': [], 
+                                                                 'keep_selected': [], 'keep_default': [],
+                                                                 'remove_selected': [], 'remove_default': []}
 
         metadata_menu[metadata_type]['rangeboxes']['labels'] = \
             [metadata_name for metadata_name in instance.standard_metadata.keys()
@@ -299,6 +301,8 @@ def init_metadata(instance):
             ['nan'] * len(metadata_menu[metadata_type]['rangeboxes']['labels'])
         metadata_menu[metadata_type]['rangeboxes']['upper_default'] = \
             ['nan'] * len(metadata_menu[metadata_type]['rangeboxes']['labels'])
+        metadata_menu[metadata_type]['rangeboxes']['apply_default'] = []
+        metadata_menu[metadata_type]['rangeboxes']['apply_selected'] = []
 
     return metadata_types, metadata_menu
 
@@ -552,8 +556,14 @@ def get_data_label(temporal_colocation, data_label):
     return data_label
 
 
+def load_conf(instance, fpath=None):
+    """ Load existing configurations from file. """
 
+    if fpath is None:
+        fpath = parse_path(instance.config_dir, instance.config_file)
 
+    if not os.path.isfile(fpath):
+        print(("Error %s" % fpath))
+        return
 
-
-        
+    instance.sub_opts, instance.all_sections, instance.parent_section_names, instance.subsection_names, _ = read_conf(fpath)        

@@ -79,13 +79,13 @@ def conf_dialogs(instance):
         return
 
     try:
-        config = configparser.ConfigParser()
-        config.read(conf_to_load)
-        all_sections = config.sections()
-        section, okpressed = QtWidgets.QInputDialog.getItem(instance, 'Sections',
-                                                            'Select section to load',  all_sections, 0, False)
+        aux.load_conf(instance, fpath=conf_to_load)
+        all_sections = instance.sub_opts.keys()
+        selected_section, okpressed = QtWidgets.QInputDialog.getItem(instance, 'Sections',
+                                                                     'Select section to load',  
+                                                                     all_sections, 0, False)
         if okpressed:
-            reload_conf(instance, section, conf_to_load)
+            reload_conf(instance, selected_section, conf_to_load)
     except Exception as e:
         QtWidgets.QMessageBox.critical(instance, "Error loading configuration file",
                                        str(e), QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
@@ -103,31 +103,39 @@ def filename_dialog(instance):
 def reload_conf(instance, section, fpath):
     """Resets previous selections, fills values according to new conf file,
     reads and filters."""
-    # firstly, delete previous attributes that we loaded from
-    # the config file
+
+    # delete attributes from default config file
+    CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+    dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
+    dconf = configparser.RawConfigParser(empty_lines_in_values=False)
+    dconf.read(dconf_path)
     if instance.from_conf:
-        for k in instance.opts:
+        for k in dconf['default'].keys():
             delattr(instance, k)
-    # # update config and section attributes of instance
+
+    # update config and section attributes of instance
     instance.config = fpath
     instance.section = section
     instance.from_conf = True
-    # and load the new confs
-    instance.load_conf(section, fpath)
+    vars(instance).update({(k, instance.parse_parameter(k, val)) for k, val in instance.sub_opts[section].items()})
 
     # update species, experiments, qa & flags
     instance.config_bar_initialisation = True
     instance.update_configuration_bar_fields()
     instance.config_bar_initialisation = False
+
     # read
     instance.handle_data_selection_update()
+
     # reset the meta fields after loading
     instance.reset_options()
+
     # set fields from conf as you do in init
     aux.representativity_conf(instance)
     if hasattr(instance, 'period'):
         instance.period_conf()
     if set([m.lower() for m in instance.metadata_vars_to_read]).intersection(vars(instance).keys()):
         aux.meta_from_conf(instance)
+        
     # call function to apply changes (filter)
     instance.mpl_canvas.handle_data_filter_update()
