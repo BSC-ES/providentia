@@ -2,7 +2,6 @@ from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data,
 from providentia import aux
 
 import os
-import gc
 import copy
 import ctypes
 import datetime
@@ -26,7 +25,7 @@ class DataReader:
         self.data_in_memory = {}
         self.plotting_params = {}
         
-    def read_setup(self, resolution, start_date, end_date, network, species, matrix):
+    def read_setup(self, resolution, start_date, end_date, network, species, matrix, reset=False):
         """Setup key variables for new read of observational/experiment
         data a time array and create arrays of unique station
         references/longitudes/latitudes.
@@ -45,8 +44,6 @@ class DataReader:
         :type matrix: str
         """
 
-        # force garbage collection (to avoid memory issues)
-        gc.collect()
         # series of actions not applicable when --offline
         if not self.read_instance.offline:
             self.read_instance.reading_nonghost = aux.check_for_ghost(network)
@@ -81,6 +78,7 @@ class DataReader:
         #get time array as integer timestamps
         self.read_instance.timestamp_array = self.read_instance.time_array.asi8
 
+        #get relevant observational files
         if not self.read_instance.reading_nonghost:
             # get all relevant observational files
             file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
@@ -103,6 +101,7 @@ class DataReader:
             self.read_instance.time_array >= datetime.datetime.strptime(str(start_yyyymm), '%Y%m%d')) for month_ii, start_yyyymm in
                                           enumerate(self.read_instance.relevant_yearmonths)])
 
+        #get station references, longitudes and latitudes
         self.read_instance.station_references = []
         self.station_longitudes = []
         self.station_latitudes = []
@@ -171,12 +170,54 @@ class DataReader:
         else:
             self.data_vars_to_read = [species]
 
-    def read_data(self, data_label, start_date, end_date,
+        #need to reset metadata and data arrays?
+        if reset:
+                    
+            #create new data AND metadata arrays 
+
+            #data
+            self.data_in_memory[data_label] = np.full((len(self.read_instance.data_labels),
+                                                       len(self.data_vars_to_read),
+                                                       len(self.read_instance.station_references),
+                                                       len(self.read_instance.time_array)),
+                                                       np.NaN, dtype=np.float32)
+
+            #metadata
+            if self.read_instance.reading_nonghost:
+                tmp_ncdf = Dataset(relevant_files[0])
+                meta_dtype = [('station_name', np.object), ('latitude', np.float32),
+                            ('longitude', np.float32), ('altitude', np.float32)]
+                if "station_code" in tmp_ncdf.variables:
+                    meta_dtype.append(('station_reference', np.object))
+                if "station_type" in tmp_ncdf.variables:
+                    meta_dtype.append(('station_type', np.object))
+                if "station_area" in tmp_ncdf.variables:
+                    meta_dtype.append(('station_area', np.object))
+                tmp_ncdf.close()
+            else:
+                meta_dtype = self.read_instance.metadata_dtype
+            self.metadata_in_memory = np.full((len(self.read_instance.station_references),
+                                            len(self.read_instance.relevant_yearmonths)),
+                                            np.NaN, dtype=meta_dtype)
+                        
+            #create new plotting param dictionaries per data label
+            # get experiment specific grid edges for exp, from first relevant file
+            for data_label in self.read_instance.data_labels:
+                self.plotting_params[data_label] = {}
+                if data_label != 'observations':
+                    exp_nc_root = Dataset(relevant_files[0])
+                    self.plotting_params[data_label]['grid_edge_longitude'] = \
+                        exp_nc_root['grid_edge_longitude'][:]
+                    self.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
+                    exp_nc_root.close()
+
+
+    def read_data(self, data_labels, start_date, end_date,
                   network, resolution, species, matrix):
         """Function that handles reading of observational/experiment data.
 
-        :param data_label: can be "observations" or the expid
-        :type data_label: str
+        :param data_labels: label of data array to read (e.g "observations" or expid)
+        :type data_labels: list 
         :param start_date: start date (e.g. "20201101")
         :type start_date: str
         :param end_date: end date (e.g. "20201231")
@@ -191,85 +232,45 @@ class DataReader:
         :type matrix: str
         """
 
-        print('READ DATA START', data_label)
+        print('READ DATA START')
 
-        # force garbage collection (to avoid memory issues)
-        gc.collect()
+        #iterate through data labels, setting up variables for read
+        relevant_files = []
+        process_types = []
+        for data_label in data_labels:
 
-        # get relevant file start dates
-        if data_label == 'observations':
-            process_type = 'observations'
-            if not self.read_instance.reading_nonghost:
-                file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
-                                                    self.read_instance.ghost_version,
-                                                    resolution, species, species)
-                relevant_file_start_dates = \
-                    sorted(self.available_observation_data[network][resolution][matrix][species])
-            else:
-                # get files from nonghost path
-                file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root,
-                                                    network[1:].lower(), matrix,
-                                                    resolution, species, species)
-                relevant_file_start_dates = \
-                    sorted(self.available_observation_data[network][resolution][matrix][species])
-
-        else:
-            process_type = 'experiment'
-            file_root = \
-                '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, data_label,
-                                           resolution, species, network, species)
-
-            relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
-
-        # get data files in required date range to read, taking care not to re-read what has already been read
-        yearmonths_to_read = get_yearmonths_to_read(relevant_file_start_dates, start_date, end_date, resolution)
-        
-        relevant_files = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in yearmonths_to_read]
-        if not os.path.exists(relevant_files[0]):
-            relevant_files = sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm
-                                     in self.read_instance.relevant_yearmonths])
-
-        # check if data label in data in memory dictionary (if fully re-reading all data)
-        if data_label not in list(self.data_in_memory.keys()):
-                  
-            #create new data AND metadata arrays if reading observations
-            if process_type == 'observations':
-                self.plotting_params['observations'] = {}
-                self.data_in_memory[data_label] = np.full((len(self.data_vars_to_read),
-                                                           len(self.read_instance.station_references),
-                                                           len(self.read_instance.time_array)),
-                                                           np.NaN, dtype=np.float32)
-
-                # create separate structure of nonghost metadata
-                if self.read_instance.reading_nonghost:
-                    tmp_ncdf = Dataset(relevant_files[0])
-                    meta_dtype = [('station_name', np.object), ('latitude', np.float32),
-                                  ('longitude', np.float32), ('altitude', np.float32)]
-                    if "station_code" in tmp_ncdf.variables:
-                        meta_dtype.append(('station_reference', np.object))
-                    if "station_type" in tmp_ncdf.variables:
-                        meta_dtype.append(('station_type', np.object))
-                    if "station_area" in tmp_ncdf.variables:
-                        meta_dtype.append(('station_area', np.object))
+            # get relevant file start dates
+            if data_label == 'observations':
+                process_type = 'observations'
+                if not self.read_instance.reading_nonghost:
+                    file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.obs_root, network,
+                                                        self.read_instance.ghost_version,
+                                                        resolution, species, species)
+                    relevant_file_start_dates = \
+                        sorted(self.available_observation_data[network][resolution][matrix][species])
                 else:
-                    meta_dtype = self.read_instance.metadata_dtype
-                self.metadata_in_memory = np.full((len(self.read_instance.station_references),
-                                                   len(self.read_instance.relevant_yearmonths)),
-                                                   np.NaN, dtype=meta_dtype)
+                    # get files from nonghost path
+                    file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root,
+                                                        network[1:].lower(), matrix,
+                                                        resolution, species, species)
+                    relevant_file_start_dates = \
+                        sorted(self.available_observation_data[network][resolution][matrix][species])
 
-            # elif process_type is experiment, create new data array, and 
-            # get experiment specific grid edges from first relevant file, and save to data in memory dictionary
-            elif process_type == 'experiment':
-                self.plotting_params[data_label] = {}
-                self.data_in_memory[data_label] = np.full((len(self.data_vars_to_read),
-                                                           len(self.read_instance.station_references),
-                                                           len(self.read_instance.time_array)),
-                                                           np.NaN, dtype=np.float32)
-                exp_nc_root = Dataset(relevant_files[0])
-                self.plotting_params[data_label]['grid_edge_longitude'] = \
-                    exp_nc_root['grid_edge_longitude'][:]
-                self.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
-                exp_nc_root.close()
+            else:
+                process_type = 'experiment'
+                file_root = \
+                    '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, data_label,
+                                            resolution, species, network, species)
+
+                relevant_file_start_dates = sorted(self.available_experiment_data[data_label])
+
+            # get data files in required date range to read, taking care not to re-read what has already been read
+            yearmonths_to_read = get_yearmonths_to_read(relevant_file_start_dates, start_date, end_date, resolution)
+            
+            files_to_read = [file_root+str(yyyymm)[:6]+'.nc' for yyyymm in yearmonths_to_read]
+            if not os.path.exists(files_to_read[0]):
+                relevant_files = relevant_files + sorted([file_root + str(yyyymm)[:8] + '.nc' for yyyymm
+                                                          in self.read_instance.relevant_yearmonths])
 
         #if active selected qa == default qa, no need to screen by qa, so set selected qa to None
         if self.read_instance.active_qa == self.read_instance.default_qa:
@@ -279,15 +280,16 @@ class DataReader:
 
         #create arrays to share across processes (for parallel multiprocessing use)
         #this only works for numerical dtypes, i.e. not strings
-        file_data_shared_shape = (len(self.data_vars_to_read),len(self.read_instance.station_references),len(self.read_instance.time_array))
-        file_data_shared = multiprocessing.RawArray(ctypes.c_float, file_data_shared_shape[0] * file_data_shared_shape[1] * file_data_shared_shape[2])  
+        file_data_shared_shape = (len(data_labels), len(self.data_vars_to_read), len(self.read_instance.station_references), len(self.read_instance.time_array))
+        file_data_shared = multiprocessing.RawArray(ctypes.c_float, file_data_shared_shape[0] * file_data_shared_shape[1] * file_data_shared_shape[2] * file_data_shared_shape[3])  
         timestamp_array_shared = multiprocessing.RawArray(ctypes.c_int64, len(self.read_instance.timestamp_array))
         qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(qa_to_filter))
         flags_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.active_flags))
         # Wrap file_data_shared as an numpy array so we can easily manipulates its data.
         file_data_shared_np = np.frombuffer(file_data_shared, dtype=np.float32).reshape(file_data_shared_shape)
         #fill arrays
-        np.copyto(file_data_shared_np, self.data_in_memory[data_label])
+        data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]
+        np.copyto(file_data_shared_np, self.data_in_memory[data_label_indices, :, :, :])
         timestamp_array_shared[:] = self.read_instance.timestamp_array
         qa_shared[:] = qa_to_filter
         flags_shared[:] = self.read_instance.active_flags
@@ -305,8 +307,9 @@ class DataReader:
                 # read file
                 file_data, time_indices, full_array_station_indices, file_metadata = read_netcdf_data(tuple_arguments)
                 # place read data into big array as appropriate
-                self.data_in_memory[data_label][full_array_station_indices[:, np.newaxis],
-                                                time_indices[np.newaxis, :]] = file_data
+                self.data_in_memory[data_label_indices[:, np.newaxis, np.newaxis], :
+                                    full_array_station_indices[:, np.newaxis],
+                                    time_indices[np.newaxis, :]] = file_data
                 #place metadata
                 if process_type == 'observations':
                     self.metadata_in_memory[full_array_station_indices[:, np.newaxis],
