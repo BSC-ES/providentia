@@ -51,19 +51,44 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
 
         # update from config file (if available)
-        #config and section defined 
-        self.from_conf = False
-        if ('config' in kwargs) and ('section' in kwargs):
-            self.load_conf(section=kwargs['section'], fpath=kwargs['config'])
-        #just config defined (and only 1 section in file)
-        elif 'config' in kwargs: 
-            self.load_conf(section=None, fpath=kwargs['config'])    
-        #if no config has been loaded 
-        if (not self.from_conf) & (os.path.isfile(dconf_path)):
-            self.load_conf(section='default', fpath=dconf_path)
-            self.from_conf = False
+        if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
+            if 'section' in kwargs:
+                # config and section defined 
+                self.from_conf = True
+                self.from_section = True
+                aux.load_conf(self, fpath=kwargs['config'])
+                if kwargs['section'] in self.all_sections:
+                    vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[kwargs['section']].items()})
+                else:
+                    print('Error: The section specified in the command line does not exist.')
+                    print('Tip: For subsections, add the name of the parent section followed by a vertical bar (|) before the subsection name (e.g. SECTIONA|Spain).')
+                    sys.exit()
+
+            elif 'section' not in kwargs:
+                # config defined, section undefined
+                self.from_conf = True
+                self.from_section = False
+                aux.load_conf(self, fpath=kwargs['config'])    
+                all_sections = self.sub_opts.keys()
+                selected_section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
+                                                                             'Select section to load',  
+                                                                             all_sections, 0, False)
+                if okpressed:
+                    vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[selected_section].items()})
+        elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
+            print('Error: The configuration path specified in the command line does not exist.')
+            sys.exit()
+        else:
+            if os.path.isfile(dconf_path):
+                # config undefined
+                self.from_conf = False
+                self.from_section = False
+                aux.load_conf(self, fpath=dconf_path)
+                vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts['default'].items()})
+            
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
+
         # arguments are only local
         self.main_window_geometry = None
         
@@ -81,8 +106,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # initialize DataReader
         self.datareader = DataReader(self)
+
         #initialise UI
         self.init_ui()
+
         # setup callback events upon resizing/moving of Providentia window
         self.resized.connect(self.get_geometry)
         self.move.connect(self.get_geometry)
@@ -103,6 +130,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
     def init_ui(self):
         """Initialise user interface"""
+
+        print("Starting Providentia online...")
+
         # set window title
         self.window_title = "Providentia"
         self.setWindowTitle(self.window_title)
@@ -440,7 +470,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
 
-        self.reading_nonghost = aux.check_for_ghost(self.selected_network)
+        self.reading_nonghost = aux.check_for_ghost(self.network)
         if self.reading_nonghost:
             self.disable_ghost_buttons()
         else:
@@ -451,9 +481,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # set initially selected/active start-end date as default
             self.le_start_date.setText(str(self.start_date))
             self.le_end_date.setText(str(self.end_date))
-            self.selected_start_date = int(self.le_start_date.text())
-            self.selected_end_date = int(self.le_end_date.text())
-            self.selected_start_date_firstdayofmonth = int(str(self.selected_start_date)[:6]+'01')
+            self.start_date = int(self.le_start_date.text())
+            self.end_date = int(self.le_end_date.text())
+            self.start_date_firstdayofmonth = int(str(self.start_date)[:6]+'01')
             self.active_start_date = int(self.le_start_date.text())
             self.active_end_date = int(self.le_end_date.text())
             self.date_range_has_changed = False
@@ -538,9 +568,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
                                                                                 self.le_end_date.text())
             if valid_obs_files:              
-                self.selected_start_date = int(self.le_start_date.text())
-                self.selected_end_date = int(self.le_end_date.text())
-                self.selected_start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
+                self.start_date = int(self.le_start_date.text())
+                self.end_date = int(self.le_end_date.text())
+                self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
 
             # check which flags to select, depending if we have conf file or no
             self.flag_menu['checkboxes']['remove_selected'] = aux.which_flags(self)
@@ -550,9 +580,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
                                                                                 self.le_end_date.text())
             if valid_obs_files:              
-                self.selected_start_date = int(self.le_start_date.text())
-                self.selected_end_date = int(self.le_end_date.text())
-                self.selected_start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
+                self.start_date = int(self.le_start_date.text())
+                self.end_date = int(self.le_end_date.text())
+                self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
 
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
@@ -573,10 +603,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # update network field
         available_networks = list(self.datareader.available_observation_data.keys())
         self.cb_network.addItems(available_networks)
-        if self.selected_network in available_networks:
-            self.cb_network.setCurrentText(self.selected_network)
+        if self.network in available_networks:
+            self.cb_network.setCurrentText(self.network)
         else:
-            self.selected_network = self.cb_network.currentText()
+            self.network = self.cb_network.currentText()
 
         # update resolution field
         available_resolutions = list(self.datareader.available_observation_data[self.cb_network.currentText()].keys())
@@ -586,46 +616,57 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                  'daily': 7, 'monthly': 8}
         available_resolutions = sorted(available_resolutions, key=resolution_order_dict.__getitem__)
         self.cb_resolution.addItems(available_resolutions)
-        if self.selected_resolution in available_resolutions:
-            self.cb_resolution.setCurrentText(self.selected_resolution)
+        if self.resolution in available_resolutions:
+            self.cb_resolution.setCurrentText(self.resolution)
         else:
-            self.selected_resolution = self.cb_resolution.currentText()
+            self.resolution = self.cb_resolution.currentText()
 
         # update matrix field
         available_matrices = sorted(
             self.datareader.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()])
         self.cb_matrix.addItems(available_matrices)
-        if self.selected_matrix in available_matrices:
-            self.cb_matrix.setCurrentText(self.selected_matrix)
+        if self.matrix in available_matrices:
+            self.cb_matrix.setCurrentText(self.matrix)
         else:
-            self.selected_matrix = self.cb_matrix.currentText()
+            self.matrix = self.cb_matrix.currentText()
 
         # update species field
         available_species = sorted(self.datareader.available_observation_data[self.cb_network.currentText()][
                                        self.cb_resolution.currentText()][self.cb_matrix.currentText()])
         self.cb_species.addItems(available_species)
-        if self.selected_species in available_species:
-            self.cb_species.setCurrentText(self.selected_species)
+        if self.species in available_species:
+            self.cb_species.setCurrentText(self.species)
         else:
-            self.selected_species = self.cb_species.currentText()
+            self.species = self.cb_species.currentText()
 
         # update available obs/experiment data dictionaries
         self.datareader.get_valid_experiment_files_in_date_range(self.le_start_date.text(), self.le_end_date.text(), 
-                                                                 self.selected_resolution, self.selected_network, 
-                                                                 self.selected_species)
+                                                                 self.resolution, self.network, 
+                                                                 self.species)
         valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(), 
                                                                             self.le_end_date.text())
         if valid_obs_files:
-            self.selected_start_date = int(self.le_start_date.text())
-            self.selected_end_date = int(self.le_end_date.text())
-            self.selected_start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
+            self.start_date = int(self.le_start_date.text())
+            self.end_date = int(self.le_end_date.text())
+            self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
+
+        # update available obs/experiment data dictionaries
+        self.datareader.get_valid_experiment_files_in_date_range(self.le_start_date.text(), self.le_end_date.text(), 
+                                                                 self.resolution, self.network, 
+                                                                 self.species)
+        valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(), 
+                                                                            self.le_end_date.text())
+        if valid_obs_files:
+            self.start_date = int(self.le_start_date.text())
+            self.end_date = int(self.le_end_date.text())
+            self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
 
         # update selected indices for experiments -- keeping previously selected experiments if available
         # set selected indices as previously selected indices in current available list of experiments
         if hasattr(self, 'experiments'):
             #update experiments from config file
             if self.config_bar_initialisation:
-                experiments_legend = get_experiments(instance)
+                experiments_legend = aux.get_experiments(self)
                 self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in experiments_legend.keys()
                                                                         if experiment in self.experiments_menu['checkboxes']['map_vars']]
                 self.experiments_legend = {experiment:experiment_legend for experiment, experiment_legend  in experiments_legend.items()
@@ -658,16 +699,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # if network, resolution, matrix or species have changed then respective
             # current selection for the changed param
             if event_source == self.cb_network:
-                self.selected_network = changed_param
+                self.network = changed_param
             elif event_source == self.cb_resolution:
-                self.selected_resolution = changed_param
+                self.resolution = changed_param
             elif event_source == self.cb_matrix:
-                self.selected_matrix = changed_param
-                self.selected_species = sorted(list(
+                self.matrix = changed_param
+                self.species = sorted(list(
                     self.datareader.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()][
                         self.cb_matrix.currentText()].keys()))[0]
             elif event_source == self.cb_species:
-                self.selected_species = changed_param
+                self.species = changed_param
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
@@ -678,7 +719,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # update configuration bar fields
             self.update_configuration_bar_fields()
             # if we're reading nonghost files, then disable fields again
-            if aux.check_for_ghost(self.selected_network):
+            if aux.check_for_ghost(self.network):
                 self.disable_ghost_buttons()
             else:
                 self.enable_ghost_buttons()
@@ -711,12 +752,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         previous_data_labels = self.data_labels
 
         # set all currently selected variables as active variables
-        self.active_network = self.selected_network
-        self.active_resolution = self.selected_resolution
-        self.active_matrix = self.selected_matrix
-        self.active_species = self.selected_species
-        self.active_start_date = self.selected_start_date
-        self.active_end_date = self.selected_end_date
+        self.active_network = self.network
+        self.active_resolution = self.resolution
+        self.active_matrix = self.matrix
+        self.active_species = self.species
+        self.active_start_date = self.start_date
+        self.active_end_date = self.end_date
         self.active_experiments = copy.deepcopy(self.experiments_menu['checkboxes']['keep_selected'])
         self.experiments_legend = {exp:previous_experiments_legend[exp] if exp in previous_experiments_legend else exp for exp in self.active_experiments}
         self.active_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
@@ -1058,7 +1099,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set rep fields to empty lists and initialize again
         self.representativity_menu['rangeboxes']['labels'] = []
         self.representativity_menu['rangeboxes']['current_lower'] = []
-        aux.representativity_fields(self, self.selected_resolution)
+        aux.representativity_fields(self, self.resolution)
 
         # set period fields to empty and initiliaze them
         self.period_menu['checkboxes']['keep_selected'] = []
@@ -1066,7 +1107,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         aux.update_period_fields(self.active_resolution, self.period_menu)
 
         # reset metadata
-        for metadata_type_ii, metadata_type in enumerate(self.metadata_menu['navigation_buttons']['labels']):
+        for metadata_type in self.metadata_menu['navigation_buttons']['labels']:
             for label in self.metadata_menu[metadata_type]['navigation_buttons']['labels']:
                 self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
                 self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
@@ -1093,27 +1134,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.mpl_canvas.handle_data_filter_update()
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
-
-    def load_conf(self, section=None, fpath=None):
-        """ Load existing configurations from file. """
-
-        from .configuration import read_conf
-
-        if fpath is None:
-            fpath = parse_path(self.config_dir, self.config_file)
-
-        if not os.path.isfile(fpath):
-            print(("Error %s" % fpath))
-            return
-
-        opts = read_conf(section, fpath)
-        #if were unable to read file then return
-        if opts is None:
-            return
-
-        self.opts = opts
-        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in opts.items()})
-        self.from_conf = True
 
     def disable_ghost_buttons(self):
         """Disable button related only to ghost data"""
