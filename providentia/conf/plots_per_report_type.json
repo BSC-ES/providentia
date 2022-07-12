@@ -22,7 +22,9 @@
     "met": ["map-Data %_obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"],
 
     "operational": ["timeseries_annotate", "periodic-violin_annotate", "scatter",
-                    "map-MB_annotate", "map-RMSE_annotate", "map-r_annotate", "map-r2_annotate"],
+                    "map-MB_annotate", "map-RMSE_annotate", "map-r_annotate", "map-r2_annotate",
+                    "heatmap-MB-RMSE-r-r2"
+                    ],
 
     "test_debug": ["scatter"],
 
