@@ -55,7 +55,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
 
         # update from config file (if available)
-        if 'config' in kwargs:
+        if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             if 'section' in kwargs:
                 # config and section defined 
                 self.from_conf = True
@@ -72,14 +72,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 # config defined, section undefined
                 self.from_conf = True
                 self.from_section = False
-                aux.load_conf(self, fpath=kwargs['config'])    
+                aux.load_conf(self, fpath=kwargs['config'])   
                 all_sections = self.sub_opts.keys()
                 selected_section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
                                                                              'Select section to load',  
                                                                              all_sections, 0, False)
                 if okpressed:
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[selected_section].items()})
-                  
+        elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
+            print('Error: The configuration path specified in the command line does not exist.')
+            sys.exit()
         else:
             if os.path.isfile(dconf_path):
                 # config undefined
@@ -101,6 +103,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                                             'conf/basic_stats_dict.json')))
         self.expbias_dict = json.load(open(os.path.join(CURRENT_PATH,
                                                         'conf/experiment_bias_stats_dict.json')))
+
         # initialize DataReader
         self.datareader = DataReader(self)
         if self.offline:
