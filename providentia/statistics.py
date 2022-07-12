@@ -20,7 +20,7 @@ basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
 
-def to_pandas_dataframe(read_instance, canvas_instance, station_index = False):
+def to_pandas_dataframe(read_instance, canvas_instance, speci_index, station_index = False):
     """Function that takes data in memory puts it in a pandas dataframe.
     For summary plots this involves take the median timeseries across the timeseries.
     For station plots it is just the station in question.
@@ -45,61 +45,51 @@ def to_pandas_dataframe(read_instance, canvas_instance, station_index = False):
     #get index of active species data
     speci_index = read_instance.datareader.data_vars_to_read.index(read_instance.active_species)
 
-    # iterate through data arrays in data in memory filtered dictionary
-    for data_label in read_instance.data_in_memory_filtered.keys():
+    # if colocation is not active, do not convert colocated data arrays to pandas data frames
+    if not canvas_instance.temporal_colocation:
+        if 'colocated' in data_label:
+            continue
+    # else, if colocation is active, do not convert non-colocated data arrays to pandas data frames
+    elif canvas_instance.temporal_colocation:
+        if 'colocated' not in data_label:
+            continue
 
-        # if colocation is not active, do not convert colocated data arrays to pandas data frames
-        if not canvas_instance.temporal_colocation:
-            if 'colocated' in data_label:
-                continue
-        # else, if colocation is active, do not convert non-colocated data arrays to pandas data frames
-        elif canvas_instance.temporal_colocation:
-            if 'colocated' not in data_label:
-                continue
-
-        # get data for selected stations
-        if station_index:
-            data_array = read_instance.data_in_memory_filtered[data_label][speci_index, station_index, :]
+    # get data for selected stations
+    if station_index:
+        data_array = read_instance.data_in_memory_filtered[:, speci_index, station_index, :]
+    else:
+        if read_instance.offline:
+            relevant_inds = read_instance.datareader.plotting_params[data_label]['valid_station_inds']
         else:
-            if read_instance.offline:
-                relevant_inds = read_instance.datareader.plotting_params[data_label]['valid_station_inds']
+            if data_label.split('_')[0] == 'observations':
+                relevant_inds = canvas_instance.relative_selected_station_inds
             else:
-                if data_label.split('_')[0] == 'observations':
-                    relevant_inds = canvas_instance.relative_selected_station_inds
-                else:
-                    relevant_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
-            data_array = read_instance.data_in_memory_filtered[data_label][speci_index, relevant_inds, :]
+                relevant_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
+        data_array = read_instance.data_in_memory_filtered[:, speci_index, relevant_inds, :]
 
-        # if data array has no valid data for selected stations, do not create a pandas dataframe
-        # data array has valid data and is not all nan?
-        if not np.isnan(data_array).all():
+    # if data array has no valid data for selected stations, do not create a pandas dataframe
+    # data array has valid data and is not all nan?
+    if not np.isnan(data_array).all():
 
-            # add nested dictionary for data array name to selection station data dictionary
-            canvas_instance.selected_station_data[data_label] = {}
-            # if making summary plots, take cross station median of selected data for data array, and place it in a pandas
-            # dataframe -->  add to selected station data dictionary
-            if station_index:
-                canvas_instance.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(data_array, index=read_instance.time_array, columns=['data'])
-            else:
-                canvas_instance.selected_station_data[data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0),
-                                                                                       index=read_instance.time_array, columns=['data'])
-    
-            # get min/max across all selected station data
-            selected_station_data_all = [canvas_instance.selected_station_data[data_label]['pandas_df']['data'] for data_label in canvas_instance.selected_station_data.keys()]
-            selected_station_data_all_flat = [item for items in selected_station_data_all for item in items]
-            if len(selected_station_data_all_flat) > 0:
-                canvas_instance.selected_station_data_min = np.nanmin(selected_station_data_all_flat)
-                canvas_instance.selected_station_data_max = np.nanmax(selected_station_data_all_flat)
+        # take cross station median of selected data for data array, and place it in a pandas dataframe 
+        if station_index:
+            canvas_instance.selected_station_data['pandas_df'] = pd.DataFrame(data_array, index=read_instance.time_array, columns=)
+        else:
+            canvas_instance.selected_station_data['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), index=read_instance.time_array, columns=['data'])
+
+        # get min/max across all selected station data
+        canvas_instance.selected_station_data_min = canvas_instance.selected_station_data['pandas_df'].min() 
+        canvas_instance.selected_station_data_max = canvas_instance.selected_station_data['pandas_df'].max()
             
-    # temporally aggregate selected data dataframes (by hour, day of week, month)
+    # temporally aggregate selected data dataframes if have periodic plot to make 
+    # (by hour, day of week, month)
     pandas_temporal_aggregation(read_instance, canvas_instance)
 
     # if have some experiment data associated with selected stations, calculate
     # temporally aggregated basic statistic differences and bias statistics between
     # observations and experiment data arrays
-    if len(read_instance.experiments_legend) > 0:
+    if len(read_instance.data_labels) > 1:
         calculate_temporally_aggregated_experiment_bias_statistics(read_instance, canvas_instance)
-
 
 def pandas_temporal_aggregation(read_instance, canvas_instance):
     """Function that aggregates pandas dataframe data, for all data arrays,
@@ -112,10 +102,10 @@ def pandas_temporal_aggregation(read_instance, canvas_instance):
     :type canvas_instance: object
     """
 
-    print('PANDAS TMEPORAL AGG')
+    print('PANDAS TEMPORAL AGG')
 
     # define statistics to calculate (all basic statistics)
-    statistics_to_calculate = list(basic_stats.keys())
+    #statistics_to_calculate = list(basic_stats.keys())
 
     # define all temporal aggregation resolutions that will be used to aggregate data
     relevant_temporal_resolutions = read_instance.relevant_temporal_resolutions + ['all']
@@ -188,8 +178,7 @@ def pandas_temporal_aggregation(read_instance, canvas_instance):
                 # save statistical output by group to selected station data dictionary
                 canvas_instance.selected_station_data[data_label][temporal_aggregation_resolution][stat] = stat_output_by_group
 
-
-def calculate_temporally_aggregated_experiment_bias_statistics(read_instance, canvas_instance):
+def calculate_temporally_aggregated_experiment_statistic(canvas_instance, data_label, relevant_temporal_resolution, zstat):
     """Function that calculates temporally aggregated basic statistic
     differences and bias statistics between observations and experiment
     data arrays
@@ -200,7 +189,7 @@ def calculate_temporally_aggregated_experiment_bias_statistics(read_instance, ca
     :type canvas_instance: object
     """
 
-    print('CALC BIAS STATS')
+    print('CALC STAT')
 
     # define all basic statistics that will be subtracted
     # (each experiment - observations) for each temporal aggregation
@@ -223,10 +212,9 @@ def calculate_temporally_aggregated_experiment_bias_statistics(read_instance, ca
                     relevant_aggregated_observations_dict = \
                         canvas_instance.selected_station_data['observations'][temporal_aggregation_resolution]
                 else:
-                    exp = data_label.split('_colocatedto_')[0]
                     relevant_aggregated_observations_dict = \
                         canvas_instance.selected_station_data[
-                            'observations_colocatedto_{}'.format(exp)][temporal_aggregation_resolution]
+                            'observations_colocatedto_experiments'][temporal_aggregation_resolution]
 
                 # calculate temporally aggregated basic statistic differences between experiment and observations
                 # iterate through basic statistics
