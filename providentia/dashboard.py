@@ -708,6 +708,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         previous_experiments_legend = self.experiments_legend
         previous_active_qa = self.active_qa
         previous_active_flags = self.active_flags
+        previous_data_labels = self.data_labels
 
         # set all currently selected variables as active variables
         self.active_network = self.selected_network
@@ -720,6 +721,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.experiments_legend = {exp:previous_experiments_legend[exp] if exp in previous_experiments_legend else exp for exp in self.active_experiments}
         self.active_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
         self.active_flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
+        self.data_labels = ['observations'] + self.active_experiments
 
         # determine what data (if any) needs to be read
         # set variables that inform what data needs to be read (set all initially as False)
@@ -785,11 +787,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     cut_right = True
 
         # determine if any of the active experiments have changed
-        # remove experiments that are no longer selected from data_in_memory dictionary
-        experiments_to_remove = [experiment for experiment in previous_active_experiments if
-                                 experiment not in self.active_experiments]
-        for experiment in experiments_to_remove:
-            del self.datareader.data_in_memory[experiment]
+        # remove experiments that are no longer selected from data_in_memory array
+        experiments_to_remove_inds = [self.data_labels.index(experiment) for experiment in previous_active_experiments 
+                                      if experiment not in self.active_experiments]
+        self.datareader.data_in_memory = np.delete(self.datareader.data_in_memory, experiments_to_remove_inds, axis=0)
         # any new experiments will need completely re-reading
         experiments_to_read = [experiment for experiment in self.active_experiments if
                                experiment not in previous_active_experiments]
@@ -801,28 +802,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # adjust data arrays to account for potential changing number of stations
             self.datareader.read_setup(self.active_resolution, self.active_start_date,
                                        self.active_end_date, self.active_network,
-                                       self.active_species, self.active_matrix)
+                                       self.active_species, self.active_matrix, reset=read_all)
 
             # need to re-read all observations/experiments?
             if read_all:
                 # reset data in memory dictionary
                 self.datareader.reset_data_in_memory()
                 self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
-                # read observations
-                self.datareader.read_data('observations', self.active_start_date,
+                # read all observations and experiments
+                self.datareader.read_data(self.data_labels, self.active_start_date,
                                           self.active_end_date, self.active_network,
                                           self.active_resolution, self.active_species,
                                           self.active_matrix)
-                # read selected experiments (iterate through)
-                for data_label in self.active_experiments:
-                    self.datareader.read_data(data_label, self.active_start_date,
-                                              self.active_end_date, self.active_network,
-                                              self.active_resolution, self.active_species,
-                                              self.active_matrix)
-
-                    # if experiment in experiments_to_read list, remove it (as no longer need to read it)
-                    if data_label in experiments_to_read:
-                        experiments_to_read.remove(data_label)
 
             #read/cut on left/right
             else:
@@ -850,19 +841,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     new_metadata_array[new_station_inds, :] = self.datareader.metadata_in_memory[old_station_inds, :]
                     self.datareader.metadata_in_memory = new_metadata_array
 
-                    # iterate through all keys in data in memory dictionary, and rearrage data array station dimensions
-                    for data_label in list(self.datareader.data_in_memory.keys()):
-
-                        new_data_array = np.full((len(self.data_vars_to_read),
-                                                  len(self.station_references),
-                                                  len(self.previous_time_array)),
-                                                  np.NaN, dtype=np.float32)
-
-                        # put the old data into new array in the correct positions
-                        new_data_array[: ,new_station_inds, :] = self.datareader.data_in_memory[
-                                                                 data_label][:, old_station_inds, :]
-                        # overwrite data array with reshaped version
-                        self.datareader.data_in_memory[data_label] = new_data_array
+                    # rearrage data array station dimension
+                    new_data_array = np.full((len(self.data_labels),
+                                              len(self.datareader.data_vars_to_read),
+                                              len(self.station_references),
+                                              len(self.previous_time_array)),
+                                              np.NaN, dtype=np.float32)
+                    # put the old data into new array in the correct positions
+                    new_data_array[:, : ,new_station_inds, :] = self.datareader.data_in_memory[:, :, old_station_inds, :]
+                    # overwrite data array with reshaped version
+                    self.datareader.data_in_memory = new_data_array
 
             # need to cut edges?
             if cut_left or cut_right:
@@ -875,6 +863,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
                 # need to cut on left data edge?
                 if cut_left:
+                    print('CUTTING LEFT')
                     data_left_edge_ind = np.where(self.previous_time_array == self.time_array[0])[0][0]
                     str_first_relevant_yearmonth = str(self.relevant_yearmonths[0])
                     str_previous_first_relevant_yearmonth = str(self.previous_relevant_yearmonths[0])
@@ -887,6 +876,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
                 # need to cut on right data edge?
                 if cut_right:
+                    print('CUTTING RIGHT')
                     data_right_edge_ind = np.where(self.previous_time_array == self.time_array[-1])[0][0] + 1
                     str_last_relevant_yearmonth = str(self.relevant_yearmonths[-1])
                     str_previous_last_relevant_yearmonth = str(self.previous_relevant_yearmonths[-1])
@@ -905,14 +895,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     self.datareader.metadata_in_memory = \
                         self.datareader.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
 
-                # iterate through all keys in data in memory dictionary and
-                # cut edges of the associated arrays appropriately
-                for data_label in list(self.datareader.data_in_memory.keys()):
-                    self.datareader.data_in_memory[data_label] = \
-                        self.datareader.data_in_memory[data_label][:, data_left_edge_ind:data_right_edge_ind]
+                # cut edges of the data array appropriately
+                self.datareader.data_in_memory = self.datareader.data_in_memory[:, :, :, data_left_edge_ind:data_right_edge_ind]
 
             # need to read on left edge?
             if read_left:
+                print('READING LEFT')
 
                 # get n number of new elements on left edge
                 n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
@@ -930,7 +918,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
                 #need to read new yearmonths?
-                if new_yearmonths:
+                if len(new_yearmonths) > 0:
 
                     #add space on left edge to add data to metadata array
                     self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
@@ -938,20 +926,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                         (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
                                                             self.datareader.metadata_in_memory), axis=1)
 
-                    # iterate through all keys in data in memory dictionary and
-                    # insert read data on left edge of the associated arrays
-                    for data_label in list(self.datareader.data_in_memory.keys()):
-                        # add space on left edge to insert new read data
-                        self.datareader.data_in_memory[data_label] = np.concatenate((np.full(
-                            (len(self.data_vars_to_read), len(self.station_references), n_new_left_data_inds), np.NaN,
-                            dtype=np.float32), self.datareader.data_in_memory[data_label]), axis=1)
-                        #read data
-                        self.datareader.read_data(data_label, self.active_start_date, previous_active_start_date,
-                                                  self.active_network, self.active_resolution,
-                                                  self.active_species, self.active_matrix)
+                    # insert read data on left edge of the data array
+                    # add space on left edge to insert new read data
+                    self.datareader.data_in_memory = np.concatenate((np.full(
+                        (len(self.data_labels), len(self.datareader.data_vars_to_read), len(self.station_references), n_new_left_data_inds), 
+                        np.NaN, dtype=np.float32), self.datareader.data_in_memory), axis=3)
+                    #read data
+                    self.datareader.read_data(self.data_labels, self.active_start_date, previous_active_start_date,
+                                              self.active_network, self.active_resolution,
+                                              self.active_species, self.active_matrix)
 
             # need to read on right edge?
             if read_right:
+                print('READING RIGHT')
 
                 # get n number of new elements on right edge
                 n_new_right_data_inds = (len(self.time_array) - 1) - \
@@ -970,22 +957,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
 
                 #need to read new yearmonths?
-                if new_yearmonths:
+                if len(new_yearmonths) > 0:
 
                     #add space on right edge to add data to metadata array
                     self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
                     self.datareader.metadata_in_memory = np.concatenate((self.datareader.metadata_in_memory, np.full(
                         (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
 
-                    # iterate through all keys in data in memory dictionary and
-                    # insert read data on right edge of the associated arrays
-                    for data_label in list(self.datareader.data_in_memory.keys()):
-                        self.datareader.data_in_memory[data_label] = np.concatenate((self.datareader.data_in_memory[data_label], np.full(
-                            (len(self.data_vars_to_read), len(self.station_references), n_new_right_data_inds), np.NaN, dtype=np.float32)),
-                                                                        axis=1)
-                        self.datareader.read_data(data_label, previous_active_end_date, self.active_end_date,
-                                                    self.active_network, self.active_resolution,
-                                                    self.active_species, self.active_matrix)
+                    # insert read data on right edge of the data array
+                    self.datareader.data_in_memory = np.concatenate((self.datareader.data_in_memory, np.full(
+                        (len(self.data_labels), len(self.datareader.data_vars_to_read), len(self.station_references), n_new_right_data_inds), 
+                        np.NaN, dtype=np.float32)), axis=3)
+                    self.datareader.read_data(self.data_labels, previous_active_end_date, self.active_end_date,
+                                              self.active_network, self.active_resolution,
+                                              self.active_species, self.active_matrix)
 
             # update menu object fields
             aux.update_metadata_fields(self)
@@ -1026,12 +1011,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # generate list of sorted z1/z2 data arrays names in memory, putting observations
         # before experiments, and empty string item as first element in z2 array list
         # (for changing from 'difference' statistics to 'absolute')
-        if len(list(self.datareader.data_in_memory.keys())) == 1:
+        if self.datareader.data_in_memory.shape[0] == 1:
             self.z1_arrays = np.array(['observations'])
         else:
-            data_array_labels = np.array(list(self.datareader.data_in_memory.keys()))
             self.z1_arrays = np.append(['observations'],
-                                       np.delete(data_array_labels, np.where(data_array_labels == 'observations')))
+                                       np.delete(self.data_labels, np.where(self.data_labels == 'observations')))
         self.z2_arrays = np.append([''], self.z1_arrays)
 
         # initialise map z statistic comboboxes
@@ -1039,7 +1023,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # update experiment bias combobox fields based on data in memory
         # if have no experiment data, all fields are empty
-        if len(list(self.datareader.data_in_memory.keys())) == 1:
+        if self.datareader.data_in_memory.shape[0] == 1:
             self.experiment_bias_types = np.array([])
         # else, generate combobox lists
         else:

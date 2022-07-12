@@ -34,7 +34,6 @@ def init_shared_vars_read_netcdf_data(file_data, file_data_shape, timestamp_arra
     shared_memory_vars['qa'] = qa
     shared_memory_vars['flag'] = flags
 
-
 def read_netcdf_data(tuple_arguments):
     """Function that handles reading of observational/experiment
     netCDF data also handles filtering of observational data based
@@ -185,7 +184,6 @@ def read_netcdf_nonghost(tuple_arguments):
         # remove microseconds
         file_time = pd.to_datetime([t.replace(microsecond=0) for t in file_time])
     
-
     # get valid file time indices (i.e. those times in active full time array)
     valid_file_time_indices = \
         np.array([i for i, val in enumerate(file_time)
