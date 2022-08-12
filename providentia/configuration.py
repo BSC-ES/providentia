@@ -17,7 +17,6 @@ def parse_path(dir, f):
     else:
         return os.path.join(dir, f)
 
-
 class ProvConfiguration(object):
     """ Configuration parameters definitions """
 
@@ -28,23 +27,37 @@ class ProvConfiguration(object):
         self.cartopy_data_dir = kwargs.get('cartopy_data_dir', '')
         self.available_cpus = kwargs.get('available_cpus', '')
         self.n_cpus = kwargs.get('n_cpus', '')
-        self.obs_root = kwargs.get('obs_root', '')
+        self.ghost_root = kwargs.get('ghost_root', '')
         self.nonghost_root = kwargs.get('nonghost_root', '')
         self.exp_root = kwargs.get('exp_root', '')
         self.offline = kwargs.get('offline', '')
+        self.available_resolutions =\
+            kwargs.get('available_resolutions',
+                       ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
+                       '3hourly_instantaneous', '6hourly_instantaneous',
+                       'daily', 'monthly'])
         self.available_networks =\
             kwargs.get('available_networks',
-                       "['AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN','CHILE_SINCA',"
-                       "'EANET','EBAS','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX',"
-                       "'MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA'," 
-                       "'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG',"
-                       "'PORT_BARCELONA']")
-        self.species = kwargs.get('species', '')
+                       ['AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN','CHILE_SINCA',
+                       'EANET','EBAS','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX',
+                       'MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA', 
+                       'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG'])
         self.network = kwargs.get('network', '')
-        self.matrix = kwargs.get('matrix', '')
+        self.species = kwargs.get('species', '')
         self.resolution = kwargs.get('resolution', '')
         self.start_date = kwargs.get('start_date', '')
         self.end_date = kwargs.get('end_date', '')
+        self.experiments = kwargs.get('experiments', '')
+        self.temporal_colocation = kwargs.get('temporal_colocation', False)
+        self.spatial_colocation = kwargs.get('spatial_colocation', True)
+        self.filter_species = kwargs.get('filter_species', '')
+        self.report_type = kwargs.get('report_type', 'standard')
+        self.report_summary = kwargs.get('report_summary', True)
+        self.report_stations = kwargs.get('report_stations', False)
+        self.report_title = kwargs.get('report_title ', 'Report')
+        self.report_filename = kwargs.get('report_filename', 'PROVIDENTIA_Report')
+        self.map_extent = kwargs.get('map_extent', '-180, 180, -90, 90')
+        self.plot_characteristics_filename = kwargs.get('plot_characteristics_filename', '')
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))
@@ -68,7 +81,7 @@ class ProvConfiguration(object):
 
             if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3v2'):
                 value = '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
-            # on all machines except CTE-POWER/MN4, pull from internet
+            # on all other machines pull from internet
 
         elif key == 'n_cpus':
             # Define number of CPUs to process on (leave empty to automatically
@@ -78,11 +91,11 @@ class ProvConfiguration(object):
             if (value == '') or (int(value) > self.available_cpus):
                 value = self.available_cpus
 
-        elif key == 'obs_root':
-            # Define observational root data directory (if undefined it is
+        elif key == 'ghost_root':
+            # Define GHOST observational root data directory (if undefined it is
             # automatically taken from the BSC machine the tool is ran on)
 
-            # set observational root data directory if left undefined
+            # set default if left undefined
             if value == '':
                 # running on CTE-POWER/MN4/N3?
                 if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3v2'):
@@ -92,17 +105,15 @@ class ProvConfiguration(object):
                     value = '/esarchive/obs/ghost'
 
         elif key == 'nonghost_root':
-            # Define observational root data directory (if undefined it is
+            # Define non-GHOST observational root data directory (if undefined it is
             # automatically taken from the BSC machine the tool is ran on)
 
-            # set observational root data directory if left undefined
+            # set default if left undefined
             if value == '':
-                if (MACHINE == 'power') or (MACHINE == 'nord3v2'):
-                    value = '/esarchive/obs'
-                elif MACHINE == 'mn4':
-                    value = None
+                # running on MN4?
+                if (MACHINE == 'mn4'):
+                    value = '/gpfs/projects/bsc32/AC_cache/obs/nonghost'
                 else:
-                    # running on workstation?
                     value = '/esarchive/obs'
 
         elif key == 'exp_root':
@@ -117,7 +128,6 @@ class ProvConfiguration(object):
                 value = '/esarchive/recon/prov_interp'
 
         return value
-
 
 def read_conf(fpath=None):
     """Read configuration"""
@@ -138,7 +148,7 @@ def read_conf(fpath=None):
                 res_sub[k] = val
 
         res['default'] = res_sub
-        all_sections_modified, parent_sections, subsections_modified, filenames = None, None, None, None
+        all_sections_modified, parent_sections, subsections_modified = None, None, None
         
     else:
         config = {}
@@ -149,7 +159,6 @@ def read_conf(fpath=None):
         subsections = []
         subsections_modified = []
         parent_sections = []
-        filenames = []
 
         # get section names (e.g. [SECTIONA], [[Spain]]) and modified names (e.g. SECTIONA, SECTIONA-Spain)
         with open(fpath) as file:
@@ -161,8 +170,8 @@ def read_conf(fpath=None):
                         parent_sections.append(section_modified)
                         all_sections_modified.append(section_modified)
                     else:
-                        print('Error: It is not possible to have two sections with the same name.')
-                        sys.exit()
+                        error = 'Error: It is not possible to have two sections with the same name.'
+                        sys.exit(error)
                 elif '[[' in line and ']]' in line:
                     subsection = line.strip()
                     subsection_modified = par_section + '|' + line.split('[[')[1].split(']]')[0]
@@ -244,11 +253,7 @@ def read_conf(fpath=None):
                             res_sub[par_k] = eval(par_val)
                         except:
                             res_sub[par_k] = par_val
-                else:
-                    # store filename
-                    if k == 'filename':
-                        filenames.append(val)
-                        
+                
                 # store pairs from current section
                 try:
                     res_sub[k] = eval(val)
@@ -260,10 +265,9 @@ def read_conf(fpath=None):
 
             # reset res variable
             res_sub = {}
+    
+    return res, all_sections_modified, parent_sections, subsections_modified
 
-    return res, all_sections_modified, parent_sections, subsections_modified, filenames
-
-          
 def write_conf(section, subsection, fpath, opts):
     """Write configurations on file. """
 
@@ -276,11 +280,10 @@ def write_conf(section, subsection, fpath, opts):
             for item in opts[section]:
                 val = opts[section][item]
                 config.set(section_name, item, val)
-            
+
     # write configuration
     with open(fpath, 'w') as configfile:
         config.write(configfile)
-
 
 def split_options(conf_string, separator="||"):
     """For the options in the configuration that define the keep and remove

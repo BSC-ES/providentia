@@ -2,14 +2,14 @@
 import os
 import configparser
 
-from providentia import aux
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 import matplotlib
 from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from .writing import export_data_npz, export_netcdf, export_configuration
 
+from .writing import export_data_npz, export_netcdf, export_configuration
+from .aux import representativity_conf, period_conf, metadata_conf, load_conf
 
 class NavigationToolbar(NavigationToolbar2QT):
     """Define class that updates available buttons on matplotlib toolbar"""
@@ -27,8 +27,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         (None, None, None, None)
     )
 
-
-def save_data(mpl_canvas):
+def save_data(canvas_instance):
     """Pops window for choosing directory, filename and type
     for saving data, metadata and configuration.
     Available filetypes: Numpy file: .npz, netCDF: .nc"""
@@ -36,10 +35,10 @@ def save_data(mpl_canvas):
     filetypes = {'NetCDF': 'nc', 'Numpy file': 'npz', 'Configuration': 'conf'}
     sorted_filetypes = sorted(filetypes.items())
     startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
-    daterange = mpl_canvas.read_instance.le_start_date.text() + "_" \
-                + mpl_canvas.read_instance.le_end_date.text()
+    daterange = canvas_instance.read_instance.le_start_date.text() + "_" \
+                + canvas_instance.read_instance.le_end_date.text()
     try:
-        eg_name = "PRV_" + mpl_canvas.read_instance.active_species + "_" + daterange
+        eg_name = "PRV_" + canvas_instance.read_instance.species + "_" + daterange
     except:
         eg_name = "default_filename"
     start = os.path.join(startpath, eg_name)
@@ -57,16 +56,15 @@ def save_data(mpl_canvas):
             try:
                 QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
                 if chose_npz:
-                    export_data_npz(mpl_canvas, fname)
+                    export_data_npz(canvas_instance, fname)
                 elif chose_conf:
-                    export_configuration(mpl_canvas.read_instance, fname)
+                    export_configuration(canvas_instance.read_instance, fname)
                 else:
-                    export_netcdf(mpl_canvas, fname)
+                    export_netcdf(canvas_instance, fname)
                 QtWidgets.QApplication.restoreOverrideCursor()
             except Exception as e:
-                QtWidgets.QMessageBox.critical(mpl_canvas, "Error saving file", str(e),
+                QtWidgets.QMessageBox.critical(canvas_instance, "Error saving file", str(e),
                                                QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
-
 
 def conf_dialogs(instance):
     """Pops window for selecting configuration file. If file selcted, pops an
@@ -79,7 +77,7 @@ def conf_dialogs(instance):
         return
 
     try:
-        aux.load_conf(instance, fpath=conf_to_load)
+        aux.load_conf(fpath=conf_to_load)
         all_sections = instance.sub_opts.keys()
         selected_section, okpressed = QtWidgets.QInputDialog.getItem(instance, 'Sections',
                                                                      'Select section to load',  
@@ -90,7 +88,6 @@ def conf_dialogs(instance):
         QtWidgets.QMessageBox.critical(instance, "Error loading configuration file",
                                        str(e), QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
 
-
 def filename_dialog(instance):
     options = QFileDialog.Options()
     options |= QFileDialog.DontUseNativeDialog
@@ -98,7 +95,6 @@ def filename_dialog(instance):
                                               "All Files (*);;Python Files (*.py)", options=options)
     if filename:
         return filename
-
 
 def reload_conf(instance, section, fpath):
     """Resets previous selections, fills values according to new conf file,
@@ -127,15 +123,13 @@ def reload_conf(instance, section, fpath):
     # read
     instance.handle_data_selection_update()
 
-    # reset the meta fields after loading
+    # reset the filter fields 
     instance.reset_options()
 
-    # set fields from conf as you do in init
+    # set fields available for filtering
     aux.representativity_conf(instance)
-    if hasattr(instance, 'period'):
-        instance.period_conf()
-    if set([m.lower() for m in instance.metadata_vars_to_read]).intersection(vars(instance).keys()):
-        aux.meta_from_conf(instance)
+    aux.period_conf(instance)
+    aux.metadata_conf(instance)
         
-    # call function to apply changes (filter)
+    # filter
     instance.mpl_canvas.handle_data_filter_update()
