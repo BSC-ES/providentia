@@ -1,9 +1,7 @@
 """ Module which provides main window """
 from .configuration import ProvConfiguration
-from .configuration import parse_path
 from .configuration import split_options
 from .init_standards import InitStandards
-from .read_aux import get_yearmonths_to_read
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
 from .toolbar import save_data, conf_dialogs
@@ -21,13 +19,12 @@ import os
 import os.path
 import json
 import sys
-from glob import glob
 from functools import partial
 from collections import OrderedDict
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
-from dateutil.relativedelta import relativedelta
+import pandas as pd
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -60,9 +57,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 if kwargs['section'] in self.all_sections:
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[kwargs['section']].items()})
                 else:
-                    print('Error: The section specified in the command line does not exist.')
-                    print('Tip: For subsections, add the name of the parent section followed by a vertical bar (|) before the subsection name (e.g. SECTIONA|Spain).')
-                    sys.exit()
+                    error = 'Error: The section specified in the command line does not exist.'
+                    tip = 'Tip: For subsections, add the name of the parent section followed by a vertical bar (|) before the subsection name (e.g. SECTIONA|Spain).'
+                    sys.exit(error + '\n' + tip)
 
             elif 'section' not in kwargs:
                 # config defined, section undefined
@@ -76,8 +73,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 if okpressed:
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[selected_section].items()})
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-            print('Error: The configuration path specified in the command line does not exist.')
-            sys.exit()
+            error = 'Error: The configuration path specified in the command line does not exist.'
+            sys.exit(error)
         else:
             if os.path.isfile(dconf_path):
                 # config undefined
@@ -85,30 +82,39 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.from_section = False
                 aux.load_conf(self, fpath=dconf_path)
                 vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts['default'].items()})
-            
+
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
+
+        # load characteristics per plot type
+        # check for self defined plot characteristics file
+        if self.plot_characteristics_filename == '':
+            self.plot_characteristics_filename = os.path.join(
+                CURRENT_PATH, 'conf/plot_characteristics_dashboard.json')
+        self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
 
         # arguments are only local
         self.main_window_geometry = None
         
         # init GHOST standards
-        InitStandards.__init__(self, obs_root=self.obs_root,
+        InitStandards.__init__(self, ghost_root=self.ghost_root,
                                ghost_version=self.ghost_version)
 
-        # load characteristics per plot type
-        #check for self defined plot characteristics file
-        if hasattr(self, 'plot_characteristics_filename'):
-            self.plot_characteristics_templates = json.load(self.plot_characteristics_filename)
-        else:
-            self.plot_characteristics_templates = json.load(open(os.path.join(
-                CURRENT_PATH, 'conf/plot_characteristics_dashboard.json')))
+        # create dictionary of all available observational GHOST data
+        self.all_observation_data = aux.get_ghost_observational_tree(self)
 
-        # initialize DataReader
+        # load dictionary with non-GHOST esarchive files to read
+        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, 'conf/nonghost_files.json')))
+        # and merge to existing GHOST observational data dict if we have the path
+        if self.nonghost_root is not None:
+            nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
+            self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
+
+        # initialise DataReader
         self.datareader = DataReader(self)
 
         #initialise UI
-        self.init_ui()
+        self.init_ui(**kwargs)
 
         # setup callback events upon resizing/moving of Providentia window
         self.resized.connect(self.get_geometry)
@@ -128,7 +134,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         """Get current geometry of main Providentia window"""
         self.main_window_geometry = copy.deepcopy(self.geometry())
 
-    def init_ui(self):
+    def init_ui(self, **kwargs):
         """Initialise user interface"""
 
         print("Starting Providentia online...")
@@ -312,44 +318,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.le_start_date.textChanged.connect(self.config_bar_params_change_handler)
         self.le_end_date.textChanged.connect(self.config_bar_params_change_handler)
 
-        # setup pop-up window menu tree for flags
-        self.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
-        self.flag_menu['checkboxes']['labels'] = np.array(sorted(self.standard_data_flag_name_to_data_flag_code, key=self.standard_data_flag_name_to_data_flag_code.get))
-        self.flag_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
-        self.flag_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
-        self.flag_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_data_flag_name_to_data_flag_code.values()))
-        self.flag_menu['select_buttons'] = ['all', 'clear', 'default']
-
-        # setup pop-up window menu tree for qa
-        self.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
-        self.qa_menu['checkboxes']['labels'] = np.array(sorted(self.standard_QA_name_to_QA_code, key=self.standard_QA_name_to_QA_code.get))
-        self.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
-        self.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
-        self.qa_menu['checkboxes']['map_vars'] = np.sort(list(self.standard_QA_name_to_QA_code.values()))
-        self.qa_menu['select_buttons'] = ['all', 'clear', 'default']
-
-        # setup pop-up window menu tree for experiments
-        self.experiments_menu = {'window_title': 'EXPERIMENTS', 'page_title': 'Select Experiment/s',
-                                 'checkboxes': {'labels': [],
-                                                'keep_default': [],
-                                                'keep_selected': [],
-                                                'map_vars': [],
-                                                'select_buttons': ['all', 'clear']}}
-        self.experiments_legend = {}
-
-        # setup pop-up window menu tree for metadata
-        self.metadata_types, self.metadata_menu = aux.init_metadata(self)
-        # setup pop-up window menu tree for % data representativity
-        self.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY',
-                                      'page_title': 'Select % Data Representativity Bounds',
-                                      'rangeboxes': {'labels': [],
-                                                     'tooltips': [],
-                                                     'current_lower': []}}
-        # setup pop-up window menu tree for data periods
-        self.period_menu = {'window_title': 'DATA PERIOD', 'page_title': 'Select Data Periods',
-                            'checkboxes': {'labels': [],
-                                           'keep_selected': [],
-                                           'remove_selected': []}}
+        # setup pop-up window menu tree for flags, qa, experiments, 
+        # % data representativity, data periods and metadata
+        aux.init_flags(self)
+        aux.init_qa(self)
+        aux.init_experiments(self)
+        aux.init_representativity(self)
+        aux.init_period(self)
+        self.metadata_vars_to_read = []
+        aux.init_metadata(self)
 
         # enable pop up configuration windows
         self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
@@ -374,8 +351,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.bu_read.clicked.connect(self.handle_data_selection_update)
         # enable RESET button
         self.bu_reset.clicked.connect(self.reset_options)
-        # enable interactivity of colocation checkbox
-        self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_colocate_update)
+        # enable interactivity of temporal colocation checkbox
+        self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_temporal_colocate_update)
         # enable FILTER button
         self.bu_screen.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
@@ -429,17 +406,22 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
 
-        # if we're starting from a configuration file, read first the setup
-        if self.from_conf:
+        # update variable to inform plotting functions whether to use colocated data/or not
+        check_state = self.ch_colocate.checkState()
+        if check_state == QtCore.Qt.Checked:
+            self.temporal_colocation = True
+        else:
+            self.temporal_colocation = False
+
+        # starting from a configuration file?
+        if self.from_conf: 
+            # read
             self.handle_data_selection_update()
-            # then see if we have fields that require to be set (meta, rep, period)
+            # set fields available for filtering
             aux.representativity_conf(self)
-            if hasattr(self, 'period'):
-                self.period_conf()
-            # if there are there are metadata reported in configuratoin
-            if set([m.lower() for m in self.metadata_vars_to_read]).intersection(vars(self).keys()):
-                aux.meta_from_conf(self)
-            # call function to apply changes (filter)
+            aux.period_conf(self)
+            aux.metadata_conf(self)
+            # filter
             self.mpl_canvas.handle_data_filter_update()
 
         # set finalised layout
@@ -448,11 +430,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.show()
         # maximise window to fit screen
         self.showMaximized()
-
-    def period_conf(self):
-        keeps, removes = split_options(self.period)
-        self.period_menu['checkboxes']['keep_selected'] += keeps
-        self.period_menu['checkboxes']['remove_selected'] += removes
 
     def savebutton_func(self):
         save_data(self.mpl_canvas)
@@ -470,119 +447,53 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
 
-        self.reading_nonghost = aux.check_for_ghost(self.network)
-        if self.reading_nonghost:
-            self.disable_ghost_buttons()
-        else:
+        #turn off some features if using non-GHOST data
+        if aux.check_for_ghost(self.network):
             self.enable_ghost_buttons()
+        else:
+            self.disable_ghost_buttons()
 
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
-            # set initially selected/active start-end date as default
+            # set initial selected start-end date as default
             self.le_start_date.setText(str(self.start_date))
             self.le_end_date.setText(str(self.end_date))
-            self.start_date = int(self.le_start_date.text())
-            self.end_date = int(self.le_end_date.text())
-            self.start_date_firstdayofmonth = int(str(self.start_date)[:6]+'01')
-            self.active_start_date = int(self.le_start_date.text())
-            self.active_end_date = int(self.le_end_date.text())
             self.date_range_has_changed = False
 
-            # set selected/active values of other fields to be initially None
-            self.active_network = None
-            self.active_resolution = None
-            self.active_matrix = None
-            self.active_species = None
+            # set temporal colocation tickbox
+            if self.temporal_colocation:
+                self.ch_colocate.setCheckState(QtCore.Qt.Checked)
+            else:
+                self.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
 
-            # set selected/active values of variables associated
-            # with pop up windows to be empty lists
-            self.active_experiments = []
-            self.active_qa = []
-            self.active_flags = []
-
-            # set initial time array to be None
+            # set initial time array and yearmonths to be None 
             self.time_array = None
-            self.relevant_yearmonths = None
-            # set initial station references to be empty list
-            self.station_references = []
+            self.yearmonths = None
+            # set initial station references to be empty dict
+            self.station_references = {}
 
-            # Gather all observational data
-            # create nested dictionary storing all observational species
-            # data by species matrix, by temporal resolution, by network,
-            # associated with list of start YYYYMM yearmonths of data files
-            self.all_observation_data = {}
-            # set all available networks
-            available_networks = eval(self.available_networks)
-            # set all available temporal resolutions
-            available_resolutions = ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
-                                     '3hourly_instantaneous', '6hourly_instantaneous',
-                                     'daily', 'monthly']
-            # iterate through available networks
-            for network in available_networks:
+            # set initial selected config variables as None
+            self.selected_network = None
+            self.selected_resolution = None
+            self.selected_matrix = None
+            self.selected_species = None
+            self.data_labels = None
 
-                # check if directory for network exists
-                # if not, continue
-                if not os.path.exists('%s/%s/%s' % (self.obs_root, network, self.ghost_version)):
-                    continue
-                # write empty dictionary for network
-                self.all_observation_data[network] = {}
+            # parse multiple networks/species
+            self.network, self.species = aux.get_parameters(self) 
 
-                # iterate through available resolutions
-                for resolution in available_resolutions:
+            # create dictionary of available observational data inside date range
+            aux.get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
 
-                    # check if directory for resolution exists
-                    # if not, continue
-                    if not os.path.exists('%s/%s/%s/%s' % (self.obs_root, network, self.ghost_version, resolution)):
-                        continue
-
-                    # write nested empty dictionary for resolution
-                    self.all_observation_data[network][resolution] = {}
-
-                    # get available species for network/resolution
-                    available_species = os.listdir('%s/%s/%s/%s' % (self.obs_root, network, self.ghost_version, resolution))
-
-                    # iterate through available files per species
-                    for species in available_species:
-                        # get all netCDF monthly files per species
-                        species_files = os.listdir(
-                            '%s/%s/%s/%s/%s' % (self.obs_root, network, self.ghost_version, resolution, species))
-                        # get monthly start date (YYYYMM) of all species files
-                        species_files_yearmonths = \
-                            [int(f.split('_')[-1][:6]+'01') for f in species_files if f != 'temporary']
-                        # get matrix for current species
-                        matrix = self.parameter_dictionary[species]['matrix']
-                        if matrix not in list(self.all_observation_data[network][resolution].keys()):
-                            # write nested empty dictionary for matrix
-                            self.all_observation_data[network][resolution][matrix] = {}
-
-                        # write nested dictionary for species, with associated file yearmonths
-                        self.all_observation_data[network][resolution][matrix][species] = species_files_yearmonths
-
-            # load dictionary with esarchive files
-            esarchive_files_empty = json.load(open(os.path.join(CURRENT_PATH, 'conf/esarchive_files.json')))
-            # and merge to existing dict if we have the path
-            if self.nonghost_root is not None:
-                esarchive_files = self.get_esarchive_yearmonth(esarchive_files_empty)
-                self.all_observation_data = {**self.all_observation_data, **esarchive_files}
-            # create dictionary of observational data inside date range
-            valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
-                                                                                self.le_end_date.text())
-            if valid_obs_files:              
-                self.start_date = int(self.le_start_date.text())
-                self.end_date = int(self.le_end_date.text())
-                self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
-
-            # check which flags to select, depending if we have conf file or no
-            self.flag_menu['checkboxes']['remove_selected'] = aux.which_flags(self)
+            #set qa / flags
+            self.flags = aux.which_flags(self)
+            self.qa = aux.which_qa(self)
+            self.flag_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.flags)
+            self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa)
 
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
-            valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(),
-                                                                                self.le_end_date.text())
-            if valid_obs_files:              
-                self.start_date = int(self.le_start_date.text())
-                self.end_date = int(self.le_end_date.text())
-                self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
+            aux.get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
 
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
@@ -592,7 +503,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.cb_species.clear()
 
         # if have no available observational data, return from function, updating variable informing that have no data
-        if len(self.datareader.available_observation_data) == 0:
+        if len(self.available_observation_data) == 0:
             self.no_data_to_read = True
             # unset variable to allow interactive handling from now
             self.block_config_bar_handling_updates = False
@@ -601,90 +512,62 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.no_data_to_read = False
 
         # update network field
-        available_networks = list(self.datareader.available_observation_data.keys())
+        available_networks = list(self.available_observation_data.keys())
         self.cb_network.addItems(available_networks)
-        if self.network in available_networks:
-            self.cb_network.setCurrentText(self.network)
+        if self.selected_network in available_networks:
+            self.cb_network.setCurrentText(self.selected_network)
         else:
-            self.network = self.cb_network.currentText()
+            self.selected_network = self.cb_network.currentText()
 
         # update resolution field
-        available_resolutions = list(self.datareader.available_observation_data[self.cb_network.currentText()].keys())
-        # manually force order of available resolutions
-        resolution_order_dict = {'hourly': 1, '3hourly': 2, '6hourly': 3, 'hourly_instantaneous': 4,
-                                 '3hourly_instantaneous': 5, '6hourly_instantaneous': 6,
-                                 'daily': 7, 'monthly': 8}
-        available_resolutions = sorted(available_resolutions, key=resolution_order_dict.__getitem__)
+        available_resolutions = list(self.available_observation_data[self.selected_network].keys())
+        # set order of available resolutions
+        available_resolutions = sorted(available_resolutions, key=aux.temporal_resolution_order_dict().__getitem__)
         self.cb_resolution.addItems(available_resolutions)
-        if self.resolution in available_resolutions:
-            self.cb_resolution.setCurrentText(self.resolution)
+        if self.selected_resolution in available_resolutions:
+            self.cb_resolution.setCurrentText(self.selected_resolution)
         else:
-            self.resolution = self.cb_resolution.currentText()
+            self.selected_resolution = self.cb_resolution.currentText()
 
         # update matrix field
-        available_matrices = sorted(
-            self.datareader.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()])
+        available_matrices = sorted(self.available_observation_data[self.selected_network][self.selected_resolution])
         self.cb_matrix.addItems(available_matrices)
-        if self.matrix in available_matrices:
-            self.cb_matrix.setCurrentText(self.matrix)
+        if self.selected_matrix in available_matrices:
+            self.cb_matrix.setCurrentText(self.selected_matrix)
         else:
-            self.matrix = self.cb_matrix.currentText()
+            self.selected_matrix = self.cb_matrix.currentText()
 
         # update species field
-        available_species = sorted(self.datareader.available_observation_data[self.cb_network.currentText()][
-                                       self.cb_resolution.currentText()][self.cb_matrix.currentText()])
+        available_species = sorted(self.available_observation_data[self.selected_network][self.selected_resolution][self.selected_matrix])
         self.cb_species.addItems(available_species)
-        if self.species in available_species:
-            self.cb_species.setCurrentText(self.species)
+        if self.selected_species in available_species:
+            self.cb_species.setCurrentText(self.selected_species)
         else:
-            self.species = self.cb_species.currentText()
+            self.selected_species = self.cb_species.currentText()
 
-        # update available obs/experiment data dictionaries
-        self.datareader.get_valid_experiment_files_in_date_range(self.le_start_date.text(), self.le_end_date.text(), 
-                                                                 self.resolution, self.network, 
-                                                                 self.species)
-        valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(), 
-                                                                            self.le_end_date.text())
-        if valid_obs_files:
-            self.start_date = int(self.le_start_date.text())
-            self.end_date = int(self.le_end_date.text())
-            self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
-
-        # update available obs/experiment data dictionaries
-        self.datareader.get_valid_experiment_files_in_date_range(self.le_start_date.text(), self.le_end_date.text(), 
-                                                                 self.resolution, self.network, 
-                                                                 self.species)
-        valid_obs_files = self.datareader.get_valid_obs_files_in_date_range(self.le_start_date.text(), 
-                                                                            self.le_end_date.text())
-        if valid_obs_files:
-            self.start_date = int(self.le_start_date.text())
-            self.end_date = int(self.le_end_date.text())
-            self.start_date_firstdayofmonth = int(self.le_start_date.text()[:6] + '01')
-
-        # update selected indices for experiments -- keeping previously selected experiments if available
-        # set selected indices as previously selected indices in current available list of experiments
-        if hasattr(self, 'experiments'):
-            #update experiments from config file
-            if self.config_bar_initialisation:
-                experiments_legend = aux.get_experiments(self)
-                self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in experiments_legend.keys()
-                                                                        if experiment in self.experiments_menu['checkboxes']['map_vars']]
-                self.experiments_legend = {experiment:experiment_legend for experiment, experiment_legend  in experiments_legend.items()
-                                          if experiment in self.experiments_menu['checkboxes']['map_vars']}
+        # update available experiments for selected fields
+        aux.get_valid_experiments(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
+                                  [self.selected_network], [self.selected_species])
+        
+        # update experiments -- keeping previously selected experiments if available
+        if self.config_bar_initialisation:   
+            experiments = aux.get_experiments(self)
+            self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in experiments
+                                                                    if experiment in self.experiments_menu['checkboxes']['map_vars']]
+            self.experiments = {experiment:experiment_alias for experiment, experiment_alias in experiments.items()
+                                if experiment in self.experiments_menu['checkboxes']['map_vars']}
 
         self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for
                                                                 previous_selected_experiment in
                                                                 self.experiments_menu['checkboxes']['keep_selected']
                                                                 if previous_selected_experiment in
                                                                 self.experiments_menu['checkboxes']['map_vars']]
-        previous_experiments_legend = copy.deepcopy(self.experiments_legend)
-        self.experiments_legend = {exp:previous_experiments_legend[exp] if exp in previous_experiments_legend else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
+        previous_experiments = self.experiments
+        self.experiments = {exp:previous_experiments[exp] if exp in previous_experiments else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
         
-        # since a selection has changed, update also the qa flags
-        qa_to_select = aux.which_qa(self)  # first check which flags
-        self.default_qa = aux.which_qa(self, return_defaults=True)
-        self.qa_menu['checkboxes']['remove_default'] = self.default_qa
-        self.qa_menu['checkboxes']['remove_selected'] = qa_to_select
+        # update default qa
+        default_qa = aux.which_qa(self, return_defaults=True)
+        self.qa_menu['checkboxes']['remove_default'] = default_qa
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -699,16 +582,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # if network, resolution, matrix or species have changed then respective
             # current selection for the changed param
             if event_source == self.cb_network:
-                self.network = changed_param
+                self.selected_network = changed_param
             elif event_source == self.cb_resolution:
-                self.resolution = changed_param
+                self.selected_resolution = changed_param
             elif event_source == self.cb_matrix:
-                self.matrix = changed_param
-                self.species = sorted(list(
-                    self.datareader.available_observation_data[self.cb_network.currentText()][self.cb_resolution.currentText()][
-                        self.cb_matrix.currentText()].keys()))[0]
+                self.selected_matrix = changed_param
+                self.selected_species = sorted(list(
+                    self.available_observation_data[self.selected_network][self.selected_resolution][selected_matrix].keys()))[0]
             elif event_source == self.cb_species:
-                self.species = changed_param
+                self.selected_species = changed_param
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
@@ -718,11 +600,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
             # update configuration bar fields
             self.update_configuration_bar_fields()
-            # if we're reading nonghost files, then disable fields again
-            if aux.check_for_ghost(self.network):
-                self.disable_ghost_buttons()
-            else:
-                self.enable_ghost_buttons()
 
     def handle_data_selection_update(self):
         """Define function which handles update of data selection
@@ -739,309 +616,137 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
 
-        # set all previously active variables as past_active variables
-        previous_active_network = self.active_network
-        previous_active_resolution = self.active_resolution
-        previous_active_species = self.active_species
-        previous_active_start_date = self.active_start_date
-        previous_active_end_date = self.active_end_date
-        previous_active_experiments = self.active_experiments
-        previous_experiments_legend = self.experiments_legend
-        previous_active_qa = self.active_qa
-        previous_active_flags = self.active_flags
-        previous_data_labels = self.data_labels
+        #set previous active variables
+        self.previous_start_date = self.start_date
+        self.previous_end_date = self.end_date
+        self.previous_network = self.network
+        self.previous_resolution = self.resolution
+        self.previous_species = self.species
+        self.previous_experiments = self.experiments
+        self.previous_qa = self.qa
+        self.previous_flags = self.flags
+        self.previous_data_labels = self.data_labels
 
-        # set all currently selected variables as active variables
-        self.active_network = self.network
-        self.active_resolution = self.resolution
-        self.active_matrix = self.matrix
-        self.active_species = self.species
-        self.active_start_date = self.start_date
-        self.active_end_date = self.end_date
-        self.active_experiments = copy.deepcopy(self.experiments_menu['checkboxes']['keep_selected'])
-        self.experiments_legend = {exp:previous_experiments_legend[exp] if exp in previous_experiments_legend else exp for exp in self.active_experiments}
-        self.active_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
-        self.active_flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
-        self.data_labels = ['observations'] + self.active_experiments
+        #set new active variables as selected variables from menu
+        self.start_date = int(self.le_start_date.text())
+        self.end_date = int(self.le_end_date.text())
+        self.network = [self.selected_network]
+        self.resolution = self.selected_resolution
+        self.species = [self.selected_species]  
+        self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
+        self.qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
+        self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
+        self.data_labels = ['observations'] + list(self.experiments.keys())
+        self.networkspeci = '{}-{}'.format(self.network[0],self.species[0])
 
-        # determine what data (if any) needs to be read
-        # set variables that inform what data needs to be read (set all initially as False)
-        read_all = False
-        read_left = False
-        read_right = False
-        cut_left = False
-        cut_right = False
+        #set read operations to be empty list initially
+        read_operations = []
 
         # determine if any of the key variables have changed
         # (network, resolution, species, qa, flags)
         # if any have changed, observations and any selected experiments have to be re-read entirely
-        if (self.active_network != previous_active_network) or (
-                self.active_resolution != previous_active_resolution) or (
-                self.active_species != previous_active_species) or (
-                np.array_equal(self.active_qa, previous_active_qa) == False) or (
-                np.array_equal(self.active_flags, previous_active_flags) == False):
-            read_all = True
+        if (self.network[0] != self.previous_network[0]) or (
+                self.resolution != self.previous_resolution) or (
+                self.species[0] != self.previous_species[0]) or (
+                np.array_equal(self.qa, self.previous_qa) == False) or (
+                np.array_equal(self.flags, self.previous_flags) == False):
+            read_operations = ['reset']
+
         # key variables have not changed, has start/end date?
         else:
             # determine if start date/end date have changed
-            if (self.active_start_date != previous_active_start_date) or (
-                    self.active_end_date != previous_active_end_date):
+            if (self.start_date != self.previous_start_date) or (
+                    self.end_date != self.previous_end_date):
                 # if date range has changed then determine type of overlap with previous date range
                 # no overlap (i.e. start date >= than previous end date, or end date <= than previous start date)?
-                if (self.active_start_date >= previous_active_end_date) or (
-                        self.active_end_date <= previous_active_start_date):
-                    read_all = True
+                if (self.start_date >= self.previous_end_date) or (
+                        self.end_date <= self.previous_start_date):
+                    read_operations = ['reset']
                 # data range fully inside previous data range (i.e. start date later and end date earlier)?
-                elif (self.active_start_date > previous_active_start_date) & (
-                        self.active_end_date < previous_active_end_date):
-                    cut_left = True
-                    cut_right = True
+                elif (self.start_date > self.previous_start_date) & (
+                        self.end_date < self.previous_end_date):
+                    read_operations = ['cut_left','cut_right']
                 # need to read data on left edge and right edge of previous date range
                 # (i.e. start date earlier and end date later)?
-                elif (self.active_start_date < previous_active_start_date) & (
-                        self.active_end_date > previous_active_end_date):
-                    read_left = True
-                    read_right = True
+                elif (self.start_date < self.previous_start_date) & (
+                        self.end_date > self.previous_end_date):
+                    read_operations = ['read_left','read_right']
                 # need to read data on left edge and cut on right edge of previous date range
                 # (i.e. start date earlier and end date earlier)?
-                elif (self.active_start_date < previous_active_start_date) & (
-                        self.active_end_date < previous_active_end_date):
-                    read_left = True
-                    cut_right = True
+                elif (self.start_date < self.previous_start_date) & (
+                        self.end_date < self.previous_end_date):
+                    read_operations = ['read_left','cut_right']
                 # need to cut data on left edge and read data on right edge of previous date range
                 # (i.e. start date later and end date later)?
-                elif (self.active_start_date > previous_active_start_date) & (
-                        self.active_end_date > previous_active_end_date):
-                    cut_left = True
-                    read_right = True
+                elif (self.start_date > self.previous_start_date) & (
+                        self.end_date > self.previous_end_date):
+                    read_operations = ['cut_left','read_right']
                 # need to read data on left edge of previous date range (i.e. start date earlier)?
-                elif self.active_start_date < previous_active_start_date:
-                    read_left = True
+                elif self.start_date < self.previous_start_date:
+                    read_operations = ['read_left']
                 # need to read data on right edge of previous date range (i.e. end date later)?
-                elif self.active_end_date > previous_active_end_date:
-                    read_right = True
+                elif self.end_date > self.previous_end_date:
+                    read_operations = ['read_right']
                 # need to cut data on left edge of previous date range (i.e. start date later)?
-                elif self.active_start_date > previous_active_start_date:
-                    cut_left = True
+                elif self.start_date > self.previous_start_date:
+                    read_operations = ['cut_left']
                 # need to cut data on right edge of previous date range (i.e. end date earlier)?
-                elif self.active_end_date < previous_active_end_date:
-                    cut_right = True
+                elif self.end_date < self.previous_end_date:
+                    read_operations = ['cut_right']
 
-        # determine if any of the active experiments have changed
-        # remove experiments that are no longer selected from data_in_memory array
-        experiments_to_remove_inds = [self.data_labels.index(experiment) for experiment in previous_active_experiments 
-                                      if experiment not in self.active_experiments]
-        self.datareader.data_in_memory = np.delete(self.datareader.data_in_memory, experiments_to_remove_inds, axis=0)
-        # any new experiments will need completely re-reading
-        experiments_to_read = [experiment for experiment in self.active_experiments if
-                               experiment not in previous_active_experiments]
+        # determine if any experiments need removing or reading 
+        experiments_to_remove = [experiment for experiment in self.previous_experiments if experiment not in self.experiments]
+        experiments_to_read = [experiment for experiment in self.experiments if experiment not in self.previous_experiments]
+        if 'reset' not in read_operations:
+            if len(experiments_to_remove) > 0:
+                read_operations.append('remove_exp')
+            if len(experiments_to_read) > 0:
+                read_operations.append('read_exp')
 
         # has date range changed?
-        if read_all or read_left or read_right or cut_left or cut_right:
+        if len(read_operations) > 0:
 
-            # set new active time array/unique station references/longitudes/latitudes
-            # adjust data arrays to account for potential changing number of stations
-            self.datareader.read_setup(self.active_resolution, self.active_start_date,
-                                       self.active_end_date, self.active_network,
-                                       self.active_species, self.active_matrix, reset=read_all)
+            # set current time array, as previous time array
+            self.previous_time_array = self.time_array
+            # set current station references, as previous station references
+            self.previous_station_references = self.station_references
+            # set current relevant yearmonths, as previous relevant yearmonths
+            self.previous_yearmonths = self.yearmonths
 
-            # need to re-read all observations/experiments?
-            if read_all:
-                # reset data in memory dictionary
-                self.datareader.reset_data_in_memory()
-                self.metadata_inds_to_fill = np.arange(len(self.relevant_yearmonths))
-                # read all observations and experiments
-                self.datareader.read_data(self.data_labels, self.active_start_date,
-                                          self.active_end_date, self.active_network,
-                                          self.active_resolution, self.active_species,
-                                          self.active_matrix)
+            # read data
+            self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, experiments_to_read=experiments_to_read)
 
-            #read/cut on left/right
-            else:
+            #clear canvas entirely if have no valid data
+            if self.clear_canvas:
+                self.network = []
+                for plot_type, ax in self.mpl_canvas.plot_axes.items():
+                    if type(ax) == dict:
+                        for sub_ax in ax.values():
+                            self.mpl_canvas.remove_axis_elements(sub_ax, plot_type)
+                    else:
+                        self.mpl_canvas.remove_axis_elements(ax, plot_type)                
+                return
 
-                # remove incomplete months
-                if ((self.active_resolution == 'monthly') and (str(self.active_end_date)[6:8] != '01')):
-                    self.previous_relevant_yearmonths = self.previous_relevant_yearmonths[:-1]
-                    self.relevant_yearmonths = self.relevant_yearmonths[:-1]
-                
-                # if station references array has changed then as cutting/appending to
-                # need to rearrange existing metadata/data arrays accordingly
-                if not np.array_equal(self.previous_station_references, self.station_references):
-                    # get indices of stations in previous station references array in current station references array
-                    old_station_inds = np.where(np.in1d(self.previous_station_references,
-                                                        self.station_references))[0]
-                    # get indices of stations in current station references array
-                    # that were in previous station references array
-                    new_station_inds = np.where(np.in1d(self.station_references,
-                                                        self.previous_station_references))[0]
-
-                    #rearrange metadata station dimension
-                    new_metadata_array = np.full((len(self.station_references),
-                                                  len(self.previous_relevant_yearmonths)),
-                                                  np.NaN, dtype=self.metadata_dtype)
-                    new_metadata_array[new_station_inds, :] = self.datareader.metadata_in_memory[old_station_inds, :]
-                    self.datareader.metadata_in_memory = new_metadata_array
-
-                    # rearrage data array station dimension
-                    new_data_array = np.full((len(self.data_labels),
-                                              len(self.datareader.data_vars_to_read),
-                                              len(self.station_references),
-                                              len(self.previous_time_array)),
-                                              np.NaN, dtype=np.float32)
-                    # put the old data into new array in the correct positions
-                    new_data_array[:, : ,new_station_inds, :] = self.datareader.data_in_memory[:, :, old_station_inds, :]
-                    # overwrite data array with reshaped version
-                    self.datareader.data_in_memory = new_data_array
-
-            # need to cut edges?
-            if cut_left or cut_right:
-                # set default edge limits as current edges
-                data_left_edge_ind = 0
-                data_right_edge_ind = len(self.previous_time_array)
-
-                metadata_left_edge_ind = 0
-                metadata_right_edge_ind = len(self.previous_relevant_yearmonths)
-
-                # need to cut on left data edge?
-                if cut_left:
-                    print('CUTTING LEFT')
-                    data_left_edge_ind = np.where(self.previous_time_array == self.time_array[0])[0][0]
-                    str_first_relevant_yearmonth = str(self.relevant_yearmonths[0])
-                    str_previous_first_relevant_yearmonth = str(self.previous_relevant_yearmonths[0])
-                    monthly_relative_delta = relativedelta(
-                        datetime.datetime(int(str_first_relevant_yearmonth[:4]), int(str_first_relevant_yearmonth[4:6]),
-                                          1, 0, 0), datetime.datetime(int(str_previous_first_relevant_yearmonth[:4]),
-                                                                      int(str_previous_first_relevant_yearmonth[4:6]),
-                                                                      1, 0, 0))
-                    metadata_left_edge_ind = (monthly_relative_delta.years * 12) + monthly_relative_delta.months
-
-                # need to cut on right data edge?
-                if cut_right:
-                    print('CUTTING RIGHT')
-                    data_right_edge_ind = np.where(self.previous_time_array == self.time_array[-1])[0][0] + 1
-                    str_last_relevant_yearmonth = str(self.relevant_yearmonths[-1])
-                    str_previous_last_relevant_yearmonth = str(self.previous_relevant_yearmonths[-1])
-                    monthly_relative_delta = relativedelta(
-                        datetime.datetime(int(str_previous_last_relevant_yearmonth[:4]),
-                                          int(str_previous_last_relevant_yearmonth[4:6]),
-                                          1, 0, 0), datetime.datetime(int(str_last_relevant_yearmonth[:4]),
-                                                                      int(str_last_relevant_yearmonth[4:6]), 1, 0, 0))
-                    metadata_right_edge_ind = \
-                        metadata_right_edge_ind - ((monthly_relative_delta.years * 12) + monthly_relative_delta.months)
-
-                # do metadata array cut
-                if metadata_left_edge_ind == metadata_right_edge_ind:
-                    self.datareader.metadata_in_memory = self.datareader.metadata_in_memory[:, [metadata_left_edge_ind]]
-                else:
-                    self.datareader.metadata_in_memory = \
-                        self.datareader.metadata_in_memory[:, metadata_left_edge_ind:metadata_right_edge_ind]
-
-                # cut edges of the data array appropriately
-                self.datareader.data_in_memory = self.datareader.data_in_memory[:, :, :, data_left_edge_ind:data_right_edge_ind]
-
-            # need to read on left edge?
-            if read_left:
-                print('READING LEFT')
-
-                # get n number of new elements on left edge
-                n_new_left_data_inds = np.where(self.time_array == self.previous_time_array[0])[0][0]
-
-                # get list of yearmonths to read
-                yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, self.active_start_date,
-                                                            previous_active_start_date, self.active_resolution)
-                                                        
-                # check which yearmonths_to_read in previous matrix
-                yearmonths_in_old_matrix = np.isin(yearmonths_to_read, self.previous_relevant_yearmonths)
-
-                # get yearmonths not currently accounted for in matrix
-                if isinstance(yearmonths_to_read, list):
-                    yearmonths_to_read = np.asarray(yearmonths_to_read)
-                new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
-
-                #need to read new yearmonths?
-                if len(new_yearmonths) > 0:
-
-                    #add space on left edge to add data to metadata array
-                    self.metadata_inds_to_fill = np.arange(0, len(yearmonths_to_read))
-                    self.datareader.metadata_in_memory = np.concatenate((np.full(
-                        (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype),
-                                                            self.datareader.metadata_in_memory), axis=1)
-
-                    # insert read data on left edge of the data array
-                    # add space on left edge to insert new read data
-                    self.datareader.data_in_memory = np.concatenate((np.full(
-                        (len(self.data_labels), len(self.datareader.data_vars_to_read), len(self.station_references), n_new_left_data_inds), 
-                        np.NaN, dtype=np.float32), self.datareader.data_in_memory), axis=3)
-                    #read data
-                    self.datareader.read_data(self.data_labels, self.active_start_date, previous_active_start_date,
-                                              self.active_network, self.active_resolution,
-                                              self.active_species, self.active_matrix)
-
-            # need to read on right edge?
-            if read_right:
-                print('READING RIGHT')
-
-                # get n number of new elements on right edge
-                n_new_right_data_inds = (len(self.time_array) - 1) - \
-                                        np.where(self.time_array == self.previous_time_array[-1])[0][0]
-
-                # get list of yearmonths to read
-                yearmonths_to_read = get_yearmonths_to_read(self.relevant_yearmonths, previous_active_end_date,
-                                                            self.active_end_date, self.active_resolution)
-
-                # check which yearmonths_to_read in previous matrix
-                yearmonths_in_old_matrix = np.isin(yearmonths_to_read, self.previous_relevant_yearmonths)
-
-                # get yearmonths not currently accounted for in matrix
-                if isinstance(yearmonths_to_read, list):
-                    yearmonths_to_read = np.asarray(yearmonths_to_read)
-                new_yearmonths = yearmonths_to_read[~yearmonths_in_old_matrix]
-
-                #need to read new yearmonths?
-                if len(new_yearmonths) > 0:
-
-                    #add space on right edge to add data to metadata array
-                    self.metadata_inds_to_fill = np.arange(-len(yearmonths_to_read), 0)
-                    self.datareader.metadata_in_memory = np.concatenate((self.datareader.metadata_in_memory, np.full(
-                        (len(self.station_references), len(new_yearmonths)), np.NaN, dtype=self.metadata_dtype)), axis=1)
-
-                    # insert read data on right edge of the data array
-                    self.datareader.data_in_memory = np.concatenate((self.datareader.data_in_memory, np.full(
-                        (len(self.data_labels), len(self.datareader.data_vars_to_read), len(self.station_references), n_new_right_data_inds), 
-                        np.NaN, dtype=np.float32)), axis=3)
-                    self.datareader.read_data(self.data_labels, previous_active_end_date, self.active_end_date,
-                                              self.active_network, self.active_resolution,
-                                              self.active_species, self.active_matrix)
-
-            # update menu object fields
+            # update fields available for filtering
+            aux.update_representativity_fields(self)
+            aux.update_period_fields(self)
             aux.update_metadata_fields(self)
-            self.representativity_menu = aux.representativity_fields(self, self.active_resolution)
-            aux.update_period_fields(self.active_resolution, self.period_menu)
+            
             #update relevant temporal resolutions 
-            self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.active_resolution)
-
-        # if have new experiments to read, then read them now
-        if len(experiments_to_read) > 0:
-            for data_label in experiments_to_read:
-                self.datareader.read_data(data_label, self.active_start_date, self.active_end_date,
-                                          self.active_network, self.active_resolution,
-                                          self.active_species, self.active_matrix)
+            self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
 
         # if species has changed, update default species specific lower/upper limits
-        if self.active_species != previous_active_species:
+        if self.species[0] != self.previous_species[0]:
             # update default lower/upper species specific limits and filter data outside limits
-            species_lower_limit, species_upper_limit = aux.which_bounds(self, self.active_species)
+            species_lower_limit, species_upper_limit = aux.which_bounds(self, self.species[0])
             # set default limits
             self.le_minimum_value.setText(str(species_lower_limit))
             self.le_maximum_value.setText(str(species_upper_limit))
 
-        # update dictionary of plotting parameters (colour and zorder etc.) for each data array
-        self.datareader.update_plotting_parameters()
-        # --------------------------------------------------------------------#
         # run function to filter data outside lower/upper limits, not using desired
         # measurement methods, and < desired minimum data availability
         self.mpl_canvas.handle_data_filter_update()
-        # --------------------------------------------------------------------#
+
         # update map z combobox fields based on data in memory
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
         self.basic_z_stats = np.array(list(
@@ -1052,11 +757,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # generate list of sorted z1/z2 data arrays names in memory, putting observations
         # before experiments, and empty string item as first element in z2 array list
         # (for changing from 'difference' statistics to 'absolute')
-        if self.datareader.data_in_memory.shape[0] == 1:
+        if len(self.data_labels) == 1:  
             self.z1_arrays = np.array(['observations'])
         else:
-            self.z1_arrays = np.append(['observations'],
-                                       np.delete(self.data_labels, np.where(self.data_labels == 'observations')))
+            self.z1_arrays = np.array(self.data_labels)
         self.z2_arrays = np.append([''], self.z1_arrays)
 
         # initialise map z statistic comboboxes
@@ -1064,7 +768,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # update experiment bias combobox fields based on data in memory
         # if have no experiment data, all fields are empty
-        if self.datareader.data_in_memory.shape[0] == 1:
+        if len(self.data_labels) == 1: 
             self.experiment_bias_types = np.array([])
         # else, generate combobox lists
         else:
@@ -1077,7 +781,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # reset station select checkboxes to be unchecked
         self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-        # --------------------------------------------------------------------#
+
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
 
@@ -1088,7 +792,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         QtWidgets.QApplication.restoreOverrideCursor()
 
     def reset_options(self):
-        """Resets all metadata fields to initial values"""
+        """Resets all filter fields to initial values"""
 
         if self.block_MPL_canvas_updates:
             return
@@ -1096,92 +800,52 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set mouse cursor to hourglass
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-        # set rep fields to empty lists and initialize again
-        self.representativity_menu['rangeboxes']['labels'] = []
-        self.representativity_menu['rangeboxes']['current_lower'] = []
-        aux.representativity_fields(self, self.resolution)
+        # reset representativity fields        
+        aux.init_representativity(self)
+        aux.update_representativity_fields(self)
 
-        # set period fields to empty and initiliaze them
-        self.period_menu['checkboxes']['keep_selected'] = []
-        self.period_menu['checkboxes']['remove_selected'] = []
-        aux.update_period_fields(self.active_resolution, self.period_menu)
+        # reset period fields 
+        aux.init_period(self)
+        aux.update_period_fields(self)
 
         # reset metadata
-        for metadata_type in self.metadata_menu['navigation_buttons']['labels']:
-            for label in self.metadata_menu[metadata_type]['navigation_buttons']['labels']:
-                self.metadata_menu[metadata_type][label]['checkboxes']['labels'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['keep_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['remove_selected'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['keep_default'] = []
-                self.metadata_menu[metadata_type][label]['checkboxes']['remove_default'] = []
-            self.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = ['nan'] * len(
-                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = ['nan'] * len(
-                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = ['nan'] * len(
-                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
-            self.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = ['nan'] * len(
-                self.metadata_menu[metadata_type]['rangeboxes']['labels'])
+        aux.init_metadata(self)
         aux.update_metadata_fields(self)
 
         # reset bounds
-        species_lower_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_lower_limit'])
-        species_upper_limit = np.float32(self.parameter_dictionary[self.active_species]['extreme_upper_limit'])
+        species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
+        species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
+        
         # set default limits
         self.le_minimum_value.setText(str(species_lower_limit))
         self.le_maximum_value.setText(str(species_upper_limit))
+        
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
+        
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 
     def disable_ghost_buttons(self):
         """Disable button related only to ghost data"""
+        
         # change background-color to indicate that it's nonusable
         self.bu_flags.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
-        self.bu_rep.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
-        self.bu_meta.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
-        self.bu_period.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
         self.bu_QA.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
-        # and disable
-        self.bu_QA.setEnabled(False)
+        self.bu_period.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        
+        # disable buttons
         self.bu_flags.setEnabled(False)
-        self.bu_rep.setEnabled(False)
-        self.bu_meta.setEnabled(False)
+        self.bu_QA.setEnabled(False)
         self.bu_period.setEnabled(False)
-
+        
     def enable_ghost_buttons(self):
         """Enable button related only to ghost data"""
-        self.bu_QA.setEnabled(True)
+
+        # enable buttons        
         self.bu_flags.setEnabled(True)
-        self.bu_rep.setEnabled(True)
-        self.bu_meta.setEnabled(True)
+        self.bu_QA.setEnabled(True)
         self.bu_period.setEnabled(True)
-
-    def get_esarchive_yearmonth(self, esfiles):
-        """
-        Returns the esarchive_files json filles with yearmonth
-        from esarchive available files
-
-        :esfiles: contains structure of esarchives to read
-        :type esfiles: json
-        """
-        for n in esfiles:
-            network = n[1:].lower()
-            for r in esfiles[n]:
-                resolution = r
-                for d in esfiles[n][r]:
-                    detail = d
-                    for s in esfiles[n][r][d]:
-                        species = s
-                        path = "{}/{}/{}/{}/{}".format(self.nonghost_root, network,
-                                                       detail, resolution, species)
-                        if os.path.exists(path):
-                            species_files = glob(path + '*/*_??????.nc')
-                            species_files_yearmonths = [int(f.split('_')[-1][:6] + '01') for f in species_files]
-                            esfiles[n][r][d][s] = species_files_yearmonths
-        return esfiles
-
 
 # generate Providentia dashboard
 def main(**kwargs):

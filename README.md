@@ -4,16 +4,25 @@ Providentia is designed to allow on-the-fly and offline analysis of experiment o
 
 # How to clone
 
-Use the command `git clone https://earth.bsc.es/gitlab/ac/Providentia.git` to get a 
-copy of the repository. You can use the latest stable version of Providentia
-by using the version's tag. For example, if the latest version is 1.4,
-you can run:
+Use the following command to get a copy of the repository:
 
 ```
-git checkout v1.4
+git clone https://earth.bsc.es/gitlab/ac/Providentia.git
 ```
 
-Using this command, you can use whichever version you want.
+You can use the latest stable version of Providentia
+by accessing the production branch:
+
+```
+git checkout production
+```
+
+You can also access the master branch to test new features,
+that are to be implemented in the upcoming release:
+
+```
+git checkout master
+```
 
 # Run
 
