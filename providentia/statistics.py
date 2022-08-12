@@ -4,7 +4,7 @@ Contains functions for the processing/calculation of statistics and colourbars
 from .calculate import Stats
 from .calculate import ExpBias
 from .read_aux import drop_nans
-from providentia import aux
+from .aux import exceedance_lim
 
 import copy
 import json
@@ -20,8 +20,8 @@ basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
 
-def to_pandas_dataframe(read_instance, canvas_instance, speci_index, station_index = False):
-    """Function that takes data in memory puts it in a pandas dataframe.
+def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_index=False):
+    """Function that takes data in memory puts it in a pandas dataframe, per network / species.
     For summary plots this involves take the median timeseries across the timeseries.
     For station plots it is just the station in question.
     Also temporally aggregate selected data dataframes (by hour, day of week, month),
@@ -33,65 +33,69 @@ def to_pandas_dataframe(read_instance, canvas_instance, speci_index, station_ind
     :type read_instance: object
     :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
     :type canvas_instance: object
-    :param station_index: Index of station
-    :type species: int
+    :param networkspecies: List of networkspeci strings
+    :type networkspecies: list
+    :param station_index: Indices of stations to keep per network/species
+    :type station_index: list
     """
 
     print('TO PANDAS DF')
 
-    # create new dictionary to store selection station data by data array
+    # create new dictionary to store selection station data by network / species
     canvas_instance.selected_station_data = {}
+    canvas_instance.selected_station_data_min = {}
+    canvas_instance.selected_station_data_max = {}
 
-    #get index of active species data
-    speci_index = read_instance.datareader.data_vars_to_read.index(read_instance.active_species)
+    # iterate through networks / species  
+    for networkspeci_ii, networkspeci in enumerate(networkspecies):
 
-    # if colocation is not active, do not convert colocated data arrays to pandas data frames
-    if not canvas_instance.temporal_colocation:
-        if 'colocated' in data_label:
-            continue
-    # else, if colocation is active, do not convert non-colocated data arrays to pandas data frames
-    elif canvas_instance.temporal_colocation:
-        if 'colocated' not in data_label:
-            continue
-
-    # get data for selected stations
-    if station_index:
-        data_array = read_instance.data_in_memory_filtered[:, speci_index, station_index, :]
-    else:
-        if read_instance.offline:
-            relevant_inds = read_instance.datareader.plotting_params[data_label]['valid_station_inds']
-        else:
-            if data_label.split('_')[0] == 'observations':
-                relevant_inds = canvas_instance.relative_selected_station_inds
-            else:
-                relevant_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.datareader.plotting_params[data_label]['valid_station_inds'])
-        data_array = read_instance.data_in_memory_filtered[:, speci_index, relevant_inds, :]
-
-    # if data array has no valid data for selected stations, do not create a pandas dataframe
-    # data array has valid data and is not all nan?
-    if not np.isnan(data_array).all():
-
-        # take cross station median of selected data for data array, and place it in a pandas dataframe 
+        # get data for selected stations
         if station_index:
-            canvas_instance.selected_station_data['pandas_df'] = pd.DataFrame(data_array, index=read_instance.time_array, columns=)
+            data_array = read_instance.data_in_memory_filtered[networkspeci][:,:,:]
+            if (read_instance.temporal_colocation) & len(read_instance.data_labels > 1):
+                data_array[:,read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+            data_array = data_array[:, station_index, :]
         else:
-            canvas_instance.selected_station_data['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), index=read_instance.time_array, columns=['data'])
+            if read_instance.offline:
+                if read_instance.temporal_colocation:
+                    station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
+                else:
+                    station_inds = read_instance.valid_station_inds[networkspeci][data_label]
+            else:
+                if read_instance.temporal_colocation:
+                    station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
+                else:
+                    station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
+            data_array = read_instance.data_in_memory_filtered[networkspeci][:,:,:]
+            if (read_instance.temporal_colocation) & len(read_instance.data_labels > 1):
+                data_array[:,read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+            data_array = data_array[:, station_inds, :]
+                
+        # if data array has no valid data for selected stations, do not create a pandas dataframe
+        # data array has valid data and is not all nan?
+        if data_array.size and not np.isnan(data_array).all():
 
-        # get min/max across all selected station data
-        canvas_instance.selected_station_data_min = canvas_instance.selected_station_data['pandas_df'].min() 
-        canvas_instance.selected_station_data_max = canvas_instance.selected_station_data['pandas_df'].max()
-            
-    # temporally aggregate selected data dataframes if have periodic plot to make 
-    # (by hour, day of week, month)
-    pandas_temporal_aggregation(read_instance, canvas_instance)
+            # take cross station median of selected data for data array, and place it in a pandas dataframe 
+            if station_index:
+                canvas_instance.selected_station_data[networkspeci]['pandas_df'] = pd.DataFrame(data_array, index=read_instance.time_array, columns=['data'])
+            else:
+                canvas_instance.selected_station_data[networkspeci]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), index=read_instance.time_array, columns=['data'])
 
-    # if have some experiment data associated with selected stations, calculate
-    # temporally aggregated basic statistic differences and bias statistics between
-    # observations and experiment data arrays
-    if len(read_instance.data_labels) > 1:
-        calculate_temporally_aggregated_experiment_bias_statistics(read_instance, canvas_instance)
+            # get min/max across all selected station data
+            canvas_instance.selected_station_data_min[networkspeci] = canvas_instance.selected_station_data[networkspeci]['pandas_df'].min() 
+            canvas_instance.selected_station_data_max[networkspeci] = canvas_instance.selected_station_data[networkspeci]['pandas_df'].max()
+                
+        # temporally aggregate selected data dataframes (if have periodic plot to make) 
+        # (by hour, day of week, month)
+        pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci)
 
-def pandas_temporal_aggregation(read_instance, canvas_instance):
+        # if have some experiment data associated with selected stations, calculate
+        # temporally aggregated basic statistic differences and bias statistics between
+        # observations and experiment data arrays
+        if len(read_instance.data_labels) > 1:
+            calculate_temporally_aggregated_experiment_bias_statistics(read_instance, canvas_instance, networkspeci)
+
+def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
     """Function that aggregates pandas dataframe data, for all data arrays,
     into desired temporal groupings also calculates all defined basic
     statistics for each individual temporal grouping
@@ -100,6 +104,8 @@ def pandas_temporal_aggregation(read_instance, canvas_instance):
     :type read_instance: object
     :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
     :type canvas_instance: object
+    :param networkspeci: name of networkspeci str
+    :type networkspeci: str
     """
 
     print('PANDAS TEMPORAL AGG')
@@ -118,20 +124,20 @@ def pandas_temporal_aggregation(read_instance, canvas_instance):
             all_xticks = canvas_instance.periodic_xticks[temporal_aggregation_resolution]
 
         # iterate through data arrays names in selected station data dictionary
-        for data_label in list(canvas_instance.selected_station_data.keys()):
+        for data_label in read_instance.data_labels:
 
             # create nested dictionary inside selected station data dictionary for storing
             # aggregated data by data array label and temporal aggregation resolution
-            canvas_instance.selected_station_data[data_label][temporal_aggregation_resolution] = {}
+            canvas_instance.selected_station_data[networkspeci][data_label][temporal_aggregation_resolution] = {}
 
             # if temporal group is all then simply take data in pandas df as is
             if temporal_aggregation_resolution == 'all':
-                full_grouped_data = [canvas_instance.selected_station_data[data_label]['pandas_df']['data'].dropna()]
+                full_grouped_data = [canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna()]
             else:
                 # else, aggregate data array into desired temporal groups (dropping NaNs)
                 grouped_data = [g['data'].dropna() for n, g in
-                                canvas_instance.selected_station_data[data_label]['pandas_df'].groupby(
-                                    getattr(canvas_instance.selected_station_data[data_label]['pandas_df'].index,
+                                canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].groupby(
+                                    getattr(canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].index,
                                             temporal_aggregation_resolution))]
                 # drop groups which have no data
                 grouped_data = [group for group in grouped_data if len(group) > 0]
@@ -147,10 +153,10 @@ def pandas_temporal_aggregation(read_instance, canvas_instance):
                     full_grouped_data[full_group_index_to_place] = grouped_data[grouped_data_ii]
                 # add valid xticks for group to selected data dictionary
                 # (i.e. the group xtick indexes which have valid data)
-                canvas_instance.selected_station_data[data_label][temporal_aggregation_resolution]['valid_xticks'] = valid_xticks
+                canvas_instance.selected_station_data[networkspeci][data_label][temporal_aggregation_resolution]['valid_xticks'] = valid_xticks
 
             # add full grouped data to selected data dictionary
-            canvas_instance.selected_station_data[data_label][temporal_aggregation_resolution]['grouped_data'] = full_grouped_data
+            canvas_instance.selected_station_data[networkspeci][data_label][temporal_aggregation_resolution]['grouped_data'] = full_grouped_data
 
             # calculate basic statistics in each group and add them to selected station data dictionary
             for stat in statistics_to_calculate:
@@ -161,7 +167,7 @@ def pandas_temporal_aggregation(read_instance, canvas_instance):
                 function_arguments = stats_dict['arguments']
                 # if stat is exceedances then add threshold value (if available)  
                 if stat == 'Exceedances':
-                    function_arguments['threshold'] = aux.exceedance_lim(read_instance.active_species)
+                    function_arguments['threshold'] = aux.exceedance_lim(read_instance.species)
                 # create empty array for storing calculated statistic by group
                 stat_output_by_group = []
                 # iterate through grouped data
@@ -176,9 +182,9 @@ def pandas_temporal_aggregation(read_instance, canvas_instance):
                     else:
                         stat_output_by_group = np.append(stat_output_by_group, np.NaN)
                 # save statistical output by group to selected station data dictionary
-                canvas_instance.selected_station_data[data_label][temporal_aggregation_resolution][stat] = stat_output_by_group
+                canvas_instance.selected_station_data[networkspeci][data_label][temporal_aggregation_resolution][stat] = stat_output_by_group
 
-def calculate_temporally_aggregated_experiment_statistic(canvas_instance, data_label, relevant_temporal_resolution, zstat):
+def calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_instance, networkspeci):
     """Function that calculates temporally aggregated basic statistic
     differences and bias statistics between observations and experiment
     data arrays
@@ -187,6 +193,8 @@ def calculate_temporally_aggregated_experiment_statistic(canvas_instance, data_l
     :type read_instance: object
     :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
     :type canvas_instance: object
+    :param networkspeci: name of networkspeci str
+    :type networkspeci: str
     """
 
     print('CALC STAT')
@@ -204,17 +212,11 @@ def calculate_temporally_aggregated_experiment_statistic(canvas_instance, data_l
     # iterate through all defined temporal aggregation resolutions
     for temporal_aggregation_resolution in relevant_temporal_resolutions:
         # iterate through data arrays names in selected station data dictionary
-        for data_label in list(canvas_instance.selected_station_data.keys()):
+        for data_label in read_instance.data_labels:
             # make sure the data array is an experimental one
-            if data_label.split('_')[0] != 'observations':
-                # get relevant aggregated observational statistics dictionary (i.e. colocated or not)
-                if not canvas_instance.temporal_colocation:
-                    relevant_aggregated_observations_dict = \
-                        canvas_instance.selected_station_data['observations'][temporal_aggregation_resolution]
-                else:
-                    relevant_aggregated_observations_dict = \
-                        canvas_instance.selected_station_data[
-                            'observations_colocatedto_experiments'][temporal_aggregation_resolution]
+            if data_label != 'observations':
+                relevant_aggregated_observations_dict = \
+                    canvas_instance.selected_station_data[networkspeci]['observations'][temporal_aggregation_resolution]
 
                 # calculate temporally aggregated basic statistic differences between experiment and observations
                 # iterate through basic statistics
@@ -226,7 +228,7 @@ def calculate_temporally_aggregated_experiment_statistic(canvas_instance, data_l
                     for group_ii in range(len(relevant_aggregated_observations_dict[basic_stat])):
                         # get observational and experiment group aggregated statistic
                         group_obs_stat = relevant_aggregated_observations_dict[basic_stat][group_ii]
-                        group_exp_stat = canvas_instance.selected_station_data[data_label][
+                        group_exp_stat = canvas_instance.selected_station_data[networkspeci][data_label][
                             temporal_aggregation_resolution][basic_stat][group_ii]
 
                         # take difference between observations and experiment statistics, if both values finite
@@ -237,12 +239,12 @@ def calculate_temporally_aggregated_experiment_statistic(canvas_instance, data_l
                         else:
                             stat_diff_by_group = np.append(stat_diff_by_group, np.NaN)
                     # save statistical difference output by group to selected station data dictionary
-                    canvas_instance.selected_station_data[data_label][temporal_aggregation_resolution][
+                    canvas_instance.selected_station_data[networkspeci][data_label][temporal_aggregation_resolution][
                         '{}_bias'.format(basic_stat)] = stat_diff_by_group
 
                 # if colocation is active, calculate temporally aggregated experiment bias
                 # statistical differences between experiment and observations
-                if canvas_instance.temporal_colocation:
+                if read_instance.temporal_colocation:
                     # iterate through bias statistics
                     for bias_stat in bias_statistics:
                         # get specific statistic dictionary (containing necessary information
@@ -253,7 +255,7 @@ def calculate_temporally_aggregated_experiment_statistic(canvas_instance, data_l
                         # create empty array for storing calculated statistic by group
                         stat_output_by_group = []
                         # iterate through experimental grouped data
-                        for group_ii, exp_group in enumerate(canvas_instance.selected_station_data[data_label]
+                        for group_ii, exp_group in enumerate(canvas_instance.selected_station_data[networkspeci][data_label]
                                                                 [temporal_aggregation_resolution]['grouped_data']):
                             # add aggregated observational and experiment group data as
                             # arguments to pass to statistical function
@@ -272,11 +274,10 @@ def calculate_temporally_aggregated_experiment_statistic(canvas_instance, data_l
                             except Exception as e:
                                 stat_output_by_group = np.append(stat_output_by_group, np.NaN)
                         # save experiment bias statistic by group to selected station data dictionary
-                        canvas_instance.selected_station_data[data_label][temporal_aggregation_resolution][
+                        canvas_instance.selected_station_data[networkspeci][data_label][temporal_aggregation_resolution][
                             '{}'.format(bias_stat)] = stat_output_by_group
 
-
-def calculate_z_statistic(read_instance, z1, z2, zstat, temporal_colocation):
+def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
     """Function that calculates selected statistic across stations for map plots.
     
     :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
@@ -287,6 +288,8 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, temporal_colocation):
     :type z2: str
     :param zstat: name of statistic
     :type zstat: str
+    :param networkspeci: name of networkspeci str
+    :type networkspeci: str
     :return: calculated map statistic and active station indices on map
     :rtype: np.float32, np.int
     """
@@ -295,10 +298,10 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, temporal_colocation):
 
     # check if have valid station data first
     # if not update z statistic and active map valid station indices to be empty lists and return
-    if not temporal_colocation:
-        n_valid_stations = len(read_instance.datareader.plotting_params['observations']['valid_station_inds'])
+    if read_instance.temporal_colocation:
+        n_valid_stations = len(read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations'])
     else:
-        n_valid_stations = len(read_instance.datareader.plotting_params['observations_colocatedto_experiments']['valid_station_inds'])
+        n_valid_stations = len(read_instance.valid_station_inds[networkspeci]['observations'])
     if n_valid_stations == 0:             
         z_statistic = np.array([], dtype=np.float32)
         active_map_valid_station_inds = np.array([], dtype=np.int)
@@ -319,17 +322,25 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, temporal_colocation):
     # get active map valid station indices (i.e. the indices of the stations data to plot on the map)
     # if only have z1, valid map indices are those simply for the z1 array
     if z2 == '':
-        active_map_valid_station_inds = \
-            read_instance.datareader.plotting_params[z1]['valid_station_inds']
+        if read_instance.temporal_colocation:
+            active_map_valid_station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][z1]
+        else:
+            active_map_valid_station_inds = read_instance.valid_station_inds[networkspeci][z1]
     else:
         # if have z2 array, get intersection of z1 and z2 valid station indices
-        active_map_valid_station_inds = \
-            np.intersect1d(read_instance.datareader.plotting_params[z1]['valid_station_inds'],
-                            read_instance.datareader.plotting_params[z2]['valid_station_inds'])
+        if read_instance.temporal_colocation:
+            active_map_valid_station_inds = \
+                np.intersect1d(read_instance.valid_station_inds_temporal_colocation[networkspeci][z1],
+                               read_instance.valid_station_inds_temporal_colocation[networkspeci][z2])
+        else:
+            active_map_valid_station_inds = \
+                np.intersect1d(read_instance.valid_station_inds[networkspeci][z1],
+                               read_instance.valid_station_inds[networkspeci][z2])
 
     # read z1 data
+    z1_index = read_instance.data_labels.index(z1)
     z1_array_data = \
-        read_instance.data_in_memory_filtered[z1][read_instance.datareader.data_vars_to_read.index(read_instance.active_species), active_map_valid_station_inds, :]
+        read_instance.data_in_memory_filtered[networkspeci][z1_index, active_map_valid_station_inds, :]
     # drop NaNs and reshape to object list of station data arrays (if not checking data %)
     if base_zstat != 'Data %':
         z1_array_data = drop_nans(z1_array_data)
@@ -354,10 +365,10 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, temporal_colocation):
 
     # else, read z2 data then calculate 'difference' statistic
     else:
-
+        z2_index = read_instance.data_labels.index(z2)
         # read z2 data
         z2_array_data = \
-            read_instance.data_in_memory_filtered[z2][read_instance.datareader.data_vars_to_read.index(read_instance.active_species), active_map_valid_station_inds, :]
+            read_instance.data_in_memory_filtered[networkspeci][z2_index,active_map_valid_station_inds,:]
         # drop NaNs and reshape to object list of station data arrays (if not checking data %)
         if base_zstat != 'Data %':
             z2_array_data = drop_nans(z2_array_data)
@@ -404,7 +415,7 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, temporal_colocation):
 
     return z_statistic, active_map_valid_station_inds
 
-def get_axes_minmax(axs):
+def get_axes_vminmax(axs):
     """Function that get minimum and maximum of plotted data across relevant axes
 
     :param axs: list of relevant axes
@@ -413,22 +424,21 @@ def get_axes_minmax(axs):
     :rtype: np.float32, np.float32
     """
 
-    # get axes z min/maxes
+    # get axes plotted vmin/vmax
     ax_min = []
     ax_max = []
     for ax in axs:
-        if len(ax.collections) > 0:
-            try:
-                ax_min.append(np.nanmin(ax.collections[-1].get_array()))
-                ax_max.append(np.nanmax(ax.collections[-1].get_array()))
-            except:
-                continue
+        for collection in ax.collections:
+            if isinstance(collection, matplotlib.collections.PathCollection):
+                col_array = collection.get_array()
+                ax_min.append(np.nanmin(col_array))
+                ax_max.append(np.nanmax(col_array))
     plotted_min = np.nanmin(ax_min)
     plotted_max = np.nanmax(ax_max)
 
     return plotted_min, plotted_max
 
-def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics):
+def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci):
     """Function that generates neccessary detail to crate colourbar.
 
     :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
@@ -441,6 +451,8 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     :type plotted_max: np.float32
     :param plot_characteristics: dictionary of plot characteristics
     :type plot_characteristics: dict
+    :param speci: speci to plot
+    :type speci: str
     :return: cbar min, cbar max, cbar label, cbar cmap
     :rtype: np.float32, np.float32, str, str
     """
@@ -452,7 +464,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     if z_statistic_type == 'basic':
         stats_dict = basic_stats[base_zstat]
         if base_zstat not in ['Data %','Exceedances']:
-            label_units = ' ({})'.format(read_instance.datareader.measurement_units)
+            label_units = ' ({})'.format(read_instance.measurement_units[speci])
         else:
             label_units = ''
     else:
@@ -464,17 +476,18 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     set_label = False
     #1. check configuration file
     if 'cb_label' in plot_characteristics:
-        if plot_characteristics['cb_label']['xlabel'] != '':
+        if plot_characteristics['cb_label']['label'] != '':
+            z_label = plot_characteristics['cb_label']['label']
             set_label = True
     #2. get label specific for z statistic
     if not set_label:
         if z_statistic_sign == 'absolute':
-            plot_characteristics['cb_label']['xlabel'] = '{}{}'.format(stats_dict['label'], label_units)
+            z_label = '{} {}'.format(stats_dict['label'], label_units)
         else:
             if z_statistic_type == 'basic':
-                plot_characteristics['cb_label']['xlabel'] = '{}bias{}'.format(stats_dict['label'], label_units)
+                z_label = '{} bias {}'.format(stats_dict['label'], label_units)
             else:
-                plot_characteristics['cb_label']['xlabel'] = '{}{}'.format(stats_dict['label'], label_units)
+                z_label = '{} {}'.format(stats_dict['label'], label_units)
     
     # set cmap for z statistic
     # first check if have defined cmap (in this order: 1. configuration file 2. specific for z statistic)
@@ -493,7 +506,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         z_colourmap = stats_dict[cmap_var_name]
 
     # check if have defined vmin (in this order: 1. configuration file 2. specific for z statistic)
-    #if have no defined vmin, then take vmin as minimum range value of calculated statistic
+    # if have no defined vmin, then take vmin as minimum range value of calculated statistic
     set_vmin = False
     if z_statistic_sign == 'absolute':
         vmin_var_name = 'vmin_absolute'
@@ -515,7 +528,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         z_vmin = plotted_min
 
     # check if have defined vmax (in this order: 1. configuration file 2. specific for z statistic)
-    #if have no defined vmax, then take vmax as maximum range value of calculated statistic
+    # if have no defined vmax, then take vmax as maximum range value of calculated statistic
     set_vmax = False
     if z_statistic_sign == 'absolute':
         vmax_var_name = 'vmax_absolute'
@@ -543,9 +556,9 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         z_vmin = -limit_stat
         z_vmax = limit_stat
 
-    return z_vmin, z_vmax, z_colourmap
+    return z_vmin, z_vmax, z_label, z_colourmap
 
-def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics):
+def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci):
     """Function that generates colourbar.
 
     :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
@@ -555,16 +568,18 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics):
     :param cb_axs: list of relevant colourbar axes
     :type cb_axs: list
     :param zstat: name of statistic
-    :type zstat: str
+    :type zstat: str    
     :param plot_characteristics: dictionary of plot characteristics
     :type plot_characteristics: dict
+    :param speci: speci to plot
+    :type speci: str
     """
 
-    #get plotted min and max over relevant axes
-    plotted_min, plotted_max = get_axes_minmax(axs)
+    # get plotted vmin and vmax over relevant axes
+    plotted_min, plotted_max = get_axes_vminmax(axs)
 
     # get colourbar limits/label
-    z_vmin, z_vmax, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics)
+    z_vmin, z_vmax, z_label, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci)
     
     # generate colourbar tick array
     tick_array = np.linspace(z_vmin, z_vmax, plot_characteristics['cb']['n_ticks'], endpoint=True)
@@ -572,40 +587,42 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics):
     # normalise colourbar range (into the 0.0 - 1.0 interval)
     norm = matplotlib.colors.Normalize(vmin=z_vmin, vmax=z_vmax)
 
-    #get cmap (handling discrete cases)
+    # get cmap (handling discrete cases)
     if plot_characteristics['cb']['discrete']:
         cmap = plt.get_cmap(z_colourmap, plot_characteristics['cb']['n_discrete'])
     else:
         cmap = plt.get_cmap(z_colourmap)
 
-    #create colourbar
+    # create colourbar
     for cb_ax in cb_axs:
 
-        #make colourbar on axis
+        # make colourbar on axis
         cb = matplotlib.colorbar.ColorbarBase(cb_ax, cmap=cmap, norm=norm, 
                                                 orientation=plot_characteristics['cb']['orientation'], 
                                                 ticks=tick_array)
 
         # set colorbar label
         if 'cb_label' in plot_characteristics:
+            label = plot_characteristics['cb_label']['label']
+            del plot_characteristics['cb_label']['label']
             if plot_characteristics['cb']['orientation'] == 'horizontal':
+                plot_characteristics['cb_label']['xlabel'] = label
                 cb_ax.set_xlabel(**plot_characteristics['cb_label'])
             else:
                 cb_ax.yaxis.set_label_position("right")
+                plot_characteristics['cb_label']['ylabel'] = label
                 cb_ax.set_ylabel(**plot_characteristics['cb_label'])
            
         # set cb tick params
         if 'cb_tick_params' in plot_characteristics:
             cb.ax.tick_params(**plot_characteristics['cb_tick_params'])
 
-    # remove xlabel so it can update properly
-    plot_characteristics['cb_label']['xlabel'] = ''
-
     # update plot axes (to take account of new colourbar vmin/vmax/cmap)
     for ax in axs:
-        if len(ax.collections) > 0:
-            ax.collections[-1].set_clim(vmin=z_vmin,vmax=z_vmax)
-            ax.collections[-1].set_cmap(cmap=cmap)
+        for collection in ax.collections:
+            if isinstance(collection, matplotlib.collections.PathCollection):
+                collection.set_clim(vmin=z_vmin,vmax=z_vmax)
+                collection.set_cmap(cmap=cmap)
 
 def get_z_statistic_comboboxes(base_zstat, second_data_label=''):
     """Function that gets appropriate zstat name for selected zstatistic comboboxes 
@@ -619,14 +636,14 @@ def get_z_statistic_comboboxes(base_zstat, second_data_label=''):
     :rtype: str
     """
     
-    #get zstat sign 
-    #this is bias, if second data label has been provided
+    # get zstat sign 
+    # this is bias, if second data label has been provided
     if second_data_label == '':
         z_statistic_sign = 'absolute'
     else:
         z_statistic_sign = 'bias'
 
-    #get zstat name
+    # get zstat name
     zstat = copy.deepcopy(base_zstat)
     if z_statistic_sign == 'bias':
         if base_zstat in basic_stats:
@@ -679,25 +696,25 @@ def get_z_statistic_info(plot_type=None, zstat=None):
     :rtype: str, str, str, str
     """
 
-    #have plot_type? Therefore need to extract zstat from plot_type name (if available)
+    # have plot_type? Therefore need to extract zstat from plot_type name (if available)
     if plot_type:
-        #have zstat in plot_type name?
+        # have zstat in plot_type name?
         if ('-' in plot_type) & ('-violin' not in plot_type):
-            #have other options in plot_type?
+            # have other options in plot_type?
             if '_' in plot_type:
-                #bias plot or not (if so, add bias to zstat)
+                # bias plot or not (if so, add bias to zstat)
                 if '_bias' not in plot_type:
                     zstat = plot_type.split('_')[0].split('-')[1]
                 else:
                     zstat = plot_type.split('_')[0].split('-')[1] + '_bias'
-            #no other options in plot_type
+            # no other options in plot_type
             else:
                 zstat = plot_type.split('-')[1]
-        #otherwise return None for all vars
+        # otherwise return None for all vars
         else:
             zstat, base_zstat, z_statistic_type, z_statistic_sign = None, None, None, None
 
-    #zstat not 'None'? Then get information for it            
+    # zstat not 'None'? Then get information for it            
     if zstat:
         # get base name name of zstat (dropping _bias suffix)
         base_zstat = zstat.split('_bias')[0]

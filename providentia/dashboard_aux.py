@@ -8,7 +8,6 @@ from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 
-
 # setup dictionary characterising formats for all GUI window objects (i.e. buttons, titles etc.)
 formatting_dict = {'title_menu':               {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20, 'underline':True},
                    'label_menu':               {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
@@ -25,7 +24,6 @@ formatting_dict = {'title_menu':               {'font':QtGui.QFont("SansSerif", 
                    'column_header_label_popup':{'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18, 'italic':True},
                    'tooltip':                  {'font':QtGui.QFont("SansSerif", 8)}
                    }
-
 
 def set_formatting(PyQt5_obj, formats):
     """function that takes a PyQt5 object and applies some defined formatting"""
@@ -71,7 +69,6 @@ def set_formatting(PyQt5_obj, formats):
     # return modified PyQt5 object
     return PyQt5_obj
 
-
 def wrap_tooltip_text(tooltip_text, max_width):
     """function which takes the text for a tooltip and wraps it by the screen pixel width.
        It does this by estimating the pixel width of the tooltip text (as formatted),
@@ -90,7 +87,6 @@ def wrap_tooltip_text(tooltip_text, max_width):
 
     return tooltip_text
 
-
 class ComboBox(QtWidgets.QComboBox):
     """Modify default class of PyQT5 combobox to always dropdown from fixed
     position box postion, stopping truncation of data"""
@@ -101,7 +97,6 @@ class ComboBox(QtWidgets.QComboBox):
         self.view().parent().move(self.mapToGlobal(QtCore.QPoint()))
         #self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
-
 class QVLine(QtWidgets.QFrame):
     """Define class that generates vertical separator line"""
 
@@ -109,7 +104,6 @@ class QVLine(QtWidgets.QFrame):
         super(QVLine, self).__init__()
         self.setFrameShape(QtWidgets.QFrame.VLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
-
 
 class PopUpWindow(QtWidgets.QWidget):
     """Define class that generates generalised pop-up window"""
@@ -133,7 +127,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
     def generate_window(self):
 
-        """generate GUI window for current menu level"""
+        """Generate GUI window for current menu level"""
 
         #get current menu level keys
         menu_current_keys = list(self.menu_current.keys())
