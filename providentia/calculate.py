@@ -9,7 +9,6 @@ Variance, Data Availability Fraction
 import numpy as np
 import scipy
 
-
 class Stats(object):
 
     @staticmethod

@@ -7,6 +7,7 @@
 
 import os
 import logging
+import sys
 
 from configargparse import ArgumentParser
 import providentia
@@ -15,6 +16,7 @@ from . import exceptions
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 class ProvArgumentParser(object):
     """ Argument Parser """
@@ -47,12 +49,12 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--n_cpus",
                                      dest="n_cpus",
                                      help="Define number of CPUs to process on")
-            self.parser.add_argument("--obs_root",
-                                     dest="obs_root",
-                                     help="directory where is/are to be stored observations")
+            self.parser.add_argument("--ghost_root",
+                                     dest="ghost_root",
+                                     help="root directory where GHOST observations are stored")
             self.parser.add_argument("--nonghost_root",
                                      dest="nonghost_root",
-                                     help="directory where is/are to stored nonghost observations")
+                                     help="root directory where non-GHOST observations are stored")
             self.parser.add_argument("--exp_root",
                                      dest="exp_root",
                                      help="set experiment root data directory")
@@ -61,27 +63,60 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="run Providentia offline")
+            self.parser.add_argument("--available_resolutions",
+                                     dest="available_resolutions",
+                                     help="define available temporal resolutions")
             self.parser.add_argument("--available_networks",
                                      dest="available_networks",
-                                     help="define available networks (default=['EBAS', 'EEA_AQ_eReporting'])")
+                                     help="define available networks")
             self.parser.add_argument("--network",
-                                     dest="selected_network",
+                                     dest="network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
-            self.parser.add_argument("--resolution",
-                                     dest="selected_resolution",
-                                     help="define data resolution (e.g. 'hourly', '3hourly', 'daily'")
-            self.parser.add_argument("--matrix",
-                                     dest="selected_matrix",
-                                     help="define species matrix (e.g. 'gas', 'aerosol'")
             self.parser.add_argument("--species",
-                                     dest="selected_species",
+                                     dest="species",
                                      help="define species to load (e.g. 'sconco3', 'pm10'")
+            self.parser.add_argument("--resolution",
+                                     dest="resolution",
+                                     help="define data resolution (e.g. 'hourly', '3hourly', 'daily'")
             self.parser.add_argument("--start_date",
                                      dest="start_date",
                                      help="define start date in format as 20160101")
             self.parser.add_argument("--end_date",
                                      dest="end_date",
                                      help="define end date in format as 20170101")
+            self.parser.add_argument("--experiments",
+                                     dest="experiments",
+                                    help="experiments to read")
+            self.parser.add_argument("--temporal_colocation",
+                                     dest="temporal_colocation",
+                                     help="activate temporal colocation betwen observations and experiments")
+            self.parser.add_argument("--spatial_colocation",
+                                     dest="spatial_colocation",
+                                     help="activate spatial colocation between multiple read species")
+            self.parser.add_argument("--filter_species",
+                                     dest="filter_species",
+                                     help="filter read species by other species within a data range")  
+            self.parser.add_argument("--report_type",
+                                     dest="report_type",
+                                     help="define ")
+            self.parser.add_argument("--report_summary",
+                                     dest="report_summary",
+                                     help="activate summary plots in offline report")
+            self.parser.add_argument("--report_stations",
+                                     dest="report_stations",
+                                     help="activate station specific plots in offline report")
+            self.parser.add_argument("--report_title",
+                                     dest="report_title",
+                                     help="offline report title")
+            self.parser.add_argument("--report_filename",
+                                     dest="report_filename",
+                                     help="offline report filename")
+            self.parser.add_argument("--map_extent",
+                                     dest="map_extent",
+                                     help="map extent for plots involving any maps")
+            self.parser.add_argument("--plot_characteristics_filename",
+                                     dest="plot_characteristics_filename",
+                                     help="set filename for plot characteristics")
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)

@@ -1,38 +1,31 @@
-{    
-"cams50": ["map-Data %_obs", "map-p5", "map-p50",
-            "map-p95", "map-p5_bias", "map-p50_bias",
-            "map-p95_bias", "map-MB", "map-RMSE", "map-MFB",
-            "map-MAFB", "map-r", "timeseries", "distribution",
-            "distribution_bias", "periodic-p5", "periodic-p50",
-            "periodic-p95", "periodic-Min", "periodic-Max",
-            "periodic-p5_bias", "periodic-p50_bias",
-            "periodic-p95_bias", "periodic-Min_bias",
-            "periodic-Max_bias", "periodic-MB", "periodic-RMSE",
-            "periodic-MFB", "periodic-MAFB", "periodic-r",
-            "heatmap-p5", "heatmap-r"
-            ],
+{            
+    "standard": ["timeseries", "distribution", "distribution_bias", "periodic-violin", "scatter", 
+                 "periodic-p5", "periodic-p5_bias", "periodic-p50", "periodic-p50_bias",
+                 "periodic-p95", "periodic-p95_bias", "periodic-MB", "periodic-r2",
+                 "map-p5", "map-p5_bias", "map-p50", "map-p50_bias",
+                 "map-p95", "map-p95_bias", "map-MB", "map-r2"],
             
-"met":["map-Data %_obs", "timeseries", "periodic-p5", "periodic-p50", "periodic-p95", "distribution"],
+    "operational": ["timeseries_annotate", "periodic-violin_annotate", "scatter",
+                    "map-MB_annotate", "map-RMSE_annotate", "map-r_annotate", "map-r2_annotate",
+                    "heatmap-MB, heatmap-RMSE, heatmap-r, heatmap-r2"],
 
-"options":["timeseries", "timeseries_obs", "timeseries_annotate", "timeseries_individual", "timeseries_individual_annotate", 
-            "distribution", "distribution_obs", "distribution_annotate", "distribution_individual", "distribution_individual_annotate", 
-            "distribution_bias", "distribution_bias_annotate", "distribution_bias_individual", "distribution_bias_individual_annotate",
-            "periodic-p95", "periodic-p95_obs", "periodic-p95_annotate",  "periodic-p95_individual", "periodic-p95_individual_annotate",
-            "periodic-p95_bias", "periodic-p95_bias_annotate",  "periodic-p95_bias_individual", "periodic-p95_bias_individual_annotate",
-            "periodic-violin", "periodic-violin_obs", "periodic-violin_annotate", "periodic-violin_individual", "periodic-violin_individual_annotate",
-            "scatter", "scatter_annotate", "scatter_individual", "scatter_individual_annotate",
-            "map-p95", "map-p95_obs", "map-p95_annotate",
-            "map-p95_bias", "map-p95_bias_annotate",
-            "heatmap-p95"
-            ],
+    "dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "heatmap-r", "heatmap-MB", "heatmap-RMSE", "heatmap-MFB", 
+            "scatter", "scatter_logx_logy", "timeseries"],
 
-"debug":["map-p50","timeseries_trend","periodic-r2","periodic-violin","distribution","scatter_regression","heatmap-p5_bias_annotate","table-p5"],
-
-"dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "heatmap-r", "heatmap-MB", "heatmap-RMSE", "heatmap-MFB", "scatter", "scatter_logx_logy", "timeseries"],
-
-"operational": ["timeseries_annotate", "periodic-violin_annotate", "scatter",
-                "map-MB_annotate", "map-RMSE_annotate", "map-r_annotate", "map-r2_annotate",
-                "heatmap-MB, heatmap-RMSE, heatmap-r, heatmap-r2"
-                ]
-
+    "test_options": ["timeseries", "timeseries_obs", "timeseries_annotate", 
+                     "timeseries_individual", "timeseries_individual_annotate", 
+                     "distribution", "distribution_obs", "distribution_annotate", 
+                     "distribution_individual", "distribution_individual_annotate", 
+                     "distribution_bias", "distribution_bias_annotate", 
+                     "distribution_bias_individual", "distribution_bias_individual_annotate",
+                     "periodic-p95", "periodic-p95_obs", "periodic-p95_annotate",  
+                     "periodic-p95_individual", "periodic-p95_individual_annotate",
+                     "periodic-p95_bias", "periodic-p95_bias_annotate",  
+                     "periodic-p95_bias_individual", "periodic-p95_bias_individual_annotate",
+                     "periodic-violin", "periodic-violin_obs", "periodic-violin_annotate", 
+                     "periodic-violin_individual", "periodic-violin_individual_annotate",
+                     "scatter", "scatter_annotate", "scatter_individual", "scatter_individual_annotate",
+                     "map-p95", "map-p95_obs", "map-p95_annotate",
+                     "map-p95_bias", "map-p95_bias_annotate",
+                     "heatmap-p95"]
 }
