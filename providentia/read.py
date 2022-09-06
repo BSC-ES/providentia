@@ -62,7 +62,7 @@ class DataReader:
             # show warning when the data consists only of less than 2 timesteps
             if len(self.read_instance.time_array) < 2:
                 self.read_instance.clear_canvas = True
-                print('Warning: Extend the time range or decrease the resolution (e.g. from monthly to daily) to create plots.')
+                print('Warning: Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots.')
                 return
             else:
                 self.read_instance.clear_canvas = False
@@ -172,7 +172,7 @@ class DataReader:
                 self.read_instance.plotting_params[data_label] = {}
                 # get experiment specific grid edges for exp, from first relevant file
                 if data_label != 'observations':
-                    exp_nc_root = Dataset(self.files_to_read['{}-{}'.format(self.network[0],self.species[0])][data_label][0])
+                    exp_nc_root = Dataset(self.files_to_read['{}-{}'.format(self.read_instance.network[0],self.read_instance.species[0])][data_label][0])
                     self.read_instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
                     self.read_instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
                     exp_nc_root.close()
@@ -511,8 +511,10 @@ class DataReader:
                 default_qa = self.read_instance.default_qa_standard
             if self.read_instance.qa == default_qa:
                 qa_to_filter = []
+                print('default qa')
             else:
-                qa_to_filter = self.read_instance.qa  
+                qa_to_filter = self.read_instance.qa 
+                print('new qa')
 
             # create network/ speci specific arrays to share across processes (for parallel multiprocessing use)
             # this only works for numerical dtypes, i.e. not strings

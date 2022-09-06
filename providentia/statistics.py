@@ -21,7 +21,7 @@ expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_
 
 
 def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_index=False):
-    """Function that takes data in memory puts it in a pandas dataframe, per network / species.
+    """Function that takes data in memory puts it in a pandas dataframe, per network / species, per data label.
     For summary plots this involves take the median timeseries across the timeseries.
     For station plots it is just the station in question.
     Also temporally aggregate selected data dataframes (by hour, day of week, month),
@@ -41,50 +41,71 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
 
     print('TO PANDAS DF')
 
-    # create new dictionary to store selection station data by network / species
+    # create new dictionary to store selection station data by network / species, per data label
     canvas_instance.selected_station_data = {}
     canvas_instance.selected_station_data_min = {}
     canvas_instance.selected_station_data_max = {}
+    canvas_instance.selected_station_data_number_non_nan = {}
 
     # iterate through networks / species  
     for networkspeci_ii, networkspeci in enumerate(networkspecies):
 
-        # get data for selected stations
-        if station_index:
-            data_array = read_instance.data_in_memory_filtered[networkspeci][:,:,:]
-            if (read_instance.temporal_colocation) & len(read_instance.data_labels > 1):
-                data_array[:,read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
-            data_array = data_array[:, station_index, :]
-        else:
-            if read_instance.offline:
-                if read_instance.temporal_colocation:
-                    station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
-                else:
-                    station_inds = read_instance.valid_station_inds[networkspeci][data_label]
-            else:
-                if read_instance.temporal_colocation:
-                    station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
-                else:
-                    station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
-            data_array = read_instance.data_in_memory_filtered[networkspeci][:,:,:]
-            if (read_instance.temporal_colocation) & len(read_instance.data_labels > 1):
-                data_array[:,read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
-            data_array = data_array[:, station_inds, :]
-                
-        # if data array has no valid data for selected stations, do not create a pandas dataframe
-        # data array has valid data and is not all nan?
-        if data_array.size and not np.isnan(data_array).all():
+        # add nested dictionary for networkspeci in selected station data dictionary
+        canvas_instance.selected_station_data[networkspeci] = {}
+        canvas_instance.selected_station_data_min[networkspeci] = np.inf
+        canvas_instance.selected_station_data_max[networkspeci] = 0
+        canvas_instance.selected_station_data_number_non_nan[networkspeci] = []
 
-            # take cross station median of selected data for data array, and place it in a pandas dataframe 
+        # iterate through data labels
+        for data_label in read_instance.data_labels:
+
+            # get data for selected stations
             if station_index:
-                canvas_instance.selected_station_data[networkspeci]['pandas_df'] = pd.DataFrame(data_array, index=read_instance.time_array, columns=['data'])
+                data_array = read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:]
+                if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
+                    data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                data_array = data_array[station_index,:]
             else:
-                canvas_instance.selected_station_data[networkspeci]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), index=read_instance.time_array, columns=['data'])
+                if read_instance.offline:
+                    if read_instance.temporal_colocation:
+                        station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
+                    else:
+                        station_inds = read_instance.valid_station_inds[networkspeci][data_label]
+                else:
+                    if read_instance.temporal_colocation:
+                        station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
+                    else:
+                        station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
+                data_array = read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:]
+                if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
+                    data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                data_array = data_array[station_inds,:]
+                    
+            # if data array has no valid data for selected stations, do not create a pandas dataframe
+            # data array has valid data and is not all nan?
+            if data_array.size and not np.isnan(data_array).all():
 
-            # get min/max across all selected station data
-            canvas_instance.selected_station_data_min[networkspeci] = canvas_instance.selected_station_data[networkspeci]['pandas_df'].min() 
-            canvas_instance.selected_station_data_max[networkspeci] = canvas_instance.selected_station_data[networkspeci]['pandas_df'].max()
+                # add nested dictionary for data label in selected station data dictionary
+                canvas_instance.selected_station_data[networkspeci][data_label] = {}
                 
+                # take cross station median of selected data for data array, and place it in a pandas dataframe 
+                if station_index:
+                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(data_array, index=read_instance.time_array, columns=['data'])
+                else:
+                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), index=read_instance.time_array, columns=['data'])
+
+                # get min / max across all selected station data per network / species
+                current_min = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].min()
+                current_max = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].max()
+                if current_min < canvas_instance.selected_station_data_min[networkspeci]:
+                    canvas_instance.selected_station_data_min[networkspeci] = current_min
+                if current_max > canvas_instance.selected_station_data_max[networkspeci]:
+                    canvas_instance.selected_station_data_max[networkspeci] = current_max
+
+                # get number of points per data label
+                n_points = len(canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna())
+                canvas_instance.selected_station_data_number_non_nan[networkspeci].append(n_points)
+
         # temporally aggregate selected data dataframes (if have periodic plot to make) 
         # (by hour, day of week, month)
         pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci)
@@ -93,8 +114,8 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
         # temporally aggregated basic statistic differences and bias statistics between
         # observations and experiment data arrays
         if len(read_instance.data_labels) > 1:
-            calculate_temporally_aggregated_experiment_bias_statistics(read_instance, canvas_instance, networkspeci)
-
+            calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_instance, networkspeci)
+            
 def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
     """Function that aggregates pandas dataframe data, for all data arrays,
     into desired temporal groupings also calculates all defined basic
@@ -111,7 +132,7 @@ def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
     print('PANDAS TEMPORAL AGG')
 
     # define statistics to calculate (all basic statistics)
-    #statistics_to_calculate = list(basic_stats.keys())
+    statistics_to_calculate = list(basic_stats.keys())
 
     # define all temporal aggregation resolutions that will be used to aggregate data
     relevant_temporal_resolutions = read_instance.relevant_temporal_resolutions + ['all']
@@ -124,7 +145,7 @@ def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
             all_xticks = canvas_instance.periodic_xticks[temporal_aggregation_resolution]
 
         # iterate through data arrays names in selected station data dictionary
-        for data_label in read_instance.data_labels:
+        for data_label in canvas_instance.selected_station_data[networkspeci]:
 
             # create nested dictionary inside selected station data dictionary for storing
             # aggregated data by data array label and temporal aggregation resolution
@@ -167,7 +188,7 @@ def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
                 function_arguments = stats_dict['arguments']
                 # if stat is exceedances then add threshold value (if available)  
                 if stat == 'Exceedances':
-                    function_arguments['threshold'] = aux.exceedance_lim(read_instance.species)
+                    function_arguments['threshold'] = exceedance_lim(networkspeci)
                 # create empty array for storing calculated statistic by group
                 stat_output_by_group = []
                 # iterate through grouped data
@@ -212,7 +233,7 @@ def calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_i
     # iterate through all defined temporal aggregation resolutions
     for temporal_aggregation_resolution in relevant_temporal_resolutions:
         # iterate through data arrays names in selected station data dictionary
-        for data_label in read_instance.data_labels:
+        for data_label in canvas_instance.selected_station_data[networkspeci]:
             # make sure the data array is an experimental one
             if data_label != 'observations':
                 relevant_aggregated_observations_dict = \
@@ -338,11 +359,10 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
                                read_instance.valid_station_inds[networkspeci][z2])
 
     # read z1 data
-    z1_index = read_instance.data_labels.index(z1)
     z1_array_data = \
-        read_instance.data_in_memory_filtered[networkspeci][z1_index, active_map_valid_station_inds, :]
+        read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(z1),active_map_valid_station_inds,:]
     # drop NaNs and reshape to object list of station data arrays (if not checking data %)
-    if base_zstat != 'Data %':
+    if base_zstat != 'Data%':
         z1_array_data = drop_nans(z1_array_data)
     else:
         z1_array_data.tolist()
@@ -365,12 +385,11 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
 
     # else, read z2 data then calculate 'difference' statistic
     else:
-        z2_index = read_instance.data_labels.index(z2)
         # read z2 data
         z2_array_data = \
-            read_instance.data_in_memory_filtered[networkspeci][z2_index,active_map_valid_station_inds,:]
+            read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(z2),active_map_valid_station_inds,:]
         # drop NaNs and reshape to object list of station data arrays (if not checking data %)
-        if base_zstat != 'Data %':
+        if base_zstat != 'Data%':
             z2_array_data = drop_nans(z2_array_data)
         else:
             z2_array_data = z2_array_data.tolist()
@@ -463,7 +482,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     # get dictionary containing necessary information for calculation of selected statistic
     if z_statistic_type == 'basic':
         stats_dict = basic_stats[base_zstat]
-        if base_zstat not in ['Data %','Exceedances']:
+        if base_zstat not in ['Data%','Exceedances']:
             label_units = ' ({})'.format(read_instance.measurement_units[speci])
         else:
             label_units = ''
@@ -603,18 +622,23 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
 
         # set colorbar label
         if 'cb_label' in plot_characteristics:
-            label = plot_characteristics['cb_label']['label']
-            del plot_characteristics['cb_label']['label']
+            cb_label_characteristics = copy.deepcopy(plot_characteristics['cb_label'])
+            del cb_label_characteristics['label']
             if plot_characteristics['cb']['orientation'] == 'horizontal':
-                plot_characteristics['cb_label']['xlabel'] = label
-                cb_ax.set_xlabel(**plot_characteristics['cb_label'])
+                cb_label_characteristics['xlabel'] = z_label
+                cb_ax.set_xlabel(**cb_label_characteristics)
             else:
                 cb_ax.yaxis.set_label_position("right")
-                plot_characteristics['cb_label']['ylabel'] = label
-                cb_ax.set_ylabel(**plot_characteristics['cb_label'])
+                cb_label_characteristics['ylabel'] = z_label
+                cb_ax.set_ylabel(**cb_label_characteristics)
            
         # set cb tick params
         if 'cb_tick_params' in plot_characteristics:
+            # remove ticks for discrete colorbars
+            # we do this because different screen resolutions slightly offset the tick position
+            # https://earth.bsc.es/gitlab/ac/Providentia/-/issues/166
+            if plot_characteristics['cb']['discrete']:
+                plot_characteristics['cb_tick_params']['size'] = 0
             cb.ax.tick_params(**plot_characteristics['cb_tick_params'])
 
     # update plot axes (to take account of new colourbar vmin/vmax/cmap)
