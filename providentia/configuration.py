@@ -23,7 +23,7 @@ class ProvConfiguration(object):
     def __init__(self, **kwargs):
         self.config_dir = kwargs.get('config_dir',
                                      os.path.join(os.environ['HOME'], '.providentia'))
-        self.ghost_version = kwargs.get('ghost_version', '1.3.3')
+        self.ghost_version = kwargs.get('ghost_version', '1.4')
         self.cartopy_data_dir = kwargs.get('cartopy_data_dir', '')
         self.available_cpus = kwargs.get('available_cpus', '')
         self.n_cpus = kwargs.get('n_cpus', '')
@@ -47,6 +47,11 @@ class ProvConfiguration(object):
         self.resolution = kwargs.get('resolution', '')
         self.start_date = kwargs.get('start_date', '')
         self.end_date = kwargs.get('end_date', '')
+        self.position_1 = kwargs.get('position_1', 'map')
+        self.position_2 = kwargs.get('position_2', 'timeseries')
+        self.position_3 = kwargs.get('position_3', 'metadata')
+        self.position_4 = kwargs.get('position_4', 'periodic')
+        self.position_5 = kwargs.get('position_5', 'periodic-violin')
         self.experiments = kwargs.get('experiments', '')
         self.temporal_colocation = kwargs.get('temporal_colocation', False)
         self.spatial_colocation = kwargs.get('spatial_colocation', True)
@@ -122,10 +127,10 @@ class ProvConfiguration(object):
             if value == '':
                 # not running on workstation?
                 if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3v2'):
-                    return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
-
-                # running on workstation?
-                value = '/esarchive/recon/prov_interp'
+                    value = '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
+                else:
+                    # running on workstation?
+                    value = '/esarchive/recon/prov_interp'
 
         return value
 

@@ -1,8 +1,10 @@
+import os
 import sys
 import pandas as pd
 
 from .aux import get_default_qa_codes
 
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 class InitStandards:
 
@@ -12,7 +14,8 @@ class InitStandards:
 
     def __init__(self, ghost_root, ghost_version):
         """ Read from ghost standards """
-        sys.path.insert(1, '{}/GHOST_standards/{}'.format(ghost_root, ghost_version))
+
+        sys.path.insert(1, os.path.join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(ghost_version)))
         from GHOST_standards import standard_parameters, \
             get_standard_metadata, standard_data_flag_name_to_data_flag_code, \
             standard_QA_name_to_QA_code
