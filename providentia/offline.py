@@ -94,7 +94,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 setattr(self, k, val)
 
             # get key configuration variables
-            self.network, self.species = aux.get_parameters(self) 
+            aux.get_parameters(self) 
             self.qa = aux.which_qa(self)
             self.flags = aux.which_flags(self)
             self.experiments = aux.get_experiments(self)
@@ -371,7 +371,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             if base_plot_type == 'periodic-violin':
                                 self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, self.plot_characteristics[plot_type], plot_options, ylim=[self.selected_station_data_min[networkspeci], self.selected_station_data_max[networkspeci]])
                             else:
-                                self.plot.harmonise_xy_lims_paradigm(list(ax.values()), base_plot_type, self.plot_characteristics[plot_type], plot_options)
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, self.plot_characteristics[plot_type], plot_options)
                         
                         # iterate through all relevant axes for plot type in paradigm
                         for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
@@ -615,6 +615,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # count how many plots are made per plot type
         current_plot_ind = 0
+
+        # if are making bias plot, and have no valid experiment data then cannot make plot type
+        if ('bias' in plot_options) & (len(self.selected_station_data[networkspeci]) < 2):
+            return
 
         # iterate through all data arrays 
         for n_data_label, data_label in enumerate(self.read_instance.data_labels):

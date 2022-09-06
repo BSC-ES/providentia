@@ -34,9 +34,9 @@
                             "axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
                             "plot": {"ha": "left", "va": "top", "fontsize": 8.0, "wrap": true, "linespacing": 1.5}},
   
-"map": {"orientation": "landscape",
-        "figure": {"ncols": 4, "nrows": 4},
-        "map_coastline_resolution": "low",
+"map": {"map_coastline_resolution": "medium",
+        "orientation": "landscape",
+        "figure": {"ncols": 4, "nrows": 4}, 
         "land_polygon": {"facecolor": "0.85"},
         "projection": "Robinson",
         "gridlines": {"linestyle": "-", "alpha": 0.4},
@@ -71,7 +71,7 @@
                "trend": {"window": 6, "min_points": 1, "format":{"linewidth": 1.0}},
                "markersize_npoints_threshold": 200,
                "markersize": {"standard": 1.1, "few_points": 4.0},
-               "plot": {"marker": "o", "markeredgecolor": null, "mew": 0, "linestyle": null},
+               "plot": {"marker": "o", "markeredgecolor": null, "mew": 0, "linestyle": null, "markersize": ""},
                "plot_options": ["bias", "obs", "individual", "annotate", "trend", "logy"]},
 
 "periodic": {"orientation": "landscape",
@@ -149,7 +149,9 @@
             "1:2_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
             "2:1_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
             "equal_aspect": true,
-            "plot": {"marker": "o", "markersize": 2, "linestyle": "None"},
+            "markersize_npoints_threshold": 200,
+            "markersize": {"standard": 1.1, "few_points": 4.0},
+            "plot": {"marker": "o", "markersize": "", "linestyle": "None"},
             "plot_options": ["individual", "annotate", "regression", "logx", "logy"]},
 
 "heatmap": {"orientation": "portrait",
