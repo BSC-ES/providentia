@@ -438,11 +438,11 @@ class DataFilter:
 
                 # if spatial colocation is not active,
                 # get indices where one of observations and experiments per network /species is NaN
-                if not read_instance.spatial_colocation:
+                if not self.read_instance.spatial_colocation:
                     self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
 
             # get indices where one of observations and experiments across networks / species is NaN
-            if read_instance.spatial_colocation:
+            if self.read_instance.spatial_colocation:
                 for network, speci in zip(self.read_instance.network, self.read_instance.species):
                     self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
 
@@ -469,11 +469,11 @@ class DataFilter:
             # get observational station indices with > 1 valid measurements 
             for data_label in self.read_instance.data_labels:
 
-                # check if data array is not observational data array
+                # check if data array is observational data array
                 if data_label == 'observations':
 
                     # get obs data array
-                    obs_data = self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:]
+                    obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
 
                     # get absolute data availability number per station in observational data array
                     station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
@@ -502,10 +502,10 @@ class DataFilter:
                 if data_label != 'observations':
 
                     # get indices of valid observational data array stations
-                    valid_station_inds = self.read_instance.valid_station_inds[networkspeci]['observations']
+                    valid_station_inds = copy.deepcopy(self.read_instance.valid_station_inds[networkspeci]['observations'])
 
                     # get experimental data array (first subset by valid observational stations)
-                    exp_data = self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),valid_station_inds,:]
+                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),valid_station_inds,:])
 
                     # get absolute data availability number per station in experiment data array
                     station_data_availability_number = Stats.calculate_data_avail_number(exp_data)

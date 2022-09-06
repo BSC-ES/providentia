@@ -126,6 +126,115 @@ def which_flags(instance):
     else:
         return []
 
+def multi_species_mapping(species):
+    """Map species special case str to multiple species names"""
+
+    multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4','vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
+
+    return multi_species_map[species]
+
+def get_parameters(instance):
+    """
+    Handle parsing of required config parameters.
+
+    Throw errors if parameters do not exist or are empty strings.
+
+    If have multiple networks / species, parse these correctly.
+    Also handling special case strings which map to binned species.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    """
+
+    # network
+    if hasattr(instance, 'network'):
+        # throw error if network is empty str
+        if instance.network.strip() == '':
+            error = 'Error: "network" field is empty in .conf file'
+            sys.exit(error)
+        # parse multiple networks
+        elif ',' in instance.network:
+            instance.network = [network.strip() for network in instance.network.split(',')]
+        else:
+            instance.network = [instance.network.strip()]
+    else:
+        error = 'Error: "network" field must be defined in .conf file'
+        sys.exit(error)
+
+    # species
+    if hasattr(instance, 'species'):
+        # throw error if species is empty str
+        if instance.species.strip() == '':
+            error = 'Error: "species" field is empty in .conf file'
+            sys.exit(error)
+        # map to multiple species if have * wildcard
+        elif '*' in instance.species:
+            instance.species = multi_species_mapping[instance.species]  
+        # parse multiple species
+        elif ',' in instance.species:
+            instance.species = [speci.strip() for speci in instance.species.split(',')]
+        else:
+            instance.species = [instance.species.strip()]
+    # throw error if species is not defined
+    else:
+        error = 'Error: "species" field must be defined in .conf file'
+        sys.exit(error)
+
+    # resolution
+    if hasattr(instance, 'resolution'):
+        # throw error if species if empty str
+        if instance.resolution.strip() == '':
+            error = 'Error: "resolution" field is empty in .conf file'
+            sys.exit(error)
+    # throw error if resolution is not defined
+    else:
+        error = 'Error: "resolution" field must be defined in .conf file'
+        sys.exit(error)
+
+    # start_date
+    if hasattr(instance, 'start_date'):
+        # throw error if start_date if empty str
+        if str(instance.start_date).strip() == '':
+            error = 'Error: "start_date" field is empty in .conf file'
+            sys.exit(error)
+    # throw error if start_date is not defined
+    else:
+        error = 'Error: "start_date" field must be defined in .conf file'
+        sys.exit(error)
+
+    # end_date
+    if hasattr(instance, 'end_date'):
+        # throw error if start_date if empty str
+        if str(instance.end_date).strip() == '':
+            error = 'Error: "end_date" field is empty in .conf file'
+            sys.exit(error)
+    # throw error if end_date is not defined
+    else:
+        error = 'Error: "end_date" field must be defined in .conf file'
+        sys.exit(error)
+
+    # throw error if length of parameter lists are not the same
+    if len(instance.network) != len(instance.species):
+        error = 'Error: The number of networks and species is not the same.'
+        sys.exit(error)
+
+    # throw error if one of networks are non all GHOST or non-GHOST
+    for network_ii, network in enumerate(instance.network):
+        if network_ii == 0:
+            previous_is_ghost = check_for_ghost(network)
+        else:
+            is_ghost = check_for_ghost(network)
+            if is_ghost != previous_is_ghost:
+                error = 'Error: Networks must be all GHOST or non-GHOST'
+                sys.exit(error)
+            previous_is_ghost = is_ghost
+
+    # if are using dashboard then just take first network/species pair, as multivar not supported yet
+    if (len(instance.network) > 1) & (len(instance.species) > 1) & (not instance.offline):
+      instance.network = [instance.network[0]]
+      instance.species = [instance.species[0]]
+      print('Warning: Mutiple networks/species not supported for dashboard.\nFirst network / species taken.')
+
 def get_experiments(instance):
     """If there are experiments coming from a config file,
     select those. Otherwise, return empty dict.
@@ -140,84 +249,19 @@ def get_experiments(instance):
         # empty string
         if instance.experiments.strip() == "":
             return {}
-        #split experiments
+        # split experiments
         else:
-            #have alternative experiment names for the legend, then parse them?
+            # have alternative experiment names for the legend, then parse them?
             if ('(' in instance.experiments) & (')' in instance.experiments):
                 exps = [exp.strip() for exp in instance.experiments.split('(')[0].strip().split(",")]
                 exps_legend = [exp_legend.strip() for exp_legend in instance.experiments.split('(')[1].split(']')[0].strip().split(",")]
-            #otherwise set legend names as given experiment names in full
+            # otherwise set legend names as given experiment names in full
             else: 
                 exps = [exp.strip() for exp in instance.experiments.split(",")]
                 exps_legend = copy.deepcopy(exps)
             return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
     else:
         return {}
-
-def multi_species_mapping(species):
-    """Map species special case str to multiple species names"""
-
-    multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4','vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
-
-    return multi_species_map[species]
-
-def get_parameters(instance):
-    """
-    Handle reading of main parameter information from config files.
-    If have multiple parameters, parse these correctly.
-    Also handling special case strings which map to binned species
-
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :return: list of networks, list of species
-    :rtype: list, list
-    """
-
-    #species
-    if hasattr(instance, 'species'):
-
-        #map to multiple species if have * wildcard
-        if '*' in instance.species:
-            species = multi_species_mapping[instance.species]  
-        elif ',' in instance.species:
-            species = [speci.strip() for speci in instance.species.split(',')]
-        else:
-            species = [instance.species.strip()]
-    else:
-        species = []
-
-    #networks
-    if hasattr(instance, 'network'):
-        if ',' in instance.network:
-            networks = [network.strip() for network in instance.network.split(',')]
-        else:
-            networks = [instance.network.strip()]
-    else:
-        networks = []
-
-    #throw error if length of parameter lists are not the same
-    if len(networks) != len(species):
-        error = 'Error: The number of networks and species is not the same.'
-        sys.exit(error)
-
-    #throw error if one of networks are non all GHOST or non-GHOST
-    for network_ii, network in enumerate(networks):
-        if network_ii == 0:
-            previous_is_ghost = check_for_ghost(network)
-        else:
-            is_ghost = check_for_ghost(network)
-            if is_ghost != previous_is_ghost:
-                error = 'Error: Networks must be all GHOST or non-GHOST'
-                sys.exit(error)
-            previous_is_ghost = is_ghost
-
-    #if are using dashboard then just take first network/species pair, as multivar not supported yet
-    if (len(networks) > 1) & (len(species) > 1) & (not instance.offline):
-      networks = [networks[0]]
-      species = [species[0]]
-      print('Warning: Mutiple networks/species not supported for dashboard.\nFirst network / species taken.')
-
-    return networks, species
 
 def get_default_qa_codes(instance):
     """Retrieve default QA codes from GHOST_standards using the QA flags' names.
@@ -567,7 +611,7 @@ def update_period_fields(instance):
                                                         'Spring', 'Summer', 'Autumn', 'Winter']
         # drop selected fields from higher temporal resolutions
         labels_to_remove = ['Daytime', 'Nighttime']
-        for label in instance.labels_to_remove:
+        for label in labels_to_remove:
             if label in instance.period_menu['checkboxes']['keep_selected']:
                 instance.period_menu['checkboxes']['keep_selected'].remove(label)
             if label in instance.period_menu['checkboxes']['remove_selected']:
@@ -819,9 +863,9 @@ def update_plotting_parameters(instance):
     for data_label in instance.data_labels:
         if data_label != 'observations':
             # define colour for experiment
-            instance.plotting_params[experiment]['colour'] = clrs[experiment_ind-1]
+            instance.plotting_params[data_label]['colour'] = clrs[experiment_ind-1]
             # define zorder for experiment (obs zorder + experiment_ind)
-            instance.plotting_params[experiment]['zorder'] = \
+            instance.plotting_params[data_label]['zorder'] = \
                 instance.plotting_params['observations']['zorder'] + experiment_ind
             # update count of experiments
             experiment_ind += 1
