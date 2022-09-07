@@ -284,18 +284,24 @@ class Plot:
         # make plot aspect ratio is equal
         # (ensure ticks and ticklabels are same also)
         if 'equal_aspect' in plot_characteristics_vars:
-            ax.set_aspect('equal', adjustable='box')
+            
+            # Get min and max values for ticks
             xticklocs = ax.get_xticks()
-            xticklabels = ax.get_xticklabels()
             yticklocs = ax.get_yticks()
-            yticklabels = ax.get_yticklabels()
-            if len(xticklocs) < len(yticklocs):
-                ax.set_yticks(xticklocs)
-                ax.set_yticklabels(xticklabels)
-            elif len(yticklocs) < len(xticklocs):
-                ax.set_xticks(yticklocs)
-                ax.set_xticklabels(yticklabels)
+            if xticklocs[0] < yticklocs[0]:
+                tickmin = xticklocs[0]
+            else:
+                tickmin = yticklocs[0]
+            if xticklocs[-1] > yticklocs[-1]:
+                tickmax = xticklocs[-1]
+            else:
+                tickmax = yticklocs[-1]
 
+            # set equal proportion and ticks
+            ax.set_aspect('equal', adjustable='box')
+            ax.set_xticks(np.linspace(tickmin, tickmax, plot_characteristics['n_ticks']+1))
+            ax.set_yticks(np.linspace(tickmin, tickmax, plot_characteristics['n_ticks']+1))
+           
         # handle formatting specific to plot types
         if base_plot_type in ['periodic','periodic-violin']:
 
@@ -327,7 +333,10 @@ class Plot:
             else:
                 map_extent = plot_characteristics['map_extent']
                 self.read_instance.map_extent = map_extent
-            ax.set_extent(map_extent, crs=self.canvas_instance.datacrs)
+            if isinstance(map_extent, str):
+                map_extent = [float(c) for c in map_extent.split(',')]
+            ax.set_extent(map_extent, 
+                          crs=self.canvas_instance.datacrs)
 
     def make_legend_handles(self, plot_characteristics_legend, plot_options=[]):
         """Make legend element handles
@@ -785,7 +794,8 @@ class Plot:
             PDF_sampled = PDF(x_grid)
 
         # make plot
-        relevant_axis.plot(x_grid, PDF_sampled, color=self.read_instance.plotting_params[data_label]['colour'], **plot_characteristics['plot'])
+        relevant_axis.plot(x_grid, PDF_sampled, color=self.read_instance.plotting_params[data_label]['colour'], 
+                           **plot_characteristics['plot'])
 
     def make_scatter(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[]):
         """Make scatter plot
@@ -802,12 +812,14 @@ class Plot:
         :type plot_options: list
         """
 
+        print('MAKE SCATTER')
+
         # get observations data
-        observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df'].dropna()['data']
+        observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']['data']
 
         # get experiment data
-        experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna()['data']
-
+        experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data']
+        
         # create scatter plot
         relevant_axis.plot(observations_data, experiment_data, 
                            color=self.read_instance.plotting_params[data_label]['colour'],
@@ -914,20 +926,20 @@ class Plot:
             observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df'].dropna()['data']
 
             # iterate through experiment data, making regression line to observations
-            for data_label in data_labels:
+            for data_label, legend_label in zip(data_labels, self.canvas_instance.legend.texts):
                 if data_label != 'observations':
                     experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna()['data']
-
                     m, b = np.polyfit(observations_data, experiment_data, deg=1)
-                    relevant_axis.plot(observations_data, m*observations_data+b, 
-                                    color=self.read_instance.plotting_params[data_label]['colour'],
-                                    zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
-                                    transform=relevant_axis.transAxes,
-                                    **plot_characteristics['regression'])
-        
+                    regression_line = relevant_axis.plot(observations_data, m*observations_data+b, 
+                                                         color=self.read_instance.plotting_params[data_label]['colour'],
+                                                         zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
+                                                         **plot_characteristics['regression'])
+
+                    if regression_line not in self.canvas_instance.lined[legend_label]:
+                        self.canvas_instance.lined[legend_label] += regression_line
         else:
-            for line in relevant_axis.lines[len(self.canvas_instance.legend.texts):]:
-                line.remove() 
+            for line in relevant_axis.lines[len(relevant_axis.lines)-2:]:
+                line.remove()
 
     def trend(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], undo=False):
         """Add trendline to plot
@@ -963,7 +975,7 @@ class Plot:
                 trend_line = relevant_axis.plot(ts.rolling(plot_characteristics['trend']['window'], min_periods=plot_characteristics['trend']['min_points'], center=True).mean().dropna(),
                                                 color=self.read_instance.plotting_params[data_label]['colour'],
                                                 zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
-                                                **plot_characteristics['trend']['trend_format'])
+                                                **plot_characteristics['trend']['format'])
 
                 if trend_line not in self.canvas_instance.lined[legend_label]:
                     self.canvas_instance.lined[legend_label] += trend_line
@@ -972,7 +984,8 @@ class Plot:
             for line in relevant_axis.lines[len(self.canvas_instance.legend.texts):]:
                 line.remove() 
 
-    def annotation(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], undo=False):
+    def annotation(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_type, plot_options=[], 
+                   undo=False):
         """Add statistical annotations to plot
 
         :param relevant_axis: axis to plot on 
@@ -1005,28 +1018,29 @@ class Plot:
 
             # iterate through plotted data labels
             for data_label in data_labels:
+                if plot_type == 'periodic' or 'scatter':
+                    if data_label != 'observations':
+                        # get stats
+                        stats_annotate = []
+                        for zstat in stats:
+                            if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
+                                stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
+                                                    plot_characteristics['annotate_text']['round_decimal_places'])))
 
-                # get stats
-                stats_annotate = []
-                for zstat in stats:
-                    if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
-                        stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
-                                              plot_characteristics['annotate_text']['round_decimal_places'])))
+                        # show number of stations if defined
+                        if plot_characteristics['annotate_text']['n_stations']:
+                            if data_label == data_labels[0]:
+                                colours.append('black')
+                                if 'individual' in plot_options:
+                                    str_to_annotate.append('Stations: 1')
+                                else:
+                                    str_to_annotate.append('Stations: ' + str(len(self.read_instance.plotting_params['observations']['valid_station_inds'])))
 
-                # show number of stations if defined
-                if plot_characteristics['annotate_text']['n_stations']:
-                    if data_label == data_labels[0]:
-                        colours.append('black')
-                        if 'individual' in plot_options:
-                            str_to_annotate.append('Stations: 1')
-                        else:
-                            str_to_annotate.append('Stations: ' + str(len(self.read_instance.plotting_params['observations']['valid_station_inds'])))
+                        # get colors
+                        colours.append(self.read_instance.plotting_params[data_label]['colour'])
 
-                # get colors
-                colours.append(self.read_instance.plotting_params[data_label]['colour'])
-
-                # generate annotation
-                str_to_annotate.append(', '.join(stats_annotate))
+                        # generate annotation
+                        str_to_annotate.append(', '.join(stats_annotate))
 
             # add annotation to plot
             # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
@@ -1123,6 +1137,9 @@ class Plot:
                     elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
                         ylim_min = -np.abs(np.min(all_ylim_lower))
                         ylim_max = np.abs(np.min(all_ylim_lower))
+
+            if 'equal_aspect' in plot_characteristics:
+                ax.set_aspect('equal', adjustable='box')
 
             # set xlim
             if xlim:
