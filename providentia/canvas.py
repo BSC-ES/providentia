@@ -135,7 +135,9 @@ class MPLCanvas(FigureCanvas):
             ax = self.plot_axes[plot_type]
             if type(ax) == dict:
                 for relevant_temporal_resolution, sub_ax in ax.items():
-                    self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], relevant_temporal_resolution=relevant_temporal_resolution, col_ii=-1)
+                    self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], 
+                                          relevant_temporal_resolution=relevant_temporal_resolution, 
+                                          col_ii=-1)
             else:
                 self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
 
@@ -276,6 +278,10 @@ class MPLCanvas(FigureCanvas):
 
             # update associated plots with selected stations
             self.update_associated_selected_station_plots()
+
+            # update layout options for position 2, 3, 4 and 5
+            self.update_layout_options()
+            self.read_instance.update_configuration_bar_fields()
 
             # draw changes
             self.figure.canvas.draw()
@@ -489,6 +495,9 @@ class MPLCanvas(FigureCanvas):
                             if plot_type == 'metadata':
                                 if data_label != 'observations':
                                     continue
+                            if plot_type == 'scatter':
+                                if data_label == 'observations':
+                                    continue
                             func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options)
 
                     # TODO: Move to offline version
@@ -498,13 +507,25 @@ class MPLCanvas(FigureCanvas):
                         self.plot.set_markersize(self.read_instance.networkspeci, self.plot_characteristics[plot_type])
                     """
 
+                    # format axes for selected_station_plots
+                    if type(ax) == dict:
+                        for relevant_temporal_resolution, sub_ax in ax.items():
+                            self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], 
+                                                  relevant_temporal_resolution=relevant_temporal_resolution, 
+                                                  col_ii=-1)
+                    else:
+                        self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
+
                     # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
                     if type(ax) == dict:
                         relevant_axs = [ax[relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
                         if plot_type == 'periodic-violin':
-                            self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], self.selected_station_data_max[self.read_instance.networkspeci]])
+                            self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
+                                                                 plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                 self.selected_station_data_max[self.read_instance.networkspeci]])
                         else:
-                            self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], plot_options, autoscale_y=True)
+                            self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
+                                                                 plot_options, autoscale_y=True)
                         set_title = False
                         for relevant_temporal_resolution, sub_ax in ax.items():
                             #do not show axis if temporal resolution is not relevant
@@ -518,8 +539,6 @@ class MPLCanvas(FigureCanvas):
                                 self.activate_axis(sub_ax, plot_type)
                                 self.reset_ax_navigation_toolbar_stack(sub_ax)
                     else:    
-                        ax.relim()
-                        ax.autoscale()
                         self.plot.set_axis_title(ax, axis_title, self.plot_characteristics[plot_type])
                         self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
                         self.activate_axis(ax, plot_type)
@@ -604,6 +623,14 @@ class MPLCanvas(FigureCanvas):
             else:
                 if ax.get_visible():
                     for i, legend_label in enumerate(self.legend.texts):
+
+                        # if plot is scatter, remove observations from legend items
+                        if plot_type == 'scatter':
+                            if i == 0:
+                                continue
+                            else:
+                                i -= 1
+
                         ax_plot_lines[legend_label] = ax.lines[i]
 
                         # transform single elements to list
@@ -637,14 +664,8 @@ class MPLCanvas(FigureCanvas):
         self.layout_options = ['None', 'distribution', 'metadata', 'periodic', 
                                'periodic-violin', 'scatter', 'timeseries']
 
-
         # remove scatter plots from list if the temporal colocation is not active
         if not self.read_instance.temporal_colocation:
-            if 'scatter' in self.layout_options:
-                self.layout_options.remove('scatter')
-        
-        # remove scatter and periodic plots from list if there are no experiments
-        if len(self.read_instance.data_labels) < 2:
             if 'scatter' in self.layout_options:
                 self.layout_options.remove('scatter')
             if 'periodic' in self.layout_options:
@@ -813,7 +834,8 @@ class MPLCanvas(FigureCanvas):
 
                     # harmonise axes limits across subplots 
                     relevant_axs = [self.plot_axes['periodic'][relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
-                    self.plot.harmonise_xy_lims_paradigm(relevant_axs, 'periodic', self.plot_characteristics['periodic'], plot_options, autoscale_y=True)
+                    self.plot.harmonise_xy_lims_paradigm(relevant_axs, 'periodic', self.plot_characteristics['periodic'], 
+                                                         plot_options, autoscale_y=True)
                     set_title = False
                     # un-hide axes, and reset navigation toolbar stack, and set axis title and ylabel
                     for relevant_temporal_resolution, sub_ax in self.plot_axes['periodic'].items():
@@ -885,7 +907,6 @@ class MPLCanvas(FigureCanvas):
             self.distribution_menu_button.hide()
 
         elif plot_type == 'scatter':
-            # TODO: Test when colocation is working
             ax.lines = []
             ax.artists = []
             self.scatter_menu_button.hide()
@@ -929,7 +950,6 @@ class MPLCanvas(FigureCanvas):
             self.distribution_menu_button.show()
        
         elif plot_type == 'scatter':
-            # TODO: Test when colocation is working
             self.scatter_menu_button.show()
 
     def select_all_stations(self):
@@ -2067,12 +2087,14 @@ class MPLCanvas(FigureCanvas):
                                              self.read_instance.networkspeci,
                                              list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                              self.plot_characteristics[key], 
+                                             key,
                                              plot_options=[])
                 else:
                     self.plot.annotation(self.plot_axes[key], 
                                          self.read_instance.networkspeci,
                                          list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                          self.plot_characteristics[key], 
+                                         key,
                                          plot_options=[])
             # remove annotation if box is unchecked
             elif not check_state:
@@ -2082,6 +2104,7 @@ class MPLCanvas(FigureCanvas):
                                              self.read_instance.networkspeci,
                                              list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                              self.plot_characteristics[key], 
+                                             key,
                                              plot_options=[], 
                                              undo=True)
                 else:
@@ -2089,6 +2112,7 @@ class MPLCanvas(FigureCanvas):
                                          self.read_instance.networkspeci,
                                          list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                          self.plot_characteristics[key], 
+                                         key,
                                          plot_options=[], 
                                          undo=True)
 
@@ -2111,7 +2135,6 @@ class MPLCanvas(FigureCanvas):
                                 undo=True)
         
         if option == 'regression':
-            # TODO: Test when colocation is working
             # add regression line if box is checked
             if check_state:
                 self.plot.linear_regression(self.plot_axes[key], 
@@ -2127,6 +2150,15 @@ class MPLCanvas(FigureCanvas):
                                             self.plot_characteristics[key],  
                                             plot_options=[],
                                             undo=True)
+     
+        # format axes for selected_station_plots
+        if type(self.plot_axes[key]) == dict:
+            for relevant_temporal_resolution, sub_ax in self.plot_axes[key].items():
+                self.plot.format_axis(sub_ax, key, self.plot_characteristics[key], 
+                                        relevant_temporal_resolution=relevant_temporal_resolution, 
+                                        col_ii=-1)
+        else:
+            self.plot.format_axis(self.plot_axes[key], key, self.plot_characteristics[key])
 
         # draw changes
         self.figure.canvas.draw()
