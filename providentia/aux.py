@@ -828,17 +828,21 @@ def check_for_ghost(network_name):
     else:
         return True
 
-def load_conf(instance, fpath=None):
-    """ Load existing configurations from file. """
+
+def load_conf(self, fpath=None):
+    """Load existing configurations from file
+    for running offline Providentia."""
 
     if fpath is None:
-        fpath = parse_path(instance.config_dir, instance.config_file)
+        print("No configuration file found")
+        sys.exit(1)
 
+    # if DEFAULT is not present, then return
     if not os.path.isfile(fpath):
         print(("Error %s" % fpath))
         return
 
-    instance.sub_opts, instance.all_sections, instance.parent_section_names, instance.subsection_names = read_conf(fpath)        
+    self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(fpath)
 
 def update_plotting_parameters(instance):
     """
