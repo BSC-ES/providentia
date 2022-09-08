@@ -637,7 +637,6 @@ class Plot:
                 xticks = np.append(xticks, steps[-1])
 
             # set xticks
-            print(xticks)
             relevant_axis.xaxis.set_ticks(xticks) 
 
     def make_periodic(self, relevant_axis, networkspeci, data_label, plot_characteristics, zstat=None, plot_options=[]):
