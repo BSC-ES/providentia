@@ -33,7 +33,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # update from config file
         if 'config' in kwargs:
-            aux.load_conf(kwargs['config'])
+            aux.load_conf(self, kwargs['config'])
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
@@ -145,10 +145,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
     def start_pdf(self):
 
         # get path where reports will be saved
-        reports_path = (os.path.join(CURRENT_PATH, '../reports/'))
+        reports_path = (os.path.join(CURRENT_PATH, '../reports/')) + self.report_filename + '.pdf'
 
         # open new PDF file
-        with PdfPages(reports_path + self.report_filename + '.pdf') as pdf:
+        with PdfPages(reports_path) as pdf:
             self.pdf = pdf
 
             # initialise first page number to plot
@@ -384,7 +384,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                             # annotation
                             if 'annotate' in plot_options:
-                                self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], self.plot_characteristics[plot_type], plot_options=plot_options)
+                                self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], self.plot_characteristics[plot_type], plot_type, plot_options=plot_options)
 
                             # regression line
                             if 'regression' in plot_options:
