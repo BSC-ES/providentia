@@ -469,6 +469,7 @@ class MPLCanvas(FigureCanvas):
                     else:
                         #set new axis title
                         axis_title = plot_type 
+                        
                         # set new ylabel
                         if 'ylabel' in self.plot_characteristics[plot_type]:
                             if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
@@ -477,6 +478,15 @@ class MPLCanvas(FigureCanvas):
                                 ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
                         else:
                             ylabel = ''
+
+                        # set new xlabel
+                        if 'xlabel' in self.plot_characteristics[plot_type]:
+                            if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
+                                xlabel = self.read_instance.measurement_units[self.read_instance.species[0]]
+                            else:
+                                xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                        else:
+                            xlabel = ''
 
                     # if are making bias plot, and have no valid experiment data then cannot make plot type
                     if ('bias' in plot_options) & (len(self.selected_station_data[self.read_instance.networkspeci]) < 2):
@@ -515,7 +525,7 @@ class MPLCanvas(FigureCanvas):
                                                   col_ii=-1)
                     else:
                         self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
-
+                    
                     # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
                     if type(ax) == dict:
                         relevant_axs = [ax[relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
@@ -539,8 +549,11 @@ class MPLCanvas(FigureCanvas):
                                 self.activate_axis(sub_ax, plot_type)
                                 self.reset_ax_navigation_toolbar_stack(sub_ax)
                     else:    
+                        ax.relim()
+                        ax.autoscale()
                         self.plot.set_axis_title(ax, axis_title, self.plot_characteristics[plot_type])
                         self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
+                        self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
                         self.activate_axis(ax, plot_type)
                         self.reset_ax_navigation_toolbar_stack(ax)
 
@@ -924,6 +937,8 @@ class MPLCanvas(FigureCanvas):
         ax.axis('off')
         ax.set_visible(False)
         ax.grid(False)
+        if plot_type != 'map':
+            ax.clear()
 
     def activate_axis(self, ax, plot_type):
         """Un-hide axis"""
@@ -931,6 +946,7 @@ class MPLCanvas(FigureCanvas):
         # un-hide axis
         ax.axis('on')
         ax.set_visible(True)
+
         if plot_type != 'legend' and plot_type != 'cb' and plot_type != 'metadata':
             ax.grid(True)
 
