@@ -194,7 +194,7 @@ def export_configuration(prv, cname, separator="||"):
     """
 
     # set section and subsection names in config file
-    if prv.section == None:
+    if hasattr(prv, 'section'):
         section = 'SECTION1'
         subsection = '[SUBSECTION1]'
     else:
