@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as st
 import seaborn as sns
+from PyQt5 import QtCore
 
 from .statistics import get_z_statistic_info
 from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels
@@ -832,15 +833,20 @@ class Plot:
                            color=self.read_instance.plotting_params[data_label]['colour'],
                            **plot_characteristics['plot'])
 
-        # add 1:1 line (if in plot_characteristics)
-        if '1:1_line' in plot_characteristics:
-            relevant_axis.plot([0, 1], [0, 1], transform=relevant_axis.transAxes, **plot_characteristics['1:1_line'])
-        # add 1:2 line (if in plot_characteristics)
-        if '1:2_line' in plot_characteristics:
-            relevant_axis.plot([0, 1], [0, 0.5], transform=relevant_axis.transAxes, **plot_characteristics['1:2_line'])
-        # add 2:1 line (if in plot_characteristics)
-        if '2:1_line' in plot_characteristics:
-            relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, **plot_characteristics['2:1_line'])
+        # add extra lines only once
+        if data_label == self.read_instance.data_labels[-1]:
+            # add 1:1 line (if in plot_characteristics)
+            if '1:1_line' in plot_characteristics:
+                relevant_axis.plot([0, 1], [0, 1], transform=relevant_axis.transAxes, 
+                                   **plot_characteristics['1:1_line'])
+            # add 1:2 line (if in plot_characteristics)
+            if '1:2_line' in plot_characteristics:
+                relevant_axis.plot([0, 1], [0, 0.5], transform=relevant_axis.transAxes, 
+                                   **plot_characteristics['1:2_line'])
+            # add 2:1 line (if in plot_characteristics)
+            if '2:1_line' in plot_characteristics:
+                relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
+                                   **plot_characteristics['2:1_line'])
 
     def make_heatmap(self, relevant_axis, stat_df, plot_characteristics, plot_options=[]):
         """Make heatmap plot
@@ -889,11 +895,13 @@ class Plot:
         table = relevant_axis.table(cellText=stat_df.values, colLabels=stat_df.columns, rowLabels=stat_df.index, loc='center')
         #table.set_fontsize(18)
 
-    def log_axes(self, relevant_axis, log_ax, undo=False):
+    def log_axes(self, relevant_axis, log_ax, event_source, undo=False):
         """Log plot axes
 
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
+        :type networkspeci: str
+        :param data_labels: names of plotted data arrays  
         :param log_ax: which axis to log
         :type log_ax: str
         :param undo: unlog plot axes
@@ -902,9 +910,17 @@ class Plot:
 
         if not undo:
             if log_ax == 'logx':
-                relevant_axis.set_xscale('log')
+                if relevant_axis.get_xlim()[0] > 0:
+                    relevant_axis.set_xscale('log')
+                else:
+                    print(f"Warning: It is not possible to log the x-axis with negative values.")
+                    event_source.setCheckState(QtCore.Qt.Unchecked)
             if log_ax == 'logy':
-                relevant_axis.set_yscale('log')
+                if relevant_axis.get_ylim()[0] > 0:
+                    relevant_axis.set_yscale('log')
+                else:
+                    print(f"Warning: It is not possible to log the y-axis with negative values.")
+                    event_source.setCheckState(QtCore.Qt.Unchecked)
         else:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('linear')
