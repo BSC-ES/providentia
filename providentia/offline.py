@@ -145,10 +145,14 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
     def start_pdf(self):
 
         # get path where reports will be saved
-        reports_path = (os.path.join(CURRENT_PATH, '../reports/')) + self.report_filename + '.pdf'
+        reports_path = (os.path.join(CURRENT_PATH, '../reports/'))
+
+        # create reports folder
+        if not os.path.exists(reports_path):
+            os.makedirs(reports_path)
 
         # open new PDF file
-        with PdfPages(reports_path) as pdf:
+        with PdfPages(reports_path + self.report_filename + '.pdf') as pdf:
             self.pdf = pdf
 
             # initialise first page number to plot

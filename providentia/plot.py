@@ -222,11 +222,7 @@ class Plot:
 
         # set axis ticks and gridlines below all artists
         ax.set_axisbelow(True)
-
-        # make axis title?
-        if 'axis_title' in plot_characteristics_vars:
-            ax.set_title(**plot_characteristics['axis_title'])
-
+        
         # make axis xlabel (only on last row on page/last valid row of visible axes)?
         if 'xlabel' in plot_characteristics_vars:
             if last_valid_row or last_row_on_page:
@@ -301,43 +297,44 @@ class Plot:
             ax.set_aspect('equal', adjustable='box')
             ax.set_xticks(np.linspace(tickmin, tickmax, plot_characteristics['n_ticks']+1))
             ax.set_yticks(np.linspace(tickmin, tickmax, plot_characteristics['n_ticks']+1))
-           
-        # handle formatting specific to plot types
-        if base_plot_type in ['periodic','periodic-violin']:
-
-            # add axis resolution label 
-            ax.annotate(self.canvas_instance.periodic_labels[relevant_temporal_resolution], **plot_characteristics['label'])
-
-            # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
-            if relevant_temporal_resolution == 'hour':
-                plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution][::3]
-                ax.set_xticks(plot_characteristics['xticks'])
-            else:
-                plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
-                ax.set_xticks(plot_characteristics['xticks'])
-                ax.set_xticklabels([self.canvas_instance.temporal_axis_mapping_dict[relevant_temporal_resolution][xtick] for xtick
-                                                                            in self.canvas_instance.periodic_xticks[relevant_temporal_resolution]])
         
-        elif base_plot_type == 'map':
+        else:
+            # handle formatting specific to plot types
+            if base_plot_type in ['periodic','periodic-violin']:
 
-            # add land polygons
-            ax.add_feature(self.canvas_instance.feature)
+                # add axis resolution label 
+                ax.annotate(self.canvas_instance.periodic_labels[relevant_temporal_resolution], **plot_characteristics['label'])
 
-            # add gridlines ?
-            if 'gridlines' in plot_characteristics_vars:
-                ax.gridlines(crs=self.canvas_instance.datacrs, **plot_characteristics['gridlines'])
+                # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
+                if relevant_temporal_resolution == 'hour':
+                    plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution][::3]
+                    ax.set_xticks(plot_characteristics['xticks'])
+                else:
+                    plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
+                    ax.set_xticks(plot_characteristics['xticks'])
+                    ax.set_xticklabels([self.canvas_instance.temporal_axis_mapping_dict[relevant_temporal_resolution][xtick] for xtick
+                                                                                in self.canvas_instance.periodic_xticks[relevant_temporal_resolution]])
+            
+            elif base_plot_type == 'map':
 
-            # set map_extent
-            if hasattr(self.read_instance, 'map_extent'):
-                map_extent = self.read_instance.map_extent
-            else:
-                map_extent = plot_characteristics['map_extent']
-                self.read_instance.map_extent = map_extent
-            if isinstance(map_extent, str):
-                map_extent = [float(c) for c in map_extent.split(',')]
-            ax.set_extent(map_extent, 
-                          crs=self.canvas_instance.datacrs)
+                # add land polygons
+                ax.add_feature(self.canvas_instance.feature)
 
+                # add gridlines ?
+                if 'gridlines' in plot_characteristics_vars:
+                    ax.gridlines(crs=self.canvas_instance.datacrs, **plot_characteristics['gridlines'])
+
+                # set map_extent
+                if hasattr(self.read_instance, 'map_extent'):
+                    map_extent = self.read_instance.map_extent
+                else:
+                    map_extent = plot_characteristics['map_extent']
+                    self.read_instance.map_extent = map_extent
+                if isinstance(map_extent, str):
+                    map_extent = [float(c) for c in map_extent.split(',')]
+                ax.set_extent(map_extent, 
+                            crs=self.canvas_instance.datacrs)
+            
     def make_legend_handles(self, plot_characteristics_legend, plot_options=[]):
         """Make legend element handles
         
@@ -591,7 +588,7 @@ class Plot:
         """
 
         print('MAKE TIMESERIES')
-        
+
         # bias plot?
         if 'bias' in plot_options:
             ts_obs = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']
@@ -600,7 +597,7 @@ class Plot:
         else:
             ts = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']
 
-        #get ts with no NaNs
+        # get ts with no NaNs
         ts_nonan = ts.dropna()
 
         # make timeseries plot
@@ -608,7 +605,7 @@ class Plot:
                            color=self.read_instance.plotting_params[data_label]['colour'], 
                            **plot_characteristics['plot'])
 
-        #recalculate xticks (if desired) for better spacing
+        # recalculate xticks (if desired) for better spacing
         if plot_characteristics['xtick_alteration']['define']:
 
             # get steps in days or months   
@@ -623,9 +620,12 @@ class Plot:
             n_days = (timeseries_end_date - timeseries_start_date).days
 
             # get months that are complete
-            months = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
-            if months.size > 0 and (months[-1] != steps[-1]):
-                months = months[:-1]
+            months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
+            months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
+            if months_start.size > 0 and (timeseries_end_date - months_end[-1]).days >= 1:
+                months = months_start[:-1]
+            else:
+                months = months_start
 
             # define time slices
             if n_months >= 3:
@@ -641,13 +641,18 @@ class Plot:
             else:
                 xticks = relevant_axis.xaxis.get_ticks()
 
+            # transform to numpy.datetime64
+            if not isinstance(xticks[0], np.datetime64):
+                xticks = [x.to_datetime64() for x in xticks]
+            if not isinstance(timeseries_end_date, np.datetime64):
+                timeseries_end_date = timeseries_end_date.to_datetime64()
+
             # add last step to xticks
-            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != steps[-1]):
-                xticks = np.append(xticks, steps[-1])
+            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != timeseries_end_date):
+                xticks = np.append(xticks, timeseries_end_date)
 
             # set xticks
-            print(xticks)
-            relevant_axis.xaxis.set_ticks(xticks) 
+            relevant_axis.xaxis.set_ticks(xticks)
 
     def make_periodic(self, relevant_axis, networkspeci, data_label, plot_characteristics, zstat=None, plot_options=[]):
         """Make period or period-violin plot
@@ -769,6 +774,8 @@ class Plot:
         :param plot_options: list of options to configure plot  
         :type plot_options: list
         """
+
+        print('MAKE DISTRIBUTION')
 
         # make distribution plot
         minmax_diff = self.canvas_instance.selected_station_data_max[networkspeci] - self.canvas_instance.selected_station_data_min[networkspeci]
