@@ -51,7 +51,7 @@ def export_netcdf(canvas_instance, fname):
     parameter_dictionary = {}
     for _, param_dict in standard_parameters.items():
         parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
-
+    
     # dictionary to map python types to netcdf types
     type_map = {np.uint8: 'u1', np.uint32: 'u4', np.object: str,
                 np.float32: 'f4', np.float64: 'f8'}
@@ -87,13 +87,13 @@ def export_netcdf(canvas_instance, fname):
         parameter_details = parameter_dictionary[speci]
         metadata_format_dict = get_standard_metadata(parameter_details)
         data_format_dict = get_standard_data(parameter_details)
-
+       
         # set variables independent of network / speci on first pass
         if speci_ii == 0:
 
             # time
             current_data_type = type_map[data_format_dict['time']['data_type']]
-            var = fout.createVariable('time', current_data_type, ('time'))
+            var = fout.createVariable('time', current_data_type, ('time',))
             # set attributes
             if 'hourly' in read_instance.resolution:
                 res_str = 'hours'
@@ -103,32 +103,40 @@ def export_netcdf(canvas_instance, fname):
                 res_str = 'months'
             var.standard_name = data_format_dict['time']['standard_name']
             var.long_name = data_format_dict['time']['long_name']
-            var.units = '{} since {}-{}-01 00:00:00'.format(res_str, read_instance.start_date[:4], read_instance.start_date[4:6])
-            var.description = 'Time in {} since {}-{}-01 00:00 UTC. Time given refers ' \
-                                'to the start of the time window the measurement is representative of ' \
-                                '(temporal resolution).'.format(res_str, read_instance.start_date[:4], read_instance.start_date[4:6])
+            var.units = '{} since {}-{}-01 00:00:00'.format(res_str, 
+                                                            str(read_instance.start_date)[:4], 
+                                                            str(read_instance.start_date)[4:6])
+            msg = 'Time in {} since {}-{}-01 00:00 UTC. Time given refers '.format(res_str, 
+                                                                                   str(read_instance.start_date)[:4], 
+                                                                                   str(read_instance.start_date)[4:6])
+            msg += 'to the start of the time window the measurement is representative of '
+            msg += '(temporal resolution).'
+            var.description = msg
             var.axis = 'T'
             var.calendar = 'standard'
             var.tz = 'UTC'
+
             # save
             var[:] = np.arange(len(read_instance.time_array))
-
+            
             # miscellaneous variables 
             var = fout.createVariable('data_labels', str, ('data_label',))
             var.standard_name = 'data_labels'
             var.long_name = 'data_labels'
             var.description = 'Labels associated with each data array, e.g. observations, experiment_1, etc.'
-            var[:] = read_instance.data_labels
-
+            var[:] = np.array(read_instance.data_labels)
+            
             var = fout.createVariable('ghost_data_variables', str, ('ghost_data_variable',))
             var.standard_name = 'ghost_data_variables'
             var.long_name = 'ghost_data_variables'
             var.description = 'The names of the GHOST data variables used for additional filtering.'
-            var[:] = read_instance.ghost_data_vars_to_read
-
+            var[:] = np.array(read_instance.ghost_data_vars_to_read)
+         
         # data
         current_data_type = type_map[data_format_dict[speci]['data_type']]
-        var = fout.createVariable('{}-{}_data'.format(network,speci), current_data_type, ('data_label','station','time'))
+        var = fout.createVariable('{}-{}_data'.format(network,speci), current_data_type, 
+                                  ('data_label', 'station', 'time',))
+        
         # set attributes
         var.standard_name = data_format_dict[speci]['standard_name']
         var.long_name = data_format_dict[speci]['long_name']
@@ -142,12 +150,14 @@ def export_netcdf(canvas_instance, fname):
         var.filter_species = str(read_instance.filter_species)
         if read_instance.reading_ghost:
             var.ghost_version = str(read_instance.ghost_version)
-        # save 
+        
+        # save
         var[:] = read_instance.data_in_memory[networkspeci]
-
+        
         # ghost data
         if read_instance.reading_ghost:
-            var = fout.createVariable('{}-{}_ghost_data'.format(network,speci), 'f4', ('ghost_data_variable','station','time'))
+            var = fout.createVariable('{}-{}_ghost_data'.format(network,speci), 'f4', 
+                                      ('ghost_data_variable', 'station', 'time',))
             # set attributes 
             var.standard_name = '{}-{}_ghost_data'.format(network,speci) 
             var.long_name = '{}-{}_ghost_data'.format(network,speci)
@@ -159,7 +169,7 @@ def export_netcdf(canvas_instance, fname):
         metadata_arr = read_instance.metadata_in_memory[networkspeci]
         for metadata_var in metadata_arr.dtype.names:
             current_data_type = type_map[metadata_format_dict[metadata_var]['data_type']]
-            var = fout.createVariable('{}-{}_{}'.format(network,speci,metadata_var), current_data_type, ('station', 'month'))
+            var = fout.createVariable('{}-{}_{}'.format(network,speci,metadata_var), current_data_type, ('station', 'month',))
             # set attributes
             var.standard_name = metadata_format_dict[metadata_var]['standard_name']
             var.long_name = metadata_format_dict[metadata_var]['long_name']
@@ -194,7 +204,7 @@ def export_configuration(prv, cname, separator="||"):
     """
 
     # set section and subsection names in config file
-    if hasattr(prv, 'section'):
+    if not hasattr(prv, 'section'):
         section = 'SECTION1'
         subsection = '[SUBSECTION1]'
     else:
@@ -210,8 +220,8 @@ def export_configuration(prv, cname, separator="||"):
     options['subsection'] = {}
 
     # default
-    options['section'] = {'network': prv.network,
-                          'species': prv.species,
+    options['section'] = {'network': prv.network[0],
+                          'species': prv.species[0],
                           'resolution': prv.resolution,
                           'start_date': prv.start_date,
                           'end_date': prv.end_date,
@@ -221,16 +231,20 @@ def export_configuration(prv, cname, separator="||"):
     if prv.experiments_menu['checkboxes']['keep_selected']:
         options['section']['experiments'] = ",".join(str(i) for i in prv.experiments_menu['checkboxes']['keep_selected'])
 
-    # add information about colocation and filter species
+    # add information about colocation
     options['section'].update({'temporal_colocation': prv.temporal_colocation,
                                'spatial_colocation': prv.spatial_colocation,
-                               'filter_species': prv.filter_species
                               })
+
+    # add information about filter species if any
+    if len(prv.filter_species) > 0:
+        options['section'].update({'filter_species': prv.filter_species
+                                  })
 
     # add information about report
     options['section'].update({'report_type': prv.report_type,
                                'report_summary': prv.report_summary,
-                               'report_stations': prv.report_station,
+                               'report_stations': prv.report_stations,
                                'report_title': prv.report_title,     
                                'report_filename': prv.report_filename 
                               })
@@ -264,13 +278,13 @@ def export_configuration(prv, cname, separator="||"):
             period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + separator
             period_r = " remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + separator
             options['subsection']['period'] = period_k + period_r
-
+     
         # bounds
         if np.float32(prv.le_minimum_value.text()) != \
-                np.float32(prv.parameter_dictionary[prv.species]['extreme_lower_limit']):
+                np.float32(prv.parameter_dictionary[prv.species[0]]['extreme_lower_limit']):
             options['subsection']['lower_bound'] = prv.le_minimum_value.text()
         if np.float32(prv.le_maximum_value.text()) != \
-                np.float32(prv.parameter_dictionary[prv.species]['extreme_upper_limit']):
+                np.float32(prv.parameter_dictionary[prv.species[0]]['extreme_upper_limit']):
             options['subsection']['upper_bound'] = prv.le_maximum_value.text()
 
         # metadata
@@ -289,10 +303,9 @@ def export_configuration(prv, cname, separator="||"):
                 #         keeps, removes = split_options(getattr(self, label))
                 keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
                 removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
-
                 if keeps or removes:
                     meta_keep = "keep: " + ",".join(str(i) for i in keeps) + separator
                     meta_remove = " remove: " + ",".join(str(i) for i in removes) + separator
                     options['subsection'][label] = meta_keep + meta_remove
-
+    
     write_conf(section, subsection, cname + '.conf', options)
