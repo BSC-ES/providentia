@@ -1092,8 +1092,8 @@ class MPLCanvas(FigureCanvas):
                 # get inds of stations inside map extent
                 extent_station_inds = []
                 for ind, lon, lat in zip(self.relative_selected_station_inds, 
-                                         self.read_instancestation_longitudes[self.relative_selected_station_inds],
-                                         self.read_instance.station_latitudes[self.relative_selected_station_inds]):
+                                         self.read_instance.station_longitudes[self.read_instance.networkspeci][self.relative_selected_station_inds],
+                                         self.read_instance.station_latitudes[self.read_instance.networkspeci][self.relative_selected_station_inds]):
 
                     if ((lon >= self.read_instance.map_extent[0]) and (lon <= self.read_instance.map_extent[1]) 
                         and (lat >= self.read_instance.map_extent[2]) and (lat <= self.read_instance.map_extent[3])):
@@ -1176,7 +1176,7 @@ class MPLCanvas(FigureCanvas):
         if len(self.absolute_selected_station_inds) == 0:
             #take first selected point coordinates and get matches of stations within tolerance 
             current_map_extent = self.plot_axes['map'].get_extent(crs=self.datacrs)
-            tolerance = np.average([current_map_extent[1]-current_map_extent[0],current_map_extent[3]-current_map_extent[2]]) / 140.0
+            tolerance = np.average([current_map_extent[1]-current_map_extent[0],current_map_extent[3]-current_map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
             self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
@@ -1240,7 +1240,7 @@ class MPLCanvas(FigureCanvas):
         if len(absolute_selected_station_inds) == 0:
             #take first selected point coordinates and get matches of stations within tolerance 
             current_map_extent = self.plot_axes['map'].get_extent(crs=self.datacrs)
-            tolerance = np.average([current_map_extent[1]-current_map_extent[0],current_map_extent[3]-current_map_extent[2]]) / 140.0
+            tolerance = np.average([current_map_extent[1]-current_map_extent[0],current_map_extent[3]-current_map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
             absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
@@ -2312,7 +2312,7 @@ class MPLCanvas(FigureCanvas):
         """ Update annotation for each station that is hovered. """
 
         # retrieve stations references and coordinates
-        station_reference = self.read_instance.station_references[self.read_instance.networkspeci][annotation_index['ind'][0]]
+        station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds][annotation_index['ind'][0]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
 
         # update location
@@ -2410,8 +2410,6 @@ class MPLCanvas(FigureCanvas):
                     # update buttons (previous-forward) history
                     self.read_instance.navi_toolbar.push_current()
                     self.read_instance.navi_toolbar.set_history_buttons()
-
-                    print('got there')
                     print(len(self.read_instance.navi_toolbar._nav_stack))
 
                     # unlock zoom
