@@ -2328,7 +2328,7 @@ class MPLCanvas(FigureCanvas):
         """ Update annotation for each station that is hovered. """
 
         # retrieve stations references and coordinates
-        station_reference = self.read_instance.station_references[annotation_index['ind'][0]]
+        station_reference = self.read_instance.station_references[self.read_instance.networkspeci][annotation_index['ind'][0]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
 
         # update location
@@ -2426,6 +2426,9 @@ class MPLCanvas(FigureCanvas):
                     # update buttons (previous-forward) history
                     self.read_instance.navi_toolbar.push_current()
                     self.read_instance.navi_toolbar.set_history_buttons()
+
+                    print('got there')
+                    print(len(self.read_instance.navi_toolbar._nav_stack))
 
                     # unlock zoom
                     self.lock_zoom = False
