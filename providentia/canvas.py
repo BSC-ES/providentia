@@ -548,9 +548,10 @@ class MPLCanvas(FigureCanvas):
                                         set_title = True
                                 self.activate_axis(sub_ax, plot_type)
                                 self.reset_ax_navigation_toolbar_stack(sub_ax)
-                    else:    
-                        ax.relim()
-                        ax.autoscale()
+                    else:
+                        if plot_type != 'scatter':    
+                            ax.relim()
+                            ax.autoscale()
                         self.plot.set_axis_title(ax, axis_title, self.plot_characteristics[plot_type])
                         self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
                         self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
@@ -2082,16 +2083,26 @@ class MPLCanvas(FigureCanvas):
             if check_state:
                 if isinstance(self.plot_axes[key], dict):
                     for sub_ax in self.plot_axes[key].values():
-                        self.plot.log_axes(sub_ax, option)
+                        self.plot.log_axes(sub_ax,
+                                           option, 
+                                           event_source)
                 else:
-                    self.plot.log_axes(self.plot_axes[key], option)
+                    self.plot.log_axes(self.plot_axes[key], 
+                                       option, 
+                                       event_source)
             # undo log y axis if box is unchecked
             elif not check_state:
                 if isinstance(self.plot_axes[key], dict):
                     for sub_ax in self.plot_axes[key].values():
-                        self.plot.log_axes(sub_ax, option, undo=True)
+                        self.plot.log_axes(sub_ax, 
+                                           option,
+                                           event_source, 
+                                           undo=True)
                 else:
-                    self.plot.log_axes(self.plot_axes[key], option, undo=True)
+                    self.plot.log_axes(self.plot_axes[key], 
+                                       option, 
+                                       event_source,
+                                       undo=True)
 
         # option 'annotate'
         if option == 'annotate':
@@ -2166,15 +2177,6 @@ class MPLCanvas(FigureCanvas):
                                             self.plot_characteristics[key],  
                                             plot_options=[],
                                             undo=True)
-     
-        # format axes for selected_station_plots
-        if type(self.plot_axes[key]) == dict:
-            for relevant_temporal_resolution, sub_ax in self.plot_axes[key].items():
-                self.plot.format_axis(sub_ax, key, self.plot_characteristics[key], 
-                                        relevant_temporal_resolution=relevant_temporal_resolution, 
-                                        col_ii=-1)
-        else:
-            self.plot.format_axis(self.plot_axes[key], key, self.plot_characteristics[key])
 
         # draw changes
         self.figure.canvas.draw()
