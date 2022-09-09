@@ -481,13 +481,13 @@ class Plot:
                 str_to_plot += (' '*plot_characteristics['var_spacing'])
                 # lon
                 str_to_plot += '{}: {:.{}f}'.format(plot_characteristics['non-ghost_vars']['longitude']['name_one'],
-                                                    self.read_instance.station_longitudes[self.canvas_instance.relative_selected_station_inds][0], 
+                                                    self.read_instance.station_longitudes[networkspeci][self.canvas_instance.relative_selected_station_inds][0], 
                                                     plot_characteristics['non-ghost_vars']['longitude']['dp'])
                 # spacing
                 str_to_plot += (' '*plot_characteristics['var_spacing'])
                 # lat
                 str_to_plot += '{}: {:.{}f}'.format(plot_characteristics['non-ghost_vars']['latitude']['name_one'],
-                                                    self.read_instance.station_latitudes[self.canvas_instance.relative_selected_station_inds][0], 
+                                                    self.read_instance.station_latitudes[networkspeci][self.canvas_instance.relative_selected_station_inds][0], 
                                                     plot_characteristics['non-ghost_vars']['latitude']['dp'])
 
         # GHOST
