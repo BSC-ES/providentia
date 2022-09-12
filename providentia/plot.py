@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import os
 
+import math
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -281,24 +282,7 @@ class Plot:
         # make plot aspect ratio is equal
         # (ensure ticks and ticklabels are same also)
         if 'equal_aspect' in plot_characteristics_vars:
-            
-            # Get min and max values for ticks
-            xticklocs = ax.get_xticks()
-            yticklocs = ax.get_yticks()
-            if xticklocs[0] < yticklocs[0]:
-                tickmin = xticklocs[0]
-            else:
-                tickmin = yticklocs[0]
-            if xticklocs[-1] > yticklocs[-1]:
-                tickmax = xticklocs[-1]
-            else:
-                tickmax = yticklocs[-1]
-
-            # set equal proportion and ticks
-            ax.set_aspect('equal', adjustable='box')
-            ax.set_xticks(np.linspace(tickmin, tickmax, plot_characteristics['n_ticks']+1))
-            ax.set_yticks(np.linspace(tickmin, tickmax, plot_characteristics['n_ticks']+1))
-        
+            self.set_equal_axes(self, ax, plot_characteristics)
         else:
             # handle formatting specific to plot types
             if base_plot_type in ['periodic','periodic-violin']:
@@ -335,7 +319,47 @@ class Plot:
                     map_extent = [float(c) for c in map_extent.split(',')]
                 ax.set_extent(map_extent, 
                             crs=self.canvas_instance.datacrs)
-            
+    
+    def set_equal_axes(self, ax, plot_characteristics):
+        """ Set equal aspect and limits (useful for scatter plots)
+        """
+
+        # set aspect
+        ax.set_aspect('equal', adjustable='box')
+
+        # Get min and max values for ticks
+        xtickmin = np.nanmin(ax.lines[0].get_xdata())
+        xtickmax = np.nanmax(ax.lines[0].get_xdata())
+        ytickmin = np.nanmin(ax.lines[0].get_ydata())
+        ytickmax = np.nanmax(ax.lines[0].get_ydata())
+        for line in ax.lines:
+            if np.nanmin(line.get_xdata()) < xtickmin:
+                xtickmin = np.nanmin(line.get_xdata())
+            if np.nanmax(line.get_xdata()) > xtickmax:
+                xtickmax = np.nanmax(line.get_xdata())
+            if np.nanmin(line.get_ydata()) < ytickmin:
+                ytickmin = np.nanmin(line.get_ydata())
+            if np.nanmax(line.get_ydata()) > ytickmax:
+                ytickmax = np.nanmax(line.get_ydata())
+
+        # Compare min and max across axes
+        if xtickmin < ytickmin:
+            tickmin = xtickmin
+        else:
+            tickmin = ytickmin
+        if xtickmax > ytickmax:
+            tickmax = xtickmax
+        else:
+            tickmax = ytickmax
+
+        # set equal ticks
+        ax.set_xticks(np.linspace(math.floor(tickmin), math.ceil(tickmax), 
+                      plot_characteristics['n_ticks']))
+        ax.set_yticks(np.linspace(math.floor(tickmin), math.ceil(tickmax), 
+                      plot_characteristics['n_ticks']))
+
+        return None
+
     def make_legend_handles(self, plot_characteristics_legend, plot_options=[]):
         """Make legend element handles
         
@@ -842,12 +866,12 @@ class Plot:
             # add 1:2 line (if in plot_characteristics)
             if '1:2_line' in plot_characteristics:
                 relevant_axis.plot([0, 1], [0, 0.5], transform=relevant_axis.transAxes, 
-                                   **plot_characteristics['1:2_line'])
+                                   **plot_characteristics['1:2_line'])     
             # add 2:1 line (if in plot_characteristics)
             if '2:1_line' in plot_characteristics:
                 relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
                                    **plot_characteristics['2:1_line'])
-
+          
     def make_heatmap(self, relevant_axis, stat_df, plot_characteristics, plot_options=[]):
         """Make heatmap plot
 
@@ -904,26 +928,39 @@ class Plot:
         :param data_labels: names of plotted data arrays  
         :param log_ax: which axis to log
         :type log_ax: str
+        :param networkspeci: str of currently active network and species 
+        :type networkspeci: str
         :param undo: unlog plot axes
         :type undo: boolean
         """
 
+        # get data limits
+        xlim = relevant_axis.get_xlim()
+        ylim = relevant_axis.get_ylim()
+        xwidth = xlim[1] - xlim[0]
+        ywidth = ylim[1] - ylim[0]
+        lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
+        lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
+        
         if not undo:
             if log_ax == 'logx':
-                if relevant_axis.get_xlim()[0] > 0:
+                if round(lower_xlim, 2) >= 0:
                     relevant_axis.set_xscale('log')
                 else:
                     print(f"Warning: It is not possible to log the x-axis with negative values.")
                     event_source.setCheckState(QtCore.Qt.Unchecked)
+            
             if log_ax == 'logy':
-                if relevant_axis.get_ylim()[0] > 0:
+                if round(lower_ylim, 2) >= 0:
                     relevant_axis.set_yscale('log')
                 else:
                     print(f"Warning: It is not possible to log the y-axis with negative values.")
                     event_source.setCheckState(QtCore.Qt.Unchecked)
+
         else:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('linear')
+           
             if log_ax == 'logy':
                 relevant_axis.set_yscale('linear')
 
@@ -1165,9 +1202,6 @@ class Plot:
                     elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
                         ylim_min = -np.abs(np.min(all_ylim_lower))
                         ylim_max = np.abs(np.min(all_ylim_lower))
-
-            if 'equal_aspect' in plot_characteristics:
-                ax.set_aspect('equal', adjustable='box')
 
             # set xlim
             if xlim:
