@@ -282,7 +282,7 @@ class Plot:
         # make plot aspect ratio is equal
         # (ensure ticks and ticklabels are same also)
         if 'equal_aspect' in plot_characteristics_vars:
-            self.set_equal_axes(self, ax, plot_characteristics)
+            self.set_equal_axes(ax, plot_characteristics)
         else:
             # handle formatting specific to plot types
             if base_plot_type in ['periodic','periodic-violin']:
@@ -919,7 +919,7 @@ class Plot:
         table = relevant_axis.table(cellText=stat_df.values, colLabels=stat_df.columns, rowLabels=stat_df.index, loc='center')
         #table.set_fontsize(18)
 
-    def log_axes(self, relevant_axis, log_ax, event_source, undo=False):
+    def log_axes(self, relevant_axis, log_ax, event_source, plot_characteristics, undo=False):
         """Log plot axes
 
         :param relevant_axis: axis to plot on 
@@ -963,6 +963,9 @@ class Plot:
            
             if log_ax == 'logy':
                 relevant_axis.set_yscale('linear')
+
+            if 'equal_aspect' in  list(plot_characteristics.keys()):
+                self.set_equal_axes(relevant_axis, plot_characteristics)
 
     def linear_regression(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], undo=False):
         """Add linear regression to plot
