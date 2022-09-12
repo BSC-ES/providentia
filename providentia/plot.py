@@ -1041,40 +1041,45 @@ class Plot:
 
             # iterate through plotted data labels
             for data_label in data_labels:
-                if plot_type == 'periodic' or 'scatter':
-                    if data_label != 'observations':
-                        # get stats
-                        stats_annotate = []
-                        for zstat in stats:
-                            if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
-                                stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
-                                                    plot_characteristics['annotate_text']['round_decimal_places'])))
+                
+                # avoid plotting stats for observations data for periodic and scatter plots
+                if 'periodic' in plot_type or plot_type == 'scatter':
+                    if data_label == 'observations':
+                        continue
 
-                        # show number of stations if defined
-                        if plot_characteristics['annotate_text']['n_stations']:
-                            if data_label == data_labels[0]:
-                                colours.append('black')
-                                if 'individual' in plot_options:
-                                    str_to_annotate.append('Stations: 1')
-                                else:
-                                    str_to_annotate.append('Stations: ' + str(len(self.read_instance.plotting_params['observations']['valid_station_inds'])))
+                # get stats
+                stats_annotate = []
+                for zstat in stats:
+                    if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
+                        stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
+                                            plot_characteristics['annotate_text']['round_decimal_places'])))
 
-                        # get colors
-                        colours.append(self.read_instance.plotting_params[data_label]['colour'])
+                # show number of stations if defined
+                if plot_characteristics['annotate_text']['n_stations']:
+                    if data_label == data_labels[0]:
+                        colours.append('black')
+                        if 'individual' in plot_options:
+                            str_to_annotate.append('Stations: 1')
+                        else:
+                            str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.relative_selected_station_inds)))
 
-                        # generate annotation
-                        str_to_annotate.append(', '.join(stats_annotate))
+                # get colors
+                colours.append(self.read_instance.plotting_params[data_label]['colour'])
+
+                # generate annotation
+                str_to_annotate.append(', '.join(stats_annotate))
 
             # add annotation to plot
             # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
-            lines = [TextArea(line, textprops=dict(color=colour, size=plot_characteristics['annotate_text']['fontsize'])) 
-                                for line, colour in zip(str_to_annotate, colours)]
+            lines = [TextArea(line, textprops=dict(color=colour, 
+                              size=plot_characteristics['annotate_text']['fontsize'])) 
+                     for line, colour in zip(str_to_annotate, colours)]
             bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
                                      loc=plot_characteristics['annotate_text']['loc'],
                                      bbox_transform=relevant_axis.transAxes)
-            bbox.patch.set(**plot_characteristics['annotate_bbox']) 
+            bbox.patch.set(**plot_characteristics['annotate_bbox'])
             relevant_axis.add_artist(bbox)
-        
+         
         else:
             for artist in relevant_axis.artists:   
                 if type(artist) == AnchoredOffsetbox:
@@ -1227,7 +1232,7 @@ class Plot:
         axs_to_set_label = []
         if type(relevant_axis) == dict:
             for relevant_temporal_resolution, sub_ax in relevant_axis.items():
-                if relevant_temporal_resolution in ['hour','month']:
+                if relevant_temporal_resolution in ['hour', 'month']:
                     axs_to_set_label.append(sub_ax)
         else:
             axs_to_set_label.append(relevant_axis)
