@@ -2174,11 +2174,13 @@ class MPLCanvas(FigureCanvas):
                     for sub_ax in self.plot_axes[key].values():
                         self.plot.log_axes(sub_ax,
                                            option, 
-                                           event_source)
+                                           event_source,
+                                           self.plot_characteristics[key])
                 else:
                     self.plot.log_axes(self.plot_axes[key], 
                                        option, 
-                                       event_source)
+                                       event_source,
+                                       self.plot_characteristics[key])
             # undo log y axis if box is unchecked
             elif not check_state:
                 if isinstance(self.plot_axes[key], dict):
@@ -2186,11 +2188,13 @@ class MPLCanvas(FigureCanvas):
                         self.plot.log_axes(sub_ax, 
                                            option,
                                            event_source, 
+                                           self.plot_characteristics[key],
                                            undo=True)
                 else:
                     self.plot.log_axes(self.plot_axes[key], 
                                        option, 
                                        event_source,
+                                       self.plot_characteristics[key],
                                        undo=True)
 
         # option 'annotate'
