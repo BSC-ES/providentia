@@ -952,6 +952,7 @@ class Plot:
             if log_ax == 'logx':
                 if round(lower_xlim, 2) >= 0:
                     relevant_axis.set_xscale('log')
+                    relevant_axis.autoscale()
                 else:
                     print(f"Warning: It is not possible to log the x-axis with negative values.")
                     event_source.setCheckState(QtCore.Qt.Unchecked)
@@ -959,6 +960,7 @@ class Plot:
             if log_ax == 'logy':
                 if round(lower_ylim, 2) >= 0:
                     relevant_axis.set_yscale('log')
+                    relevant_axis.autoscale()
                 else:
                     print(f"Warning: It is not possible to log the y-axis with negative values.")
                     event_source.setCheckState(QtCore.Qt.Unchecked)
@@ -969,7 +971,7 @@ class Plot:
            
             if log_ax == 'logy':
                 relevant_axis.set_yscale('linear')
-
+            
             if 'equal_aspect' in  list(plot_characteristics.keys()):
                 self.set_equal_axes(relevant_axis, plot_characteristics)
 
