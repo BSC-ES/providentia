@@ -357,6 +357,8 @@ class Plot:
                       plot_characteristics['n_ticks']))
         ax.set_yticks(np.linspace(math.floor(tickmin), math.ceil(tickmax), 
                       plot_characteristics['n_ticks']))
+        ax.set_xlim(math.floor(tickmin), math.ceil(tickmax))
+        ax.set_ylim(math.floor(tickmin), math.ceil(tickmax))
 
         return None
 
@@ -392,6 +394,7 @@ class Plot:
                                               label=self.read_instance.experiments[experiment]))
         
         plot_characteristics_legend['plot']['handles'] = legend_elements
+        
         return plot_characteristics_legend
 
     def make_experiment_domain_polygons(self, plot_options=[]):
@@ -647,8 +650,11 @@ class Plot:
             # get months that are complete
             months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
             months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
-            if months_start.size > 0 and (timeseries_end_date - months_end[-1]).days >= 1:
-                months = months_start[:-1]
+            if months_start.size > 1:
+                if (timeseries_end_date - months_end[-1]).days >= 1:
+                    months = months_start[:-1]
+                else:
+                    months = months_start
             else:
                 months = months_start
 
@@ -941,7 +947,7 @@ class Plot:
         ywidth = ylim[1] - ylim[0]
         lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
         lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
-        
+
         if not undo:
             if log_ax == 'logx':
                 if round(lower_xlim, 2) >= 0:
