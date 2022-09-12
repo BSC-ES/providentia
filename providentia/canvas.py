@@ -149,6 +149,8 @@ class MPLCanvas(FigureCanvas):
             else:
                 self.remove_axis_elements(ax, plot_type)
 
+        return None
+        
     def update_MPL_canvas(self):
         """Function that updates MPL canvas upon clicking
         the 'READ' button, and when colocating data
@@ -188,6 +190,8 @@ class MPLCanvas(FigureCanvas):
         # draw changes
         self.figure.canvas.draw()
 
+        return None
+
     def reset_ax_navigation_toolbar_stack(self, ax):
         """Function which resets the navigation toolbar stack
         for a given axis with the current view limits"""
@@ -210,6 +214,8 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.navi_toolbar._nav_stack[0][ax] = \
                 (ax._get_view(), (ax.get_position(True).frozen(), ax.get_position().frozen()))
 
+        return None
+
     def handle_data_filter_update(self):
         """Function which handles updates of data filtering"""
 
@@ -226,6 +232,8 @@ class MPLCanvas(FigureCanvas):
             self.filter_data.filter_all()
             self.update_active_map()
         QtWidgets.QApplication.restoreOverrideCursor()
+
+        return None
 
     def update_active_map(self):
         """Function that updates plotted map z statistic and updates associated plots"""
@@ -244,6 +252,8 @@ class MPLCanvas(FigureCanvas):
 
             # draw changes
             self.figure.canvas.draw()
+
+        return None
 
     def handle_temporal_colocate_update(self):
         """Function that handles the update of the MPL canvas
@@ -285,6 +295,8 @@ class MPLCanvas(FigureCanvas):
 
             # draw changes
             self.figure.canvas.draw()
+
+        return None
 
     def update_map_z_statistic(self):
         """Function that updates plotted z statistic on map, with colourbar"""
@@ -355,11 +367,16 @@ class MPLCanvas(FigureCanvas):
             self.activate_axis(self.plot_axes['map'], 'map')
             self.activate_axis(self.plot_axes['cb'], 'cb')
 
+        # update plot options
+        self.update_plot_options()
+
         # re-draw (needed to update plotted colours before update_map_station_selection)
         self.figure.canvas.draw()
 
         # update map selection appropriately for z statistic
         self.update_map_station_selection()
+
+        return None
 
     def update_map_station_selection(self):
         """Function that updates the visual selection of stations on map"""
@@ -408,6 +425,8 @@ class MPLCanvas(FigureCanvas):
         # redraw points
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
+
+        return None
 
     def update_associated_selected_station_plots(self):
         """Function that updates all plots associated with selected stations on map"""
@@ -561,6 +580,8 @@ class MPLCanvas(FigureCanvas):
                 # configure legend picker
                 self.configure_legend_picker()
 
+        return None
+
     def configure_legend_picker(self):
         """ Function that creates a dictionary with the lines and collections
             that will be removed when picking up each legend element
@@ -654,6 +675,8 @@ class MPLCanvas(FigureCanvas):
                         # add lines to self.lined
                         self.lined[legend_label] += ax_plot_lines[legend_label]
 
+        return None
+
     def update_experiment_domain_edges(self):
         """Function that plots grid domain edges of experiments in memory"""
 
@@ -670,6 +693,8 @@ class MPLCanvas(FigureCanvas):
         # plot grid edge polygons on map
         for grid_edge_polygon in grid_edge_polygons:
             self.plot_axes['map'].add_patch(grid_edge_polygon)
+
+        return None
 
     def update_layout_options(self):
         """Function that updates layout options"""
@@ -698,6 +723,8 @@ class MPLCanvas(FigureCanvas):
 
         # un-hide legend
         self.activate_axis(self.plot_axes['legend'], 'legend')
+
+        return None
 
     def handle_map_z_statistic_update(self):
         """Define function which handles update of map z statistic upon interaction with map comboboxes"""
@@ -765,6 +792,8 @@ class MPLCanvas(FigureCanvas):
 
                 # update plotted map z statistic
                 self.update_map_z_statistic()
+
+        return None
 
     def handle_experiment_bias_update(self):
         """Define function that handles update of plotted experiment bias statistics"""
@@ -864,8 +893,13 @@ class MPLCanvas(FigureCanvas):
                             self.activate_axis(sub_ax, 'periodic')
                             self.reset_ax_navigation_toolbar_stack(sub_ax)
 
+                    # update plot options
+                    self.update_plot_options()
+
                     # draw changes
                     self.figure.canvas.draw()
+
+        return None
 
     def remove_axis_elements(self, ax, plot_type):
         """ Removes all plotted axis elements,
@@ -941,6 +975,8 @@ class MPLCanvas(FigureCanvas):
         if plot_type != 'map':
             ax.clear()
 
+        return None
+
     def activate_axis(self, ax, plot_type):
         """Un-hide axis"""
 
@@ -968,6 +1004,20 @@ class MPLCanvas(FigureCanvas):
        
         elif plot_type == 'scatter':
             self.scatter_menu_button.show()
+
+        return None
+
+    def update_plot_options(self):
+        """ Uncheck checked boxes in plot configuration options under menus and
+            reapply check with new data
+        """
+        
+        for option_box in self.options:
+            if option_box.isChecked():
+                option_box.setCheckState(QtCore.Qt.Unchecked)
+                option_box.setCheckState(QtCore.Qt.Checked)
+
+        return None
 
     def select_all_stations(self):
         """Define function that selects/unselects all plotted stations
@@ -1013,8 +1063,13 @@ class MPLCanvas(FigureCanvas):
             if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
                 self.update_associated_selected_station_plots()
 
+            # update plot options
+            self.update_plot_options()
+
             # draw changes
             self.figure.canvas.draw()
+
+        return None
 
     def select_intersect_stations(self):
         """Define function that selects/unselects intersection of
@@ -1083,8 +1138,13 @@ class MPLCanvas(FigureCanvas):
             if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
                 self.update_associated_selected_station_plots()
 
+            # update plot options
+            self.update_plot_options()
+
             # draw changes
             self.figure.canvas.draw()
+
+        return None
 
     def select_extent_stations(self):
         """Define function that selects/unselects the
@@ -1146,8 +1206,13 @@ class MPLCanvas(FigureCanvas):
             if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
                 self.update_associated_selected_station_plots()
 
+            # update plot options
+            self.update_plot_options()
+
             # draw changes
             self.figure.canvas.draw()
+
+        return None
 
     def onlassoselect_left(self, verts):
         """Function that handles station selection upon lasso selection with left click.
@@ -1212,11 +1277,16 @@ class MPLCanvas(FigureCanvas):
             self.update_map_station_selection()
             self.update_associated_selected_station_plots()
 
+        # update plot options
+        self.update_plot_options()
+
         # draw changes
         self.figure.canvas.draw()
 
         # unlock stations pick 
         self.lock_station_pick = False
+
+        return None
 
     def onlassoselect_right(self, verts):
         """Function that handles station selection upon lasso selection with right click.
@@ -1241,7 +1311,7 @@ class MPLCanvas(FigureCanvas):
         self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
         self.read_instance.block_MPL_canvas_updates = False
 
-         # make copy of current full array relative selected stations indices, before selecting new ones
+        # make copy of current full array relative selected stations indices, before selecting new ones
         previous_absolute_selected_station_inds = copy.deepcopy(self.absolute_selected_station_inds)
         previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
@@ -1286,8 +1356,13 @@ class MPLCanvas(FigureCanvas):
             self.update_map_station_selection()
             self.update_associated_selected_station_plots()
 
+        # update plot options
+        self.update_plot_options()
+
         # draw changes
         self.figure.canvas.draw()
+
+        return None
 
     def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
         """ Takes the indices of selected stations on the map
@@ -1304,6 +1379,7 @@ class MPLCanvas(FigureCanvas):
         """ Function to create settings menus for each plot and their elements."""
 
         self.interactive_elements = {}
+        self.options = []
 
         # MAP SETTINGS MENU #
         # add button to map to show and hide settings menu
@@ -1444,6 +1520,8 @@ class MPLCanvas(FigureCanvas):
             self.map_options[option].hide()
             y_move += 25 
 
+            self.options.append(self.map_options[option])
+
         # set show/hide actions
         self.map_elements = [self.map_container, self.map_settings_label, 
                              self.map_unsel_label, self.map_markersize_unsel_sl_label, 
@@ -1540,6 +1618,8 @@ class MPLCanvas(FigureCanvas):
                 y_move = 0
             else:
                 y_move += 25 
+            
+            self.options.append(self.timeseries_options[option])
 
         # set show/hide actions
         self.timeseries_elements = [self.timeseries_container, self.timeseries_settings_label, 
@@ -1646,6 +1726,8 @@ class MPLCanvas(FigureCanvas):
                 y_move = 0
             else:
                 y_move += 25 
+            
+            self.options.append(self.periodic_options[option])
 
         # set show/hide actions
         self.periodic_elements = [self.periodic_container, self.periodic_settings_label, 
@@ -1777,6 +1859,7 @@ class MPLCanvas(FigureCanvas):
             else:
                 y_move += 25 
 
+            self.options.append(self.periodic_violin_options[option])
 
         # set show/hide actions
         self.periodic_violin_elements = [self.periodic_violin_container, self.periodic_violin_settings_label, 
@@ -1871,6 +1954,8 @@ class MPLCanvas(FigureCanvas):
                 y_move = 0
             else:
                 y_move += 25 
+            
+            self.options.append(self.distribution_options[option])
 
         # set show/hide actions
         self.distribution_elements = [self.distribution_container, self.distribution_settings_label, 
@@ -1959,6 +2044,8 @@ class MPLCanvas(FigureCanvas):
                 y_move = 0
             else:
                 y_move += 25 
+            
+            self.options.append(self.scatter_options[option])
 
         # set show/hide actions
         self.scatter_elements = [self.scatter_container, self.scatter_settings_label, 
@@ -1983,6 +2070,8 @@ class MPLCanvas(FigureCanvas):
         self.elements = [self.map_elements, self.timeseries_elements, 
                          self.periodic_elements, self.periodic_violin_elements,
                          self.distribution_elements, self.scatter_elements]
+
+        return None
 
     def interactive_elements_button_func(self):
         """Function to show and hide elements in setting menus"""
@@ -2110,12 +2199,13 @@ class MPLCanvas(FigureCanvas):
             if check_state:
                 if isinstance(self.plot_axes[key], dict):
                     for sub_ax in self.plot_axes[key].values():
-                        self.plot.annotation(sub_ax, 
+                        self.plot.annotation(sub_ax,
                                              self.read_instance.networkspeci,
                                              list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                              self.plot_characteristics[key], 
                                              key,
                                              plot_options=[])
+                        break
                 else:
                     self.plot.annotation(self.plot_axes[key], 
                                          self.read_instance.networkspeci,
@@ -2142,7 +2232,7 @@ class MPLCanvas(FigureCanvas):
                                          key,
                                          plot_options=[], 
                                          undo=True)
-
+        
         # option 'trend'
         if option == 'trend':
             # add trend line if box is checked
@@ -2233,7 +2323,9 @@ class MPLCanvas(FigureCanvas):
         # redraw points
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
-    
+
+        return None
+
     def update_opacity(self, ax, plot_type, opacity, event_source):
         """ Update markers opacity for each plot type. """
 
@@ -2267,6 +2359,8 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
+        return None
+
     def update_linewidth(self, ax, plot_type, linewidth):
         """ Update line widths for each plot type. """
         
@@ -2288,6 +2382,8 @@ class MPLCanvas(FigureCanvas):
         # redraw points
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
+
+        return None
 
     def update_violin_widths(self, ax, plot_type, width):
         """ Update violin widths for violin plots. """
@@ -2313,6 +2409,8 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
+        return None
+
     def create_station_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
@@ -2325,6 +2423,7 @@ class MPLCanvas(FigureCanvas):
                                                                   bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
                                                                   arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
 
+        return None
 
     def update_station_annotation(self, annotation_index):
         """ Update annotation for each station that is hovered. """
@@ -2352,6 +2451,8 @@ class MPLCanvas(FigureCanvas):
         text_label += ('Lat: {0:.2f}').format(station_location[1])
         self.station_annotation.set_text(text_label)
 
+        return None
+        
     def hover_station_annotation(self, event):
         """ Show or hide annotation for each station that is hovered. """
 
@@ -2382,6 +2483,8 @@ class MPLCanvas(FigureCanvas):
                 
                 # unlock annotation 
                 self.lock_annotation = False
+
+        return None
 
     def zoom_map_func(self, event):
         """ Function to handle zoom on map using scroll wheel. """
@@ -2428,10 +2531,11 @@ class MPLCanvas(FigureCanvas):
                     # update buttons (previous-forward) history
                     self.read_instance.navi_toolbar.push_current()
                     self.read_instance.navi_toolbar.set_history_buttons()
-                    print(len(self.read_instance.navi_toolbar._nav_stack))
 
                     # unlock zoom
                     self.lock_zoom = False
+
+        return None
 
     def picker_block_func(self, event):
         """ Block or unblock the station and legend pick functions
@@ -2452,6 +2556,8 @@ class MPLCanvas(FigureCanvas):
             # block stations picker and legend picker
             self.lock_station_pick = True
             self.lock_legend_pick = True
+
+        return None
 
     def legend_picker_func(self, event):
         """ Function to handle legend picker. """
@@ -2481,3 +2587,5 @@ class MPLCanvas(FigureCanvas):
                 
                 # unlock legend pick 
                 self.lock_legend_pick = False
+    
+        return None
