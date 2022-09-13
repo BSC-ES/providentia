@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from PyQt5 import QtWidgets
-
+from providentia import aux
 
 class DataFilter:
     """
@@ -57,7 +57,8 @@ class DataFilter:
 
             # get set lower/upper data bounds
             if self.read_instance.offline:
-                lower_bound, upper_bound = aux.which_bounds(self, self.species)
+                lower_bound, upper_bound = aux.which_bounds(self.read_instance, 
+                                                            self.read_instance.species[0])
             else:
                 lower_bound = self.read_instance.le_minimum_value.text()
                 upper_bound = self.read_instance.le_maximum_value.text()

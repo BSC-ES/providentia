@@ -448,7 +448,8 @@ class MPLCanvas(FigureCanvas):
             if len(self.relative_selected_station_inds) > 0:
 
                 # put selected data for each data array into pandas dataframes
-                to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, networkspecies=[self.read_instance.networkspeci])
+                to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
+                                    networkspecies=[self.read_instance.networkspeci])
 
                 # iterate through selected_station_plots
                 for plot_type_ii, plot_type in enumerate(self.selected_station_plots):
@@ -528,13 +529,6 @@ class MPLCanvas(FigureCanvas):
                                 if data_label == 'observations':
                                     continue
                             func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options)
-
-                    # TODO: Move to offline version
-                    """
-                    # change markersize (timeseries and scatter plots)
-                    if plot_type in ['timeseries', 'scatter']:
-                        self.plot.set_markersize(self.read_instance.networkspeci, self.plot_characteristics[plot_type])
-                    """
 
                     # format axes for selected_station_plots
                     if type(ax) == dict:
