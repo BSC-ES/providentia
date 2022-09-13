@@ -823,7 +823,7 @@ def check_for_ghost(network_name):
     All non-GHOST networks start with an asterisk at their name.
     """
 
-    if '*' in network_name:
+    if '/' in network_name:
         return False
     else:
         return True
@@ -955,35 +955,32 @@ def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
     nonghost_observation_data = {}
 
     #iterate through networks
-    for network_upper in nonghost_observation_data_json:
-
-        #drop first character which is '*' for non-GHOST networks
-        network_lower = network_upper[1:].lower()
+    for network in nonghost_observation_data_json:
 
         # check if directory for network exists
         # if not, continue
-        if not os.path.exists('%s/%s' % (instance.nonghost_root, network_lower)):
+        if not os.path.exists('%s/%s' % (instance.nonghost_root, network)):
             continue
 
         # write empty dictionary for network
-        nonghost_observation_data[network_lower] = {}
+        nonghost_observation_data[network] = {}
 
         #iterate through resolutions
-        for resolution in nonghost_observation_data_json[network_upper]:
+        for resolution in nonghost_observation_data_json[network]:
 
             # check if directory for resolution exists
             # if not, continue
-            if not os.path.exists('%s/%s/%s' % (instance.nonghost_root, network_lower, resolution)):
+            if not os.path.exists('%s/%s/%s' % (instance.nonghost_root, network, resolution)):
                 continue
 
             # write nested empty dictionary for resolution
-            nonghost_observation_data[network_lower][resolution] = {}
+            nonghost_observation_data[network][resolution] = {}
 
             #iterate through species
-            for speci in nonghost_observation_data_json[network_upper][resolution]:
+            for speci in nonghost_observation_data_json[network][resolution]:
 
                 # get all available netCDF files 
-                available_files = glob('%s/%s/%s/%s/%s_??????.nc' % (instance.nonghost_root, network_lower, resolution, speci, speci))
+                available_files = glob('%s/%s/%s/%s/%s_??????.nc' % (instance.nonghost_root, network, resolution, speci, speci))
 
                 # coninue if have no files
                 if len(available_files) == 0:
@@ -994,12 +991,12 @@ def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
 
                 # get matrix for current species
                 matrix = instance.parameter_dictionary[speci]['matrix']
-                if matrix not in nonghost_observation_data[network_lower][resolution]:
+                if matrix not in nonghost_observation_data[network][resolution]:
                     # write nested empty dictionary for matrix
-                    nonghost_observation_data[network_lower][resolution][matrix] = {}
+                    nonghost_observation_data[network][resolution][matrix] = {}
 
                 # write nested dictionary for species, with associated file yearmonths
-                nonghost_observation_data[network_lower][resolution][matrix][speci] = file_yearmonths
+                nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
     
     return nonghost_observation_data
 
@@ -1237,7 +1234,7 @@ def get_basic_metadata(instance, networks, species, resolution):
                                                 speci, speci)
         # non-GHOST
         else:
-            file_root = '%s/%s/%s/%s/%s_' % (instance.nonghost_root, network[1:].lower(),
+            file_root = '%s/%s/%s/%s/%s_' % (instance.nonghost_root, network,
                                                 resolution, speci, speci)
 
         # get relevant files

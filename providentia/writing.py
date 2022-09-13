@@ -17,9 +17,7 @@ def export_data_npz(canvas_instance, fname):
     # save data / ghost data / metadata
     for network, speci in zip(canvas_instance.read_instance.network, canvas_instance.read_instance.species):
         networkspeci = '{}-{}'.format(network,speci)
-        if not canvas_instance.read_instance.reading_ghost:
-            network = network[1:]
-        else:
+        if canvas_instance.read_instance.reading_ghost:
             save_data_dict['{}-{}_ghost_data'.format(network,speci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci]
         save_data_dict['{}-{}_data'.format(network,speci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci]
         save_data_dict['{}-{}_metadata'.format(network,speci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci]
@@ -78,10 +76,6 @@ def export_netcdf(canvas_instance, fname):
     # iterate through networks and species 
     for speci_ii, (network, speci) in enumerate(zip(read_instance.network, read_instance.species)):
         networkspeci = '{}-{}'.format(network,speci)
-
-        # remove '*' character in non-GHOST network
-        if not read_instance.reading_ghost:
-            network = network[1:]
 
         # get some key variables for speci
         parameter_details = parameter_dictionary[speci]
