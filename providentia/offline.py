@@ -61,6 +61,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         # initialise DataReader class
         self.datareader = DataReader(self)
 
+        # check for self defined plot characteristics file
+        if self.plot_characteristics_filename == '':
+            self.plot_characteristics_filename = os.path.join(
+                CURRENT_PATH, 'conf/plot_characteristics_offline.json')
+        self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
+        self.plot_characteristics = {}
+
+        # add general plot characteristics to self
+        for k, val in self.plot_characteristics_templates['general'].items():
+            setattr(self, k, val)
+
         # initialise Plot class
         self.plot = Plot(read_instance=self, canvas_instance=self)
 
@@ -82,17 +93,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # update self with section variables
             vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.section_opts.items()})
 
-            # check for self defined plot characteristics file
-            if self.plot_characteristics_filename == '':
-                self.plot_characteristics_filename = os.path.join(
-                    CURRENT_PATH, 'conf/plot_characteristics_dashboard.json')
-            self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
-            self.plot_characteristics = {}
-
-            # add general plot characteristics to self
-            for k, val in self.plot_characteristics_templates['general'].items():
-                setattr(self, k, val)
-
             # get key configuration variables
             aux.get_parameters(self) 
             self.qa = aux.which_qa(self)
@@ -112,7 +112,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             aux.get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
 
             # update available experiments for selected fields
-            aux.get_valid_experiments(self, self.start_date, self.end_date, self.temporal_resolution,
+            aux.get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
                                       self.network, self.species)
 
             # read data
@@ -125,7 +125,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # set plot characteristics
             plot_types = self.report_plots[self.report_type]
-            plot_types.extend(['header'])
             self.plot.set_plot_characteristics(plot_types)
 
             # define dictionary to store plot figures per page
@@ -153,6 +152,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # open new PDF file
         with PdfPages(reports_path + self.report_filename + '.pdf') as pdf:
+            
             self.pdf = pdf
 
             # initialise first page number to plot
@@ -164,9 +164,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             if self.report_stations:
                 self.station_pages = {}
 
-            # make header
-            self.plot.make_header(self.plot_characteristics['header'])
-        
             # get list of all networks and species strings
             networkspecies = ['{}-{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
 
@@ -178,6 +175,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             else:
                 self.subsections = [self.section]
 
+            # make header
+            self.plot.set_plot_characteristics(['header'])
+            self.plot.make_header(self.pdf, self.plot_characteristics['header'])
+        
             # iterate through subsections
             for subsection_ind, subsection in enumerate(self.subsections):
  
@@ -209,12 +210,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                 # iterate through all desired plots, making each one (summary or station specific plots)
                 print('Making {} Subsection Plots'.format(self.subsection))  
-           
+
                 # iterate through networks and species
                 for networkspeci_ii, networkspeci in enumerate(networkspecies):
 
                     # make summary plots?
                     if self.report_summary:
+
+                        if networkspeci_ii == 0:
+                            # get median timeseries across data from filtered data, and place it pandas dataframe
+                            to_pandas_dataframe(read_instance=self, canvas_instance=self, networkspecies=networkspecies)
 
                         if subsection_ind == 0:
                             # update plot characteristics
@@ -223,13 +228,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             # setup plotting geometry for summary plots per networkspeci (for all subsections)
                             self.setup_plot_geometry('summary', networkspeci, networkspeci_ii)
 
-                        if networkspeci_ii == 0:
-                            # get median timeseries across data from filtered data, and place it pandas dataframe
-                            to_pandas_dataframe(read_instance=self, canvas_instance=self, networkspecies=networkspecies)
-                    
                         # iterate through plots to make
                         for plot_type in self.summary_plots_to_make:
-
+                            
                             #get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                             plot_options = plot_type.split('_')[1:]
 
@@ -252,9 +253,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         else:
                             valid_station_inds = self.valid_station_inds[networkspeci]['observations']
 
-                        # setup plotting geometry for station plots per networkspeci (for one subsection)
-                        self.setup_plot_geometry('station', networkspeci, networkspeci_ii, n_stations=len(valid_station_inds))
-
                         # initialise station ind as -1
                         self.station_ind = -1
 
@@ -276,6 +274,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             else:
                                 to_pandas_dataframe(read_instance=self, canvas_instance=self, networkspecies=[networkspeci], station_index=valid_station_ind)
                             
+                            #  setup plotting geometry for station plots per networkspeci (for one subsection)
+                            self.setup_plot_geometry('station', networkspeci, networkspeci_ii, n_stations=len(valid_station_inds))
+
                             # iterate through plots to make
                             for plot_type in self.station_plots_to_make:
 
@@ -361,14 +362,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                         relevant_axs.append(axs['handle'][ax_type])
                                         relevant_data_labels.append(axs['data_labels'])
                                 else:
-                                    relevant_axs.extend(self.plot_dictionary[relevant_page]['axs']['handle'])
-                                    relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs']['data_labels'])
+                                    relevant_axs.append(self.plot_dictionary[relevant_page]['axs'][0]['handle'])
+                                    relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][0]['data_labels'])
 
                         # generate colourbars for required plots in paradigm on each relevant page
                         if 'cb' in self.plot_characteristics[plot_type]:
                             # get all cb_axs for plot_type across relevant pages
                             cb_axs = [self.plot_dictionary[relevant_page]['cb_ax'] for relevant_page in relevant_pages]
-                            generate_colourbar(self, relevant_axs, cb_axs, zstat, self.plot_characteristics[plot_type], networkspeci.split('-')[-1])
+                            generate_colourbar(self, relevant_axs, cb_axs, zstat, self.plot_characteristics[plot_type], 
+                                               networkspeci.split('-')[-1])
 
                         # harmonise xy limits for plot paradigm
                         if base_plot_type not in ['map','heatmap','table']: 
@@ -388,16 +390,20 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                             # annotation
                             if 'annotate' in plot_options:
-                                self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], self.plot_characteristics[plot_type], plot_type, plot_options=plot_options)
+                                self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
+                                                     self.plot_characteristics[plot_type], plot_type, 
+                                                     plot_options=plot_options)
 
                             # regression line
                             if 'regression' in plot_options:
-                                self.plot.linear_regression(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], self.plot_characteristics[plot_type], plot_options=plot_options)
+                                self.plot.linear_regression(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
+                                                            self.plot_characteristics[plot_type], plot_options=plot_options)
 
                             # trend line
                             if 'trend' in plot_options:
-                                self.plot.trend(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], self.plot_characteristics[plot_type], plot_options=plot_options)
-
+                                self.plot.trend(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
+                                                self.plot_characteristics[plot_type], plot_options=plot_options)
+    
             # save page figures
             print('WRITING PDF')
             for figure_n in self.plot_dictionary:
@@ -462,6 +468,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 plot_characteristics['page_title']['t'] = '{} (Summary)\n{}'.format(plot_characteristics['page_title']['t'], networkspeci) 
             elif plotting_paradigm == 'station':
                 plot_characteristics['page_title']['t'] = '{} (Per Station)\n{}\n{}'.format(plot_characteristics['page_title']['t'], self.subsection, networkspeci) 
+
+            # update markersize in plot characteristics (timeseries and scatter plots)
+            if (base_plot_type == 'timeseries') or (base_plot_type == 'scatter'):
+                self.plot.set_markersize(networkspeci, self.plot_characteristics[plot_type])
 
             # define number of plots per type
             n_plots_per_plot_type = False
@@ -578,7 +588,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     # then turn off unneeded axes
                     else:
                         ax.set_axis_off()
-                    
+
                     plot_ii_per_type += 1
                     col_ii += 1
 
@@ -625,7 +635,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             return
 
         # iterate through all data arrays 
-        for n_data_label, data_label in enumerate(self.read_instance.data_labels):
+        for n_data_label, data_label in enumerate(self.data_labels):
 
             # set how experiment should be referred to in heatmap/table
             if data_label == 'observations':
@@ -658,9 +668,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
                 
                 # set axis title
-                if self.relevant_axis.get_title() == '':
+                # TODO: Fix this
+                """
+                if relevant_axis.get_title() == '':
                     axis_title_label = '{}\n{}'.format(data_label, self.subsection)
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+                """
 
                 # make map if there are data
                 if not self.selected_station_data[networkspeci]:
@@ -733,10 +746,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         axis_ind = self.station_ind
 
                 # get relevant axis
-                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
+                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
+                                                                           axis_ind)
                 
                 # set axis title
-                if self.relevant_axis.get_title() == '':
+                if isinstance(relevant_axis, dict):
+                    for sub_ax in relevant_axis.values():
+                        axis_title = sub_ax.get_title()
+                        break
+                else:
+                    axis_title = relevant_axis.get_title()
+                if axis_title == '':
                     if plotting_paradigm == 'summary':
                         axis_title_label = self.subsection
                     elif plotting_paradigm == 'station':
@@ -760,9 +780,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         if data_label in self.selected_station_data[networkspeci]:
                             if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
                                 if base_plot_type == 'periodic':
-                                    self.make_periodic(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options)
+                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options)
                                 elif base_plot_type == 'periodic-violin':
-                                    self.make_periodic(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options)
+                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options)
                                 self.plot_dictionary[relevant_page]['axs'][axis_ind]['data_labels'].append(data_label)
 
                     # other plot types (except heatmap and table) 
@@ -802,7 +822,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],index=self.subsections)
 
             # set axis title
-            if self.relevant_axis.get_title() == '':
+            if relevant_axis.get_title() == '':
                 if plotting_paradigm == 'summary':
                     axis_title_label = ''
                 elif plotting_paradigm == 'station':
