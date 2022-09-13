@@ -80,15 +80,12 @@ class MPLCanvas(FigureCanvas):
         self.plot_axes['periodic-violin']['hour'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=30))
         self.plot_axes['periodic-violin']['dayofweek'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 90), rowspan=20, colspan=10))
         self.plot_axes['periodic-violin']['month'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
-        self.plot_axes['periodic'] = {}
-        self.plot_axes['periodic']['hour'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 35), rowspan=20, colspan=30))
-        self.plot_axes['periodic']['dayofweek'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 55), rowspan=20, colspan=10))
-        self.plot_axes['periodic']['month'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 35), rowspan=20, colspan=18))
+        self.plot_axes['distribution'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 35), rowspan=44, colspan=30))
         self.plot_axes['metadata'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=30))
         self.plot_axes['cb'] = self.figure.add_axes([0.0375, 0.53, 0.375, 0.02])
 
         # define plots to update upon selecting stations
-        self.selected_station_plots = ['timeseries', 'periodic-violin', 'periodic', 'metadata']
+        self.selected_station_plots = ['timeseries', 'periodic-violin', 'distribution', 'metadata']
 
         # define all possible plots
         self.all_plots = ['legend', 'map', 'timeseries', 'periodic-violin', 'periodic', 
@@ -130,8 +127,8 @@ class MPLCanvas(FigureCanvas):
         self.lock_zoom = False
         self.figure.canvas.mpl_connect('scroll_event', self.zoom_map_func)
 
-        # format axes for selected_station_plots, map and legend
-        for plot_type in self.selected_station_plots + ['map', 'legend']:
+        # format axes for map and legend
+        for plot_type in ['map', 'legend']:
             ax = self.plot_axes[plot_type]
             if type(ax) == dict:
                 for relevant_temporal_resolution, sub_ax in ax.items():
@@ -141,7 +138,7 @@ class MPLCanvas(FigureCanvas):
             else:
                 self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
 
-        # hide all axes
+        # hide all plot axes
         for plot_type, ax in self.plot_axes.items():
             if type(ax) == dict:
                 for relevant_temporal_resolution, sub_ax in ax.items():
@@ -180,10 +177,6 @@ class MPLCanvas(FigureCanvas):
 
             # update legend
             self.update_legend()
-
-            # update layout options for position 2, 3, 4 and 5
-            self.update_layout_options()
-            self.read_instance.update_configuration_bar_fields()
 
         # draw changes
         self.figure.canvas.draw()
@@ -276,12 +269,11 @@ class MPLCanvas(FigureCanvas):
             # update plotted map z statistic
             self.update_map_z_statistic()
 
+            # update layout field options 
+            self.read_instance.update_layout_fields()
+
             # update associated plots with selected stations
             self.update_associated_selected_station_plots()
-
-            # update layout options for position 2, 3, 4 and 5
-            self.update_layout_options()
-            self.read_instance.update_configuration_bar_fields()
 
             # draw changes
             self.figure.canvas.draw()
@@ -409,20 +401,163 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
+    def update_associated_selected_station_plot(self, plot_type):
+        """Function that updates a plot associated with selected stations on map"""
+    
+        print('UPDATE SELECTED STATION PLOT')
+
+        if hasattr(self, 'relative_selected_station_inds'):
+            if len(self.relative_selected_station_inds) > 0:
+
+                # get relevant axis
+                ax = self.plot_axes[plot_type]
+
+                # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
+                plot_options = plot_type.split('_')[1:]
+
+                # format axis
+                if type(ax) == dict:
+                    for relevant_temporal_resolution, sub_ax in ax.items():
+                        self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], 
+                                            relevant_temporal_resolution=relevant_temporal_resolution, 
+                                            col_ii=-1)
+                else:
+                    self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
+
+                # get plotting function for specific plot
+                func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+
+                # get zstat for plots with statistics, and set new axis title and ylabel
+                if plot_type in ['periodic']:
+                    # get currently selected experiment bias statistic name
+                    base_zstat = self.read_instance.cb_experiment_bias_stat.currentText()
+                    # if have no zstat, it is because no experiments are loaded so cannot make periodic bias plot
+                    if not base_zstat:
+                        return 
+                    zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
+                    # get zstat information 
+                    zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat) 
+                    # add bias to plot options if stat is bias
+                    if z_statistic_sign == 'bias':
+                        plot_options.append('bias')  
+                    #set new axis title
+                    axis_title = '{}-{}'.format(plot_type, zstat) 
+                    # set new ylabel
+                    if z_statistic_type == 'basic':
+                        if base_zstat not in ['Data%', 'Exceedances']:
+                            ylabel = self.read_instance.measurement_units[self.read_instance.species[0]] 
+                        else:
+                            ylabel = basic_stats[base_zstat]['label']
+                    else:
+                        ylabel = expbias_stats[base_zstat]['label']
+                else:
+                    #set new axis title
+                    axis_title = plot_type 
+                    
+                    # set new ylabel
+                    if 'ylabel' in self.plot_characteristics[plot_type]:
+                        if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
+                            ylabel = self.read_instance.measurement_units[self.read_instance.species[0]]
+                        else:
+                            ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                    else:
+                        ylabel = ''
+
+                    # set new xlabel
+                    if 'xlabel' in self.plot_characteristics[plot_type]:
+                        if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
+                            xlabel = self.read_instance.measurement_units[self.read_instance.species[0]]
+                        else:
+                            xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                    else:
+                        xlabel = ''
+
+                # if are making bias plot, and have no valid experiment data then cannot make plot type
+                if ('bias' in plot_options) & (len(self.selected_station_data[self.read_instance.networkspeci]) < 2):
+                    return
+
+                # iterate through data array names in selected station data dictionary
+                valid_data_labels = []
+                for data_label in self.selected_station_data[self.read_instance.networkspeci]:
+
+                    # call function to update plot
+                    if plot_type in ['periodic']:
+                        # skip observational array if bias stat and data array is observations
+                        if (z_statistic_sign == 'bias') & (data_label == 'observations'):
+                            continue
+                        func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options)
+                    else: 
+                        if plot_type == 'metadata':
+                            if data_label != 'observations':
+                                continue
+                        if plot_type == 'scatter':
+                            if data_label == 'observations':
+                                continue
+                        func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options)
+                    valid_data_labels.append(data_label)
+
+                # TODO: Move to offline version
+                """
+                # change markersize (timeseries and scatter plots)
+                if plot_type in ['timeseries', 'scatter']:
+                    self.plot.set_markersize(self.read_instance.networkspeci, self.plot_characteristics[plot_type])
+                """
+                
+                # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
+                if type(ax) == dict:
+                    relevant_axs = [ax[relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
+                    if plot_type == 'periodic-violin':
+                        self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
+                                                                plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                self.selected_station_data_max[self.read_instance.networkspeci]])
+                    else:
+                        self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
+                                                                plot_options, autoscale_y=True)
+
+                    set_title = False
+                    for relevant_temporal_resolution, sub_ax in ax.items():
+                        #do not show axis if temporal resolution is not relevant
+                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                            # set ylabel (if sub_ax in first column) and title (if sub_ax in first column and not previously set)   
+                            if relevant_temporal_resolution in ['hour','month']:
+                                self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics[plot_type])
+                                if not set_title:
+                                    self.plot.set_axis_title(sub_ax, axis_title, self.plot_characteristics[plot_type])
+                                    set_title = True
+                            self.activate_axis(sub_ax, plot_type)
+                            self.reset_ax_navigation_toolbar_stack(sub_ax)
+                else:
+                    if plot_type != 'scatter':    
+                        ax.relim()
+                        ax.autoscale()
+                    self.plot.set_axis_title(ax, axis_title, self.plot_characteristics[plot_type])
+                    self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
+                    self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
+                    self.activate_axis(ax, plot_type)
+                    self.reset_ax_navigation_toolbar_stack(ax)
+
+                # configure legend picker per plot type / data_label
+                self.configure_legend_picker(plot_type, valid_data_labels)
+
     def update_associated_selected_station_plots(self):
         """Function that updates all plots associated with selected stations on map"""
 
         print('UPDATE SELECTED STATION PLOTS')
 
         # clear all previously plotted artists from selected station plots and hide axes 
-        if not self.avoid_hiding_plots:
-            for plot_type in self.selected_station_plots:
-                ax = self.plot_axes[plot_type]
-                if type(ax) == dict:
-                    for sub_ax in ax.values():
-                        self.remove_axis_elements(sub_ax, plot_type)
-                else:
-                    self.remove_axis_elements(ax, plot_type)
+        for plot_type in self.selected_station_plots:
+            ax = self.plot_axes[plot_type]
+            if type(ax) == dict:
+                for sub_ax in ax.values():
+                    self.remove_axis_elements(sub_ax, plot_type)
+            else:
+                self.remove_axis_elements(ax, plot_type)
+
+        # remove legend picker lines
+        for legend_label in self.lined:
+            relevant_plots = list(self.lined[legend_label]['lines_per_plot'].keys())
+            for plot_type in relevant_plots:
+                del self.lined[legend_label]['lines_per_plot'][plot_type]
 
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
@@ -432,227 +567,100 @@ class MPLCanvas(FigureCanvas):
                 to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, networkspecies=[self.read_instance.networkspeci])
 
                 # iterate through selected_station_plots
-                for plot_type_ii, plot_type in enumerate(self.selected_station_plots):
+                for plot_type in self.selected_station_plots:
 
-                    # get relevant axis
-                    ax = self.plot_axes[plot_type]
+                    # update plot
+                    self.update_associated_selected_station_plot(plot_type)
 
-                    # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
-                    plot_options = plot_type.split('_')[1:]
-
-                    # get plotting function for specific plot
-                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
-
-                    # get zstat for plots with statistics, and set new axis title and ylabel
-                    if plot_type in ['periodic']:
-                        # get currently selected experiment bias statistic name
-                        base_zstat = self.read_instance.cb_experiment_bias_stat.currentText()
-                        # if have no zstat, it is because no experiments are loaded so cannot make periodic bias plot
-                        if not base_zstat:
-                            continue
-                        zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
-                        # get zstat information 
-                        zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat) 
-                        # add bias to plot options if stat is bias
-                        if z_statistic_sign == 'bias':
-                            plot_options.append('bias')  
-                        #set new axis title
-                        axis_title = '{}-{}'.format(plot_type, zstat) 
-                        # set new ylabel
-                        if z_statistic_type == 'basic':
-                            if base_zstat not in ['Data%', 'Exceedances']:
-                                ylabel = self.read_instance.measurement_units[self.read_instance.species[0]] 
-                            else:
-                                ylabel = basic_stats[base_zstat]['label']
-                        else:
-                            ylabel = expbias_stats[base_zstat]['label']
-                    else:
-                        #set new axis title
-                        axis_title = plot_type 
-                        
-                        # set new ylabel
-                        if 'ylabel' in self.plot_characteristics[plot_type]:
-                            if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
-                                ylabel = self.read_instance.measurement_units[self.read_instance.species[0]]
-                            else:
-                                ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
-                        else:
-                            ylabel = ''
-
-                        # set new xlabel
-                        if 'xlabel' in self.plot_characteristics[plot_type]:
-                            if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
-                                xlabel = self.read_instance.measurement_units[self.read_instance.species[0]]
-                            else:
-                                xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
-                        else:
-                            xlabel = ''
-
-                    # if are making bias plot, and have no valid experiment data then cannot make plot type
-                    if ('bias' in plot_options) & (len(self.selected_station_data[self.read_instance.networkspeci]) < 2):
-                        continue
-
-                    # iterate through data array names in selected station data dictionary
-                    for data_label in self.selected_station_data[self.read_instance.networkspeci]:
-
-                        # call function to update plot
-                        if plot_type in ['periodic']:
-                            # skip observational array if bias stat and data array is observations
-                            if (z_statistic_sign == 'bias') & (data_label == 'observations'):
-                                continue
-                            func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options)
-                        else: 
-                            if plot_type == 'metadata':
-                                if data_label != 'observations':
-                                    continue
-                            if plot_type == 'scatter':
-                                if data_label == 'observations':
-                                    continue
-                            func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options)
-
-                    # TODO: Move to offline version
-                    """
-                    # change markersize (timeseries and scatter plots)
-                    if plot_type in ['timeseries', 'scatter']:
-                        self.plot.set_markersize(self.read_instance.networkspeci, self.plot_characteristics[plot_type])
-                    """
-
-                    # format axes for selected_station_plots
-                    if type(ax) == dict:
-                        for relevant_temporal_resolution, sub_ax in ax.items():
-                            self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], 
-                                                  relevant_temporal_resolution=relevant_temporal_resolution, 
-                                                  col_ii=-1)
-                    else:
-                        self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
-                    
-                    # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
-                    if type(ax) == dict:
-                        relevant_axs = [ax[relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
-                        if plot_type == 'periodic-violin':
-                            self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
-                                                                 plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                 self.selected_station_data_max[self.read_instance.networkspeci]])
-                        else:
-                            self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
-                                                                 plot_options, autoscale_y=True)
-                        set_title = False
-                        for relevant_temporal_resolution, sub_ax in ax.items():
-                            #do not show axis if temporal resolution is not relevant
-                            if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                                # set ylabel (if sub_ax in first column) and title (if sub_ax in first column and not previously set)   
-                                if relevant_temporal_resolution in ['hour','month']:
-                                    self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics[plot_type])
-                                    if not set_title:
-                                        self.plot.set_axis_title(sub_ax, axis_title, self.plot_characteristics[plot_type])
-                                        set_title = True
-                                self.activate_axis(sub_ax, plot_type)
-                                self.reset_ax_navigation_toolbar_stack(sub_ax)
-                    else:
-                        if plot_type != 'scatter':    
-                            ax.relim()
-                            ax.autoscale()
-                        self.plot.set_axis_title(ax, axis_title, self.plot_characteristics[plot_type])
-                        self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
-                        self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
-                        self.activate_axis(ax, plot_type)
-                        self.reset_ax_navigation_toolbar_stack(ax)
-
-                # configure legend picker
-                self.configure_legend_picker()
-
-    def configure_legend_picker(self):
+    def configure_legend_picker(self, plot_type, legend_labels):
         """ Function that creates a dictionary with the lines and collections
             that will be removed when picking up each legend element
         """
 
-        self.lined = {}
-
-        # setup element picker in legend
-        for legend_label in self.legend.texts:
-            legend_label.set_picker(True)
-            self.lined[legend_label] = []
-
         # get plot lines from timeseries and periodic violin plots
         ax_plot_lines = {}
         ax_plot_collections = {}
-        for plot_type in list(set(['timeseries', 'periodic-violin', 'periodic', 'distribution', 'scatter']).intersection(self.selected_station_plots)):
+        if plot_type in ['timeseries', 'periodic-violin', 'periodic', 'distribution', 'scatter']:
             
-            ax = self.plot_axes[plot_type]
-            if type(ax) == dict:
-                for key, sub_ax in ax.items(): 
-                    if sub_ax.get_visible():
+                for legend_label in legend_labels:
+                    self.lined[legend_label]['lines_per_plot'][plot_type] = []
+                
+                ax = self.plot_axes[plot_type]
+                if type(ax) == dict:
+                    for key, sub_ax in ax.items(): 
+                        if sub_ax.get_visible():
 
-                        ax_plot_lines[key] = {}
-                        ax_plot_collections[key] = {}
-                        last_break = 0
-                        break_sum = 0
+                            for i, legend_label in enumerate(legend_labels):
 
-                        # remove [0, 0] lines (periodic plots)
-                        sub_ax_lines = [line for line in sub_ax.lines if line.get_ydata() != [0, 0]]
-                        
-                        for i, legend_label in enumerate(self.legend.texts):
+                                visible = self.lined[legend_label]['visible']
 
-                            # if plot is periodic bias, remove observations from legend items
-                            if plot_type == 'periodic':
-                                if i == 0:
-                                    continue
-                                else:
-                                    i -= 1
+                                ax_plot_lines[key] = {}
+                                ax_plot_collections[key] = {}
+                                last_break = 0
+                                break_sum = 0
 
-                            # get line per legend element
-                            ax_plot_lines[key][legend_label] = sub_ax_lines[i]
-                            
-                            # are there collections? (skip periodic plots)
-                            if sub_ax.collections:
-                            
-                                # get corresponding patches according to breaks
-                                # some patches do not exist, so breaks are not always 0-24, 24-48, etc...
-                                # and change depending on the legend element
-                                if i != 0:
-                                    last_break = len(sub_ax_lines[i-1].get_ydata()[~np.isnan(sub_ax_lines[i-1].get_ydata())])
-                                curr_break = len(sub_ax_lines[i].get_ydata()[~np.isnan(sub_ax_lines[i].get_ydata())])
-                                break_sum += last_break
+                                # remove [0, 0] lines (periodic plots)
+                                sub_ax_lines = [line for line in sub_ax.lines if line.get_ydata() != [0, 0]]
+                                
+                                # get line per legend element
+                                ax_plot_lines[key][legend_label] = sub_ax_lines[i]
+                                
+                                # are there collections? (skip periodic plots)
+                                if sub_ax.collections:
+                                
+                                    # get corresponding patches according to breaks
+                                    # some patches do not exist, so breaks are not always 0-24, 24-48, etc...
+                                    # and change depending on the legend element
+                                    if i != 0:
+                                        last_break = len(sub_ax_lines[i-1].get_ydata()[~np.isnan(sub_ax_lines[i-1].get_ydata())])
+                                    curr_break = len(sub_ax_lines[i].get_ydata()[~np.isnan(sub_ax_lines[i].get_ydata())])
+                                    break_sum += last_break
 
-                                # get patches per legend elements
-                                ax_plot_collections[key][legend_label] = sub_ax.collections[break_sum:break_sum+curr_break]
-
-                            # transform single elements to list
-                            if not isinstance(ax_plot_lines[key][legend_label], list):
-                                ax_plot_lines[key][legend_label] = [ax_plot_lines[key][legend_label]]
-
-                            # add lines to self.lined
-                            self.lined[legend_label] += ax_plot_lines[key][legend_label]
-
-                            # there are no collections for periodic bias plots (only lines)
-                            if sub_ax.collections:
+                                    # get patches per legend elements
+                                    ax_plot_collections[key][legend_label] = sub_ax.collections[break_sum:break_sum+curr_break]
 
                                 # transform single elements to list
-                                if not isinstance(ax_plot_collections[key][legend_label], list):
-                                    ax_plot_collections[key][legend_label] = [ax_plot_collections[key][legend_label]]
-                                
-                                # add collections to self.lined
-                                self.lined[legend_label] += ax_plot_collections[key][legend_label]
+                                if not isinstance(ax_plot_lines[key][legend_label], list):
+                                    ax_plot_lines[key][legend_label] = [ax_plot_lines[key][legend_label]]
 
-            else:
-                if ax.get_visible():
-                    for i, legend_label in enumerate(self.legend.texts):
+                                # add lines to self.lined
+                                self.lined[legend_label]['lines_per_plot'][plot_type] += ax_plot_lines[key][legend_label]
 
-                        # if plot is scatter, remove observations from legend items
-                        if plot_type == 'scatter':
-                            if i == 0:
-                                continue
-                            else:
-                                i -= 1
+                                # there are no collections for periodic bias plots (only lines)
+                                if sub_ax.collections:
 
-                        ax_plot_lines[legend_label] = ax.lines[i]
+                                    # transform single elements to list
+                                    if not isinstance(ax_plot_collections[key][legend_label], list):
+                                        ax_plot_collections[key][legend_label] = [ax_plot_collections[key][legend_label]]
+                                    
+                                    # add collections to self.lined
+                                    self.lined[legend_label]['lines_per_plot'][plot_type] += ax_plot_collections[key][legend_label]
 
-                        # transform single elements to list
-                        if not isinstance(ax_plot_lines[legend_label], list):
-                            ax_plot_lines[legend_label] = [ax_plot_lines[legend_label]]
+                                # set line visibility
+                                if not visible:
+                                    for line in self.lined[legend_label]['lines_per_plot'][plot_type]:
+                                        line.set_visible(False)
 
-                        # add lines to self.lined
-                        self.lined[legend_label] += ax_plot_lines[legend_label]
+                else:
+                    if ax.get_visible():
+
+                        for i, legend_label in enumerate(legend_labels):
+
+                            visible = self.lined[legend_label]['visible']
+
+                            ax_plot_lines[legend_label] = ax.lines[i]
+
+                            # transform single elements to list
+                            if not isinstance(ax_plot_lines[legend_label], list):
+                                ax_plot_lines[legend_label] = [ax_plot_lines[legend_label]]
+
+                            # add lines to self.lined
+                            self.lined[legend_label]['lines_per_plot'][plot_type] += ax_plot_lines[legend_label]
+
+                            # set line visibility
+                            if not visible:
+                                for line in self.lined[legend_label]['lines_per_plot'][plot_type]:
+                                    line.set_visible(False)
 
     def update_experiment_domain_edges(self):
         """Function that plots grid domain edges of experiments in memory"""
@@ -671,22 +679,6 @@ class MPLCanvas(FigureCanvas):
         for grid_edge_polygon in grid_edge_polygons:
             self.plot_axes['map'].add_patch(grid_edge_polygon)
 
-    def update_layout_options(self):
-        """Function that updates layout options"""
-
-        # initialise layout options
-        self.layout_options = ['None', 'distribution', 'metadata', 'periodic', 
-                               'periodic-violin', 'scatter', 'timeseries']
-
-        # remove scatter plots from list if the temporal colocation is not active
-        if not self.read_instance.temporal_colocation:
-            if 'scatter' in self.layout_options:
-                self.layout_options.remove('scatter')
-            if 'periodic' in self.layout_options:
-                self.layout_options.remove('periodic')
-
-        return None
-
     def update_legend(self):
         """Function that updates legend"""
 
@@ -698,6 +690,12 @@ class MPLCanvas(FigureCanvas):
 
         # un-hide legend
         self.activate_axis(self.plot_axes['legend'], 'legend')
+
+        # setup element picker in legend
+        self.lined = {}
+        for data_label, legend_label in zip(self.read_instance.data_labels, self.legend.texts):
+            legend_label.set_picker(True)
+            self.lined[data_label] = {'visible':True, 'lines_per_plot':{}}
 
     def handle_map_z_statistic_update(self):
         """Define function which handles update of map z statistic upon interaction with map comboboxes"""
@@ -817,6 +815,11 @@ class MPLCanvas(FigureCanvas):
                     for sub_ax in self.plot_axes['periodic'].values():
                         self.remove_axis_elements(sub_ax, 'periodic')
 
+                    # remove legend picker lines
+                    for legend_label in self.lined:
+                        if 'periodic' in self.lined[legend_label]['lines_per_plot']:
+                            del self.lined[legend_label]['lines_per_plot']['periodic']
+
                     # get currently selected experiment bias statistic name
                     zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
                     # get zstat information 
@@ -840,11 +843,13 @@ class MPLCanvas(FigureCanvas):
                     # if experiment bias type == 'Station Median' --> update plotted experiment bias plots
                     if selected_experiment_bias_type == 'Station Median':
 
+                        valid_data_labels = []
                         for data_label in self.selected_station_data[self.read_instance.networkspeci]:
                             # skip observational array if bias stat
                             if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                                 continue
                             self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, data_label, self.plot_characteristics['periodic'], zstat=zstat)
+                            valid_data_labels.append(data_label)
 
                     # harmonise axes limits across subplots 
                     relevant_axs = [self.plot_axes['periodic'][relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
@@ -863,6 +868,9 @@ class MPLCanvas(FigureCanvas):
                                     set_title = True
                             self.activate_axis(sub_ax, 'periodic')
                             self.reset_ax_navigation_toolbar_stack(sub_ax)
+
+                    # configure legend picker per plot type / data_label
+                    self.configure_legend_picker('periodic', valid_data_labels)
 
                     # draw changes
                     self.figure.canvas.draw()
@@ -925,8 +933,7 @@ class MPLCanvas(FigureCanvas):
             ax.artists = []
             self.scatter_menu_button.hide()
 
-        if ((plot_type == 'map') or (plot_type == 'timeseries') or 
-            (plot_type == 'periodic') or (plot_type == 'periodic-violin')):
+        if plot_type in self.interactive_elements:
             for element in self.interactive_elements[plot_type]['elements']:
                 if isinstance(element, dict):
                     for sub_element in element.values():
@@ -1313,6 +1320,7 @@ class MPLCanvas(FigureCanvas):
         self.map_menu_button.setIconSize(QtCore.QSize(31, 35))
         self.map_menu_button.setStyleSheet("QPushButton { border: None;} "
                                            "QPushButton:hover { border: None; }")
+        self.map_menu_button.hide()
 
         # add white container
         self.map_container = QtWidgets.QWidget(self)
@@ -1477,6 +1485,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_menu_button.setIconSize(QtCore.QSize(31, 35))
         self.timeseries_menu_button.setStyleSheet("QPushButton { border: None; }"
                                                   "QPushButton:hover { border: None; }")
+        self.timeseries_menu_button.hide()
 
         # add white container
         self.timeseries_container = QtWidgets.QWidget(self)
@@ -1564,6 +1573,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_menu_button.setIconSize(QtCore.QSize(31, 35))
         self.periodic_menu_button.setStyleSheet("QPushButton { border: None; } "
                                                 "QPushButton:hover { border: None; }")
+        self.periodic_menu_button.hide()
 
         # add white container
         self.periodic_container = QtWidgets.QWidget(self)
@@ -1673,6 +1683,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_menu_button.setIconSize(QtCore.QSize(31, 35))
         self.periodic_violin_menu_button.setStyleSheet("QPushButton { border: None; } "
                                                        "QPushButton:hover { border: None; }")
+        self.periodic_violin_menu_button.hide()
 
         # add white container
         self.periodic_violin_container = QtWidgets.QWidget(self)
@@ -1729,27 +1740,6 @@ class MPLCanvas(FigureCanvas):
                                                       200, 20)
         self.periodic_violin_linewidth_sl.hide()
 
-        """
-        # add periodic violin widths slider name ('Violin width') to layout
-        self.periodic_violin_widths_sl_label = QtWidgets.QLabel("Violin width", self)
-        self.periodic_violin_widths_sl_label.setGeometry(self.periodic_violin_menu_button.geometry().x()-200, 
-                                                            self.periodic_violin_menu_button.geometry().y()+150, 
-                                                            200, 20)
-        self.periodic_violin_widths_sl_label.hide()
-
-        # add periodic violin line width slider
-        self.periodic_violin_widths_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.periodic_violin_widths_sl.setObjectName('periodic_violin_widths_sl')
-        self.periodic_violin_widths_sl.setMinimum(0)
-        self.periodic_violin_widths_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['violin']['widths']*100)
-        self.periodic_violin_widths_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['violin']['widths']*10)
-        self.periodic_violin_widths_sl.setTickInterval(2)
-        self.periodic_violin_widths_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-200, 
-                                                   self.periodic_violin_menu_button.geometry().y()+175, 
-                                                   200, 20)
-        self.periodic_violin_widths_sl.hide()
-        """
-
         # add periodic violin plot options name ('Options') to layout
         self.periodic_violin_options_label = QtWidgets.QLabel("Options", self)
         self.periodic_violin_options_label.setGeometry(self.periodic_violin_menu_button.geometry().x()-200,
@@ -1777,12 +1767,10 @@ class MPLCanvas(FigureCanvas):
             else:
                 y_move += 25 
 
-
         # set show/hide actions
         self.periodic_violin_elements = [self.periodic_violin_container, self.periodic_violin_settings_label, 
                                          self.periodic_violin_markersize_sl_label, self.periodic_violin_markersize_sl,
                                          self.periodic_violin_linewidth_sl_label, self.periodic_violin_linewidth_sl,
-                                         #self.periodic_violin_widths_sl_label, self.periodic_violin_widths_sl
                                          self.periodic_violin_options_label, self.periodic_violin_options
                                         ]
         self.interactive_elements['periodic-violin'] = {'button': self.periodic_violin_menu_button, 
@@ -1792,12 +1780,10 @@ class MPLCanvas(FigureCanvas):
                                                         'opacity_sl': [],
                                                         'linewidth_sl': [self.periodic_violin_linewidth_sl],
                                                         'widths_sl': []
-                                                        #'widths_sl': [self.periodic_violin_widths_sl]
                                                         }
         self.periodic_violin_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.periodic_violin_markersize_sl.valueChanged.connect(self.update_markersize_func)
         self.periodic_violin_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
-        # self.periodic_violin_widths_sl.valueChanged.connect(self.update_violin_widths_func)
 
         # DISTRIBUTION PLOT SETTINGS MENU #
         # add button to distribution plot to show and hide settings menu
@@ -2428,7 +2414,6 @@ class MPLCanvas(FigureCanvas):
                     # update buttons (previous-forward) history
                     self.read_instance.navi_toolbar.push_current()
                     self.read_instance.navi_toolbar.set_history_buttons()
-                    print(len(self.read_instance.navi_toolbar._nav_stack))
 
                     # unlock zoom
                     self.lock_zoom = False
@@ -2463,17 +2448,30 @@ class MPLCanvas(FigureCanvas):
             
                 # get plot lines
                 legend_label = event.artist
-                plot_lines = self.lined[legend_label]
+                legend_label_text = legend_label.get_text().lower()
+                visible = copy.deepcopy(self.lined[legend_label_text]['visible'])
+
+                # iterate through plot types
+                for plot_type in self.lined[legend_label_text]['lines_per_plot']:
+
+                    print(len(self.lined[legend_label_text]['lines_per_plot'][plot_type]))
+                    plot_lines = self.lined[legend_label_text]['lines_per_plot'][plot_type]
                 
-                # change visibility and font weight
+                    # change visibility of lines
+                    for plot_line in plot_lines:
+                        if visible:
+                            plot_line.set_visible(False)
+                        else:
+                            plot_line.set_visible(True)
+
+                # change font weight of label
                 legend_label._fontproperties = self.legend.get_texts()[0]._fontproperties.copy()
-                for plot_line in plot_lines:
-                    if plot_line.get_visible():
-                        plot_line.set_visible(False)
-                        legend_label.set_fontweight('regular')
-                    else:
-                        plot_line.set_visible(True)
-                        legend_label.set_fontweight('bold')
+                if visible:
+                    legend_label.set_fontweight('regular')
+                    self.lined[legend_label_text]['visible'] = False
+                else:
+                    legend_label.set_fontweight('bold')
+                    self.lined[legend_label_text]['visible'] = True
 
                 # redraw points
                 self.figure.canvas.draw()
