@@ -50,7 +50,7 @@ class ProvConfiguration(object):
         self.position_1 = kwargs.get('position_1', 'map')
         self.position_2 = kwargs.get('position_2', 'timeseries')
         self.position_3 = kwargs.get('position_3', 'metadata')
-        self.position_4 = kwargs.get('position_4', 'periodic')
+        self.position_4 = kwargs.get('position_4', 'distribution')
         self.position_5 = kwargs.get('position_5', 'periodic-violin')
         self.experiments = kwargs.get('experiments', '')
         self.temporal_colocation = kwargs.get('temporal_colocation', False)

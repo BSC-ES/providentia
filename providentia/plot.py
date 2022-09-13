@@ -993,7 +993,7 @@ class Plot:
             observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df'].dropna()['data']
 
             # iterate through experiment data, making regression line to observations
-            for data_label, legend_label in zip(data_labels, self.canvas_instance.legend.texts):
+            for data_label in data_labels:
                 if data_label != 'observations':
                     experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna()['data']
                     m, b = np.polyfit(observations_data, experiment_data, deg=1)
@@ -1002,8 +1002,8 @@ class Plot:
                                                          zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
                                                          **plot_characteristics['regression'])
 
-                    if regression_line not in self.canvas_instance.lined[legend_label]:
-                        self.canvas_instance.lined[legend_label] += regression_line
+                    if regression_line not in self.canvas_instance.lined[data_label]['lines_per_plot']['scatter']:
+                        self.canvas_instance.lined[data_label]['lines_per_plot']['scatter'] += regression_line
         else:
             for line in relevant_axis.lines[len(relevant_axis.lines)-2:]:
                 line.remove()
@@ -1027,7 +1027,7 @@ class Plot:
 
         if not undo:
             # iterate through plotted data arrays making trendline
-            for data_label, legend_label in zip(data_labels, self.canvas_instance.legend.texts):
+            for data_label in data_labels:
 
                 # bias plot?
                 if 'bias' in plot_options:
@@ -1044,8 +1044,8 @@ class Plot:
                                                 zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
                                                 **plot_characteristics['trend']['format'])
 
-                if trend_line not in self.canvas_instance.lined[legend_label]:
-                    self.canvas_instance.lined[legend_label] += trend_line
+                if trend_line not in self.canvas_instance.lined[data_label]['lines_per_plot']['timeseries']:
+                    self.canvas_instance.lined[data_label]['lines_per_plot']['timeseries'] += trend_line
         
         else:
             for line in relevant_axis.lines[len(self.canvas_instance.legend.texts):]:
@@ -1218,7 +1218,6 @@ class Plot:
                 ax.set_xlim(xlim)
             elif xlim_min and xlim_max and ('xlim' not in plot_characteristics):
                 ax.set_xlim(xlim_min, xlim_max)
-
             # set ylim
             if ylim:
                 ax.set_ylim(ylim)
