@@ -37,6 +37,7 @@ class DataReader:
 
             # determine if reading GHOST or non-GHOST
             self.read_instance.reading_ghost = check_for_ghost(self.read_instance.network[0])
+            print(self.read_instance.network[0], self.read_instance.reading_ghost)
 
             # set active frequency code
             if (self.read_instance.resolution == 'hourly') or (self.read_instance.resolution == 'hourly_instantaneous'):
@@ -477,7 +478,7 @@ class DataReader:
 
                     # non-GHOST
                     else:
-                        file_root = '%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network[1:].lower(), 
+                        file_root = '%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network, 
                                                          resolution, speci, speci)
                         try:
                             available_yearmonths = self.read_instance.available_observation_data[network][resolution][matrix][speci]

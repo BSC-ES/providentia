@@ -18,11 +18,12 @@ class DataFilter:
 
         # get indices of some data variables
         self.obs_index = self.read_instance.data_labels.index('observations')
-        if self.read_instance.resolution != 'daily' and self.read_instance.resolution != 'monthly':
-            self.day_night_index = self.read_instance.ghost_data_vars_to_read.index('day_night_code')
-        if self.read_instance.resolution != 'monthly':
-            self.weekday_weekend_index = self.read_instance.ghost_data_vars_to_read.index('weekday_weekend_code')
-        self.season_index = self.read_instance.ghost_data_vars_to_read.index('season_code')
+        if self.read_instance.reading_ghost:
+            if self.read_instance.resolution != 'daily' and self.read_instance.resolution != 'monthly':
+                self.day_night_index = self.read_instance.ghost_data_vars_to_read.index('day_night_code')
+            if self.read_instance.resolution != 'monthly':
+                self.weekday_weekend_index = self.read_instance.ghost_data_vars_to_read.index('weekday_weekend_code')
+            self.season_index = self.read_instance.ghost_data_vars_to_read.index('season_code')
 
         #apply filtering
         self.filter_all()
