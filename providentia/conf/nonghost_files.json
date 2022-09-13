@@ -1,5 +1,5 @@
 {
-    "*NASA-AERONET/DIRECTSUN_V3-LEV15": {
+    "nasa-aeronet/directsun_v3-lev15": {
         "3hourly": {
             "od550aero": [],
             "ae440-870aero": []
@@ -10,14 +10,14 @@
             }
         },
 
-    "*NASA-AERONET/DIRECTSUN_V2-LEV20": {
+    "nasa-aeronet/directsun_v2-lev20": {
         "3hourly": {
             "od550aero": [],
             "ae440-870aero": []
             }
         },
 
-    "*NASA-AERONET/ONEILL_V3-LEV15": {
+    "nasa-aeronet/oneill_v3-lev15": {
         "3hourly": {
             "od500aero": [],
             "od500aerocoarse": [],
@@ -30,7 +30,7 @@
             }
         },
 
-    "*EEA/EIONET": {
+    "eea/eionet": {
         "hourly": {
             "pm10": [],
             "pm2p5": [],
@@ -42,7 +42,7 @@
             }
         },
 
-    "*EEA/EIONET-VALID": {
+    "eea/eionet-valid": {
         "hourly": {
             "pm10": [],
             "pm2p5": [],
@@ -54,14 +54,14 @@
             }
         },
 
-    "*CNRS-LISA/INDAAF": {
+    "cnrs-lisa/indaaf": {
         "hourly": {
             "pm10": [],
             "pm10du": []
             }
         },
 
-    "*PORT_BARCELONA/PORT-BARCELONA": {
+    "port_barcelona/port-barcelona": {
         "hourly": {
             "sconcno2": []
             }

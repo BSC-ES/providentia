@@ -109,24 +109,28 @@ def read_netcdf_data(tuple_arguments):
             species_data = ncdf_root[speci][valid_file_time_indices, current_file_station_indices].T
 
         print(1)
-        # read GHOST data variables
+        
+        # reading GHOST data?
         if reading_ghost:
+
+            # read GHOST data variables
             for ghost_data_var_ii, ghost_data_var in enumerate(ghost_data_vars_to_read):
                 ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] =\
                     ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
 
-        print(2)
+            print(2)
 
-        # if some qa flags selected then screen observations
-        if (reading_ghost) & (len(shared_memory_vars['qa']) > 0):
-            # screen out observations which are associated with any of the selected qa flags
-            species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['qa']).any(axis=2)] = np.NaN
+            # if some qa flags selected then screen observations
+            if len(shared_memory_vars['qa']) > 0:
+                # screen out observations which are associated with any of the selected qa flags
+                species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['qa']).any(axis=2)] = np.NaN
 
-        print(3)
-        # if some data provider flags selected then screen observations
-        if (reading_ghost) & (len(shared_memory_vars['flag']) > 0):
-            # screen out observations which are associated with any of the selected data provider flags
-            species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['flag']).any(axis=2)] = np.NaN
+            print(3)
+            
+            # if some data provider flags selected then screen observations
+            if len(shared_memory_vars['flag']) > 0:
+                # screen out observations which are associated with any of the selected data provider flags
+                species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['flag']).any(axis=2)] = np.NaN
 
         # write filtered species data to shared file data
         data_in_memory[data_labels.index('observations'), full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] = species_data

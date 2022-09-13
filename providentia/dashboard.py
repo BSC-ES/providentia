@@ -755,7 +755,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
                 self.selected_species = sorted(list(
-                    self.available_observation_data[self.selected_network][self.selected_resolution][selected_matrix].keys()))[0]
+                    self.available_observation_data[self.selected_network][self.selected_resolution][self.selected_matrix].keys()))[0]
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
 
