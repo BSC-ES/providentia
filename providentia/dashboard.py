@@ -21,6 +21,7 @@ import json
 import sys
 from functools import partial
 from collections import OrderedDict
+from weakref import WeakKeyDictionary
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
@@ -148,8 +149,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
                 # get plot type
                 plot_type = button.objectName().split('_menu')[0]
-                if plot_type == 'periodic_violin':
-                    plot_type = 'periodic-violin'
                 
                 if position == plot_type:
                     # calculate proportional geometry of buttons respect main window
@@ -420,10 +419,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set variable that blocks updating of MPL canvas until some data has been read
         self.block_MPL_canvas_updates = True
         self.mpl_canvas = MPLCanvas(self)
-
-        # initialise layout options
-        self.mpl_canvas.layout_options = ['None', 'distribution', 'metadata', 'periodic', 
-                                          'periodic-violin', 'scatter', 'timeseries']
                                           
         # initialise configuration bar fields
         self.config_bar_initialisation = True
@@ -463,6 +458,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # Generate MPL navigation toolbar
         self.navi_toolbar = NavigationToolbar(self.mpl_canvas, self)
+        self.navi_toolbar._nav_stack.push(
+            WeakKeyDictionary({self.mpl_canvas.plot_axes['map']: (self.mpl_canvas.plot_axes['map']._get_view(), (self.mpl_canvas.plot_axes['map'].get_position(True).frozen(), self.mpl_canvas.plot_axes['map'].get_position().frozen()))}))
 
         # add more buttons on the toolbar, next to the navi_toolbar
         self.savebutton = QtWidgets.QPushButton()
@@ -497,9 +494,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
-
-        # hide plots if needed
-        self.mpl_canvas.avoid_hiding_plots = False
 
         # update variable to inform plotting functions whether to use colocated data/or not
         check_state = self.ch_colocate.checkState()
@@ -668,7 +662,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         default_qa = aux.which_qa(self, return_defaults=True)
         self.qa_menu['checkboxes']['remove_default'] = default_qa
 
-        # initialise/update fields - maintain previously selected values wherever possible
+        # update layout fields
+        self.update_layout_fields()
+
+        # unset variable to allow interactive handling from now
+        self.block_config_bar_handling_updates = False
+
+    def update_layout_fields(self):
+        """Define function which updates layout fields"""
+
+        # set variable to block interactive handling while updating config bar parameters
+        self.block_config_bar_handling_updates = True
+
+        # update layout field buttons
         # clear fields
         self.cb_position_1.clear()
         self.cb_position_2.clear()
@@ -676,40 +682,59 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.cb_position_4.clear()
         self.cb_position_5.clear()
 
+        # update available layout options
+        layout_options = ['None', 'distribution', 'metadata', 'periodic', 
+                          'periodic-violin', 'scatter', 'timeseries']
+        # remove scatter plots from list if the temporal colocation is not active
+        if not self.temporal_colocation:
+            if 'scatter' in layout_options:
+                layout_options.remove('scatter')
+
+        # remove periodic plots if have no experiment data    
+        if self.data_labels:
+            if len(self.data_labels) < 2:
+                layout_options.remove('periodic')
+        else:
+            layout_options.remove('periodic')
+
         # update position 1 in layout (always map)
         self.cb_position_1.addItems(['map'])
-        if self.position_1 in ['map']:
-            self.cb_position_1.setCurrentText(self.position_1)
-        else:
-            self.position_1 = self.cb_position_1.currentText()
         
         # update position 2 in layout
-        self.cb_position_2.addItems(self.mpl_canvas.layout_options)
-        if self.position_2 in self.mpl_canvas.layout_options:
+        self.cb_position_2.addItems(layout_options)
+        if self.position_2 in layout_options:
             self.cb_position_2.setCurrentText(self.position_2)
         else:
-            self.position_2 = self.cb_position_2.currentText()
-        
+            self.block_config_bar_handling_updates = False
+            self.cb_position_2.setCurrentText('None')
+            self.block_config_bar_handling_updates = True
+
         # update position 3 in layout
-        self.cb_position_3.addItems(self.mpl_canvas.layout_options)
-        if self.position_3 in self.mpl_canvas.layout_options:
+        self.cb_position_3.addItems(layout_options)
+        if self.position_3 in layout_options:
             self.cb_position_3.setCurrentText(self.position_3)
         else:
-            self.position_3 = self.cb_position_3.currentText()
+            self.block_config_bar_handling_updates = False
+            self.cb_position_3.setCurrentText('None')
+            self.block_config_bar_handling_updates = True
 
         # update position 4 in layout
-        self.cb_position_4.addItems(self.mpl_canvas.layout_options)
-        if self.position_4 in self.mpl_canvas.layout_options:
+        self.cb_position_4.addItems(layout_options)
+        if self.position_4 in layout_options:
             self.cb_position_4.setCurrentText(self.position_4)
         else:
-            self.position_4 = self.cb_position_4.currentText()
+            self.block_config_bar_handling_updates = False
+            self.cb_position_4.setCurrentText('None')
+            self.block_config_bar_handling_updates = True
 
         # update position 5 in layout
-        self.cb_position_5.addItems(self.mpl_canvas.layout_options)
-        if self.position_5 in self.mpl_canvas.layout_options:
+        self.cb_position_5.addItems(layout_options)
+        if self.position_5 in layout_options:
             self.cb_position_5.setCurrentText(self.position_5)
         else:
-            self.position_5 = self.cb_position_5.currentText()
+            self.block_config_bar_handling_updates = False
+            self.cb_position_5.setCurrentText('None')
+            self.block_config_bar_handling_updates = True
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -744,72 +769,103 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # update configuration bar fields
             self.update_configuration_bar_fields()
 
-    def handle_layout_update(self, changed_param):
+    def handle_layout_update(self, changed_plot_type):
         
-        if (changed_param != '') & (not self.block_config_bar_handling_updates):
+        if (changed_plot_type != '') & (not self.block_config_bar_handling_updates):
             
-            # clear all previously plotted artists from selected station plots and hide axes 
-            self.mpl_canvas.previous_selected_station_plots = self.mpl_canvas.selected_station_plots
-            for plot_type in self.mpl_canvas.previous_selected_station_plots:
-                ax = self.mpl_canvas.plot_axes[plot_type]
-                if type(ax) == dict:
-                    for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, plot_type)
-                else:
-                    self.mpl_canvas.remove_axis_elements(ax, plot_type)
-
             # get event origin source
             event_source = self.sender()
 
             print('Updating layout')
+
+            # update selected station plots, avoiding duplicates
             if event_source == self.cb_position_2:
-                self.position_2 = changed_param
-                [self.position_3, self.position_4, self.position_5] = self.avoid_duplicate_plots(self.position_2, 
-                                                                                                 [self.position_3, 
-                                                                                                  self.position_4, 
-                                                                                                  self.position_5])
+                previous_plot_type = copy.deepcopy(self.position_2)
+                self.position_2 = copy.deepcopy(changed_plot_type)
+                
             elif event_source == self.cb_position_3:
-                self.position_3 = changed_param
-                [self.position_2, self.position_4, self.position_5] = self.avoid_duplicate_plots(self.position_3, 
-                                                                                                 [self.position_2, 
-                                                                                                  self.position_4, 
-                                                                                                  self.position_5])
+                previous_plot_type = copy.deepcopy(self.position_3)
+                self.position_3 = copy.deepcopy(changed_plot_type)
+
             elif event_source == self.cb_position_4:
-                self.position_4 = changed_param
-                [self.position_2, self.position_3, self.position_5] = self.avoid_duplicate_plots(self.position_4, 
-                                                                                                 [self.position_2, 
-                                                                                                  self.position_3, 
-                                                                                                  self.position_5])
+                previous_plot_type = copy.deepcopy(self.position_4)
+                self.position_4 = copy.deepcopy(changed_plot_type)
+
             elif event_source == self.cb_position_5:
-                self.position_5 = changed_param
-                [self.position_2, self.position_3, self.position_4] = self.avoid_duplicate_plots(self.position_5, 
-                                                                                                 [self.position_2, 
-                                                                                                  self.position_3, 
-                                                                                                  self.position_4])
+                previous_plot_type = copy.deepcopy(self.position_5)
+                self.position_5 = copy.deepcopy(changed_plot_type)
 
-            # update layout
-            self.update_plot_axes()
+            # if changed plot type is selected elsewhere, then set that field to None
+            if (changed_plot_type == self.position_2) & (event_source != self.cb_position_2):
+                self.position_2 = 'None'
 
-            # remove empty plots if READ has never been clicked
-            if not hasattr(self.mpl_canvas, 'relative_selected_station_inds'):
-                for plot_type in self.mpl_canvas.selected_station_plots:
-                    ax = self.mpl_canvas.plot_axes[plot_type]
-                    if type(ax) == dict:
-                        for sub_ax in ax.values():
-                            self.mpl_canvas.remove_axis_elements(sub_ax, plot_type)
-                    else:
-                        self.mpl_canvas.remove_axis_elements(ax, plot_type)
+            elif (changed_plot_type == self.position_3) & (event_source != self.cb_position_3):
+                self.position_3 = 'None'
+
+            if (changed_plot_type == self.position_4) & (event_source != self.cb_position_4):
+                self.position_4 = 'None'
+
+            elif (changed_plot_type == self.position_5) & (event_source != self.cb_position_5):
+                self.position_5 = 'None'
+
+            # remove axis elements for previous plot type, and from selected_station_plots
+            if (previous_plot_type in self.mpl_canvas.selected_station_plots) & (previous_plot_type in self.mpl_canvas.plot_axes):
+                ax = self.mpl_canvas.plot_axes[previous_plot_type]
+                if type(ax) == dict:
+                    for sub_ax in ax.values():
+                        self.mpl_canvas.remove_axis_elements(sub_ax, previous_plot_type)
+                else:
+                    self.mpl_canvas.remove_axis_elements(ax, previous_plot_type)
+                self.mpl_canvas.selected_station_plots.remove(previous_plot_type)
+                # remove legend picker lines
+                for legend_label in self.mpl_canvas.lined:
+                    if previous_plot_type in self.mpl_canvas.lined[legend_label]['lines_per_plot']:
+                        del self.mpl_canvas.lined[legend_label]['lines_per_plot'][previous_plot_type]
+
+            # if changed_plot_type already axis on another axis then remove those axis elements
+            if (changed_plot_type in self.mpl_canvas.selected_station_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
+                ax = self.mpl_canvas.plot_axes[changed_plot_type]
+                if type(ax) == dict:
+                    for sub_ax in ax.values():
+                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type)
+                else:
+                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
+                # remove legend picker lines
+                for legend_label in self.mpl_canvas.lined:
+                    if changed_plot_type in self.mpl_canvas.lined[legend_label]['lines_per_plot']:
+                        del self.mpl_canvas.lined[legend_label]['lines_per_plot'][changed_plot_type]
+
+            # otherwise add plot_type to selected_station_plots
+            elif changed_plot_type != 'None': 
+                self.mpl_canvas.selected_station_plots.append(changed_plot_type)
+
+            # update plot axis for new plot type
+            self.update_plot_axis(event_source, changed_plot_type)
+
+            # hide axis for new plot type before replot
+            if (changed_plot_type in self.mpl_canvas.selected_station_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
+                ax = self.mpl_canvas.plot_axes[changed_plot_type]
+                if type(ax) == dict:
+                    for sub_ax in ax.values():
+                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type)
+                else:
+                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
             
-            # update characteristics (send warnings if some plots cannot be created)
-            self.mpl_canvas.plot.set_plot_characteristics(self.mpl_canvas.selected_station_plots)
+            # update plot if changed_plot_type != None
+            if changed_plot_type != 'None':
 
-            # make plots
-            self.mpl_canvas.avoid_hiding_plots = True
-            self.mpl_canvas.update_associated_selected_station_plots()
-            self.mpl_canvas.avoid_hiding_plots = False
+                # set plot characteristics (if do not yet exist)
+                if changed_plot_type not in self.mpl_canvas.plot_characteristics:
+                    if changed_plot_type in ['map', 'periodic']:
+                        self.mpl_canvas.plot.set_plot_characteristics([changed_plot_type], zstat='Mean')
+                    else:
+                        self.mpl_canvas.plot.set_plot_characteristics([changed_plot_type])
 
-            # update configuration bar fields
-            self.update_configuration_bar_fields()
+                # make plot
+                self.mpl_canvas.update_associated_selected_station_plot(changed_plot_type)
+
+            # update layout fields
+            self.update_layout_fields()
 
             # update buttons geometry
             self.update_buttons_geometry()
@@ -819,71 +875,47 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         return None
 
-    def avoid_duplicate_plots(self, current_plot_type, plots):
-        
-        if current_plot_type in plots:
-            for i, plot_type in enumerate(plots):
-                if plot_type == current_plot_type and plot_type != 'None':
-                    plots[i] = 'None'
+    def update_plot_axis(self, changed_position, changed_plot_type):
 
-        return plots
-
-    def update_plot_axes(self):
-
-        # update plots
-        self.mpl_canvas.selected_station_plots = [self.position_2, 
-                                                  self.position_3, 
-                                                  self.position_4, 
-                                                  self.position_5]
-       
-        # drop empty plots from list
-        self.mpl_canvas.selected_station_plots = list(filter(lambda val: val != 'None', 
-                                                             self.mpl_canvas.selected_station_plots))
-
-        # create fixed plot axes on grid
-        self.mpl_canvas.plot_axes = {}
-        self.mpl_canvas.plot_axes['map'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((2, 0), 
-                                                                              rowspan=44, colspan=42), projection=self.mpl_canvas.plotcrs)
-        self.mpl_canvas.plot_axes['cb'] = self.mpl_canvas.figure.add_axes([0.0375, 0.53, 0.375, 0.02])
-        self.mpl_canvas.plot_axes['legend'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((0, 47), 
-                                                                                 rowspan=8,  colspan=53))
-        
-        # create swappable plot axes on grid
         # position 2 (top right)
-        if (self.position_2 == 'periodic') or (self.position_2 == 'periodic-violin'):
-            self.mpl_canvas.plot_axes[self.position_2] = {}
-            self.mpl_canvas.plot_axes[self.position_2]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((10, 50), rowspan=17, colspan=50))
-            self.mpl_canvas.plot_axes[self.position_2]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 82), rowspan=17, colspan=18))
-            self.mpl_canvas.plot_axes[self.position_2]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 50), rowspan=17, colspan=30))
-        elif self.position_2 != 'None':
-            self.mpl_canvas.plot_axes[self.position_2] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=50))
-        
+        if changed_position == self.cb_position_2:
+            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+                self.mpl_canvas.plot_axes[changed_plot_type] = {}
+                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((10, 50), rowspan=17, colspan=50))
+                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 82), rowspan=17, colspan=18))
+                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 50), rowspan=17, colspan=30))
+            elif changed_plot_type != 'None':
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=50))
+            
         # position 3 (bottom left)
-        if (self.position_3 == 'periodic') or (self.position_3 == 'periodic-violin'):
-            self.mpl_canvas.plot_axes[self.position_3] = {}
-            self.mpl_canvas.plot_axes[self.position_3]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0), rowspan=20, colspan=30))
-            self.mpl_canvas.plot_axes[self.position_3]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 20), rowspan=20, colspan=10))
-            self.mpl_canvas.plot_axes[self.position_3]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 0), rowspan=20, colspan=18))
-        elif self.position_3 != 'None':
-            self.mpl_canvas.plot_axes[self.position_3] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=30))
-        
+        if changed_position == self.cb_position_3:
+            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+                self.mpl_canvas.plot_axes[changed_plot_type] = {}
+                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0), rowspan=20, colspan=30))
+                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 20), rowspan=20, colspan=10))
+                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 0), rowspan=20, colspan=18))
+            elif changed_plot_type != 'None':
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=30))
+            
         # position 4 (bottom centre)
-        if (self.position_4 == 'periodic') or (self.position_4 == 'periodic-violin'):
-            self.mpl_canvas.plot_axes[self.position_4] = {}
-            self.mpl_canvas.plot_axes[self.position_4]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35), rowspan=20, colspan=30))
-            self.mpl_canvas.plot_axes[self.position_4]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 55), rowspan=20, colspan=10))
-            self.mpl_canvas.plot_axes[self.position_4]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 35), rowspan=20, colspan=18))
-        elif self.position_4 != 'None':
-            self.mpl_canvas.plot_axes[self.position_4] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35),  rowspan=44, colspan=30))
-        
+        if changed_position == self.cb_position_4:
+            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+                self.mpl_canvas.plot_axes[changed_plot_type] = {}
+                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35), rowspan=20, colspan=30))
+                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 55), rowspan=20, colspan=10))
+                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 35), rowspan=20, colspan=18))
+            elif changed_plot_type != 'None':
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35),  rowspan=44, colspan=30))
+            
         # position 5 (bottom right)
-        if (self.position_5 == 'periodic') or (self.position_5 == 'periodic-violin'):
-            self.mpl_canvas.plot_axes[self.position_5] = {}
-            self.mpl_canvas.plot_axes[self.position_5]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=30))
-            self.mpl_canvas.plot_axes[self.position_5]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 90), rowspan=20, colspan=10))
-            self.mpl_canvas.plot_axes[self.position_5]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
-        elif self.position_5 != 'None':
-            self.mpl_canvas.plot_axes[self.position_5] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70),  rowspan=44, colspan=30))
+        if changed_position == self.cb_position_5:
+            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+                self.mpl_canvas.plot_axes[changed_plot_type] = {}
+                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=30))
+                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 90), rowspan=20, colspan=10))
+                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
+            elif changed_plot_type != 'None':
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70),  rowspan=44, colspan=30))
 
     def handle_data_selection_update(self):
         """Define function which handles update of data selection
