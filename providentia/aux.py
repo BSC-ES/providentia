@@ -1090,7 +1090,7 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
         return 
 
     # get start date on first of month
-    start_date_firstdayofmonth = int(start_date[:6] + '01')
+    start_date_firstdayofmonth = int(str(start_date)[:6] + '01')
 
     # iterate through observational dictionary
     for network in instance.all_observation_data:
@@ -1144,7 +1144,7 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
     experiments_to_add = []
 
     # get start date on first of month
-    start_date_firstdayofmonth = int(start_date[:6] + '01')
+    start_date_firstdayofmonth = int(str(start_date)[:6] + '01')
 
     #iterate through networks and species
     for network, speci in zip(networks, species):
@@ -1283,8 +1283,8 @@ def get_basic_metadata(instance, networks, species, resolution):
             spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes)
         for networkspecies in station_references:
             station_references[networkspecies] = intersecting_station_references
-            station_longitudes[networkspecies] = intersecting_longitudes
-            station_latitudes[networkspecies] = intersecting_latitudes
+            station_longitudes[networkspecies] = intersecting_station_longitudes
+            station_latitudes[networkspecies] = intersecting_station_latitudes
 
     return station_references, station_longitudes, station_latitudes
 

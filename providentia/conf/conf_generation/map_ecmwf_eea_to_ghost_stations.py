@@ -89,7 +89,6 @@ for stations_file in stations_files:
         root.close()
 
     print(len(stations_unfound), stations_unfound)
-    print()
 
     create_config_file(conf_fname, eval_type, 'EEA_AQ_eReporting', 'hourly', matrix, species, '20180101', '20190101', mapped_stations)
 
