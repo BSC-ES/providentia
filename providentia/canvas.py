@@ -82,7 +82,7 @@ class MPLCanvas(FigureCanvas):
         self.plot_axes['periodic-violin']['month'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
         self.plot_axes['distribution'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 35), rowspan=44, colspan=30))
         self.plot_axes['metadata'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=30))
-        self.plot_axes['cb'] = self.figure.add_axes([0.0375, 0.53, 0.375, 0.02])
+        self.plot_axes['cb'] = self.figure.add_axes([0.0375, 0.536, 0.393, 0.02])
 
         # define plots to update upon selecting stations
         self.selected_station_plots = ['timeseries', 'periodic-violin', 'distribution', 'metadata']
@@ -788,7 +788,7 @@ class MPLCanvas(FigureCanvas):
     def handle_experiment_bias_update(self):
         """Define function that handles update of plotted experiment bias statistics"""
 
-        if not self.read_instance.block_config_bar_handling_updates:
+        if (not self.read_instance.block_config_bar_handling_updates) & ('periodic' in self.selected_station_plots):
 
             print('UPDATE EXP BIAS')
             # update experiment bias comboboxes
