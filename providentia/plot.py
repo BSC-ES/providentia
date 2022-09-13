@@ -67,7 +67,7 @@ class Plot:
 
         # add all valid defined plots to self.plot_characteristics
         for plot_type in plot_types:
-
+        
             # do not create empty plots
             if plot_type == 'None':
                 continue
@@ -75,12 +75,9 @@ class Plot:
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
 
-            # get zstat information from plot_type (if available)
-            if zstat:
-                _, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type='{}-{}'.format(plot_type,zstat))
-            else:
-                zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
-
+            # get zstat information from plot_type
+            zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type)
+            
             # remove plots where setting 'obs' and 'bias' options together
             if ('obs' in plot_options) & ('bias' in plot_options): 
                 print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together")
@@ -118,10 +115,13 @@ class Plot:
 
                 # set page title 
                 if 'page_title' in self.canvas_instance.plot_characteristics[plot_type]:
-                    if 'bias' in plot_options:
-                        self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'] = '{} {} bias'.format(self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'],stats_dict[base_zstat]['label'])
-                    else:
-                        self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'] = '{} {}'.format(self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'], stats_dict[base_zstat]['label'])
+                    if 't' in self.canvas_instance.plot_characteristics[plot_type]['page_title'].keys():
+                        if 'bias' in plot_options:
+                            self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'] = '{} {} bias'.format(self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'],
+                                                                                                                          stats_dict[base_zstat]['label'])
+                        else:
+                            self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'] = '{} {}'.format(self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'], 
+                                                                                                                     stats_dict[base_zstat]['label'])
 
                 # set ylabel for periodic plots
                 if base_plot_type == 'periodic':
@@ -139,7 +139,7 @@ class Plot:
                     if z_statistic_type == 'basic':
                         if base_zstat not in ['Data%', 'Exceedances']:
                             if speci:
-                                self.canvas_instance.plot_characteristics[plot_type]['cb_label']['label'] = self.read_instance.datareader.measurement_units[speci]
+                                self.canvas_instance.plot_characteristics[plot_type]['cb_label']['label'] = self.read_instance.measurement_units[speci]
                         else:
                             self.canvas_instance.plot_characteristics[plot_type]['cb_label']['label'] = basic_stats[base_zstat]['label']
                     else:
@@ -279,47 +279,42 @@ class Plot:
             for side in list(set(['top', 'bottom', 'right', 'left']).symmetric_difference(plot_characteristics['remove_spines'])):
                 ax.spines[side].set_visible(True)
 
-        # make plot aspect ratio is equal
-        # (ensure ticks and ticklabels are same also)
-        if 'equal_aspect' in plot_characteristics_vars:
-            self.set_equal_axes(ax, plot_characteristics)
-        else:
-            # handle formatting specific to plot types
-            if base_plot_type in ['periodic','periodic-violin']:
+        # handle formatting specific to plot types
+        if base_plot_type in ['periodic','periodic-violin']:
 
-                # add axis resolution label 
-                ax.annotate(self.canvas_instance.periodic_labels[relevant_temporal_resolution], **plot_characteristics['label'])
+            # add axis resolution label 
+            ax.annotate(self.canvas_instance.periodic_labels[relevant_temporal_resolution], **plot_characteristics['label'])
 
-                # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
-                if relevant_temporal_resolution == 'hour':
-                    plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution][::3]
-                    ax.set_xticks(plot_characteristics['xticks'])
-                else:
-                    plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
-                    ax.set_xticks(plot_characteristics['xticks'])
-                    ax.set_xticklabels([self.canvas_instance.temporal_axis_mapping_dict[relevant_temporal_resolution][xtick] for xtick
-                                                                                in self.canvas_instance.periodic_xticks[relevant_temporal_resolution]])
-            
-            elif base_plot_type == 'map':
+            # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
+            if relevant_temporal_resolution == 'hour':
+                plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution][::3]
+                ax.set_xticks(plot_characteristics['xticks'])
+            else:
+                plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
+                ax.set_xticks(plot_characteristics['xticks'])
+                ax.set_xticklabels([self.canvas_instance.temporal_axis_mapping_dict[relevant_temporal_resolution][xtick] for xtick
+                                                                            in self.canvas_instance.periodic_xticks[relevant_temporal_resolution]])
+        
+        elif base_plot_type == 'map':
 
-                # add land polygons
-                ax.add_feature(self.canvas_instance.feature)
+            # add land polygons
+            ax.add_feature(self.canvas_instance.feature)
 
-                # add gridlines ?
-                if 'gridlines' in plot_characteristics_vars:
-                    ax.gridlines(crs=self.canvas_instance.datacrs, **plot_characteristics['gridlines'])
+            # add gridlines ?
+            if 'gridlines' in plot_characteristics_vars:
+                ax.gridlines(crs=self.canvas_instance.datacrs, **plot_characteristics['gridlines'])
 
-                # set map_extent
-                if hasattr(self.read_instance, 'map_extent'):
-                    map_extent = self.read_instance.map_extent
-                else:
-                    map_extent = plot_characteristics['map_extent']
-                    self.read_instance.map_extent = map_extent
-                if isinstance(map_extent, str):
-                    map_extent = [float(c) for c in map_extent.split(',')]
-                ax.set_extent(map_extent, 
-                            crs=self.canvas_instance.datacrs)
-    
+            # set map_extent
+            if hasattr(self.read_instance, 'map_extent'):
+                map_extent = self.read_instance.map_extent
+            else:
+                map_extent = plot_characteristics['map_extent']
+                self.read_instance.map_extent = map_extent
+            if isinstance(map_extent, str):
+                map_extent = [float(c) for c in map_extent.split(',')]
+            ax.set_extent(map_extent, 
+                          crs=self.canvas_instance.datacrs)
+
     def set_equal_axes(self, ax, plot_characteristics):
         """ Set equal aspect and limits (useful for scatter plots)
         """
@@ -423,7 +418,7 @@ class Plot:
             
         return grid_edge_polygons
 
-    def make_header(self, plot_characteristics, plot_options=[]):
+    def make_header(self, pdf, plot_characteristics, plot_options=[]):
         """Make header
         
         :param plot_characteristics: plot characteristics 
@@ -457,7 +452,7 @@ class Plot:
         plot_characteristics['page_text']['transform'] = page.transFigure
         page.text(**plot_characteristics['page_text'])
 
-        self.pdf.savefig(page, dpi=self.canvas_instance.dpi)
+        pdf.savefig(page, dpi=self.canvas_instance.dpi)
         plt.close(page)
 
     def make_metadata(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[]):
@@ -627,7 +622,7 @@ class Plot:
 
         # get ts with no NaNs
         ts_nonan = ts.dropna()
-
+        
         # make timeseries plot
         relevant_axis.plot(ts_nonan, 
                            color=self.read_instance.plotting_params[data_label]['colour'], 
@@ -765,6 +760,7 @@ class Plot:
                     
                 # plot horizontal line/s across x axis at value/s of minimum experiment bias
                 zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
+                
                 if z_statistic_sign == 'bias':
                     # get value/s of minimum bias for statistic
                     if z_statistic_type == 'basic':
@@ -1100,7 +1096,7 @@ class Plot:
                 for zstat in stats:
                     if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
                         stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
-                                            plot_characteristics['annotate_text']['round_decimal_places'])))
+                                              plot_characteristics['annotate_text']['round_decimal_places'])))
 
                 # show number of stations if defined
                 if plot_characteristics['annotate_text']['n_stations']:
@@ -1109,7 +1105,10 @@ class Plot:
                         if 'individual' in plot_options:
                             str_to_annotate.append('Stations: 1')
                         else:
-                            str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.relative_selected_station_inds)))
+                            if self.read_instance.offline:
+                                str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_latitudes[networkspeci])))
+                            else:
+                                str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.relative_selected_station_inds)))
 
                 # get colors
                 colours.append(self.read_instance.plotting_params[data_label]['colour'])
@@ -1226,6 +1225,9 @@ class Plot:
             elif ylim_min and ylim_max and ('ylim' not in plot_characteristics):
                 ax.set_ylim(ylim_min, ylim_max)
 
+        if 'equal_aspect' in plot_characteristics:
+            self.set_equal_axes(ax, plot_characteristics)
+
     def set_axis_title(self, relevant_axis, title, plot_characteristics):
         """Set title of plot axis
 
@@ -1253,6 +1255,7 @@ class Plot:
         # set title for appropriate axes
         axis_title_characteristics = copy.deepcopy(plot_characteristics['axis_title'])
         axis_title_characteristics['label'] = title
+
         for relevant_axis in axs_to_set_title:
             relevant_axis.set_title(**axis_title_characteristics)
 
