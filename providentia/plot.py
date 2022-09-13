@@ -327,7 +327,7 @@ class Plot:
         xtickmax = np.nanmax(ax.lines[0].get_xdata())
         ytickmin = np.nanmin(ax.lines[0].get_ydata())
         ytickmax = np.nanmax(ax.lines[0].get_ydata())
-        for line in ax.lines:
+        for line in ax.lines[:len(self.canvas_instance.legend.texts)-1]:
             if np.nanmin(line.get_xdata()) < xtickmin:
                 xtickmin = np.nanmin(line.get_xdata())
             if np.nanmax(line.get_xdata()) > xtickmax:
@@ -348,10 +348,6 @@ class Plot:
             tickmax = ytickmax
 
         # set equal ticks
-        ax.set_xticks(np.linspace(math.floor(tickmin), math.ceil(tickmax), 
-                      plot_characteristics['n_ticks']))
-        ax.set_yticks(np.linspace(math.floor(tickmin), math.ceil(tickmax), 
-                      plot_characteristics['n_ticks']))
         ax.set_xlim(math.floor(tickmin), math.ceil(tickmax))
         ax.set_ylim(math.floor(tickmin), math.ceil(tickmax))
 
@@ -968,7 +964,7 @@ class Plot:
             if log_ax == 'logy':
                 relevant_axis.set_yscale('linear')
             
-            if 'equal_aspect' in  list(plot_characteristics.keys()):
+            if 'equal_aspect' in list(plot_characteristics.keys()):
                 self.set_equal_axes(relevant_axis, plot_characteristics)
 
     def linear_regression(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], undo=False):
@@ -1224,8 +1220,8 @@ class Plot:
             elif ylim_min and ylim_max and ('ylim' not in plot_characteristics):
                 ax.set_ylim(ylim_min, ylim_max)
 
-        if 'equal_aspect' in plot_characteristics:
-            self.set_equal_axes(ax, plot_characteristics)
+            if 'equal_aspect' in plot_characteristics:
+                self.set_equal_axes(ax, plot_characteristics)
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics):
         """Set title of plot axis

@@ -135,7 +135,6 @@
             "1:2_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
             "2:1_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
             "equal_aspect": true,
-            "n_ticks": 10,
             "plot": {"marker": "o", "linestyle": "None", "markersize": 2, "alpha": 0.5},
             "plot_options": ["annotate", "regression", "logx", "logy"]},
 
