@@ -82,7 +82,7 @@ class MPLCanvas(FigureCanvas):
         self.plot_axes['periodic-violin']['month'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
         self.plot_axes['distribution'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 35), rowspan=44, colspan=30))
         self.plot_axes['metadata'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=30))
-        self.plot_axes['cb'] = self.figure.add_axes([0.0375, 0.53, 0.375, 0.02])
+        self.plot_axes['cb'] = self.figure.add_axes([0.0455, 0.536, 0.3794, 0.02])
 
         # define plots to update upon selecting stations
         self.selected_station_plots = ['timeseries', 'periodic-violin', 'distribution', 'metadata']
@@ -516,11 +516,11 @@ class MPLCanvas(FigureCanvas):
                     relevant_axs = [ax[relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
                     if plot_type == 'periodic-violin':
                         self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
-                                                                plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                self.selected_station_data_max[self.read_instance.networkspeci]])
+                                                             plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                             self.selected_station_data_max[self.read_instance.networkspeci]])
                     else:
                         self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
-                                                                plot_options, autoscale_y=True)
+                                                             plot_options, autoscale_y=True)
 
                     set_title = False
                     for relevant_temporal_resolution, sub_ax in ax.items():
@@ -535,9 +535,12 @@ class MPLCanvas(FigureCanvas):
                             self.activate_axis(sub_ax, plot_type)
                             self.reset_ax_navigation_toolbar_stack(sub_ax)
                 else:
-                    if plot_type != 'scatter':    
-                        ax.relim()
-                        ax.autoscale()
+                    if plot_type == 'scatter':
+                        self.plot.harmonise_xy_lims_paradigm([ax], plot_type, self.plot_characteristics[plot_type], 
+                                                             plot_options, relim=True)
+                    else: 
+                        self.plot.harmonise_xy_lims_paradigm([ax], plot_type, self.plot_characteristics[plot_type], 
+                                                             plot_options, relim=True, autoscale=True)
                     self.plot.set_axis_title(ax, axis_title, self.plot_characteristics[plot_type])
                     self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
                     self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])

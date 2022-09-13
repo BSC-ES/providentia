@@ -149,7 +149,6 @@
             "1:2_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
             "2:1_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
             "equal_aspect": true,
-            "n_ticks": 10,
             "markersize_npoints_threshold": 200,
             "markersize": {"standard": 1.1, "few_points": 4.0},
             "plot": {"marker": "o", "markersize": "", "linestyle": "None"},
