@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import os
 
+import math
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -281,24 +282,7 @@ class Plot:
         # make plot aspect ratio is equal
         # (ensure ticks and ticklabels are same also)
         if 'equal_aspect' in plot_characteristics_vars:
-            
-            # Get min and max values for ticks
-            xticklocs = ax.get_xticks()
-            yticklocs = ax.get_yticks()
-            if xticklocs[0] < yticklocs[0]:
-                tickmin = xticklocs[0]
-            else:
-                tickmin = yticklocs[0]
-            if xticklocs[-1] > yticklocs[-1]:
-                tickmax = xticklocs[-1]
-            else:
-                tickmax = yticklocs[-1]
-
-            # set equal proportion and ticks
-            ax.set_aspect('equal', adjustable='box')
-            ax.set_xticks(np.linspace(tickmin, tickmax, plot_characteristics['n_ticks']+1))
-            ax.set_yticks(np.linspace(tickmin, tickmax, plot_characteristics['n_ticks']+1))
-        
+            self.set_equal_axes(ax, plot_characteristics)
         else:
             # handle formatting specific to plot types
             if base_plot_type in ['periodic','periodic-violin']:
@@ -335,7 +319,49 @@ class Plot:
                     map_extent = [float(c) for c in map_extent.split(',')]
                 ax.set_extent(map_extent, 
                             crs=self.canvas_instance.datacrs)
-            
+    
+    def set_equal_axes(self, ax, plot_characteristics):
+        """ Set equal aspect and limits (useful for scatter plots)
+        """
+
+        # set aspect
+        ax.set_aspect('equal', adjustable='box')
+
+        # Get min and max values for ticks
+        xtickmin = np.nanmin(ax.lines[0].get_xdata())
+        xtickmax = np.nanmax(ax.lines[0].get_xdata())
+        ytickmin = np.nanmin(ax.lines[0].get_ydata())
+        ytickmax = np.nanmax(ax.lines[0].get_ydata())
+        for line in ax.lines:
+            if np.nanmin(line.get_xdata()) < xtickmin:
+                xtickmin = np.nanmin(line.get_xdata())
+            if np.nanmax(line.get_xdata()) > xtickmax:
+                xtickmax = np.nanmax(line.get_xdata())
+            if np.nanmin(line.get_ydata()) < ytickmin:
+                ytickmin = np.nanmin(line.get_ydata())
+            if np.nanmax(line.get_ydata()) > ytickmax:
+                ytickmax = np.nanmax(line.get_ydata())
+
+        # Compare min and max across axes
+        if xtickmin < ytickmin:
+            tickmin = xtickmin
+        else:
+            tickmin = ytickmin
+        if xtickmax > ytickmax:
+            tickmax = xtickmax
+        else:
+            tickmax = ytickmax
+
+        # set equal ticks
+        ax.set_xticks(np.linspace(math.floor(tickmin), math.ceil(tickmax), 
+                      plot_characteristics['n_ticks']))
+        ax.set_yticks(np.linspace(math.floor(tickmin), math.ceil(tickmax), 
+                      plot_characteristics['n_ticks']))
+        ax.set_xlim(math.floor(tickmin), math.ceil(tickmax))
+        ax.set_ylim(math.floor(tickmin), math.ceil(tickmax))
+
+        return None
+
     def make_legend_handles(self, plot_characteristics_legend, plot_options=[]):
         """Make legend element handles
         
@@ -368,6 +394,7 @@ class Plot:
                                               label=self.read_instance.experiments[experiment]))
         
         plot_characteristics_legend['plot']['handles'] = legend_elements
+        
         return plot_characteristics_legend
 
     def make_experiment_domain_polygons(self, plot_options=[]):
@@ -623,8 +650,11 @@ class Plot:
             # get months that are complete
             months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
             months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
-            if months_start.size > 0 and (timeseries_end_date - months_end[-1]).days >= 1:
-                months = months_start[:-1]
+            if months_start.size > 1:
+                if (timeseries_end_date - months_end[-1]).days >= 1:
+                    months = months_start[:-1]
+                else:
+                    months = months_start
             else:
                 months = months_start
 
@@ -842,12 +872,12 @@ class Plot:
             # add 1:2 line (if in plot_characteristics)
             if '1:2_line' in plot_characteristics:
                 relevant_axis.plot([0, 1], [0, 0.5], transform=relevant_axis.transAxes, 
-                                   **plot_characteristics['1:2_line'])
+                                   **plot_characteristics['1:2_line'])     
             # add 2:1 line (if in plot_characteristics)
             if '2:1_line' in plot_characteristics:
                 relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
                                    **plot_characteristics['2:1_line'])
-
+          
     def make_heatmap(self, relevant_axis, stat_df, plot_characteristics, plot_options=[]):
         """Make heatmap plot
 
@@ -895,7 +925,7 @@ class Plot:
         table = relevant_axis.table(cellText=stat_df.values, colLabels=stat_df.columns, rowLabels=stat_df.index, loc='center')
         #table.set_fontsize(18)
 
-    def log_axes(self, relevant_axis, log_ax, event_source, undo=False):
+    def log_axes(self, relevant_axis, log_ax, event_source, plot_characteristics, undo=False):
         """Log plot axes
 
         :param relevant_axis: axis to plot on 
@@ -904,28 +934,46 @@ class Plot:
         :param data_labels: names of plotted data arrays  
         :param log_ax: which axis to log
         :type log_ax: str
+        :param networkspeci: str of currently active network and species 
+        :type networkspeci: str
         :param undo: unlog plot axes
         :type undo: boolean
         """
 
+        # get data limits
+        xlim = relevant_axis.get_xlim()
+        ylim = relevant_axis.get_ylim()
+        xwidth = xlim[1] - xlim[0]
+        ywidth = ylim[1] - ylim[0]
+        lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
+        lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
+
         if not undo:
             if log_ax == 'logx':
-                if relevant_axis.get_xlim()[0] > 0:
+                if round(lower_xlim, 2) >= 0:
                     relevant_axis.set_xscale('log')
+                    relevant_axis.autoscale()
                 else:
                     print(f"Warning: It is not possible to log the x-axis with negative values.")
                     event_source.setCheckState(QtCore.Qt.Unchecked)
+            
             if log_ax == 'logy':
-                if relevant_axis.get_ylim()[0] > 0:
+                if round(lower_ylim, 2) >= 0:
                     relevant_axis.set_yscale('log')
+                    relevant_axis.autoscale()
                 else:
                     print(f"Warning: It is not possible to log the y-axis with negative values.")
                     event_source.setCheckState(QtCore.Qt.Unchecked)
+
         else:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('linear')
+           
             if log_ax == 'logy':
                 relevant_axis.set_yscale('linear')
+            
+            if 'equal_aspect' in  list(plot_characteristics.keys()):
+                self.set_equal_axes(relevant_axis, plot_characteristics)
 
     def linear_regression(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], undo=False):
         """Add linear regression to plot
@@ -1041,40 +1089,45 @@ class Plot:
 
             # iterate through plotted data labels
             for data_label in data_labels:
-                if plot_type == 'periodic' or 'scatter':
-                    if data_label != 'observations':
-                        # get stats
-                        stats_annotate = []
-                        for zstat in stats:
-                            if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
-                                stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
-                                                    plot_characteristics['annotate_text']['round_decimal_places'])))
+                
+                # avoid plotting stats for observations data for periodic and scatter plots
+                if 'periodic' in plot_type or plot_type == 'scatter':
+                    if data_label == 'observations':
+                        continue
 
-                        # show number of stations if defined
-                        if plot_characteristics['annotate_text']['n_stations']:
-                            if data_label == data_labels[0]:
-                                colours.append('black')
-                                if 'individual' in plot_options:
-                                    str_to_annotate.append('Stations: 1')
-                                else:
-                                    str_to_annotate.append('Stations: ' + str(len(self.read_instance.plotting_params['observations']['valid_station_inds'])))
+                # get stats
+                stats_annotate = []
+                for zstat in stats:
+                    if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
+                        stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
+                                            plot_characteristics['annotate_text']['round_decimal_places'])))
 
-                        # get colors
-                        colours.append(self.read_instance.plotting_params[data_label]['colour'])
+                # show number of stations if defined
+                if plot_characteristics['annotate_text']['n_stations']:
+                    if data_label == data_labels[0]:
+                        colours.append('black')
+                        if 'individual' in plot_options:
+                            str_to_annotate.append('Stations: 1')
+                        else:
+                            str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.relative_selected_station_inds)))
 
-                        # generate annotation
-                        str_to_annotate.append(', '.join(stats_annotate))
+                # get colors
+                colours.append(self.read_instance.plotting_params[data_label]['colour'])
+
+                # generate annotation
+                str_to_annotate.append(', '.join(stats_annotate))
 
             # add annotation to plot
             # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
-            lines = [TextArea(line, textprops=dict(color=colour, size=plot_characteristics['annotate_text']['fontsize'])) 
-                                for line, colour in zip(str_to_annotate, colours)]
+            lines = [TextArea(line, textprops=dict(color=colour, 
+                              size=plot_characteristics['annotate_text']['fontsize'])) 
+                     for line, colour in zip(str_to_annotate, colours)]
             bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
                                      loc=plot_characteristics['annotate_text']['loc'],
                                      bbox_transform=relevant_axis.transAxes)
-            bbox.patch.set(**plot_characteristics['annotate_bbox']) 
+            bbox.patch.set(**plot_characteristics['annotate_bbox'])
             relevant_axis.add_artist(bbox)
-        
+         
         else:
             for artist in relevant_axis.artists:   
                 if type(artist) == AnchoredOffsetbox:
@@ -1161,9 +1214,6 @@ class Plot:
                         ylim_min = -np.abs(np.min(all_ylim_lower))
                         ylim_max = np.abs(np.min(all_ylim_lower))
 
-            if 'equal_aspect' in plot_characteristics:
-                ax.set_aspect('equal', adjustable='box')
-
             # set xlim
             if xlim:
                 ax.set_xlim(xlim)
@@ -1226,7 +1276,7 @@ class Plot:
         axs_to_set_label = []
         if type(relevant_axis) == dict:
             for relevant_temporal_resolution, sub_ax in relevant_axis.items():
-                if relevant_temporal_resolution in ['hour','month']:
+                if relevant_temporal_resolution in ['hour', 'month']:
                     axs_to_set_label.append(sub_ax)
         else:
             axs_to_set_label.append(relevant_axis)
