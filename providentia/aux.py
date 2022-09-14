@@ -169,7 +169,7 @@ def get_parameters(instance):
             sys.exit(error)
         # map to multiple species if have * wildcard
         elif '*' in instance.species:
-            instance.species = multi_species_mapping[instance.species]  
+            instance.species = multi_species_mapping(instance.species)
         # parse multiple species
         elif ',' in instance.species:
             instance.species = [speci.strip() for speci in instance.species.split(',')]
@@ -1194,100 +1194,6 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
         instance.experiments_menu['checkboxes']['labels'] = experiments_to_add
         instance.experiments_menu['checkboxes']['map_vars'] = experiments_to_add
 
-def get_basic_metadata(instance, networks, species, resolution):     
-    """
-    Get basic unique metadata across networks / species wanting to read
-    The basic fields are: station_reference, longitude, latitude
-
-    If have multiple species, then spatially cocolocate across species 
-    to get matching stations across stations.
-
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-
-    :param networks: list of networks
-    :type networks: list
-    :param species: list of species
-    :type species: list
-    :param resolution: selected temporal resolution
-    :type resolution: str
-    :return: station_references per network/species, longitudes per network/species, latitudes per network/species 
-    :rtype: dict, dict, dict
-    """
-
-    # define dictionaries for storing basic metadata across all species to read
-    station_references = {}
-    station_longitudes = {}
-    station_latitudes = {}
-
-    # iterate through network, speci pair
-    for network, speci in zip(networks, species):
-    
-        # get species matrix
-        matrix = instance.parameter_dictionary[speci]['matrix']
-
-        # get file root
-        # GHOST
-        if instance.reading_ghost:
-            file_root = '%s/%s/%s/%s/%s/%s_' % (instance.ghost_root, network,
-                                                instance.ghost_version, resolution,
-                                                speci, speci)
-        # non-GHOST
-        else:
-            file_root = '%s/%s/%s/%s/%s_' % (instance.nonghost_root, network,
-                                                resolution, speci, speci)
-
-        # get relevant files
-        relevant_files = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in instance.yearmonths])
-    
-        # get station references, longitudes and latitudes for speci
-        # GHOST
-        if instance.reading_ghost:
-            
-            # define arrays for storing speci metadata
-            speci_station_references = []
-            speci_station_longitudes = []
-            speci_station_latitudes = []
-
-            for relevant_file in relevant_files:
-                ncdf_root = Dataset(relevant_file)
-                speci_station_references = np.append(speci_station_references, ncdf_root['station_reference'][:])
-                speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
-                speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
-                ncdf_root.close()
-
-            speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
-            station_references['{}-{}'.format(network, speci)] = speci_station_references
-            station_longitudes['{}-{}'.format(network, speci)] = speci_station_longitudes[station_unique_indices]
-            station_latitudes['{}-{}'.format(network, speci)] = speci_station_latitudes[station_unique_indices]
-        
-        # non-GHOST
-        else:
-            
-            ncdf_root = Dataset(relevant_files[0])
-            station_references['{}-{}'.format(network, speci)] = np.array(
-                [st_name.tostring().decode('ascii').replace('\x00', '')
-                for st_name in ncdf_root['station_name'][:]], dtype=np.str)
-            if "latitude" in ncdf_root.variables:
-                station_longitudes['{}-{}'.format(network, speci)] = ncdf_root['longitude'][:]
-                station_latitudes['{}-{}'.format(network, speci)] = ncdf_root['latitude'][:]
-            else:
-                station_longitudes['{}-{}'.format(network, speci)] = ncdf_root['lon'][:]
-                station_latitudes['{}-{}'.format(network, speci)] = ncdf_root['lat'][:]
-            ncdf_root.close()
-
-    # if have more than 1 species to read, and spatial_colocation is active,
-    # then spatially colocate stations across species
-    if (len(species) > 1) & (instance.spatial_colocation):
-        intersecting_station_references, intersecting_station_longitudes, intersecting_station_latitudes = \
-            spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes)
-        for networkspecies in station_references:
-            station_references[networkspecies] = intersecting_station_references
-            station_longitudes[networkspecies] = intersecting_station_longitudes
-            station_latitudes[networkspecies] = intersecting_station_latitudes
-
-    return station_references, station_longitudes, station_latitudes
-
 def spatial_colocation(reading_ghost, station_references, longitudes, latitudes):
     """ 
     Given multiple species, return intersecting station_references, longitudes and latitudes 
@@ -1402,6 +1308,100 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
     intersecting_latitudes = intersecting_latitudes[sorted_inds]
 
     return intersecting_station_references, intersecting_longitudes, intersecting_latitudes
+
+def get_basic_metadata(instance, networks, species, resolution):     
+    """
+    Get basic unique metadata across networks / species wanting to read
+    The basic fields are: station_reference, longitude, latitude
+
+    If have multiple species, then spatially cocolocate across species 
+    to get matching stations across stations.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+
+    :param networks: list of networks
+    :type networks: list
+    :param species: list of species
+    :type species: list
+    :param resolution: selected temporal resolution
+    :type resolution: str
+    :return: station_references per network/species, longitudes per network/species, latitudes per network/species 
+    :rtype: dict, dict, dict
+    """
+
+    # define dictionaries for storing basic metadata across all species to read
+    station_references = {}
+    station_longitudes = {}
+    station_latitudes = {}
+
+    # iterate through network, speci pair
+    for network, speci in zip(networks, species):
+    
+        # get species matrix
+        matrix = instance.parameter_dictionary[speci]['matrix']
+
+        # get file root
+        # GHOST
+        if instance.reading_ghost:
+            file_root = '%s/%s/%s/%s/%s/%s_' % (instance.ghost_root, network,
+                                                instance.ghost_version, resolution,
+                                                speci, speci)
+        # non-GHOST
+        else:
+            file_root = '%s/%s/%s/%s/%s_' % (instance.nonghost_root, network,
+                                                resolution, speci, speci)
+
+        # get relevant files
+        relevant_files = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in instance.yearmonths])
+    
+        # get station references, longitudes and latitudes for speci
+        # GHOST
+        if instance.reading_ghost:
+            
+            # define arrays for storing speci metadata
+            speci_station_references = []
+            speci_station_longitudes = []
+            speci_station_latitudes = []
+
+            for relevant_file in relevant_files:
+                ncdf_root = Dataset(relevant_file)
+                speci_station_references = np.append(speci_station_references, ncdf_root['station_reference'][:])
+                speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
+                speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
+                ncdf_root.close()
+
+            speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
+            station_references['{}-{}'.format(network, speci)] = speci_station_references
+            station_longitudes['{}-{}'.format(network, speci)] = speci_station_longitudes[station_unique_indices]
+            station_latitudes['{}-{}'.format(network, speci)] = speci_station_latitudes[station_unique_indices]
+        
+        # non-GHOST
+        else:
+            
+            ncdf_root = Dataset(relevant_files[0])
+            station_references['{}-{}'.format(network, speci)] = np.array(
+                [st_name.tostring().decode('ascii').replace('\x00', '')
+                for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+            if "latitude" in ncdf_root.variables:
+                station_longitudes['{}-{}'.format(network, speci)] = ncdf_root['longitude'][:]
+                station_latitudes['{}-{}'.format(network, speci)] = ncdf_root['latitude'][:]
+            else:
+                station_longitudes['{}-{}'.format(network, speci)] = ncdf_root['lon'][:]
+                station_latitudes['{}-{}'.format(network, speci)] = ncdf_root['lat'][:]
+            ncdf_root.close()
+
+    # if have more than 1 species to read, and spatial_colocation is active,
+    # then spatially colocate stations across species
+    if (len(species) > 1) & (instance.spatial_colocation):
+        intersecting_station_references, intersecting_station_longitudes, intersecting_station_latitudes = \
+            spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes)
+        for networkspecies in station_references:
+            station_references[networkspecies] = intersecting_station_references
+            station_longitudes[networkspecies] = intersecting_station_longitudes
+            station_latitudes[networkspecies] = intersecting_station_latitudes
+
+    return station_references, station_longitudes, station_latitudes
 
 def filter_by_species():
     pass

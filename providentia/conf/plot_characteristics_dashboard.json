@@ -7,7 +7,7 @@
             "experiment_domain_polygon": {"linewidth": 1, "linestyle": "--", "fill": false, "zorder": 2},
             "settings_menu": {"position_1": {"x": 790, "y": 15},
                               "position_2": {"x": 1810, "y": 75},
-                              "position_3": {"x": 590, "y": 455},
+                              "position_3": {"x": 600, "y": 455},
                               "position_4": {"x": 1200, "y": 455},
                               "position_5": {"x": 1810, "y": 455}}},
 
@@ -103,7 +103,7 @@
                     "patch": {"alpha_obs": 0.7, "alpha_exp": 0.5},
                     "plot": {"violin": {"points": 100, "widths": 0.85, "showmeans": false, "showmedians": false, "showextrema": false}, 
                              "p50": {"marker": "o", "markersize": 3, "linewidth": 0.5}},
-                    "plot_options":["annotate", "logy"]},
+                    "plot_options":["annotate"]},
 
 "distribution": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                  "remove_spines": ["top", "right"],

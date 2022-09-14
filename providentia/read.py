@@ -303,7 +303,7 @@ class DataReader:
                     # get yearmonths not currently accounted for
                     if isinstance(yearmonths_to_read, list):
                         yearmonths_to_read = np.asarray(yearmonths_to_read)
-                    yearmonths_to_read = list(earmonths_to_read[~yearmonths_previously_read])
+                    yearmonths_to_read = list(yearmonths_to_read[~yearmonths_previously_read])
 
                     #need to read new yearmonths?
                     if len(yearmonths_to_read) > 0:
