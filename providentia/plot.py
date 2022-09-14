@@ -1193,7 +1193,6 @@ class Plot:
 
         # get minimum and maximum from all axes and set limits
         for ax in relevant_axs:
-            print(base_plot_type, len(relevant_axs))
             # get xlims
             if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic','periodic-violin']:
@@ -1221,7 +1220,6 @@ class Plot:
             elif 'ylim' in plot_characteristics:
                 ax.set_ylim(plot_characteristics['ylim'])
             elif ylim is not None:
-                print('here', ax, ylim)
                 ax.set_ylim(ylim)
 
             if 'equal_aspect' in plot_characteristics:
