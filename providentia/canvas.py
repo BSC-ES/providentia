@@ -564,11 +564,11 @@ class MPLCanvas(FigureCanvas):
             else:
                 self.remove_axis_elements(ax, plot_type)
 
-        # remove legend picker lines
-        for legend_label in self.lined:
-            relevant_plots = list(self.lined[legend_label]['lines_per_plot'].keys())
+        # remove legend picker elements
+        for legend_label in self.plot_elements:
+            relevant_plots = list(self.plot_elements[legend_label]['plot_elements'].keys())
             for plot_type in relevant_plots:
-                del self.lined[legend_label]['lines_per_plot'][plot_type]
+                del self.plot_elements[legend_label]['plot_elements'][plot_type]
 
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
@@ -593,85 +593,87 @@ class MPLCanvas(FigureCanvas):
         ax_plot_collections = {}
         if plot_type in ['timeseries', 'periodic-violin', 'periodic', 'distribution', 'scatter']:
             
-                for legend_label in legend_labels:
-                    self.lined[legend_label]['lines_per_plot'][plot_type] = []
-                
-                ax = self.plot_axes[plot_type]
-                if type(ax) == dict:
-                    for key, sub_ax in ax.items(): 
-                        if sub_ax.get_visible():
+            for legend_label in legend_labels:
+                self.plot_elements[legend_label]['plot_elements'][plot_type] = []
 
-                            for i, legend_label in enumerate(legend_labels):
-
-                                visible = self.lined[legend_label]['visible']
-
-                                ax_plot_lines[key] = {}
-                                ax_plot_collections[key] = {}
-                                last_break = 0
-                                break_sum = 0
-
-                                # remove [0, 0] lines (periodic plots)
-                                sub_ax_lines = [line for line in sub_ax.lines if line.get_ydata() != [0, 0]]
-                                
-                                # get line per legend element
-                                ax_plot_lines[key][legend_label] = sub_ax_lines[i]
-                                
-                                # are there collections? (skip periodic plots)
-                                if sub_ax.collections:
-                                
-                                    # get corresponding patches according to breaks
-                                    # some patches do not exist, so breaks are not always 0-24, 24-48, etc...
-                                    # and change depending on the legend element
-                                    if i != 0:
-                                        last_break = len(sub_ax_lines[i-1].get_ydata()[~np.isnan(sub_ax_lines[i-1].get_ydata())])
-                                    curr_break = len(sub_ax_lines[i].get_ydata()[~np.isnan(sub_ax_lines[i].get_ydata())])
-                                    break_sum += last_break
-
-                                    # get patches per legend elements
-                                    ax_plot_collections[key][legend_label] = sub_ax.collections[break_sum:break_sum+curr_break]
-
-                                # transform single elements to list
-                                if not isinstance(ax_plot_lines[key][legend_label], list):
-                                    ax_plot_lines[key][legend_label] = [ax_plot_lines[key][legend_label]]
-
-                                # add lines to self.lined
-                                self.lined[legend_label]['lines_per_plot'][plot_type] += ax_plot_lines[key][legend_label]
-
-                                # there are no collections for periodic bias plots (only lines)
-                                if sub_ax.collections:
-
-                                    # transform single elements to list
-                                    if not isinstance(ax_plot_collections[key][legend_label], list):
-                                        ax_plot_collections[key][legend_label] = [ax_plot_collections[key][legend_label]]
-                                    
-                                    # add collections to self.lined
-                                    self.lined[legend_label]['lines_per_plot'][plot_type] += ax_plot_collections[key][legend_label]
-
-                                # set line visibility
-                                if not visible:
-                                    for line in self.lined[legend_label]['lines_per_plot'][plot_type]:
-                                        line.set_visible(False)
-
-                else:
-                    if ax.get_visible():
+            ax = self.plot_axes[plot_type]
+            if type(ax) == dict:
+                for key, sub_ax in ax.items(): 
+                    if sub_ax.get_visible():
 
                         for i, legend_label in enumerate(legend_labels):
 
-                            visible = self.lined[legend_label]['visible']
+                            visible = self.plot_elements[legend_label]['visible']
 
-                            ax_plot_lines[legend_label] = ax.lines[i]
+                            ax_plot_lines[key] = {}
+                            ax_plot_collections[key] = {}
+                            last_break = 0
+                            break_sum = 0
+
+                            # remove [0, 0] lines (fbias plot)
+                            sub_ax_lines = [line for line in sub_ax.lines if line.get_ydata() != [0, 0]]
+                            
+                            print(len(sub_ax_lines))
+                            print(len(sub_ax.collections))
+                            # get line per legend element
+                            ax_plot_lines[key][legend_label] = sub_ax_lines[i]
+                            
+                            # are there collections?
+                            if sub_ax.collections:
+                            
+                                # get corresponding patches according to breaks
+                                # some patches do not exist, so breaks are not always 0-24, 24-48, etc...
+                                # and change depending on the legend element
+                                if i != 0:
+                                    last_break = len(sub_ax_lines[i-1].get_ydata()[~np.isnan(sub_ax_lines[i-1].get_ydata())])
+                                curr_break = len(sub_ax_lines[i].get_ydata()[~np.isnan(sub_ax_lines[i].get_ydata())])
+                                break_sum += last_break
+
+                                # get patches per legend elements
+                                ax_plot_collections[key][legend_label] = sub_ax.collections[break_sum:break_sum+curr_break]
 
                             # transform single elements to list
-                            if not isinstance(ax_plot_lines[legend_label], list):
-                                ax_plot_lines[legend_label] = [ax_plot_lines[legend_label]]
+                            if not isinstance(ax_plot_lines[key][legend_label], list):
+                                ax_plot_lines[key][legend_label] = [ax_plot_lines[key][legend_label]]
 
-                            # add lines to self.lined
-                            self.lined[legend_label]['lines_per_plot'][plot_type] += ax_plot_lines[legend_label]
+                            # add lines to self.plot_elements
+                            self.plot_elements[legend_label]['plot_elements'][plot_type] += ax_plot_lines[key][legend_label]
 
-                            # set line visibility
+                            # there are no collections for periodic bias plots (only lines)
+                            if sub_ax.collections:
+
+                                # transform single elements to list
+                                if not isinstance(ax_plot_collections[key][legend_label], list):
+                                    ax_plot_collections[key][legend_label] = [ax_plot_collections[key][legend_label]]
+                                
+                                # add collections to self.plot_elements
+                                self.plot_elements[legend_label]['plot_elements'][plot_type] += ax_plot_collections[key][legend_label]
+
+                            # set element visibility
                             if not visible:
-                                for line in self.lined[legend_label]['lines_per_plot'][plot_type]:
+                                for line in self.plot_elements[legend_label]['plot_elements'][plot_type]:
                                     line.set_visible(False)
+
+            else:
+                if ax.get_visible():
+
+                    for i, legend_label in enumerate(legend_labels):
+
+                        visible = self.plot_elements[legend_label]['visible']
+
+                        ax_plot_lines[legend_label] = ax.lines[i]
+
+                        # transform single elements to list
+                        if not isinstance(ax_plot_lines[legend_label], list):
+                            ax_plot_lines[legend_label] = [ax_plot_lines[legend_label]]
+
+                        # add lines to self.plot_elements
+                        self.plot_elements[legend_label]['plot_elements'][plot_type] += ax_plot_lines[legend_label]
+
+                        # set element visibility
+                        if not visible:
+                            for line in self.plot_elements[legend_label]['plot_elements'][plot_type]:
+                                line.set_visible(False)
 
         return None
 
@@ -705,10 +707,10 @@ class MPLCanvas(FigureCanvas):
         self.activate_axis(self.plot_axes['legend'], 'legend')
 
         # setup element picker in legend
-        self.lined = {}
+        self.plot_elements = {}
         for data_label, legend_label in zip(self.read_instance.data_labels, self.legend.texts):
             legend_label.set_picker(True)
-            self.lined[data_label] = {'visible':True, 'lines_per_plot':{}}
+            self.plot_elements[data_label] = {'visible':True, 'plot_elements':{}}
 
         return None
 
@@ -833,9 +835,9 @@ class MPLCanvas(FigureCanvas):
                         self.remove_axis_elements(sub_ax, 'periodic')
 
                     # remove legend picker lines
-                    for legend_label in self.lined:
-                        if 'periodic' in self.lined[legend_label]['lines_per_plot']:
-                            del self.lined[legend_label]['lines_per_plot']['periodic']
+                    for legend_label in self.plot_elements:
+                        if 'periodic' in self.plot_elements[legend_label]['plot_elements']:
+                            del self.plot_elements[legend_label]['plot_elements']['periodic']
 
                     # get currently selected experiment bias statistic name
                     zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
@@ -2542,36 +2544,36 @@ class MPLCanvas(FigureCanvas):
         """ Function to handle legend picker. """
 
         if self.lock_legend_pick == False:
-            if self.lined:
+            if self.plot_elements:
                 # lock legend pick
                 self.lock_legend_pick = True
             
-                # get plot lines
+                # get event information
                 legend_label = event.artist
                 legend_label_text = legend_label.get_text().lower()
-                visible = copy.deepcopy(self.lined[legend_label_text]['visible'])
+                visible = copy.deepcopy(self.plot_elements[legend_label_text]['visible'])
 
                 # iterate through plot types
-                for plot_type in self.lined[legend_label_text]['lines_per_plot']:
+                for plot_type in self.plot_elements[legend_label_text]['plot_elements']:
 
-                    print(len(self.lined[legend_label_text]['lines_per_plot'][plot_type]))
-                    plot_lines = self.lined[legend_label_text]['lines_per_plot'][plot_type]
+                    # get elements per plot
+                    plot_elements = self.plot_elements[legend_label_text]['plot_elements'][plot_type]
                 
                     # change visibility of lines
-                    for plot_line in plot_lines:
+                    for plot_element in plot_elements:
                         if visible:
-                            plot_line.set_visible(False)
+                            plot_element.set_visible(False)
                         else:
-                            plot_line.set_visible(True)
+                            plot_element.set_visible(True)
 
                 # change font weight of label
                 legend_label._fontproperties = self.legend.get_texts()[0]._fontproperties.copy()
                 if visible:
                     legend_label.set_fontweight('regular')
-                    self.lined[legend_label_text]['visible'] = False
+                    self.plot_elements[legend_label_text]['visible'] = False
                 else:
                     legend_label.set_fontweight('bold')
-                    self.lined[legend_label_text]['visible'] = True
+                    self.plot_elements[legend_label_text]['visible'] = True
 
                 # redraw points
                 self.figure.canvas.draw()
