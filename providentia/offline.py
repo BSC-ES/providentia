@@ -318,10 +318,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             for networkspeci_ii, networkspeci in enumerate(networkspecies): 
 
                 # update plot characteristics
-                self.plot.set_plot_characteristics(self.station_plots_to_make, speci=networkspeci.split('-')[-1])
+                self.plot.set_plot_characteristics(self.plots_to_make, speci=networkspeci.split('-')[-1])
 
                 # iterate through plot types
-                for plot_type in self.station_plots_to_make:
+                for plot_type in self.plots_to_make:
 
                     # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                     plot_options = plot_type.split('_')[1:]
@@ -363,8 +363,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     for relevant_pages in paradigm_pages:
 
                         # get all relevant axes for plot_type/paradigm
-                        if base_plot_type in ['periodic','periodic-violin']:
-                            ax_types = ['hour','month','dayofweek']
+                        if base_plot_type in ['periodic', 'periodic-violin']:
+                            ax_types = ['hour', 'month', 'dayofweek']
                         else:
                             ax_types = ['']
                         
@@ -372,7 +372,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         relevant_data_labels = []
                         for ax_type in ax_types:
                             for relevant_page in relevant_pages:
-                                if base_plot_type in ['periodic','periodic-violin']:
+                                if base_plot_type in ['periodic', 'periodic-violin']:
                                     for axs in self.plot_dictionary[relevant_page]['axs']:
                                         relevant_axs.append(axs['handle'][ax_type])
                                         relevant_data_labels.append(axs['data_labels'])
@@ -381,7 +381,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                     relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][0]['data_labels'])
 
                         # generate colourbars for required plots in paradigm on each relevant page
-                        if 'cb' in self.plot_characteristics[plot_type]:
+                        if 'cb' in list(self.plot_characteristics[plot_type].keys()):
                             # get all cb_axs for plot_type across relevant pages
                             cb_axs = [self.plot_dictionary[relevant_page]['cb_ax'] for relevant_page in relevant_pages]
                             generate_colourbar(self, relevant_axs, cb_axs, zstat, self.plot_characteristics[plot_type], 
@@ -440,12 +440,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # depending on plot type set plots to make
         if plotting_paradigm == 'summary':
-            plots_to_make = self.summary_plots_to_make
+            self.plots_to_make = self.summary_plots_to_make
         elif plotting_paradigm == 'station':
-            plots_to_make = self.station_plots_to_make
+            self.plots_to_make = self.station_plots_to_make
         
         # iterate through plot types to make
-        for plot_type in plots_to_make:
+        for plot_type in self.plots_to_make:
 
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
