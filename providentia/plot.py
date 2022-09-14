@@ -327,7 +327,7 @@ class Plot:
         xtickmax = np.nanmax(ax.lines[0].get_xdata())
         ytickmin = np.nanmin(ax.lines[0].get_ydata())
         ytickmax = np.nanmax(ax.lines[0].get_ydata())
-        for line in ax.lines[:len(self.canvas_instance.legend.texts)-1]:
+        for line in ax.lines[:len(self.read_instance.data_labels)-1]:
             if np.nanmin(line.get_xdata()) < xtickmin:
                 xtickmin = np.nanmin(line.get_xdata())
             if np.nanmax(line.get_xdata()) > xtickmax:
@@ -824,8 +824,9 @@ class Plot:
             PDF_sampled = PDF(x_grid)
 
         # make plot
-        relevant_axis.plot(x_grid, PDF_sampled, color=self.read_instance.plotting_params[data_label]['colour'], 
-                           **plot_characteristics['plot'])
+        distribution_plot = relevant_axis.plot(x_grid, PDF_sampled, 
+                                               color=self.read_instance.plotting_params[data_label]['colour'], 
+                                               **plot_characteristics['plot'])
 
     def make_scatter(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[]):
         """Make scatter plot
@@ -851,11 +852,11 @@ class Plot:
         experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data']
         
         # create scatter plot
-        relevant_axis.plot(observations_data, experiment_data, 
-                           color=self.read_instance.plotting_params[data_label]['colour'],
-                           **plot_characteristics['plot'])
+        scatter_plot = relevant_axis.plot(observations_data, experiment_data, 
+                                          color=self.read_instance.plotting_params[data_label]['colour'],
+                                          **plot_characteristics['plot'])
 
-        # add extra lines only once
+        # add extra lines only once (for last plotted data_label)
         if data_label == self.read_instance.data_labels[-1]:
             # add 1:1 line (if in plot_characteristics)
             if '1:1_line' in plot_characteristics:
@@ -998,8 +999,8 @@ class Plot:
                                                          zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
                                                          **plot_characteristics['regression'])
 
-                    if regression_line not in self.canvas_instance.lined[data_label]['lines_per_plot']['scatter']:
-                        self.canvas_instance.lined[data_label]['lines_per_plot']['scatter'] += regression_line
+                    if regression_line not in self.canvas_instance.plot_elements[data_label]['plot_elements']['scatter']:
+                        self.canvas_instance.plot_elements[data_label]['plot_elements']['scatter'] += regression_line
         else:
             for line in relevant_axis.lines[len(relevant_axis.lines)-2:]:
                 line.remove()
@@ -1040,11 +1041,11 @@ class Plot:
                                                 zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
                                                 **plot_characteristics['trend']['format'])
 
-                if trend_line not in self.canvas_instance.lined[data_label]['lines_per_plot']['timeseries']:
-                    self.canvas_instance.lined[data_label]['lines_per_plot']['timeseries'] += trend_line
+                if trend_line not in self.canvas_instance.plot_elements[data_label]['plot_elements']['timeseries']:
+                    self.canvas_instance.plot_elements[data_label]['plot_elements']['timeseries'] += trend_line
         
         else:
-            for line in relevant_axis.lines[len(self.canvas_instance.legend.texts):]:
+            for line in relevant_axis.lines[len(data_labels):]:
                 line.remove() 
 
     def annotation(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_type, plot_options=[], 
