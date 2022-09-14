@@ -367,9 +367,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             ax_types = ['hour','month','dayofweek']
                         else:
                             ax_types = ['']
+                        
+                        relevant_axs = []
+                        relevant_data_labels = []
                         for ax_type in ax_types:
-                            relevant_axs = []
-                            relevant_data_labels = []
                             for relevant_page in relevant_pages:
                                 if base_plot_type in ['periodic','periodic-violin']:
                                     for axs in self.plot_dictionary[relevant_page]['axs']:
@@ -389,10 +390,19 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         # harmonise xy limits for plot paradigm
                         if base_plot_type not in ['map','heatmap','table']: 
                             if base_plot_type == 'periodic-violin':
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, self.plot_characteristics[plot_type], plot_options, ylim=[self.selected_station_data_min[networkspeci], self.selected_station_data_max[networkspeci]])
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     ylim=[self.selected_station_data_min[networkspeci], 
+                                                                           self.selected_station_data_max[networkspeci]])
+                            elif base_plot_type == 'scatter':
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True)
                             else:
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, self.plot_characteristics[plot_type], plot_options)
-                        
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True, autoscale=True)
+
                         # iterate through all relevant axes for plot type in paradigm
                         for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
 
@@ -485,7 +495,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # update markersize in plot characteristics (timeseries and scatter plots)
             if (base_plot_type == 'timeseries') or (base_plot_type == 'scatter'):
-                self.plot.set_markersize(networkspeci, self.plot_characteristics[plot_type])
+                self.plot.get_markersize(networkspeci, self.plot_characteristics[plot_type])
 
             # define number of plots per type
             n_plots_per_plot_type = False
