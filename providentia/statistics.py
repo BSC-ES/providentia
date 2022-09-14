@@ -319,7 +319,7 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
 
     # check if have valid station data first
     # if not update z statistic and active map valid station indices to be empty lists and return
-    if read_instance.temporal_colocation:
+    if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
         n_valid_stations = len(read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations'])
     else:
         n_valid_stations = len(read_instance.valid_station_inds[networkspeci]['observations'])
@@ -343,13 +343,13 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
     # get active map valid station indices (i.e. the indices of the stations data to plot on the map)
     # if only have z1, valid map indices are those simply for the z1 array
     if z2 == '':
-        if read_instance.temporal_colocation:
+        if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
             active_map_valid_station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][z1]
         else:
             active_map_valid_station_inds = read_instance.valid_station_inds[networkspeci][z1]
     else:
         # if have z2 array, get intersection of z1 and z2 valid station indices
-        if read_instance.temporal_colocation:
+        if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
             active_map_valid_station_inds = \
                 np.intersect1d(read_instance.valid_station_inds_temporal_colocation[networkspeci][z1],
                                read_instance.valid_station_inds_temporal_colocation[networkspeci][z2])

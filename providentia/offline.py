@@ -90,8 +90,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # update for new section parameters
             self.section = section
             self.section_opts = self.sub_opts[section]
+
             # update self with section variables
             vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.section_opts.items()})
+
+            # update self from command line arguments
+            vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
 
             # get key configuration variables
             aux.get_parameters(self) 
@@ -144,14 +148,24 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
     def start_pdf(self):
 
         # get path where reports will be saved
-        reports_path = (os.path.join(CURRENT_PATH, '../reports/'))
+        if '/' in self.report_filename:
+            if os.path.isdir(os.path.dirname(self.report_filename)):
+                reports_path = self.report_filename
+        else:
+            reports_path = (os.path.join(CURRENT_PATH, '../reports/')) + self.report_filename
 
         # create reports folder
-        if not os.path.exists(reports_path):
-            os.makedirs(reports_path)
+        if not os.path.exists(os.path.dirname(reports_path)):
+            if '/' in self.report_filename:
+                print('Path {0} does not exist and it will be created.'.format(os.path.dirname(self.report_filename)))
+            os.makedirs(os.path.dirname(reports_path))
+
+        # add termination .pdf to filenames
+        if '.pdf' not in reports_path:
+            reports_path += '.pdf'
 
         # open new PDF file
-        with PdfPages(reports_path + self.report_filename + '.pdf') as pdf:
+        with PdfPages(reports_path) as pdf:
             
             self.pdf = pdf
 
