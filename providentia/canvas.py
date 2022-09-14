@@ -517,7 +517,7 @@ class MPLCanvas(FigureCanvas):
                     if plot_type == 'periodic-violin':
                         self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                             self.selected_station_data_max[self.read_instance.networkspeci]])
+                                                                                 self.selected_station_data_max[self.read_instance.networkspeci]])
                     else:
                         self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, autoscale_y=True)
