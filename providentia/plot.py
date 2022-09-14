@@ -31,6 +31,7 @@ class Plot:
     """
 
     def __init__(self, read_instance=None, canvas_instance=None):
+        
         self.read_instance = read_instance
         self.canvas_instance = canvas_instance
 
@@ -933,15 +934,17 @@ class Plot:
         :type undo: boolean
         """
 
-        # get data limits
-        xlim = relevant_axis.get_xlim()
-        ylim = relevant_axis.get_ylim()
-        xwidth = xlim[1] - xlim[0]
-        ywidth = ylim[1] - ylim[0]
-        lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
-        lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
-
+        
         if not undo:
+
+            # get data limits
+            xlim = relevant_axis.get_xlim()
+            ylim = relevant_axis.get_ylim()
+            xwidth = xlim[1] - xlim[0]
+            ywidth = ylim[1] - ylim[0]
+            lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
+            lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
+
             if log_ax == 'logx':
                 if round(lower_xlim, 2) >= 0:
                     relevant_axis.set_xscale('log')
