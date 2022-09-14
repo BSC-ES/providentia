@@ -1131,7 +1131,9 @@ class Plot:
                 if type(artist) == AnchoredOffsetbox:
                     artist.remove()
 
-    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, xlim=None, ylim=None, relim=False, autoscale=False, autoscale_x=False, autoscale_y=False, bias_centre=False):
+    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, 
+                                   xlim=None, ylim=None, relim=False, autoscale=False, autoscale_x=False, 
+                                   autoscale_y=False, bias_centre=False):
         """Harmonises xy limits across paradigm of plot type, unless axis limits have been defined
         
         :param relevant_axs: relevant axes
@@ -1157,7 +1159,7 @@ class Plot:
         :param bias_centre: centre bias plots at 0 on the y axis
         :type bias_centre: boolean   
         """
-
+        print(base_plot_type)
         # initialise arrays to save lower and upper limits in all axes
         all_xlim_lower = []
         all_xlim_upper = []
@@ -1180,29 +1182,33 @@ class Plot:
                 ax.autoscale(axis='x', tight=False)
             if autoscale_y:
                 ax.autoscale(axis='y', tight=False)
-            if not xlim and ('xlim' not in plot_characteristics):
+            if xlim is None and ('xlim' not in plot_characteristics):
                 xlim_lower, xlim_upper = ax.get_xlim()
                 all_xlim_lower.append(xlim_lower)
                 all_xlim_upper.append(xlim_upper)
-            if not ylim and ('ylim' not in plot_characteristics):
+            if ylim is None and ('ylim' not in plot_characteristics):
                 ylim_lower, ylim_upper = ax.get_ylim()
                 all_ylim_lower.append(ylim_lower)
                 all_ylim_upper.append(ylim_upper)
 
         # get minimum and maximum from all axes and set limits
         for ax in relevant_axs:
-
+            print(base_plot_type, len(relevant_axs))
             # get xlims
-            if not xlim and ('xlim' not in plot_characteristics):
+            if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic','periodic-violin']:
                     xlim_min = np.min(all_xlim_lower)
                     xlim_max = np.max(all_xlim_upper)
-                
+                ax.set_xlim(xlim_min, xlim_max)
+            elif 'xlim' in plot_characteristics:
+                ax.set_xlim(plot_characteristics['xlim'])
+            elif xlim is not None:
+                ax.set_xlim(xlim)
+
             # get ylims
-            if not ylim and ('ylim' not in plot_characteristics):
+            if ylim is None and ('ylim' not in plot_characteristics):
                 ylim_min = np.min(all_ylim_lower) 
                 ylim_max = np.max(all_ylim_upper)
-
                 # if have bias_centre option, centre around zero
                 if ('bias' in plot_options) & (bias_centre):                    
                     if np.abs(np.max(all_ylim_upper)) >= np.abs(np.min(all_ylim_lower)):
@@ -1211,17 +1217,12 @@ class Plot:
                     elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
                         ylim_min = -np.abs(np.min(all_ylim_lower))
                         ylim_max = np.abs(np.min(all_ylim_lower))
-
-            # set xlim
-            if xlim:
-                ax.set_xlim(xlim)
-            elif xlim_min and xlim_max and ('xlim' not in plot_characteristics):
-                ax.set_xlim(xlim_min, xlim_max)
-            # set ylim
-            if ylim:
-                ax.set_ylim(ylim)
-            elif ylim_min and ylim_max and ('ylim' not in plot_characteristics):
                 ax.set_ylim(ylim_min, ylim_max)
+            elif 'ylim' in plot_characteristics:
+                ax.set_ylim(plot_characteristics['ylim'])
+            elif ylim is not None:
+                print('here', ax, ylim)
+                ax.set_ylim(ylim)
 
             if 'equal_aspect' in plot_characteristics:
                 self.set_equal_axes(ax, plot_characteristics)
@@ -1294,7 +1295,7 @@ class Plot:
                 axis_label_characteristics['ylabel'] = label
                 relevant_axis.set_ylabel(**axis_label_characteristics)
 
-    def set_markersize(self, networkspeci, plot_characteristics):
+    def get_markersize(self, networkspeci, plot_characteristics):
         """Set markersize for plot.
 
         :param networkspeci: str of currently active network and species 
