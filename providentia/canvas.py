@@ -1148,6 +1148,8 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
+            
+            self.read_instance.map_extent = self.plot_axes['map'].get_extent(crs=self.datacrs)
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1570,8 +1572,8 @@ class MPLCanvas(FigureCanvas):
                                                    200, 20)
         self.timeseries_settings_label.hide()
 
-        # add timeseries markersize slider name ('Markersize') to layout
-        self.timeseries_markersize_sl_label = QtWidgets.QLabel("Markersize", self)
+        # add timeseries markersize slider name ('Size') to layout
+        self.timeseries_markersize_sl_label = QtWidgets.QLabel("Size", self)
         self.timeseries_markersize_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-200,
                                                         self.timeseries_menu_button.geometry().y()+50, 
                                                         200, 20)
@@ -1761,7 +1763,7 @@ class MPLCanvas(FigureCanvas):
                                                      "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
         self.periodic_violin_container.setGeometry(self.periodic_violin_menu_button.geometry().x()-210, 
                                                    self.periodic_violin_menu_button.geometry().y()+25, 
-                                                   235, 200)
+                                                   235, 175)
         self.periodic_violin_container.hide()
 
         # add settings label
@@ -2256,7 +2258,7 @@ class MPLCanvas(FigureCanvas):
         """ Update markers size for each plot type. """
         
         # set markersize
-        if plot_type in ['timeseries', 'periodic', 'scatter']:
+        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin']:
 
             if type(ax) == dict:
                 for sub_ax in ax.values():

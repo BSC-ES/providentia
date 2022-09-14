@@ -31,6 +31,7 @@ class Plot:
     """
 
     def __init__(self, read_instance=None, canvas_instance=None):
+        
         self.read_instance = read_instance
         self.canvas_instance = canvas_instance
 
@@ -327,7 +328,7 @@ class Plot:
         xtickmax = np.nanmax(ax.lines[0].get_xdata())
         ytickmin = np.nanmin(ax.lines[0].get_ydata())
         ytickmax = np.nanmax(ax.lines[0].get_ydata())
-        for line in ax.lines[:len(self.canvas_instance.legend.texts)-1]:
+        for line in ax.lines[:len(self.read_instance.data_labels)-1]:
             if np.nanmin(line.get_xdata()) < xtickmin:
                 xtickmin = np.nanmin(line.get_xdata())
             if np.nanmax(line.get_xdata()) > xtickmax:
@@ -932,15 +933,17 @@ class Plot:
         :type undo: boolean
         """
 
-        # get data limits
-        xlim = relevant_axis.get_xlim()
-        ylim = relevant_axis.get_ylim()
-        xwidth = xlim[1] - xlim[0]
-        ywidth = ylim[1] - ylim[0]
-        lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
-        lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
-
+        
         if not undo:
+
+            # get data limits
+            xlim = relevant_axis.get_xlim()
+            ylim = relevant_axis.get_ylim()
+            xwidth = xlim[1] - xlim[0]
+            ywidth = ylim[1] - ylim[0]
+            lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
+            lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
+
             if log_ax == 'logx':
                 if round(lower_xlim, 2) >= 0:
                     relevant_axis.set_xscale('log')
@@ -1044,7 +1047,7 @@ class Plot:
                     self.canvas_instance.lined[data_label]['lines_per_plot']['timeseries'] += trend_line
         
         else:
-            for line in relevant_axis.lines[len(self.canvas_instance.legend.texts):]:
+            for line in relevant_axis.lines[len(self.read_instance.data_labels):]:
                 line.remove() 
 
     def annotation(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_type, plot_options=[], 
