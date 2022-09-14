@@ -4,7 +4,6 @@ from .configuration import split_options
 from .init_standards import InitStandards
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .toolbar import save_data, conf_dialogs
 from .dashboard_aux import ComboBox
 from .dashboard_aux import QVLine
 from .dashboard_aux import PopUpWindow
@@ -68,10 +67,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.from_section = False
                 aux.load_conf(self, fpath=kwargs['config'])    
                 all_sections = self.sub_opts.keys()
-                selected_section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
-                                                                             'Select section to load',  
-                                                                             all_sections, 0, False)
-                if okpressed:
+                if len(all_sections) == 1:
+                    okpressed = False
+                    selected_section = list(all_sections)[0]
+                else:
+                    selected_section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
+                                                                                 'Select section to load',  
+                                                                                 all_sections, 0, False)
+                if okpressed or (len(all_sections) == 1):
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[selected_section].items()})
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The configuration path specified in the command line does not exist.'
@@ -83,7 +86,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.from_section = False
                 aux.load_conf(self, fpath=dconf_path)
                 vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts['default'].items()})
-
+        
         # update from command line
         vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
 
@@ -142,15 +145,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
     def update_buttons_geometry(self):
         """Update current geometry of buttons"""
-
+        
         for i, position in enumerate([self.position_1, self.position_2, self.position_3, 
                                       self.position_4, self.position_5]):
             for button, element in zip(self.mpl_canvas.buttons, self.mpl_canvas.elements):
 
                 # get plot type
                 plot_type = button.objectName().split('_menu')[0]
-                
+                if position == 'periodic-violin':
+                    position = 'periodic_violin'
+
                 if position == plot_type:
+                    
                     # calculate proportional geometry of buttons respect main window
                     x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'+str(i+1)]['x'] * 
                         self.main_window_geometry.width()) / 1848
@@ -457,35 +463,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.cb_position_5.currentTextChanged.connect(self.handle_layout_update)
 
         # Generate MPL navigation toolbar
-        self.navi_toolbar = NavigationToolbar(self.mpl_canvas, self)
+        self.navi_toolbar = NavigationToolbar(self, canvas_instance=self.mpl_canvas)
         self.navi_toolbar._nav_stack.push(
-            WeakKeyDictionary({self.mpl_canvas.plot_axes['map']: (self.mpl_canvas.plot_axes['map']._get_view(), (self.mpl_canvas.plot_axes['map'].get_position(True).frozen(), self.mpl_canvas.plot_axes['map'].get_position().frozen()))}))
+            WeakKeyDictionary({self.mpl_canvas.plot_axes['map']: (self.mpl_canvas.plot_axes['map']._get_view(), 
+                                                                  (self.mpl_canvas.plot_axes['map'].get_position(True).frozen(), 
+                                                                   self.mpl_canvas.plot_axes['map'].get_position().frozen()))}))
 
-        # add more buttons on the toolbar, next to the navi_toolbar
-        self.savebutton = QtWidgets.QPushButton()
-        self.savebutton.setFlat(True)
-        self.savebutton.setToolTip("Save current instance of data and metadata")
-        self.savebutton.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_data.png")))
-        self.savebutton.setIconSize(QtCore.QSize(31, 35))
-        self.savebutton.setStyleSheet("QPushButton { border: none;} QPushButton:hover "
-                                      "{ border-width: 1px; border-style: solid; border-color: darkgrey; "
-                                      "border-radius: 4px; background-color : white; }")
-        self.savebutton.clicked.connect(self.savebutton_func)
-
-        # add more buttons on the toolbar, next to the navi_toolbar
-        self.conf_load = QtWidgets.QPushButton()
-        self.conf_load.setFlat(True)
-        self.conf_load.setToolTip("Load toolbar selections from configuration file")
-        self.conf_load.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/conf_icon.png")))
-        self.conf_load.setIconSize(QtCore.QSize(31, 35))
-        self.conf_load.setStyleSheet("QPushButton { border: none;} QPushButton:hover "
-                                      "{ border-width: 1px; border-style: solid; border-color: darkgrey; "
-                                      "border-radius: 4px; background-color : white; }")
-        self.conf_load.clicked.connect(self.conf_load_func)
-
-        # position config bar, navigation toolbar and MPL canvas and elements in parent layout`
-        hbox.addWidget(self.savebutton)
-        hbox.addWidget(self.conf_load)
+        # position navigation toolbar in parent layout
         hbox.addWidget(self.navi_toolbar)
 
         # add config bar and hbox to parent frame
@@ -519,12 +503,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.show()
         # maximise window to fit screen
         self.showMaximized()
-
-    def savebutton_func(self):
-        save_data(self.mpl_canvas)
-
-    def conf_load_func(self):
-        conf_dialogs(self)
 
     def generate_pop_up_window(self, menu_root):
         """Generate pop up window"""
@@ -931,7 +909,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
-
+        
         #set previous active variables
         self.previous_start_date = self.start_date
         self.previous_end_date = self.end_date
@@ -942,7 +920,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
-
+        
         #set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
         self.end_date = int(self.le_end_date.text())
@@ -954,7 +932,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
         self.data_labels = ['observations'] + list(self.experiments.keys())
         self.networkspeci = '{}-{}'.format(self.network[0],self.species[0])
-
+        
         #set read operations to be empty list initially
         read_operations = []
 
@@ -1025,7 +1003,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # has date range changed?
         if len(read_operations) > 0:
-
+           
             # set current time array, as previous time array
             self.previous_time_array = self.time_array
             # set current station references, as previous station references
@@ -1035,7 +1013,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
             # read data
             self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, experiments_to_read=experiments_to_read)
-
+            
             #clear canvas entirely if have no valid data
             if self.clear_canvas:
                 # clear axes
@@ -1070,7 +1048,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # run function to filter data outside lower/upper limits, not using desired
         # measurement methods, and < desired minimum data availability
         self.mpl_canvas.handle_data_filter_update()
-
+        
         # update map z combobox fields based on data in memory
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
         self.basic_z_stats = np.array(list(
