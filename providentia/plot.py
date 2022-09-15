@@ -871,13 +871,13 @@ class Plot:
                 relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
                                    **plot_characteristics['2:1_line'])
           
-    def make_heatmap(self, relevant_axis, stat_df, plot_characteristics, plot_options=[]):
+    def make_heatmap(self, relevant_axis, stats_df, plot_characteristics, plot_options=[]):
         """Make heatmap plot
 
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
-        :param stat_df: dataframe of calculated statistical information
-        :type stat_df: object
+        :param stats_df: dataframe of calculated statistical information
+        :type stats_df: object
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plot  
@@ -890,21 +890,22 @@ class Plot:
             annotate = False
 
         # plot heatmap
-        ax = sns.heatmap(stat_df, 
-                         ax=relevant_axis, annot=annotate,
+        ax = sns.heatmap(stats_df, 
+                         ax=relevant_axis, 
+                         annot=annotate,
                          **plot_characteristics['plot'])
 
         # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
         bottom, top = relevant_axis.get_ylim()
         relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
 
-    def make_table(self, relevant_axis, stat_df, plot_characteristics, plot_options=[]):
+    def make_table(self, relevant_axis, stats_df, plot_characteristics, plot_options=[]):
         """Make table plot
 
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
-        :param stat_df: dataframe of calculated statistical information
-        :type stat_df: object
+        :param stats_df: dataframe of calculated statistical information
+        :type stats_df: object
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plot  
@@ -915,7 +916,10 @@ class Plot:
         relevant_axis.axis('off')
 
         # make table
-        table = relevant_axis.table(cellText=stat_df.values, colLabels=stat_df.columns, rowLabels=stat_df.index, loc='center')
+        table = relevant_axis.table(cellText=stats_df.values, 
+                                    colLabels=stats_df.columns, 
+                                    rowLabels=stats_df.index, 
+                                    loc='center')
         #table.set_fontsize(18)
 
     def log_axes(self, relevant_axis, log_ax, event_source, plot_characteristics, undo=False):
@@ -1159,7 +1163,7 @@ class Plot:
         :param bias_centre: centre bias plots at 0 on the y axis
         :type bias_centre: boolean   
         """
-        print(base_plot_type)
+      
         # initialise arrays to save lower and upper limits in all axes
         all_xlim_lower = []
         all_xlim_upper = []
@@ -1183,28 +1187,35 @@ class Plot:
             if autoscale_y:
                 ax.autoscale(axis='y', tight=False)
             if xlim is None and ('xlim' not in plot_characteristics):
-                xlim_lower, xlim_upper = ax.get_xlim()
-                all_xlim_lower.append(xlim_lower)
-                all_xlim_upper.append(xlim_upper)
+                if base_plot_type not in ['periodic','periodic-violin']:
+                    xlim_lower, xlim_upper = ax.get_xlim()
+                    all_xlim_lower.append(xlim_lower)
+                    all_xlim_upper.append(xlim_upper)
             if ylim is None and ('ylim' not in plot_characteristics):
-                ylim_lower, ylim_upper = ax.get_ylim()
-                all_ylim_lower.append(ylim_lower)
-                all_ylim_upper.append(ylim_upper)
+                if isinstance(ax, dict):
+                    for sub_ax in ax.values():
+                        ylim_lower, ylim_upper = sub_ax.get_ylim()
+                        all_ylim_lower.append(ylim_lower)
+                        all_ylim_upper.append(ylim_upper)
+                else:
+                    ylim_lower, ylim_upper = ax.get_ylim()
+                    all_ylim_lower.append(ylim_lower)
+                    all_ylim_upper.append(ylim_upper)
 
         # get minimum and maximum from all axes and set limits
         for ax in relevant_axs:
-            # get xlims
+            # get and set xlim
             if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic','periodic-violin']:
                     xlim_min = np.min(all_xlim_lower)
                     xlim_max = np.max(all_xlim_upper)
-                ax.set_xlim(xlim_min, xlim_max)
+                    ax.set_xlim(xlim_min, xlim_max)
             elif 'xlim' in plot_characteristics:
                 ax.set_xlim(plot_characteristics['xlim'])
             elif xlim is not None:
                 ax.set_xlim(xlim)
 
-            # get ylims
+            # get ylim
             if ylim is None and ('ylim' not in plot_characteristics):
                 ylim_min = np.min(all_ylim_lower) 
                 ylim_max = np.max(all_ylim_upper)
@@ -1216,10 +1227,15 @@ class Plot:
                     elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
                         ylim_min = -np.abs(np.min(all_ylim_lower))
                         ylim_max = np.abs(np.min(all_ylim_lower))
-                ax.set_ylim(ylim_min, ylim_max)
+                ylim = ylim_min, ylim_max
             elif 'ylim' in plot_characteristics:
-                ax.set_ylim(plot_characteristics['ylim'])
-            elif ylim is not None:
+                ylim = plot_characteristics['ylim']
+
+            # set ylim
+            if isinstance(ax, dict):
+                for sub_ax in ax.values():
+                    sub_ax.set_ylim(ylim)
+            else:
                 ax.set_ylim(ylim)
 
             if 'equal_aspect' in plot_characteristics:
