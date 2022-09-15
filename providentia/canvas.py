@@ -1099,6 +1099,10 @@ class MPLCanvas(FigureCanvas):
                 np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind
                             in self.relative_selected_station_inds], dtype=np.int)
 
+            # get absolute unselected station indices
+            self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
+                                                                 self.absolute_selected_station_inds))[0]
+
             # update map station selection
             self.update_map_station_selection()
 
