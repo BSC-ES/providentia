@@ -795,10 +795,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 else:
                     self.mpl_canvas.remove_axis_elements(ax, previous_plot_type)
                 self.mpl_canvas.selected_station_plots.remove(previous_plot_type)
-                # remove legend picker lines
-                for legend_label in self.mpl_canvas.lined:
-                    if previous_plot_type in self.mpl_canvas.lined[legend_label]['lines_per_plot']:
-                        del self.mpl_canvas.lined[legend_label]['lines_per_plot'][previous_plot_type]
+                # remove tracked plot elements
+                for legend_label in self.mpl_canvas.plot_elements:
+                    if previous_plot_type in self.mpl_canvas.plot_elements[legend_label]['plot_elements']:
+                        del self.mpl_canvas.plot_elements[legend_label]['plot_elements'][previous_plot_type]
 
             # if changed_plot_type already axis on another axis then remove those axis elements
             if (changed_plot_type in self.mpl_canvas.selected_station_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
@@ -809,9 +809,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 else:
                     self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
                 # remove legend picker lines
-                for legend_label in self.mpl_canvas.lined:
-                    if changed_plot_type in self.mpl_canvas.lined[legend_label]['lines_per_plot']:
-                        del self.mpl_canvas.lined[legend_label]['lines_per_plot'][changed_plot_type]
+                for legend_label in self.mpl_canvas.plot_elements:
+                    if changed_plot_type in self.mpl_canvas.plot_elements[legend_label]['plot_elements']:
+                        del self.mpl_canvas.plot_elements[legend_label]['plot_elements'][changed_plot_type]
 
             # otherwise add plot_type to selected_station_plots
             elif changed_plot_type != 'None': 
