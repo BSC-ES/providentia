@@ -663,6 +663,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # update available layout options
         layout_options = ['None', 'distribution', 'metadata', 'periodic', 
                           'periodic-violin', 'scatter', 'timeseries']
+
         # remove scatter plots from list if the temporal colocation is not active
         if not self.temporal_colocation:
             if 'scatter' in layout_options:
@@ -672,8 +673,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         if self.data_labels:
             if len(self.data_labels) < 2:
                 layout_options.remove('periodic')
-        else:
-            layout_options.remove('periodic')
 
         # update position 1 in layout (always map)
         self.cb_position_1.addItems(['map'])
