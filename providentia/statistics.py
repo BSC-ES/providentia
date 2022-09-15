@@ -617,10 +617,10 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
 
         # make colourbar on axis
         cb = matplotlib.colorbar.ColorbarBase(cb_ax, cmap=cmap, norm=norm, 
-                                                orientation=plot_characteristics['cb']['orientation'], 
-                                                ticks=tick_array)
+                                              orientation=plot_characteristics['cb']['orientation'], 
+                                              ticks=tick_array)
 
-        # set colorbar label
+        # set colorbar labeltest_options
         if 'cb_label' in plot_characteristics:
             cb_label_characteristics = copy.deepcopy(plot_characteristics['cb_label'])
             del cb_label_characteristics['label']
