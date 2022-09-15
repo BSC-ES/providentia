@@ -232,17 +232,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_network.setFixedWidth(100)
+        self.cb_network.AdjustToContents
         self.cb_network.setToolTip('Select providing observational data network. '
                                    'Names starting with * indicate non-GHOST datasets')
         self.cb_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_resolution.setFixedWidth(100)
+        self.cb_resolution.AdjustToContents
         self.cb_resolution.setToolTip('Select temporal resolution of data')
         self.cb_matrix = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_matrix.setFixedWidth(100)
+        self.cb_matrix.AdjustToContents
         self.cb_matrix.setToolTip('Select data matrix')
         self.cb_species = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_species.setStyleSheet("QComboBox { combobox-popup: 0; }")
         self.cb_species.setFixedWidth(100)
+        self.cb_species.AdjustToContents
         self.cb_species.setToolTip('Select species')
         self.cb_species.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
@@ -297,13 +300,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.lb_z = set_formatting(QtWidgets.QLabel(self, text="Map Stat"), formatting_dict['title_menu'])
         self.lb_z.setToolTip('Set plotted map statistic')
         self.cb_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z_stat.setFixedWidth(136)
+        self.cb_z_stat.setFixedWidth(125)
+        self.cb_z_stat.AdjustToContents
         self.cb_z_stat.setToolTip('Select map statistic')
         self.cb_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z1.setFixedWidth(136)
+        self.cb_z1.setFixedWidth(125)
+        self.cb_z1.AdjustToContents
         self.cb_z1.setToolTip('Select map dataset 1')
         self.cb_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z2.setFixedWidth(136)
+        self.cb_z2.setFixedWidth(125)
+        self.cb_z2.AdjustToContents
         self.cb_z2.setToolTip('Select map dataset 2')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
@@ -311,10 +317,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                                  formatting_dict['title_menu'])
         self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
         self.cb_experiment_bias_type = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_experiment_bias_type.setFixedWidth(136)
+        self.cb_experiment_bias_type.setFixedWidth(125)
+        self.cb_experiment_bias_type.AdjustToContents
         self.cb_experiment_bias_type.setToolTip('Select experiment bias type')
         self.cb_experiment_bias_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_experiment_bias_stat.setFixedWidth(136)
+        self.cb_experiment_bias_stat.setFixedWidth(125)
+        self.cb_experiment_bias_stat.AdjustToContents
         self.cb_experiment_bias_stat.setToolTip('Select experiment bias statistic')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
@@ -336,18 +344,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                                   formatting_dict['title_menu'])
         self.cb_position_1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_position_1.setFixedWidth(100)
+        self.cb_position_1.AdjustToContents
         self.cb_position_1.setToolTip('Select plot type in top left position')
         self.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_position_2.setFixedWidth(100)
+        self.cb_position_2.AdjustToContents
         self.cb_position_2.setToolTip('Select plot type in top right position')
         self.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_position_3.setFixedWidth(100)
+        self.cb_position_3.AdjustToContents
         self.cb_position_3.setToolTip('Select plot type in bottom left position')
         self.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_position_4.setFixedWidth(100)
+        self.cb_position_4.AdjustToContents
         self.cb_position_4.setToolTip('Select plot type in bottom centre position')
         self.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_position_5.setFixedWidth(100)
+        self.cb_position_5.AdjustToContents
         self.cb_position_5.setToolTip('Select plot type in bottom right position')
 
         # position objects on gridded configuration bar
