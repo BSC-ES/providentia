@@ -409,12 +409,13 @@ class MPLCanvas(FigureCanvas):
                         if isinstance(collection, matplotlib.collections.PathCollection):
                             collection.set_facecolor(rgba_tuples)
 
-                # increase marker size of selected stations
+                # increase marker size and alpha of selected stations
                 markersizes[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['s']
+                rgba_tuples[self.absolute_selected_station_inds, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
                 for collection in self.plot_axes['map'].collections:
                     if isinstance(collection, matplotlib.collections.PathCollection):
                         collection.set_sizes(markersizes)
-
+                        collection.set_facecolor(rgba_tuples)
         # redraw points
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
