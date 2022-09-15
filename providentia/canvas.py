@@ -313,7 +313,7 @@ class MPLCanvas(FigureCanvas):
 
         # if have no valid active map indices, reset absolute/relative
         # selected station indices to be empty lists
-        # also uncheck select all/intersect checkboxes
+        # also uncheck select all/intersect/extent checkboxes
         if len(self.active_map_valid_station_inds) == 0:
             # unselect all/intersect/extent checkboxes
             self.read_instance.block_MPL_canvas_updates = True
@@ -325,23 +325,28 @@ class MPLCanvas(FigureCanvas):
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
             self.relative_selected_station_inds = np.array([], dtype=np.int)
             self.absolute_selected_station_inds = np.array([], dtype=np.int)
+            self.absolute_non_selected_station_inds = np.array([], dtype=np.int)
 
         # otherwise plot valid active map stations on map
         else:
             # if any of the currently selected stations are not in the current active map
             # valid station indices --> unselect selected stations (and associated plots)
-            # also uncheck select all/intersect checkboxes
+            # also uncheck select all/intersect/extent checkboxes
             if not np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)):
-                # unselect all/intersect checkboxes
+                # unselect all/intersect/extent checkboxes
                 self.read_instance.block_MPL_canvas_updates = True
                 self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
+                self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.block_MPL_canvas_updates = False
                 # reset relative/absolute selected station indices to be empty lists
                 self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
                 self.relative_selected_station_inds = np.array([], dtype=np.int)
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
-                self.absolute_non_selected_station_inds = np.array([], dtype=np.int)
+
+            #get absolute non-selected station inds
+            self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
+                                                                 self.absolute_selected_station_inds))[0]
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
             self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, z_statistic, self.plot_characteristics['map'])
@@ -396,9 +401,6 @@ class MPLCanvas(FigureCanvas):
             # if have some selected stations, update map plot with station selection
             # (reducing alpha of non-selected stations, and increasing marker size of selected stations)
             if len(self.relative_selected_station_inds) > 0:
-
-                self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
-                                                                     self.absolute_selected_station_inds))[0]
                 
                 # decrease alpha of non-selected stations
                 if len(self.absolute_non_selected_station_inds) > 0:
@@ -493,7 +495,6 @@ class MPLCanvas(FigureCanvas):
                     return
 
                 # iterate through data array names in selected station data dictionary
-                valid_data_labels = []
                 for data_label in self.selected_station_data[self.read_instance.networkspeci]:
 
                     # call function to update plot
@@ -510,7 +511,6 @@ class MPLCanvas(FigureCanvas):
                             if data_label == 'observations':
                                 continue
                         func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options)
-                    valid_data_labels.append(data_label)
                 
                 # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
                 if type(ax) == dict:
@@ -548,9 +548,6 @@ class MPLCanvas(FigureCanvas):
                     self.activate_axis(ax, plot_type)
                     self.reset_ax_navigation_toolbar_stack(ax)
 
-                # configure legend picker per plot type / data_label
-                self.configure_legend_picker(plot_type, valid_data_labels)
-
     def update_associated_selected_station_plots(self):
         """Function that updates all plots associated with selected stations on map"""
 
@@ -565,11 +562,11 @@ class MPLCanvas(FigureCanvas):
             else:
                 self.remove_axis_elements(ax, plot_type)
 
-        # remove legend picker lines
-        for legend_label in self.lined:
-            relevant_plots = list(self.lined[legend_label]['lines_per_plot'].keys())
+        # remove legend picker elements
+        for legend_label in self.plot_elements:
+            relevant_plots = list(self.plot_elements[legend_label]['plot_elements'].keys())
             for plot_type in relevant_plots:
-                del self.lined[legend_label]['lines_per_plot'][plot_type]
+                del self.plot_elements[legend_label]['plot_elements'][plot_type]
 
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
@@ -583,98 +580,6 @@ class MPLCanvas(FigureCanvas):
 
                     # update plot
                     self.update_associated_selected_station_plot(plot_type)
-
-    def configure_legend_picker(self, plot_type, legend_labels):
-        """ Function that creates a dictionary with the lines and collections
-            that will be removed when picking up each legend element
-        """
-
-        # get plot lines from timeseries and periodic violin plots
-        ax_plot_lines = {}
-        ax_plot_collections = {}
-        if plot_type in ['timeseries', 'periodic-violin', 'periodic', 'distribution', 'scatter']:
-            
-                for legend_label in legend_labels:
-                    self.lined[legend_label]['lines_per_plot'][plot_type] = []
-                
-                ax = self.plot_axes[plot_type]
-                if type(ax) == dict:
-                    for key, sub_ax in ax.items(): 
-                        if sub_ax.get_visible():
-
-                            for i, legend_label in enumerate(legend_labels):
-
-                                visible = self.lined[legend_label]['visible']
-
-                                ax_plot_lines[key] = {}
-                                ax_plot_collections[key] = {}
-                                last_break = 0
-                                break_sum = 0
-
-                                # remove [0, 0] lines (periodic plots)
-                                sub_ax_lines = [line for line in sub_ax.lines if line.get_ydata() != [0, 0]]
-                                
-                                # get line per legend element
-                                ax_plot_lines[key][legend_label] = sub_ax_lines[i]
-                                
-                                # are there collections? (skip periodic plots)
-                                if sub_ax.collections:
-                                
-                                    # get corresponding patches according to breaks
-                                    # some patches do not exist, so breaks are not always 0-24, 24-48, etc...
-                                    # and change depending on the legend element
-                                    if i != 0:
-                                        last_break = len(sub_ax_lines[i-1].get_ydata()[~np.isnan(sub_ax_lines[i-1].get_ydata())])
-                                    curr_break = len(sub_ax_lines[i].get_ydata()[~np.isnan(sub_ax_lines[i].get_ydata())])
-                                    break_sum += last_break
-
-                                    # get patches per legend elements
-                                    ax_plot_collections[key][legend_label] = sub_ax.collections[break_sum:break_sum+curr_break]
-
-                                # transform single elements to list
-                                if not isinstance(ax_plot_lines[key][legend_label], list):
-                                    ax_plot_lines[key][legend_label] = [ax_plot_lines[key][legend_label]]
-
-                                # add lines to self.lined
-                                self.lined[legend_label]['lines_per_plot'][plot_type] += ax_plot_lines[key][legend_label]
-
-                                # there are no collections for periodic bias plots (only lines)
-                                if sub_ax.collections:
-
-                                    # transform single elements to list
-                                    if not isinstance(ax_plot_collections[key][legend_label], list):
-                                        ax_plot_collections[key][legend_label] = [ax_plot_collections[key][legend_label]]
-                                    
-                                    # add collections to self.lined
-                                    self.lined[legend_label]['lines_per_plot'][plot_type] += ax_plot_collections[key][legend_label]
-
-                                # set line visibility
-                                if not visible:
-                                    for line in self.lined[legend_label]['lines_per_plot'][plot_type]:
-                                        line.set_visible(False)
-
-                else:
-                    if ax.get_visible():
-
-                        for i, legend_label in enumerate(legend_labels):
-
-                            visible = self.lined[legend_label]['visible']
-
-                            ax_plot_lines[legend_label] = ax.lines[i]
-
-                            # transform single elements to list
-                            if not isinstance(ax_plot_lines[legend_label], list):
-                                ax_plot_lines[legend_label] = [ax_plot_lines[legend_label]]
-
-                            # add lines to self.lined
-                            self.lined[legend_label]['lines_per_plot'][plot_type] += ax_plot_lines[legend_label]
-
-                            # set line visibility
-                            if not visible:
-                                for line in self.lined[legend_label]['lines_per_plot'][plot_type]:
-                                    line.set_visible(False)
-
-        return None
 
     def update_experiment_domain_edges(self):
         """Function that plots grid domain edges of experiments in memory"""
@@ -706,10 +611,10 @@ class MPLCanvas(FigureCanvas):
         self.activate_axis(self.plot_axes['legend'], 'legend')
 
         # setup element picker in legend
-        self.lined = {}
+        self.plot_elements = {}
         for data_label, legend_label in zip(self.read_instance.data_labels, self.legend.texts):
             legend_label.set_picker(True)
-            self.lined[data_label] = {'visible':True, 'lines_per_plot':{}}
+            self.plot_elements[data_label] = {'visible':True, 'plot_elements':{}}
 
         return None
 
@@ -834,9 +739,9 @@ class MPLCanvas(FigureCanvas):
                         self.remove_axis_elements(sub_ax, 'periodic')
 
                     # remove legend picker lines
-                    for legend_label in self.lined:
-                        if 'periodic' in self.lined[legend_label]['lines_per_plot']:
-                            del self.lined[legend_label]['lines_per_plot']['periodic']
+                    for legend_label in self.plot_elements:
+                        if 'periodic' in self.plot_elements[legend_label]['plot_elements']:
+                            del self.plot_elements[legend_label]['plot_elements']['periodic']
 
                     # get currently selected experiment bias statistic name
                     zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
@@ -861,14 +766,12 @@ class MPLCanvas(FigureCanvas):
                     # if experiment bias type == 'Station Median' --> update plotted experiment bias plots
                     if selected_experiment_bias_type == 'Station Median':
 
-                        valid_data_labels = []
                         for data_label in self.selected_station_data[self.read_instance.networkspeci]:
                             # skip observational array if bias stat
                             if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                                 continue
                             self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, 
                                                     data_label, self.plot_characteristics['periodic'], zstat=zstat)
-                            valid_data_labels.append(data_label)
 
                     # harmonise axes limits across subplots 
                     relevant_axs = [self.plot_axes['periodic'][relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
@@ -887,9 +790,6 @@ class MPLCanvas(FigureCanvas):
                                     set_title = True
                             self.activate_axis(sub_ax, 'periodic')
                             self.reset_ax_navigation_toolbar_stack(sub_ax)
-
-                    # configure legend picker per plot type / data_label
-                    self.configure_legend_picker('periodic', valid_data_labels)
 
                     # update plot options
                     self.update_plot_options()
@@ -2138,118 +2038,87 @@ class MPLCanvas(FigureCanvas):
         # get option and plot names
         event_source = self.sender()
         option = event_source.objectName().split('option_')[1]
-        key = event_source.objectName().split('_option')[0]
-        if key == 'periodic_violin':
-            key = 'periodic-violin'
+        plot_type = event_source.objectName().split('_option')[0]
+        if plot_type == 'periodic_violin':
+            plot_type = 'periodic-violin'
 
         # is box checked?
         check_state = event_source.isChecked()
-        
-        # options 'logy' and 'logx'
+        if check_state:
+            undo = False
+        else:
+            undo = True
+
+        # options 'logy' and 'logx' 
+        # only plot if axis has all positive values
         if option == 'logy' or option == 'logx':
-            # log y axis if box is checked
-            if check_state:
-                if isinstance(self.plot_axes[key], dict):
-                    for sub_ax in self.plot_axes[key].values():
+            if isinstance(self.plot_axes[plot_type], dict):
+                for sub_ax in self.plot_axes[plot_type].values():
+                    log_validity = self.plot.log_validity(sub_ax, option)
+                    if log_validity:
                         self.plot.log_axes(sub_ax,
                                            option, 
-                                           event_source,
-                                           self.plot_characteristics[key])
-                else:
-                    self.plot.log_axes(self.plot_axes[key], 
+                                           plot_type,
+                                           self.plot_characteristics[plot_type],
+                                           undo=undo)
+                    else:
+                        print("Warning: It is not possible to log the {}-axis with negative values.".format(option[-1]))
+                        event_source.setCheckState(QtCore.Qt.Unchecked)
+            else:
+                log_validity = self.plot.log_validity(self.plot_axes[plot_type], option)
+                if log_validity:
+                    self.plot.log_axes(self.plot_axes[plot_type], 
                                        option, 
-                                       event_source,
-                                       self.plot_characteristics[key])
-            # undo log y axis if box is unchecked
-            elif not check_state:
-                if isinstance(self.plot_axes[key], dict):
-                    for sub_ax in self.plot_axes[key].values():
-                        self.plot.log_axes(sub_ax, 
-                                           option,
-                                           event_source, 
-                                           self.plot_characteristics[key],
-                                           undo=True)
+                                       plot_type,
+                                       self.plot_characteristics[plot_type], 
+                                       undo=undo)
                 else:
-                    self.plot.log_axes(self.plot_axes[key], 
-                                       option, 
-                                       event_source,
-                                       self.plot_characteristics[key],
-                                       undo=True)
+                    print("Warning: It is not possible to log the {}-axis with negative values.".format(option[-1]))
+                    event_source.setCheckState(QtCore.Qt.Unchecked)
 
         # option 'annotate'
+        # only plot if have selected stations (for map annotations)
         if option == 'annotate':
-            # add annotation if box is checked
-            if check_state:
-                if isinstance(self.plot_axes[key], dict):
-                    for sub_ax in self.plot_axes[key].values():
-                        self.plot.annotation(sub_ax,
-                                             self.read_instance.networkspeci,
-                                             list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                             self.plot_characteristics[key], 
-                                             key,
-                                             plot_options=[])
-                        break
-                else:
-                    self.plot.annotation(self.plot_axes[key], 
-                                         self.read_instance.networkspeci,
-                                         list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                         self.plot_characteristics[key], 
-                                         key,
-                                         plot_options=[])
-            # remove annotation if box is unchecked
-            elif not check_state:
-                if isinstance(self.plot_axes[key], dict):
-                    for sub_ax in self.plot_axes[key].values():
-                        self.plot.annotation(sub_ax, 
-                                             self.read_instance.networkspeci,
-                                             list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                             self.plot_characteristics[key], 
-                                             key,
-                                             plot_options=[], 
-                                             undo=True)
-                else:
-                    self.plot.annotation(self.plot_axes[key], 
-                                         self.read_instance.networkspeci,
-                                         list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                         self.plot_characteristics[key], 
-                                         key,
-                                         plot_options=[], 
-                                         undo=True)
-        
+            if len(self.relative_selected_station_inds) == 0:
+                undo = True
+
+            if isinstance(self.plot_axes[plot_type], dict):
+                for sub_ax in self.plot_axes[plot_type].values():
+                    self.plot.annotation(sub_ax,
+                                            self.read_instance.networkspeci,
+                                            list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                            plot_type,
+                                            self.plot_characteristics[plot_type], 
+                                            plot_options=[],
+                                            undo=undo)
+                    break
+            else:
+                self.plot.annotation(self.plot_axes[plot_type], 
+                                        self.read_instance.networkspeci,
+                                        list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                        plot_type,
+                                        self.plot_characteristics[plot_type], 
+                                        plot_options=[],
+                                        undo=undo)
+
         # option 'trend'
         if option == 'trend':
-            # add trend line if box is checked
-            if check_state:
-                self.plot.trend(self.plot_axes[key], 
-                                self.read_instance.networkspeci,
-                                list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                self.plot_characteristics[key], 
-                                plot_options=[])
-            # remove trend line if box is unchecked
-            elif not check_state:
-                self.plot.trend(self.plot_axes[key], 
-                                self.read_instance.networkspeci,
-                                list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                self.plot_characteristics[key], 
-                                plot_options=[], 
-                                undo=True)
+            self.plot.trend(self.plot_axes[plot_type], 
+                            self.read_instance.networkspeci,
+                            list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                            plot_type,
+                            self.plot_characteristics[plot_type], 
+                            plot_options=[], 
+                            undo=undo)
         
         if option == 'regression':
-            # add regression line if box is checked
-            if check_state:
-                self.plot.linear_regression(self.plot_axes[key], 
-                                            self.read_instance.networkspeci,
-                                            list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                            self.plot_characteristics[key],  
-                                            plot_options=[])
-            # remove regression line if box is unchecked
-            elif not check_state:
-                self.plot.linear_regression(self.plot_axes[key], 
-                                            self.read_instance.networkspeci,
-                                            list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                            self.plot_characteristics[key],  
-                                            plot_options=[],
-                                            undo=True)
+            self.plot.linear_regression(self.plot_axes[plot_type], 
+                                        self.read_instance.networkspeci,
+                                        list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                        plot_type,
+                                        self.plot_characteristics[plot_type],  
+                                        plot_options=[],
+                                        undo=undo)
 
         # draw changes
         self.figure.canvas.draw()
@@ -2546,36 +2415,36 @@ class MPLCanvas(FigureCanvas):
         """ Function to handle legend picker. """
 
         if self.lock_legend_pick == False:
-            if self.lined:
+            if self.plot_elements:
                 # lock legend pick
                 self.lock_legend_pick = True
             
-                # get plot lines
+                # get event information
                 legend_label = event.artist
                 legend_label_text = legend_label.get_text().lower()
-                visible = copy.deepcopy(self.lined[legend_label_text]['visible'])
+                visible = copy.deepcopy(self.plot_elements[legend_label_text]['visible'])
 
                 # iterate through plot types
-                for plot_type in self.lined[legend_label_text]['lines_per_plot']:
+                for plot_type in self.plot_elements[legend_label_text]['plot_elements']:
 
-                    print(len(self.lined[legend_label_text]['lines_per_plot'][plot_type]))
-                    plot_lines = self.lined[legend_label_text]['lines_per_plot'][plot_type]
+                    # get elements per plot
+                    plot_elements = self.plot_elements[legend_label_text]['plot_elements'][plot_type]
                 
                     # change visibility of lines
-                    for plot_line in plot_lines:
+                    for plot_element in plot_elements:
                         if visible:
-                            plot_line.set_visible(False)
+                            plot_element.set_visible(False)
                         else:
-                            plot_line.set_visible(True)
+                            plot_element.set_visible(True)
 
                 # change font weight of label
                 legend_label._fontproperties = self.legend.get_texts()[0]._fontproperties.copy()
                 if visible:
                     legend_label.set_fontweight('regular')
-                    self.lined[legend_label_text]['visible'] = False
+                    self.plot_elements[legend_label_text]['visible'] = False
                 else:
                     legend_label.set_fontweight('bold')
-                    self.lined[legend_label_text]['visible'] = True
+                    self.plot_elements[legend_label_text]['visible'] = True
 
                 # redraw points
                 self.figure.canvas.draw()
