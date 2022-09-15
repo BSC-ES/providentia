@@ -351,7 +351,8 @@ class MPLCanvas(FigureCanvas):
                                                      self.read_instance.station_latitudes[self.read_instance.networkspeci][self.active_map_valid_station_inds])).T
 
             # generate colourbar
-            generate_colourbar(self.read_instance, [self.plot_axes['map']], [self.plot_axes['cb']], zstat, self.plot_characteristics['map'], self.read_instance.species[0])
+            generate_colourbar(self.read_instance, [self.plot_axes['map']], [self.plot_axes['cb']], zstat, 
+                               self.plot_characteristics['map'], self.read_instance.species[0])
 
             # activate map/cb axes
             self.activate_axis(self.plot_axes['map'], 'map')
@@ -865,7 +866,8 @@ class MPLCanvas(FigureCanvas):
                             # skip observational array if bias stat
                             if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                                 continue
-                            self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, data_label, self.plot_characteristics['periodic'], zstat=zstat)
+                            self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, 
+                                                    data_label, self.plot_characteristics['periodic'], zstat=zstat)
                             valid_data_labels.append(data_label)
 
                     # harmonise axes limits across subplots 
