@@ -448,7 +448,8 @@ def get_axes_vminmax(axs):
     ax_max = []
     for ax in axs:
         for collection in ax.collections:
-            if isinstance(collection, matplotlib.collections.PathCollection):
+            if ((isinstance(collection, matplotlib.collections.PathCollection)) or 
+                (isinstance(collection, matplotlib.collections.QuadMesh))):
                 col_array = collection.get_array()
                 ax_min.append(np.nanmin(col_array))
                 ax_max.append(np.nanmax(col_array))
@@ -598,8 +599,9 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
     plotted_min, plotted_max = get_axes_vminmax(axs)
 
     # get colourbar limits/label
-    z_vmin, z_vmax, z_label, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci)
-    
+    z_vmin, z_vmax, z_label, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, 
+                                                                     plot_characteristics, speci)
+
     # generate colourbar tick array
     tick_array = np.linspace(z_vmin, z_vmax, plot_characteristics['cb']['n_ticks'], endpoint=True)
 
@@ -620,7 +622,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
                                               orientation=plot_characteristics['cb']['orientation'], 
                                               ticks=tick_array)
 
-        # set colorbar labeltest_options
+        # set colorbar label
         if 'cb_label' in plot_characteristics:
             cb_label_characteristics = copy.deepcopy(plot_characteristics['cb_label'])
             del cb_label_characteristics['label']
@@ -644,7 +646,8 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
     # update plot axes (to take account of new colourbar vmin/vmax/cmap)
     for ax in axs:
         for collection in ax.collections:
-            if isinstance(collection, matplotlib.collections.PathCollection):
+            if ((isinstance(collection, matplotlib.collections.PathCollection)) or 
+                (isinstance(collection, matplotlib.collections.QuadMesh))):
                 collection.set_clim(vmin=z_vmin,vmax=z_vmax)
                 collection.set_cmap(cmap=cmap)
 

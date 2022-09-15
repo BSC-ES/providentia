@@ -128,7 +128,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             aux.init_metadata(self)
 
             # set plot characteristics
-            plot_types = self.report_plots[self.report_type]
+            try:
+                plot_types = self.report_plots[self.report_type]
+            except KeyError:
+                msg = 'Error: The report type {0} cannot be found in conf/report_plots.json. '.format(self.report_type)
+                msg += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
+                sys.exit(msg)
             self.plot.set_plot_characteristics(plot_types)
 
             # define dictionary to store plot figures per page
@@ -373,12 +378,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         for ax_type in ax_types:
                             for relevant_page in relevant_pages:
                                 if base_plot_type in ['periodic', 'periodic-violin']:
-                                    for axs in self.plot_dictionary[relevant_page]['axs']:
-                                        relevant_axs.append(axs['handle'][ax_type])
-                                        relevant_data_labels.append(axs['data_labels'])
+                                    for ax in self.plot_dictionary[relevant_page]['axs']:
+                                        relevant_axs.append(ax['handle'][ax_type])
+                                        relevant_data_labels.append(ax['data_labels'])
                                 else:
-                                    relevant_axs.append(self.plot_dictionary[relevant_page]['axs'][0]['handle'])
-                                    relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][0]['data_labels'])
+                                    for ax in self.plot_dictionary[relevant_page]['axs']:
+                                        relevant_axs.append(ax['handle'])
+                                        relevant_data_labels.append(ax['data_labels'])
 
                         # generate colourbars for required plots in paradigm on each relevant page
                         if 'cb' in list(self.plot_characteristics[plot_type].keys()):
@@ -388,8 +394,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                networkspeci.split('-')[-1])
 
                         # harmonise xy limits for plot paradigm
-                        if base_plot_type not in ['map','heatmap','table']: 
-                            if base_plot_type == 'periodic-violin':
+                        if base_plot_type not in ['map', 'heatmap', 'table']: 
+                            if base_plot_type in ['periodic', 'periodic-violin']:
                                 self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
                                                                      self.plot_characteristics[plot_type], plot_options, 
                                                                      ylim=[self.selected_station_data_min[networkspeci], 
@@ -417,11 +423,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
                                                      self.plot_characteristics[plot_type], plot_type, 
                                                      plot_options=plot_options)
+                                # annotate in first axis
+                                if base_plot_type in ['periodic', 'periodic-violin']:
+                                    break
 
                             # regression line
                             if 'regression' in plot_options:
-                                self.plot.linear_regression(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
-                                                            self.plot_characteristics[plot_type], plot_options=plot_options)
+                                self.plot.linear_regression(relevant_ax, networkspeci, 
+                                                            relevant_data_labels[relevant_ax_ii], 
+                                                            self.plot_characteristics[plot_type], 
+                                                            plot_options=plot_options)
 
                             # trend line
                             if 'trend' in plot_options:
