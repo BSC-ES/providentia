@@ -359,10 +359,10 @@ class Plot:
         
         :param plot_characteristics_legend: plot characteristics for relevant legend
         :type plot_characteristics_legend: dict
+        :param plot_options: list of options to configure plot  
+        :type plot_options: list    
         :return: plot_characteristics_legend with handles updated
         :rtype: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list        
         """
 
         # create legend elements
@@ -392,10 +392,10 @@ class Plot:
     def make_experiment_domain_polygons(self, plot_options=[]):
         """Make experiment domain polygons
         
-        :return: grid_edge_polygons
-        :rtype: list
         :param plot_options: list of options to configure plot  
         :type plot_options: list
+        :return: grid_edge_polygons
+        :rtype: list
         """
 
         grid_edge_polygons = []
@@ -621,9 +621,13 @@ class Plot:
         ts_nonan = ts.dropna()
         
         # make timeseries plot
-        relevant_axis.plot(ts_nonan, 
-                           color=self.read_instance.plotting_params[data_label]['colour'], 
-                           **plot_characteristics['plot'])
+        timeseries_plot = relevant_axis.plot(ts_nonan, 
+                                             color=self.read_instance.plotting_params[data_label]['colour'], 
+                                             **plot_characteristics['plot'])
+
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            self.track_plot_elements(data_label, 'timeseries', timeseries_plot)
 
         # recalculate xticks (if desired) for better spacing
         if plot_characteristics['xtick_alteration']['define']:
@@ -711,7 +715,9 @@ class Plot:
                 grouped_data = [group for group in grouped_data if len(group) > 0]
 
                 # make violin plot 
-                violin_plot = relevant_subplot_axis.violinplot(grouped_data, positions=self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['valid_xticks'], **plot_characteristics['plot']['violin'])
+                violin_plot = relevant_subplot_axis.violinplot(grouped_data, 
+                                                               positions=self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['valid_xticks'], 
+                                                               **plot_characteristics['plot']['violin'])
 
                 # plot p50
                 xticks = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
@@ -721,14 +727,24 @@ class Plot:
                 # line drawn being interpolated across missing values
                 inds_to_split = np.where(np.diff(xticks) > 1)[0]
                 if len(inds_to_split) == 0:
-                    relevant_subplot_axis.plot(xticks, medians, color=self.read_instance.plotting_params[data_label]['colour'], zorder=median_zorder, **plot_characteristics['plot']['p50'])
+                    p50_plots = relevant_subplot_axis.plot(xticks, medians, 
+                                                          color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                          zorder=median_zorder, 
+                                                          **plot_characteristics['plot']['p50'])
                 else:
+                    p50_plots = []
                     inds_to_split += 1
                     start_ind = 0
                     for end_ind in inds_to_split:
-                        relevant_subplot_axis.plot(xticks[start_ind:end_ind], medians[start_ind:end_ind], color=self.read_instance.plotting_params[data_label]['colour'], zorder=median_zorder, **plot_characteristics['plot']['p50'])
+                        p50_plots += relevant_subplot_axis.plot(xticks[start_ind:end_ind], medians[start_ind:end_ind], 
+                                                                color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                                zorder=median_zorder, 
+                                                                **plot_characteristics['plot']['p50'])
                         start_ind = end_ind
-                    relevant_subplot_axis.plot(xticks[start_ind:], medians[start_ind:], color=self.read_instance.plotting_params[data_label]['colour'], zorder=median_zorder, **plot_characteristics['plot']['p50'])
+                    p50_plots += relevant_subplot_axis.plot(xticks[start_ind:], medians[start_ind:], 
+                                                            color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                            zorder=median_zorder, 
+                                                            **plot_characteristics['plot']['p50'])
 
                 # update plotted objects with necessary colour and alpha
                 for patch in violin_plot['bodies']:
@@ -748,12 +764,23 @@ class Plot:
                         else:
                             patch.get_paths()[0].vertices[:, 0] = np.clip(patch.get_paths()[0].vertices[:, 0], m, np.inf)
 
+                # track plot elements if using dashboard 
+                if not self.read_instance.offline:
+                    self.track_plot_elements(data_label, 'periodic-violin', violin_plot)
+                    self.track_plot_elements(data_label, 'periodic-violin', p50_plots)
+
             # standard periodic plot type
             else:
                 # make plot
-                relevant_subplot_axis.plot(self.canvas_instance.periodic_xticks[relevant_temporal_resolution],self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution][zstat],
-                                           color=self.read_instance.plotting_params[data_label]['colour'], zorder=self.read_instance.plotting_params[data_label]['zorder'],
-                                           **plot_characteristics['plot'])
+                periodic_plot = relevant_subplot_axis.plot(self.canvas_instance.periodic_xticks[relevant_temporal_resolution],
+                                                           self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution][zstat],
+                                                           color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                           zorder=self.read_instance.plotting_params[data_label]['zorder'],
+                                                           **plot_characteristics['plot'])
+                    
+                # track plot elements if using dashboard 
+                if not self.read_instance.offline:
+                    self.track_plot_elements(data_label, 'periodic', periodic_plot)
                     
                 # plot horizontal line/s across x axis at value/s of minimum experiment bias
                 zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
@@ -829,6 +856,10 @@ class Plot:
                                                color=self.read_instance.plotting_params[data_label]['colour'], 
                                                **plot_characteristics['plot'])
 
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            self.track_plot_elements(data_label, 'distribution', distribution_plot)
+
     def make_scatter(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[]):
         """Make scatter plot
 
@@ -871,6 +902,10 @@ class Plot:
             if '2:1_line' in plot_characteristics:
                 relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
                                    **plot_characteristics['2:1_line'])
+
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            self.track_plot_elements(data_label, 'scatter', scatter_plot)
           
     def make_heatmap(self, relevant_axis, stat_df, plot_characteristics, plot_options=[]):
         """Make heatmap plot
@@ -891,9 +926,10 @@ class Plot:
             annotate = False
 
         # plot heatmap
-        ax = sns.heatmap(stat_df, 
-                         ax=relevant_axis, annot=annotate,
-                         **plot_characteristics['plot'])
+        heatmap_plot = sns.heatmap(stat_df, 
+                                   ax=relevant_axis, 
+                                   annot=annotate,
+                                   **plot_characteristics['plot'])
 
         # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
         bottom, top = relevant_axis.get_ylim()
@@ -916,50 +952,33 @@ class Plot:
         relevant_axis.axis('off')
 
         # make table
-        table = relevant_axis.table(cellText=stat_df.values, colLabels=stat_df.columns, rowLabels=stat_df.index, loc='center')
+        table_plot = relevant_axis.table(cellText=stat_df.values, colLabels=stat_df.columns, rowLabels=stat_df.index, loc='center')
         #table.set_fontsize(18)
 
-    def log_axes(self, relevant_axis, log_ax, event_source, plot_characteristics, undo=False):
+    def log_axes(self, relevant_axis, log_ax, base_plot_type, plot_characteristics, 
+                 undo=False):
         """Log plot axes
 
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
-        :type networkspeci: str
-        :param data_labels: names of plotted data arrays  
         :param log_ax: which axis to log
         :type log_ax: str
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
+        :param base_plot_type: plot type, without statistical information
+        :type base_plot_type: str
+        :param plot_characteristics: plot characteristics  
+        :type plot_characteristics: dict
         :param undo: unlog plot axes
         :type undo: boolean
         """
 
-        
         if not undo:
-
-            # get data limits
-            xlim = relevant_axis.get_xlim()
-            ylim = relevant_axis.get_ylim()
-            xwidth = xlim[1] - xlim[0]
-            ywidth = ylim[1] - ylim[0]
-            lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
-            lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
-
             if log_ax == 'logx':
-                if round(lower_xlim, 2) >= 0:
-                    relevant_axis.set_xscale('log')
-                    relevant_axis.autoscale()
-                else:
-                    print(f"Warning: It is not possible to log the x-axis with negative values.")
-                    event_source.setCheckState(QtCore.Qt.Unchecked)
+                relevant_axis.set_xscale('log')
+                relevant_axis.autoscale()
             
             if log_ax == 'logy':
-                if round(lower_ylim, 2) >= 0:
-                    relevant_axis.set_yscale('log')
-                    relevant_axis.autoscale()
-                else:
-                    print(f"Warning: It is not possible to log the y-axis with negative values.")
-                    event_source.setCheckState(QtCore.Qt.Unchecked)
+                relevant_axis.set_yscale('log')
+                relevant_axis.autoscale()
 
         else:
             if log_ax == 'logx':
@@ -971,7 +990,8 @@ class Plot:
             if 'equal_aspect' in list(plot_characteristics.keys()):
                 self.set_equal_axes(relevant_axis, plot_characteristics)
 
-    def linear_regression(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], undo=False):
+    def linear_regression(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
+                          plot_options=[], undo=False):
         """Add linear regression to plot
 
         :param relevant_axis: axis to plot on 
@@ -980,6 +1000,8 @@ class Plot:
         :type networkspeci: str
         :param data_labels: names of plotted data arrays  
         :type data_labels: list
+        :param base_plot_type: plot type, without statistical information
+        :type base_plot_type: str
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
@@ -1001,14 +1023,16 @@ class Plot:
                                                          color=self.read_instance.plotting_params[data_label]['colour'],
                                                          zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
                                                          **plot_characteristics['regression'])
-
-                    if regression_line not in self.canvas_instance.plot_elements[data_label]['plot_elements']['scatter']:
-                        self.canvas_instance.plot_elements[data_label]['plot_elements']['scatter'] += regression_line
+                    
+                    # track plot elements if using dashboard 
+                    if not self.read_instance.offline:
+                        self.track_plot_elements(data_label, base_plot_type, regression_line)
         else:
             for line in relevant_axis.lines[len(relevant_axis.lines)-2:]:
                 line.remove()
 
-    def trend(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], undo=False):
+    def trend(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
+              plot_options=[], undo=False):
         """Add trendline to plot
 
         :param relevant_axis: axis to plot on 
@@ -1017,6 +1041,8 @@ class Plot:
         :type networkspeci: str
         :param data_labels: names of plotted data arrays   
         :type data_labels: list
+        :param base_plot_type: plot type, without statistical information
+        :type base_plot_type: str
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
@@ -1044,15 +1070,16 @@ class Plot:
                                                 zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
                                                 **plot_characteristics['trend']['format'])
 
-                if trend_line not in self.canvas_instance.plot_elements[data_label]['plot_elements']['timeseries']:
-                    self.canvas_instance.plot_elements[data_label]['plot_elements']['timeseries'] += trend_line
+                # track plot elements if using dashboard 
+                if not self.read_instance.offline:
+                    self.track_plot_elements(data_label, base_plot_type, trend_line)
         
         else:
             for line in relevant_axis.lines[len(data_labels):]:
                 line.remove() 
 
-    def annotation(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_type, plot_options=[], 
-                   undo=False):
+    def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
+                   plot_options=[], undo=False):
         """Add statistical annotations to plot
 
         :param relevant_axis: axis to plot on 
@@ -1061,6 +1088,8 @@ class Plot:
         :type networkspeci: str
         :param data_labels: names of plotted data arrays 
         :type data_labels: list
+        :param base_plot_type: plot type, without statistical information
+        :type base_plot_type: str
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
@@ -1076,7 +1105,7 @@ class Plot:
 
             # if no stats defined, then return
             if len(stats) == 0:
-                print(f'No annotation statistics have not been defined for {plot_type} in plot_characteristics_offline.py')
+                print(f'No annotation statistics have not been defined for {base_plot_type} in plot_characteristics_offline.py')
                 return
 
             # initialise list of strs to annotate, and colours of annotations
@@ -1087,7 +1116,7 @@ class Plot:
             for data_label in data_labels:
                 
                 # avoid plotting stats for observations data for periodic and scatter plots
-                if 'periodic' in plot_type or plot_type == 'scatter':
+                if 'periodic' in base_plot_type or base_plot_type == 'scatter':
                     if data_label == 'observations':
                         continue
 
@@ -1132,12 +1161,72 @@ class Plot:
                 if type(artist) == AnchoredOffsetbox:
                     artist.remove()
 
+    def log_validity(self, relevant_axis, log_ax):
+        """Determine if log operation for a given axes is valid (no values <= 0)
+        
+        :param relevant_axis: relevant axes
+        :type relevant_axis: list
+        :param log_ax: which axis to log
+        :type log_ax: str
+        :return: validity to log axis
+        :rtype: boolean
+        """
+
+        if log_ax == 'logx':
+            xlim = relevant_axis.get_xlim()
+            xwidth = xlim[1] - xlim[0]
+            lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
+            if round(lower_xlim, 2) >= 0:
+                validity = True
+            else:
+                validity = False
+        
+        if log_ax == 'logy':
+            ylim = relevant_axis.get_ylim()
+            ywidth = ylim[1] - ylim[0]
+            lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
+            if round(lower_ylim, 2) >= 0:
+                validity = True
+            else:
+                validity = False
+
+        return validity
+
+    def track_plot_elements(self, data_label, base_plot_type, plot_object):
+        """ Function that tracks plotted lines and collections
+            that will be removed/added when picking up legend elements on daahboard.
+        """
+
+        # add list for plot_type elements per data_label if does not exist yet
+        if base_plot_type not in self.canvas_instance.plot_elements[data_label]['plot_elements']:
+            self.canvas_instance.plot_elements[data_label]['plot_elements'][base_plot_type] = []
+
+        # get current data_label visibility
+        visible = self.canvas_instance.plot_elements[data_label]['visible']
+
+        # track plot elements
+        if base_plot_type in ['periodic', 'periodic-violin']:
+            # add list of collections
+            if isinstance(plot_object, dict):
+                self.canvas_instance.plot_elements[data_label]['plot_elements'][base_plot_type] += plot_object['bodies']
+            # add list of lines
+            elif isinstance(plot_object, list):
+                self.canvas_instance.plot_elements[data_label]['plot_elements'][base_plot_type] += plot_object
+        else:
+            # add list of lines
+            self.canvas_instance.plot_elements[data_label]['plot_elements'][base_plot_type] += plot_object
+            
+        # set element visibility
+        if not visible:
+            for element in self.canvas_instance.plot_elements[legend_label]['plot_elements'][base_plot_type]:
+                element.set_visible(False)
+
     def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, xlim=None, ylim=None, relim=False, autoscale=False, autoscale_x=False, autoscale_y=False, bias_centre=False):
         """Harmonises xy limits across paradigm of plot type, unless axis limits have been defined
         
         :param relevant_axs: relevant axes
         :type relevant_axs: list
-        :param base_plot_type: plot type name
+        :param base_plot_type: plot type, without statistical information
         :type base_plot_type: str
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict

@@ -398,25 +398,35 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                             # log axes?
                             if 'logx' in plot_options:
-                                self.plot.log_axes(relevant_ax, 'logx')
+                                log_validity = self.plot.log_validity(relevant_ax, 'logx')
+                                if log_validity:
+                                    self.plot.log_axes(relevant_ax, 'logx', base_plot_type, plot_characteristics)
+                                else:
+                                    print("Warning: It is not possible to log the x-axis with negative values.")
                             if 'logy' in plot_options:
-                                self.plot.log_axes(relevant_ax, 'logy')
+                                log_validity = self.plot.log_validity(relevant_ax, 'logy')
+                                if log_validity:
+                                    self.plot.log_axes(relevant_ax, 'logy', base_plot_type, plot_characteristics)
+                                else:
+                                    print("Warning: It is not possible to log the y-axis with negative values.")
 
                             # annotation
                             if 'annotate' in plot_options:
                                 self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
-                                                     self.plot_characteristics[plot_type], plot_type, 
+                                                     base_plot_type, self.plot_characteristics[plot_type],
                                                      plot_options=plot_options)
 
                             # regression line
                             if 'regression' in plot_options:
                                 self.plot.linear_regression(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
-                                                            self.plot_characteristics[plot_type], plot_options=plot_options)
+                                                            base_plot_type, self.plot_characteristics[plot_type], 
+                                                            plot_options=plot_options)
 
                             # trend line
                             if 'trend' in plot_options:
                                 self.plot.trend(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
-                                                self.plot_characteristics[plot_type], plot_options=plot_options)
+                                                base_plot_type, self.plot_characteristics[plot_type], 
+                                                plot_options=plot_options)
     
             # save page figures
             print('WRITING PDF')
