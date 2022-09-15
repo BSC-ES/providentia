@@ -67,12 +67,12 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
                 data_array = data_array[station_index,:]
             else:
                 if read_instance.offline:
-                    if read_instance.temporal_colocation:
+                    if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                         station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
                     else:
                         station_inds = read_instance.valid_station_inds[networkspeci][data_label]
                 else:
-                    if read_instance.temporal_colocation:
+                    if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                         station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
                     else:
                         station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
