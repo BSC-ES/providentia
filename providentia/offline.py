@@ -318,10 +318,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             for networkspeci_ii, networkspeci in enumerate(networkspecies): 
 
                 # update plot characteristics
-                self.plot.set_plot_characteristics(self.station_plots_to_make, speci=networkspeci.split('-')[-1])
+                self.plot.set_plot_characteristics(self.plots_to_make, speci=networkspeci.split('-')[-1])
 
                 # iterate through plot types
-                for plot_type in self.station_plots_to_make:
+                for plot_type in self.plots_to_make:
 
                     # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                     plot_options = plot_type.split('_')[1:]
@@ -363,15 +363,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     for relevant_pages in paradigm_pages:
 
                         # get all relevant axes for plot_type/paradigm
-                        if base_plot_type in ['periodic','periodic-violin']:
-                            ax_types = ['hour','month','dayofweek']
+                        if base_plot_type in ['periodic', 'periodic-violin']:
+                            ax_types = ['hour', 'month', 'dayofweek']
                         else:
                             ax_types = ['']
+                        
+                        relevant_axs = []
+                        relevant_data_labels = []
                         for ax_type in ax_types:
-                            relevant_axs = []
-                            relevant_data_labels = []
                             for relevant_page in relevant_pages:
-                                if base_plot_type in ['periodic','periodic-violin']:
+                                if base_plot_type in ['periodic', 'periodic-violin']:
                                     for axs in self.plot_dictionary[relevant_page]['axs']:
                                         relevant_axs.append(axs['handle'][ax_type])
                                         relevant_data_labels.append(axs['data_labels'])
@@ -380,7 +381,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                     relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][0]['data_labels'])
 
                         # generate colourbars for required plots in paradigm on each relevant page
-                        if 'cb' in self.plot_characteristics[plot_type]:
+                        if 'cb' in list(self.plot_characteristics[plot_type].keys()):
                             # get all cb_axs for plot_type across relevant pages
                             cb_axs = [self.plot_dictionary[relevant_page]['cb_ax'] for relevant_page in relevant_pages]
                             generate_colourbar(self, relevant_axs, cb_axs, zstat, self.plot_characteristics[plot_type], 
@@ -389,10 +390,19 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         # harmonise xy limits for plot paradigm
                         if base_plot_type not in ['map','heatmap','table']: 
                             if base_plot_type == 'periodic-violin':
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, self.plot_characteristics[plot_type], plot_options, ylim=[self.selected_station_data_min[networkspeci], self.selected_station_data_max[networkspeci]])
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     ylim=[self.selected_station_data_min[networkspeci], 
+                                                                           self.selected_station_data_max[networkspeci]])
+                            elif base_plot_type == 'scatter':
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True)
                             else:
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, self.plot_characteristics[plot_type], plot_options)
-                        
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True, autoscale=True)
+
                         # iterate through all relevant axes for plot type in paradigm
                         for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
 
@@ -440,12 +450,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
         # depending on plot type set plots to make
         if plotting_paradigm == 'summary':
-            plots_to_make = self.summary_plots_to_make
+            self.plots_to_make = self.summary_plots_to_make
         elif plotting_paradigm == 'station':
-            plots_to_make = self.station_plots_to_make
+            self.plots_to_make = self.station_plots_to_make
         
         # iterate through plot types to make
-        for plot_type in plots_to_make:
+        for plot_type in self.plots_to_make:
 
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
@@ -495,7 +505,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # update markersize in plot characteristics (timeseries and scatter plots)
             if (base_plot_type == 'timeseries') or (base_plot_type == 'scatter'):
-                self.plot.set_markersize(networkspeci, self.plot_characteristics[plot_type])
+                self.plot.get_markersize(networkspeci, self.plot_characteristics[plot_type])
 
             # define number of plots per type
             n_plots_per_plot_type = False
