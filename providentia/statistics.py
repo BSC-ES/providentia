@@ -39,8 +39,6 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
     :type station_index: list
     """
 
-    print('TO PANDAS DF')
-
     # create new dictionary to store selection station data by network / species, per data label
     canvas_instance.selected_station_data = {}
     canvas_instance.selected_station_data_min = {}
@@ -129,8 +127,6 @@ def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
     :type networkspeci: str
     """
 
-    print('PANDAS TEMPORAL AGG')
-
     # define statistics to calculate (all basic statistics)
     statistics_to_calculate = list(basic_stats.keys())
 
@@ -217,8 +213,6 @@ def calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_i
     :param networkspeci: name of networkspeci str
     :type networkspeci: str
     """
-
-    print('CALC STAT')
 
     # define all basic statistics that will be subtracted
     # (each experiment - observations) for each temporal aggregation
@@ -314,8 +308,6 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
     :return: calculated map statistic and active station indices on map
     :rtype: np.float32, np.int
     """
-
-    print('CALC Z STAT')
 
     # check if have valid station data first
     # if not update z statistic and active map valid station indices to be empty lists and return
