@@ -4,10 +4,10 @@
                  "periodic-p95", "periodic-p95_bias", "periodic-MB", "periodic-r2",
                  "map-p5", "map-p5_bias", "map-p50", "map-p50_bias",
                  "map-p95", "map-p95_bias", "map-MB", "map-r2"],
-            
+
     "operational": ["timeseries_annotate", "periodic-violin_annotate", "scatter",
                     "map-MB_annotate", "map-RMSE_annotate", "map-r_annotate", "map-r2_annotate",
-                    "heatmap-MB, heatmap-RMSE, heatmap-r, heatmap-r2"],
+                    "heatmap-MB", "heatmap-RMSE", "heatmap-r", "heatmap-r2"],
 
     "dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "heatmap-r", "heatmap-MB", "heatmap-RMSE", "heatmap-MFB", 
             "scatter", "scatter_logx_logy", "timeseries"],

@@ -52,7 +52,6 @@ stations_files = sorted(glob.glob('/esarchive/obs/ecmwf/eea-cams50/original_file
 
 for stations_file in stations_files:
 
-    print(stations_file)
     if 'assimilation' in stations_file:
         eval_type = 'assimilation'
     elif 'validation' in stations_file:
@@ -87,8 +86,6 @@ for stations_file in stations_files:
         stations_unfound, mapped_stations = cross_check(stations_unfound, ghost_station_references, ghost_associated_networks, mapped_stations)
 
         root.close()
-
-    print(len(stations_unfound), stations_unfound)
 
     create_config_file(conf_fname, eval_type, 'EEA_AQ_eReporting', 'hourly', matrix, species, '20180101', '20190101', mapped_stations)
 

@@ -254,7 +254,7 @@ def get_experiments(instance):
             # have alternative experiment names for the legend, then parse them?
             if ('(' in instance.experiments) & (')' in instance.experiments):
                 exps = [exp.strip() for exp in instance.experiments.split('(')[0].strip().split(",")]
-                exps_legend = [exp_legend.strip() for exp_legend in instance.experiments.split('(')[1].split(']')[0].strip().split(",")]
+                exps_legend = [exp_legend.strip() for exp_legend in instance.experiments.split('(')[1].split(')')[0].strip().split(",")]
             # otherwise set legend names as given experiment names in full
             else: 
                 exps = [exp.strip() for exp in instance.experiments.split(",")]
