@@ -14,8 +14,8 @@
 "legend": {"remove_spines": ["top", "right", "left", "bottom"],
            "xtick_params": {"which": "both", "bottom": false, "top": false, "right": false, "left": false, "labelbottom": false, "labeltop": false, "labelright": false, "labelleft": false},
            "ytick_params": {"which": "both", "bottom": false, "top": false, "right": false, "left": false, "labelbottom": false, "labeltop": false, "labelright": false, "labelleft": false},
-           "plot": {"loc": "upper center", "columnspacing": 1, "frameon": false, "handletextpad": 0, "ncol": 3, "borderaxespad": 0, "fontsize": 9.0, 
-                    "handles": {"markersize": 8, "marker": "o", "color": "white", "obs_label": "Observations"}, "prop": {"weight": "bold"}}},
+           "plot": {"loc": "upper center", "columnspacing": 1, "frameon": false, "handletextpad": 0, "ncol": 3, "borderaxespad": 0, "fontsize": 9.0}, 
+                    "handles": {"markersize": 8, "marker": "o", "color": "white", "obs_label": "Observations"}, "prop": {"weight": "bold"}},
 
 "metadata": {"non-ghost_vars": {"longitude": {"name_one": "Lon.", "dp": 4},
                                 "latitude":  {"name_one": "Lat.", "dp": 4}},
