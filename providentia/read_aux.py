@@ -107,8 +107,6 @@ def read_netcdf_data(tuple_arguments):
         # non-GHOST (transpose array to swap station and time dimensions)
         else:
             species_data = ncdf_root[speci][valid_file_time_indices, current_file_station_indices].T
-
-        print(1)
         
         # reading GHOST data?
         if reading_ghost:
@@ -118,14 +116,10 @@ def read_netcdf_data(tuple_arguments):
                 ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] =\
                     ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
 
-            print(2)
-
             # if some qa flags selected then screen observations
             if len(shared_memory_vars['qa']) > 0:
                 # screen out observations which are associated with any of the selected qa flags
                 species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['qa']).any(axis=2)] = np.NaN
-
-            print(3)
             
             # if some data provider flags selected then screen observations
             if len(shared_memory_vars['flag']) > 0:
@@ -135,7 +129,6 @@ def read_netcdf_data(tuple_arguments):
         # write filtered species data to shared file data
         data_in_memory[data_labels.index('observations'), full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] = species_data
 
-        print(4)
         # get file metadata
         file_metadata = np.full((len(station_references), 1), np.NaN, dtype=metadata_dtype)
         for meta_var in metadata_vars_to_read:
@@ -183,8 +176,6 @@ def read_netcdf_data(tuple_arguments):
             # put metadata in array
             file_metadata[meta_var][full_array_station_indices, 0] = meta_val
 
-        print(5)
-
     #experiment data
     else:
         relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
@@ -192,8 +183,6 @@ def read_netcdf_data(tuple_arguments):
         relevant_data[relevant_data.mask] = np.NaN
         #put data in array
         data_in_memory[data_labels.index(data_label), full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] = relevant_data
-
-    print(6)
 
     # close netCDF
     ncdf_root.close()

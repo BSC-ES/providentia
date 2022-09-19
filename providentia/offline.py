@@ -32,8 +32,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         print("Starting Providentia offline...")
 
         # update from config file
-        if 'config' in kwargs:
+        if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             aux.load_conf(self, kwargs['config'])
+        elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
+            error = 'Error: The configuration path specified in the command line does not exist.'
+            sys.exit(error)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
@@ -713,12 +716,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
                 
                 # set axis title
-                # TODO: Fix this
-                """
                 if relevant_axis.get_title() == '':
                     axis_title_label = '{}\n{}'.format(data_label, self.subsection)
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
-                """
 
                 # make map if there are data
                 if not self.selected_station_data[networkspeci]:

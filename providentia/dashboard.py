@@ -148,10 +148,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         
         for i, position in enumerate([self.position_1, self.position_2, self.position_3, 
                                       self.position_4, self.position_5]):
-            for button, element in zip(self.mpl_canvas.buttons, self.mpl_canvas.elements):
+            for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
+                                                         self.mpl_canvas.save_buttons, 
+                                                         self.mpl_canvas.elements):
 
                 # get plot type
-                plot_type = button.objectName().split('_menu')[0]
+                plot_type = menu_button.objectName().split('_menu')[0]
                 if position == 'periodic-violin':
                     position = 'periodic_violin'
 
@@ -164,11 +166,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                         self.main_window_geometry.height()) / 1016
                     
                     # get geometries
-                    old_button_geometry = QtCore.QRect(button.x(), button.y(), 20, 20)
-                    new_button_geometry = QtCore.QRect(x, y, 20, 20)
+                    old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
+                    new_button_geometry = QtCore.QRect(x, y, 18, 18)
                     
-                    # apply new geometry to button
-                    button.setGeometry(new_button_geometry)
+                    # apply new geometry to menu and save button
+                    menu_button.setGeometry(new_button_geometry)
+                    save_button.setGeometry(menu_button.x()-25, menu_button.y(), 20, 20)
 
                     # apply new geometry to container elements
                     for sub_element in element:
@@ -183,7 +186,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                             sub_element.setGeometry(sub_element.x() - old_button_geometry.x() + new_button_geometry.x(), 
                                                     sub_element.y() - old_button_geometry.y() + new_button_geometry.y(),
                                                     sub_element.width(), sub_element.height())
-                        
+                    
                     continue
 
     def init_ui(self, **kwargs):
@@ -766,8 +769,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # get event origin source
             event_source = self.sender()
 
-            print('Updating layout')
-
             # update selected station plots, avoiding duplicates
             if event_source == self.cb_position_2:
                 previous_plot_type = copy.deepcopy(self.position_2)
@@ -871,9 +872,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         if changed_position == self.cb_position_2:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 self.mpl_canvas.plot_axes[changed_plot_type] = {}
-                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((10, 50), rowspan=17, colspan=50))
-                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 82), rowspan=17, colspan=18))
-                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 50), rowspan=17, colspan=30))
+                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((10, 50), rowspan=17, colspan=48))
+                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 82), rowspan=17, colspan=16))
+                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 50), rowspan=17, colspan=28))
             elif changed_plot_type != 'None':
                 self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=50))
             
@@ -881,31 +882,31 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         if changed_position == self.cb_position_3:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 self.mpl_canvas.plot_axes[changed_plot_type] = {}
-                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0), rowspan=20, colspan=30))
-                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 20), rowspan=20, colspan=10))
-                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 0), rowspan=20, colspan=18))
+                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0), rowspan=20, colspan=29))
+                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 19), rowspan=20, colspan=10))
+                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 0), rowspan=20, colspan=17))
             elif changed_plot_type != 'None':
-                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=30))
-            
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=29))
+
         # position 4 (bottom centre)
         if changed_position == self.cb_position_4:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 self.mpl_canvas.plot_axes[changed_plot_type] = {}
-                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35), rowspan=20, colspan=30))
-                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 55), rowspan=20, colspan=10))
-                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 35), rowspan=20, colspan=18))
+                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35), rowspan=20, colspan=29))
+                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 54), rowspan=20, colspan=10))
+                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 35), rowspan=20, colspan=17))
             elif changed_plot_type != 'None':
-                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35),  rowspan=44, colspan=30))
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35),  rowspan=44, colspan=29))
             
         # position 5 (bottom right)
         if changed_position == self.cb_position_5:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 self.mpl_canvas.plot_axes[changed_plot_type] = {}
-                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=30))
-                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 90), rowspan=20, colspan=10))
-                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
+                self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=29))
+                self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 89), rowspan=20, colspan=10))
+                self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 70), rowspan=20, colspan=17))
             elif changed_plot_type != 'None':
-                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70),  rowspan=44, colspan=30))
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70),  rowspan=44, colspan=29))
 
     def handle_data_selection_update(self):
         """Define function which handles update of data selection

@@ -77,11 +77,11 @@ class MPLCanvas(FigureCanvas):
         self.plot_axes['legend'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 47), rowspan=8,  colspan=53))
         self.plot_axes['timeseries'] = self.figure.add_subplot(self.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=50))
         self.plot_axes['periodic-violin'] = {}
-        self.plot_axes['periodic-violin']['hour'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=30))
-        self.plot_axes['periodic-violin']['dayofweek'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 90), rowspan=20, colspan=10))
-        self.plot_axes['periodic-violin']['month'] = self.figure.add_subplot(self.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
-        self.plot_axes['distribution'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 35), rowspan=44, colspan=30))
-        self.plot_axes['metadata'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=30))
+        self.plot_axes['periodic-violin']['hour'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=29))
+        self.plot_axes['periodic-violin']['dayofweek'] = self.figure.add_subplot(self.gridspec.new_subplotspec((82, 89), rowspan=20, colspan=10))
+        self.plot_axes['periodic-violin']['month'] = self.figure.add_subplot(self.gridspec.new_subplotspec((82, 70), rowspan=20, colspan=17))
+        self.plot_axes['distribution'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 35), rowspan=44, colspan=29))
+        self.plot_axes['metadata'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=29))
         self.plot_axes['cb'] = self.figure.add_axes([0.0455, 0.536, 0.3794, 0.02])
 
         # define plots to update upon selecting stations
@@ -151,8 +151,6 @@ class MPLCanvas(FigureCanvas):
         the 'READ' button, and when colocating data
         """
 
-        print('UPDATE CANVAS')
-
         # clear and then hide all axes 
         for plot_type, ax in self.plot_axes.items():
             if type(ax) == dict:
@@ -210,8 +208,6 @@ class MPLCanvas(FigureCanvas):
     def handle_data_filter_update(self):
         """Function which handles updates of data filtering"""
 
-        print('UPDATE DATA FILTER')
-
         # return if nothing has been loaded yet
         if not hasattr(self.read_instance, 'data_in_memory'):
             return
@@ -231,8 +227,6 @@ class MPLCanvas(FigureCanvas):
 
         if not self.read_instance.block_MPL_canvas_updates:
 
-            print('UPDATE ACTIVE MAP')
-
             # update plotted map z statistic
             self.update_map_z_statistic()
 
@@ -251,8 +245,6 @@ class MPLCanvas(FigureCanvas):
         with colocated data upon checking of the temporal colocate checkbox"""
 
         if not self.read_instance.block_MPL_canvas_updates:
-
-            print('TEMPORAL COLOCATE UPDATE')
 
             # if only have 1 data array in memory (i.e. observations), no colocation is possible,
             # therefore set colocation to be False, and return
@@ -290,8 +282,6 @@ class MPLCanvas(FigureCanvas):
 
     def update_map_z_statistic(self):
         """Function that updates plotted z statistic on map, with colourbar"""
-
-        print('UPDATE MAP Z')
 
         # remove axis elements from map/cb
         self.remove_axis_elements(self.plot_axes['map'], 'map')
@@ -377,8 +367,6 @@ class MPLCanvas(FigureCanvas):
     def update_map_station_selection(self):
         """Function that updates the visual selection of stations on map"""
 
-        print('UPDATE STATION SELECTION')
-
         # update map title
         if len(self.relative_selected_station_inds) == 1:
             axis_title_label = '{} Selected'.format(
@@ -423,8 +411,6 @@ class MPLCanvas(FigureCanvas):
     def update_associated_selected_station_plot(self, plot_type):
         """Function that updates a plot associated with selected stations on map"""
     
-        print('UPDATE SELECTED STATION PLOT')
-
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
 
@@ -454,13 +440,18 @@ class MPLCanvas(FigureCanvas):
                     if not base_zstat:
                         return 
                     zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
+                    
                     # get zstat information 
                     zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat) 
+                    
                     # add bias to plot options if stat is bias
                     if z_statistic_sign == 'bias':
                         plot_options.append('bias')  
+
                     #set new axis title
                     axis_title = '{}-{}'.format(plot_type, zstat) 
+                    self.plot_characteristics[plot_type]['axis_title']['label'] = axis_title
+
                     # set new ylabel
                     if z_statistic_type == 'basic':
                         if base_zstat not in ['Data%', 'Exceedances']:
@@ -471,7 +462,8 @@ class MPLCanvas(FigureCanvas):
                         ylabel = expbias_stats[base_zstat]['label']
                 else:
                     #set new axis title
-                    axis_title = plot_type 
+                    axis_title = plot_type
+                    self.plot_characteristics[plot_type]['axis_title']['label'] = axis_title
                     
                     # set new ylabel
                     if 'ylabel' in self.plot_characteristics[plot_type]:
@@ -552,8 +544,6 @@ class MPLCanvas(FigureCanvas):
     def update_associated_selected_station_plots(self):
         """Function that updates all plots associated with selected stations on map"""
 
-        print('UPDATE SELECTED STATION PLOTS')
-
         # clear all previously plotted artists from selected station plots and hide axes 
         for plot_type in self.selected_station_plots:
             ax = self.plot_axes[plot_type]
@@ -624,8 +614,6 @@ class MPLCanvas(FigureCanvas):
 
         if not self.read_instance.block_config_bar_handling_updates:
 
-            print('MAP Z COMBOBOX UPDATE')
-
             # update map z statistic comboboxes
             # set variable that blocks configuration bar handling updates until all
             # changes to the z statistic comboboxes are made
@@ -693,7 +681,6 @@ class MPLCanvas(FigureCanvas):
 
         if (not self.read_instance.block_config_bar_handling_updates) & ('periodic' in self.selected_station_plots):
 
-            print('UPDATE EXP BIAS')
             # update experiment bias comboboxes
 
             # set variable that blocks configuration bar handling updates until all changes
@@ -755,6 +742,8 @@ class MPLCanvas(FigureCanvas):
 
                     # set new axis title
                     axis_title = 'periodic-{}'.format(zstat)
+                    self.plot_characteristics['periodic']['axis_title']['label'] = axis_title
+
                     # set new ylabel
                     if z_statistic_type == 'basic':
                         if base_zstat not in ['Data%', 'Exceedances']:
@@ -804,7 +793,7 @@ class MPLCanvas(FigureCanvas):
         """ Removes all plotted axis elements,
             and hide axis.
         """
-
+       
         #remove all plotted axis elements
         if plot_type == 'legend':
             leg = ax.get_legend()
@@ -824,6 +813,7 @@ class MPLCanvas(FigureCanvas):
                     inds_to_remove.append(col_ii)
             ax.collections = list(np.delete(np.array(ax.collections), inds_to_remove))
             self.map_menu_button.hide()
+            self.map_save_button.hide()
 
         elif plot_type == 'cb':
             ax.artists = []
@@ -833,17 +823,20 @@ class MPLCanvas(FigureCanvas):
             ax.lines = []
             ax.artists = []
             self.timeseries_menu_button.hide()
+            self.timeseries_save_button.hide()
         
         elif plot_type == 'periodic':
             ax.lines = []
             ax.artists = []
             self.periodic_menu_button.hide()
+            self.periodic_save_button.hide()
 
         elif plot_type == 'periodic-violin':
             ax.lines = []
             ax.artists = []
             ax.collections = []
             self.periodic_violin_menu_button.hide()
+            self.periodic_violin_save_button.hide()
 
         elif plot_type == 'metadata':
             ax.texts = []
@@ -852,11 +845,13 @@ class MPLCanvas(FigureCanvas):
             ax.lines = []
             ax.artists = []
             self.distribution_menu_button.hide()
+            self.distribution_save_button.hide()
 
         elif plot_type == 'scatter':
             ax.lines = []
             ax.artists = []
             self.scatter_menu_button.hide()
+            self.scatter_save_button.hide()
 
         if plot_type in self.interactive_elements:
             for element in self.interactive_elements[plot_type]['elements']:
@@ -887,21 +882,27 @@ class MPLCanvas(FigureCanvas):
 
         if plot_type == 'map':
             self.map_menu_button.show()
+            self.map_save_button.show()
 
         elif plot_type == 'timeseries':
             self.timeseries_menu_button.show()
+            self.timeseries_save_button.show()
 
         elif plot_type == 'periodic':
             self.periodic_menu_button.show()
+            self.periodic_save_button.show()
 
         elif plot_type == 'periodic-violin':
             self.periodic_violin_menu_button.show()
+            self.periodic_violin_save_button.show()
 
         elif plot_type == 'distribution':
             self.distribution_menu_button.show()
+            self.distribution_save_button.show()
        
         elif plot_type == 'scatter':
             self.scatter_menu_button.show()
+            self.scatter_save_button.show()
 
         return None
 
@@ -920,8 +921,6 @@ class MPLCanvas(FigureCanvas):
     def select_all_stations(self):
         """Define function that selects/unselects all plotted stations
         (and associated plots) upon ticking of checkbox"""
-
-        print('SELECT ALL')
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -974,8 +973,6 @@ class MPLCanvas(FigureCanvas):
         stations and all experiment domains (and associated plots)
         upon ticking of checkbox
         """
-
-        print('SELECT INTERSECT')
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -1128,8 +1125,6 @@ class MPLCanvas(FigureCanvas):
            If no station is found with left click, all stations are unselected.
         """
 
-        print('ON LASSO LEFT')
-
         # check if have any plotted stations on map, if not, return
         if len(self.active_map_valid_station_inds) == 0:
             return
@@ -1201,8 +1196,6 @@ class MPLCanvas(FigureCanvas):
 
            If no station is found with right click, nothing happens.
         """
-
-        print('ON LASSO RIGHT')
 
         # check if have any plotted stations on map, if not, return
         if len(self.active_map_valid_station_inds) == 0:
@@ -1427,6 +1420,15 @@ class MPLCanvas(FigureCanvas):
 
             self.options.append(self.map_options[option])
 
+        # add map figure save button
+        self.map_save_button = QtWidgets.QPushButton(self)
+        self.map_save_button.setObjectName('map_save_button')
+        self.map_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        self.map_save_button.setIconSize(QtCore.QSize(20, 20))
+        self.map_save_button.setStyleSheet("QPushButton { border: None; }"
+                                           "QPushButton:hover { border: None; }")
+        self.map_save_button.hide()
+
         # set show/hide actions
         self.map_elements = [self.map_container, self.map_settings_label, 
                              self.map_unsel_label, self.map_markersize_unsel_sl_label, 
@@ -1451,7 +1453,8 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_unsel_sl.valueChanged.connect(self.update_markersize_func)
         self.map_opacity_sel_sl.valueChanged.connect(self.update_opacity_func)
         self.map_opacity_unsel_sl.valueChanged.connect(self.update_opacity_func)
-        
+        self.map_save_button.clicked.connect(self.save_axis_figure_func)
+
         # TIMESERIES PLOT SETTINGS MENU #
         # add button to timeseries to show and hide settings menu
         self.timeseries_menu_button = QtWidgets.QPushButton(self)
@@ -1527,6 +1530,15 @@ class MPLCanvas(FigureCanvas):
             
             self.options.append(self.timeseries_options[option])
 
+        # add timeseries figure save button
+        self.timeseries_save_button = QtWidgets.QPushButton(self)
+        self.timeseries_save_button.setObjectName('timeseries_save_button')
+        self.timeseries_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        self.timeseries_save_button.setIconSize(QtCore.QSize(20, 20))
+        self.timeseries_save_button.setStyleSheet("QPushButton { border: None; }"
+                                                  "QPushButton:hover { border: None; }")
+        self.timeseries_save_button.hide()
+
         # set show/hide actions
         self.timeseries_elements = [self.timeseries_container, self.timeseries_settings_label, 
                                     self.timeseries_markersize_sl_label, self.timeseries_markersize_sl,
@@ -1541,6 +1553,7 @@ class MPLCanvas(FigureCanvas):
                                                    }
         self.timeseries_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.timeseries_markersize_sl.valueChanged.connect(self.update_markersize_func)
+        self.timeseries_save_button.clicked.connect(self.save_axis_figure_func)
 
         # PERIODIC PLOT SETTINGS MENU #
         # add button to periodic plot to show and hide settings menu
@@ -1603,8 +1616,8 @@ class MPLCanvas(FigureCanvas):
         self.periodic_linewidth_sl.setValue(self.plot_characteristics['periodic']['plot']['linewidth']*10)
         self.periodic_linewidth_sl.setTickInterval(2)
         self.periodic_linewidth_sl.setGeometry(self.periodic_menu_button.geometry().x()-210, 
-                                                self.periodic_menu_button.geometry().y()+125, 
-                                                200, 20)
+                                               self.periodic_menu_button.geometry().y()+125, 
+                                               200, 20)
         self.periodic_linewidth_sl.hide()
 
         # add periodic plot options name ('Options') to layout
@@ -1636,6 +1649,15 @@ class MPLCanvas(FigureCanvas):
             
             self.options.append(self.periodic_options[option])
 
+        # add periodic figure save button
+        self.periodic_save_button = QtWidgets.QPushButton(self)
+        self.periodic_save_button.setObjectName('periodic_save_button')
+        self.periodic_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        self.periodic_save_button.setIconSize(QtCore.QSize(20, 20))
+        self.periodic_save_button.setStyleSheet("QPushButton { border: None; }"
+                                                "QPushButton:hover { border: None; }")
+        self.periodic_save_button.hide()
+
         # set show/hide actions
         self.periodic_elements = [self.periodic_container, self.periodic_settings_label, 
                                   self.periodic_markersize_sl_label, self.periodic_markersize_sl,
@@ -1653,6 +1675,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.periodic_markersize_sl.valueChanged.connect(self.update_markersize_func)
         self.periodic_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
+        self.periodic_save_button.clicked.connect(self.save_axis_figure_func)
 
         # PERIODIC VIOLIN PLOT SETTINGS MENU #
         # add button to periodic violin plot to show and hide settings menu
@@ -1748,6 +1771,15 @@ class MPLCanvas(FigureCanvas):
 
             self.options.append(self.periodic_violin_options[option])
 
+        # add periodic violin figure save button
+        self.periodic_violin_save_button = QtWidgets.QPushButton(self)
+        self.periodic_violin_save_button.setObjectName('periodic_violin_save_button')
+        self.periodic_violin_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        self.periodic_violin_save_button.setIconSize(QtCore.QSize(20, 20))
+        self.periodic_violin_save_button.setStyleSheet("QPushButton { border: None; }"
+                                                       "QPushButton:hover { border: None; }")
+        self.periodic_violin_save_button.hide()
+
         # set show/hide actions
         self.periodic_violin_elements = [self.periodic_violin_container, self.periodic_violin_settings_label, 
                                          self.periodic_violin_markersize_sl_label, self.periodic_violin_markersize_sl,
@@ -1765,6 +1797,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.periodic_violin_markersize_sl.valueChanged.connect(self.update_markersize_func)
         self.periodic_violin_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
+        self.periodic_violin_save_button.clicked.connect(self.save_axis_figure_func)
 
         # DISTRIBUTION PLOT SETTINGS MENU #
         # add button to distribution plot to show and hide settings menu
@@ -1841,6 +1874,15 @@ class MPLCanvas(FigureCanvas):
             
             self.options.append(self.distribution_options[option])
 
+        # add distribution figure save button
+        self.distribution_save_button = QtWidgets.QPushButton(self)
+        self.distribution_save_button.setObjectName('distribution_save_button')
+        self.distribution_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        self.distribution_save_button.setIconSize(QtCore.QSize(20, 20))
+        self.distribution_save_button.setStyleSheet("QPushButton { border: None; }"
+                                                    "QPushButton:hover { border: None; }")
+        self.distribution_save_button.hide()
+
         # set show/hide actions
         self.distribution_elements = [self.distribution_container, self.distribution_settings_label, 
                                       self.distribution_linewidth_sl_label, self.distribution_linewidth_sl,
@@ -1855,6 +1897,7 @@ class MPLCanvas(FigureCanvas):
                                                     }
         self.distribution_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.distribution_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
+        self.distribution_save_button.clicked.connect(self.save_axis_figure_func)
 
         # SCATTER PLOT SETTINGS MENU #
         # add button scatter plot to show and hide settings menu
@@ -1931,6 +1974,15 @@ class MPLCanvas(FigureCanvas):
             
             self.options.append(self.scatter_options[option])
 
+        # add scatter figure save button
+        self.scatter_save_button = QtWidgets.QPushButton(self)
+        self.scatter_save_button.setObjectName('scatter_save_button')
+        self.scatter_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        self.scatter_save_button.setIconSize(QtCore.QSize(20, 20))
+        self.scatter_save_button.setStyleSheet("QPushButton { border: None; }"
+                                               "QPushButton:hover { border: None; }")
+        self.scatter_save_button.hide()
+
         # set show/hide actions
         self.scatter_elements = [self.scatter_container, self.scatter_settings_label, 
                                  self.scatter_markersize_sl_label, self.scatter_markersize_sl,
@@ -1945,11 +1997,16 @@ class MPLCanvas(FigureCanvas):
                                                }
         self.scatter_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.scatter_markersize_sl.valueChanged.connect(self.update_markersize_func)
+        self.scatter_save_button.clicked.connect(self.save_axis_figure_func)
 
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
-        self.buttons = [self.map_menu_button, self.timeseries_menu_button,
-                        self.periodic_menu_button, self.periodic_violin_menu_button,
-                        self.distribution_menu_button, self.scatter_menu_button]
+        self.menu_buttons = [self.map_menu_button, self.timeseries_menu_button,
+                             self.periodic_menu_button, self.periodic_violin_menu_button,
+                             self.distribution_menu_button, self.scatter_menu_button]
+
+        self.save_buttons = [self.map_save_button, self.timeseries_save_button,
+                             self.periodic_save_button, self.periodic_violin_save_button,
+                             self.distribution_save_button, self.scatter_save_button]
 
         self.elements = [self.map_elements, self.timeseries_elements, 
                          self.periodic_elements, self.periodic_violin_elements,
@@ -2265,6 +2322,106 @@ class MPLCanvas(FigureCanvas):
         # redraw points
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
+
+        return None
+
+    def save_axis_figure_func(self):
+        
+        # get option and plot names
+        event_source = self.sender()
+        plot_type = event_source.objectName().split('_save')[0]
+        if plot_type == 'periodic_violin':
+            plot_type = 'periodic-violin'
+        
+        # create figures folder
+        figures_path = os.path.join(CURRENT_PATH, '../figures/')
+        if not os.path.exists(os.path.dirname(figures_path)):
+            print('Path {0} does not exist and it will be created.'.format(figures_path))
+            os.makedirs(os.path.dirname(figures_path))
+
+        # set extent expansion
+        for i, position in enumerate([self.read_instance.position_1, 
+                                      self.read_instance.position_2, 
+                                      self.read_instance.position_3, 
+                                      self.read_instance.position_4, 
+                                      self.read_instance.position_5]):
+            if plot_type == position:
+                if i + 1 == 1:
+                    expand_x, expand_y = 1.4, 1.35
+                if i + 1 == 2:
+                    if plot_type == 'scatter':
+                        expand_x, expand_y = 1.30, 1.25
+                    else:
+                        expand_x, expand_y = 1.2, 1.3
+                else:
+                    if plot_type == 'scatter':
+                        expand_x, expand_y = 1.25, 1.2
+                    else:
+                        expand_x, expand_y = 1.2, 1.2
+                continue
+
+        # remove titles
+        for key in self.selected_station_plots:
+            if isinstance(self.plot_axes[key], dict):
+                for relevant_temporal_resolution, sub_ax in self.plot_axes[key].items():
+                    if relevant_temporal_resolution in ['hour']:
+                        sub_ax.set_title(label='', 
+                                         fontsize=self.plot_characteristics[key]['axis_title']['fontsize'],
+                                         loc=self.plot_characteristics[key]['axis_title']['loc'])
+            else:
+                self.plot_axes[key].set_title(label='',
+                                              fontsize=self.plot_characteristics[key]['axis_title']['fontsize'],
+                                              loc=self.plot_characteristics[key]['axis_title']['loc'])
+       
+        # hide colorbar
+        self.plot_axes['cb'].set_visible(False)
+
+        # draw changes
+        self.figure.canvas.draw()
+
+        # make screenshot and save
+        if isinstance(self.plot_axes[plot_type], dict):
+            for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
+                extent = sub_ax.get_window_extent().transformed(self.figure.dpi_scale_trans.inverted())
+                if relevant_temporal_resolution == 'hour':
+                    expand_x, expand_y = 1.15, 1.3
+                elif relevant_temporal_resolution == 'dayofweek':
+                    expand_x, expand_y = 1.25, 1.3
+                elif relevant_temporal_resolution == 'month':
+                    expand_x, expand_y = 1.15, 1.3
+                self.figure.savefig('figures/{0}-{1}-{2}-{3}-{4}-{5}-{6}-{7}.png'.format(self.read_instance.network[0],
+                                                                                         self.read_instance.matrix,
+                                                                                         self.read_instance.species[0],
+                                                                                         self.read_instance.resolution, 
+                                                                                         self.read_instance.start_date, 
+                                                                                         self.read_instance.end_date,
+                                                                                         plot_type, relevant_temporal_resolution),
+                                    bbox_inches=extent.expanded(expand_x, expand_y))
+        else:
+            extent = self.plot_axes[plot_type].get_window_extent().transformed(self.figure.dpi_scale_trans.inverted())
+            self.figure.savefig('figures/{0}-{1}-{2}-{3}-{4}-{5}-{6}.png'.format(self.read_instance.network[0],
+                                                                                 self.read_instance.matrix,
+                                                                                 self.read_instance.species[0],
+                                                                                 self.read_instance.resolution, 
+                                                                                 self.read_instance.start_date, 
+                                                                                 self.read_instance.end_date,
+                                                                                 plot_type),
+                                bbox_inches=extent.expanded(expand_x, expand_y))
+
+        # add titles
+        for key in self.selected_station_plots:
+            if isinstance(self.plot_axes[key], dict):
+                for relevant_temporal_resolution, sub_ax in self.plot_axes[key].items():
+                    if relevant_temporal_resolution in ['hour']:
+                        sub_ax.set_title(**self.plot_characteristics[key]['axis_title'])
+            else:
+                self.plot_axes[key].set_title(**self.plot_characteristics[key]['axis_title'])
+
+        # show colorbar
+        self.plot_axes['cb'].set_visible(True)
+
+        # draw changes
+        self.figure.canvas.draw()
 
         return None
 
