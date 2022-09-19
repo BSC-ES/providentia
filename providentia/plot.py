@@ -368,21 +368,21 @@ class Plot:
         # create legend elements
         # add observations element
         legend_elements = [Line2D([0], [0], 
-                                  marker=plot_characteristics_legend['plot']['handles']['marker'], 
-                                  color=plot_characteristics_legend['plot']['handles']['color'],
+                                  marker=plot_characteristics_legend['handles']['marker'], 
+                                  color=plot_characteristics_legend['handles']['color'],
                                   markerfacecolor=self.read_instance.plotting_params['observations']['colour'],
-                                  markersize=plot_characteristics_legend['plot']['handles']['markersize'], 
-                                  label=plot_characteristics_legend['plot']['handles']['obs_label'])]
+                                  markersize=plot_characteristics_legend['handles']['markersize'], 
+                                  label=plot_characteristics_legend['handles']['obs_label'])]
                                   
         # add element for each experiment
         for experiment in self.read_instance.data_labels:
             if experiment != 'observations':
                 # add experiment element
                 legend_elements.append(Line2D([0], [0], 
-                                              marker=plot_characteristics_legend['plot']['handles']['marker'],  
-                                              color=plot_characteristics_legend['plot']['handles']['color'],
+                                              marker=plot_characteristics_legend['handles']['marker'],  
+                                              color=plot_characteristics_legend['handles']['color'],
                                               markerfacecolor=self.read_instance.plotting_params[experiment]['colour'],
-                                              markersize=plot_characteristics_legend['plot']['handles']['markersize'],
+                                              markersize=plot_characteristics_legend['handles']['markersize'],
                                               label=self.read_instance.experiments[experiment]))
         
         plot_characteristics_legend['plot']['handles'] = legend_elements
