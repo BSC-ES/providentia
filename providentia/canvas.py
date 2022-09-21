@@ -275,17 +275,14 @@ class MPLCanvas(FigureCanvas):
             self.handle_periodic_statistic_update()
             self.read_instance.block_MPL_canvas_updates = False
 
+            # update layout fields
+            self.read_instance.update_layout_fields()
+
             # update plotted map z statistic
             self.update_map_z_statistic()
 
-            # update layout field options 
-            self.read_instance.update_layout_fields()
-
             # update associated plots with selected stations
             self.update_associated_selected_station_plots()
-
-            # update layout fields
-            self.read_instance.update_layout_fields()
 
             # draw changes
             self.figure.canvas.draw()
