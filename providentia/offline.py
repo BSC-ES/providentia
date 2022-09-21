@@ -211,12 +211,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 if len(self.child_subsection_names) > 0:
                     for section in self.all_sections:
                         for k in self.sub_opts[section]:
-                            try:
-                                vars(self).pop(k)
-                            except:
-                                continue
+                            if k != 'experiments':
+                                try:
+                                    vars(self).pop(k)
+                                except:
+                                    continue
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in
-                                      self.sub_opts[self.subsection].items()})
+                                      self.sub_opts[self.subsection].items() if k != 'experiments'})
 
                 # update fields available for filtering
                 aux.update_representativity_fields(self)
