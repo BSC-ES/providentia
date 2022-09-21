@@ -39,8 +39,6 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
     :type station_index: list
     """
 
-    print('TO PANDAS DF')
-
     # create new dictionary to store selection station data by network / species, per data label
     canvas_instance.selected_station_data = {}
     canvas_instance.selected_station_data_min = {}
@@ -67,12 +65,12 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
                 data_array = data_array[station_index,:]
             else:
                 if read_instance.offline:
-                    if read_instance.temporal_colocation:
+                    if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                         station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
                     else:
                         station_inds = read_instance.valid_station_inds[networkspeci][data_label]
                 else:
-                    if read_instance.temporal_colocation:
+                    if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                         station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
                     else:
                         station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
@@ -128,8 +126,6 @@ def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
     :param networkspeci: name of networkspeci str
     :type networkspeci: str
     """
-
-    print('PANDAS TEMPORAL AGG')
 
     # define statistics to calculate (all basic statistics)
     statistics_to_calculate = list(basic_stats.keys())
@@ -217,8 +213,6 @@ def calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_i
     :param networkspeci: name of networkspeci str
     :type networkspeci: str
     """
-
-    print('CALC STAT')
 
     # define all basic statistics that will be subtracted
     # (each experiment - observations) for each temporal aggregation
@@ -314,8 +308,6 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
     :return: calculated map statistic and active station indices on map
     :rtype: np.float32, np.int
     """
-
-    print('CALC Z STAT')
 
     # check if have valid station data first
     # if not update z statistic and active map valid station indices to be empty lists and return
@@ -448,7 +440,8 @@ def get_axes_vminmax(axs):
     ax_max = []
     for ax in axs:
         for collection in ax.collections:
-            if isinstance(collection, matplotlib.collections.PathCollection):
+            if ((isinstance(collection, matplotlib.collections.PathCollection)) or 
+                (isinstance(collection, matplotlib.collections.QuadMesh))):
                 col_array = collection.get_array()
                 ax_min.append(np.nanmin(col_array))
                 ax_max.append(np.nanmax(col_array))
@@ -598,8 +591,9 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
     plotted_min, plotted_max = get_axes_vminmax(axs)
 
     # get colourbar limits/label
-    z_vmin, z_vmax, z_label, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci)
-    
+    z_vmin, z_vmax, z_label, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, 
+                                                                     plot_characteristics, speci)
+
     # generate colourbar tick array
     tick_array = np.linspace(z_vmin, z_vmax, plot_characteristics['cb']['n_ticks'], endpoint=True)
 
@@ -620,7 +614,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
                                               orientation=plot_characteristics['cb']['orientation'], 
                                               ticks=tick_array)
 
-        # set colorbar labeltest_options
+        # set colorbar label
         if 'cb_label' in plot_characteristics:
             cb_label_characteristics = copy.deepcopy(plot_characteristics['cb_label'])
             del cb_label_characteristics['label']
@@ -644,7 +638,8 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
     # update plot axes (to take account of new colourbar vmin/vmax/cmap)
     for ax in axs:
         for collection in ax.collections:
-            if isinstance(collection, matplotlib.collections.PathCollection):
+            if ((isinstance(collection, matplotlib.collections.PathCollection)) or 
+                (isinstance(collection, matplotlib.collections.QuadMesh))):
                 collection.set_clim(vmin=z_vmin,vmax=z_vmax)
                 collection.set_cmap(cmap=cmap)
 
