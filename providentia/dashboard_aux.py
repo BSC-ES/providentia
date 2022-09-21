@@ -542,4 +542,4 @@ class PopUpWindow(QtWidgets.QWidget):
                     if element != 'apply_selected':
                         self.menu_current[menu_type][element] = set_vals
                     else:
-                        self.menu_current[menu_type][element] = selected_vars
+                        self.menu_current[menu_type][element] = selected_vars       

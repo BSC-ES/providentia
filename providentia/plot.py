@@ -81,14 +81,16 @@ class Plot:
             
             # remove plots where setting 'obs' and 'bias' options together
             if ('obs' in plot_options) & ('bias' in plot_options): 
-                print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together")
-                continue
+                if self.read_instance.offline:
+                    print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together")
+                    continue
 
             # if no experiments are defined, remove all bias plots 
             if ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                 if len(self.read_instance.data_labels) == 1:
-                    print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created')
-                    continue
+                    if self.read_instance.offline:
+                        print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created')
+                        continue
 
             # add new keys to make plots with stats (map, periodic, heatmap, table)
             if zstat:
@@ -100,16 +102,19 @@ class Plot:
                 
                 # check all defined plot options are allowed for current plot type
                 if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
-                    print(f'Warning: {plot_type} cannot be created as some plot options are not valid')
-                    continue
+                    if self.read_instance.offline:
+                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid')
+                        continue
                 # check desired statistic is defined in stats dict
                 if base_zstat not in stats_dict:
-                    print(f"Warning: {plot_type} cannot be created as {base_zstat} not defined in Providentia's statistical library.")
-                    continue
+                    if self.read_instance.offline:
+                        print(f"Warning: {plot_type} cannot be created as {base_zstat} not defined in Providentia's statistical library.")
+                        continue
                 # remove plots where setting 'obs', but z_statistic_sign is 'bias'
                 elif ('obs' in plot_options) & (z_statistic_sign == 'bias'):
-                    print(f"Warning: {plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set")
-                    continue
+                    if self.read_instance.offline:
+                        print(f"Warning: {plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set")
+                        continue
 
                 # add information for plot type from base plot type template 
                 self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
@@ -159,21 +164,18 @@ class Plot:
 
                 # check all defined plot options are allowed for current plot type
                 if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
-                    print(f'Warning: {plot_type} cannot be created as some plot options are not valid')
-                    continue
+                    if self.read_instance.offline:
+                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid')
+                        continue
                 # warning for scatter plot if the temporal colocation is not active
                 elif ('scatter' == base_plot_type) & (self.read_instance.temporal_colocation == False):
-                    print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
-                    # remove scatter from available dashboard plots
-                    if not self.read_instance.offline: 
-                        if 'scatter' in self.canvas_instance.selected_station_plots:
-                            self.canvas_instance.selected_station_plots.remove('scatter')
-                    else:
+                    if self.read_instance.offline:
+                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
                         continue
                 # warning for timeseries bias plot if the temporal colocation is not active
                 elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (self.read_instance.temporal_colocation == False):
-                    print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
-                    if self.read_instance.offline: 
+                    if self.read_instance.offline:
+                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
                         continue
 
                 # add information for plot type for base plot type 
@@ -452,7 +454,8 @@ class Plot:
         pdf.savefig(page, dpi=self.canvas_instance.dpi)
         plt.close(page)
 
-    def make_metadata(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[]):
+    def make_metadata(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
+                      first_data_label=False):
         """Make metadata summary plot
 
         :param relevant_axis: axis to plot on 
@@ -465,6 +468,8 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plot  
         :type plot_options: list
+        :param first_data_label: boolean informing if first plotted data_label on axis
+        :type first_data_label: boolean
         """
 
         print('MAKE METADATA')
@@ -571,7 +576,8 @@ class Plot:
         # automatically sets limit as figure width
         plot_txt._get_wrap_line_width = lambda: ax_width_px
 
-    def make_map(self, relevant_axis, networkspeci, z_statistic, plot_characteristics, plot_options=[]):
+    def make_map(self, relevant_axis, networkspeci, z_statistic, plot_characteristics, plot_options=[],
+                 first_data_label=False):
         """make map plot
 
         :param relevant_axis: axis to plot on 
@@ -584,6 +590,8 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plot  
         :type plot_options: list
+        :param first_data_label: boolean informing if first plotted data_label on axis
+        :type first_data_label: boolean
         """
       
         # plot new station points on map - coloured by currently active z statisitic
@@ -592,7 +600,12 @@ class Plot:
                                                       c=z_statistic, transform=self.canvas_instance.datacrs,
                                                       **plot_characteristics['plot'])
 
-    def make_timeseries(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[]):
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            self.track_plot_elements('observations', 'map', 'plot', [self.stations_scatter], bias=False)
+
+    def make_timeseries(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[], 
+                        first_data_label=False):
         """make timeseries plot
 
         :param relevant_axis: axis to plot on 
@@ -605,18 +618,28 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plot  
         :type plot_options: list
+        :param first_data_label: boolean informing if first plotted data_label on axis
+        :type first_data_label: boolean
         """
 
         print('MAKE TIMESERIES')
 
         # bias plot?
         if 'bias' in plot_options:
+            bias = True
             ts_obs = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']
             ts_model = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] 
             ts = ts_model - ts_obs
+            # plot horizontal line across x axis at 0 (if not already plotted)
+            if first_data_label:
+                bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
+                # track plot elements if using dashboard 
+                if not self.read_instance.offline:
+                    self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
         else:
+            bias = False
             ts = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']
-
+            
         # get ts with no NaNs
         ts_nonan = ts.dropna()
         
@@ -627,7 +650,7 @@ class Plot:
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'timeseries', timeseries_plot)
+            self.track_plot_elements(data_label, 'timeseries', 'plot', timeseries_plot, bias=bias)
 
         # recalculate xticks (if desired) for better spacing
         if plot_characteristics['xtick_alteration']['define']:
@@ -681,7 +704,8 @@ class Plot:
             # set xticks
             relevant_axis.xaxis.set_ticks(xticks)
 
-    def make_periodic(self, relevant_axis, networkspeci, data_label, plot_characteristics, zstat=None, plot_options=[]):
+    def make_periodic(self, relevant_axis, networkspeci, data_label, plot_characteristics, zstat=None, plot_options=[],
+                      first_data_label=False):
         """Make period or period-violin plot
 
         :param relevant_axis: axis to plot on 
@@ -696,6 +720,8 @@ class Plot:
         :type zstat: str
         :param plot_options: list of options to configure plot  
         :type plot_options: list
+        :param first_data_label: boolean informing if first plotted data_label on axis
+        :type first_data_label: boolean
         """
 
         print('MAKE PERIODIC')
@@ -766,36 +792,48 @@ class Plot:
 
                 # track plot elements if using dashboard 
                 if not self.read_instance.offline:
-                    self.track_plot_elements(data_label, 'periodic-violin', violin_plot)
-                    self.track_plot_elements(data_label, 'periodic-violin', p50_plots)
+                    self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), violin_plot, bias=False)
+                    self.track_plot_elements(data_label, 'periodic-violin', 'p50_plot_{}'.format(relevant_temporal_resolution), p50_plots, bias=False)
 
             # standard periodic plot type
             else:
+                # determine if 'bias' in plot_options
+                if 'bias' in plot_options:
+                    bias = True
+                else:
+                    bias = False
+
+                # get zstat information
+                zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
+
+                # plot horizontal line/s across x axis at value/s of minimum experiment bias (if bias option is active, and not previously plotted)
+                if z_statistic_sign == 'bias':
+                    if first_data_label:
+                        # get value/s of minimum bias for statistic
+                        if z_statistic_type == 'basic':
+                            minimum_bias = basic_stats[base_zstat]['minimum_bias']
+                        else:
+                            minimum_bias = expbias_stats[base_zstat]['minimum_bias']
+                        bias_lines = []
+                        for mb in minimum_bias:
+                            bias_lines += [relevant_subplot_axis.axhline(y=mb, **plot_characteristics['bias_line'])]
+                        # track plot elements if using dashboard 
+                        if not self.read_instance.offline:
+                            self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), bias_lines, bias=bias)
+
                 # make plot
                 periodic_plot = relevant_subplot_axis.plot(self.canvas_instance.periodic_xticks[relevant_temporal_resolution],
                                                            self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution][zstat],
                                                            color=self.read_instance.plotting_params[data_label]['colour'], 
                                                            zorder=self.read_instance.plotting_params[data_label]['zorder'],
                                                            **plot_characteristics['plot'])
-                    
+                                        
                 # track plot elements if using dashboard 
                 if not self.read_instance.offline:
-                    self.track_plot_elements(data_label, 'periodic', periodic_plot)
-                    
-                # plot horizontal line/s across x axis at value/s of minimum experiment bias
-                zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
-                
-                if z_statistic_sign == 'bias':
-                    # get value/s of minimum bias for statistic
-                    if z_statistic_type == 'basic':
-                        minimum_bias = basic_stats[base_zstat]['minimum_bias']
-                    else:
-                        minimum_bias = expbias_stats[base_zstat]['minimum_bias']
-                    for mb in minimum_bias:
-                        relevant_subplot_axis.axhline(y=mb, **plot_characteristics['bias_line'])
+                    self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), periodic_plot, bias=bias)
 
             # adjust plot x axis to have correct margin on edges 
-            relevant_subplot_axis.relim()
+            relevant_subplot_axis.relim(visible_only=True)
             relevant_subplot_axis.autoscale(axis='x', tight=False)
             xlim_lower, xlim_upper = relevant_subplot_axis.get_xlim()
             first_valid_x = self.canvas_instance.periodic_xticks[relevant_temporal_resolution][(np.abs(self.canvas_instance.periodic_xticks[relevant_temporal_resolution] - xlim_lower)).argmin()]
@@ -811,7 +849,8 @@ class Plot:
                 xlim_upper = last_valid_x + 0.55
             relevant_subplot_axis.set_xlim(xlim_lower, xlim_upper)
 
-    def make_distribution(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[]):
+    def make_distribution(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
+                          first_data_label=False):
         """Make distribution plot
 
         :param relevant_axis: axis to plot on 
@@ -824,33 +863,40 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plot  
         :type plot_options: list
+        :param first_data_label: boolean informing if first plotted data_label on axis
+        :type first_data_label: boolean
         """
 
         print('MAKE DISTRIBUTION')
 
         # make distribution plot
         minmax_diff = self.canvas_instance.selected_station_data_max[networkspeci] - self.canvas_instance.selected_station_data_min[networkspeci]
-        if pd.isnull(self.read_instance.parameter_dictionary[networkspeci.split('-')[1]]['minimum_resolution']):
+        if pd.isnull(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']):
             n_samples = plot_characteristics['pdf_min_samples']
         else:
-            n_samples = int(np.around(minmax_diff/(self.read_instance.parameter_dictionary[networkspeci.split('-')[1]]['minimum_resolution']/4.0),0))
+            n_samples = int(np.around(minmax_diff/(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']/4.0),0))
             if n_samples < plot_characteristics['pdf_min_samples']:
                 n_samples = plot_characteristics['pdf_min_samples']
         x_grid = np.linspace(self.canvas_instance.selected_station_data_min[networkspeci], self.canvas_instance.selected_station_data_max[networkspeci], n_samples, endpoint=True)
 
         # setup bias plot
         if 'bias' in plot_options:
+            bias = True
             PDF_obs = st.gaussian_kde(self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']['data'].dropna())
             PDF_model = st.gaussian_kde(self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna())
             PDF_sampled = PDF_model(x_grid) - PDF_obs(x_grid)
-            # plot horizontal line across x axis at 0
-            relevant_axis.axhline(**plot_characteristics['bias_line'])
-
+            # plot horizontal line across x axis at 0 (if not already plotted)
+            if first_data_label:
+                bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
+                # track plot elements if using dashboard 
+                if not self.read_instance.offline:
+                    self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
         # setup standard plot
         else:
+            bias = False
             PDF = st.gaussian_kde(self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna())
             PDF_sampled = PDF(x_grid)
-
+            
         # make plot
         distribution_plot = relevant_axis.plot(x_grid, PDF_sampled, 
                                                color=self.read_instance.plotting_params[data_label]['colour'], 
@@ -858,9 +904,10 @@ class Plot:
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'distribution', distribution_plot)
+            self.track_plot_elements(data_label, 'distribution', 'plot', distribution_plot, bias=bias)
 
-    def make_scatter(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[]):
+    def make_scatter(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
+                     first_data_label=False):
         """Make scatter plot
 
         :param relevant_axis: axis to plot on 
@@ -873,6 +920,8 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plot  
         :type plot_options: list
+        :param first_data_label: boolean informing if first plotted data_label on axis
+        :type first_data_label: boolean
         """
 
         print('MAKE SCATTER')
@@ -888,8 +937,8 @@ class Plot:
                                           color=self.read_instance.plotting_params[data_label]['colour'],
                                           **plot_characteristics['plot'])
 
-        # add extra lines only once (for last plotted data_label)
-        if data_label == self.read_instance.data_labels[-1]:
+        # add extra lines only once (if not already plotted)
+        if first_data_label:
             # add 1:1 line (if in plot_characteristics)
             if '1:1_line' in plot_characteristics:
                 relevant_axis.plot([0, 1], [0, 1], transform=relevant_axis.transAxes, 
@@ -905,7 +954,7 @@ class Plot:
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'scatter', scatter_plot)
+            self.track_plot_elements(data_label, 'scatter', 'plot', scatter_plot, bias=False)
           
     def make_heatmap(self, relevant_axis, stat_df, plot_characteristics, plot_options=[]):
         """Make heatmap plot
@@ -991,7 +1040,7 @@ class Plot:
                 self.set_equal_axes(relevant_axis, plot_characteristics)
 
     def linear_regression(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
-                          plot_options=[], undo=False):
+                          plot_options=[]):
         """Add linear regression to plot
 
         :param relevant_axis: axis to plot on 
@@ -1006,33 +1055,27 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
-        :param undo: remove regression line
-        :type undo: boolean
         """
     
-        if not undo:
-            # get observations data
-            observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df'].dropna()['data']
+        # get observations data
+        observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df'].dropna()['data']
 
-            # iterate through experiment data, making regression line to observations
-            for data_label in data_labels:
-                if data_label != 'observations':
-                    experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna()['data']
-                    m, b = np.polyfit(observations_data, experiment_data, deg=1)
-                    regression_line = relevant_axis.plot(observations_data, m*observations_data+b, 
-                                                         color=self.read_instance.plotting_params[data_label]['colour'],
-                                                         zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
-                                                         **plot_characteristics['regression'])
-                    
-                    # track plot elements if using dashboard 
-                    if not self.read_instance.offline:
-                        self.track_plot_elements(data_label, base_plot_type, regression_line)
-        else:
-            for line in relevant_axis.lines[len(relevant_axis.lines)-2:]:
-                line.remove()
+        # iterate through experiment data, making regression line to observations
+        for data_label in data_labels:
+            if data_label != 'observations':
+                experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna()['data']
+                m, b = np.polyfit(observations_data, experiment_data, deg=1)
+                regression_line = relevant_axis.plot(observations_data, m*observations_data+b, 
+                                                        color=self.read_instance.plotting_params[data_label]['colour'],
+                                                        zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
+                                                        **plot_characteristics['regression'])
+                
+                # track plot elements if using dashboard 
+                if not self.read_instance.offline:
+                    self.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
     def trend(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
-              plot_options=[], undo=False):
+              plot_options=[]):
         """Add trendline to plot
 
         :param relevant_axis: axis to plot on 
@@ -1047,39 +1090,37 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
-        :param undo: remove trend line
-        :type undo: boolean
         """
 
-        if not undo:
-            # iterate through plotted data arrays making trendline
-            for data_label in data_labels:
+        # iterate through plotted data arrays making trendline
+        for data_label in data_labels:
 
-                # bias plot?
-                if 'bias' in plot_options:
-                    ts_obs = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']
-                    ts_model = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] 
-                    ts = ts_model - ts_obs
-                # normal plot?
-                else:
-                    ts = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']
+            # bias plot?
+            if 'bias' in plot_options:
+                # skip to next data label if making bias, and data label == 'observations'
+                if data_label == 'observations':
+                    continue
+                ts_obs = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']
+                ts_model = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] 
+                ts = ts_model - ts_obs
+                bias = True
+            # normal plot?
+            else:
+                ts = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']
+                bias = False
 
-                # make trendline
-                trend_line = relevant_axis.plot(ts.rolling(plot_characteristics['trend']['window'], min_periods=plot_characteristics['trend']['min_points'], center=True).mean().dropna(),
-                                                color=self.read_instance.plotting_params[data_label]['colour'],
-                                                zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
-                                                **plot_characteristics['trend']['format'])
+            # make trendline
+            trend_line = relevant_axis.plot(ts.rolling(plot_characteristics['trend']['window'], min_periods=plot_characteristics['trend']['min_points'], center=True).mean().dropna(),
+                                            color=self.read_instance.plotting_params[data_label]['colour'],
+                                            zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
+                                            **plot_characteristics['trend']['format'])
 
-                # track plot elements if using dashboard 
-                if not self.read_instance.offline:
-                    self.track_plot_elements(data_label, base_plot_type, trend_line)
-        
-        else:
-            for line in relevant_axis.lines[len(data_labels):]:
-                line.remove() 
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements(data_label, base_plot_type, 'trend', trend_line, bias=bias)
 
     def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
-                   plot_options=[], undo=False):
+                   plot_options=[]):
         """Add statistical annotations to plot
 
         :param relevant_axis: axis to plot on 
@@ -1094,72 +1135,73 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
-        :param undo: remove annotation
-        :type undo: boolean
         """
-        
-        if not undo:
 
-            # get stats wished to be annotated
-            stats = plot_characteristics['annotate_stats']
+        # get stats wished to be annotated
+        stats = plot_characteristics['annotate_stats']
 
-            # if no stats defined, then return
-            if len(stats) == 0:
-                print(f'No annotation statistics have not been defined for {base_plot_type} in plot_characteristics_offline.py')
-                return
+        # if no stats defined, then return
+        if len(stats) == 0:
+            print(f'No annotation statistics have not been defined for {base_plot_type} in plot_characteristics_offline.py')
+            return
 
-            # initialise list of strs to annotate, and colours of annotations
-            str_to_annotate = []
-            colours = []
+        # initialise list of strs to annotate, and colours of annotations
+        str_to_annotate = []
+        colours = []
 
-            # iterate through plotted data labels
-            for data_label in data_labels:
-                
-                # avoid plotting stats for observations data for periodic and scatter plots
-                if 'periodic' in base_plot_type or base_plot_type == 'scatter':
-                    if data_label == 'observations':
-                        continue
-
-                # get stats
-                stats_annotate = []
-                for zstat in stats:
-                    if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
-                        stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
-                                              plot_characteristics['annotate_text']['round_decimal_places'])))
-
-                # show number of stations if defined
-                if plot_characteristics['annotate_text']['n_stations']:
-                    if data_label == data_labels[0]:
-                        colours.append('black')
-                        if 'individual' in plot_options:
-                            str_to_annotate.append('Stations: 1')
-                        else:
-                            if self.read_instance.offline:
-                                str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_latitudes[networkspeci])))
-                            else:
-                                str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.relative_selected_station_inds)))
-
-                # get colors
-                colours.append(self.read_instance.plotting_params[data_label]['colour'])
-
-                # generate annotation
-                str_to_annotate.append(', '.join(stats_annotate))
-
-            # add annotation to plot
-            # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
-            lines = [TextArea(line, textprops=dict(color=colour, 
-                              size=plot_characteristics['annotate_text']['fontsize'])) 
-                     for line, colour in zip(str_to_annotate, colours)]
-            bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
-                                     loc=plot_characteristics['annotate_text']['loc'],
-                                     bbox_transform=relevant_axis.transAxes)
-            bbox.patch.set(**plot_characteristics['annotate_bbox'])
-            relevant_axis.add_artist(bbox)
-         
+        # bias plot?
+        if 'bias' in plot_options:
+            bias = True
         else:
-            for artist in relevant_axis.artists:   
-                if type(artist) == AnchoredOffsetbox:
-                    artist.remove()
+            bias = False
+
+        # iterate through plotted data labels
+        for data_label in data_labels:
+            
+            # avoid plotting stats for observations data for scatter plots
+            if base_plot_type == 'scatter':
+                if data_label == 'observations':
+                    continue
+
+            # get stats
+            stats_annotate = []
+            for zstat in stats:
+                if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
+                    stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
+                                            plot_characteristics['annotate_text']['round_decimal_places'])))
+
+            # show number of stations if defined
+            if plot_characteristics['annotate_text']['n_stations']:
+                if data_label == data_labels[0]:
+                    colours.append('black')
+                    if 'individual' in plot_options:
+                        str_to_annotate.append('Stations: 1')
+                    else:
+                        if self.read_instance.offline:
+                            str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_latitudes[networkspeci])))
+                        else:
+                            str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.relative_selected_station_inds)))
+
+            # get colors
+            colours.append(self.read_instance.plotting_params[data_label]['colour'])
+
+            # generate annotation
+            str_to_annotate.append(', '.join(stats_annotate))
+
+        # add annotation to plot
+        # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
+        lines = [TextArea(line, textprops=dict(color=colour, 
+                            size=plot_characteristics['annotate_text']['fontsize'])) 
+                    for line, colour in zip(str_to_annotate, colours)]
+        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
+                                    loc=plot_characteristics['annotate_text']['loc'],
+                                    bbox_transform=relevant_axis.transAxes)
+        bbox.patch.set(**plot_characteristics['annotate_bbox'])
+        relevant_axis.add_artist(bbox)
+
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            self.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
 
     def log_validity(self, relevant_axis, log_ax):
         """Determine if log operation for a given axes is valid (no values <= 0)
@@ -1192,33 +1234,62 @@ class Plot:
 
         return validity
 
-    def track_plot_elements(self, data_label, base_plot_type, plot_object):
+    def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
-            that will be removed/added when picking up legend elements on daahboard.
+            that will be removed/added when picking up legend elements on dashboard.
+
+        :param data_label: name of data array to plot
+        :type data_label: str
+        :param base_plot_type: plot type, without statistical information
+        :type base_plot_type: str
+        :param element_type: type of element
+        :type element_type: str
+        :param plot_object: plotted element object
+        :type plot_object: object
+        :param bias: boolean stating if plot is a bias plot
+        :type bias: boolean
         """
 
-        # add list for plot_type elements per data_label if does not exist yet
-        if base_plot_type not in self.canvas_instance.plot_elements[data_label]['plot_elements']:
-            self.canvas_instance.plot_elements[data_label]['plot_elements'][base_plot_type] = []
+        # set variable name to access plot elements (absolute or bias versions)
+        if not bias:
+            plot_element_varname = 'absolute'
+        else:
+            plot_element_varname = 'bias'
 
-        # get current data_label visibility
-        visible = self.canvas_instance.plot_elements[data_label]['visible']
+        # add dictionary for plot_type elements if does not yet exist
+        if base_plot_type not in self.canvas_instance.plot_elements:
+            self.canvas_instance.plot_elements[base_plot_type] =  {'active': 'absolute', 'absolute': {}} 
+
+        # add plot_element_varname if does not yet exist
+        if plot_element_varname not in self.canvas_instance.plot_elements[base_plot_type]:
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname] = {}
+
+        # add dictionary for data label if does not yet exist
+        if data_label not in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname]:
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label] = {}
+
+        # add list for element type if does not yet exist
+        if element_type not in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label]:
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] = []
+        # if does exist already then remove plot element return, as element has already been plotted
+        else:
+            return 
 
         # track plot elements
         if base_plot_type in ['periodic', 'periodic-violin']:
             # add list of collections
             if isinstance(plot_object, dict):
-                self.canvas_instance.plot_elements[data_label]['plot_elements'][base_plot_type] += plot_object['bodies']
+                self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['bodies']
             # add list of lines
             elif isinstance(plot_object, list):
-                self.canvas_instance.plot_elements[data_label]['plot_elements'][base_plot_type] += plot_object
+                self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object
         else:
             # add list of lines
-            self.canvas_instance.plot_elements[data_label]['plot_elements'][base_plot_type] += plot_object
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object
             
         # set element visibility
-        if not visible:
-            for element in self.canvas_instance.plot_elements[legend_label]['plot_elements'][base_plot_type]:
+        if (data_label not in self.canvas_instance.plot_elements['data_labels_active']) & (data_label != 'ALL'):
+            for element in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]:
                 element.set_visible(False)
 
     def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, 
@@ -1250,7 +1321,7 @@ class Plot:
         :param bias_centre: centre bias plots at 0 on the y axis
         :type bias_centre: boolean   
         """
-        print(base_plot_type)
+        
         # initialise arrays to save lower and upper limits in all axes
         all_xlim_lower = []
         all_xlim_upper = []
@@ -1266,7 +1337,7 @@ class Plot:
         # get lower and upper limits across all relevant axes
         for ax in relevant_axs:
             if relim:
-                ax.relim()
+                ax.relim(visible_only=True)
             if autoscale:
                 ax.autoscale(tight=False)
             if autoscale_x:
@@ -1289,7 +1360,7 @@ class Plot:
                 if base_plot_type not in ['periodic','periodic-violin']:
                     xlim_min = np.min(all_xlim_lower)
                     xlim_max = np.max(all_xlim_upper)
-                ax.set_xlim(xlim_min, xlim_max)
+                    ax.set_xlim(xlim_min, xlim_max)
             elif 'xlim' in plot_characteristics:
                 ax.set_xlim(plot_characteristics['xlim'])
             elif xlim is not None:
