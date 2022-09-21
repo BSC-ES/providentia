@@ -41,7 +41,8 @@ class NavigationToolbar(NavigationToolbar2QT):
         self._actions['save_data'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_icon.png")))
         self._actions['conf_dialogs'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/conf_icon.png")))
         self._actions['zoom'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/zoom_icon.png")))
-    
+        self._actions['save_figure'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        
     def save_data(self):
         """Pops window for choosing directory, filename and type
         for saving data, metadata and configuration.

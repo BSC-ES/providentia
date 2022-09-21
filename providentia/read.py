@@ -429,8 +429,6 @@ class DataReader:
         :type filter: boolean
         """
 
-        print('READ DATA START')
-
         # create arrays to share across processes (for parallel multiprocessing use)
         # this only works for numerical dtypes, i.e. not strings
         timestamp_array_shared = multiprocessing.RawArray(ctypes.c_int64, len(self.read_instance.timestamp_array))
@@ -551,14 +549,12 @@ class DataReader:
                     tuple_arguments.append((fname, self.read_instance.station_references['{}|{}'.format(network,speci)], speci, data_label, data_labels,
                                             self.read_instance.reading_ghost, self.read_instance.ghost_data_vars_to_read, self.read_instance.metadata_dtype, self.read_instance.metadata_vars_to_read))
 
-            print('POOLING', time.time() - s)
             returned_data = pool.map(read_netcdf_data, tuple_arguments)
 
             pool.close()
             # wait for worker processes to terminate before continuing
             pool.join()
             
-            print('READY TO JOIN', time.time() - s)
             # iterate through read file data and place metadata into full array as appropriate
             for returned_data_ii, returned_data_per_month in enumerate(returned_data):
                 returned_filename = tuple_arguments[returned_data_ii][tuple_argument_fields.index('filename')]
@@ -567,14 +563,10 @@ class DataReader:
                 if returned_data_label == 'observations':
                     self.read_instance.metadata_in_memory['{}|{}'.format(network,speci)][:, self.read_instance.yearmonths.index(returned_yearmonth)] = returned_data_per_month[:, 0]
 
-            print('METADATA PLACED', time.time() - s)
-
             # save to data in memory
             self.read_instance.data_in_memory['{}|{}'.format(network,speci)][data_label_indices, :, :] = data_in_memory_shared_np
             if (self.read_instance.reading_ghost) & ('observations' in data_labels):
                 self.read_instance.ghost_data_in_memory['{}|{}'.format(network,speci)] = ghost_data_in_memory_shared_np
-
-            print('DATA PLACED', time.time() - s)
 
             # check if datasets consist of arrays full of -9999.0 or nan values or if they are empty
             if (self.read_instance.data_in_memory['{}|{}'.format(network,speci)].size == 0) or \
@@ -588,5 +580,3 @@ class DataReader:
 
                 tip = 'Tip: Check if the data from the observations was downloaded correctly and if the experiments were interpolated at the stations of the network of interest.'
                 sys.exit(error + '\n' + tip)
-
-            print('READ DATA END', time.time() - s)
