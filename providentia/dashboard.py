@@ -307,15 +307,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.cb_z2.setToolTip('Select map dataset 2')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
-        self.lb_experiment_bias = set_formatting(QtWidgets.QLabel(self, text="Exp Bias"),
+        self.lb_periodic_stat = set_formatting(QtWidgets.QLabel(self, text="Periodic Stat"),
                                                  formatting_dict['title_menu'])
-        self.lb_experiment_bias.setToolTip('Set experiment bias statistic')
-        self.cb_experiment_bias_type = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_experiment_bias_type.setFixedWidth(136)
-        self.cb_experiment_bias_type.setToolTip('Select experiment bias type')
-        self.cb_experiment_bias_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_experiment_bias_stat.setFixedWidth(136)
-        self.cb_experiment_bias_stat.setToolTip('Select experiment bias statistic')
+        self.lb_periodic_stat.setToolTip('Set plotted periodic statistic')
+        self.cb_periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_periodic_stat.setFixedWidth(136)
+        self.cb_periodic_stat.setToolTip('Select periodic statistic')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
         self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Select"),
@@ -379,9 +376,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         config_bar.addWidget(self.cb_z1, 2, 10)
         config_bar.addWidget(self.cb_z2, 3, 10)
         config_bar.addWidget(self.vertical_splitter_3, 0, 11, 4, 1)
-        config_bar.addWidget(self.lb_experiment_bias, 0, 12, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_experiment_bias_type, 1, 12)
-        config_bar.addWidget(self.cb_experiment_bias_stat, 2, 12)
+        config_bar.addWidget(self.lb_periodic_stat, 0, 12, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_periodic_stat, 1, 12)
         config_bar.addWidget(self.vertical_splitter_4, 0, 13, 4, 1)
         config_bar.addWidget(self.lb_station_selection, 0, 14, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_select_all, 1, 14)
@@ -446,9 +442,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.cb_z1.currentTextChanged.connect(self.mpl_canvas.handle_map_z_statistic_update)
         self.cb_z2.currentTextChanged.connect(self.mpl_canvas.handle_map_z_statistic_update)
 
-        # enable updating of experiment bias statistic
-        self.cb_experiment_bias_type.currentTextChanged.connect(self.mpl_canvas.handle_experiment_bias_update)
-        self.cb_experiment_bias_stat.currentTextChanged.connect(self.mpl_canvas.handle_experiment_bias_update)
+        # enable updating of periodic statistic
+        self.cb_periodic_stat.currentTextChanged.connect(self.mpl_canvas.handle_periodic_statistic_update)
 
         # enable interactivity of station selection checkboxes
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
@@ -478,13 +473,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
-
-        # update variable to inform plotting functions whether to use colocated data/or not
-        check_state = self.ch_colocate.checkState()
-        if check_state == QtCore.Qt.Checked:
-            self.temporal_colocation = True
-        else:
-            self.temporal_colocation = False
 
         # starting from a configuration file?
         if self.from_conf: 
@@ -668,13 +656,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if 'scatter' in layout_options:
                 layout_options.remove('scatter')
 
-        # remove periodic plots if have no experiment data    
-        if self.data_labels:
-            if len(self.data_labels) < 2:
-                layout_options.remove('periodic')
-        else:
-            layout_options.remove('periodic')
-
         # update position 1 in layout (always map)
         self.cb_position_1.addItems(['map'])
         
@@ -754,8 +735,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # get event origin source
             event_source = self.sender()
 
-            print('Updating layout')
-
             # update selected station plots, avoiding duplicates
             if event_source == self.cb_position_2:
                 previous_plot_type = copy.deepcopy(self.position_2)
@@ -795,10 +774,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 else:
                     self.mpl_canvas.remove_axis_elements(ax, previous_plot_type)
                 self.mpl_canvas.selected_station_plots.remove(previous_plot_type)
-                # remove tracked plot elements
-                for legend_label in self.mpl_canvas.plot_elements:
-                    if previous_plot_type in self.mpl_canvas.plot_elements[legend_label]['plot_elements']:
-                        del self.mpl_canvas.plot_elements[legend_label]['plot_elements'][previous_plot_type]
 
             # if changed_plot_type already axis on another axis then remove those axis elements
             if (changed_plot_type in self.mpl_canvas.selected_station_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
@@ -808,10 +783,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                         self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type)
                 else:
                     self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
-                # remove legend picker lines
-                for legend_label in self.mpl_canvas.plot_elements:
-                    if changed_plot_type in self.mpl_canvas.plot_elements[legend_label]['plot_elements']:
-                        del self.mpl_canvas.plot_elements[legend_label]['plot_elements'][changed_plot_type]
 
             # otherwise add plot_type to selected_station_plots
             elif changed_plot_type != 'None': 
@@ -931,7 +902,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
         self.data_labels = ['observations'] + list(self.experiments.keys())
-        self.networkspeci = '{}-{}'.format(self.network[0],self.species[0])
+        self.networkspeci = '{}|{}'.format(self.network[0],self.species[0])
         
         #set read operations to be empty list initially
         read_operations = []
@@ -1065,23 +1036,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.z1_arrays = np.array(self.data_labels)
         self.z2_arrays = np.append([''], self.z1_arrays)
 
-        # initialise map z statistic comboboxes
+        # update map z statistic comboboxes
         self.mpl_canvas.handle_map_z_statistic_update()
 
-        # update experiment bias combobox fields based on data in memory
-        # if have no experiment data, all fields are empty
-        self.block_config_bar_handling_updates = True
-        if len(self.data_labels) == 1: 
-            self.cb_experiment_bias_type.clear()
-            self.cb_experiment_bias_stat.clear()
-            self.block_config_bar_handling_updates = False
-        # else, generate combobox lists
-        else:
-            # set all experiment bias types
-            self.cb_experiment_bias_type.clear()
-            self.cb_experiment_bias_type.addItems(np.array(['Station Median']))
-            self.block_config_bar_handling_updates = False
-            self.mpl_canvas.handle_experiment_bias_update()
+        # update periodic statistic combobox
+        self.mpl_canvas.handle_periodic_statistic_update()
     
         # reset station select checkboxes to be unchecked
         self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
@@ -1095,8 +1054,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.mpl_canvas.update_MPL_canvas()
 
         # if first read, then set this now to be False
+        # if colocate checkbox is ticked, then 
         if self.first_read:
             self.first_read = False
+            if self.ch_colocate.checkState() == QtCore.Qt.Checked:
+                self.mpl_canvas.handle_temporal_colocate_update()
 
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()

@@ -16,11 +16,11 @@ def export_data_npz(canvas_instance, fname):
 
     # save data / ghost data / metadata
     for network, speci in zip(canvas_instance.read_instance.network, canvas_instance.read_instance.species):
-        networkspeci = '{}-{}'.format(network,speci)
+        networkspeci = '{}|{}'.format(network,speci)
         if canvas_instance.read_instance.reading_ghost:
-            save_data_dict['{}-{}_ghost_data'.format(network,speci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci]
-        save_data_dict['{}-{}_data'.format(network,speci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci]
-        save_data_dict['{}-{}_metadata'.format(network,speci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci]
+            save_data_dict['{}_{}_ghost_data'.format(network,speci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci]
+        save_data_dict['{}_{}_data'.format(network,speci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci]
+        save_data_dict['{}_{}_metadata'.format(network,speci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci]
 
     # save out miscellaneous variables 
     save_data_dict['time'] = canvas_instance.read_instance.time_array
@@ -75,7 +75,7 @@ def export_netcdf(canvas_instance, fname):
 
     # iterate through networks and species 
     for speci_ii, (network, speci) in enumerate(zip(read_instance.network, read_instance.species)):
-        networkspeci = '{}-{}'.format(network,speci)
+        networkspeci = '{}|{}'.format(network,speci)
 
         # get some key variables for speci
         parameter_details = parameter_dictionary[speci]
@@ -128,7 +128,7 @@ def export_netcdf(canvas_instance, fname):
          
         # data
         current_data_type = type_map[data_format_dict[speci]['data_type']]
-        var = fout.createVariable('{}-{}_data'.format(network,speci), current_data_type, 
+        var = fout.createVariable('{}_{}_data'.format(network,speci), current_data_type, 
                                   ('data_label', 'station', 'time',))
         
         # set attributes
@@ -150,11 +150,11 @@ def export_netcdf(canvas_instance, fname):
         
         # ghost data
         if read_instance.reading_ghost:
-            var = fout.createVariable('{}-{}_ghost_data'.format(network,speci), 'f4', 
+            var = fout.createVariable('{}_{}_ghost_data'.format(network,speci), 'f4', 
                                       ('ghost_data_variable', 'station', 'time',))
             # set attributes 
-            var.standard_name = '{}-{}_ghost_data'.format(network,speci) 
-            var.long_name = '{}-{}_ghost_data'.format(network,speci)
+            var.standard_name = '{}_{}_ghost_data'.format(network,speci) 
+            var.long_name = '{}_{}_ghost_data'.format(network,speci)
             var.description = 'GHOST data variables used for additional filtering.'
             # save
             var[:] = read_instance.ghost_data_in_memory[networkspeci]
@@ -163,7 +163,7 @@ def export_netcdf(canvas_instance, fname):
         metadata_arr = read_instance.metadata_in_memory[networkspeci]
         for metadata_var in metadata_arr.dtype.names:
             current_data_type = type_map[metadata_format_dict[metadata_var]['data_type']]
-            var = fout.createVariable('{}-{}_{}'.format(network,speci,metadata_var), current_data_type, ('station', 'month',))
+            var = fout.createVariable('{}_{}_{}'.format(network,speci,metadata_var), current_data_type, ('station', 'month',))
             # set attributes
             var.standard_name = metadata_format_dict[metadata_var]['standard_name']
             var.long_name = metadata_format_dict[metadata_var]['long_name']
