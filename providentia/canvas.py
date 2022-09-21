@@ -2109,6 +2109,7 @@ class MPLCanvas(FigureCanvas):
             event_source = self.sender()
             option = event_source.objectName().split('option_')[1]
             plot_type_alt = event_source.objectName().split('_option')[0]
+            
             # get currently selected options for plot
             plot_options = []
             for other_option, other_option_obj in getattr(self, '{}_options'.format(plot_type_alt)).items():
@@ -2809,6 +2810,10 @@ class MPLCanvas(FigureCanvas):
                 # get event information
                 legend_label = event.artist
                 data_label = legend_label.get_text().lower()
+                for experiment, experiment_alias in self.read_instance.experiments.items():
+                    if data_label == experiment_alias:
+                        data_label = experiment
+                        continue
                 if data_label not in self.plot_elements['data_labels_active']:
                     visible = True
                     self.plot_elements['data_labels_active'].append(data_label)
