@@ -517,7 +517,7 @@ class DataFilter:
                         valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
 
                     # get colocated experimental data array (if have experiments, first subset by valid observational stations)
-                    exp_data = self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:]
+                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
                     exp_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
                     exp_data = exp_data[valid_station_inds,:]
 
