@@ -59,7 +59,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
 
             # get data for selected stations
             if station_index:
-                data_array = read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:]
+                data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:])
                 if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                     data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
                 data_array = data_array[station_index,:]
@@ -74,7 +74,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
                         station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
                     else:
                         station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
-                data_array = read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:]
+                data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:])
                 if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                     data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
                 data_array = data_array[station_inds,:]
