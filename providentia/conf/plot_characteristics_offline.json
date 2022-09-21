@@ -73,6 +73,7 @@
                "annotate_text": {"s": "", "loc": "upper right", "fontsize": 6, "n_stations": true, "round_decimal_places": 2},
                "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1},
                "trend": {"window": 6, "min_points": 1, "format":{"linewidth": 1.0}},
+               "bias_line": {"y": 0.0, "linestyle": "--", "linewidth": 1.0, "color": "black", "zorder": 0},
                "markersize_npoints_threshold": 200,
                "markersize": {"standard": 1.1, "few_points": 4.0},
                "plot": {"marker": "o", "markeredgecolor": null, "mew": 0, "linestyle": "None", "markersize": ""},
