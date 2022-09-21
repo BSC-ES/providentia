@@ -54,7 +54,7 @@ class DataFilter:
         for network, speci in zip(self.read_instance.network, self.read_instance.species):
 
             # get network / species str
-            networkspeci = '{}-{}'.format(network,speci)
+            networkspeci = '{}|{}'.format(network,speci)
 
             # get set lower/upper data bounds
             if self.read_instance.offline:
@@ -100,7 +100,7 @@ class DataFilter:
                 if (self.read_instance.resolution != 'daily') & (self.read_instance.resolution != 'monthly'):
                     # iterate through network / species  
                     for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                        networkspeci = '{}-{}'.format(network,speci)
+                        networkspeci = '{}|{}'.format(network,speci)
                         inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.day_night_index,:,:], day_night_codes_to_keep, invert=True)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -113,7 +113,7 @@ class DataFilter:
                 if self.read_instance.resolution != 'monthly':
                     # iterate through network / species  
                     for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                        networkspeci = '{}-{}'.format(network,speci)
+                        networkspeci = '{}|{}'.format(network,speci)
                         inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.weekday_weekend_index,:,:], weekday_weekend_codes_to_keep, invert=True)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -129,7 +129,7 @@ class DataFilter:
             if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
                 # iterate through network / species  
                 for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                    networkspeci = '{}-{}'.format(network,speci)
+                    networkspeci = '{}|{}'.format(network,speci)
                     inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.season_index,:,:], season_codes_to_keep, invert=True)
                     self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -143,7 +143,7 @@ class DataFilter:
                 if (self.read_instance.resolution != 'daily') & (self.read_instance.resolution != 'monthly'):
                     # iterate through network / species  
                     for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                        networkspeci = '{}-{}'.format(network,speci)
+                        networkspeci = '{}|{}'.format(network,speci)
                         inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.day_night_index,:,:], day_night_codes_to_remove)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -156,7 +156,7 @@ class DataFilter:
                 if self.read_instance.resolution != 'monthly':
                     # iterate through network / species  
                     for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                        networkspeci = '{}-{}'.format(network,speci)
+                        networkspeci = '{}|{}'.format(network,speci)
                         inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.weekday_weekend_index,:,:], weekday_weekend_codes_to_remove)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -172,7 +172,7 @@ class DataFilter:
             if len(season_codes_to_remove) > 0:
                 # iterate through network / species  
                 for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                    networkspeci = '{}-{}'.format(network,speci)
+                    networkspeci = '{}|{}'.format(network,speci)
                     inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.season_index,:,:], season_codes_to_remove)
                     self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -202,7 +202,7 @@ class DataFilter:
                     for network, speci in zip(self.read_instance.network, self.read_instance.species):
 
                         # get network / species str
-                        networkspeci = '{}-{}'.format(network,speci)
+                        networkspeci = '{}|{}'.format(network,speci)
 
                         # max gap variable?
                         if 'max_gap' in var:
@@ -254,7 +254,7 @@ class DataFilter:
                         for network, speci in zip(self.read_instance.network, self.read_instance.species):
 
                             # get network / species str
-                            networkspeci = '{}-{}'.format(network,speci)
+                            networkspeci = '{}|{}'.format(network,speci)
 
                             # max gap variable?
                             if 'max_gap' in var:
@@ -294,7 +294,7 @@ class DataFilter:
                 for network, speci in zip(self.read_instance.network, self.read_instance.species):
 
                     # get network / species str
-                    networkspeci = '{}-{}'.format(network,speci)
+                    networkspeci = '{}|{}'.format(network,speci)
 
                     # if any of the keep checkboxes are selected, filter out data by fields that have not been selected
                     current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
@@ -332,7 +332,7 @@ class DataFilter:
                         for network, speci in zip(self.read_instance.network, self.read_instance.species):
 
                             # get network / species str
-                            networkspeci = '{}-{}'.format(network,speci)
+                            networkspeci = '{}|{}'.format(network,speci)
 
                             # if current lower value is non-NaN, then filter out data with metadata < current lower value
                             if not pd.isnull(current_lower):
@@ -408,7 +408,7 @@ class DataFilter:
             for ii, (network, speci) in enumerate(zip(self.read_instance.network, self.read_instance.species)):
 
                 # get network / species str
-                networkspeci = '{}-{}'.format(network,speci)
+                networkspeci = '{}|{}'.format(network,speci)
 
                 if (self.read_instance.spatial_colocation) or (ii == 0):
                     # create array for finding instances where have 0 valid values across all observations in all networks / species
@@ -463,7 +463,7 @@ class DataFilter:
         for network, speci in zip(self.read_instance.network, self.read_instance.species):
 
             # get network / species str
-            networkspeci = '{}-{}'.format(network,speci)
+            networkspeci = '{}|{}'.format(network,speci)
 
             self.read_instance.valid_station_inds[networkspeci] = {}
             self.read_instance.valid_station_inds_temporal_colocation[networkspeci] = {}

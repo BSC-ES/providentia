@@ -74,9 +74,10 @@
                "annotate_stats": ["Mean", "StdDev", "r2", "RMSE", "MB"],
                "annotate_text": {"s": "", "loc": "upper right", "fontsize": 8, "n_stations": true, "round_decimal_places": 2},
                "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
-               "trend": {"window": 1, "min_points": 1, "format":{"linewidth": 1.0}},
+               "trend": {"window": 6, "min_points": 1, "format":{"linewidth": 1.0}},
+               "bias_line": {"y": 0.0, "linestyle": "--", "linewidth": 1.0, "color": "black", "zorder": 0},
                "plot": {"marker": "o", "markeredgecolor": null, "mew": 0, "linestyle": "None", "markersize": 2},
-               "plot_options": ["annotate", "trend", "logy"]},
+               "plot_options": ["annotate", "bias", "logy", "trend"]},
 
 "periodic": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
              "label": {"xy": [0, 1], "xytext": [2, -2], "xycoords": "axes fraction", "textcoords": "offset points", "fontsize": 9, "ha": "left", "va": "top", "zorder": 3},
@@ -89,7 +90,7 @@
              "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
              "bias_line": {"linestyle": "--", "linewidth": 1.0, "color": "black", "zorder": 2},
              "plot": {"marker": "o", "markersize": 3, "linewidth": 0.5},
-             "plot_options": ["annotate", "logy"]},
+             "plot_options": ["annotate", "bias", "logy"]},
 
 "periodic-violin": {"axis_title": {"label":"", "fontsize": 8.5, "loc": "left"},
                     "label": {"xy": [0, 1], "xytext": [2, -2], "xycoords": "axes fraction", "textcoords": "offset points", "fontsize": 9, "ha": "left", "va": "top", "zorder": 3},
@@ -118,7 +119,7 @@
                  "pdf_min_samples": 2000,
                  "bias_line": {"y": 0.0, "linestyle": "--", "linewidth": 1.0, "color": "black", "zorder": 0},
                  "plot": {"linewidth": 1},
-                 "plot_options": ["annotate", "logx", "logy"]},
+                 "plot_options": ["annotate", "bias", "logx", "logy"]},
 
 "scatter": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
             "remove_spines": ["top", "right"],
@@ -136,7 +137,7 @@
             "2:1_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
             "equal_aspect": true,
             "plot": {"marker": "o", "linestyle": "None", "markersize": 2, "alpha": 0.5},
-            "plot_options": ["annotate", "regression", "logx", "logy"]},
+            "plot_options": ["annotate", "logx", "logy", "regression"]},
 
 "heatmap": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"}, 
             "xtick_params": {"labelsize": 7, "which": "both", "bottom": true, "top": false, "right": false, "left": true, "labelbottom": true, "labeltop": false, "labelright": false, "labelleft": true},
@@ -146,7 +147,7 @@
             "cb_label": {"label": "", "fontsize": 8}, 
             "round_decimal_places": 2,
             "plot": {"xticklabels": "auto", "yticklabels": "auto", "square": true, "cbar": false},
-            "plot_options": ["annotate"]},
+            "plot_options": ["annotate", "bias"]},
 
 "table": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
           "round_decimal_places":2,

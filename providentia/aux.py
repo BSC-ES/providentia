@@ -381,14 +381,17 @@ def init_flags(instance):
     :type instance: object
     """
 
-    # setup pop-up window menu tree for flags
-    instance.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
+    # do not have object instance already?
+    # if not, create it
+    if not hasattr(instance, 'flag_menu'):
+        instance.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
+        instance.flag_menu['select_buttons'] = ['all', 'clear', 'default']
+    # reset fields
     instance.flag_menu['checkboxes']['labels'] = np.array(sorted(instance.standard_data_flag_name_to_data_flag_code, key=instance.standard_data_flag_name_to_data_flag_code.get))
     instance.flag_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
     instance.flag_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
     instance.flag_menu['checkboxes']['map_vars'] = np.sort(list(instance.standard_data_flag_name_to_data_flag_code.values()))
-    instance.flag_menu['select_buttons'] = ['all', 'clear', 'default']
-
+    
 def init_qa(instance):
     """Initialise internal structure to store selected qa.
 
@@ -396,14 +399,17 @@ def init_qa(instance):
     :type instance: object
     """
 
-    # setup pop-up window menu tree for qa
-    instance.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
+    # do not have object instance already?
+    # if not, create it
+    if not hasattr(instance, 'qa_menu'):
+        instance.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
+        instance.qa_menu['select_buttons'] = ['all', 'clear', 'default']
+    # reset fields
     instance.qa_menu['checkboxes']['labels'] = np.array(sorted(instance.standard_QA_name_to_QA_code, key=instance.standard_QA_name_to_QA_code.get))
     instance.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
     instance.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
     instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(instance.standard_QA_name_to_QA_code.values()))
-    instance.qa_menu['select_buttons'] = ['all', 'clear', 'default']
-
+    
 def init_experiments(instance):
     """Initialise internal structure to store selected experiments.
 
@@ -411,14 +417,17 @@ def init_experiments(instance):
     :type instance: object
     """
 
-    # setup pop-up window menu tree for experiments
-    instance.experiments_menu = {'window_title': 'EXPERIMENTS', 'page_title': 'Select Experiment/s',
-                                 'checkboxes': {'labels': [],
-                                 'keep_default': [],
-                                 'keep_selected': [],
-                                 'map_vars': [],
-                                 'select_buttons': ['all', 'clear']}}
-
+    # do not have object instance already?
+    # if not, create it
+    if not hasattr(instance, 'experiments_menu'):
+        instance.experiments_menu = {'window_title': 'EXPERIMENTS', 'page_title': 'Select Experiment/s', 'checkboxes':{}}
+        instance.experiments_menu['select_buttons']: ['all', 'clear']
+    # reset fields
+    instance.experiments_menu['checkboxes']['labels'] = [] 
+    instance.experiments_menu['checkboxes']['keep_default'] = [] 
+    instance.experiments_menu['checkboxes']['keep_selected'] = [] 
+    instance.experiments_menu['checkboxes']['map_vars'] = [] 
+    
 def init_representativity(instance):
     """Initialise internal structure to store representativity fields.
 
@@ -426,12 +435,13 @@ def init_representativity(instance):
     :type instance: object
     """
 
-    # setup pop-up window menu tree for % data representativity
-    instance.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY',
-                                      'page_title': 'Select % Data Representativity Bounds',
-                                      'tooltips': [],
-                                      'rangeboxes': {'labels': [],
-                                                     'current_lower': []}}
+    # do not have object instance already?
+    # if not, create it
+    if not hasattr(instance, 'representativity_menu'):
+        instance.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY', 'page_title': 'Select % Data Representativity Bounds', 'rangeboxes':{}}
+    # reset fields
+    instance.representativity_menu['rangeboxes']['labels'] = [] 
+    instance.representativity_menu['rangeboxes']['current_lower'] = []                                                  
 
 def init_period(instance):
     """Initialise internal structure to store period fields.
@@ -440,11 +450,14 @@ def init_period(instance):
     :type instance: object
     """
 
-    # setup pop-up window menu tree for data periods
-    instance.period_menu = {'window_title': 'DATA PERIOD', 'page_title': 'Select Data Periods',
-                            'checkboxes': {'labels': [],
-                                           'keep_selected': [],
-                                           'remove_selected': []}}
+    # do not have object instance already?
+    # if not, create it
+    if not hasattr(instance, 'period_menu'):
+        instance.period_menu = {'window_title': 'DATA PERIOD', 'page_title': 'Select Data Periods', 'checkboxes':{}}
+    # reset fields
+    instance.period_menu['checkboxes']['labels'] = []
+    instance.period_menu['checkboxes']['keep_selected'] = []
+    instance.period_menu['checkboxes']['remove_selected'] = []
 
 def init_metadata(instance):
     """Initialise internal structure to store metadata.
@@ -453,65 +466,89 @@ def init_metadata(instance):
     :type instance: object
     """
 
-    # setup pop-up window menu tree for metadata
-    instance.metadata_types = {'STATION POSITION': 'Filter stations by measurement position',
-                               'STATION CLASSIFICATIONS': 'Filter stations by station provided classifications',
-                               'STATION MISCELLANEOUS': 'Filter stations by miscellaneous station provided metadata',
-                               'GLOBALLY GRIDDED CLASSIFICATIONS': 'Filter stations by globally gridded classifications',
-                               'MEASUREMENT PROCESS INFORMATION': 'Filter stations by measurement process information'}
-    
-    instance.metadata_menu = {'window_title': 'METADATA', 'page_title': 'Select metadata type to filter stations by',
-                              'navigation_buttons': {}}
+    # do not have object instance already?
+    # if not, create it
+    if not hasattr(instance, 'metadata_menu'):
+        instance.metadata_types = {'STATION POSITION': 'Filter stations by measurement position',
+                                   'STATION CLASSIFICATIONS': 'Filter stations by station provided classifications',
+                                   'STATION MISCELLANEOUS': 'Filter stations by miscellaneous station provided metadata',
+                                   'GLOBALLY GRIDDED CLASSIFICATIONS': 'Filter stations by globally gridded classifications',
+                                   'MEASUREMENT PROCESS INFORMATION': 'Filter stations by measurement process information'}
+            
+        instance.metadata_menu = {'window_title': 'METADATA', 'page_title': 'Select metadata type to filter stations by',
+                                  'navigation_buttons': {}}
 
-    instance.metadata_menu['navigation_buttons']['labels'] = list(instance.metadata_types.keys())
-    instance.metadata_menu['navigation_buttons']['tooltips'] = [instance.metadata_types[key] for key in
-                                                                instance.metadata_menu['navigation_buttons']['labels']]
+        instance.metadata_menu['navigation_buttons']['labels'] = list(instance.metadata_types.keys())
+        instance.metadata_menu['navigation_buttons']['tooltips'] = [instance.metadata_types[key] for key in
+                                                                    instance.metadata_menu['navigation_buttons']['labels']]
 
+        for metadata_type_ii, metadata_type in enumerate(instance.metadata_menu['navigation_buttons']['labels']):
+            
+            # setup nested menu
+            instance.metadata_menu[metadata_type] = {'window_title': metadata_type,
+                                                    'page_title': instance.metadata_menu['navigation_buttons']['tooltips'][
+                                                     metadata_type_ii], 'navigation_buttons': {}, 'rangeboxes': {}}
+        
+    # reset fields
     for metadata_type_ii, metadata_type in enumerate(instance.metadata_menu['navigation_buttons']['labels']):
-        
-        instance.metadata_menu[metadata_type] = {'window_title': metadata_type,
-                                                 'page_title': instance.metadata_menu['navigation_buttons']['tooltips'][
-                                                 metadata_type_ii], 'navigation_buttons': {}, 'rangeboxes': {}}
-        
+
+        #reset rangebox labels    
+        instance.metadata_menu[metadata_type]['rangeboxes']['labels'] = \
+            [metadata_var for metadata_var in instance.metadata_vars_to_read
+            if (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type)
+            & (instance.standard_metadata[metadata_var]['data_type'] != np.object)]
+
+        #reset rangebox tooltips
+        instance.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = \
+            [instance.standard_metadata[metadata_var]['description']
+            for metadata_var in instance.metadata_menu[metadata_type]['rangeboxes']['labels']]
+
+        # reset rangeboxes
+        instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = \
+            ['nan'] * len(instance.metadata_menu[metadata_type]['rangeboxes']['labels'])
+        instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = \
+            ['nan'] * len(instance.metadata_menu[metadata_type]['rangeboxes']['labels'])
+        instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = \
+            ['nan'] * len(instance.metadata_menu[metadata_type]['rangeboxes']['labels'])
+        instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = \
+            ['nan'] * len(instance.metadata_menu[metadata_type]['rangeboxes']['labels'])
+        instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'] = []
+
+        #reset checkbox labels            
         instance.metadata_menu[metadata_type]['navigation_buttons']['labels'] = \
             [metadata_var for metadata_var in instance.metadata_vars_to_read if
             (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type) &
             (instance.standard_metadata[metadata_var]['data_type'] == np.object)]
         
+        # reset checkbox tooltips
         instance.metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = \
             [instance.standard_metadata[metadata_var]['description'] for metadata_var in
             instance.metadata_menu[metadata_type]['navigation_buttons']['labels']]
 
+        # reset checkboxes
         for metadata_var in instance.metadata_menu[metadata_type]['navigation_buttons']['labels']:
-            instance.metadata_menu[metadata_type][metadata_var] = {'window_title': metadata_var,
-                                                                   'page_title': 'Filter stations by unique {} metadata'.format(metadata_var), 
-                                                                   'checkboxes': {}}
-            instance.metadata_menu[metadata_type][metadata_var]['checkboxes'] = {'labels': [], 
-                                                                                 'keep_selected': [], 'keep_default': [],
-                                                                                 'remove_selected': [], 'remove_default': []}
-
-        instance.metadata_menu[metadata_type]['rangeboxes']['labels'] = \
-            [metadata_var for metadata_var in instance.metadata_vars_to_read
-             if (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type)
-             & (instance.standard_metadata[metadata_var]['data_type'] != np.object)]
-
-        instance.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = \
-            [instance.standard_metadata[metadata_var]['description']
-             for metadata_var in instance.metadata_menu[metadata_type]['rangeboxes']['labels']]
-
-        instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'] = \
-            ['nan'] * len(instance.metadata_menu[metadata_type]['rangeboxes']['labels'])
-
-        instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'] = \
-            ['nan'] * len(instance.metadata_menu[metadata_type]['rangeboxes']['labels'])
-
-        instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'] = \
-            ['nan'] * len(instance.metadata_menu[metadata_type]['rangeboxes']['labels'])
-
-        instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'] = \
-            ['nan'] * len(instance.metadata_menu[metadata_type]['rangeboxes']['labels'])
-
-        instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'] = []
+            # metadata variable already in dict?
+            # then just reset lists
+            if metadata_var in instance.metadata_menu[metadata_type]:
+                instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['labels'] = []
+                instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['keep_selected'] = []
+                instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['keep_default'] = []
+                instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['remove_selected'] = []
+                instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['remove_default'] = []
+            #otherwise, create infracstructure to store metadata var information
+            else:
+                instance.metadata_menu[metadata_type][metadata_var] = {'window_title': metadata_var,
+                                                                       'page_title': 'Filter stations by unique {} metadata'.format(metadata_var), 
+                                                                       'checkboxes': {}}
+                instance.metadata_menu[metadata_type][metadata_var]['checkboxes'] = {'labels': [], 
+                                                                                     'keep_selected': [], 'keep_default': [],
+                                                                                     'remove_selected': [], 'remove_default': []}
+        
+        #remove metadata type checkbox var dicts not in metadata_vars_to_read
+        metadata_type_checkbox_vars = [metadata_type_var for metadata_type_var in instance.metadata_menu[metadata_type].keys() if metadata_type_var not in ['window_title', 'page_title', 'navigation_buttons', 'rangeboxes']]
+        metadata_type_checkbox_vars_to_remove = [metadata_type_checkbox_var for metadata_type_checkbox_var in metadata_type_checkbox_vars if metadata_type_checkbox_var not in instance.metadata_vars_to_read]
+        for metadata_type_checkbox_var_to_remove in metadata_type_checkbox_vars_to_remove:
+            del instance.metadata_menu[metadata_type][metadata_type_checkbox_var_to_remove]
 
 def update_representativity_fields(instance):
     """Update the data representativity menu upon read.
@@ -657,88 +694,88 @@ def update_metadata_fields(instance):
     # reinitialise metadata menu
     if reset_meta:
         init_metadata(instance)
-    # otherwise, update metadata menu
-    else:
-        for meta_var in instance.metadata_vars_to_read:
 
-            #get all metadata values for field across all networks and species
-            meta_var_field = []
-            for network, speci in zip(instance.network, instance.species):
-                networkspeci = '{}-{}'.format(network, speci)
-                meta_var_field.extend(instance.metadata_in_memory[networkspeci][meta_var].flatten())
-            meta_var_field = np.array(meta_var_field)
-            meta_var_field[np.where(meta_var_field == 'nan')[0]] = np.NaN
+    # update metadata menu
+    for meta_var in instance.metadata_vars_to_read:
 
-            # get metadata variable type/data type
-            metadata_type = instance.standard_metadata[meta_var]['metadata_type']
-            metadata_data_type = instance.standard_metadata[meta_var]['data_type']
+        #get all metadata values for field across all networks and species
+        meta_var_field = []
+        for network, speci in zip(instance.network, instance.species):
+            networkspeci = '{}|{}'.format(network, speci)
+            meta_var_field.extend(instance.metadata_in_memory[networkspeci][meta_var].flatten())
+        meta_var_field = np.array(meta_var_field)
+        meta_var_field[np.where(meta_var_field == 'nan')[0]] = np.NaN
 
-            # remove NaNs from metadata values
-            meta_var_field_nan_removed = meta_var_field[~pd.isnull(meta_var_field)]
+        # get metadata variable type/data type
+        metadata_type = instance.standard_metadata[meta_var]['metadata_type']
+        metadata_data_type = instance.standard_metadata[meta_var]['data_type']
 
-            # update pop-up metadata menu object with read metadata values
-            # for non-numeric metadata gets all the unique fields per metadata variable
-            # and sets the available fields as such
-            if metadata_data_type == np.object:
-                # get previous fields in menu 
-                previous_fields = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'])
-                previous_keep = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'])
-                previous_remove = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'])
+        # remove NaNs from metadata values
+        meta_var_field_nan_removed = meta_var_field[~pd.isnull(meta_var_field)]
 
-                # update new labels
-                instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'] = np.unique(meta_var_field_nan_removed)
-                # if field previously existed, then copy across checkbox settings for field
-                # else set initial checkboxes to be all blank
-                instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'] = []
-                instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'] = []
-                for field in instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels']:
-                    if field in previous_fields:
-                        if field in previous_keep:
-                            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'].append(field)
-                        if field in previous_remove:
-                            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'].append(field)
-                # set defaults to be empty
-                instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
-                instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []
+        # update pop-up metadata menu object with read metadata values
+        # for non-numeric metadata gets all the unique fields per metadata variable
+        # and sets the available fields as such
+        if metadata_data_type == np.object:
+            # get previous fields in menu 
+            previous_fields = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'])
+            previous_keep = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'])
+            previous_remove = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'])
 
-            # for numeric fields get the minimum and maximum boundaries of each metadata variable
-            # if previous set values vary from min/max boundaries, copy across the values
-            # set as min/max as nan if have no numeric metadata for variable
+            # update new labels
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'] = np.unique(meta_var_field_nan_removed)
+            # if field previously existed, then copy across checkbox settings for field
+            # else set initial checkboxes to be all blank
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'] = []
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'] = []
+            for field in instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels']:
+                if field in previous_fields:
+                    if field in previous_keep:
+                        instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'].append(field)
+                    if field in previous_remove:
+                        instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'].append(field)
+            # set defaults to be empty
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
+            instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []
+
+        # for numeric fields get the minimum and maximum boundaries of each metadata variable
+        # if previous set values vary from min/max boundaries, copy across the values
+        # set as min/max as nan if have no numeric metadata for variable
+        else:
+            meta_var_index = instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
+            previous_lower_default = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
+            previous_upper_default = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
+            previous_lower = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
+            previous_upper = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
+
+            # have some numeric values for existing metadata variable?
+            if len(meta_var_field_nan_removed) > 0:
+                min_val = str(np.min(meta_var_field_nan_removed))
+                max_val = str(np.max(meta_var_field_nan_removed))
+
+                # if previous lower > previous default lower bound then copy across (and also not 'nan')
+                # initially set as min extent
+                instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = min_val
+                if (previous_lower != 'nan') & (previous_lower_default != 'nan'):
+                    if previous_lower > previous_lower_default:
+                        instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = copy.deepcopy(previous_lower)
+                # if previous upper < previous default upper bound then copy across (and also not 'nan')
+                # initially set as max extent
+                instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = max_val
+                if (previous_upper != 'nan') & (previous_upper_default != 'nan'):
+                    if previous_upper < previous_upper_default:
+                        instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = copy.deepcopy(previous_upper)
+                # set defaults to min/max extents
+                instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
+                instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = max_val
+            # do not have some numeric values for metadata variable so set as 'nan'
             else:
-                meta_var_index = instance.metadata_menu[metadata_type]['rangeboxes']['labels'].index(meta_var)
-                previous_lower_default = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index])
-                previous_upper_default = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index])
-                previous_lower = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index])
-                previous_upper = copy.deepcopy(instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index])
-
-                # have some numeric values for existing metadata variable?
-                if len(meta_var_field_nan_removed) > 0:
-                    min_val = str(np.min(meta_var_field_nan_removed))
-                    max_val = str(np.max(meta_var_field_nan_removed))
-
-                    # if previous lower > previous default lower bound then copy across (and also not 'nan')
-                    # initially set as min extent
-                    instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = min_val
-                    if (previous_lower != 'nan') & (previous_lower_default != 'nan'):
-                        if previous_lower > previous_lower_default:
-                            instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = copy.deepcopy(previous_lower)
-                    # if previous upper < previous default upper bound then copy across (and also not 'nan')
-                    # initially set as max extent
-                    instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = max_val
-                    if (previous_upper != 'nan') & (previous_upper_default != 'nan'):
-                        if previous_upper < previous_upper_default:
-                            instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = copy.deepcopy(previous_upper)
-                    # set defaults to min/max extents
-                    instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
-                    instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = max_val
-                # do not have some numeric values for metadata variable so set as 'nan'
-                else:
-                    instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = 'nan'
-                    instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
-                    instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = 'nan'
-                    instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
-                    if meta_var in instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected']:
-                        instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
+                instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = 'nan'
+                instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
+                instance.metadata_menu[metadata_type]['rangeboxes']['current_upper'][meta_var_index] = 'nan'
+                instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
+                if meta_var in instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected']:
+                    instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
 
 def representativity_conf(instance):
     """Function used when loading from a configuration file. 
@@ -1372,23 +1409,23 @@ def get_basic_metadata(instance, networks, species, resolution):
                 ncdf_root.close()
 
             speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
-            station_references['{}-{}'.format(network, speci)] = speci_station_references
-            station_longitudes['{}-{}'.format(network, speci)] = speci_station_longitudes[station_unique_indices]
-            station_latitudes['{}-{}'.format(network, speci)] = speci_station_latitudes[station_unique_indices]
+            station_references['{}|{}'.format(network, speci)] = speci_station_references
+            station_longitudes['{}|{}'.format(network, speci)] = speci_station_longitudes[station_unique_indices]
+            station_latitudes['{}|{}'.format(network, speci)] = speci_station_latitudes[station_unique_indices]
         
         # non-GHOST
         else:
             
             ncdf_root = Dataset(relevant_files[0])
-            station_references['{}-{}'.format(network, speci)] = np.array(
+            station_references['{}|{}'.format(network, speci)] = np.array(
                 [st_name.tostring().decode('ascii').replace('\x00', '')
                 for st_name in ncdf_root['station_name'][:]], dtype=np.str)
             if "latitude" in ncdf_root.variables:
-                station_longitudes['{}-{}'.format(network, speci)] = ncdf_root['longitude'][:]
-                station_latitudes['{}-{}'.format(network, speci)] = ncdf_root['latitude'][:]
+                station_longitudes['{}|{}'.format(network, speci)] = ncdf_root['longitude'][:]
+                station_latitudes['{}|{}'.format(network, speci)] = ncdf_root['latitude'][:]
             else:
-                station_longitudes['{}-{}'.format(network, speci)] = ncdf_root['lon'][:]
-                station_latitudes['{}-{}'.format(network, speci)] = ncdf_root['lat'][:]
+                station_longitudes['{}|{}'.format(network, speci)] = ncdf_root['lon'][:]
+                station_latitudes['{}|{}'.format(network, speci)] = ncdf_root['lat'][:]
             ncdf_root.close()
 
     # if have more than 1 species to read, and spatial_colocation is active,
