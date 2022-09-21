@@ -421,7 +421,7 @@ def init_experiments(instance):
     # if not, create it
     if not hasattr(instance, 'experiments_menu'):
         instance.experiments_menu = {'window_title': 'EXPERIMENTS', 'page_title': 'Select Experiment/s', 'checkboxes':{}}
-        instance.experiments_menu['select_buttons']: ['all', 'clear']
+        instance.experiments_menu['select_buttons'] = ['all', 'clear']
     # reset fields
     instance.experiments_menu['checkboxes']['labels'] = [] 
     instance.experiments_menu['checkboxes']['keep_default'] = [] 
@@ -697,9 +697,16 @@ def update_metadata_fields(instance):
 
     # update metadata menu
     for meta_var in instance.metadata_vars_to_read:
-
+        
         #get all metadata values for field across all networks and species
         meta_var_field = []
+
+        # transform to list if there is only one species / network
+        if isinstance(instance.network, str):
+            instance.network = [instance.network]
+        if isinstance(instance.species, str):
+            instance.species = [instance.species]
+
         for network, speci in zip(instance.network, instance.species):
             networkspeci = '{}|{}'.format(network, speci)
             meta_var_field.extend(instance.metadata_in_memory[networkspeci][meta_var].flatten())
