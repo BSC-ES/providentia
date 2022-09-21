@@ -584,7 +584,7 @@ class MPLCanvas(FigureCanvas):
         legend_plot_characteristics = self.plot.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
 
         # plot legend
-        self.legend = self.plot_axes['legend'].legend(**legend_plot_characteristics['plot'])
+        self.legend = self.plot_axes['legend'].legend(**legend_plot_characteristics['plot'], prop=legend_plot_characteristics['prop'])
 
         # un-hide legend
         self.activate_axis(self.plot_axes['legend'], 'legend')
@@ -669,7 +669,6 @@ class MPLCanvas(FigureCanvas):
 
         if (not self.read_instance.block_config_bar_handling_updates) & ('periodic' in self.selected_station_plots):
 
-            print('PERIODIC COMBOBOX UPDATE')
             # update periodic statistic comboboxes
 
             # set variable that blocks configuration bar handling updates until all changes
@@ -2147,7 +2146,6 @@ class MPLCanvas(FigureCanvas):
                                     for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
                                         plot_element.remove()
                                     del self.plot_elements[plot_type][active_type][data_label][plot_option]
-                print(self.plot_elements[plot_type])
                 return 
 
             # remove current option elements (both absolute and bias)
@@ -2172,8 +2170,6 @@ class MPLCanvas(FigureCanvas):
 
             # get active (absolute / bias)
             active = self.plot_elements[plot_type]['active']
-
-            print('UPDATE PLOT OPTION: {}, UNDO: {}, ACTIVE: {}'.format(option, undo, active))
 
             # options 'logy' and 'logx' 
             # only plot if axis has all positive values
@@ -2384,7 +2380,6 @@ class MPLCanvas(FigureCanvas):
         for plot_option in plot_options:
 
             if plot_option == 'annotate':
-                print('UPDATE PLOT OPTION: ANNOTATE, UNDO: False, ACTIVE: {}'.format(active))
 
                 if isinstance(self.plot_axes[plot_type], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
@@ -2405,7 +2400,6 @@ class MPLCanvas(FigureCanvas):
                                          plot_options=plot_options)
 
             elif plot_option == 'trend':
-                print('UPDATE PLOT OPTION: TREND, UNDO: False, ACTIVE: {}'.format(active))
                 self.plot.trend(self.plot_axes[plot_type], 
                                 self.read_instance.networkspeci,
                                 data_labels_alt,
@@ -2414,7 +2408,6 @@ class MPLCanvas(FigureCanvas):
                                 plot_options=plot_options)
             
             elif plot_option == 'regression':
-                print('UPDATE PLOT OPTION: REGRESSION, UNDO: False, ACTIVE: {}'.format(active))
                 self.plot.linear_regression(self.plot_axes[plot_type], 
                                             self.read_instance.networkspeci,
                                             data_labels_alt, 
