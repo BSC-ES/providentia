@@ -755,7 +755,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    def remove_axis_elements(self, ax, plot_type):
+    def remove_axis_elements(self, ax, plot_type, clear_ax=False):
         """ Removes all plotted axis elements,
             and hide axis.
         """
@@ -837,8 +837,10 @@ class MPLCanvas(FigureCanvas):
         ax.axis('off')
         ax.set_visible(False)
         ax.grid(False)
-        if plot_type != 'map':
-            ax.clear()
+        
+        # clear axis entirely
+        if clear_ax:
+            ax.cla()
 
         return None
 
