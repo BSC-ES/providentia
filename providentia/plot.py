@@ -326,11 +326,12 @@ class Plot:
         ax.set_aspect('equal', adjustable='box')
 
         # Get min and max values for ticks
-        xtickmin = np.nanmin(ax.lines[0].get_xdata())
-        xtickmax = np.nanmax(ax.lines[0].get_xdata())
-        ytickmin = np.nanmin(ax.lines[0].get_ydata())
-        ytickmax = np.nanmax(ax.lines[0].get_ydata())
-        for line in ax.lines[:len(self.read_instance.data_labels)-1]:
+        xtickmin = np.nanmin(ax.lines[3].get_xdata())
+        xtickmax = np.nanmax(ax.lines[3].get_xdata())
+        ytickmin = np.nanmin(ax.lines[3].get_ydata())
+        ytickmax = np.nanmax(ax.lines[3].get_ydata())
+
+        for line in ax.lines[3:]:
             if np.nanmin(line.get_xdata()) < xtickmin:
                 xtickmin = np.nanmin(line.get_xdata())
             if np.nanmax(line.get_xdata()) > xtickmax:
@@ -619,6 +620,10 @@ class Plot:
         :param first_data_label: boolean informing if first plotted data_label on axis
         :type first_data_label: boolean
         """
+
+        # get marker size
+        if self.read_instance.offline:
+            self.get_markersize(networkspeci, plot_characteristics)
 
         # bias plot?
         if 'bias' in plot_options:
@@ -916,17 +921,16 @@ class Plot:
         :type first_data_label: boolean
         """
 
+        # get marker size
+        if self.read_instance.offline:
+            self.get_markersize(networkspeci, plot_characteristics)
+
         # get observations data
         observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']['data']
 
         # get experiment data
         experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data']
         
-        # create scatter plot
-        scatter_plot = relevant_axis.plot(observations_data, experiment_data, 
-                                          color=self.read_instance.plotting_params[data_label]['colour'],
-                                          **plot_characteristics['plot'])
-
         # add extra lines only once (if not already plotted)
         if first_data_label:
             # add 1:1 line (if in plot_characteristics)
@@ -941,6 +945,11 @@ class Plot:
             if '2:1_line' in plot_characteristics:
                 relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
                                    **plot_characteristics['2:1_line'])
+
+        # create scatter plot
+        scatter_plot = relevant_axis.plot(observations_data, experiment_data, 
+                                          color=self.read_instance.plotting_params[data_label]['colour'],
+                                          **plot_characteristics['plot'])
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
@@ -1329,6 +1338,8 @@ class Plot:
 
         # get lower and upper limits across all relevant axes
         for ax in relevant_axs:
+            if 'equal_aspect' in plot_characteristics:
+                self.set_equal_axes(ax)
             if relim:
                 ax.relim(visible_only=True)
             if autoscale:
@@ -1355,18 +1366,17 @@ class Plot:
 
         # get minimum and maximum from all axes and set limits
         for ax in relevant_axs:
-            # get xlims
+
+            # get xlim
             if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic','periodic-violin']:
                     xlim_min = np.min(all_xlim_lower)
                     xlim_max = np.max(all_xlim_upper)
-                    ax.set_xlim(xlim_min, xlim_max)
+                    xlim = xlim_min, xlim_max
             elif 'xlim' in plot_characteristics:
-                ax.set_xlim(plot_characteristics['xlim'])
-            elif xlim is not None:
-                ax.set_xlim(xlim)
+                xlim = plot_characteristics['xlim']
 
-            # get ylims
+            # get ylim
             if ylim is None and ('ylim' not in plot_characteristics):
                 ylim_min = np.min(all_ylim_lower) 
                 ylim_max = np.max(all_ylim_upper)
@@ -1378,52 +1388,18 @@ class Plot:
                     elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
                         ylim_min = -np.abs(np.min(all_ylim_lower))
                         ylim_max = np.abs(np.min(all_ylim_lower))
-                ax.set_ylim(ylim_min, ylim_max)
+                ylim = ylim_min, ylim_max
             elif 'ylim' in plot_characteristics:
-                ax.set_ylim(plot_characteristics['ylim'])
-            elif ylim is not None:
-                ax.set_ylim(ylim)
+                ylim = plot_characteristics['ylim']
 
-            if 'equal_aspect' in plot_characteristics:
-                # set aspect and lim
-                self.set_equal_axes(ax)
+            # set lim
+            if isinstance(ax, dict):
+                for sub_ax in ax.values():
+                    sub_ax.set_xlim(xlim)
+                    sub_ax.set_ylim(ylim) 
             else:
-                # set aspect
-                ax.set_aspect('auto')
-
-                # get xlim
-                if xlim is None and ('xlim' not in plot_characteristics):
-                    if base_plot_type not in ['periodic','periodic-violin']:
-                        xlim_min = np.min(all_xlim_lower)
-                        xlim_max = np.max(all_xlim_upper)
-                        xlim = xlim_min, xlim_max
-                elif 'xlim' in plot_characteristics:
-                    xlim = plot_characteristics['xlim']
-
-                # get ylim
-                if ylim is None and ('ylim' not in plot_characteristics):
-                    ylim_min = np.min(all_ylim_lower) 
-                    ylim_max = np.max(all_ylim_upper)
-                    # if have bias_centre option, centre around zero
-                    if ('bias' in plot_options) & (bias_centre):                    
-                        if np.abs(np.max(all_ylim_upper)) >= np.abs(np.min(all_ylim_lower)):
-                            ylim_min = -np.abs(np.max(all_ylim_upper))
-                            ylim_max = np.abs(np.max(all_ylim_upper))
-                        elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
-                            ylim_min = -np.abs(np.min(all_ylim_lower))
-                            ylim_max = np.abs(np.min(all_ylim_lower))
-                    ylim = ylim_min, ylim_max
-                elif 'ylim' in plot_characteristics:
-                    ylim = plot_characteristics['ylim']
-
-                # set lim
-                if isinstance(ax, dict):
-                    for sub_ax in ax.values():
-                        sub_ax.set_xlim(xlim)
-                        sub_ax.set_ylim(ylim) 
-                else:
-                    ax.set_xlim(xlim)
-                    ax.set_ylim(ylim)
+                ax.set_xlim(xlim)
+                ax.set_ylim(ylim)
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics):
         """Set title of plot axis
