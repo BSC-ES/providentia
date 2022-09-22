@@ -496,7 +496,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             aux.representativity_conf(self)
             aux.period_conf(self)
             aux.metadata_conf(self)
-            # filter
             self.mpl_canvas.handle_data_filter_update()
 
         # set finalised layout
