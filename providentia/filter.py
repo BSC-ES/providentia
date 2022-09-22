@@ -180,7 +180,7 @@ class DataFilter:
         """Function which filters data by selected data availability variables"""
 
         # get set variables names representing percentage data availability (native and non-native)
-        active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['labels']
+        active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['map_vars']
 
         try:
             data_availability_lower_bounds = []
