@@ -871,7 +871,7 @@ def representativity_conf(instance):
     :type instance: object
     """
 
-    for i, label in enumerate(instance.representativity_menu['rangeboxes']['labels']):
+    for i, label in enumerate(instance.representativity_menu['rangeboxes']['map_vars']):
         if hasattr(instance, label):
             instance.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(instance, label))
         else:
