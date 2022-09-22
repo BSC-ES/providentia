@@ -2119,6 +2119,8 @@ class MPLCanvas(FigureCanvas):
             loc = 1
         elif '_sel' in source_object:
             loc = 2
+        else:
+            loc = 0
         for key, val in self.interactive_elements.items():
             if event_source in self.interactive_elements[key]['markersize_sl']:
                 markersize = self.interactive_elements[key]['markersize_sl'][loc].value()
@@ -2138,6 +2140,8 @@ class MPLCanvas(FigureCanvas):
             loc = 1
         elif '_sel' in source_object:
             loc = 2
+        else:
+            loc = 0
         for key, val in self.interactive_elements.items():
             if event_source in self.interactive_elements[key]['opacity_sl']:
                 opacity = self.interactive_elements[key]['opacity_sl'][loc].value()/10
