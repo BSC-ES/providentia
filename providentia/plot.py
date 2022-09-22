@@ -1340,6 +1340,8 @@ class Plot:
         for ax in relevant_axs:
             if 'equal_aspect' in plot_characteristics:
                 self.set_equal_axes(ax)
+            else:
+                ax.set_aspect('auto')
             if relim:
                 ax.relim(visible_only=True)
             if autoscale:
