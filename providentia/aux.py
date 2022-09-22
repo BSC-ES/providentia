@@ -440,8 +440,12 @@ def init_representativity(instance):
     if not hasattr(instance, 'representativity_menu'):
         instance.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY', 'page_title': 'Select % Data Representativity Bounds', 'rangeboxes':{}}
     # reset fields
+    instance.representativity_menu['rangeboxes']['tooltips'] = []
     instance.representativity_menu['rangeboxes']['labels'] = [] 
     instance.representativity_menu['rangeboxes']['current_lower'] = []                                                  
+    instance.representativity_menu['rangeboxes']['map_vars'] = []
+    instance.representativity_menu['rangeboxes']['subtitles'] = []
+    instance.representativity_menu['rangeboxes']['subtitle_inds'] = []
 
 def init_period(instance):
     """Initialise internal structure to store period fields.
@@ -558,31 +562,68 @@ def update_representativity_fields(instance):
     """
  
     # get previously set rangebox labels / values
-    previous_labels = copy.deepcopy(instance.representativity_menu['rangeboxes']['labels'])
+    previous_mapped_labels = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
     previous_lower = copy.deepcopy(instance.representativity_menu['rangeboxes']['current_lower'])
 
     # hourly temporal resolution?
     if (instance.resolution == 'hourly') or (instance.resolution == 'hourly_instantaneous'):
         # GHOST 
         if instance.reading_ghost:
-            instance.representativity_menu['rangeboxes']['labels'] = ['hourly_native_representativity_percent',
-                                                                      'hourly_native_max_gap_percent',
-                                                                      'daily_native_representativity_percent',
-                                                                      'daily_representativity_percent',
-                                                                      'daily_native_max_gap_percent',
-                                                                      'daily_max_gap_percent',
-                                                                      'monthly_native_representativity_percent',
-                                                                      'monthly_representativity_percent',
-                                                                      'monthly_native_max_gap_percent',
-                                                                      'monthly_max_gap_percent',
-                                                                      'all_representativity_percent', 'all_max_gap_percent']
+
+            instance.representativity_menu['rangeboxes']['map_vars'] = ['hourly_native_representativity_percent',
+                                                                        'hourly_native_max_gap_percent',
+                                                                        'daily_native_representativity_percent',
+                                                                        'daily_native_max_gap_percent',
+                                                                        'monthly_native_representativity_percent',
+                                                                        'monthly_native_max_gap_percent',
+                                                                        'daily_representativity_percent',
+                                                                        'daily_max_gap_percent',
+                                                                        'monthly_representativity_percent',
+                                                                        'monthly_max_gap_percent',
+                                                                        'all_representativity_percent', 
+                                                                        'all_max_gap_percent']
+            
+            instance.representativity_menu['rangeboxes']['labels'] = ['Min Hourly Rep. %',
+                                                                      'Max Hourly Gap %',
+                                                                      'Min Daily Rep. %',
+                                                                      'Max Daily Gap %',
+                                                                      'Min Monthly Rep. %',
+                                                                      'Max Monthly Gap %',
+                                                                      'Min Daily Rep. %',
+                                                                      'Max Daily Gap %',
+                                                                      'Min Monthly Rep. %',
+                                                                      'Max Monthly Gap %',
+                                                                      'Min All Rep. %',
+                                                                      'Max All Gap %']
+
+            instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
+            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 6]
+
         # non-GHOST
         else:
-            instance.representativity_menu['rangeboxes']['labels'] = ['daily_representativity_percent',
-                                                                      'daily_max_gap_percent',
-                                                                      'monthly_representativity_percent',
-                                                                      'monthly_max_gap_percent',
-                                                                      'all_representativity_percent', 'all_max_gap_percent']            
+            instance.representativity_menu['rangeboxes']['map_vars'] = ['daily_representativity_percent',
+                                                                        'daily_max_gap_percent',
+                                                                        'monthly_representativity_percent',
+                                                                        'monthly_max_gap_percent',
+                                                                        'all_representativity_percent', 
+                                                                        'all_max_gap_percent']
+
+            instance.representativity_menu['rangeboxes']['labels'] = ['Daily',
+                                                                      'Daily Max Gap',
+                                                                      'Monthly',
+                                                                      'Monthly Max Gap',
+                                                                      'All',
+                                                                      'All Max Gap']   
+
+            instance.representativity_menu['rangeboxes']['labels'] = ['Min Daily Rep. %',
+                                                                      'Max Daily Gap %',
+                                                                      'Min Monthly Rep. %',
+                                                                      'Max Monthly Gap %',
+                                                                      'Min All Rep. %',
+                                                                      'Max All Gap %']
+
+            instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
+            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0]                                                                   
 
     # daily temporal resolution?
     elif (instance.resolution == 'daily') or (instance.resolution == '3hourly') or \
@@ -590,46 +631,84 @@ def update_representativity_fields(instance):
             (instance.resolution == '6hourly_instantaneous'):
         # GHOST 
         if instance.reading_ghost:
-            instance.representativity_menu['rangeboxes']['labels'] = ['daily_native_representativity_percent',
-                                                                      'daily_native_max_gap_percent',
-                                                                      'monthly_native_representativity_percent',
-                                                                      'monthly_representativity_percent',
-                                                                      'monthly_native_max_gap_percent',
-                                                                      'monthly_max_gap_percent',
-                                                                      'all_representativity_percent', 'all_max_gap_percent']
+            instance.representativity_menu['rangeboxes']['map_vars'] = ['daily_native_representativity_percent',
+                                                                        'daily_native_max_gap_percent',
+                                                                        'monthly_native_representativity_percent',
+                                                                        'monthly_native_max_gap_percent',
+                                                                        'monthly_representativity_percent',
+                                                                        'monthly_max_gap_percent',
+                                                                        'all_representativity_percent', 
+                                                                        'all_max_gap_percent']
+
+            instance.representativity_menu['rangeboxes']['labels'] = ['Min Daily Rep. %',
+                                                                      'Max Daily Gap %',
+                                                                      'Min Monthly Rep. %',
+                                                                      'Max Monthly Gap %',
+                                                                      'Min Monthly Rep. %',
+                                                                      'Max Monthly Gap %',
+                                                                      'Min All Rep. %',
+                                                                      'Max All Gap %']
+
+            instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
+            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 4]
 
         # non-GHOST
         else:
-            instance.representativity_menu['rangeboxes']['labels'] = ['monthly_representativity_percent',
-                                                                      'monthly_max_gap_percent',
-                                                                      'all_representativity_percent', 'all_max_gap_percent']
+            instance.representativity_menu['rangeboxes']['map_vars'] = ['monthly_representativity_percent',
+                                                                        'monthly_max_gap_percent',
+                                                                        'all_representativity_percent', 
+                                                                        'all_max_gap_percent']
+
+            instance.representativity_menu['rangeboxes']['labels'] = ['Min Monthly Rep. %',
+                                                                      'Max Monthly Gap %',
+                                                                      'Min All Rep. %',
+                                                                      'Max All Gap %'] 
+
+            instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
+            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0] 
 
     # monthly temporal resolution?
     elif instance.resolution == 'monthly':
         # GHOST 
         if instance.reading_ghost:
-            instance.representativity_menu['rangeboxes']['labels'] = ['monthly_native_representativity_percent',
-                                                                      'monthly_native_max_gap_percent',
-                                                                      'all_representativity_percent', 'all_max_gap_percent']
+            instance.representativity_menu['rangeboxes']['map_vars'] = ['monthly_native_representativity_percent',
+                                                                        'monthly_native_max_gap_percent',
+                                                                        'all_representativity_percent', 
+                                                                        'all_max_gap_percent']
+
+            instance.representativity_menu['rangeboxes']['labels'] = ['Min Monthly Rep. %',
+                                                                      'Max Monthly Gap %',
+                                                                      'Min All Rep. %',
+                                                                      'Max All Gap %'] 
+
+            instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
+            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 2]  
 
         # non-GHOST
         else:
-            instance.representativity_menu['rangeboxes']['labels'] = ['all_representativity_percent', 'all_max_gap_percent']
+            instance.representativity_menu['rangeboxes']['map_vars'] = ['all_representativity_percent', 
+                                                                        'all_max_gap_percent']
+            
+            instance.representativity_menu['rangeboxes']['labels'] = ['Min All Rep. %',
+                                                                      'Max All Gap %'] 
+
+            instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
+            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0] 
             
 
     # initialise rangebox values --> for data representativity fields
     # the default is 0%, for max gap fields % the default is 100%
     instance.representativity_menu['rangeboxes']['current_lower'] = []
-    for label_ii, label in enumerate(instance.representativity_menu['rangeboxes']['labels']):
-        if 'max_gap' in label:
+    for label_ii, label_mapped in enumerate(instance.representativity_menu['rangeboxes']['map_vars']):
+        if 'max_gap' in label_mapped:
             instance.representativity_menu['rangeboxes']['current_lower'].append('100')
         else:
             instance.representativity_menu['rangeboxes']['current_lower'].append('0')
 
         # label previously existed?
-        if label in previous_labels:
+        if label_mapped in previous_mapped_labels:
             instance.representativity_menu['rangeboxes']['current_lower'][label_ii] = \
-                previous_lower[previous_labels.index(label)]
+                previous_lower[previous_mapped_labels.index(label_mapped)]
 
 def update_period_fields(instance):
     """Update the data period menu upon read.
