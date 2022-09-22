@@ -385,34 +385,27 @@ class MPLCanvas(FigureCanvas):
                 len(self.relative_selected_station_inds), len(self.active_map_valid_station_inds))
         self.plot.set_axis_title(self.plot_axes['map'], axis_title_label, self.plot_characteristics['map'])
 
-        # reset alphas and marker sizes of all plotted stations (if have some stations on map)
+        # reset alphas and marker sizes of stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
-            markersizes = np.full(len(self.active_map_valid_station_inds), self.plot_characteristics['map']['marker_unselected']['s'])
+            # set markersize of all stations (initally assuming zero stations are selected)
+            markersizes = np.full(len(self.active_map_valid_station_inds), self.plot_characteristics['map']['marker_zero_stations_selected']['s'])
             for collection in self.plot_axes['map'].collections:
                 if isinstance(collection, matplotlib.collections.PathCollection):
                     rgba_tuples = collection.get_facecolor()
-                    rgba_tuples[:, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
-                    collection.set_facecolor(rgba_tuples)
+                    # set alpha of all stations (initally assuming zero stations are selected)
+                    rgba_tuples[:, -1] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']
+                    # have selected stations?
+                    if len(self.relative_selected_station_inds) > 0:
+                        # update markersize and alphas of non-selected stations
+                        markersizes[self.absolute_non_selected_station_inds] = self.plot_characteristics['map']['marker_unselected']['s']
+                        rgba_tuples[self.absolute_non_selected_station_inds, -1] = self.plot_characteristics['map']['marker_unselected']['alpha']
+                        # update markersize and alphas of selected stations
+                        markersizes[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['s']
+                        rgba_tuples[self.absolute_selected_station_inds, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
+                    # set new markersizes and alphas
                     collection.set_sizes(markersizes)
-
-            # if have some selected stations, update map plot with station selection
-            # (reducing alpha of non-selected stations, and increasing marker size of selected stations)
-            if len(self.relative_selected_station_inds) > 0:
-                
-                # decrease alpha of non-selected stations
-                if len(self.absolute_non_selected_station_inds) > 0:
-                    rgba_tuples[self.absolute_non_selected_station_inds, -1] = self.plot_characteristics['map']['marker_unselected']['alpha']
-                    for collection in self.plot_axes['map'].collections:
-                        if isinstance(collection, matplotlib.collections.PathCollection):
-                            collection.set_facecolor(rgba_tuples)
-
-                # increase marker size and alpha of selected stations
-                markersizes[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['s']
-                rgba_tuples[self.absolute_selected_station_inds, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
-                for collection in self.plot_axes['map'].collections:
-                    if isinstance(collection, matplotlib.collections.PathCollection):
-                        collection.set_sizes(markersizes)
-                        collection.set_facecolor(rgba_tuples)
+                    collection.set_facecolor(rgba_tuples)
+                    
         # redraw points
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
@@ -950,6 +943,10 @@ class MPLCanvas(FigureCanvas):
             # update absolute selected station indices (indices relative to plotted stations on map)
             self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds), dtype=np.int)
 
+            #get absolute non-selected station inds
+            self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
+                                                                 self.absolute_selected_station_inds))[0]
+
             # update map station selection
             self.update_map_station_selection()
 
@@ -983,6 +980,8 @@ class MPLCanvas(FigureCanvas):
             if check_state == QtCore.Qt.Unchecked:
                 self.relative_selected_station_inds = np.array([], dtype=np.int)
                 self.absolute_selected_station_inds = np.array([], dtype=np.int)
+                self.absolute_non_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
+                                                                    dtype=np.int)
 
             # else, if checkbox is checked then select all stations which intersect with all loaded experiment domains
             elif check_state == QtCore.Qt.Checked:
@@ -992,6 +991,7 @@ class MPLCanvas(FigureCanvas):
                     self.relative_selected_station_inds = copy.deepcopy(self.active_map_valid_station_inds)
                     self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
                                                                     dtype=np.int)
+                    self.absolute_non_selected_station_inds = np.array([], dtype=np.int)
                 # else, define list of lists to get intersection between (active_map_valid_station_inds, 
                 # and valid station indices associated with each loaded experiment array)
                 else:
@@ -1010,6 +1010,9 @@ class MPLCanvas(FigureCanvas):
                     self.absolute_selected_station_inds = \
                         np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind
                                   in self.relative_selected_station_inds], dtype=np.int)
+                    #get absolute non-selected station inds
+                    self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
+                                                                         self.absolute_selected_station_inds))[0]
 
                 # if select all stations checkbox is checked then uncheck it (without updating canvas)
                 if self.read_instance.ch_select_all.checkState() == QtCore.Qt.Checked:
@@ -1162,6 +1165,10 @@ class MPLCanvas(FigureCanvas):
             if len(self.absolute_selected_station_inds) > 1:
                 self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int)
 
+        #get absolute non-selected station inds
+        self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
+                                                             self.absolute_selected_station_inds))[0]
+
         # get selected station indices with respect to all available stations
         self.relative_selected_station_inds = self.map_selected_station_inds_to_all_available_inds(self.absolute_selected_station_inds)
 
@@ -1238,6 +1245,10 @@ class MPLCanvas(FigureCanvas):
         self.absolute_selected_station_inds = np.setxor1d(previous_absolute_selected_station_inds, absolute_selected_station_inds)
         self.previous_absolute_selected_station_inds = previous_absolute_selected_station_inds
 
+        #get absolute non-selected station inds
+        self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
+                                                             self.absolute_selected_station_inds))[0]
+
         # get new relative selected indices with respect to all available stations
         self.previous_relative_selected_station_inds = previous_relative_selected_station_inds
         self.relative_selected_station_inds = self.map_selected_station_inds_to_all_available_inds(self.absolute_selected_station_inds)
@@ -1291,7 +1302,7 @@ class MPLCanvas(FigureCanvas):
                                          "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
         self.map_container.setGeometry(self.map_menu_button.geometry().x()-210,
                                        self.map_menu_button.geometry().y()+35, 
-                                       235, 350)
+                                       235, 460)
         self.map_container.hide()
 
         # add settings label
@@ -1302,18 +1313,64 @@ class MPLCanvas(FigureCanvas):
                                             200, 20)
         self.map_settings_label.hide()
 
+        # add map general text for zero selected stations ('Zero selected stations')
+        self.map_zerosel_label = QtWidgets.QLabel("Zero selected stations", self)
+        self.map_zerosel_label.setStyleSheet("QLabel { font-style: italic; }")
+        self.map_zerosel_label.setGeometry(self.map_menu_button.geometry().x()-200,
+                                         self.map_menu_button.geometry().y()+60, 
+                                         200, 20)
+        self.map_zerosel_label.hide()
+
+        # add map markersize slider name ('Size') to layout
+        self.map_markersize_zerosel_sl_label = QtWidgets.QLabel("Size", self)
+        self.map_markersize_zerosel_sl_label.setGeometry(self.map_menu_button.geometry().x()-200,
+                                                         self.map_menu_button.geometry().y()+85, 
+                                                         200, 20)
+        self.map_markersize_zerosel_sl_label.hide()
+
+        # add map markersize unselected stations slider
+        self.map_markersize_zerosel_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.map_markersize_zerosel_sl.setObjectName('map_markersize_zerosel_sl')
+        self.map_markersize_zerosel_sl.setMinimum(0)
+        self.map_markersize_zerosel_sl.setMaximum(80)
+        self.map_markersize_zerosel_sl.setValue(self.plot_characteristics['map']['marker_zero_stations_selected']['s'])
+        self.map_markersize_zerosel_sl.setTickInterval(2)
+        self.map_markersize_zerosel_sl.setGeometry(self.map_menu_button.geometry().x()-200, 
+                                                   self.map_menu_button.geometry().y()+110, 
+                                                   200, 20)
+        self.map_markersize_zerosel_sl.hide()
+
+        # add map opacity slider name ('Opacity') to layout
+        self.map_opacity_zerosel_sl_label = QtWidgets.QLabel("Opacity", self)
+        self.map_opacity_zerosel_sl_label.setGeometry(self.map_menu_button.geometry().x()-200, 
+                                                      self.map_menu_button.geometry().y()+135, 
+                                                      200, 20)
+        self.map_opacity_zerosel_sl_label.hide()
+
+        # add map opacity zero selected stations slider
+        self.map_opacity_zerosel_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.map_opacity_zerosel_sl.setObjectName('map_opacity_zerosel_sl')
+        self.map_opacity_zerosel_sl.setMinimum(0)
+        self.map_opacity_zerosel_sl.setMaximum(10)
+        self.map_opacity_zerosel_sl.setValue(self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']*10)
+        self.map_opacity_zerosel_sl.setTickInterval(1)
+        self.map_opacity_zerosel_sl.setGeometry(self.map_menu_button.geometry().x()-200, 
+                                                self.map_menu_button.geometry().y()+160, 
+                                                200, 20)
+        self.map_opacity_zerosel_sl.hide()
+
         # add map general text for unselected stations ('Unselected stations')
         self.map_unsel_label = QtWidgets.QLabel("Unselected stations", self)
         self.map_unsel_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_unsel_label.setGeometry(self.map_menu_button.geometry().x()-200,
-                                         self.map_menu_button.geometry().y()+60, 
+                                         self.map_menu_button.geometry().y()+185, 
                                          200, 20)
         self.map_unsel_label.hide()
 
         # add map markersize slider name ('Size') to layout
         self.map_markersize_unsel_sl_label = QtWidgets.QLabel("Size", self)
         self.map_markersize_unsel_sl_label.setGeometry(self.map_menu_button.geometry().x()-200,
-                                                       self.map_menu_button.geometry().y()+85, 
+                                                       self.map_menu_button.geometry().y()+210, 
                                                        200, 20)
         self.map_markersize_unsel_sl_label.hide()
 
@@ -1321,18 +1378,18 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_unsel_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.map_markersize_unsel_sl.setObjectName('map_markersize_unsel_sl')
         self.map_markersize_unsel_sl.setMinimum(0)
-        self.map_markersize_unsel_sl.setMaximum(self.plot_characteristics['map']['marker_unselected']['s']*10)
+        self.map_markersize_unsel_sl.setMaximum(80)
         self.map_markersize_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['s'])
-        self.map_markersize_unsel_sl.setTickInterval(5)
+        self.map_markersize_unsel_sl.setTickInterval(2)
         self.map_markersize_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-200, 
-                                                 self.map_menu_button.geometry().y()+110, 
+                                                 self.map_menu_button.geometry().y()+235, 
                                                  200, 20)
         self.map_markersize_unsel_sl.hide()
 
         # add map opacity slider name ('Opacity') to layout
         self.map_opacity_unsel_sl_label = QtWidgets.QLabel("Opacity", self)
         self.map_opacity_unsel_sl_label.setGeometry(self.map_menu_button.geometry().x()-200, 
-                                                    self.map_menu_button.geometry().y()+135, 
+                                                    self.map_menu_button.geometry().y()+260, 
                                                     200, 20)
         self.map_opacity_unsel_sl_label.hide()
 
@@ -1344,7 +1401,7 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['alpha']*10)
         self.map_opacity_unsel_sl.setTickInterval(1)
         self.map_opacity_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-200, 
-                                              self.map_menu_button.geometry().y()+160, 
+                                              self.map_menu_button.geometry().y()+285, 
                                               200, 20)
         self.map_opacity_unsel_sl.hide()
 
@@ -1352,14 +1409,14 @@ class MPLCanvas(FigureCanvas):
         self.map_sel_label = QtWidgets.QLabel("Selected stations", self)
         self.map_sel_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_sel_label.setGeometry(self.map_menu_button.geometry().x()-200, 
-                                       self.map_menu_button.geometry().y()+185, 
+                                       self.map_menu_button.geometry().y()+310, 
                                        200, 20)
         self.map_sel_label.hide()
 
         # add map markersize slider name ('Size') to layout
         self.map_markersize_sel_sl_label = QtWidgets.QLabel("Size", self)
         self.map_markersize_sel_sl_label.setGeometry(self.map_menu_button.geometry().x()-200, 
-                                                     self.map_menu_button.geometry().y()+210, 
+                                                     self.map_menu_button.geometry().y()+335, 
                                                      200, 20)
         self.map_markersize_sel_sl_label.hide()
 
@@ -1367,18 +1424,18 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_sel_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.map_markersize_sel_sl.setObjectName('map_markersize_sel_sl')
         self.map_markersize_sel_sl.setMinimum(0)
-        self.map_markersize_sel_sl.setMaximum(self.plot_characteristics['map']['marker_selected']['s']*10)
-        self.map_markersize_sel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['s'])
-        self.map_markersize_sel_sl.setTickInterval(5)
+        self.map_markersize_sel_sl.setMaximum(80)
+        self.map_markersize_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['s'])
+        self.map_markersize_sel_sl.setTickInterval(2)
         self.map_markersize_sel_sl.setGeometry(self.map_menu_button.geometry().x()-200, 
-                                               self.map_menu_button.geometry().y()+235, 
+                                               self.map_menu_button.geometry().y()+360, 
                                                200, 20)
         self.map_markersize_sel_sl.hide()
 
         # add map opacity slider name ('Opacity') to layout
         self.map_opacity_sel_sl_label = QtWidgets.QLabel("Opacity", self)
         self.map_opacity_sel_sl_label.setGeometry(self.map_menu_button.geometry().x()-200, 
-                                                  self.map_menu_button.geometry().y()+260, 
+                                                  self.map_menu_button.geometry().y()+385, 
                                                   200, 20)
         self.map_opacity_sel_sl_label.hide()
 
@@ -1390,14 +1447,14 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['alpha']*10)
         self.map_opacity_sel_sl.setTickInterval(1)
         self.map_opacity_sel_sl.setGeometry(self.map_menu_button.geometry().x()-200, 
-                                            self.map_menu_button.geometry().y()+285, 
+                                            self.map_menu_button.geometry().y()+410, 
                                             200, 20)
         self.map_opacity_sel_sl.hide()
 
         # add map options name ('Options') to layout
         self.map_options_label = QtWidgets.QLabel("Options", self)
         self.map_options_label.setGeometry(self.map_menu_button.geometry().x()-200,
-                                           self.map_menu_button.geometry().y()+310, 
+                                           self.map_menu_button.geometry().y()+435, 
                                            200, 20)
         self.map_options_label.hide()
 
@@ -1409,7 +1466,7 @@ class MPLCanvas(FigureCanvas):
             self.map_options[option] = QtWidgets.QCheckBox(option, self)
             self.map_options[option].setObjectName('map_option_' + option)
             self.map_options[option].setGeometry(self.map_menu_button.geometry().x()-200, 
-                                                 self.map_menu_button.geometry().y()+345+y_move, 
+                                                 self.map_menu_button.geometry().y()+460+y_move, 
                                                  200, 20)
             self.map_options[option].stateChanged.connect(self.update_plot_option)
             self.map_options[option].hide()
@@ -1428,28 +1485,36 @@ class MPLCanvas(FigureCanvas):
 
         # set show/hide actions
         self.map_elements = [self.map_container, self.map_settings_label, 
-                             self.map_unsel_label, self.map_markersize_unsel_sl_label, 
-                             self.map_markersize_unsel_sl, self.map_opacity_unsel_sl_label, 
-                             self.map_opacity_unsel_sl, self.map_sel_label, 
-                             self.map_markersize_sel_sl, self.map_markersize_sel_sl_label,
-                             self.map_opacity_sel_sl_label, self.map_opacity_sel_sl,
-                             self.map_options_label, self.map_options
+                             self.map_zerosel_label, self.map_markersize_zerosel_sl_label, 
+                             self.map_markersize_zerosel_sl, self.map_opacity_zerosel_sl_label, 
+                             self.map_opacity_zerosel_sl, self.map_unsel_label, 
+                             self.map_markersize_unsel_sl_label, self.map_markersize_unsel_sl, 
+                             self.map_opacity_unsel_sl_label, self.map_opacity_unsel_sl, 
+                             self.map_sel_label, self.map_markersize_sel_sl, 
+                             self.map_markersize_sel_sl_label, self.map_opacity_sel_sl_label, 
+                             self.map_opacity_sel_sl, self.map_options_label, 
+                             self.map_options
                              ]
         self.interactive_elements['map'] = {'button': self.map_menu_button, 
                                             'hidden': True,
                                             'elements': self.map_elements,
-                                            'markersize_sl': [self.map_markersize_unsel_sl, 
+                                            'markersize_sl': [self.map_markersize_zerosel_sl,
+                                                              self.map_markersize_unsel_sl, 
                                                               self.map_markersize_sel_sl],
-                                            'opacity_sl': [self.map_opacity_unsel_sl, 
+                                            'opacity_sl': [self.map_opacity_zerosel_sl,
+                                                           self.map_opacity_unsel_sl, 
                                                            self.map_opacity_sel_sl],
                                             'linewidth_sl': [],
                                             'widths_sl': []
                                             }
         self.map_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.map_markersize_sel_sl.valueChanged.connect(self.update_markersize_func)
+        
+        self.map_markersize_zerosel_sl.valueChanged.connect(self.update_markersize_func)
         self.map_markersize_unsel_sl.valueChanged.connect(self.update_markersize_func)
-        self.map_opacity_sel_sl.valueChanged.connect(self.update_opacity_func)
+        self.map_markersize_sel_sl.valueChanged.connect(self.update_markersize_func)
+        self.map_opacity_zerosel_sl.valueChanged.connect(self.update_opacity_func)
         self.map_opacity_unsel_sl.valueChanged.connect(self.update_opacity_func)
+        self.map_opacity_sel_sl.valueChanged.connect(self.update_opacity_func)
         self.map_save_button.clicked.connect(self.save_axis_figure_func)
 
         # TIMESERIES PLOT SETTINGS MENU #
@@ -2045,7 +2110,13 @@ class MPLCanvas(FigureCanvas):
         """Function to handle the update of the markers size."""
 
         event_source = self.sender()
-        loc = [1 if '_sel' in event_source.objectName() else 0][0]
+        source_object = event_source.objectName()
+        if '_zerosel' in source_object:
+            loc = 0
+        elif '_unsel' in source_object:
+            loc = 1
+        elif '_sel' in source_object:
+            loc = 2
         for key, val in self.interactive_elements.items():
             if event_source in self.interactive_elements[key]['markersize_sl']:
                 markersize = self.interactive_elements[key]['markersize_sl'][loc].value()
@@ -2058,7 +2129,13 @@ class MPLCanvas(FigureCanvas):
         """Function to handle the update of the markers opacity."""
 
         event_source = self.sender()
-        loc = [1 if '_sel' in event_source.objectName() else 0][0]
+        source_object = event_source.objectName()
+        if '_zerosel' in source_object:
+            loc = 0
+        elif '_unsel' in source_object:
+            loc = 1
+        elif '_sel' in source_object:
+            loc = 2
         for key, val in self.interactive_elements.items():
             if event_source in self.interactive_elements[key]['opacity_sl']:
                 opacity = self.interactive_elements[key]['opacity_sl'][loc].value()/10
@@ -2438,24 +2515,44 @@ class MPLCanvas(FigureCanvas):
 
             markersizes = self.plot_axes['map'].collections[-1].get_sizes()
 
+            # zero selected stations
             if event_source == self.interactive_elements[plot_type]['markersize_sl'][0]:
 
-                # set markersize for unselected stations
-                markersizes[self.absolute_non_selected_station_inds] = markersize
-                for collection in self.plot_axes['map'].collections:
-                    if isinstance(collection, matplotlib.collections.PathCollection):
-                        collection.set_sizes(markersizes)
+                # actually have zero selected stations currently?
+                # if so, update active markersizes
+                if len(self.absolute_selected_station_inds) == 0:
+                    markersizes[:] = markersize
+                    for collection in self.plot_axes['map'].collections:
+                        if isinstance(collection, matplotlib.collections.PathCollection):
+                            collection.set_sizes(markersizes)
+
+                # update characteristics per plot type
+                self.plot_characteristics['map']['marker_zero_stations_selected']['s'] = markersize
+
+            # unselected stations
+            elif event_source == self.interactive_elements[plot_type]['markersize_sl'][1]:
+
+                # actually have selected stations currently?
+                # if so, update active opacities
+                if (len(self.absolute_non_selected_station_inds) > 0) & (len(self.absolute_selected_station_inds) > 0):
+                    markersizes[self.absolute_non_selected_station_inds] = markersize
+                    for collection in self.plot_axes['map'].collections:
+                        if isinstance(collection, matplotlib.collections.PathCollection):
+                            collection.set_sizes(markersizes)
 
                 # update characteristics per plot type
                 self.plot_characteristics['map']['marker_unselected']['s'] = markersize
 
-            elif event_source == self.interactive_elements[plot_type]['markersize_sl'][1]:
+            # selected stations
+            elif event_source == self.interactive_elements[plot_type]['markersize_sl'][2]:
 
-                # set markersize for selected stations
-                markersizes[self.absolute_selected_station_inds] = markersize
-                for collection in self.plot_axes['map'].collections:
-                    if isinstance(collection, matplotlib.collections.PathCollection):
-                        collection.set_sizes(markersizes)
+                # actually have selected stations currently?
+                # if so, update active opacities
+                if len(self.absolute_selected_station_inds) > 0:
+                    markersizes[self.absolute_selected_station_inds] = markersize
+                    for collection in self.plot_axes['map'].collections:
+                        if isinstance(collection, matplotlib.collections.PathCollection):
+                            collection.set_sizes(markersizes)
 
                 # update characteristics per plot type
                 self.plot_characteristics['map']['marker_selected']['s'] = markersize
@@ -2473,24 +2570,45 @@ class MPLCanvas(FigureCanvas):
         if plot_type == 'map':
 
             opacities = self.plot_axes['map'].collections[-1].get_facecolor()
+
+            # zero selected stations
             if event_source == self.interactive_elements[plot_type]['opacity_sl'][0]:
 
-                # set opacity for unselected stations
-                opacities[self.absolute_non_selected_station_inds, -1] = opacity
-                for collection in self.plot_axes['map'].collections:
-                    if isinstance(collection, matplotlib.collections.PathCollection):
-                        collection.set_facecolor(opacities)
+                # actually have zero selected stations currently?
+                # if so, update active opacities
+                if len(self.absolute_selected_station_inds) == 0:
+                    opacities[:, -1] = opacity
+                    for collection in self.plot_axes['map'].collections:
+                        if isinstance(collection, matplotlib.collections.PathCollection):
+                            collection.set_facecolor(opacities)
+
+                # update characteristics per plot type
+                self.plot_characteristics['map']['marker_zero_stations_selected']['alpha'] = opacity
+
+            # unselected stations
+            elif event_source == self.interactive_elements[plot_type]['opacity_sl'][1]:
+
+                # actually have selected stations currently?
+                # if so, update active opacities
+                if (len(self.absolute_non_selected_station_inds) > 0) & (len(self.absolute_selected_station_inds) > 0):
+                    opacities[self.absolute_non_selected_station_inds, -1] = opacity
+                    for collection in self.plot_axes['map'].collections:
+                        if isinstance(collection, matplotlib.collections.PathCollection):
+                            collection.set_facecolor(opacities)
 
                 # update characteristics per plot type
                 self.plot_characteristics['map']['marker_unselected']['alpha'] = opacity
 
-            elif event_source == self.interactive_elements[plot_type]['opacity_sl'][1]:
+            # selected stations
+            elif event_source == self.interactive_elements[plot_type]['opacity_sl'][2]:
 
-                # set opacity for selected stations
-                opacities[self.absolute_selected_station_inds, -1] = opacity
-                for collection in self.plot_axes['map'].collections:
-                    if isinstance(collection, matplotlib.collections.PathCollection):
-                        collection.set_facecolor(opacities)
+                # actually have selected stations currently?
+                # if so, update active opacities
+                if len(self.absolute_selected_station_inds) > 0:
+                    opacities[self.absolute_selected_station_inds, -1] = opacity
+                    for collection in self.plot_axes['map'].collections:
+                        if isinstance(collection, matplotlib.collections.PathCollection):
+                            collection.set_facecolor(opacities)
 
                 # update characteristics per plot type
                 self.plot_characteristics['map']['marker_selected']['alpha'] = opacity
@@ -2615,23 +2733,21 @@ class MPLCanvas(FigureCanvas):
                     expand_x, expand_y = 1.25, 1.3
                 elif relevant_temporal_resolution == 'month':
                     expand_x, expand_y = 1.15, 1.3
-                self.figure.savefig('figures/{0}-{1}-{2}-{3}-{4}-{5}-{6}-{7}.png'.format(self.read_instance.network[0],
-                                                                                         self.read_instance.matrix,
-                                                                                         self.read_instance.species[0],
-                                                                                         self.read_instance.resolution, 
-                                                                                         self.read_instance.start_date, 
-                                                                                         self.read_instance.end_date,
-                                                                                         plot_type, relevant_temporal_resolution),
+                self.figure.savefig('figures/{0}-{1}-{2}-{3}-{4}-{5}-{6}.png'.format(self.read_instance.network[0],
+                                                                                     self.read_instance.species[0],
+                                                                                     self.read_instance.resolution, 
+                                                                                     self.read_instance.start_date, 
+                                                                                     self.read_instance.end_date,
+                                                                                     plot_type, relevant_temporal_resolution),
                                     bbox_inches=extent.expanded(expand_x, expand_y))
         else:
             extent = self.plot_axes[plot_type].get_window_extent().transformed(self.figure.dpi_scale_trans.inverted())
-            self.figure.savefig('figures/{0}-{1}-{2}-{3}-{4}-{5}-{6}.png'.format(self.read_instance.network[0],
-                                                                                 self.read_instance.matrix,
-                                                                                 self.read_instance.species[0],
-                                                                                 self.read_instance.resolution, 
-                                                                                 self.read_instance.start_date, 
-                                                                                 self.read_instance.end_date,
-                                                                                 plot_type),
+            self.figure.savefig('figures/{0}-{1}-{2}-{3}-{4}-{5}.png'.format(self.read_instance.network[0],
+                                                                             self.read_instance.species[0],
+                                                                             self.read_instance.resolution, 
+                                                                             self.read_instance.start_date, 
+                                                                             self.read_instance.end_date,
+                                                                             plot_type),
                                 bbox_inches=extent.expanded(expand_x, expand_y))
 
         # add titles
