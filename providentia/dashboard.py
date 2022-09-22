@@ -784,9 +784,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 ax = self.mpl_canvas.plot_axes[previous_plot_type]
                 if type(ax) == dict:
                     for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, previous_plot_type)
+                        self.mpl_canvas.remove_axis_elements(sub_ax, previous_plot_type, clear_ax=True)
                 else:
-                    self.mpl_canvas.remove_axis_elements(ax, previous_plot_type)
+                    self.mpl_canvas.remove_axis_elements(ax, previous_plot_type, clear_ax=True)
                 self.mpl_canvas.selected_station_plots.remove(previous_plot_type)
 
             # if changed_plot_type already axis on another axis then remove those axis elements
@@ -794,9 +794,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
                 if type(ax) == dict:
                     for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type)
+                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type, clear_ax=True)
                 else:
-                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
+                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type, clear_ax=True)
 
             # otherwise add plot_type to selected_station_plots
             elif changed_plot_type != 'None': 
@@ -810,9 +810,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
                 if type(ax) == dict:
                     for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type)
+                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type, clear_ax=True)
                 else:
-                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
+                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type, clear_ax=True)
             
             # update plot if changed_plot_type != None
             if changed_plot_type != 'None':
@@ -1005,9 +1005,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 for plot_type, ax in self.mpl_canvas.plot_axes.items():
                     if type(ax) == dict:
                         for sub_ax in ax.values():
-                            self.mpl_canvas.remove_axis_elements(sub_ax, plot_type)
+                            self.mpl_canvas.remove_axis_elements(sub_ax, plot_type, clear_ax=True)
                     else:
-                        self.mpl_canvas.remove_axis_elements(ax, plot_type)  
+                        self.mpl_canvas.remove_axis_elements(ax, plot_type, clear_ax=True)  
                 # update MPL canvas
                 self.mpl_canvas.figure.canvas.draw()  
                 # restore mouse cursor to normal
