@@ -2075,6 +2075,15 @@ class MPLCanvas(FigureCanvas):
                          self.periodic_elements, self.periodic_violin_elements,
                          self.distribution_elements, self.scatter_elements]
 
+        # make sure white containers are above buttons
+        for element in self.elements:
+            for sub_element in element:
+                if isinstance(sub_element, dict):
+                    for val in sub_element.values():
+                        val.raise_()
+                else:
+                    sub_element.raise_()
+
         return None
 
     def interactive_elements_button_func(self):
