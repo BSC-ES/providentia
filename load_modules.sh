@@ -49,7 +49,8 @@ else
      PyQt5/5.13.0-foss-2015a-Python-3.7.3 \
      Qt/5.13.0-foss-2015a \
      seaborn/0.9.0-foss-2015a-Python-3.7.3 \
-     scipy/1.3.0-foss-2015a-Python-3.7.3
+     scipy/1.3.0-foss-2015a-Python-3.7.3 \
+     pyproj/2.2.1-foss-2015a-Python-3.7.3
 fi
 
 export HDF5_USE_FILE_LOCKING=FALSE
