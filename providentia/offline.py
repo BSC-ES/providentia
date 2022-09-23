@@ -109,8 +109,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # if have no experiments, force temporal colocation to be False
             if len(self.experiments) == 0:
-                self.temporal_colocation = False
-                self.defaults['temporal_colocation'] = False         
+                self.temporal_colocation = False    
                 for k in self.sub_opts.keys():
                     self.sub_opts[k]['temporal_colocation'] = False
 
