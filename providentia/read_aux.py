@@ -10,17 +10,15 @@ import time
 shared_memory_vars = {}
 
 def drop_nans(data):
-    """Function that returns numpy object of lists
-    of station data with NaNs removed
-    """
+    """Function that returns list of lists of station data with NaNs removed"""
 
     # reshape numpy array to have lists of data per station
-    data = data.tolist()
+    data_nonan = []
     # iterate through each list of station data and remove NaNs
     for station_ii, station_data in enumerate(data):
-        data[station_ii] = np.array(station_data)[~np.isnan(station_data)]
-    # return numpy object of lists of station data with NaNs removed
-    return np.array(data)
+        data_nonan.append(station_data[~np.isnan(station_data)])
+    # return nested list of station data with NaNs removed
+    return data_nonan
 
 def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghost_data_in_memory, ghost_data_in_memory_shape, timestamp_array, qa, flags):
     """Function which called before netCDF read function,
