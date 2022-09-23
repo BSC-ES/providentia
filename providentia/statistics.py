@@ -58,25 +58,41 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
         for data_label in read_instance.data_labels:
 
             # get data for selected stations
+            
+            # specific station
             if station_index:
+                # get array for specific data label
                 data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:])
+                # temporally colocate data array
                 if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                     data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                # cut data array for station index
                 data_array = data_array[station_index,:]
+            
+            # multiple stations
             else:
+                # offline 
                 if read_instance.offline:
+                    # get valid station indices
                     if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                         station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
                     else:
                         station_inds = read_instance.valid_station_inds[networkspeci][data_label]
+                
+                # dashboard
                 else:
+                    # get valid station indices
                     if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                         station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
                     else:
                         station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
+                
+                # get array for specific data label
                 data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:])
+                # temporally colocate data array
                 if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                     data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                # cut data array for station indices
                 data_array = data_array[station_inds,:]
                     
             # if data array has no valid data for selected stations, do not create a pandas dataframe
@@ -350,10 +366,16 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
                 np.intersect1d(read_instance.valid_station_inds[networkspeci][z1],
                                read_instance.valid_station_inds[networkspeci][z2])
 
-    # read z1 data
+    # get z1 data
     z1_array_data = \
-        read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(z1),active_map_valid_station_inds,:]
-    # drop NaNs and reshape to object list of station data arrays (if not checking data %)
+        copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(z1),:,:])
+    # temporally colocate data (if active)
+    if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
+        z1_array_data[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+    # cut for valid stations
+    z1_array_data = z1_array_data[active_map_valid_station_inds,:]
+    
+    # drop NaNs and reshape to lists of station data (if not checking data %)
     if base_zstat != 'Data%':
         z1_array_data = drop_nans(z1_array_data)
     else:
@@ -377,14 +399,22 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
 
     # else, read z2 data then calculate 'difference' statistic
     else:
-        # read z2 data
+
+        # get z2 data
         z2_array_data = \
-            read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(z2),active_map_valid_station_inds,:]
-        # drop NaNs and reshape to object list of station data arrays (if not checking data %)
+            copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(z2),:,:])
+        # temporally colocate data (if active)
+        if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
+            z2_array_data[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+        # cut for valid stations
+        z2_array_data = z2_array_data[active_map_valid_station_inds,:]
+ 
+        # drop NaNs and reshape to lists of station data (if not checking data %)
         if base_zstat != 'Data%':
             z2_array_data = drop_nans(z2_array_data)
         else:
             z2_array_data = z2_array_data.tolist()
+        
         # is the difference statistic basic (i.e. mean)?
         if z_statistic_type == 'basic':
 
