@@ -1,6 +1,5 @@
 """ Module which provides main window """
 from .configuration import ProvConfiguration
-from .configuration import split_options
 from .init_standards import InitStandards
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
