@@ -1,4 +1,3 @@
-from .read_aux import drop_nans
 from .filter import DataFilter
 from .statistics import to_pandas_dataframe
 from .statistics import calculate_z_statistic

@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.backends.backend_pdf import PdfPages
 
-from .read_aux import drop_nans
 from .read import DataReader
 from .filter import DataFilter
 from .plot import Plot
