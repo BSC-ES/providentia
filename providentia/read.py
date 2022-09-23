@@ -468,10 +468,10 @@ class DataReader:
                         try:
                             available_yearmonths = self.read_instance.available_observation_data[network][resolution][matrix][speci]
                         except KeyError:
-                            error = 'Warning: The folder {0} does not exist.'.format(file_root[:-1])
+                            error = 'Error: The folder {0} does not exist.'.format(file_root[:-1])
                             tip = 'Tip: Consider interpolating the network data for the given configuration using Providentia Interpolation.'
                             print(error + '\n' + tip)
-                            continue
+                            sys.exit()
 
                     # non-GHOST
                     else:
@@ -480,10 +480,10 @@ class DataReader:
                         try:
                             available_yearmonths = self.read_instance.available_observation_data[network][resolution][matrix][speci]
                         except KeyError:
-                            error = 'Warning: The folder {0} does not exist.'.format(file_root[:-1])
+                            error = 'Error: The folder {0} does not exist.'.format(file_root[:-1])
                             tip = 'Tip: Consider interpolating the network data for the given configuration using Providentia Interpolation.'
                             print(error + '\n' + tip)
-                            continue
+                            sys.exit()
 
                 # experiments
                 else:
@@ -493,10 +493,10 @@ class DataReader:
                     try:
                         available_yearmonths = self.read_instance.available_experiment_data[network][resolution][speci][data_label]
                     except KeyError:
-                        error = 'Warning: The folder {0} does not exist.'.format(file_root[:-1])
+                        error = 'Error: The folder {0} does not exist.'.format(file_root[:-1])
                         tip = 'Tip: Consider interpolating the network data for the given configuration using Providentia Interpolation.'
                         print(error + '\n' + tip)
-                        continue
+                        sys.exit()
 
                 # get intersection of yearmonths_to_read and available_yearmonths
                 yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
