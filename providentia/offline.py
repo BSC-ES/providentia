@@ -175,9 +175,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             
             self.pdf = pdf
 
-            # initialise first page number to plot
-            self.current_page_n = 1
-
             # initialise dictionaries to store relevant page numebrs
             if self.report_summary:
                 self.summary_pages = {}
@@ -232,9 +229,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # iterate through all desired plots, making each one (summary or station specific plots)
                 print('Making {} Subsection Plots'.format(self.subsection))  
 
+                self.n_summary_pages = 0
+                self.n_summary_plots = 0
+                self.n_total_pages = 0
+                
                 # iterate through networks and species
                 for networkspeci_ii, networkspeci in enumerate(networkspecies):
-
+                    
                     # make summary plots?
                     if self.report_summary:
 
@@ -249,6 +250,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             # setup plotting geometry for summary plots per networkspeci (for all subsections)
                             self.setup_plot_geometry('summary', networkspeci, networkspeci_ii)
 
+                        print(self.plot_dictionary)
+
                         # iterate through plots to make
                         for plot_type in self.summary_plots_to_make:
                             
@@ -261,6 +264,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                             # make plot
                             self.make_plot('summary', plot_type, plot_options, networkspeci)
+
+                            self.n_summary_pages = len(self.plot_dictionary)
+                            for page in self.plot_dictionary:
+                                self.n_summary_plots += len(self.plot_dictionary[page]['axs'])
+                    
+                    print(self.plot_dictionary)
                     
                     # make station specific plots?
                     if self.report_stations:               
@@ -277,6 +286,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         # initialise station ind as -1
                         self.station_ind = -1
 
+                        #  setup plotting geometry for station plots per networkspeci (for one subsection)
+                        self.setup_plot_geometry('station', networkspeci, networkspeci_ii, n_stations=len(valid_station_inds))
+                        
                         # iterate through stations
                         for valid_station_ind in valid_station_inds:
                             
@@ -295,9 +307,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             else:
                                 to_pandas_dataframe(read_instance=self, canvas_instance=self, networkspecies=[networkspeci], station_index=valid_station_ind)
                             
-                            #  setup plotting geometry for station plots per networkspeci (for one subsection)
-                            self.setup_plot_geometry('station', networkspeci, networkspeci_ii, n_stations=len(valid_station_inds))
-
                             # iterate through plots to make
                             for plot_type in self.station_plots_to_make:
 
@@ -418,13 +427,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             if 'logx' in plot_options:
                                 log_validity = self.plot.log_validity(relevant_ax, 'logx')
                                 if log_validity:
-                                    self.plot.log_axes(relevant_ax, 'logx', base_plot_type, plot_characteristics)
+                                    self.plot.log_axes(relevant_ax, 'logx', base_plot_type, self.plot_characteristics[plot_type])
                                 else:
                                     print("Warning: It is not possible to log the x-axis with negative values.")
                             if 'logy' in plot_options:
                                 log_validity = self.plot.log_validity(relevant_ax, 'logy')
                                 if log_validity:
-                                    self.plot.log_axes(relevant_ax, 'logy', base_plot_type, plot_characteristics)
+                                    self.plot.log_axes(relevant_ax, 'logy', base_plot_type, self.plot_characteristics[plot_type])
                                 else:
                                     print("Warning: It is not possible to log the y-axis with negative values.")
 
@@ -450,11 +459,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 self.plot.trend(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
                                                 base_plot_type, self.plot_characteristics[plot_type], 
                                                 plot_options=plot_options)
-    
+
             # save page figures
             print('WRITING PDF')
-            for figure_n in self.plot_dictionary:
-                fig = self.plot_dictionary[figure_n]['fig']
+            for page in self.plot_dictionary:
+                fig = self.plot_dictionary[page]['fig']
                 self.pdf.savefig(fig, dpi=self.dpi)
                 plt.close(fig)
 
@@ -466,7 +475,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             self.plots_to_make = self.summary_plots_to_make
         elif plotting_paradigm == 'station':
             self.plots_to_make = self.station_plots_to_make
-        
+
         # iterate through plot types to make
         for plot_type in self.plots_to_make:
 
@@ -516,10 +525,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             elif plotting_paradigm == 'station':
                 plot_characteristics['page_title']['t'] = '{} (Per Station)\n{}\n{}'.format(plot_characteristics['page_title']['t'], self.subsection, networkspeci) 
 
-            # update markersize in plot characteristics (timeseries and scatter plots)
-            if (base_plot_type == 'timeseries') or (base_plot_type == 'scatter'):
-                self.plot.get_markersize(networkspeci, self.plot_characteristics[plot_type])
-
             # define number of plots per type
             n_plots_per_plot_type = False
             if base_plot_type == 'map':
@@ -563,14 +568,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                     plot_characteristics['figure']['ncols'] * plot_characteristics['figure']['nrows'])))
             plot_ii_per_type = 0
 
-            # iterate through n pages per plot
-            for page_n in range(n_pages_per_plot_type):
+            # iterate through n pages per plot type
+            for page_n in range(self.n_total_pages, self.n_total_pages + n_pages_per_plot_type):
+
                 if base_plot_type == 'map':
                     plot_characteristics['figure']['subplot_kw'] = {'projection': self.plotcrs}
                 fig, axs = plt.subplots(**plot_characteristics['figure'])
-                # each page is handled as 1 figure, with multiple axes
-                plot_reference = ''
-                self.plot_dictionary[self.current_page_n] = {'fig': fig, 'plot_type': plot_type, 'axs': []}
+
+                # each page is handled as 1 figure
+                self.plot_dictionary[page_n] = {'fig': fig, 'plot_type': plot_type, 'axs': []}
 
                 # make page title?
                 if 'page_title' in plot_characteristics_vars:
@@ -579,8 +585,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # iterate through axes (by row, then column)
                 row_ii = -1
                 col_ii = copy.deepcopy(plot_characteristics['figure']['ncols'])
-               
+                
                 for ax_ii, ax in enumerate(axs.flatten()):
+
                     if col_ii == plot_characteristics['figure']['ncols']:
                         row_ii += 1
                         col_ii = 0
@@ -594,7 +601,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                     # keep iteratively plotting until have satisfied needed plots per type
                     if plot_ii_per_type < n_plots_per_plot_type:
-
+                        
                         # determine if are on last valid row to plot
                         if (n_plots_per_plot_type - plot_ii_per_type) <= plot_characteristics['figure']['ncols']:
                             last_valid_row = True
@@ -608,7 +615,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             grid_dict['hour'] = fig.add_subplot(gs[:9, :])
                             grid_dict['month'] = fig.add_subplot(gs[11:, :11])
                             grid_dict['dayofweek'] = fig.add_subplot(gs[11:, 13:])
-                            self.plot_dictionary[self.current_page_n]['axs'].append({'handle':grid_dict, 'data_labels':[]})
+                            self.plot_dictionary[page_n]['axs'].append({'handle':grid_dict, 'data_labels':[]})
                             ax.spines['top'].set_color('none')
                             ax.spines['bottom'].set_color('none')
                             ax.spines['left'].set_color('none')
@@ -623,13 +630,18 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 # turn axis on
                                 grid_dict[relevant_temporal_resolution].set_axis_on()
                                 # format axis
-                                self.plot.format_axis(grid_dict[relevant_temporal_resolution], base_plot_type, plot_characteristics, relevant_temporal_resolution=relevant_temporal_resolution, col_ii=col_ii, last_valid_row=last_valid_row, last_row_on_page=last_row_on_page)
+                                self.plot.format_axis(grid_dict[relevant_temporal_resolution], base_plot_type, 
+                                                      plot_characteristics, 
+                                                      relevant_temporal_resolution=relevant_temporal_resolution, 
+                                                      col_ii=col_ii, last_valid_row=last_valid_row, 
+                                                      last_row_on_page=last_row_on_page)
 
                         # rest of plot types
                         else:
-                            self.plot_dictionary[self.current_page_n]['axs'].append({'handle':ax, 'data_labels':[]})
+                            self.plot_dictionary[page_n]['axs'].append({'handle':ax, 'data_labels':[]})
                             # format axis 
-                            self.plot.format_axis(ax, base_plot_type, plot_characteristics, col_ii=col_ii, last_valid_row=last_valid_row, last_row_on_page=last_row_on_page)
+                            self.plot.format_axis(ax, base_plot_type, plot_characteristics, col_ii=col_ii, 
+                                                  last_valid_row=last_valid_row, last_row_on_page=last_row_on_page)
 
                     # no more plots to make on page? 
                     # then turn off unneeded axes
@@ -651,20 +663,22 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                 # add colourbar axis to plot dictionary?
                 if 'cb' in plot_characteristics_vars:
-                    self.plot_dictionary[self.current_page_n]['cb_ax'] = fig.add_axes(plot_characteristics['cb']['position'])
-                    self.plot_dictionary[self.current_page_n]['cb_ax'].set_rasterized(True)
+                    self.plot_dictionary[page_n]['cb_ax'] = fig.add_axes(plot_characteristics['cb']['position'])
+                    self.plot_dictionary[page_n]['cb_ax'].set_rasterized(True)
                             
                 # add current page number
                 if plotting_paradigm == 'summary':
-                    self.summary_pages[plot_type][networkspeci].append(self.current_page_n)
+                    self.summary_pages[plot_type][networkspeci].append(page_n)
                 elif plotting_paradigm == 'station':
-                    self.station_pages[plot_type][networkspeci][self.subsection].append(self.current_page_n)
-                
-                self.current_page_n += 1
+                    self.station_pages[plot_type][networkspeci][self.subsection].append(page_n)
+
+                # add to total number of pages
+                self.n_total_pages += 1
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """Function that calls making of any type of plot"""
 
+        print(plotting_paradigm)
         # get zstat information from plot_type
         zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
 
@@ -714,7 +728,19 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # get relevant page/axis to plot on
                 axis_ind = (current_plot_ind * len(self.subsections)) + self.subsection_ind
                 relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
-                
+                print('Summary pages', self.n_summary_pages)
+                relevant_page += self.n_summary_pages
+
+                # calculate number of created axis and get corresponding page index given an axis index
+                total_axis_ind = 0
+                for page in self.plot_dictionary:
+                    if page < relevant_page:
+                        total_axis_ind += len(self.plot_dictionary[page]['axs'])
+                if axis_ind >= len(self.plot_dictionary[relevant_page]['axs']):
+                    page_ind = axis_ind + self.n_summary_plots - total_axis_ind
+                else:
+                    page_ind = axis_ind + self.n_summary_plots
+
                 # set axis title
                 if relevant_axis.get_title() == '':
                     axis_title_label = '{}\n{}'.format(data_label, self.subsection)
@@ -730,11 +756,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     self.active_map_valid_station_inds = active_map_valid_station_inds
 
                     # make map plot
-                    self.plot.make_map(relevant_axis, networkspeci, z_statistic, self.plot_characteristics[plot_type], plot_options=plot_options)
+                    self.plot.make_map(relevant_axis, networkspeci, z_statistic, self.plot_characteristics[plot_type], 
+                                       plot_options=plot_options)
                     if z2 == '':
-                        self.plot_dictionary[relevant_page]['axs'][axis_ind]['data_labels'].append(z1)
+                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z1)
                     else:
-                        self.plot_dictionary[relevant_page]['axs'][axis_ind]['data_labels'].append(z2)
+                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z2)
 
             # heatmap and table
             elif base_plot_type in ['heatmap','table']:
@@ -791,8 +818,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         axis_ind = self.station_ind
 
                 # get relevant axis
-                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
-                                                                           axis_ind)
+                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
+                #relevant_page += self.n_summary_pages
                 
                 # set axis title
                 if isinstance(relevant_axis, dict):
@@ -817,6 +844,19 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     else:
                         relevant_axis.set_axis_off()
                 else:
+                    # calculate number of created axis and get corresponding page index given an axis index
+                    total_axis_ind = 0
+                    print(relevant_page)
+                    for page in self.plot_dictionary:
+                        if page < relevant_page:
+                            total_axis_ind += len(self.plot_dictionary[page]['axs'])
+                    if axis_ind >= len(self.plot_dictionary[relevant_page]['axs']):
+                        page_ind = axis_ind + self.n_summary_plots - total_axis_ind
+                    else:
+                        page_ind = axis_ind
+                    print('Page', relevant_page, 'Page ind', page_ind, 'Axis ind', axis_ind)
+                    print(self.plot_dictionary[relevant_page]['axs'])
+
                     # periodic plots
                     if base_plot_type in ['periodic','periodic-violin']:
                         # skip observational array if plotting bias stat
@@ -825,10 +865,14 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         if data_label in self.selected_station_data[networkspeci]:
                             if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
                                 if base_plot_type == 'periodic':
-                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options, first_data_label=first_data_label)
+                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
+                                                            self.plot_characteristics[plot_type], zstat=zstat, 
+                                                            plot_options=plot_options, first_data_label=first_data_label)
                                 elif base_plot_type == 'periodic-violin':
-                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options, first_data_label=first_data_label)
-                                self.plot_dictionary[relevant_page]['axs'][axis_ind]['data_labels'].append(data_label)
+                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
+                                                            self.plot_characteristics[plot_type], 
+                                                            plot_options=plot_options, first_data_label=first_data_label)
+                                self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)
                                 first_data_label = False
 
                     # other plot types (except heatmap and table) 
@@ -841,9 +885,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         
                         if data_label in self.selected_station_data[networkspeci]:
                             if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
-                                func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options, first_data_label=first_data_label) 
+                                func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
+                                     plot_options=plot_options, first_data_label=first_data_label) 
                                 first_data_label = False
-                                self.plot_dictionary[relevant_page]['axs'][axis_ind]['data_labels'].append(data_label)              
+                                self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)              
 
             # iterate number of plots made for current type of plot 
             current_plot_ind += 1
@@ -858,7 +903,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             elif plotting_paradigm == 'station':
                 axis_ind = self.station_ind
             relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
-
+            
             #convert subsection_stats dicts to dataframe, with subsection names as indices
             if plotting_paradigm == 'summary':
                 stats_df = pd.DataFrame(data=self.subsection_stats_summary[zstat],index=self.subsections)
