@@ -881,9 +881,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
                 relevant_axis.set_axis_off()
             else:
-                #round dataframe
-                stats_df = stats_df.round(self.plot_characteristics[plot_type]['round_decimal_places'])
-
                 #make plot
                 func = getattr(self.plot, 'make_{}'.format(base_plot_type))
                 func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
