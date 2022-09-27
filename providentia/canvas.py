@@ -91,7 +91,7 @@ class MPLCanvas(FigureCanvas):
 
         # define all possible plots
         self.all_plots = ['legend', 'map', 'timeseries', 'periodic-violin', 'periodic', 
-                          'metadata', 'distribution', 'scatter']
+                          'metadata', 'distribution', 'scatter', 'statsummary']
 
         # update plot characteristics for all plots
         for plot_type in self.all_plots:
@@ -431,7 +431,10 @@ class MPLCanvas(FigureCanvas):
                     self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
 
                 # get plotting function for specific plot
-                func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+                if plot_type == 'statsummary':
+                    func = getattr(self.plot, 'make_table')
+                else:
+                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
 
                 # get zstat for plots with statistics, and set new axis title and ylabel
                 if plot_type in ['periodic']:
@@ -447,8 +450,15 @@ class MPLCanvas(FigureCanvas):
                             ylabel = basic_stats[base_zstat]['label']
                     else:
                         ylabel = expbias_stats[base_zstat]['label']
-                else:
-                    
+                # create structure to store data for statsummary plot
+                elif plot_type in ['statsummary']:
+                    #get list of statistics to create lists for
+                    relevant_zstats = self.plot_characteristics[plot_type]['basic']
+                    stat_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
+                    xlabel = ''
+                    ylabel = ''
+                # setup other plot information
+                else:    
                     # set new ylabel
                     if 'ylabel' in self.plot_characteristics[plot_type]:
                         if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
@@ -472,12 +482,18 @@ class MPLCanvas(FigureCanvas):
                 for data_label in self.selected_station_data[self.read_instance.networkspeci]:
 
                     # call function to update plot
+                    # periodic plot
                     if plot_type in ['periodic']:
                         # skip observational array if bias stat and data array is observations
                         if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                             continue
                         func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options, first_data_label=first_data_label)
                         first_data_label = False
+                    # gather data for statsummary plot
+                    elif plot_type in ['statsummary']:
+                        for relevant_zstat in relevant_zstats:
+                            stat_df[relevant_zstat].append(self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0])
+                    # other plots
                     else: 
                         if plot_type == 'metadata':
                             if data_label != 'observations':
@@ -487,6 +503,11 @@ class MPLCanvas(FigureCanvas):
                                 continue
                         func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options, first_data_label=first_data_label)
                         first_data_label = False
+
+                # make statsummary plot
+                if plot_type in ['statsummary']:
+                    stat_df = pd.DataFrame(data=stat_df,index=self.selected_station_data[self.read_instance.networkspeci])
+                    func(ax, stat_df, self.plot_characteristics[plot_type], plot_options=plot_options)
 
                 # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
                 if type(ax) == dict:
@@ -850,7 +871,7 @@ class MPLCanvas(FigureCanvas):
         ax.axis('on')
         ax.set_visible(True)
 
-        if plot_type != 'legend' and plot_type != 'cb' and plot_type != 'metadata':
+        if plot_type not in ['legend', 'cb', 'metadata', 'statsummary']:
             ax.grid(True)
 
         if plot_type == 'map':
