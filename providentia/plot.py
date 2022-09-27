@@ -973,6 +973,9 @@ class Plot:
         else:
             annotate = False
 
+        #round dataframe
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+
         # plot heatmap
         ax = sns.heatmap(stats_df, 
                          ax=relevant_axis, 
@@ -999,12 +1002,21 @@ class Plot:
         # turn off axis to make table
         relevant_axis.axis('off')
 
+        #round dataframe
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+
+        # set column widths
+        if 'colWidths' in plot_characteristics['plot']:
+            plot_characteristics['plot']['colWidths'] = [plot_characteristics['plot']['colWidths']] * len(stats_df.columns)
+
         # make table
         table = relevant_axis.table(cellText=stats_df.values, 
                                     colLabels=stats_df.columns, 
                                     rowLabels=stats_df.index, 
-                                    loc='center')
+                                    **plot_characteristics['plot'])
+
         #table.set_fontsize(18)
+        #table.scale(1.0, 1.5) 
 
     def log_axes(self, relevant_axis, log_ax, base_plot_type, plot_characteristics, 
                  undo=False):
