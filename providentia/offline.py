@@ -202,7 +202,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         
             # iterate through subsections
             for subsection_ind, subsection in enumerate(self.subsections):
- 
+
                 self.subsection_ind = subsection_ind
                 self.subsection = subsection
 
@@ -264,6 +264,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                             # make plot
                             self.make_plot('summary', plot_type, plot_options, networkspeci)
+
+                        self.n_total_pages = len(self.plot_dictionary)
 
                     # make station specific plots?
                     if self.report_stations:               
