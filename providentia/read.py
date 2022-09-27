@@ -540,14 +540,22 @@ class DataReader:
 
             # read data in parallel
             # setup pool of N workers on N CPUs
-            pool = multiprocessing.Pool(self.read_instance.n_cpus, initializer=init_shared_vars_read_netcdf_data, initargs=(data_in_memory_shared, data_in_memory_shared_shape, ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, timestamp_array_shared, qa_shared, flags_shared))
+            pool = multiprocessing.Pool(self.read_instance.n_cpus, initializer=init_shared_vars_read_netcdf_data, 
+                                        initargs=(data_in_memory_shared, data_in_memory_shared_shape, 
+                                                  ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, 
+                                                  timestamp_array_shared, qa_shared, flags_shared))
             # read netCDF files in parallel
-            tuple_argument_fields = ['filename','station_references','speci','data_label','data_labels','reading_ghost','ghost_data_vars_to_read','metadata_dtype','metadata_vars_to_read']
+            tuple_argument_fields = ['filename', 'station_references', 'speci', 'data_label', 'data_labels', 
+                                     'reading_ghost', 'ghost_data_vars_to_read', 'metadata_dtype', 
+                                     'metadata_vars_to_read']
             tuple_arguments = []
             for data_label in self.files_to_read['{}|{}'.format(network,speci)]:
                 for fname in self.files_to_read['{}|{}'.format(network,speci)][data_label]:
-                    tuple_arguments.append((fname, self.read_instance.station_references['{}|{}'.format(network,speci)], speci, data_label, data_labels,
-                                            self.read_instance.reading_ghost, self.read_instance.ghost_data_vars_to_read, self.read_instance.metadata_dtype, self.read_instance.metadata_vars_to_read))
+                    tuple_arguments.append((fname, self.read_instance.station_references['{}|{}'.format(network,speci)], 
+                                            speci, data_label, data_labels, self.read_instance.reading_ghost, 
+                                            self.read_instance.ghost_data_vars_to_read, 
+                                            self.read_instance.metadata_dtype, 
+                                            self.read_instance.metadata_vars_to_read))
 
             returned_data = pool.map(read_netcdf_data, tuple_arguments)
 

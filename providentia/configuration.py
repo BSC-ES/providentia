@@ -261,7 +261,7 @@ def read_conf(fpath=None):
                             res_sub[par_k] = par_val
                 else:
                     # store filename
-                    if k == 'filename':
+                    if k == 'report_filename':
                         filenames.append(val)
                         
                 # store pairs from current section
