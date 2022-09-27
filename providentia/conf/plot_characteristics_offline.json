@@ -180,5 +180,6 @@
           "axis_title": {"label": "", "fontsize": 8},
           "subplots_adjust": {"left": 0.05, "right": 0.98, "top": 0.90, "bottom": 0.06, "hspace": 0.2, "wspace": 0.01},
           "round_decimal_places":2,
+          "plot": {"loc": "center"},
           "plot_options": ["bias"]}
 }

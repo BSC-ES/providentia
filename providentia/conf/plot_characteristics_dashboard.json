@@ -152,6 +152,14 @@
             "plot_options": ["annotate", "bias"]},
 
 "table": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
-          "round_decimal_places":2,
-          "plot_options": ["bias"]}
+          "round_decimal_places": 2,
+          "plot": {"loc": "center"},
+          "plot_options": ["bias"]},
+
+"statsummary": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
+                "round_decimal_places": 2,
+                "basic": ["p5", "Mean", "p50", "p95", "StdDev"],
+                "experiment_bias": ["p5", "Mean", "p50", "p95", "StdDev", "MAE", "MNB", "RMSE", "r"],
+                "plot": {"loc": "center", "colWidths": 0.15},
+                "plot_options": ["bias"]}
 }
