@@ -78,20 +78,24 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         self.plot = Plot(read_instance=self, canvas_instance=self)
 
         # iterate through configuration sections
-        for section in self.parent_section_names:
+        for filename, section in zip(self.filenames, self.parent_section_names):
+
+            # update for new section parameters
+            self.report_filename = filename
+            self.section = section
+            self.section_opts = self.sub_opts[self.section]
+
+            # initialize plot characteristics
+            self.plot_characteristics = dict()
 
             # remove old parameters
-            other_sections = [value for value in self.all_sections if value != section]
+            other_sections = [value for value in self.all_sections if value != self.section]
             for other_section in other_sections:
                 for k in self.sub_opts[other_section]:
                     try:
                         vars(self).pop(k)
                     except:
                         pass
-
-            # update for new section parameters
-            self.section = section
-            self.section_opts = self.sub_opts[section]
 
             # update self with section variables
             vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.section_opts.items()})
