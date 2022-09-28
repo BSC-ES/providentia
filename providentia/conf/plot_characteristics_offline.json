@@ -10,7 +10,11 @@
            "page_title": {"x": 0.5, "y": 0.9, "size": 20, "ha": "center", "va": "top", "wrap": true},
            "page_text": {"x": 0.5, "y": 0.82, "weight": "light", "size": 15, "ha": "center", "va": "top", "wrap": true}},
 
-"metadata": {"non-ghost_vars": {"longitude": {"name_one": "Lon.", "dp": 4},
+"metadata": {"orientation": "portrait",
+             "figure": {"ncols": 2, "nrows": 2}, 
+             "page_title": {"t": "Metadata", "fontsize": 15, "ha": "left", "x": 0.05, "y": 0.98},
+             "subplots_adjust": {"left": 0.02, "right": 0.98, "top": 0.85, "bottom": 0.02, "hspace": 0.3, "wspace": 0.03},
+             "non-ghost_vars": {"longitude": {"name_one": "Lon.", "dp": 4},
                                 "latitude":  {"name_one": "Lat.", "dp": 4}},
              "ghost_vars": {"longitude":                           {"name_one": "Lon.", "dp": 4},
                             "latitude":                            {"name_one": "Lat.", "dp": 4},

@@ -1,7 +1,7 @@
 {       
     "debug": ["scatter_logx", "scatter_logy"],
 
-    "training": ["metadata", "timeseries", "timeseries_individual", "scatter_annotate", "map-r2", 
+    "training": ["timeseries", "timeseries_individual", "scatter_annotate", "map-r2", 
                  "periodic-violin", "distribution_bias", "heatmap-p95"],
 
     "standard": ["timeseries", "distribution", "distribution_bias", "periodic-violin", "scatter", 
