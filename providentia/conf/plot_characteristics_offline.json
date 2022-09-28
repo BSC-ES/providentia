@@ -126,7 +126,7 @@
                  "ytick_params": {"labelsize": 7}, 
                  "legend": {"plot": {"loc": "upper right", "columnspacing": 1, "frameon": false, "handletextpad": 0, "ncol": 2, "borderaxespad": 0, "fontsize": 8.0}, 
                             "handles": {"markersize": 8, "marker": "o", "color": "white", "obs_label": "Observations"}},
-                 "subplots_adjust": {"left": 0.08, "right": 0.98, "top": 0.90, "bottom": 0.06, "hspace": 0.23, "wspace": 0.09},
+                 "subplots_adjust": {"left": 0.08, "right": 0.98, "top": 0.90, "bottom": 0.06, "hspace": 0.23, "wspace": 0.15},
                  "annotate_stats": ["Min", "Max"],
                  "annotate_text": {"s": "", "loc": "upper right", "fontsize": 6, "n_stations": false, "round_decimal_places": 2},
                  "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1},
