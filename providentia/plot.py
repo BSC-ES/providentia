@@ -151,11 +151,6 @@ class Plot:
                     else:
                         self.canvas_instance.plot_characteristics[plot_type]['cb_label']['label'] = expbias_stats[base_zstat]['label']
 
-                # define dictionary to store stats from all subsections for heatmap and table plots
-                if base_plot_type in ['heatmap', 'table']:
-                    self.canvas_instance.subsection_stats_summary = {}
-                    self.canvas_instance.subsection_stats_station = {}
-
             # add new keys for plots without stats
             else:
 
@@ -748,6 +743,7 @@ class Plot:
                 xticks = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
                 medians = self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['p50']
                 median_zorder = self.read_instance.plotting_params[data_label]['zorder']+len(self.read_instance.data_labels)
+                
                 # split arrays if there are any temporal gaps to avoid
                 # line drawn being interpolated across missing values
                 inds_to_split = np.where(np.diff(xticks) > 1)[0]
@@ -1294,9 +1290,8 @@ class Plot:
             for element in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]:
                 element.set_visible(False)
 
-    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, 
-                                   xlim=None, ylim=None, relim=False, 
-                                   autoscale=False, autoscale_x=False, autoscale_y=False, 
+    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, xlim=None, 
+                                   ylim=None, relim=False, autoscale=False, autoscale_x=False, autoscale_y=False, 
                                    bias_centre=False):
         """Harmonises xy limits across paradigm of plot type, unless axis limits have been defined
         

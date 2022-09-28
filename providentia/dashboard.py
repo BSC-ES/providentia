@@ -323,7 +323,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.cb_periodic_stat.setToolTip('Select periodic statistic')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
-        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Select"),
+        self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
                                                    formatting_dict['title_menu'])
         self.lb_station_selection.setToolTip('Select stations')
         self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), formatting_dict['checkbox_menu'])
