@@ -206,6 +206,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 self.subsection_ind = subsection_ind
                 self.subsection = subsection
 
+                # define dictionary to store stats from each subsection (used for heatmap and table plots)
+                self.subsection_stats_summary = {}
+                self.subsection_stats_station = {}
+
                 # update the conf options for this subsection
                 if len(self.child_subsection_names) > 0:
                     for section in self.all_sections:
@@ -264,6 +268,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                             # make plot
                             self.make_plot('summary', plot_type, plot_options, networkspeci)
+                            print('Summary plot type {0} has been created'.format(plot_type))
 
                         self.n_total_pages = len(self.plot_dictionary)
 
@@ -316,6 +321,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                                 # make plot
                                 self.make_plot('station', plot_type, plot_options, networkspeci)
+                                print('Station plot type {0} has been created for {1}'.format(plot_type, self.current_station_name))
 
             # do formatting to axes per networkspeci
             # create colourbars
@@ -325,14 +331,18 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # regression line
             # trend line
 
+            # remove header from plot characteristics dictionary
+            if 'header' in list(self.plot_characteristics.keys()):
+                del self.plot_characteristics['header']
+
             # iterate through networks and species
             for networkspeci_ii, networkspeci in enumerate(networkspecies): 
 
                 # update plot characteristics
-                self.plot.set_plot_characteristics(self.plots_to_make, speci=networkspeci.split('|')[-1])
+                self.plot.set_plot_characteristics(list(self.plot_characteristics.keys()), speci=networkspeci.split('|')[-1])
 
                 # iterate through plot types
-                for plot_type in self.plots_to_make:
+                for plot_type in list(self.plot_characteristics.keys()):
 
                     # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                     plot_options = plot_type.split('_')[1:]
@@ -358,7 +368,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         if ('multispecies' in plot_options) & (not self.spatial_colocation) & (plot_type not in self.station_pages):
                             station_pages = []
                         else:
-                            station_pages = [self.station_pages[plot_type][networkspeci][subsection] for subsection in self.subsections]
+                            if plot_type in self.station_plots_to_make:
+                                station_pages = [self.station_pages[plot_type][networkspeci][subsection] for subsection in self.subsections]
+                            else:
+                                station_pages = []
                         paradigm_pages = summary_pages + station_pages
                     elif self.report_summary:
                         paradigm_pages = [self.summary_pages[plot_type][networkspeci]]
@@ -368,7 +381,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         if ('multispecies' in plot_options) & (not self.spatial_colocation) & (plot_type not in self.station_pages):
                             paradigm_pages = []
                         else:
-                            paradigm_pages = [self.station_pages[plot_type][networkspeci][subsection] for subsection in self.subsections]
+                            if plot_type in self.station_plots_to_make:
+                                paradigm_pages = [self.station_pages[plot_type][networkspeci][subsection] for subsection in self.subsections]
+                            else:
+                                paradigm_pages = []
 
                     # iterate through paradigm pages
                     for relevant_pages in paradigm_pages:
@@ -768,19 +784,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # heatmap and table
             elif base_plot_type in ['heatmap','table']:
 
-                # first subsection?
-                # then create nested dictionary to store statistical information across all subsections
-                if self.subsection_ind == 0:
-                    if plotting_paradigm == 'summary':
-                        if zstat not in self.subsection_stats_summary:
-                            self.subsection_stats_summary[zstat] = {}
-                        self.subsection_stats_summary[zstat][data_label_legend] = []
-                    elif plotting_paradigm == 'station':
-                        if self.current_station_reference not in self.subsection_stats_station:
-                            self.subsection_stats_station[self.current_station_reference] = {}
-                        if zstat not in self.subsection_stats_station[self.current_station_reference]:
-                            self.subsection_stats_station[self.current_station_reference][zstat] = {}
-                        self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend] = []
+                # create nested dictionary to store statistical information across all subsections
+                if plotting_paradigm == 'summary':
+                    if zstat not in self.subsection_stats_summary:
+                        self.subsection_stats_summary[zstat] = {}
+                    self.subsection_stats_summary[zstat][data_label_legend] = []
+                elif plotting_paradigm == 'station':
+                    if self.current_station_reference not in self.subsection_stats_station:
+                        self.subsection_stats_station[self.current_station_reference] = {}
+                    if zstat not in self.subsection_stats_station[self.current_station_reference]:
+                        self.subsection_stats_station[self.current_station_reference][zstat] = {}
+                    self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend] = []
 
                 # add stat for current data array (if has been calculated correctly, otherwise append NaNs)                                         
                 if data_label in self.selected_station_data[networkspeci]:
@@ -901,9 +915,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # iterate number of plots made for current type of plot 
             self.current_plot_ind += 1
 
-        #last subsection?
-        #then make plot heatmap/table plot
-        if (base_plot_type in ['heatmap','table']) & (self.subsection_ind == (len(self.subsections) - 1)):
+        # then make plot heatmap/table plot
+        if (base_plot_type in ['heatmap','table']):
             
             # get relevant axis to plot on
             if plotting_paradigm == 'summary':
@@ -912,14 +925,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 axis_ind = self.station_ind
             relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
             
-            #convert subsection_stats dicts to dataframe, with subsection names as indices
+            # convert subsection_stats dicts to dataframe, with subsection names as indices
             if plotting_paradigm == 'summary':
-                stats_df = pd.DataFrame(data=self.subsection_stats_summary[zstat],index=self.subsections)
+                stats_df = pd.DataFrame(data=self.subsection_stats_summary[zstat],
+                                        index=self.subsections)
             elif plotting_paradigm == 'station':
                 if self.current_station_reference not in self.subsection_stats_station:
                     stats_df = pd.DataFrame()
                 else:
-                    stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],index=self.subsections)
+                    stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
+                                            index=self.subsections)
 
             # set axis title
             if relevant_axis.get_title() == '':
@@ -929,17 +944,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     axis_title_label = '{} ({}, {})'.format(self.current_station_name, self.current_lon, self.current_lat)
                 self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
-            #turn off relevant axis if dataframe is empty or all NaN
+            # turn off relevant axis if dataframe is empty or all NaN
             if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
                 relevant_axis.set_axis_off()
             else:
-                #round dataframe
+                # round dataframe
                 stats_df = stats_df.round(self.plot_characteristics[plot_type]['round_decimal_places'])
 
-                #make plot
+                # make plot
                 func = getattr(self.plot, 'make_{}'.format(base_plot_type))
                 func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
-                #self.plot_dictionary[relevant_page]['axs'][axis_ind]['data_labels'].append() 
 
     def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
         """get relevant page and axis for current plot type/subsection/axis index"""
