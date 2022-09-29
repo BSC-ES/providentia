@@ -181,7 +181,7 @@
                  "plot_options": ["bias", "obs", "individual", "annotate", "logx", "logy"]},
 
 "scatter": {"orientation": "landscape",
-            "figure": {"ncols": 2, "nrows": 3},
+            "figure": {"ncols": 2, "nrows": 2},
             "grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
             "page_title": {"t": "Scatter", "fontsize": 15, "ha": "left", "x": 0.05, "y": 0.98},
             "axis_title": {"label": "", "fontsize": 8}, 
