@@ -140,7 +140,7 @@ class Plot:
                     else:
                         self.canvas_instance.plot_characteristics[plot_type]['ylabel']['ylabel'] = expbias_stats[base_zstat]['label']
 
-                # get colorbar label for heatmap
+                # get colourbar label for heatmap
                 if base_plot_type == 'heatmap':
                     if z_statistic_type == 'basic':
                         if base_zstat not in ['Data%', 'Exceedances']:
