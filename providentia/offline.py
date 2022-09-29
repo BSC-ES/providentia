@@ -657,7 +657,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     # no more plots to make on page? 
                     # then turn off unneeded axes
                     else:
-                        ax.set_axis_off()
+                        ax.axis('off')
+                        ax.set_visible(False)
+                        ax.grid(False)
 
                     plot_ii_per_type += 1
                     col_ii += 1
@@ -786,18 +788,18 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                 # create nested dictionary to store statistical information across all subsections
                 if plotting_paradigm == 'summary':
-                    if zstat not in list(self.subsection_stats_summary.keys()):
+                    if zstat not in self.subsection_stats_summary:
                         self.subsection_stats_summary[zstat] = {}
-                    if data_label_legend not in list(self.subsection_stats_summary[zstat].keys()):
-                        self.subsection_stats_summary[zstat][data_label_legend] = []
+                    if data_label_legend not in self.subsection_stats_summary[zstat]:
+                        self.subsection_stats_summary[zstat][data_label_legend] = {}
                 elif plotting_paradigm == 'station':
-                    if self.current_station_reference not in list(self.subsection_stats_station.keys()):
+                    if self.current_station_reference not in self.subsection_stats_station:
                         self.subsection_stats_station[self.current_station_reference] = {}
-                    if zstat not in list(self.subsection_stats_station[self.current_station_reference].keys()):
+                    if zstat not in self.subsection_stats_station[self.current_station_reference]:
                         self.subsection_stats_station[self.current_station_reference][zstat] = {}
-                    if data_label_legend not in list(self.subsection_stats_station[self.current_station_reference][zstat].keys()):
-                        self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend] = []
-
+                    if data_label_legend not in self.subsection_stats_station[self.current_station_reference][zstat]:
+                        self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend] = {}
+                
                 # add stat for current data array (if has been calculated correctly, otherwise append NaNs)                                         
                 if data_label in self.selected_station_data[networkspeci]:
                     if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
@@ -806,11 +808,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         data_to_add = np.NaN
                 else:
                     data_to_add = np.NaN
-
+                
                 if plotting_paradigm == 'summary':
-                    self.subsection_stats_summary[zstat][data_label_legend].append(data_to_add)
+                    if self.subsection not in self.subsection_stats_summary[zstat][data_label_legend]:
+                        self.subsection_stats_summary[zstat][data_label_legend][self.subsection] = data_to_add
                 elif plotting_paradigm == 'station':
-                    self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend].append(data_to_add)
+                    if self.subsection not in self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend]:
+                        self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend][self.subsection] = data_to_add
 
             # other plots (1 plot per subsection with multiple data arrays for summary paradigm, 1 plot per subsection per station for station paradigm)
             else:
@@ -932,12 +936,25 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 
                 # convert subsection_stats dicts to dataframe, with subsection names as indices
                 if plotting_paradigm == 'summary':
-                    stats_df = pd.DataFrame(data=self.subsection_stats_summary[zstat],
+                    stats_to_plot = copy.deepcopy(self.subsection_stats_summary)
+                    for data_label in stats_to_plot[zstat].keys():
+                        stats_per_data_label = []
+                        for subsection, stat in stats_to_plot[zstat][data_label].items():
+                            stats_per_data_label.append(stat)
+                    stats_to_plot[zstat][data_label] = stats_per_data_label
+                    stats_df = pd.DataFrame(data=stats_to_plot[zstat],
                                             index=self.subsections)
                 elif plotting_paradigm == 'station':
                     if self.current_station_reference not in self.subsection_stats_station:
                         stats_df = pd.DataFrame()
                     else:
+                        stats_to_plot = copy.deepcopy(self.subsection_stats_station)
+                        for station in stats_to_plot[self.current_station_reference].keys():
+                            for data_label in stats_to_plot[station][zstat].keys():
+                                stats_per_data_label = []
+                                for subsection, stat in stats_to_plot[station][zstat][data_label].items():
+                                    stats_per_data_label.append(stat)
+                        stats_to_plot[zstat][data_label] = stats_per_data_label
                         stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
                                                 index=[self.subsection])
     
