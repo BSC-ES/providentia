@@ -63,6 +63,9 @@ class ProvConfiguration(object):
         self.report_filename = kwargs.get('report_filename', 'PROVIDENTIA_Report')
         self.map_extent = kwargs.get('map_extent', '-180, 180, -90, 90')
         self.plot_characteristics_filename = kwargs.get('plot_characteristics_filename', '')
+        self.fixed_section_vars =  ['network', 'species', 'resolution', 'start_date', 'end_date', 'experiments', 
+                                    'spatial_colocation', 'report_type', 'report_summary', 'report_stations',
+                                    'report_title', 'report_filename', 'plot_characteristics_filename']
 
     def __setattr__(self, key, value):
         super(ProvConfiguration, self).__setattr__(key, self.parse_parameter(key, value))

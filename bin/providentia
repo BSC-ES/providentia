@@ -4,7 +4,7 @@
 cores=12
 jobname="PRV"
 queue="debug"
-mem="5Gb"
+mem="20Gb"
 
 function usage () {
 echo "Usage: providentia [-u|--usage] [-c|--cores NUM_CORES (default=12)]"
