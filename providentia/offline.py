@@ -214,13 +214,14 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 if len(self.child_subsection_names) > 0:
                     for section in self.all_sections:
                         for k in self.sub_opts[section]:
-                            if k != 'experiments':
+                            if k not in self.fixed_section_vars:
                                 try:
                                     vars(self).pop(k)
                                 except:
                                     continue
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in
-                                      self.sub_opts[self.subsection].items() if k != 'experiments'})
+                                      self.sub_opts[self.subsection].items() if k not in self.fixed_section_vars})
+
 
                 # update fields available for filtering
                 aux.update_representativity_fields(self)
@@ -532,9 +533,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # update page title depending on plot paradigm
             if plotting_paradigm == 'summary':
-                plot_characteristics['page_title']['t'] = '{} (Summary)\n{}'.format(plot_characteristics['page_title']['t'], networkspeci) 
+                if 'multispecies' in plot_options:
+                    plot_characteristics['page_title']['t'] = '{} (Summary)\nmultispecies'.format(plot_characteristics['page_title']['t']) 
+                else:
+                    plot_characteristics['page_title']['t'] = '{} (Summary)\n{}'.format(plot_characteristics['page_title']['t'], networkspeci) 
             elif plotting_paradigm == 'station':
-                plot_characteristics['page_title']['t'] = '{} (Per Station)\n{}\n{}'.format(plot_characteristics['page_title']['t'], self.subsection, networkspeci) 
+                if 'multispecies' in plot_options:
+                    plot_characteristics['page_title']['t'] = '{} (Per Station)\n{}\nmultispecies'.format(plot_characteristics['page_title']['t'], self.subsection) 
+                else:
+                    plot_characteristics['page_title']['t'] = '{} (Per Station)\n{}\n{}'.format(plot_characteristics['page_title']['t'], self.subsection, networkspeci) 
 
             # define number of plots per type
             n_plots_per_plot_type = False
@@ -785,6 +792,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # heatmap and table
             elif base_plot_type in ['heatmap', 'table']:
+
+                
 
                 # create nested dictionary to store statistical information across all subsections
                 if plotting_paradigm == 'summary':

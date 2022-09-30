@@ -1,5 +1,5 @@
 {       
-    "debug": ["scatter_logx", "scatter_logy"],
+    "debug": ["boxplot", "boxplot_individual"],
 
     "training": ["timeseries", "timeseries_individual", "scatter_annotate", "map-p95", 
                  "periodic-violin", "distribution_bias"],

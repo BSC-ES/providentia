@@ -129,7 +129,8 @@ def which_flags(instance):
 def multi_species_mapping(species):
     """Map species special case str to multiple species names"""
 
-    multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4','vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
+    #multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4','vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
+    multi_species_map = {'vconcaerobin*':['vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
 
     return multi_species_map[species]
 
@@ -167,9 +168,6 @@ def get_parameters(instance):
         if instance.species.strip() == '':
             error = 'Error: "species" field is empty in .conf file'
             sys.exit(error)
-        # map to multiple species if have * wildcard
-        elif '*' in instance.species:
-            instance.species = multi_species_mapping(instance.species)
         # parse multiple species
         elif ',' in instance.species:
             instance.species = [speci.strip() for speci in instance.species.split(',')]
@@ -179,6 +177,37 @@ def get_parameters(instance):
     else:
         error = 'Error: "species" field must be defined in .conf file'
         sys.exit(error)
+
+    # if number of networks and species is not the same,
+    # and len of one of network or species == 1,
+    # then duplicate respestive network/species
+    if len(instance.network) != len(instance.species):
+
+        # 1 network?
+        if len(instance.network) == 1:
+            # duplicate network to match species len
+            instance.network = instance.network * len(instance.species)
+
+        # 1 species?
+        elif len(instance.species) == 1:
+            # duplicate species to match network len
+            instance.species = instance.species * len(instance.network)
+
+        # otherwise throw error
+        else:
+            error = 'Error: The number of networks and species is not the same.'
+            sys.exit(error)
+
+    # throw error if one of networks are non all GHOST or non-GHOST
+    for network_ii, network in enumerate(instance.network):
+        if network_ii == 0:
+            previous_is_ghost = check_for_ghost(network)
+        else:
+            is_ghost = check_for_ghost(network)
+            if is_ghost != previous_is_ghost:
+                error = 'Error: Networks must be all GHOST or non-GHOST'
+                sys.exit(error)
+            previous_is_ghost = is_ghost
 
     # resolution
     if hasattr(instance, 'resolution'):
@@ -213,21 +242,19 @@ def get_parameters(instance):
         error = 'Error: "end_date" field must be defined in .conf file'
         sys.exit(error)
 
-    # throw error if length of parameter lists are not the same
-    if len(instance.network) != len(instance.species):
-        error = 'Error: The number of networks and species is not the same.'
-        sys.exit(error)
-
-    # throw error if one of networks are non all GHOST or non-GHOST
-    for network_ii, network in enumerate(instance.network):
-        if network_ii == 0:
-            previous_is_ghost = check_for_ghost(network)
-        else:
-            is_ghost = check_for_ghost(network)
-            if is_ghost != previous_is_ghost:
-                error = 'Error: Networks must be all GHOST or non-GHOST'
-                sys.exit(error)
-            previous_is_ghost = is_ghost
+    # map to multiple species if have * wildcard
+    # also duplicate out associated network
+    # remove any species for which there exists no data
+    new_species = copy.deepcopy(instance.species)
+    for speci_ii, speci in enumerate(instance.species): 
+        if '*' in speci:
+            mapped_species = multi_species_mapping(speci)
+            del new_species[speci_ii]
+            new_species[speci_ii:speci_ii] = mapped_species
+            network_to_duplicate = instance.network[speci_ii]
+            del instance.network[speci_ii]
+            instance.network[speci_ii:speci_ii] = [network_to_duplicate]*len(mapped_species)
+    instance.species = copy.deepcopy(new_species)
 
     # if are using dashboard then just take first network/species pair, as multivar not supported yet
     if (len(instance.network) > 1) & (len(instance.species) > 1) & (not instance.offline):
@@ -1369,7 +1396,7 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
 
     # if non-intersecting indices unaccounted for across species, 
     # then attempt to resolve them by matching longitudes / latitudes
-    if len(intersecting_station_references) != len(species_references_no_method[firstnetworkspecies]):
+    if len(intersecting_station_references) != len(station_references_no_method[firstnetworkspecies]):
 
         # set tolerance for matching longitudes and latitudes in metres
         tolerance = 20
