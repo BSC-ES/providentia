@@ -2731,7 +2731,7 @@ class MPLCanvas(FigureCanvas):
                                               fontsize=self.plot_characteristics[key]['axis_title']['fontsize'],
                                               loc=self.plot_characteristics[key]['axis_title']['loc'])
        
-        # hide colorbar
+        # hide colourbar
         self.plot_axes['cb'].set_visible(False)
 
         # draw changes
@@ -2773,7 +2773,7 @@ class MPLCanvas(FigureCanvas):
             else:
                 self.plot_axes[key].set_title(**self.plot_characteristics[key]['axis_title'])
 
-        # show colorbar
+        # show colourbar
         self.plot_axes['cb'].set_visible(True)
 
         # draw changes
