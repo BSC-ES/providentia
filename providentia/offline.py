@@ -728,7 +728,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # 2 arrays if making bias plot), per subsection)
             if base_plot_type == 'map':
                 
-                 # get necessary data labels to plot
+                # get necessary data labels to plot
                 if z_statistic_sign == 'bias':
                     z1 = 'observations'
                     z2 = copy.deepcopy(data_label)
@@ -949,12 +949,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         stats_df = pd.DataFrame()
                     else:
                         stats_to_plot = copy.deepcopy(self.subsection_stats_station)
-                        for station in stats_to_plot[self.current_station_reference].keys():
-                            for data_label in stats_to_plot[station][zstat].keys():
-                                stats_per_data_label = []
-                                for subsection, stat in stats_to_plot[station][zstat][data_label].items():
-                                    stats_per_data_label.append(stat)
-                        stats_to_plot[zstat][data_label] = stats_per_data_label
+                        for data_label in stats_to_plot[self.current_station_reference][zstat].keys():
+                            stats_per_data_label = []
+                            for subsection, stat in stats_to_plot[self.current_station_reference][zstat][data_label].items():
+                                stats_per_data_label.append(stat)
+                        stats_to_plot[self.current_station_reference][zstat][data_label] = stats_per_data_label
                         stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
                                                 index=[self.subsection])
     
