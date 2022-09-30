@@ -3,7 +3,7 @@
             "gridspec_format": {"left": 0.04, "right": 0.97, "top": 0.99, "bottom": 0.06, "wspace": 0.00, "hspace": 0.00},
             "lasso": {"alpha": 0.5, "color": "hotpink", "linewidth": 1},
             "legend_color_palette": "husl",
-            "obs_zorder": 5, "obs_label": "observations", "obs_markerfacecolor": "black", 
+            "obs_zorder": 5, "obs_markerfacecolor": "black", 
             "experiment_domain_polygon": {"linewidth": 1, "linestyle": "--", "fill": false, "zorder": 2},
             "settings_menu": {"position_1": {"x": 820, "y": 15},
                               "position_2": {"x": 1820, "y": 75},
