@@ -432,13 +432,17 @@ class Plot:
         plot_characteristics['page_title']['transform'] = page.transFigure
         page.text(**plot_characteristics['page_title'])
 
+        # if len of network or species uniques is 1, set that instead of lng list of duplicates
+        network_to_write = np.unique(self.read_instance.network)
+        species_to_write = np.unique(self.read_instance.species)
+
         #set header main text
         txt = 'Network = {}\nTemporal Resolution = {}\n' \
               'Species = {}\nDate Range = {} - {}\nExperiments = {}\n' \
               'Subsections = {}\n' \
-            .format(self.read_instance.network,
+            .format(network_to_write,
                     self.read_instance.resolution,
-                    self.read_instance.species,
+                    species_to_write,
                     self.read_instance.start_date,
                     self.read_instance.end_date, 
                     list(self.read_instance.experiments.values()),
@@ -627,7 +631,7 @@ class Plot:
             ts_model = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] 
             ts = ts_model - ts_obs
             # plot horizontal line across x axis at 0 (if not already plotted)
-            if first_data_label:
+            if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
                 bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
                 # track plot elements if using dashboard 
                 if not self.read_instance.offline:
@@ -803,7 +807,7 @@ class Plot:
 
                 # plot horizontal line/s across x axis at value/s of minimum experiment bias (if bias option is active, and not previously plotted)
                 if z_statistic_sign == 'bias':
-                    if first_data_label:
+                    if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
                         # get value/s of minimum bias for statistic
                         if z_statistic_type == 'basic':
                             minimum_bias = basic_stats[base_zstat]['minimum_bias']
@@ -879,7 +883,7 @@ class Plot:
             PDF_model = st.gaussian_kde(self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna())
             PDF_sampled = PDF_model(x_grid) - PDF_obs(x_grid)
             # plot horizontal line across x axis at 0 (if not already plotted)
-            if first_data_label:
+            if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
                 bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
                 # track plot elements if using dashboard 
                 if not self.read_instance.offline:
@@ -928,7 +932,7 @@ class Plot:
         experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data']
         
         # add extra lines only once (if not already plotted)
-        if first_data_label:
+        if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
             # add 1:1 line (if in plot_characteristics)
             if '1:1_line' in plot_characteristics:
                 relevant_axis.plot([0, 1], [0, 1], transform=relevant_axis.transAxes, 
@@ -951,6 +955,101 @@ class Plot:
         if not self.read_instance.offline:
             self.track_plot_elements(data_label, 'scatter', 'plot', scatter_plot, bias=False)
           
+
+    def make_boxplot(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
+                     first_data_label=False):
+        """Make boxplot
+
+        :param relevant_axis: axis to plot on 
+        :type relevant_axis: object
+        :param networkspeci: str of currently active network and species 
+        :type networkspeci: str
+        :param data_label: name of data array to plot
+        :type data_label: str
+        :param plot_characteristics: plot characteristics  
+        :type plot_characteristics: dict
+        :param plot_options: list of options to configure plot  
+        :type plot_options: list
+        :param first_data_label: boolean informing if first plotted data_label on axis
+        :type first_data_label: boolean
+        """
+
+        # make boxplot for data_label for multispecies
+        if 'multispecies' in plot_options:
+            networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.read_instance.network, self.read_instance.species)]
+            widths = plot_characteristics['group_widths']['multispecies'] / (len(self.read_instance.data_labels) + 1)
+            gap_after_plot = widths / len(self.read_instance.data_labels)
+            if ('individual' in plot_options) or ('obs' in plot_options):
+                offset = plot_characteristics['group_widths']['multispecies'] / 2.0
+            else:
+                offset = ((widths * (self.read_instance.data_labels.index(data_label) + 1)) - (widths/2.0)) + (gap_after_plot * (self.read_instance.data_labels.index(data_label)))
+
+            for ns_ii, ns in enumerate(networkspecies):
+                positions = [(ns_ii - (plot_characteristics['group_widths']['multispecies'] / 2.0)) + (offset)]
+                # make boxplot
+                boxplot = relevant_axis.boxplot(self.canvas_instance.selected_station_data[ns][data_label]['pandas_df']['data'].dropna(), 
+                                                positions=positions, widths=widths, **plot_characteristics['plot'])
+
+                # set box colour
+                for element in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']:
+                    plt.setp(boxplot[element], color=self.read_instance.plotting_params[data_label]['colour'])
+                # set fill colour to be white
+                for patch in boxplot['boxes']:
+                    patch.set(facecolor='white')
+
+        # make boxplot for datalabel for networkspeci
+        else:
+            if ('individual' in plot_options) or ('obs' in plot_options):
+                positions = [0]
+            else:
+                positions = [self.read_instance.data_labels.index(data_label)]
+            widths = plot_characteristics['group_widths']['singlespecies']
+
+            # make boxplot
+            boxplot = relevant_axis.boxplot(self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna(), 
+                                            positions=positions, widths=widths, **plot_characteristics['plot'])
+        
+            # set box colour
+            for element in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']:
+                plt.setp(boxplot[element], color=self.read_instance.plotting_params[data_label]['colour'])
+            # set fill colour to be white
+            for patch in boxplot['boxes']:
+                patch.set(facecolor='white')
+
+        # set xticklabels (if not already plotted)
+        if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
+            if 'multispecies' in plot_options:
+                relevant_axis.set_xticks(np.arange(len(networkspecies)))
+                #if all networks or species are same, drop them from xtick label
+                if len(np.unique(self.read_instance.network)) == 1:
+                    networkspecies_labels = copy.deepcopy(self.read_instance.species)
+                elif len(np.unique(self.read_instance.species)) == 1:
+                    networkspecies_labels = copy.deepcopy(self.read_instance.network)
+                else:
+                    networkspecies_labels = networkspecies
+                relevant_axis.set_xticklabels(networkspecies_labels)
+            else:
+                data_labels_to_plot = copy.deepcopy(self.read_instance.data_labels)
+                for dl_ii, dl in enumerate(self.read_instance.data_labels):
+                    if dl == 'observations':
+                        if 'legend' in plot_characteristics:
+                            obs_label = plot_characteristics['legend']['handles']['obs_label']
+                        else:
+                            obs_label = self.canvas_instance.plot_characteristics_templates['legend']['plot']['handles']['obs_label']
+                        data_labels_to_plot[dl_ii] = obs_label
+                    else:
+                        data_labels_to_plot[dl_ii] = self.read_instance.experiments[dl]
+                if ('individual' in plot_options) or ('obs' in plot_options):
+                    relevant_axis.set_xticks([0])
+                    relevant_axis.set_xticklabels([data_labels_to_plot[self.read_instance.data_labels.index(data_label)]])
+                else:
+                    relevant_axis.set_xticks(np.arange(len(data_labels_to_plot)))
+                    relevant_axis.set_xticklabels(data_labels_to_plot)
+
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            self.track_plot_elements(data_label, 'boxplot', 'plot', boxplot, bias=False)
+
     def make_heatmap(self, relevant_axis, stats_df, plot_characteristics, plot_options=[]):
         """Make heatmap plot
 
