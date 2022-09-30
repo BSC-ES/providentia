@@ -199,16 +199,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # make header
             self.plot.set_plot_characteristics(['header'])
             self.plot.make_header(self.pdf, self.plot_characteristics['header'])
-        
+
+            # define dictionary to store stats from all subsections for heatmap and table plots
+            self.subsection_stats_summary = {}
+            self.subsection_stats_station = {}
+
             # iterate through subsections
             for subsection_ind, subsection in enumerate(self.subsections):
 
                 self.subsection_ind = subsection_ind
                 self.subsection = subsection
-
-                # define dictionary to store stats from each subsection (used for heatmap and table plots)
-                self.subsection_stats_summary = {}
-                self.subsection_stats_station = {}
 
                 # update the conf options for this subsection
                 if len(self.child_subsection_names) > 0:
@@ -232,11 +232,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 aux.metadata_conf(self)
                 
                 # filter dataset for current subsection
-                print('\nFiltering Data for {} Subsection'.format(self.subsection))
+                print('\nFiltering data for {} subsection'.format(self.subsection))
                 DataFilter(self)
 
                 # iterate through all desired plots, making each one (summary or station specific plots)
-                print('Making {} Subsection Plots'.format(self.subsection))  
+                print('Making {} subsection plots'.format(self.subsection))  
 
                 self.n_total_pages = 0
                 
@@ -554,7 +554,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 else:
                     n_plots_per_plot_type = len(self.subsections) * \
                                             len(self.data_labels)
-            elif base_plot_type in ['heatmap','table']:
+            elif base_plot_type in ['heatmap', 'table']:
                 if plotting_paradigm == 'summary':
                     n_plots_per_plot_type = 1
                 elif plotting_paradigm == 'station':
@@ -664,7 +664,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     # no more plots to make on page? 
                     # then turn off unneeded axes
                     else:
-                        ax.set_axis_off()
+                        ax.axis('off')
+                        ax.set_visible(False)
+                        ax.grid(False)
 
                     plot_ii_per_type += 1
                     col_ii += 1
@@ -789,7 +791,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z2)
 
             # heatmap and table
-            elif base_plot_type in ['heatmap','table']:
+            elif base_plot_type in ['heatmap', 'table']:
 
                 
 
@@ -797,14 +799,16 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 if plotting_paradigm == 'summary':
                     if zstat not in self.subsection_stats_summary:
                         self.subsection_stats_summary[zstat] = {}
-                    self.subsection_stats_summary[zstat][data_label_legend] = []
+                    if data_label_legend not in self.subsection_stats_summary[zstat]:
+                        self.subsection_stats_summary[zstat][data_label_legend] = {}
                 elif plotting_paradigm == 'station':
                     if self.current_station_reference not in self.subsection_stats_station:
                         self.subsection_stats_station[self.current_station_reference] = {}
                     if zstat not in self.subsection_stats_station[self.current_station_reference]:
                         self.subsection_stats_station[self.current_station_reference][zstat] = {}
-                    self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend] = []
-
+                    if data_label_legend not in self.subsection_stats_station[self.current_station_reference][zstat]:
+                        self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend] = {}
+                
                 # add stat for current data array (if has been calculated correctly, otherwise append NaNs)                                         
                 if data_label in self.selected_station_data[networkspeci]:
                     if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
@@ -813,11 +817,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         data_to_add = np.NaN
                 else:
                     data_to_add = np.NaN
-
+                
                 if plotting_paradigm == 'summary':
-                    self.subsection_stats_summary[zstat][data_label_legend].append(data_to_add)
+                    if self.subsection not in self.subsection_stats_summary[zstat][data_label_legend]:
+                        self.subsection_stats_summary[zstat][data_label_legend][self.subsection] = data_to_add
                 elif plotting_paradigm == 'station':
-                    self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend].append(data_to_add)
+                    if self.subsection not in self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend]:
+                        self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend][self.subsection] = data_to_add
 
             # other plots (1 plot per subsection with multiple data arrays for summary paradigm, 1 plot per subsection per station for station paradigm)
             else:
@@ -925,44 +931,60 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             self.current_plot_ind += 1
 
         # then make plot heatmap/table plot
-        if (base_plot_type in ['heatmap','table']):
-            
-            # get relevant axis to plot on
-            if plotting_paradigm == 'summary':
-                axis_ind = 0
-            elif plotting_paradigm == 'station':
-                axis_ind = self.station_ind
-            relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
-            
-            # convert subsection_stats dicts to dataframe, with subsection names as indices
-            if plotting_paradigm == 'summary':
-                stats_df = pd.DataFrame(data=self.subsection_stats_summary[zstat],
-                                        index=self.subsections)
-            elif plotting_paradigm == 'station':
-                if self.current_station_reference not in self.subsection_stats_station:
-                    stats_df = pd.DataFrame()
-                else:
-                    stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
-                                            index=self.subsections)
+        if (base_plot_type in ['heatmap', 'table']):
 
-            # set axis title
-            if relevant_axis.get_title() == '':
+            if ((plotting_paradigm == 'summary' and self.subsection_ind == (len(self.subsections) - 1)) or 
+                (plotting_paradigm == 'station')):
+                    
+                # get relevant axis to plot on
                 if plotting_paradigm == 'summary':
-                    axis_title_label = ''
+                    axis_ind = 0
                 elif plotting_paradigm == 'station':
-                    axis_title_label = '{} ({}, {})'.format(self.current_station_name, self.current_lon, self.current_lat)
-                self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+                    axis_ind = self.station_ind
+                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
+                
+                # convert subsection_stats dicts to dataframe, with subsection names as indices
+                if plotting_paradigm == 'summary':
+                    stats_to_plot = copy.deepcopy(self.subsection_stats_summary)
+                    for data_label in stats_to_plot[zstat].keys():
+                        stats_per_data_label = []
+                        for subsection, stat in stats_to_plot[zstat][data_label].items():
+                            stats_per_data_label.append(stat)
+                    stats_to_plot[zstat][data_label] = stats_per_data_label
+                    stats_df = pd.DataFrame(data=stats_to_plot[zstat],
+                                            index=self.subsections)
+                elif plotting_paradigm == 'station':
+                    if self.current_station_reference not in self.subsection_stats_station:
+                        stats_df = pd.DataFrame()
+                    else:
+                        stats_to_plot = copy.deepcopy(self.subsection_stats_station)
+                        for station in stats_to_plot[self.current_station_reference].keys():
+                            for data_label in stats_to_plot[station][zstat].keys():
+                                stats_per_data_label = []
+                                for subsection, stat in stats_to_plot[station][zstat][data_label].items():
+                                    stats_per_data_label.append(stat)
+                        stats_to_plot[zstat][data_label] = stats_per_data_label
+                        stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
+                                                index=[self.subsection])
+    
+                # set axis title
+                if relevant_axis.get_title() == '':
+                    if plotting_paradigm == 'summary':
+                        axis_title_label = ''
+                    elif plotting_paradigm == 'station':
+                        axis_title_label = '{} ({}, {})'.format(self.current_station_name, self.current_lon, self.current_lat)
+                    self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
-            # turn off relevant axis if dataframe is empty or all NaN
-            if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
-                relevant_axis.set_axis_off()
-            else:
-                # round dataframe
-                stats_df = stats_df.round(self.plot_characteristics[plot_type]['round_decimal_places'])
+                # turn off relevant axis if dataframe is empty or all NaN
+                if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
+                    relevant_axis.set_axis_off()
+                else:
+                    # round dataframe
+                    stats_df = stats_df.round(self.plot_characteristics[plot_type]['round_decimal_places'])
 
-                # make plot
-                func = getattr(self.plot, 'make_{}'.format(base_plot_type))
-                func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
+                    # make plot
+                    func = getattr(self.plot, 'make_{}'.format(base_plot_type))
+                    func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
 
     def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
         """get relevant page and axis for current plot type/subsection/axis index"""
