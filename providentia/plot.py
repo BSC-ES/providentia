@@ -140,7 +140,7 @@ class Plot:
                     else:
                         self.canvas_instance.plot_characteristics[plot_type]['ylabel']['ylabel'] = expbias_stats[base_zstat]['label']
 
-                # get colorbar label for heatmap
+                # get colourbar label for heatmap
                 if base_plot_type == 'heatmap':
                     if z_statistic_type == 'basic':
                         if base_zstat not in ['Data%', 'Exceedances']:
@@ -321,12 +321,18 @@ class Plot:
         ax.set_aspect('equal', adjustable='box')
 
         # Get min and max values for ticks
-        xtickmin = np.nanmin(ax.lines[3].get_xdata())
-        xtickmax = np.nanmax(ax.lines[3].get_xdata())
-        ytickmin = np.nanmin(ax.lines[3].get_ydata())
-        ytickmax = np.nanmax(ax.lines[3].get_ydata())
+        for i, line in enumerate(ax.lines):
+            line_xdata = line.get_xdata()
+            line_ydata = line.get_ydata()
+            if list(line_xdata) != [0, 1] and list(line_xdata) != [0, 0.5]:
+                break
 
-        for line in ax.lines[3:]:
+        xtickmin = np.nanmin(line_xdata)
+        xtickmax = np.nanmax(line_xdata)
+        ytickmin = np.nanmin(line_ydata)
+        ytickmax = np.nanmax(line_ydata)
+
+        for line in ax.lines[i:]:
             if np.nanmin(line.get_xdata()) < xtickmin:
                 xtickmin = np.nanmin(line.get_xdata())
             if np.nanmax(line.get_xdata()) > xtickmax:
