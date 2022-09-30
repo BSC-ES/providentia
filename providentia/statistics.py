@@ -644,7 +644,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
                                               orientation=plot_characteristics['cb']['orientation'], 
                                               ticks=tick_array)
 
-        # set colorbar label
+        # set colourbar label
         if 'cb_label' in plot_characteristics:
             cb_label_characteristics = copy.deepcopy(plot_characteristics['cb_label'])
             del cb_label_characteristics['label']
@@ -658,7 +658,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
            
         # set cb tick params
         if 'cb_tick_params' in plot_characteristics:
-            # remove ticks for discrete colorbars
+            # remove ticks for discrete colourbars
             # we do this because different screen resolutions slightly offset the tick position
             # https://earth.bsc.es/gitlab/ac/Providentia/-/issues/166
             if plot_characteristics['cb']['discrete']:
