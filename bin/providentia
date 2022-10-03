@@ -73,7 +73,7 @@ queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 load_command="source load_modules.sh"
 salloc_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
-python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $@"
+python_command="srun python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $@"
 
 # set QT scale to avoid magnifying issues
 if [ "${BSC_MACHINE}" != "nord3" ]; then

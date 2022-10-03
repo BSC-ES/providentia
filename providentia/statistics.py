@@ -97,7 +97,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
                     
             # if data array has no valid data for selected stations, do not create a pandas dataframe
             # data array has valid data and is not all nan?
-            if data_array.size and not np.isnan(data_array).all():
+            if data_array.size > 0 and not np.isnan(data_array).all():
 
                 # add nested dictionary for data label in selected station data dictionary
                 canvas_instance.selected_station_data[networkspeci][data_label] = {}
@@ -244,6 +244,7 @@ def calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_i
     for temporal_aggregation_resolution in relevant_temporal_resolutions:
         # iterate through data arrays names in selected station data dictionary
         for data_label in canvas_instance.selected_station_data[networkspeci]:
+            
             # make sure the data array is an experimental one
             if data_label != 'observations':
                 relevant_aggregated_observations_dict = \
