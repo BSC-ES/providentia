@@ -222,6 +222,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in
                                       self.sub_opts[self.subsection].items() if k not in self.fixed_section_vars})
 
+                # update map extent per subsection
+                if hasattr(self, 'map_extent'):
+                    if isinstance(self.map_extent, str):
+                        self.map_extent = [float(c) for c in self.map_extent.split(',')]
 
                 # update fields available for filtering
                 aux.update_representativity_fields(self)
@@ -294,7 +298,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             # initialise station ind as -1
                             self.station_ind = -1
 
-                            for valid_station_ind in valid_station_inds:
+                            for i, valid_station_ind in enumerate(valid_station_inds):
                                 
                                 # gather some information about current station
                                 self.station_ind += 1
@@ -306,6 +310,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 # put station data in pandas dataframe
                                 # put multiple species data in pandas dataframe if a multispecies plot is wanted (spatial colocation must also be active)
                                 have_multispecies_option = np.any(['multispecies' in plot_type.split('_')[1:] for plot_type in self.station_plots_to_make])
+                                
                                 if (have_multispecies_option) & (networkspeci_ii == 0) & (self.spatial_colocation):
                                     to_pandas_dataframe(read_instance=self, canvas_instance=self, networkspecies=networkspecies, station_index=valid_station_ind)
                                 else:
@@ -319,10 +324,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 if 'multispecies' in plot_options: 
                                     if (networkspeci_ii != 0) or (not self.spatial_colocation):
                                         continue
-
+                                
                                 # make plot
                                 self.make_plot('station', plot_type, plot_options, networkspeci)
-                                print('Station plot type {0} has been created for {1}'.format(plot_type, self.current_station_name))
+                                print('Station {2} plot type has been created for {3} ({0}/{1})'.format(i, 
+                                                                                                        len(valid_station_inds),
+                                                                                                        plot_type, 
+                                                                                                        self.current_station_name))
 
             # do formatting to axes per networkspeci
             # create colourbars
@@ -773,6 +781,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     axis_title_label = '{}\n{}'.format(data_label, self.subsection)
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
+                # set map extent
+                relevant_axis.set_extent(self.map_extent, crs=self.datacrs)
+
                 # make map if there are data
                 if not self.selected_station_data[networkspeci]:
                     relevant_axis.set_axis_off()
@@ -792,8 +803,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # heatmap and table
             elif base_plot_type in ['heatmap', 'table']:
-
-                
 
                 # create nested dictionary to store statistical information across all subsections
                 if plotting_paradigm == 'summary':

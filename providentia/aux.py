@@ -1404,7 +1404,7 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
         # get non-intersecting station references, longitudes and latitudes across speci
         non_intersecting_station_references = {networkspecies: (np.delete(station_references_no_method[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(station_references_no_method[networkspecies])) for networkspecies in station_references_no_method}
         non_intersecting_longitudes = {networkspecies: (np.delete(longitudes[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(longitudes[networkspecies])) for networkspecies in longitudes}
-        non_intersecting_latitudes = {networkspecies: (np.delete(latitudes[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(latitudes[networkspecies])) for networkspecies in latitudes}
+        non_intersecting_latitudes = {networkspecies: (np.delete(latitudes[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(latitudes[networkspecies])) for networkspecies in latitudes}
 
         # get non-intersecting station references, longitudes and latitudes for first speci
         speci_non_intersecting_station_references = non_intersecting_station_references[firstnetworkspecies]
