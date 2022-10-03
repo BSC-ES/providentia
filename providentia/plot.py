@@ -310,8 +310,7 @@ class Plot:
                 self.read_instance.map_extent = map_extent
             if isinstance(map_extent, str):
                 map_extent = [float(c) for c in map_extent.split(',')]
-            ax.set_extent(map_extent, 
-                          crs=self.canvas_instance.datacrs)
+            ax.set_extent(map_extent, crs=self.canvas_instance.datacrs)
 
     def set_equal_axes(self, ax):
         """ Set equal aspect and limits (useful for scatter plots)
