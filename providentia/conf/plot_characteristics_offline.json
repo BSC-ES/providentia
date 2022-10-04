@@ -252,7 +252,7 @@
           "figure": {"ncols": 1, "nrows": 2},
           "page_title": {"t": "Table", "fontsize": 15, "ha": "left", "x": 0.05, "y": 0.98},
           "axis_title": {"label": "", "fontsize": 8},
-          "subplots_adjust": {"left": 0.05, "right": 0.98, "top": 0.90, "bottom": 0.06, "hspace": 0.2, "wspace": 0.01},
+          "subplots_adjust": {"left": 0.25, "right": 0.98, "top": 0.90, "bottom": 0.06, "hspace": 0.2, "wspace": 0.01},
           "round_decimal_places":2,
           "plot_options": ["bias"]}
 }
