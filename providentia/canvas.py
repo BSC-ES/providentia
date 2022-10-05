@@ -2799,6 +2799,7 @@ class MPLCanvas(FigureCanvas):
         """ Update annotation for each station that is hovered. """
 
         # retrieve stations references and coordinates
+        station_name = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds][annotation_index['ind'][0]]
         station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds][annotation_index['ind'][0]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
 
@@ -2816,9 +2817,10 @@ class MPLCanvas(FigureCanvas):
             self.station_annotation.set_va('bottom')
 
         # create annotation text
-        text_label = ('Station: {0}\n').format(station_reference)
-        text_label += ('Lon: {0:.2f}\n').format(station_location[0])
-        text_label += ('Lat: {0:.2f}').format(station_location[1])
+        text_label = ('Station: {0}\n').format(station_name[0])
+        text_label += ('Reference: {0}\n').format(station_reference)
+        text_label += ('Longitude: {0:.2f}\n').format(station_location[0])
+        text_label += ('Latitude: {0:.2f}').format(station_location[1])
         self.station_annotation.set_text(text_label)
 
         return None
