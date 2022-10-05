@@ -23,7 +23,9 @@
                                 "prop": {"weight": "bold"}},
 
 "metadata": {"non-ghost_vars": {"longitude": {"name_one": "Lon.", "dp": 4},
-                                "latitude":  {"name_one": "Lat.", "dp": 4}},
+                                "latitude":  {"name_one": "Lat.", "dp": 4},
+                                "station_name": {"name_one": "Station Name"}
+                                },
              "ghost_vars": {"longitude":                           {"name_one": "Lon.", "dp": 4},
                             "latitude":                            {"name_one": "Lat.", "dp": 4},
                             "measurement_altitude":                {"name_one": "Meas. Alt.", 
