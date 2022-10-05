@@ -65,5 +65,11 @@
         "hourly": {
             "sconcno2": []
             }
+        },
+
+    "csic/csic": {
+        "monthly": {
+            "sconcnh3": []
+            }
         }
 }
