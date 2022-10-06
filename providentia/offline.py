@@ -983,16 +983,14 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         axis_title_label = '{} ({}, {})'.format(self.current_station_name, self.current_lon, self.current_lat)
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
-                # turn off relevant axis if dataframe is empty or all NaN
-                if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
-                    relevant_axis.set_axis_off()
-                else:
-                    # round dataframe
-                    stats_df = stats_df.round(self.plot_characteristics[plot_type]['round_decimal_places'])
-
-                    # make plot
-                    func = getattr(self.plot, 'make_{}'.format(base_plot_type))
-                    func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
+            #turn off relevant axis if dataframe is empty or all NaN
+            if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
+                relevant_axis.set_axis_off()
+            else:
+                #make plot
+                func = getattr(self.plot, 'make_{}'.format(base_plot_type))
+                func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
+                #self.plot_dictionary[relevant_page]['axs'][axis_ind]['data_labels'].append() 
 
     def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
         """get relevant page and axis for current plot type/subsection/axis index"""
