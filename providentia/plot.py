@@ -1109,6 +1109,9 @@ class Plot:
         else:
             annotate = False
 
+        #round dataframe
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+
         # plot heatmap
         ax = sns.heatmap(stats_df, 
                          ax=relevant_axis, 
@@ -1134,6 +1137,13 @@ class Plot:
 
         # turn off axis to make table
         relevant_axis.axis('off')
+
+        #round dataframe
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+
+        # set column widths
+        if 'colWidths' in plot_characteristics['plot']:
+            plot_characteristics['plot']['colWidths'] = [plot_characteristics['plot']['colWidths']] * len(stats_df.columns)
 
         # make table
         table = relevant_axis.table(cellText=stats_df.values, 
