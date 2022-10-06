@@ -208,5 +208,12 @@
 "table": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
           "round_decimal_places": 2,
           "plot": {"cell_height": 1.3},
-          "plot_options": ["bias"]}
+          "plot_options": ["bias"]},
+
+"statsummary": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
+                "round_decimal_places": 2,
+                "basic": ["p5", "Mean", "p50", "p95", "StdDev"],
+                "experiment_bias": ["p5", "Mean", "p50", "p95", "StdDev", "MAE", "MNB", "RMSE", "r"],
+                "plot": {"cell_height": 1.3},
+                "plot_options": ["bias"]}
 }
