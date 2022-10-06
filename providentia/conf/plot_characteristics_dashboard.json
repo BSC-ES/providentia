@@ -206,6 +206,7 @@
             "plot_options": ["annotate", "bias"]},
 
 "table": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
-          "round_decimal_places":2,
+          "round_decimal_places": 2,
+          "plot": {"cell_height": 1.3},
           "plot_options": ["bias"]}
 }
