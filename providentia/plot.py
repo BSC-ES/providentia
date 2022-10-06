@@ -1576,6 +1576,8 @@ class Plot:
 
         for relevant_axis in axs_to_set_title:
             relevant_axis.set_title(**axis_title_characteristics)
+        
+        return title
 
     def set_axis_label(self, relevant_axis, label_ax, label, plot_characteristics):
         """Set label of plot axis
