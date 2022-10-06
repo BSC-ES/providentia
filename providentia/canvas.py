@@ -2834,7 +2834,7 @@ class MPLCanvas(FigureCanvas):
                 # lock annotation
                 self.lock_annotation = True
 
-                if event.button == None:
+                if not self.lock_zoom:
                     
                     is_contained, annotation_index = self.plot.stations_scatter.contains(event)
                     
@@ -2862,6 +2862,7 @@ class MPLCanvas(FigureCanvas):
         """ Function to handle zoom on map using scroll wheel. """
 
         if event.inaxes == self.plot_axes['map']:
+            
             if self.lock_zoom == False:
                 # lock zoom
                 self.lock_zoom = True
