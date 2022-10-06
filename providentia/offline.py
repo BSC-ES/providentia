@@ -326,10 +326,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                         continue
                                 
                                 # make plot
-                                print('Making station {2} for {3} ({0}/{1})'.format(i, 
-                                                                                              len(valid_station_inds),
-                                                                                              plot_type, 
-                                                                                              self.current_station_name))                                
+                                print('Making station {2} for {3} ({0}/{1})'.format(i+1, 
+                                                                                    len(valid_station_inds),
+                                                                                    plot_type, 
+                                                                                    self.current_station_name))                                
                                 self.make_plot('station', plot_type, plot_options, networkspeci)
 
             # do formatting to axes per networkspeci
