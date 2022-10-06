@@ -477,42 +477,42 @@ class Plot:
         :type first_data_label: boolean
         """
 
-        # get some details of the station metadata axis --> to set limit for wrapping text
-        # get axis bounding box
-        ax_bbox = relevant_axis.get_window_extent().transformed(self.canvas_instance.figure.dpi_scale_trans.inverted())
-        # get axis dimensions in inches
-        ax_width_inches = ax_bbox.width
-        # get axis dimensions in pixels
-        ax_width_px = ax_width_inches * self.canvas_instance.figure.dpi
-
         # initialise string to plot on axis
         str_to_plot = ''
+        
+        if not self.read_instance.offline:
+            station_inds = self.canvas_instance.relative_selected_station_inds
+        else:
+            if self.read_instance.temporal_colocation and len(self.read_instance.data_labels) > 1:
+                station_inds = self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
+            else:
+                station_inds = self.read_instance.valid_station_inds[networkspeci][data_label]
 
         # setup some variables for handling if just one or multiple stations selected
-        if len(self.canvas_instance.relative_selected_station_inds) == 1:
+        if len(station_inds) == 1:
             var_str_name = 'name_one' 
-            str_to_plot += ' Station: {}'.format(self.read_instance.station_references[networkspeci][self.canvas_instance.relative_selected_station_inds][0])
+            str_to_plot += ' Station: {}'.format(self.read_instance.station_references[networkspeci][station_inds][0])
         else:
             var_str_name = 'name_multiple' 
-            str_to_plot += '{} Stations'.format(len(self.canvas_instance.relative_selected_station_inds))
+            str_to_plot += '{} Stations'.format(len(station_inds))
         
         # iterate n vars per line and add spacing
         current_n_vars_per_line = 1
 
         # non-GHOST (add longitude and latitude)
         if not self.read_instance.reading_ghost:
-            if len(self.canvas_instance.relative_selected_station_inds) == 1:
+            if len(station_inds) == 1:
                 # spacing
                 str_to_plot += (' '*plot_characteristics['var_spacing'])
                 # lon
                 str_to_plot += '{}: {:.{}f}'.format(plot_characteristics['non-ghost_vars']['longitude']['name_one'],
-                                                    self.read_instance.station_longitudes[networkspeci][self.canvas_instance.relative_selected_station_inds][0], 
+                                                    self.read_instance.station_longitudes[networkspeci][station_inds][0], 
                                                     plot_characteristics['non-ghost_vars']['longitude']['dp'])
                 # spacing
                 str_to_plot += (' '*plot_characteristics['var_spacing'])
                 # lat
                 str_to_plot += '{}: {:.{}f}'.format(plot_characteristics['non-ghost_vars']['latitude']['name_one'],
-                                                    self.read_instance.station_latitudes[networkspeci][self.canvas_instance.relative_selected_station_inds][0], 
+                                                    self.read_instance.station_latitudes[networkspeci][station_inds][0], 
                                                     plot_characteristics['non-ghost_vars']['latitude']['dp'])
 
         # GHOST
@@ -536,14 +536,14 @@ class Plot:
                 if 'dp' in ghost_var_dict:
                     str_to_plot += '{}: {:.{}f}'.format(ghost_var_dict[var_str_name],
                                                         np.nanmedian(self.read_instance.metadata_in_memory[networkspeci][ghost_var][
-                                                        self.canvas_instance.relative_selected_station_inds].astype(np.float32)), 
+                                                        station_inds].astype(np.float32)), 
                                                         ghost_var_dict['dp'])
 
                 # if str then get unique elements or percentage dependent on n uniques
                 else:
                     # gather all selected station metadata for current meta variable
                     all_current_meta = self.read_instance.metadata_in_memory[networkspeci][ghost_var][
-                        self.canvas_instance.relative_selected_station_inds].flatten().astype(np.str)
+                        station_inds].flatten().astype(np.str)
 
                     # get counts of all unique metadata elements across selected stations
                     unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
@@ -575,7 +575,21 @@ class Plot:
         # plot string to axis
         plot_txt = relevant_axis.text(0.0, 1.0, str_to_plot, transform=relevant_axis.transAxes, **plot_characteristics['plot'])
 
-        # modify limit to wrap text as axis width in pixels  --> hack as matplotlib
+        # modify limit to wrap text as axis width in pixels
+        if not self.read_instance.offline:
+            # get axis bounding box
+            ax_bbox = relevant_axis.get_window_extent().transformed(self.canvas_instance.figure.dpi_scale_trans.inverted())
+            
+            # get axis dimensions in inches
+            ax_width_inches = ax_bbox.width
+
+            # get axis dimensions in pixels
+            ax_width_px = ax_width_inches * self.canvas_instance.figure.dpi
+
+        else:
+            # get axis dimensions in pixels
+            ax_width_px = relevant_axis.bbox.width * plot_characteristics['figure']['nrows']
+
         # automatically sets limit as figure width
         plot_txt._get_wrap_line_width = lambda: ax_width_px
 
