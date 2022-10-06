@@ -1,5 +1,5 @@
 {       
-    "debug": ["boxplot", "boxplot_individual"],
+    "debug": ["scatter_annotate"],
 
     "training": ["timeseries", "timeseries_individual", "scatter_annotate", "map-p95", 
                  "periodic-violin", "distribution_bias"],
@@ -32,5 +32,8 @@
                      "scatter", "scatter_annotate", "scatter_individual", "scatter_individual_annotate",
                      "map-p95", "map-p95_obs", "map-p95_annotate",
                      "map-p95_bias", "map-p95_bias_annotate",
-                     "heatmap-p95"]
+                     "heatmap-p95"],
+
+     "table_plots": ["timeseries", "distribution", "distribution_bias", "periodic-violin", "scatter",
+                     "map-p95", "heatmap-MB", "table-RMSE", "table-p50_bias"]
 }
