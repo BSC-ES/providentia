@@ -881,32 +881,54 @@ class Plot:
                 n_samples = plot_characteristics['pdf_min_samples']
         x_grid = np.linspace(self.canvas_instance.selected_station_data_min[networkspeci], self.canvas_instance.selected_station_data_max[networkspeci], n_samples, endpoint=True)
 
+        PDF_sampled_calculated = False
+
         # setup bias plot
         if 'bias' in plot_options:
+
             bias = True
-            PDF_obs = st.gaussian_kde(self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']['data'].dropna())
-            PDF_model = st.gaussian_kde(self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna())
-            PDF_sampled = PDF_model(x_grid) - PDF_obs(x_grid)
-            # plot horizontal line across x axis at 0 (if not already plotted)
-            if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
-                bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
-                # track plot elements if using dashboard 
-                if not self.read_instance.offline:
-                    self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
+            kde_data_obs = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']['data'].dropna()
+            kde_data_model = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna()
+            
+            # check if all values are equal in the dataframe
+            if kde_data_obs.eq(kde_data_obs[0]).all(axis=0) or kde_data_model.eq(kde_data_model[0]).all(axis=0):
+                print('Warning: The kernel density cannot be calculated for this station because all values are equal.')
+            else:
+                PDF_obs = st.gaussian_kde(kde_data_obs)
+                PDF_model = st.gaussian_kde(kde_data_model)
+                PDF_sampled = PDF_model(x_grid) - PDF_obs(x_grid)
+                PDF_sampled_calculated = True
+
+                # plot horizontal line across x axis at 0 (if not already plotted)
+                if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
+                    bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
+                    # track plot elements if using dashboard 
+                    if not self.read_instance.offline:
+                        self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
+
         # setup standard plot
         else:
-            bias = False
-            PDF = st.gaussian_kde(self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna())
-            PDF_sampled = PDF(x_grid)
-            
-        # make plot
-        distribution_plot = relevant_axis.plot(x_grid, PDF_sampled, 
-                                               color=self.read_instance.plotting_params[data_label]['colour'], 
-                                               **plot_characteristics['plot'])
 
-        # track plot elements if using dashboard 
-        if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'distribution', 'plot', distribution_plot, bias=bias)
+            bias = False
+            kde_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna()
+
+            # check if all values are equal in the dataframe
+            if kde_data.eq(kde_data[0]).all(axis=0):
+                print('Warning: The kernel density cannot be calculated for this station because all values are equal.')
+            else:
+                PDF = st.gaussian_kde(kde_data)
+                PDF_sampled = PDF(x_grid)
+                PDF_sampled_calculated = True
+        
+        if PDF_sampled_calculated:
+            # make plot
+            distribution_plot = relevant_axis.plot(x_grid, PDF_sampled, 
+                                                color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                **plot_characteristics['plot'])
+
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements(data_label, 'distribution', 'plot', distribution_plot, bias=bias)
 
     def make_scatter(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
                      first_data_label=False):
@@ -1269,7 +1291,7 @@ class Plot:
             for zstat in stats:
                 if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
                     stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
-                                            plot_characteristics['annotate_text']['round_decimal_places'])))
+                                          plot_characteristics['annotate_text']['round_decimal_places'])))
 
             # show number of stations if defined
             if plot_characteristics['annotate_text']['n_stations']:
@@ -1287,7 +1309,13 @@ class Plot:
             colours.append(self.read_instance.plotting_params[data_label]['colour'])
 
             # generate annotation
-            str_to_annotate.append(', '.join(stats_annotate))
+            if plot_characteristics['annotate_text']['exp_labels']:
+                str_to_annotate.append(self.read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate))
+            else:
+                str_to_annotate.append(', '.join(stats_annotate))
+
+        if plot_characteristics['annotate_text']['color'] != "":
+            colours = [plot_characteristics['annotate_text']['color']]*len(data_labels)
 
         # add annotation to plot
         # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
