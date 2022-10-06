@@ -3,7 +3,6 @@ import os
 import configparser
 
 from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtWidgets import QFileDialog
 import matplotlib
 from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
@@ -109,13 +108,15 @@ class NavigationToolbar(NavigationToolbar2QT):
                 self.reload_conf(read_instance, selected_section, conf_to_load)
         except Exception as e:
             QtWidgets.QMessageBox.critical(read_instance, "Error loading configuration file",
-                                          str(e), QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+                                           str(e), QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
 
     def filename_dialog(self, read_instance):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getOpenFileName(read_instance, "Choose configuration file to load", "",
-                                                 "All Files (*);;Python Files (*.py)", options=options)
+        "Open dialog to choose configuration file."
+
+        options =  QtWidgets.QFileDialog.Options()
+        options |=  QtWidgets.QFileDialog.DontUseNativeDialog
+        filename, _ =  QtWidgets.QFileDialog.getOpenFileName(read_instance, "Choose configuration file to load", "",
+                                                             "All Files (*);;Python Files (*.py", options=options)
         if filename:
             return filename
 

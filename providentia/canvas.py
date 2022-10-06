@@ -507,7 +507,8 @@ class MPLCanvas(FigureCanvas):
                             if relevant_temporal_resolution in ['hour','month']:
                                 self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics[plot_type])
                                 if not set_title:
-                                    self.plot.set_axis_title(sub_ax, plot_type, self.plot_characteristics[plot_type])
+                                    title = self.plot.set_axis_title(sub_ax, plot_type, self.plot_characteristics[plot_type])
+                                    self.plot_characteristics[plot_type]['axis_title']['label'] = title
                                     set_title = True
                             self.activate_axis(sub_ax, plot_type)
                             self.reset_ax_navigation_toolbar_stack(sub_ax)
@@ -518,7 +519,8 @@ class MPLCanvas(FigureCanvas):
                     else: 
                         self.plot.harmonise_xy_lims_paradigm([ax], plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, relim=True, autoscale=True)
-                    self.plot.set_axis_title(ax, plot_type, self.plot_characteristics[plot_type])
+                    title = self.plot.set_axis_title(ax, plot_type, self.plot_characteristics[plot_type])
+                    self.plot_characteristics[plot_type]['axis_title']['label'] = title
                     self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
                     self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
                     self.activate_axis(ax, plot_type)
@@ -741,7 +743,8 @@ class MPLCanvas(FigureCanvas):
                             if relevant_temporal_resolution in ['hour','month']:
                                 self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics['periodic'])
                                 if not set_title:
-                                    self.plot.set_axis_title(sub_ax, 'periodic', self.plot_characteristics['periodic'])
+                                    title = self.plot.set_axis_title(sub_ax, 'periodic', self.plot_characteristics['periodic'])
+                                    self.plot_characteristics['periodic']['axis_title']['label'] = title
                                     set_title = True
                             self.activate_axis(sub_ax, 'periodic')
                             self.reset_ax_navigation_toolbar_stack(sub_ax)
@@ -2683,6 +2686,26 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def save_axis_figure_dialog(self, plot_type, relevant_temporal_resolution=None):
+        
+        default_filename = '{0}-{1}-{2}-{3}-{4}-{5}-{6}.png'.format(self.read_instance.network[0],
+                                                                    self.read_instance.species[0],
+                                                                    self.read_instance.resolution, 
+                                                                    self.read_instance.start_date, 
+                                                                    self.read_instance.end_date,
+                                                                    plot_type, str(relevant_temporal_resolution))
+
+        if relevant_temporal_resolution == None:
+            default_filename = default_filename.split('-None')[0] + '.png'
+
+        options = QtWidgets.QFileDialog.Options()
+        options |=  QtWidgets.QFileDialog.DontUseNativeDialog
+        figure_path, _ =  QtWidgets.QFileDialog.getSaveFileName(self.read_instance, "Choose folder to save figure", 
+                                                                default_filename, "All Files (*);;Figures (*.png)", 
+                                                                options=options)
+        if figure_path:
+            return figure_path
+
     def save_axis_figure_func(self):
         
         # get option and plot names
@@ -2691,12 +2714,6 @@ class MPLCanvas(FigureCanvas):
         if plot_type == 'periodic_violin':
             plot_type = 'periodic-violin'
         
-        # create figures folder
-        figures_path = os.path.join(CURRENT_PATH, '../figures/')
-        if not os.path.exists(os.path.dirname(figures_path)):
-            print('Path {0} does not exist and it will be created.'.format(figures_path))
-            os.makedirs(os.path.dirname(figures_path))
-
         # set extent expansion
         for i, position in enumerate([self.read_instance.position_1, 
                                       self.read_instance.position_2, 
@@ -2705,8 +2722,8 @@ class MPLCanvas(FigureCanvas):
                                       self.read_instance.position_5]):
             if plot_type == position:
                 if i + 1 == 1:
-                    expand_x, expand_y = 1.4, 1.35
-                if i + 1 == 2:
+                    expand_x, expand_y = 1.4, 1.4
+                elif i + 1 == 2:
                     if plot_type == 'scatter':
                         expand_x, expand_y = 1.30, 1.25
                     else:
@@ -2732,7 +2749,8 @@ class MPLCanvas(FigureCanvas):
                                               loc=self.plot_characteristics[key]['axis_title']['loc'])
        
         # hide colourbar
-        self.plot_axes['cb'].set_visible(False)
+        if plot_type != 'map':
+            self.plot_axes['cb'].set_visible(False)
 
         # draw changes
         self.figure.canvas.draw()
@@ -2747,22 +2765,22 @@ class MPLCanvas(FigureCanvas):
                     expand_x, expand_y = 1.25, 1.3
                 elif relevant_temporal_resolution == 'month':
                     expand_x, expand_y = 1.15, 1.3
-                self.figure.savefig('figures/{0}-{1}-{2}-{3}-{4}-{5}-{6}.png'.format(self.read_instance.network[0],
-                                                                                     self.read_instance.species[0],
-                                                                                     self.read_instance.resolution, 
-                                                                                     self.read_instance.start_date, 
-                                                                                     self.read_instance.end_date,
-                                                                                     plot_type, relevant_temporal_resolution),
-                                    bbox_inches=extent.expanded(expand_x, expand_y))
+                
+                # get folder where figure will be saved
+                figure_path = self.save_axis_figure_dialog(plot_type, relevant_temporal_resolution)
+                
+                # save figure
+                if figure_path is not None:
+                    self.figure.savefig(figure_path, bbox_inches=extent.expanded(expand_x, expand_y))
         else:
             extent = self.plot_axes[plot_type].get_window_extent().transformed(self.figure.dpi_scale_trans.inverted())
-            self.figure.savefig('figures/{0}-{1}-{2}-{3}-{4}-{5}.png'.format(self.read_instance.network[0],
-                                                                             self.read_instance.species[0],
-                                                                             self.read_instance.resolution, 
-                                                                             self.read_instance.start_date, 
-                                                                             self.read_instance.end_date,
-                                                                             plot_type),
-                                bbox_inches=extent.expanded(expand_x, expand_y))
+            
+            # get folder where figure will be saved
+            figure_path = self.save_axis_figure_dialog(plot_type)
+
+            # save figure
+            if figure_path is not None:
+                self.figure.savefig(figure_path, bbox_inches=extent.expanded(expand_x, expand_y))
 
         # add titles
         for key in self.selected_station_plots:
