@@ -1126,6 +1126,9 @@ class Plot:
                                     colLabels=stats_df.columns, 
                                     rowLabels=stats_df.index, 
                                     loc='center')
+        
+        # adjust cell height
+        table.scale(1, plot_characteristics['plot']['cell_height'])
 
     def log_axes(self, relevant_axis, log_ax, base_plot_type, plot_characteristics, 
                  undo=False):
