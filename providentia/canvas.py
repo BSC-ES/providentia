@@ -2267,7 +2267,7 @@ class MPLCanvas(FigureCanvas):
             # only plot if axis has all positive values
             if (option == 'logy') or (option == 'logx'):
                 if isinstance(self.plot_axes[plot_type], dict):
-                    for sub_ax in self.plot_axes[plot_type].values():
+                    for temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         log_validity = self.plot.log_validity(sub_ax, option)
                         if log_validity:
                             self.plot.log_axes(sub_ax,
@@ -2276,7 +2276,9 @@ class MPLCanvas(FigureCanvas):
                                                self.plot_characteristics[plot_type],
                                                undo=undo)
                         else:
-                            print("Warning: It is not possible to log the {}-axis with negative values.".format(option[-1]))
+                            msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
+                            msg += "in {0} ({1}) with negative values.".format(plot_type, temporal_resolution)
+                            print(msg)
                             self.read_instance.block_MPL_canvas_updates = True
                             event_source.setCheckState(QtCore.Qt.Unchecked)
                             self.read_instance.block_MPL_canvas_updates = False
@@ -2290,7 +2292,9 @@ class MPLCanvas(FigureCanvas):
                                            self.plot_characteristics[plot_type], 
                                            undo=undo)
                     else:
-                        print("Warning: It is not possible to log the {}-axis with negative values.".format(option[-1]))
+                        msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
+                        msg += "in {0} with negative values.".format(plot_type)
+                        print(msg)
                         self.read_instance.block_MPL_canvas_updates = True
                         event_source.setCheckState(QtCore.Qt.Unchecked)
                         self.read_instance.block_MPL_canvas_updates = False
