@@ -145,7 +145,7 @@
                     "plot": {"violin": {"points": 100, "widths": 0.85, "showmeans": false, "showmedians": false, 
                                         "showextrema": false}, 
                              "p50": {"marker": "o", "markersize": 3, "linewidth": 0.5}},
-                    "plot_options":["annotate"]},
+                    "plot_options":["annotate", "logy"]},
 
 "distribution": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                  "remove_spines": ["top", "right"],
