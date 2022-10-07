@@ -361,7 +361,9 @@ def periodic_xticks():
     :rtype dict
     """
 
-    return {'hour':np.arange(24, dtype=np.int), 'dayofweek':np.arange(7, dtype=np.int), 'month':np.arange(1, 13, dtype=np.int)}
+    return {'hour':np.arange(24, dtype=np.int), 
+            'dayofweek':np.arange(7, dtype=np.int), 
+            'month':np.arange(1, 13, dtype=np.int)}
 
 def periodic_labels():
     """Return axes labels for periodic subplots.
