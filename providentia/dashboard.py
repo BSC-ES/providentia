@@ -996,7 +996,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.previous_yearmonths = self.yearmonths
 
             # read data
-            self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, experiments_to_read=experiments_to_read)
+            self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, 
+                                       experiments_to_read=experiments_to_read)
             
             #clear canvas entirely if have no valid data
             if self.clear_canvas:
