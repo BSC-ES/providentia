@@ -1176,18 +1176,23 @@ def get_experiment_tree(instance):
                 for species in instance.all_observation_data[network][resolution][matrix]:
                     # iterate through available experiments
                     for experiment in available_experiments:
-
+                        
+                        # get folder where interpolated experiments are saved
+                        if '/' not in network:
+                            files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
+                                                                     experiment, resolution, species, network)
+                        else:
+                            files_directory = '%s/%s/%s/%s/%s/*%s' % (instance.exp_root, instance.ghost_version, 
+                                                                      experiment, resolution, species,
+                                                                      network.split('/')[0].upper())
+                            
                         # test if interpolated directory exists for experiment
                         # if it does not exit, continue
-                        if not os.path.exists(
-                            '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
-                                                    experiment, resolution, species, network)):
+                        if not os.path.exists(files_directory):
                             continue
                         else:
                             # get all available netCDF files
-                            available_files = os.listdir(
-                                '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version,
-                                                        experiment, resolution, species, network))
+                            available_files = os.listdir(files_directory)
 
                             # get monthly start date (YYYYMM) of all files
                             file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
@@ -1304,17 +1309,22 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
         #iterate through available experiments
         for experiment in available_experiments:
 
+            # get folder where interpolated experiments are saved
+            if '/' not in network:           
+                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
+                                                         experiment, resolution, speci, network)
+            else:
+                files_directory = '%s/%s/%s/%s/%s/*%s' % (instance.exp_root, instance.ghost_version, 
+                                                          experiment, resolution, speci,
+                                                          network.split('/')[0].upper())
+                
             # test if interpolated directory exists for experiment
             # if it does not exit, continue
-            if not os.path.exists(
-                '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
-                                        experiment, resolution, speci, network)):
+            if not os.path.exists(files_directory):
                 continue
             else:
                 # get all available netCDF files
-                available_files = os.listdir(
-                    '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version,
-                                            experiment, resolution, speci, network))
+                available_files = os.listdir(files_directory)
 
             # get monthly start date (YYYYMM) of all files
             file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
