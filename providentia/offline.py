@@ -449,13 +449,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 if log_validity:
                                     self.plot.log_axes(relevant_ax, 'logx', base_plot_type, self.plot_characteristics[plot_type])
                                 else:
-                                    print("Warning: It is not possible to log the x-axis with negative values.")
+                                    msg = "Warning: It is not possible to log the x-axis "
+                                    msg += "in {0} ({1}) with negative values.".format(plot_type, relevant_ax_ii)
+                                    print(msg)
                             if 'logy' in plot_options:
                                 log_validity = self.plot.log_validity(relevant_ax, 'logy')
                                 if log_validity:
                                     self.plot.log_axes(relevant_ax, 'logy', base_plot_type, self.plot_characteristics[plot_type])
                                 else:
-                                    print("Warning: It is not possible to log the y-axis with negative values.")
+                                    msg = "Warning: It is not possible to log the y-axis "
+                                    msg += "in {0} ({1}) with negative values.".format(plot_type, relevant_ax_ii)
+                                    print(msg)
 
                             # annotation
                             if 'annotate' in plot_options:
