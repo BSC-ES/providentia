@@ -19,7 +19,7 @@ import seaborn as sns
 from PyQt5 import QtCore
 
 from .statistics import get_z_statistic_info
-from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels
+from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_power_of_10
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -1144,37 +1144,6 @@ class Plot:
         # adjust cell height
         table.scale(1, plot_characteristics['plot']['cell_height'])
 
-    def get_powers_of_10(self, relevant_axis, log_ax):
-        """Get powers of 10 of logged data"""
-        
-        # Get min and max values for ticks
-        for i, line in enumerate(relevant_axis.lines):
-            line_xdata = line.get_xdata()
-            line_ydata = line.get_ydata()
-            break
-        
-        if log_ax == 'logx':
-            xtickmin = np.nanmin(line_xdata)
-            xtickmax = np.nanmax(line_xdata)
-            for line in relevant_axis.lines[i:]:
-                if np.nanmin(line.get_xdata()) < xtickmin:
-                    xtickmin = np.nanmin(line.get_xdata())
-                if np.nanmax(line.get_xdata()) > xtickmax:
-                    xtickmax = np.nanmax(line.get_xdata())
-            ticks = [10**i for i in range(math.floor(xtickmin), math.ceil(xtickmax) + 1)]
-
-        elif log_ax == 'logy':
-            ytickmin = np.nanmin(line_ydata)
-            ytickmax = np.nanmax(line_ydata)
-            for line in relevant_axis.lines[i:]:
-                if np.nanmin(line.get_ydata()) < ytickmin:
-                    ytickmin = np.nanmin(line.get_ydata())
-                if np.nanmax(line.get_ydata()) > ytickmax:
-                    ytickmax = np.nanmax(line.get_ydata())
-            ticks = [10**i for i in range(math.floor(ytickmin), math.ceil(ytickmax) + 1)]
-        
-        return ticks
-
     def log_axes(self, relevant_axis, log_ax, base_plot_type, plot_characteristics, 
                  undo=False):
         """Log plot axes
@@ -1194,16 +1163,12 @@ class Plot:
         if not undo:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('log')
-                x_ticks = self.get_powers_of_10(relevant_axis, log_ax)
-                #relevant_axis.set_xticks(x_ticks, [str(i) for i in x_ticks])
-                relevant_axis.set_xlim(x_ticks[0], x_ticks[-1])
+                relevant_axis.autoscale()
                 
             if log_ax == 'logy':
                 relevant_axis.set_yscale('log')
+                relevant_axis.autoscale()
                 
-                y_ticks = self.get_powers_of_10(relevant_axis, log_ax)
-                #relevant_axis.set_yticks(y_ticks, [str(i) for i in y_ticks])
-                relevant_axis.set_ylim(y_ticks[0], y_ticks[-1])
         else:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('linear')
@@ -1534,16 +1499,25 @@ class Plot:
             if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic','periodic-violin']:
                     xlim_lower, xlim_upper = ax.get_xlim()
+                    if 'logx' in plot_options:
+                        xlim_lower = get_power_of_10(xlim_lower)
+                        xlim_upper = get_power_of_10(xlim_upper)
                     all_xlim_lower.append(xlim_lower)
                     all_xlim_upper.append(xlim_upper)
             if ylim is None and ('ylim' not in plot_characteristics):
                 if isinstance(ax, dict):
                     for sub_ax in ax.values():
                         ylim_lower, ylim_upper = sub_ax.get_ylim()
+                        if 'logy' in plot_options:
+                            ylim_lower = get_power_of_10(ylim_lower)
+                            ylim_upper = get_power_of_10(ylim_upper)
                         all_ylim_lower.append(ylim_lower)
                         all_ylim_upper.append(ylim_upper)
                 else:
                     ylim_lower, ylim_upper = ax.get_ylim()
+                    if 'logy' in plot_options:
+                        ylim_lower = get_power_of_10(ylim_lower)
+                        ylim_upper = get_power_of_10(ylim_upper)
                     all_ylim_lower.append(ylim_lower)
                     all_ylim_upper.append(ylim_upper)
 
@@ -1575,14 +1549,50 @@ class Plot:
             elif 'ylim' in plot_characteristics:
                 ylim = plot_characteristics['ylim']
 
+            # get all powers of 10 between 10**-20 and 10**20
+            options = [10**i for i in range(-20, 20)]
+
             # set lim
             if isinstance(ax, dict):
                 for sub_ax in ax.values():
-                    sub_ax.set_xlim(xlim)
-                    sub_ax.set_ylim(ylim) 
+                    # set xlim
+                    if xlim is not None:
+                        if xlim[0] == xlim[1]:
+                            loc = options.index(xlim[0])
+                            sub_ax.set_xlim(options[loc-1], options[loc])
+                        else:
+                            sub_ax.set_xlim(xlim)
+
+                    # set ylim
+                    if ylim is not None:
+                        if ylim[0] == ylim[1]:
+                            loc = options.index(ylim[0])
+                            sub_ax.set_ylim(options[loc-1], options[loc])
+                        else:
+                            sub_ax.set_ylim(ylim)
+                
+                    # remove minor ticks
+                    sub_ax.minorticks_off()
+
             else:
-                ax.set_xlim(xlim)
-                ax.set_ylim(ylim)
+                # set xlim
+                if xlim is not None:
+                    if xlim[0] == xlim[1]:
+                        loc = options.index(xlim[0])
+                        ax.set_xlim(options[loc-1], options[loc])
+                    else:
+                        ax.set_xlim(xlim)
+
+                # set ylim
+                if ylim is not None:
+                    if ylim[0] == ylim[1]:
+                        loc = options.index(ylim[0])
+                        ax.set_ylim(options[loc-1], options[loc])
+                    else:
+                        ax.set_ylim(ylim)
+
+                # remove minor ticks
+                ax.minorticks_off()
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics):
         """Set title of plot axis
