@@ -18,6 +18,7 @@ import sys
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
+import math
 import pyproj
 from scipy.spatial import cKDTree
 import seaborn as sns
@@ -1567,3 +1568,12 @@ def get_basic_metadata(instance, networks, species, resolution):
 
 def filter_by_species():
     pass
+
+def get_power_of_10(x):
+
+    if x >= 0:
+        x = 10**math.ceil(math.log10(x))
+    else:
+        x = -10**math.ceil(math.log10(-x))
+
+    return x
