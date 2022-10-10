@@ -1144,6 +1144,37 @@ class Plot:
         # adjust cell height
         table.scale(1, plot_characteristics['plot']['cell_height'])
 
+    def get_powers_of_10(self, relevant_axis, log_ax):
+        """Get powers of 10 of logged data"""
+        
+        # Get min and max values for ticks
+        for i, line in enumerate(relevant_axis.lines):
+            line_xdata = line.get_xdata()
+            line_ydata = line.get_ydata()
+            break
+        
+        if log_ax == 'logx':
+            xtickmin = np.nanmin(line_xdata)
+            xtickmax = np.nanmax(line_xdata)
+            for line in relevant_axis.lines[i:]:
+                if np.nanmin(line.get_xdata()) < xtickmin:
+                    xtickmin = np.nanmin(line.get_xdata())
+                if np.nanmax(line.get_xdata()) > xtickmax:
+                    xtickmax = np.nanmax(line.get_xdata())
+            ticks = [10**i for i in range(math.floor(xtickmin), math.ceil(xtickmax) + 1)]
+
+        elif log_ax == 'logy':
+            ytickmin = np.nanmin(line_ydata)
+            ytickmax = np.nanmax(line_ydata)
+            for line in relevant_axis.lines[i:]:
+                if np.nanmin(line.get_ydata()) < ytickmin:
+                    ytickmin = np.nanmin(line.get_ydata())
+                if np.nanmax(line.get_ydata()) > ytickmax:
+                    ytickmax = np.nanmax(line.get_ydata())
+            ticks = [10**i for i in range(math.floor(ytickmin), math.ceil(ytickmax) + 1)]
+        
+        return ticks
+
     def log_axes(self, relevant_axis, log_ax, base_plot_type, plot_characteristics, 
                  undo=False):
         """Log plot axes
@@ -1163,12 +1194,16 @@ class Plot:
         if not undo:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('log')
-                relevant_axis.autoscale()
-            
+                x_ticks = self.get_powers_of_10(relevant_axis, log_ax)
+                #relevant_axis.set_xticks(x_ticks, [str(i) for i in x_ticks])
+                relevant_axis.set_xlim(x_ticks[0], x_ticks[-1])
+                
             if log_ax == 'logy':
                 relevant_axis.set_yscale('log')
-                relevant_axis.autoscale()
-
+                
+                y_ticks = self.get_powers_of_10(relevant_axis, log_ax)
+                #relevant_axis.set_yticks(y_ticks, [str(i) for i in y_ticks])
+                relevant_axis.set_ylim(y_ticks[0], y_ticks[-1])
         else:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('linear')
@@ -1327,7 +1362,10 @@ class Plot:
 
             # generate annotation
             if plot_characteristics['annotate_text']['exp_labels']:
-                str_to_annotate.append(self.read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate))
+                if data_label == 'observations':
+                    str_to_annotate.append('Observations' + ' | ' + ', '.join(stats_annotate))
+                else:
+                    str_to_annotate.append(self.read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate))
             else:
                 str_to_annotate.append(', '.join(stats_annotate))
 
