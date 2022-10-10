@@ -874,8 +874,12 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 if axis_title == '':
                     if plotting_paradigm == 'summary':
                         axis_title_label = self.subsection
-                    elif plotting_paradigm == 'station':
-                        axis_title_label = '{} ({}, {})'.format(self.current_station_name, self.current_lon, self.current_lat)
+                    elif plotting_paradigm == 'station': 
+                        axis_title_label = '{} ({:.{}f}, {:.{}f})'.format(self.current_station_name, 
+                                                                          self.current_lon,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'],
+                                                                          self.current_lat,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'])
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
                 # make plot if there is data
@@ -984,7 +988,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     if plotting_paradigm == 'summary':
                         axis_title_label = ''
                     elif plotting_paradigm == 'station':
-                        axis_title_label = '{} ({}, {})'.format(self.current_station_name, self.current_lon, self.current_lat)
+                        axis_title_label = '{} ({:.{}f}, {:.{}f})'.format(self.current_station_name, 
+                                                                          self.current_lon,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'],
+                                                                          self.current_lat,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'])
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
                 # turn off relevant axis if dataframe is empty or all NaN
