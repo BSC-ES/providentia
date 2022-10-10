@@ -424,22 +424,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             generate_colourbar(self, relevant_axs, cb_axs, zstat, self.plot_characteristics[plot_type], 
                                                networkspeci.split('|')[-1])
 
-                        # harmonise xy limits for plot paradigm
-                        if base_plot_type not in ['map', 'heatmap', 'table']: 
-                            if base_plot_type == 'periodic-violin':
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
-                                                                     self.plot_characteristics[plot_type], plot_options, 
-                                                                     ylim=[self.selected_station_data_min[networkspeci], 
-                                                                           self.selected_station_data_max[networkspeci]])
-                            elif base_plot_type == 'scatter':
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
-                                                                     self.plot_characteristics[plot_type], plot_options, 
-                                                                     relim=True)
-                            else:
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
-                                                                     self.plot_characteristics[plot_type], plot_options, 
-                                                                     relim=True, autoscale=True)
-
                         # iterate through all relevant axes for plot type in paradigm
                         for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
 
@@ -484,6 +468,21 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                 base_plot_type, self.plot_characteristics[plot_type], 
                                                 plot_options=plot_options)
 
+                        # harmonise xy limits for plot paradigm
+                        if base_plot_type not in ['map', 'heatmap', 'table']: 
+                            if base_plot_type == 'periodic-violin':
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     ylim=[self.selected_station_data_min[networkspeci], 
+                                                                           self.selected_station_data_max[networkspeci]])
+                            elif base_plot_type == 'scatter':
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True)
+                            else:
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True, autoscale=True)
             # save page figures
             print('WRITING PDF')
             for page in self.plot_dictionary:
