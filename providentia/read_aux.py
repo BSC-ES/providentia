@@ -162,7 +162,7 @@ def read_netcdf_data(tuple_arguments):
                     meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
                 
                 # some extra str formatting
-                if meta_var in ['station_reference', '', '']:
+                if meta_var in ['station_reference', 'station_classification', 'area_classification' '']:
                     meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
                                    for val in meta_val], dtype=np.str)
 
