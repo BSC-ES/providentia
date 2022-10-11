@@ -2277,7 +2277,7 @@ class MPLCanvas(FigureCanvas):
                                                undo=undo)
                         else:
                             msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
-                            msg += "in {0} ({1}) with negative values.".format(plot_type, temporal_resolution)
+                            msg += "in {0} with negative values.".format(plot_type)
                             print(msg)
                             self.read_instance.block_MPL_canvas_updates = True
                             event_source.setCheckState(QtCore.Qt.Unchecked)
