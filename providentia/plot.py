@@ -1571,8 +1571,10 @@ class Plot:
                         else:
                             sub_ax.set_ylim(ylim)
                 
-                    # remove minor ticks
-                    sub_ax.minorticks_off()
+                    # remove minor tick labels
+                    sub_ax.tick_params(which='minor', 
+                                       labelbottom=False, labeltop=False,
+                                       labelright=False, labelleft=False)   
 
             else:
                 # set xlim
@@ -1591,8 +1593,10 @@ class Plot:
                     else:
                         ax.set_ylim(ylim)
 
-                # remove minor ticks
-                ax.minorticks_off()
+                # remove minor tick labels
+                ax.tick_params(which='minor', 
+                               labelbottom=False, labeltop=False,
+                               labelright=False, labelleft=False)   
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics):
         """Set title of plot axis
