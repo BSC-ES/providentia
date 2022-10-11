@@ -1568,12 +1568,3 @@ def get_basic_metadata(instance, networks, species, resolution):
 
 def filter_by_species():
     pass
-
-def get_power_of_10(x):
-
-    if x >= 0:
-        x = 10**math.ceil(math.log10(x))
-    else:
-        x = -10**math.ceil(math.log10(-x))
-
-    return x

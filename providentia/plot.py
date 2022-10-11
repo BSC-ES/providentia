@@ -19,7 +19,7 @@ import seaborn as sns
 from PyQt5 import QtCore
 
 from .statistics import get_z_statistic_info
-from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_power_of_10
+from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -1352,6 +1352,26 @@ class Plot:
         if not self.read_instance.offline:
             self.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
 
+    def get_no_margin_lim(self, ax, lim):
+        """ Get true limits of plot area.
+        """
+
+        # xlim
+        if lim == 'xlim':
+            xlim = ax.get_xlim()
+            xwidth = xlim[1] - xlim[0]
+            lower_lim = xlim[0] + (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
+            upper_lim = xlim[1] - (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
+
+        # ylim
+        if lim == 'ylim':
+            ylim = ax.get_ylim()
+            ywidth = ylim[1] - ylim[0]
+            lower_lim = ylim[0] + (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
+            upper_lim = ylim[1] - (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
+
+        return lower_lim, upper_lim
+
     def log_validity(self, relevant_axis, log_ax):
         """Determine if log operation for a given axes is valid (no values <= 0)
         
@@ -1364,19 +1384,15 @@ class Plot:
         """
 
         if log_ax == 'logx':
-            xlim = relevant_axis.get_xlim()
-            xwidth = xlim[1] - xlim[0]
-            lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
-            if round(lower_xlim, 2) >= 0:
+            lower_lim, _ = self.get_no_margin_lim(relevant_axis, 'xlim')
+            if round(lower_lim, 2) >= 0:
                 validity = True
             else:
                 validity = False
         
         if log_ax == 'logy':
-            ylim = relevant_axis.get_ylim()
-            ywidth = ylim[1] - ylim[0]
-            lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
-            if round(lower_ylim, 2) >= 0:
+            lower_lim, _ = self.get_no_margin_lim(relevant_axis, 'ylim')
+            if round(lower_lim, 2) >= 0:
                 validity = True
             else:
                 validity = False
@@ -1499,31 +1515,21 @@ class Plot:
             if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic','periodic-violin']:
                     xlim_lower, xlim_upper = ax.get_xlim()
-                    if 'logx' in plot_options:
-                        xlim_lower = get_power_of_10(xlim_lower)
-                        xlim_upper = get_power_of_10(xlim_upper)
                     all_xlim_lower.append(xlim_lower)
                     all_xlim_upper.append(xlim_upper)
             if ylim is None and ('ylim' not in plot_characteristics):
                 if isinstance(ax, dict):
                     for sub_ax in ax.values():
                         ylim_lower, ylim_upper = sub_ax.get_ylim()
-                        if 'logy' in plot_options:
-                            ylim_lower = get_power_of_10(ylim_lower)
-                            ylim_upper = get_power_of_10(ylim_upper)
                         all_ylim_lower.append(ylim_lower)
                         all_ylim_upper.append(ylim_upper)
                 else:
                     ylim_lower, ylim_upper = ax.get_ylim()
-                    if 'logy' in plot_options:
-                        ylim_lower = get_power_of_10(ylim_lower)
-                        ylim_upper = get_power_of_10(ylim_upper)
                     all_ylim_lower.append(ylim_lower)
                     all_ylim_upper.append(ylim_upper)
 
         # get minimum and maximum from all axes and set limits
         for ax in relevant_axs:
-
             # get xlim
             if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic','periodic-violin']:
@@ -1549,54 +1555,25 @@ class Plot:
             elif 'ylim' in plot_characteristics:
                 ylim = plot_characteristics['ylim']
 
-            # get all powers of 10 between 10**-20 and 10**20
-            options = [10**i for i in range(-20, 20)]
-
             # set lim
             if isinstance(ax, dict):
                 for sub_ax in ax.values():
                     # set xlim
                     if xlim is not None:
-                        if xlim[0] == xlim[1]:
-                            loc = options.index(xlim[0])
-                            sub_ax.set_xlim(options[loc-1], options[loc])
-                        else:
-                            sub_ax.set_xlim(xlim)
+                        sub_ax.set_xlim(xlim)
 
                     # set ylim
                     if ylim is not None:
-                        if ylim[0] == ylim[1]:
-                            loc = options.index(ylim[0])
-                            sub_ax.set_ylim(options[loc-1], options[loc])
-                        else:
-                            sub_ax.set_ylim(ylim)
-                
-                    # remove minor tick labels
-                    sub_ax.tick_params(which='minor', 
-                                       labelbottom=False, labeltop=False,
-                                       labelright=False, labelleft=False)   
+                        sub_ax.set_ylim(ylim)
 
             else:
                 # set xlim
                 if xlim is not None:
-                    if xlim[0] == xlim[1]:
-                        loc = options.index(xlim[0])
-                        ax.set_xlim(options[loc-1], options[loc])
-                    else:
-                        ax.set_xlim(xlim)
+                    ax.set_xlim(xlim)
 
                 # set ylim
                 if ylim is not None:
-                    if ylim[0] == ylim[1]:
-                        loc = options.index(ylim[0])
-                        ax.set_ylim(options[loc-1], options[loc])
-                    else:
-                        ax.set_ylim(ylim)
-
-                # remove minor tick labels
-                ax.tick_params(which='minor', 
-                               labelbottom=False, labeltop=False,
-                               labelright=False, labelleft=False)   
+                    ax.set_ylim(ylim)
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics):
         """Set title of plot axis
