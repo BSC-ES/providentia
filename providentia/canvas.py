@@ -425,8 +425,8 @@ class MPLCanvas(FigureCanvas):
                 if type(ax) == dict:
                     for relevant_temporal_resolution, sub_ax in ax.items():
                         self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], 
-                                            relevant_temporal_resolution=relevant_temporal_resolution, 
-                                            col_ii=-1)
+                                              relevant_temporal_resolution=relevant_temporal_resolution, 
+                                              col_ii=-1)
                 else:
                     self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
 
@@ -490,34 +490,37 @@ class MPLCanvas(FigureCanvas):
 
                 # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
                 if type(ax) == dict:
-                    relevant_axs = [ax[relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
                     if plot_type == 'periodic-violin':
-                        self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
+                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                                 self.selected_station_data_max[self.read_instance.networkspeci]])
+                                                                                 self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                             relim=True, autoscale_x=True)
                     else:
-                        self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
-                                                             plot_options, relim=True, autoscale_y=True)
+                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
+                                                             plot_options, relim=True, autoscale=True)
 
                     set_title = False
                     for relevant_temporal_resolution, sub_ax in ax.items():
                         #do not show axis if temporal resolution is not relevant
                         if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
                             # set ylabel (if sub_ax in first column) and title (if sub_ax in first column and not previously set)   
-                            if relevant_temporal_resolution in ['hour','month']:
+                            if relevant_temporal_resolution in ['hour', 'month']:
                                 self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics[plot_type])
                                 if not set_title:
                                     title = self.plot.set_axis_title(sub_ax, plot_type, self.plot_characteristics[plot_type])
                                     self.plot_characteristics[plot_type]['axis_title']['label'] = title
                                     set_title = True
+                            elif relevant_temporal_resolution == 'dayofweek':
+                                sub_ax.set_ylabel('')
+                                sub_ax.yaxis.set_tick_params(which='both', labelleft=False)
                             self.activate_axis(sub_ax, plot_type)
                             self.reset_ax_navigation_toolbar_stack(sub_ax)
                 else:
                     if plot_type == 'scatter':
-                        self.plot.harmonise_xy_lims_paradigm([ax], plot_type, self.plot_characteristics[plot_type], 
+                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, relim=True)
                     else: 
-                        self.plot.harmonise_xy_lims_paradigm([ax], plot_type, self.plot_characteristics[plot_type], 
+                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, relim=True, autoscale=True)
                     title = self.plot.set_axis_title(ax, plot_type, self.plot_characteristics[plot_type])
                     self.plot_characteristics[plot_type]['axis_title']['label'] = title
@@ -731,9 +734,8 @@ class MPLCanvas(FigureCanvas):
                         first_data_label = False
 
                     # harmonise axes limits across subplots 
-                    relevant_axs = [self.plot_axes['periodic'][relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
-                    self.plot.harmonise_xy_lims_paradigm(relevant_axs, 'periodic', self.plot_characteristics['periodic'], 
-                                                         plot_options, relim=True, autoscale_y=True)
+                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'], 
+                                                         plot_options, relim=True, autoscale=True)
                     set_title = False
                     # un-hide axes, and reset navigation toolbar stack, and set axis title and ylabel
                     for relevant_temporal_resolution, sub_ax in self.plot_axes['periodic'].items():
@@ -746,6 +748,9 @@ class MPLCanvas(FigureCanvas):
                                     title = self.plot.set_axis_title(sub_ax, 'periodic', self.plot_characteristics['periodic'])
                                     self.plot_characteristics['periodic']['axis_title']['label'] = title
                                     set_title = True
+                            elif relevant_temporal_resolution == 'dayofweek':
+                                sub_ax.set_ylabel('')
+                                sub_ax.yaxis.set_tick_params(which='both', labelleft=False)
                             self.activate_axis(sub_ax, 'periodic')
                             self.reset_ax_navigation_toolbar_stack(sub_ax)
 
@@ -1759,7 +1764,7 @@ class MPLCanvas(FigureCanvas):
                                                      "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
         self.periodic_violin_container.setGeometry(self.periodic_violin_menu_button.geometry().x()-210, 
                                                    self.periodic_violin_menu_button.geometry().y()+25, 
-                                                   235, 175)
+                                                   235, 200)
         self.periodic_violin_container.hide()
 
         # add settings label
@@ -2448,13 +2453,23 @@ class MPLCanvas(FigureCanvas):
                     self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                                plot_type, 'absolute', plot_options)
 
-                # update axis scaling
-                if type(self.plot_axes[plot_type]) == dict:
-                    relevant_axs = [self.plot_axes[plot_type][relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
-                    self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
-                                                         plot_options, relim=True, autoscale_y=True)
+            # update axis scaling
+            if type(self.plot_axes[plot_type]) == dict:
+                if plot_type == 'periodic-violin':
+                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
+                                                         plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                             self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                         relim=True, autoscale_x=True)
                 else:
-                    self.plot.harmonise_xy_lims_paradigm([self.plot_axes[plot_type]], plot_type, self.plot_characteristics[plot_type], 
+                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
+                                                         plot_options, relim=True, autoscale=True)
+            else:
+                if plot_type == 'scatter':
+                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                         self.plot_characteristics[plot_type], plot_options, 
+                                                         relim=True)
+                else:
+                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
                                                          plot_options, relim=True, autoscale=True)                                
 
             # draw changes
@@ -2821,7 +2836,7 @@ class MPLCanvas(FigureCanvas):
         """ Update annotation for each station that is hovered. """
 
         # retrieve stations references and coordinates
-        station_name = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds][annotation_index['ind'][0]]
+        station_names = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds][annotation_index['ind'][0]]
         station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds][annotation_index['ind'][0]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
 
@@ -2839,7 +2854,7 @@ class MPLCanvas(FigureCanvas):
             self.station_annotation.set_va('bottom')
 
         # create annotation text
-        text_label = ('Station: {0}\n').format(station_name[0])
+        text_label = ('Station: {0}\n').format(station_names[pd.notnull(station_names)][0])
         text_label += ('Reference: {0}\n').format(station_reference)
         text_label += ('Longitude: {0:.2f}\n').format(station_location[0])
         text_label += ('Latitude: {0:.2f}').format(station_location[1])
@@ -3005,23 +3020,23 @@ class MPLCanvas(FigureCanvas):
                                         else:
                                             plot_element.set_visible(False)
 
-                                # update axis scaling 
-                                    if type(self.plot_axes[plot_type]) == dict:
-                                        relevant_axs = [self.plot_axes[plot_type][relevant_temporal_resolution] for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
-                                        if plot_type == 'periodic-violin':
-                                            self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
-                                                                                plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                                                    self.selected_station_data_max[self.read_instance.networkspeci]])
-                                        else:
-                                            self.plot.harmonise_xy_lims_paradigm(relevant_axs, plot_type, self.plot_characteristics[plot_type], 
-                                                                                plot_options, relim=True, autoscale_y=True)
-                                    else:
-                                        if plot_type == 'scatter':
-                                            self.plot.harmonise_xy_lims_paradigm([self.plot_axes[plot_type]], plot_type, self.plot_characteristics[plot_type], 
-                                                                                plot_options, relim=True)
-                                        else: 
-                                            self.plot.harmonise_xy_lims_paradigm([self.plot_axes[plot_type]], plot_type, self.plot_characteristics[plot_type], 
-                                                                                plot_options, relim=True, autoscale=True)
+                            # update axis scaling 
+                            if type(self.plot_axes[plot_type]) == dict:
+                                if plot_type == 'periodic-violin':
+                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
+                                                                         plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                                             self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                                         relim=True, autoscale_x=True)
+                                else:
+                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
+                                                                         plot_options, relim=True, autoscale=True)
+                            else:
+                                if plot_type == 'scatter':
+                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
+                                                                         plot_options, relim=True)
+                                else: 
+                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
+                                                                         plot_options, relim=True, autoscale=True)
 
                 # change font weight of label
                 legend_label._fontproperties = self.legend.get_texts()[0]._fontproperties.copy()
