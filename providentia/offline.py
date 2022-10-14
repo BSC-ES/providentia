@@ -302,10 +302,14 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 
                                 # gather some information about current station
                                 self.station_ind += 1
-                                self.current_station_reference = self.metadata_in_memory[networkspeci]['station_reference'][valid_station_ind, :][0]
-                                self.current_station_name = self.metadata_in_memory[networkspeci]['station_name'][valid_station_ind, :][0]
-                                self.current_lon = round(self.metadata_in_memory[networkspeci]['longitude'][valid_station_ind, :][0], 2)
-                                self.current_lat = round(self.metadata_in_memory[networkspeci]['latitude'][valid_station_ind, :][0], 2)
+                                valid_station_references = self.metadata_in_memory[networkspeci]['station_reference'][valid_station_ind, :]
+                                self.current_station_reference = valid_station_references[pd.notnull(valid_station_references)][0]
+                                valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][valid_station_ind, :]
+                                self.current_station_name = valid_station_names[pd.notnull(valid_station_names)][0]
+                                current_lons = self.metadata_in_memory[networkspeci]['longitude'][valid_station_ind, :]
+                                self.current_lon = round(current_lons[pd.notnull(current_lons)][0], 2)
+                                current_lats = self.metadata_in_memory[networkspeci]['latitude'][valid_station_ind, :]
+                                self.current_lat = round(current_lats[pd.notnull(current_lats)][0], 2)
                                 
                                 # put station data in pandas dataframe
                                 # put multiple species data in pandas dataframe if a multispecies plot is wanted (spatial colocation must also be active)
@@ -474,7 +478,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
                                                                      self.plot_characteristics[plot_type], plot_options, 
                                                                      ylim=[self.selected_station_data_min[networkspeci], 
-                                                                           self.selected_station_data_max[networkspeci]])
+                                                                           self.selected_station_data_max[networkspeci]],
+                                                                     relim=True, autoscale_x=True)
                             elif base_plot_type == 'scatter':
                                 self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
                                                                      self.plot_characteristics[plot_type], plot_options, 
@@ -638,7 +643,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             last_valid_row = False
 
                         # setup periodic plot type gridspec
-                        if base_plot_type in ['periodic','periodic-violin']:
+                        if base_plot_type in ['periodic', 'periodic-violin']:
                             gs = gridspec.GridSpecFromSubplotSpec(20, 20, subplot_spec=ax)
                             grid_dict = dict()
                             grid_dict['hour'] = fig.add_subplot(gs[:9, :])
@@ -664,6 +669,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                       relevant_temporal_resolution=relevant_temporal_resolution, 
                                                       col_ii=col_ii, last_valid_row=last_valid_row, 
                                                       last_row_on_page=last_row_on_page)
+
+                            grid_dict['dayofweek'].yaxis.set_tick_params(which='both', labelleft=False)
+                            grid_dict['dayofweek'].set_ylabel('')
 
                         # rest of plot types
                         else:

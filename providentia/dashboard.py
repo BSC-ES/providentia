@@ -170,7 +170,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     
                     # apply new geometry to menu and save button
                     menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(menu_button.x()-25, menu_button.y(), 20, 20)
+                    save_button.setGeometry(menu_button.x(), menu_button.y()-25, 20, 20)
 
                     # apply new geometry to container elements
                     for sub_element in element:
