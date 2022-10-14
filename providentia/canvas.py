@@ -2327,15 +2327,15 @@ class MPLCanvas(FigureCanvas):
                                              self.plot_characteristics[plot_type], 
                                              plot_options=plot_options)
 
-            # option 'trend'
-            elif option == 'trend':
+            # option 'smooth'
+            elif option == 'smooth':
                 if not undo:
-                    self.plot.trend(self.plot_axes[plot_type], 
-                                    self.read_instance.networkspeci,
-                                    list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                    plot_type,
-                                    self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options)
+                    self.plot.smooth(self.plot_axes[plot_type], 
+                                     self.read_instance.networkspeci,
+                                     list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                     plot_type,
+                                     self.plot_characteristics[plot_type], 
+                                     plot_options=plot_options)
             
             # option 'regression'
             elif option == 'regression':
@@ -2510,13 +2510,13 @@ class MPLCanvas(FigureCanvas):
                                          self.plot_characteristics[plot_type], 
                                          plot_options=plot_options)
 
-            elif plot_option == 'trend':
-                self.plot.trend(self.plot_axes[plot_type], 
-                                self.read_instance.networkspeci,
-                                data_labels_alt,
-                                plot_type,
-                                self.plot_characteristics[plot_type], 
-                                plot_options=plot_options)
+            elif plot_option == 'smooth':
+                self.plot.smooth(self.plot_axes[plot_type], 
+                                 self.read_instance.networkspeci,
+                                 data_labels_alt,
+                                 plot_type,
+                                 self.plot_characteristics[plot_type], 
+                                 plot_options=plot_options)
             
             elif plot_option == 'regression':
                 self.plot.linear_regression(self.plot_axes[plot_type], 

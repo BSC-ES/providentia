@@ -1197,9 +1197,8 @@ class Plot:
                 if not self.read_instance.offline:
                     self.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
-    def trend(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
-              plot_options=[]):
-        """Add trendline to plot
+    def smooth(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, plot_options=[]):
+        """Add smooth line to plot
 
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
@@ -1215,7 +1214,7 @@ class Plot:
         :type plot_options: list
         """
 
-        # iterate through plotted data arrays making trendline
+        # iterate through plotted data arrays making smooth line
         for data_label in data_labels:
 
             # bias plot?
@@ -1232,15 +1231,15 @@ class Plot:
                 ts = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']
                 bias = False
 
-            # make trendline
-            trend_line = relevant_axis.plot(ts.rolling(plot_characteristics['trend']['window'], min_periods=plot_characteristics['trend']['min_points'], center=True).mean().dropna(),
-                                            color=self.read_instance.plotting_params[data_label]['colour'],
-                                            zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
-                                            **plot_characteristics['trend']['format'])
+            # make smooth line
+            smooth_line = relevant_axis.plot(ts.rolling(plot_characteristics['smooth']['window'], min_periods=plot_characteristics['smooth']['min_points'], center=True).mean().dropna(),
+                                             color=self.read_instance.plotting_params[data_label]['colour'],
+                                             zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
+                                             **plot_characteristics['smooth']['format'])
 
             # track plot elements if using dashboard 
             if not self.read_instance.offline:
-                self.track_plot_elements(data_label, base_plot_type, 'trend', trend_line, bias=bias)
+                self.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
     def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
                    plot_options=[]):
