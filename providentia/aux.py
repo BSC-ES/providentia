@@ -1543,9 +1543,12 @@ def get_basic_metadata(instance, networks, species, resolution):
         else:
             
             ncdf_root = Dataset(relevant_files[0])
-            station_references['{}|{}'.format(network, speci)] = np.array(
-                [st_name.tostring().decode('ascii').replace('\x00', '')
-                for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+            if ncdf_root['station_name'].dtype == np.str:
+                station_references['{}|{}'.format(network, speci)] = ncdf_root['station_name'][:]
+            else:
+                station_references['{}|{}'.format(network, speci)] = np.array(
+                    [st_name.tostring().decode('ascii').replace('\x00', '')
+                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
             if "latitude" in ncdf_root.variables:
                 station_longitudes['{}|{}'.format(network, speci)] = ncdf_root['longitude'][:]
                 station_latitudes['{}|{}'.format(network, speci)] = ncdf_root['latitude'][:]

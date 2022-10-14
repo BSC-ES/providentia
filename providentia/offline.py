@@ -34,7 +34,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             aux.load_conf(self, kwargs['config'])
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-            error = 'Error: The configuration path specified in the command line does not exist.'
+            error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."

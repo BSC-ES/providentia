@@ -75,8 +75,11 @@ def read_netcdf_data(tuple_arguments):
 
     # get all station references in file (do little extra work to get non-GHOST observational station references)
     if (not reading_ghost) & (data_label == 'observations'):
-        file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
-                                            for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+        if ncdf_root['station_name'].dtype == np.str:
+            file_station_references = ncdf_root['station_name'][:]
+        else:
+            file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
+                                                for st_name in ncdf_root['station_name'][:]], dtype=np.str)
     else:
         file_station_references = ncdf_root['station_reference'][:]
 
@@ -89,7 +92,6 @@ def read_netcdf_data(tuple_arguments):
     # contained in all unique station references array
     current_file_station_indices = \
         np.where(np.in1d(file_station_references, station_references))[0]
-
     # read observations
     s = time.time()
     if data_label == 'observations':
@@ -163,8 +165,9 @@ def read_netcdf_data(tuple_arguments):
                 
                 # some extra str formatting
                 if meta_var in ['station_reference', 'station_classification', 'area_classification' '']:
-                    meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
-                                   for val in meta_val], dtype=np.str)
+                    if meta_val.dtype != np.str:
+                        meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
+                                             for val in meta_val], dtype=np.str)
 
             # GHOST metadata
             else:
@@ -177,8 +180,10 @@ def read_netcdf_data(tuple_arguments):
     #experiment data
     else:
         relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
+
         # mask out fill values for parameter field
         relevant_data[relevant_data.mask] = np.NaN
+        
         #put data in array
         data_in_memory[data_labels.index(data_label), full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] = relevant_data
 
