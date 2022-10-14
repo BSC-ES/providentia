@@ -76,7 +76,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 if okpressed or (len(all_sections) == 1):
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[selected_section].items()})
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-            error = 'Error: The configuration path specified in the command line does not exist.'
+            error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
         else:
             if os.path.isfile(dconf_path):
