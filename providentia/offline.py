@@ -342,7 +342,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # log axes
             # annotation
             # regression line
-            # trend line
+            # smooth line
 
             # remove header from plot characteristics dictionary
             if 'header' in list(self.plot_characteristics.keys()):
@@ -466,11 +466,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                             self.plot_characteristics[plot_type], 
                                                             plot_options=plot_options)
 
-                            # trend line
-                            if 'trend' in plot_options:
-                                self.plot.trend(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
-                                                base_plot_type, self.plot_characteristics[plot_type], 
-                                                plot_options=plot_options)
+                            # smooth line
+                            if 'smooth' in plot_options:
+                                self.plot.smooth(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
+                                                 base_plot_type, self.plot_characteristics[plot_type], 
+                                                 plot_options=plot_options)
 
                         # harmonise xy limits for plot paradigm
                         if base_plot_type not in ['map', 'heatmap', 'table']: 
