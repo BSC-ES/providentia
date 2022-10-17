@@ -40,24 +40,24 @@ class DataReader:
 
             # set active frequency code
             if (self.read_instance.resolution == 'hourly') or (self.read_instance.resolution == 'hourly_instantaneous'):
-                self.active_frequency_code = 'H'
+                self.read_instance.active_frequency_code = 'H'
             elif (self.read_instance.resolution == '3hourly') or (self.read_instance.resolution == '3hourly_instantaneous'):
-                self.active_frequency_code = '3H'
+                self.read_instance.active_frequency_code = '3H'
             elif (self.read_instance.resolution == '6hourly') or (self.read_instance.resolution == '6hourly_instantaneous'):
-                self.active_frequency_code = '6H'
+                self.read_instance.active_frequency_code = '6H'
             elif self.read_instance.resolution == 'daily':
-                self.active_frequency_code = 'D'
+                self.read_instance.active_frequency_code = 'D'
             elif self.read_instance.resolution == 'monthly':
-                self.active_frequency_code = 'MS'
+                self.read_instance.active_frequency_code = 'MS'
 
             # get time array
             self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str(self.read_instance.start_date)[:4]),
-                                                                                int(str(self.read_instance.start_date)[4:6]),
-                                                                                int(str(self.read_instance.start_date)[6:8])),
+                                                                                  int(str(self.read_instance.start_date)[4:6]),
+                                                                                  int(str(self.read_instance.start_date)[6:8])),
                                                           end=datetime.datetime(int(str(self.read_instance.end_date)[:4]),
                                                                                 int(str(self.read_instance.end_date)[4:6]),
                                                                                 int(str(self.read_instance.end_date)[6:8])),
-                                                          freq=self.active_frequency_code)[:-1]
+                                                          freq=self.read_instance.active_frequency_code)[:-1]
 
             # show warning when the data consists only of less than 2 timesteps
             if len(self.read_instance.time_array) < 2:

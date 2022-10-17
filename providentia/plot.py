@@ -673,55 +673,71 @@ class Plot:
 
         # recalculate xticks (if desired) for better spacing
         if plot_characteristics['xtick_alteration']['define']:
+            
+            if first_data_label:
+                
+                # get steps for first data label
+                steps = ts_nonan.index.values
+                
+                # get start and end dates for first data label
+                timeseries_start_date = pd.to_datetime(ts_nonan.index.values[0])
+                timeseries_end_date = pd.to_datetime(ts_nonan.index.values[-1])
 
-            # get steps in days or months   
-            steps = ts_nonan.index.values
+                # get start and end dates for all data labels
+                for data_label in self.read_instance.data_labels:
+                    start_date = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna().index.values[0]
+                    end_date = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna().index.values[-1]
+                    if start_date < timeseries_start_date:
+                        timeseries_start_date = start_date
+                    if end_date > timeseries_end_date:
+                        timeseries_end_date = end_date
+                
+                # get steps for all data labels
+                steps = pd.date_range(timeseries_start_date, timeseries_end_date, 
+                                      freq=self.read_instance.active_frequency_code)
 
-            # get start and end dates
-            timeseries_start_date = pd.to_datetime(steps[0])
-            timeseries_end_date = pd.to_datetime(steps[-1])
+                # get number of months and days
+                n_months = (12*(timeseries_end_date.year - timeseries_start_date.year) + (timeseries_end_date.month - 
+                                                                                          timeseries_start_date.month))
+                n_days = (timeseries_end_date - timeseries_start_date).days
 
-            # get number of months and days
-            n_months = (timeseries_end_date.year - timeseries_start_date.year) * 12 + (timeseries_end_date.month - timeseries_start_date.month)
-            n_days = (timeseries_end_date - timeseries_start_date).days
-
-            # get months that are complete
-            months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
-            months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
-            if months_start.size > 1:
-                if (timeseries_end_date - months_end[-1]).days >= 1:
-                    months = months_start[:-1]
+                # get months that are complete
+                months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
+                months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
+                if months_start.size > 1:
+                    if (timeseries_end_date - months_end[-1]).days >= 1:
+                        months = months_start[:-1]
+                    else:
+                        months = months_start
                 else:
                     months = months_start
-            else:
-                months = months_start
 
-            # define time slices
-            if n_months >= 3:
-                steps = months
-                relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
-            elif n_days < 7:
-                relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
-            slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
+                # define time slices
+                if n_months >= 3:
+                    steps = months
+                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
+                elif n_days < 7:
+                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+                slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
 
-            # use default axes if the number of timesteps is lower than the number of slices
-            if slices >= 1:
-                xticks = steps[0::slices]
-            else:
-                xticks = relevant_axis.xaxis.get_ticks()
+                # use default axes if the number of timesteps is lower than the number of slices
+                if slices >= 1:
+                    xticks = steps[0::slices]
+                else:
+                    xticks = relevant_axis.xaxis.get_ticks()
 
-            # transform to numpy.datetime64
-            if not isinstance(xticks[0], np.datetime64):
-                xticks = [x.to_datetime64() for x in xticks]
-            if not isinstance(timeseries_end_date, np.datetime64):
-                timeseries_end_date = timeseries_end_date.to_datetime64()
+                # transform to numpy.datetime64
+                if not isinstance(xticks[0], np.datetime64):
+                    xticks = [x.to_datetime64() for x in xticks]
+                if not isinstance(timeseries_end_date, np.datetime64):
+                    timeseries_end_date = timeseries_end_date.to_datetime64()
 
-            # add last step to xticks
-            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != timeseries_end_date):
-                xticks = np.append(xticks, timeseries_end_date)
+                # add last step to xticks
+                if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != timeseries_end_date):
+                    xticks = np.append(xticks, timeseries_end_date)
 
-            # set xticks
-            relevant_axis.xaxis.set_ticks(xticks)
+                # set xticks
+                relevant_axis.xaxis.set_ticks(xticks)
 
     def make_periodic(self, relevant_axis, networkspeci, data_label, plot_characteristics, zstat=None, plot_options=[],
                       first_data_label=False):
