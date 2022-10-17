@@ -514,12 +514,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
 
-        #turn off some features if using non-GHOST data
-        if aux.check_for_ghost(self.network):
-            self.enable_ghost_buttons()
-        else:
-            self.disable_ghost_buttons()
-
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
 
@@ -589,6 +583,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.cb_network.setCurrentText(self.selected_network)
         else:
             self.selected_network = self.cb_network.currentText()
+
+        # turn off some features if using non-GHOST data
+        if aux.check_for_ghost(self.selected_network):
+            self.enable_ghost_buttons()
+        else:
+            self.disable_ghost_buttons()
 
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.selected_network].keys())
