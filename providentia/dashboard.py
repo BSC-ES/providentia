@@ -661,7 +661,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.cb_position_5.clear()
 
         # update available layout options
-        layout_options = ['None', 'distribution', 'metadata', 'periodic', 
+        layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
                           'periodic-violin', 'scatter', 'statsummary', 'timeseries']
 
         # remove scatter plots from list if the temporal colocation is not active
@@ -742,6 +742,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.update_configuration_bar_fields()
 
     def handle_layout_update(self, changed_plot_type):
+        """Define function which handles update of layout"""
         
         if (changed_plot_type != '') & (not self.block_config_bar_handling_updates):
             
@@ -778,53 +779,64 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             elif (changed_plot_type == self.position_5) & (event_source != self.cb_position_5):
                 self.position_5 = 'None'
 
-            # remove axis elements for previous plot type, and from selected_station_plots
-            if (previous_plot_type in self.mpl_canvas.selected_station_plots) & (previous_plot_type in self.mpl_canvas.plot_axes):
+            # remove axis elements for previous plot type, and from active_dashboard_plots
+            if (previous_plot_type in self.mpl_canvas.active_dashboard_plots) & (previous_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[previous_plot_type]
                 if type(ax) == dict:
                     for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, previous_plot_type, clear_ax=True)
+                        self.mpl_canvas.remove_axis_elements(sub_ax, previous_plot_type)
+                        sub_ax.remove()
                 else:
-                    self.mpl_canvas.remove_axis_elements(ax, previous_plot_type, clear_ax=True)
-                self.mpl_canvas.selected_station_plots.remove(previous_plot_type)
+                    self.mpl_canvas.remove_axis_elements(ax, previous_plot_type)
+                    ax.remove()
+                self.mpl_canvas.active_dashboard_plots.remove(previous_plot_type)
 
             # if changed_plot_type already axis on another axis then remove those axis elements
-            if (changed_plot_type in self.mpl_canvas.selected_station_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
+            if (changed_plot_type in self.mpl_canvas.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
                 if type(ax) == dict:
                     for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type, clear_ax=True)
+                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type)
+                        sub_ax.remove()
                 else:
-                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type, clear_ax=True)
+                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
+                    ax.remove()
 
-            # otherwise add plot_type to selected_station_plots
+            # otherwise add plot_type to active_dashboard_plots
             elif changed_plot_type != 'None': 
-                self.mpl_canvas.selected_station_plots.append(changed_plot_type)
+                self.mpl_canvas.active_dashboard_plots.append(changed_plot_type)
 
             # update plot axis for new plot type
             self.update_plot_axis(event_source, changed_plot_type)
 
             # hide axis for new plot type before replot
-            if (changed_plot_type in self.mpl_canvas.selected_station_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
+            if (changed_plot_type in self.mpl_canvas.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
                 if type(ax) == dict:
                     for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type, clear_ax=True)
+                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type)
                 else:
-                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type, clear_ax=True)
-            
+                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
+
             # update plot if changed_plot_type != None
             if changed_plot_type != 'None':
 
-                # set plot characteristics (if do not yet exist)
-                if changed_plot_type not in self.mpl_canvas.plot_characteristics:
-                    if changed_plot_type in ['map', 'periodic']:
-                        self.mpl_canvas.plot.set_plot_characteristics([changed_plot_type], zstat='Mean')
-                    else:
-                        self.mpl_canvas.plot.set_plot_characteristics([changed_plot_type])
-
+                # format axis
+                ax = self.mpl_canvas.plot_axes[changed_plot_type]
+                if type(ax) == dict:
+                    for relevant_temporal_resolution, sub_ax in ax.items():
+                        self.mpl_canvas.plot.format_axis(sub_ax, 
+                                                         changed_plot_type, 
+                                                         self.mpl_canvas.plot_characteristics[changed_plot_type], 
+                                                         relevant_temporal_resolution=relevant_temporal_resolution, 
+                                                         col_ii=-1)
+                else:
+                    self.mpl_canvas.plot.format_axis(ax, 
+                                                     changed_plot_type, 
+                                                     self.mpl_canvas.plot_characteristics[changed_plot_type])
+                
                 # make plot
-                self.mpl_canvas.update_associated_selected_station_plot(changed_plot_type)
+                self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
 
             # update layout fields
             self.update_layout_fields()
@@ -846,6 +858,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((10, 50), rowspan=17, colspan=48))
                 self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 82), rowspan=17, colspan=16))
                 self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((32, 50), rowspan=17, colspan=28))
+            elif changed_plot_type == 'statsummary':
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((12, 61), rowspan=34, colspan=39))
             elif changed_plot_type != 'None':
                 self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=50))
             
@@ -856,6 +870,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0), rowspan=20, colspan=29))
                 self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 19), rowspan=20, colspan=10))
                 self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 0), rowspan=20, colspan=17))
+            elif changed_plot_type == 'statsummary':
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 10), rowspan=44, colspan=19))
             elif changed_plot_type != 'None':
                 self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=29))
 
@@ -866,6 +882,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35), rowspan=20, colspan=29))
                 self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 54), rowspan=20, colspan=10))
                 self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 35), rowspan=20, colspan=17))
+            elif changed_plot_type == 'statsummary':
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 45),  rowspan=44, colspan=19))
             elif changed_plot_type != 'None':
                 self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 35),  rowspan=44, colspan=29))
             
@@ -876,6 +894,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.mpl_canvas.plot_axes[changed_plot_type]['hour'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=29))
                 self.mpl_canvas.plot_axes[changed_plot_type]['dayofweek'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 89), rowspan=20, colspan=10))
                 self.mpl_canvas.plot_axes[changed_plot_type]['month'] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((82, 70), rowspan=20, colspan=17))
+            elif changed_plot_type == 'statsummary':
+                self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 80),  rowspan=44, colspan=19))
             elif changed_plot_type != 'None':
                 self.mpl_canvas.plot_axes[changed_plot_type] = self.mpl_canvas.figure.add_subplot(self.mpl_canvas.gridspec.new_subplotspec((56, 70),  rowspan=44, colspan=29))
 
@@ -1004,9 +1024,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 for plot_type, ax in self.mpl_canvas.plot_axes.items():
                     if type(ax) == dict:
                         for sub_ax in ax.values():
-                            self.mpl_canvas.remove_axis_elements(sub_ax, plot_type, clear_ax=True)
+                            sub_ax.remove()
                     else:
-                        self.mpl_canvas.remove_axis_elements(ax, plot_type, clear_ax=True)  
+                        ax.remove() 
                 # update MPL canvas
                 self.mpl_canvas.figure.canvas.draw()  
                 # restore mouse cursor to normal
