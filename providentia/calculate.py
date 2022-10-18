@@ -4,6 +4,11 @@ calculations and experiment bias evaluation.
 
 Mean, Percentile, Standard Deviation
 Variance, Data Availability Fraction
+
+Function defintions mainly stem from: 
+https://www.tandfonline.com/doi/pdf/10.1080/10962247.2016.1265027 ,
+https://www.cmascenter.org/conference/2003/session_poster/yu_abstract3.pdf ,
+and https://github.com/davidcarslaw/openair/blob/HEAD/R/modStats.R 
 """
 
 import numpy as np
@@ -143,8 +148,7 @@ class ExpBias(object):
            Legates DR, McCabe GJ. (2012). A refined index of model performance: a rejoinder,
            International Journal of Climatology.
         """
-        return 1.0 - (np.mean(np.abs(exp - obs)) /
-                      np.mean(np.abs(obs - np.mean(obs))))
+        return 1.0 - np.sum(np.abs(exp - obs)) / np.sum(np.abs(obs - np.mean(obs))) 
 
     @staticmethod
     def calculate_ioa(obs, exp):
@@ -163,99 +167,106 @@ class ExpBias(object):
            Willmott, C.J., Robeson, S.M., Matsuura, K., 2011. A refined index of model performance. International
            Journal of Climatology.
         """
-        return 1.0 - (np.sum((obs - exp) ** 2)) /\
-                     (np.sum((np.abs(exp - np.mean(obs)) +
-                              np.abs(obs - np.mean(obs))) ** 2))
+        lhs = np.sum(np.abs(exp - obs))
+        rhs = 2.0 * np.sum(np.abs(obs - np.mean(obs)))
+        if lhs <= rhs: 
+            return 1.0 - lhs / rhs 
+        else: 
+            return rhs / lhs - 1.0
 
     @staticmethod
     def calculate_mb(obs, exp, normalisation_type='none'):
-        """Calculate mean bias (MB), or normalised derivation.
+        """Calculate mean bias (MB), or normalised derivation (NMB).
            The difference between a modelled and an observed value,
            𝑀𝑖 − 𝑂𝑖 , is referred to as the bias.
            The mean bias is simply the average bias between the modelled and observed values.
+           This statistic is equivalent to the 'Mean_bias' when temporal_colocation is active.
         """
-
-        mbe = np.mean(exp - obs)
+        mb = np.mean(exp - obs)
         # handle normalisation if desired
         if normalisation_type == 'max_min':
-            mbe = mbe / (np.max(obs) - np.min(obs))
+            mb = (mb / (np.max(obs) - np.min(obs))) * 100.0
         elif normalisation_type == 'mean':
-            mbe = mbe / np.mean(obs)
+            mb = (mb / np.mean(obs)) * 100.0
+        elif normalisation_type == 'sum':
+            mb = (mb / np.sum(obs)) * 100.0
         elif normalisation_type == 'iq':
-            mbe = mbe / (np.percentile(obs, 75) - np.percentile(obs, 25))
+            mb = (mb / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0
         elif normalisation_type == 'stdev':
-            mbe = mbe / np.std(obs)
-        return mbe
+            mb = (mb / np.std(obs)) * 100.0
+        return mb
 
     @staticmethod
-    def calculate_mae(obs, exp, normalisation_type='none'):
-        """Calculate mean absolute error (MAE), or normalised derivation.
+    def calculate_me(obs, exp, normalisation_type='none'):
+        """Calculate mean error (ME), or normalised derivation (NME).
            It is calculated from the absolute of the difference between a modelled
-           and an observed value,|𝑀𝑖 −𝑂𝑖|. Therefore the mean absolute error is always positive.
+           and an observed value,|𝑀𝑖 −𝑂𝑖|. Therefore the mean error is always positive.
            This metric can highlight reveal somes biases not seen using the MB metric, where
            postive and negative biases can average out to be zero.
+           Otherwise known as mean gross error (MGE), mean absolute error (MAE), 
+           and mean absolute gross error (MAGE); 
+           and normalised form as normalised mean gross error (NMGE) and normalised mean absolute error (NMAE).
         """
-
-        mae = np.mean(np.abs(exp - obs))
+        me = np.mean(np.abs(exp - obs))
         # handle normalisation if desired
         if normalisation_type == 'max_min':
-            mae = mae / (np.max(obs) - np.min(obs))
+            me = (me / (np.max(obs) - np.min(obs))) * 100.0 
         elif normalisation_type == 'mean':
-            mae = mae / np.mean(obs)
+            me = (me / np.mean(obs)) * 100.0
+        elif normalisation_type == 'sum':
+            me = (me / np.sum(obs)) * 100.0 
         elif normalisation_type == 'iq':
-            mae = mae / (np.percentile(obs, 75) - np.percentile(obs, 25))
+            me = (me / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0 
         elif normalisation_type == 'stdev':
-            mae = mae / np.std(obs)
-        return mae
+            me = (me / np.std(obs)) * 100.0 
+        return me
 
     @staticmethod
     def calculate_mnb(obs, exp):
         """Calculate mean normalised bias (MNB).
            The mean normalised bias (MNB) is calculated in a similar fashion to the mean bias.
            The mean normalised bias is calculated from the difference between the modelled and observed values
-           (i.e., the bias, 𝑀𝑖 − 𝑂𝑖) is normalised (divided) by the observed value (𝑂𝑖).
-           The mean normalised bias is reported as a percentage.
+           (i.e. the bias, 𝑀𝑖 − 𝑂𝑖) is normalised (divided) by the observed value (𝑂𝑖).
         """
-
-        mnb = np.mean((exp - obs) / obs)
+        mnb = np.mean((exp - obs) / obs) * 100.0
         return mnb
 
     @staticmethod
-    def calculate_mnae(obs, exp):
-        """Calculate mean normalised absolute error (MNAE).
-           The mean normalised absolute error (MNAE) is calculated in a similar fashion to the mean absolute error.
-           The mean normalised absolute error is calculated from the absolute of the bias, 𝑀𝑖 − 𝑂𝑖,
-           normalised by the observed value, 𝑂𝑖. Therefore the mean normalised absolute error is always positive.
-           The mean normalised absolute error is reported as a percentage.
+    def calculate_mne(obs, exp):
+        """Calculate mean normalised error (MNE).
+           The mean normalised error (MNE) is calculated in a similar fashion to the mean error.
+           The mean normalised error is calculated from the absolute of the bias, 𝑀𝑖 − 𝑂𝑖,
+           normalised by the observed value, 𝑂𝑖. Therefore the mean normalised error is always positive.
+           Otherwise known as mean normalised absolute error (MNAE).
         """
-
-        mnae = np.mean((np.abs(exp - obs)) / obs)
-        return mnae
-
+        mne = np.mean((np.abs(exp - obs)) / obs) * 100.0
+        return mne
+    
     @staticmethod
     def calculate_mfb(obs, exp):
         """Calculate mean fractional bias (MFB).
            The mean fractional bias (MFB) is used as a substitute for the mean normalised bias (MNB),
-           when the mean normalised bias becomes large.
-           The mean normalised bias can become very large when a minimum threshold is not used for the observations.
-           The fractional bias for cases with factors of 2 under-and over-prediction are -67 and +67%,
+           when the MNB becomes large.
+           The MNB can become very large when a minimum threshold is not used for the observations.
+           The mean fractional bias for cases with factors of 2 under-and over-prediction are -67 and +67%,
            respectively (as opposed to -50 and +100%, when using normalised bias).
            The mean fractional bias is a useful indicator because it has the advantage of equally weighting positive and
            negative bias estimates.
            It has also the advantage of not considering observations as the true value. The mean fractional bias can
            range in value from -200% to +200%.
+           Otherwise known as fractional bias (FB).
         """
-
-        mfb = np.mean((exp - obs) / ((exp + obs) / 2.))
+        mfb = np.mean((exp - obs) / ((exp + obs) / 2.0)) * 100.0
         return mfb
 
     @staticmethod
-    def calculate_mafb(obs, exp):
-        """Calculate mean absolute fractional bias (MAFB).
+    def calculate_mfe(obs, exp):
+        """Calculate mean fractional error (MFE).
+           Otherwise known as fractional error (FE), fractional gross error (FGE), 
+           or mean absolute fractional bias (MAFB).
         """
-
-        mafb = np.mean(np.abs((exp - obs) / ((exp + obs) / 2.)))
-        return mafb
+        mfe = np.mean(np.abs(exp - obs) / ((exp + obs) / 2.0)) * 100.0
+        return mfe
 
     @staticmethod
     def calculate_rmse(obs, exp, normalisation_type='none'):
@@ -266,13 +277,15 @@ class ExpBias(object):
         rmse = np.sqrt(np.mean((exp - obs) ** 2))
         # handle normalisation if desired
         if normalisation_type == 'max_min':
-            rmse = rmse / (np.max(obs) - np.min(obs))
+            rmse = (rmse / (np.max(obs) - np.min(obs))) * 100.0 
         elif normalisation_type == 'mean':
-            rmse = rmse / np.mean(obs)
+            rmse = (rmse / np.mean(obs)) * 100.0 
+        elif normalisation_type == 'rmse':
+            rmse = (rmse / np.sum(obs)) * 100.0 
         elif normalisation_type == 'iq':
-            rmse = rmse / (np.percentile(obs, 75) - np.percentile(obs, 25))
+            rmse = (rmse / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0 
         elif normalisation_type == 'stdev':
-            rmse = rmse / np.std(obs)
+            rmse = (rmse / np.std(obs)) * 100.0 
         return rmse
 
     @staticmethod
