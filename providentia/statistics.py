@@ -632,10 +632,13 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
     norm = matplotlib.colors.Normalize(vmin=z_vmin, vmax=z_vmax)
 
     # get cmap (handling discrete cases)
-    if plot_characteristics['cb']['discrete']:
-        cmap = plt.get_cmap(z_colourmap, plot_characteristics['cb']['n_discrete'])
+    if z_vmin != z_vmax:
+        if plot_characteristics['cb']['discrete']:
+            cmap = plt.get_cmap(z_colourmap, plot_characteristics['cb']['n_discrete'])
+        else:
+            cmap = plt.get_cmap(z_colourmap)
     else:
-        cmap = plt.get_cmap(z_colourmap)
+        cmap = plt.get_cmap(z_colourmap, 1)
 
     # create colourbar
     for cb_ax in cb_axs:
