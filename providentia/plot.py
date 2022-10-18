@@ -642,55 +642,71 @@ class Plot:
 
         # recalculate xticks (if desired) for better spacing
         if plot_characteristics['xtick_alteration']['define']:
+            
+            if first_data_label:
+                
+                # get steps for first data label
+                steps = ts_nonan.index.values
+                
+                # get start and end dates for first data label
+                timeseries_start_date = pd.to_datetime(ts_nonan.index.values[0])
+                timeseries_end_date = pd.to_datetime(ts_nonan.index.values[-1])
 
-            # get steps in days or months   
-            steps = ts_nonan.index.values
+                # get start and end dates for all data labels
+                for data_label in self.read_instance.data_labels:
+                    start_date = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna().index.values[0]
+                    end_date = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna().index.values[-1]
+                    if start_date < timeseries_start_date:
+                        timeseries_start_date = start_date
+                    if end_date > timeseries_end_date:
+                        timeseries_end_date = end_date
+                
+                # get steps for all data labels
+                steps = pd.date_range(timeseries_start_date, timeseries_end_date, 
+                                      freq=self.read_instance.active_frequency_code)
 
-            # get start and end dates
-            timeseries_start_date = pd.to_datetime(steps[0])
-            timeseries_end_date = pd.to_datetime(steps[-1])
+                # get number of months and days
+                n_months = (12*(timeseries_end_date.year - timeseries_start_date.year) + (timeseries_end_date.month - 
+                                                                                          timeseries_start_date.month))
+                n_days = (timeseries_end_date - timeseries_start_date).days
 
-            # get number of months and days
-            n_months = (timeseries_end_date.year - timeseries_start_date.year) * 12 + (timeseries_end_date.month - timeseries_start_date.month)
-            n_days = (timeseries_end_date - timeseries_start_date).days
-
-            # get months that are complete
-            months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
-            months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
-            if months_start.size > 1:
-                if (timeseries_end_date - months_end[-1]).days >= 1:
-                    months = months_start[:-1]
+                # get months that are complete
+                months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
+                months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
+                if months_start.size > 1:
+                    if (timeseries_end_date - months_end[-1]).days >= 1:
+                        months = months_start[:-1]
+                    else:
+                        months = months_start
                 else:
                     months = months_start
-            else:
-                months = months_start
 
-            # define time slices
-            if n_months >= 3:
-                steps = months
-                relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
-            elif n_days < 7:
-                relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
-            slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
+                # define time slices
+                if n_months >= 3:
+                    steps = months
+                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
+                elif n_days < 7:
+                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+                slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
 
-            # use default axes if the number of timesteps is lower than the number of slices
-            if slices >= 1:
-                xticks = steps[0::slices]
-            else:
-                xticks = relevant_axis.xaxis.get_ticks()
+                # use default axes if the number of timesteps is lower than the number of slices
+                if slices >= 1:
+                    xticks = steps[0::slices]
+                else:
+                    xticks = relevant_axis.xaxis.get_ticks()
 
-            # transform to numpy.datetime64
-            if not isinstance(xticks[0], np.datetime64):
-                xticks = [x.to_datetime64() for x in xticks]
-            if not isinstance(timeseries_end_date, np.datetime64):
-                timeseries_end_date = timeseries_end_date.to_datetime64()
+                # transform to numpy.datetime64
+                if not isinstance(xticks[0], np.datetime64):
+                    xticks = [x.to_datetime64() for x in xticks]
+                if not isinstance(timeseries_end_date, np.datetime64):
+                    timeseries_end_date = timeseries_end_date.to_datetime64()
 
-            # add last step to xticks
-            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != timeseries_end_date):
-                xticks = np.append(xticks, timeseries_end_date)
+                # add last step to xticks
+                if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != timeseries_end_date):
+                    xticks = np.append(xticks, timeseries_end_date)
 
-            # set xticks
-            relevant_axis.xaxis.set_ticks(xticks)
+                # set xticks
+                relevant_axis.xaxis.set_ticks(xticks)
 
     def make_periodic(self, relevant_axis, networkspeci, data_label, plot_characteristics, zstat=None, plot_options=[],
                       first_data_label=False):
@@ -716,7 +732,7 @@ class Plot:
         for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
 
             #get subplot axis
-            relevant_subplot_axis = relevant_axis[relevant_temporal_resolution]
+            relevant_sub_ax = relevant_axis[relevant_temporal_resolution]
 
             # violin plot type?
             if not zstat:
@@ -727,9 +743,9 @@ class Plot:
                 grouped_data = [group for group in grouped_data if len(group) > 0]
 
                 # make violin plot 
-                violin_plot = relevant_subplot_axis.violinplot(grouped_data, 
-                                                               positions=self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['valid_xticks'], 
-                                                               **plot_characteristics['plot']['violin'])
+                violin_plot = relevant_sub_ax.violinplot(grouped_data, 
+                                                         positions=self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['valid_xticks'], 
+                                                         **plot_characteristics['plot']['violin'])
 
                 # plot p50
                 xticks = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
@@ -740,24 +756,24 @@ class Plot:
                 # line drawn being interpolated across missing values
                 inds_to_split = np.where(np.diff(xticks) > 1)[0]
                 if len(inds_to_split) == 0:
-                    p50_plots = relevant_subplot_axis.plot(xticks, medians, 
-                                                          color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                          zorder=median_zorder, 
-                                                          **plot_characteristics['plot']['p50'])
+                    p50_plots = relevant_sub_ax.plot(xticks, medians, 
+                                                     color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                     zorder=median_zorder, 
+                                                     **plot_characteristics['plot']['p50'])
                 else:
                     p50_plots = []
                     inds_to_split += 1
                     start_ind = 0
                     for end_ind in inds_to_split:
-                        p50_plots += relevant_subplot_axis.plot(xticks[start_ind:end_ind], medians[start_ind:end_ind], 
-                                                                color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                                zorder=median_zorder, 
-                                                                **plot_characteristics['plot']['p50'])
+                        p50_plots += relevant_sub_ax.plot(xticks[start_ind:end_ind], medians[start_ind:end_ind], 
+                                                          color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                          zorder=median_zorder, 
+                                                          **plot_characteristics['plot']['p50'])
                         start_ind = end_ind
-                    p50_plots += relevant_subplot_axis.plot(xticks[start_ind:], medians[start_ind:], 
-                                                            color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                            zorder=median_zorder, 
-                                                            **plot_characteristics['plot']['p50'])
+                    p50_plots += relevant_sub_ax.plot(xticks[start_ind:], medians[start_ind:], 
+                                                      color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                      zorder=median_zorder, 
+                                                      **plot_characteristics['plot']['p50'])
 
                 # update plotted objects with necessary colour and alpha
                 for patch in violin_plot['bodies']:
@@ -803,38 +819,21 @@ class Plot:
                             minimum_bias = expbias_stats[base_zstat]['minimum_bias']
                         bias_lines = []
                         for mb in minimum_bias:
-                            bias_lines += [relevant_subplot_axis.axhline(y=mb, **plot_characteristics['bias_line'])]
+                            bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
                         # track plot elements if using dashboard 
                         if not self.read_instance.offline:
                             self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), bias_lines, bias=bias)
 
                 # make plot
-                periodic_plot = relevant_subplot_axis.plot(self.canvas_instance.periodic_xticks[relevant_temporal_resolution],
-                                                           self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution][zstat],
-                                                           color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                           zorder=self.read_instance.plotting_params[data_label]['zorder'],
-                                                           **plot_characteristics['plot'])
+                periodic_plot = relevant_sub_ax.plot(self.canvas_instance.periodic_xticks[relevant_temporal_resolution],
+                                                     self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution][zstat],
+                                                     color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                     zorder=self.read_instance.plotting_params[data_label]['zorder'],
+                                                     **plot_characteristics['plot'])
                                         
                 # track plot elements if using dashboard 
                 if not self.read_instance.offline:
                     self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), periodic_plot, bias=bias)
-
-            # adjust plot x axis to have correct margin on edges 
-            relevant_subplot_axis.relim(visible_only=True)
-            relevant_subplot_axis.autoscale(axis='x', tight=False)
-            xlim_lower, xlim_upper = relevant_subplot_axis.get_xlim()
-            first_valid_x = self.canvas_instance.periodic_xticks[relevant_temporal_resolution][(np.abs(self.canvas_instance.periodic_xticks[relevant_temporal_resolution] - xlim_lower)).argmin()]
-            last_valid_x = self.canvas_instance.periodic_xticks[relevant_temporal_resolution][(np.abs(self.canvas_instance.periodic_xticks[relevant_temporal_resolution] - xlim_upper)).argmin()]
-            if relevant_temporal_resolution == 'hour':
-                xlim_lower = first_valid_x - 0.65
-                xlim_upper = last_valid_x + 0.65
-            elif relevant_temporal_resolution == 'month':
-                xlim_lower = first_valid_x - 0.55
-                xlim_upper = last_valid_x + 0.55
-            elif relevant_temporal_resolution == 'dayofweek':
-                xlim_lower = first_valid_x - 0.55
-                xlim_upper = last_valid_x + 0.55
-            relevant_subplot_axis.set_xlim(xlim_lower, xlim_upper)
 
     def make_distribution(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
                           first_data_label=False):
@@ -1188,11 +1187,11 @@ class Plot:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('log')
                 relevant_axis.autoscale()
-            
+                
             if log_ax == 'logy':
                 relevant_axis.set_yscale('log')
                 relevant_axis.autoscale()
-
+                
         else:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('linear')
@@ -1238,9 +1237,8 @@ class Plot:
                 if not self.read_instance.offline:
                     self.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
-    def trend(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
-              plot_options=[]):
-        """Add trendline to plot
+    def smooth(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, plot_options=[]):
+        """Add smooth line to plot
 
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
@@ -1256,7 +1254,7 @@ class Plot:
         :type plot_options: list
         """
 
-        # iterate through plotted data arrays making trendline
+        # iterate through plotted data arrays making smooth line
         for data_label in data_labels:
 
             # bias plot?
@@ -1273,15 +1271,15 @@ class Plot:
                 ts = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']
                 bias = False
 
-            # make trendline
-            trend_line = relevant_axis.plot(ts.rolling(plot_characteristics['trend']['window'], min_periods=plot_characteristics['trend']['min_points'], center=True).mean().dropna(),
-                                            color=self.read_instance.plotting_params[data_label]['colour'],
-                                            zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
-                                            **plot_characteristics['trend']['format'])
+            # make smooth line
+            smooth_line = relevant_axis.plot(ts.rolling(plot_characteristics['smooth']['window'], min_periods=plot_characteristics['smooth']['min_points'], center=True).mean().dropna(),
+                                             color=self.read_instance.plotting_params[data_label]['colour'],
+                                             zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
+                                             **plot_characteristics['smooth']['format'])
 
             # track plot elements if using dashboard 
             if not self.read_instance.offline:
-                self.track_plot_elements(data_label, base_plot_type, 'trend', trend_line, bias=bias)
+                self.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
     def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
                    plot_options=[]):
@@ -1381,6 +1379,26 @@ class Plot:
         if not self.read_instance.offline:
             self.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
 
+    def get_no_margin_lim(self, ax, lim):
+        """ Get true limits of plot area.
+        """
+
+        # xlim
+        if lim == 'xlim':
+            xlim = ax.get_xlim()
+            xwidth = xlim[1] - xlim[0]
+            lower_lim = xlim[0] + (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
+            upper_lim = xlim[1] - (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
+
+        # ylim
+        if lim == 'ylim':
+            ylim = ax.get_ylim()
+            ywidth = ylim[1] - ylim[0]
+            lower_lim = ylim[0] + (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
+            upper_lim = ylim[1] - (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
+
+        return lower_lim, upper_lim
+
     def log_validity(self, relevant_axis, log_ax):
         """Determine if log operation for a given axes is valid (no values <= 0)
         
@@ -1393,19 +1411,15 @@ class Plot:
         """
 
         if log_ax == 'logx':
-            xlim = relevant_axis.get_xlim()
-            xwidth = xlim[1] - xlim[0]
-            lower_xlim = xlim[0] + (0.5 * relevant_axis.margins()[0]) / (0.5 + relevant_axis.margins()[0]) * xwidth
-            if round(lower_xlim, 2) >= 0:
+            lower_lim, _ = self.get_no_margin_lim(relevant_axis, 'xlim')
+            if round(lower_lim, 2) >= 0:
                 validity = True
             else:
                 validity = False
         
         if log_ax == 'logy':
-            ylim = relevant_axis.get_ylim()
-            ywidth = ylim[1] - ylim[0]
-            lower_ylim = ylim[0] + (0.5 * relevant_axis.margins()[1]) / (0.5 + relevant_axis.margins()[1]) * ywidth
-            if round(lower_ylim, 2) >= 0:
+            lower_lim, _ = self.get_no_margin_lim(relevant_axis, 'ylim')
+            if round(lower_lim, 2) >= 0:
                 validity = True
             else:
                 validity = False
@@ -1525,6 +1539,15 @@ class Plot:
         ylim_min = None
         ylim_max = None
 
+        # if changes only apply to one axis, put it in list
+        if (isinstance(relevant_axs, matplotlib.axes._subplots.Subplot) or
+            isinstance(relevant_axs, cartopy.mpl.geoaxes.GeoAxesSubplot)):
+            relevant_axs = [relevant_axs]
+        # transform dictionaries into lists
+        elif isinstance(relevant_axs, dict):
+            relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
+                            relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
+
         # get lower and upper limits across all relevant axes
         for ax in relevant_axs:
             if 'equal_aspect' in plot_characteristics:
@@ -1545,19 +1568,12 @@ class Plot:
                     all_xlim_lower.append(xlim_lower)
                     all_xlim_upper.append(xlim_upper)
             if ylim is None and ('ylim' not in plot_characteristics):
-                if isinstance(ax, dict):
-                    for sub_ax in ax.values():
-                        ylim_lower, ylim_upper = sub_ax.get_ylim()
-                        all_ylim_lower.append(ylim_lower)
-                        all_ylim_upper.append(ylim_upper)
-                else:
-                    ylim_lower, ylim_upper = ax.get_ylim()
-                    all_ylim_lower.append(ylim_lower)
-                    all_ylim_upper.append(ylim_upper)
+                ylim_lower, ylim_upper = ax.get_ylim()
+                all_ylim_lower.append(ylim_lower)
+                all_ylim_upper.append(ylim_upper)
 
         # get minimum and maximum from all axes and set limits
         for ax in relevant_axs:
-
             # get xlim
             if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic','periodic-violin']:
@@ -1566,6 +1582,10 @@ class Plot:
                     xlim = xlim_min, xlim_max
             elif 'xlim' in plot_characteristics:
                 xlim = plot_characteristics['xlim']
+
+            # set xlim
+            if xlim is not None:
+                ax.set_xlim(xlim)
 
             # get ylim
             if ylim is None and ('ylim' not in plot_characteristics):
@@ -1583,14 +1603,34 @@ class Plot:
             elif 'ylim' in plot_characteristics:
                 ylim = plot_characteristics['ylim']
 
-            # set lim
-            if isinstance(ax, dict):
-                for sub_ax in ax.values():
-                    sub_ax.set_xlim(xlim)
-                    sub_ax.set_ylim(ylim) 
-            else:
-                ax.set_xlim(xlim)
+            # set ylim
+            if ylim is not None:
                 ax.set_ylim(ylim)
+
+        # get minimum and maximum from all axes and set limits for periodic plots
+        if base_plot_type in ['periodic','periodic-violin']:
+            mapped_resolutions = self.read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(self.read_instance.relevant_temporal_resolutions)))
+            if xlim is None and ('xlim' not in plot_characteristics):
+                for temporal_resolution, sub_ax in zip(mapped_resolutions, relevant_axs):
+                    # adjust plot x axis to have correct margin on edges
+                    xlim_lower, xlim_upper = sub_ax.get_xlim()
+                    first_valid_x = self.canvas_instance.periodic_xticks[temporal_resolution][(np.abs(self.canvas_instance.periodic_xticks[temporal_resolution] - xlim_lower)).argmin()]
+                    last_valid_x = self.canvas_instance.periodic_xticks[temporal_resolution][(np.abs(self.canvas_instance.periodic_xticks[temporal_resolution] - xlim_upper)).argmin()]
+                    if temporal_resolution == 'hour':
+                        xlim_lower = first_valid_x - 0.65
+                        xlim_upper = last_valid_x + 0.65
+                    elif temporal_resolution == 'month':
+                        xlim_lower = first_valid_x - 0.55
+                        xlim_upper = last_valid_x + 0.55
+                    elif temporal_resolution == 'dayofweek':
+                        xlim_lower = first_valid_x - 0.55
+                        xlim_upper = last_valid_x + 0.55
+                    xlim = xlim_lower, xlim_upper
+                    sub_ax.set_xlim(xlim)
+            elif 'xlim' in plot_characteristics:
+                xlim = plot_characteristics['xlim']
+                for temporal_resolution, sub_ax in zip(mapped_resolutions, relevant_axs):
+                    sub_ax.set_xlim(xlim)
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics):
         """Set title of plot axis

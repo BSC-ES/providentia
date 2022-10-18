@@ -40,24 +40,24 @@ class DataReader:
 
             # set active frequency code
             if (self.read_instance.resolution == 'hourly') or (self.read_instance.resolution == 'hourly_instantaneous'):
-                self.active_frequency_code = 'H'
+                self.read_instance.active_frequency_code = 'H'
             elif (self.read_instance.resolution == '3hourly') or (self.read_instance.resolution == '3hourly_instantaneous'):
-                self.active_frequency_code = '3H'
+                self.read_instance.active_frequency_code = '3H'
             elif (self.read_instance.resolution == '6hourly') or (self.read_instance.resolution == '6hourly_instantaneous'):
-                self.active_frequency_code = '6H'
+                self.read_instance.active_frequency_code = '6H'
             elif self.read_instance.resolution == 'daily':
-                self.active_frequency_code = 'D'
+                self.read_instance.active_frequency_code = 'D'
             elif self.read_instance.resolution == 'monthly':
-                self.active_frequency_code = 'MS'
+                self.read_instance.active_frequency_code = 'MS'
 
             # get time array
             self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str(self.read_instance.start_date)[:4]),
-                                                                                int(str(self.read_instance.start_date)[4:6]),
-                                                                                int(str(self.read_instance.start_date)[6:8])),
+                                                                                  int(str(self.read_instance.start_date)[4:6]),
+                                                                                  int(str(self.read_instance.start_date)[6:8])),
                                                           end=datetime.datetime(int(str(self.read_instance.end_date)[:4]),
                                                                                 int(str(self.read_instance.end_date)[4:6]),
                                                                                 int(str(self.read_instance.end_date)[6:8])),
-                                                          freq=self.active_frequency_code)[:-1]
+                                                          freq=self.read_instance.active_frequency_code)[:-1]
 
             # show warning when the data consists only of less than 2 timesteps
             if len(self.read_instance.time_array) < 2:
@@ -160,7 +160,8 @@ class DataReader:
                                                         self.read_instance.end_date, self.read_instance.resolution)
 
             # read data 
-            self.read_data(self.read_instance.network, self.read_instance.species, self.read_instance.resolution, yearmonths_to_read, self.read_instance.data_labels)
+            self.read_data(self.read_instance.network, self.read_instance.species, self.read_instance.resolution, 
+                           yearmonths_to_read, self.read_instance.data_labels)
 
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
             self.read_instance.measurement_units = {speci:self.read_instance.parameter_dictionary[speci]['standard_units'] for speci in self.read_instance.species}
@@ -476,7 +477,7 @@ class DataReader:
                     # non-GHOST
                     else:
                         file_root = '%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network, 
-                                                         resolution, speci, speci)
+                                                        resolution, speci, speci)
                         try:
                             available_yearmonths = self.read_instance.available_observation_data[network][resolution][matrix][speci]
                         except KeyError:
@@ -487,9 +488,14 @@ class DataReader:
 
                 # experiments
                 else:
-                    file_root = \
-                        '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                   data_label, resolution, speci, network, speci)
+                    if '/' in network:
+                        file_root = \
+                            '%s/%s/%s/%s/%s/*%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                                                       data_label, resolution, speci, network.split('/')[0].upper(), speci)
+                    else:
+                        file_root = \
+                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                                                    data_label, resolution, speci, network, speci)
                     try:
                         available_yearmonths = self.read_instance.available_experiment_data[network][resolution][speci][data_label]
                     except KeyError:
@@ -549,8 +555,9 @@ class DataReader:
                                      'reading_ghost', 'ghost_data_vars_to_read', 'metadata_dtype', 
                                      'metadata_vars_to_read']
             tuple_arguments = []
-            for data_label in self.files_to_read['{}|{}'.format(network,speci)]:
-                for fname in self.files_to_read['{}|{}'.format(network,speci)][data_label]:
+
+            for data_label in self.files_to_read['{}|{}'.format(network, speci)]:
+                for fname in self.files_to_read['{}|{}'.format(network, speci)][data_label]:
                     tuple_arguments.append((fname, self.read_instance.station_references['{}|{}'.format(network,speci)], 
                                             speci, data_label, data_labels, self.read_instance.reading_ghost, 
                                             self.read_instance.ghost_data_vars_to_read, 
