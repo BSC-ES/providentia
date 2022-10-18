@@ -1497,7 +1497,8 @@ class Plot:
         ylim_max = None
 
         # if changes only apply to one axis, put it in list
-        if isinstance(relevant_axs, matplotlib.axes._subplots.Subplot):
+        if (isinstance(relevant_axs, matplotlib.axes._subplots.Subplot) or
+            isinstance(relevant_axs, cartopy.mpl.geoaxes.GeoAxesSubplot)):
             relevant_axs = [relevant_axs]
         # transform dictionaries into lists
         elif isinstance(relevant_axs, dict):
