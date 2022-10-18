@@ -34,7 +34,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             aux.load_conf(self, kwargs['config'])
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-            error = 'Error: The configuration path specified in the command line does not exist.'
+            error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
@@ -302,10 +302,14 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 
                                 # gather some information about current station
                                 self.station_ind += 1
-                                self.current_station_reference = self.metadata_in_memory[networkspeci]['station_reference'][valid_station_ind, :][0]
-                                self.current_station_name = self.metadata_in_memory[networkspeci]['station_name'][valid_station_ind, :][0]
-                                self.current_lon = round(self.metadata_in_memory[networkspeci]['longitude'][valid_station_ind, :][0], 2)
-                                self.current_lat = round(self.metadata_in_memory[networkspeci]['latitude'][valid_station_ind, :][0], 2)
+                                valid_station_references = self.metadata_in_memory[networkspeci]['station_reference'][valid_station_ind, :]
+                                self.current_station_reference = valid_station_references[pd.notnull(valid_station_references)][0]
+                                valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][valid_station_ind, :]
+                                self.current_station_name = valid_station_names[pd.notnull(valid_station_names)][0]
+                                current_lons = self.metadata_in_memory[networkspeci]['longitude'][valid_station_ind, :]
+                                self.current_lon = round(current_lons[pd.notnull(current_lons)][0], 2)
+                                current_lats = self.metadata_in_memory[networkspeci]['latitude'][valid_station_ind, :]
+                                self.current_lat = round(current_lats[pd.notnull(current_lats)][0], 2)
                                 
                                 # put station data in pandas dataframe
                                 # put multiple species data in pandas dataframe if a multispecies plot is wanted (spatial colocation must also be active)
@@ -338,7 +342,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             # log axes
             # annotation
             # regression line
-            # trend line
+            # smooth line
 
             # remove header from plot characteristics dictionary
             if 'header' in list(self.plot_characteristics.keys()):
@@ -421,22 +425,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             generate_colourbar(self, relevant_axs, cb_axs, zstat, self.plot_characteristics[plot_type], 
                                                networkspeci.split('|')[-1])
 
-                        # harmonise xy limits for plot paradigm
-                        if base_plot_type not in ['map', 'heatmap', 'table']: 
-                            if base_plot_type == 'periodic-violin':
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
-                                                                     self.plot_characteristics[plot_type], plot_options, 
-                                                                     ylim=[self.selected_station_data_min[networkspeci], 
-                                                                           self.selected_station_data_max[networkspeci]])
-                            elif base_plot_type == 'scatter':
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
-                                                                     self.plot_characteristics[plot_type], plot_options, 
-                                                                     relim=True)
-                            else:
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
-                                                                     self.plot_characteristics[plot_type], plot_options, 
-                                                                     relim=True, autoscale=True)
-
                         # iterate through all relevant axes for plot type in paradigm
                         for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
 
@@ -446,13 +434,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 if log_validity:
                                     self.plot.log_axes(relevant_ax, 'logx', base_plot_type, self.plot_characteristics[plot_type])
                                 else:
-                                    print("Warning: It is not possible to log the x-axis with negative values.")
+                                    msg = "Warning: It is not possible to log the x-axis "
+                                    msg += "in {0} with negative values.".format(plot_type)
+                                    print(msg)
                             if 'logy' in plot_options:
                                 log_validity = self.plot.log_validity(relevant_ax, 'logy')
                                 if log_validity:
                                     self.plot.log_axes(relevant_ax, 'logy', base_plot_type, self.plot_characteristics[plot_type])
                                 else:
-                                    print("Warning: It is not possible to log the y-axis with negative values.")
+                                    msg = "Warning: It is not possible to log the y-axis "
+                                    msg += "in {0} with negative values.".format(plot_type)
+                                    print(msg)
 
                             # annotation
                             if 'annotate' in plot_options:
@@ -471,12 +463,28 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                             self.plot_characteristics[plot_type], 
                                                             plot_options=plot_options)
 
-                            # trend line
-                            if 'trend' in plot_options:
-                                self.plot.trend(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
-                                                base_plot_type, self.plot_characteristics[plot_type], 
-                                                plot_options=plot_options)
+                            # smooth line
+                            if 'smooth' in plot_options:
+                                self.plot.smooth(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
+                                                 base_plot_type, self.plot_characteristics[plot_type], 
+                                                 plot_options=plot_options)
 
+                        # harmonise xy limits for plot paradigm
+                        if base_plot_type not in ['map', 'heatmap', 'table']: 
+                            if base_plot_type == 'periodic-violin':
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     ylim=[self.selected_station_data_min[networkspeci], 
+                                                                           self.selected_station_data_max[networkspeci]],
+                                                                     relim=True, autoscale_x=True)
+                            elif base_plot_type == 'scatter':
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True)
+                            else:
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True, autoscale=True)
             # save page figures
             print('WRITING PDF')
             for page in self.plot_dictionary:
@@ -632,7 +640,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             last_valid_row = False
 
                         # setup periodic plot type gridspec
-                        if base_plot_type in ['periodic','periodic-violin']:
+                        if base_plot_type in ['periodic', 'periodic-violin']:
                             gs = gridspec.GridSpecFromSubplotSpec(20, 20, subplot_spec=ax)
                             grid_dict = dict()
                             grid_dict['hour'] = fig.add_subplot(gs[:9, :])
@@ -658,6 +666,9 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                       relevant_temporal_resolution=relevant_temporal_resolution, 
                                                       col_ii=col_ii, last_valid_row=last_valid_row, 
                                                       last_row_on_page=last_row_on_page)
+
+                            grid_dict['dayofweek'].yaxis.set_tick_params(which='both', labelleft=False)
+                            grid_dict['dayofweek'].set_ylabel('')
 
                         # rest of plot types
                         else:
@@ -869,7 +880,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     if plotting_paradigm == 'summary':
                         axis_title_label = self.subsection
                     elif plotting_paradigm == 'station':
-                        axis_title_label = '{} ({}, {})'.format(self.current_station_name, self.current_lon, self.current_lat)
+                        axis_title_label = '{} ({:.{}f}, {:.{}f})'.format(self.current_station_name, 
+                                                                          self.current_lon,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'],
+                                                                          self.current_lat,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'])
                     # set title
                     if isinstance(relevant_axis, dict):
                         self.plot.set_axis_title(sub_ax, axis_title_label, self.plot_characteristics[plot_type])
@@ -1037,7 +1052,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     if plotting_paradigm == 'summary':
                         axis_title_label = ''
                     elif plotting_paradigm == 'station':
-                        axis_title_label = '{} ({}, {})'.format(self.current_station_name, self.current_lon, self.current_lat)
+                        axis_title_label = '{} ({:.{}f}, {:.{}f})'.format(self.current_station_name, 
+                                                                          self.current_lon,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'],
+                                                                          self.current_lat,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'])
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
             #turn off relevant axis if dataframe is empty or all NaN
