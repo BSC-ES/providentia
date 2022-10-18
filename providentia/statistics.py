@@ -506,13 +506,11 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     # get dictionary containing necessary information for calculation of selected statistic
     if z_statistic_type == 'basic':
         stats_dict = basic_stats[base_zstat]
-        if base_zstat not in ['Data%','Exceedances']:
-            label_units = ' ({})'.format(read_instance.measurement_units[speci])
-        else:
-            label_units = ''
     else:
         stats_dict = expbias_stats[base_zstat]
-        label_units = ''
+    label_units = stats_dict['units']
+    if label_units == 'measurement_units':
+        label_units = read_instance.measurement_units[speci]
 
     # generate z colourbar label
     # first check if have defined label (in this order: 1. configuration file 2. specific for z statistic)
@@ -525,13 +523,22 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     #2. get label specific for z statistic
     if not set_label:
         if z_statistic_sign == 'absolute':
-            z_label = '{} {}'.format(stats_dict['label'], label_units)
+            if label_units != '':
+                z_label = '{} ({})'.format(stats_dict['label'], label_units)
+            else:
+                z_label = copy.deepcopy(stats_dict['label'])
         else:
             if z_statistic_type == 'basic':
-                z_label = '{} bias {}'.format(stats_dict['label'], label_units)
+                if label_units != '':
+                    z_label = '{} bias ({})'.format(stats_dict['label'], label_units)
+                else:
+                    z_label = '{} bias'.format(stats_dict['label'])
             else:
-                z_label = '{} {}'.format(stats_dict['label'], label_units)
-    
+                if label_units != '':
+                    z_label = '{} ({})'.format(stats_dict['label'], label_units)
+                else:
+                    z_label = copy.deepcopy(stats_dict['label'])        
+
     # set cmap for z statistic
     # first check if have defined cmap (in this order: 1. configuration file 2. specific for z statistic)
     set_cmap = False
