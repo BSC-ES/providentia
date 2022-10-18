@@ -18,6 +18,7 @@ import sys
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
+import math
 import pyproj
 from scipy.spatial import cKDTree
 import seaborn as sns
@@ -361,7 +362,9 @@ def periodic_xticks():
     :rtype dict
     """
 
-    return {'hour':np.arange(24, dtype=np.int), 'dayofweek':np.arange(7, dtype=np.int), 'month':np.arange(1, 13, dtype=np.int)}
+    return {'hour':np.arange(24, dtype=np.int), 
+            'dayofweek':np.arange(7, dtype=np.int), 
+            'month':np.arange(1, 13, dtype=np.int)}
 
 def periodic_labels():
     """Return axes labels for periodic subplots.
@@ -1174,18 +1177,23 @@ def get_experiment_tree(instance):
                 for species in instance.all_observation_data[network][resolution][matrix]:
                     # iterate through available experiments
                     for experiment in available_experiments:
-
+                        
+                        # get folder where interpolated experiments are saved
+                        if '/' not in network:
+                            files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
+                                                                     experiment, resolution, species, network)
+                        else:
+                            files_directory = '%s/%s/%s/%s/%s/*%s' % (instance.exp_root, instance.ghost_version, 
+                                                                      experiment, resolution, species,
+                                                                      network.split('/')[0].upper())
+                            
                         # test if interpolated directory exists for experiment
                         # if it does not exit, continue
-                        if not os.path.exists(
-                            '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
-                                                    experiment, resolution, species, network)):
+                        if not os.path.exists(files_directory):
                             continue
                         else:
                             # get all available netCDF files
-                            available_files = os.listdir(
-                                '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version,
-                                                        experiment, resolution, species, network))
+                            available_files = os.listdir(files_directory)
 
                             # get monthly start date (YYYYMM) of all files
                             file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
@@ -1302,17 +1310,22 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
         #iterate through available experiments
         for experiment in available_experiments:
 
+            # get folder where interpolated experiments are saved
+            if '/' not in network:           
+                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
+                                                         experiment, resolution, speci, network)
+            else:
+                files_directory = '%s/%s/%s/%s/%s/*%s' % (instance.exp_root, instance.ghost_version, 
+                                                          experiment, resolution, speci,
+                                                          network.split('/')[0].upper())
+                
             # test if interpolated directory exists for experiment
             # if it does not exit, continue
-            if not os.path.exists(
-                '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
-                                        experiment, resolution, speci, network)):
+            if not os.path.exists(files_directory):
                 continue
             else:
                 # get all available netCDF files
-                available_files = os.listdir(
-                    '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version,
-                                            experiment, resolution, speci, network))
+                available_files = os.listdir(files_directory)
 
             # get monthly start date (YYYYMM) of all files
             file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
@@ -1530,9 +1543,12 @@ def get_basic_metadata(instance, networks, species, resolution):
         else:
             
             ncdf_root = Dataset(relevant_files[0])
-            station_references['{}|{}'.format(network, speci)] = np.array(
-                [st_name.tostring().decode('ascii').replace('\x00', '')
-                for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+            if ncdf_root['station_name'].dtype == np.str:
+                station_references['{}|{}'.format(network, speci)] = ncdf_root['station_name'][:]
+            else:
+                station_references['{}|{}'.format(network, speci)] = np.array(
+                    [st_name.tostring().decode('ascii').replace('\x00', '')
+                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
             if "latitude" in ncdf_root.variables:
                 station_longitudes['{}|{}'.format(network, speci)] = ncdf_root['longitude'][:]
                 station_latitudes['{}|{}'.format(network, speci)] = ncdf_root['latitude'][:]
