@@ -76,7 +76,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 if okpressed or (len(all_sections) == 1):
                     vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[selected_section].items()})
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-            error = 'Error: The configuration path specified in the command line does not exist.'
+            error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
         else:
             if os.path.isfile(dconf_path):
@@ -170,7 +170,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                     
                     # apply new geometry to menu and save button
                     menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(menu_button.x()-25, menu_button.y(), 20, 20)
+                    save_button.setGeometry(menu_button.x(), menu_button.y()-25, 20, 20)
 
                     # apply new geometry to container elements
                     for sub_element in element:
@@ -514,12 +514,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
 
-        #turn off some features if using non-GHOST data
-        if aux.check_for_ghost(self.network):
-            self.enable_ghost_buttons()
-        else:
-            self.disable_ghost_buttons()
-
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
 
@@ -589,6 +583,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.cb_network.setCurrentText(self.selected_network)
         else:
             self.selected_network = self.cb_network.currentText()
+
+        # turn off some features if using non-GHOST data
+        if aux.check_for_ghost(self.selected_network):
+            self.enable_ghost_buttons()
+        else:
+            self.disable_ghost_buttons()
 
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.selected_network].keys())
@@ -1016,7 +1016,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             self.previous_yearmonths = self.yearmonths
 
             # read data
-            self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, experiments_to_read=experiments_to_read)
+            self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, 
+                                       experiments_to_read=experiments_to_read)
             
             #clear canvas entirely if have no valid data
             if self.clear_canvas:
