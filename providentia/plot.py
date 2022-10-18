@@ -1539,14 +1539,14 @@ class Plot:
         ylim_min = None
         ylim_max = None
 
-        # if changes only apply to one axis, put it in list
-        if (isinstance(relevant_axs, matplotlib.axes._subplots.Subplot) or
-            isinstance(relevant_axs, cartopy.mpl.geoaxes.GeoAxesSubplot)):
-            relevant_axs = [relevant_axs]
-        # transform dictionaries into lists
-        elif isinstance(relevant_axs, dict):
-            relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
-                            relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
+        if not isinstance(relevant_axs, list):
+            # if changes only apply to one axis, put it in list
+            if not isinstance(relevant_axs, dict):
+                relevant_axs = [relevant_axs]
+            # transform dictionaries into lists
+            else:
+                relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
+                                relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
 
         # get lower and upper limits across all relevant axes
         for ax in relevant_axs:
