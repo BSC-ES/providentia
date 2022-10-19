@@ -663,13 +663,13 @@ class Plot:
         ts_nonan = ts.dropna()
         
         # make timeseries plot
-        timeseries_plot = relevant_axis.plot(ts_nonan, 
-                                             color=self.read_instance.plotting_params[data_label]['colour'], 
-                                             **plot_characteristics['plot'])
+        self.timeseries_plot = relevant_axis.plot(ts_nonan, 
+                                                  color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                  **plot_characteristics['plot'])
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'timeseries', 'plot', timeseries_plot, bias=bias)
+            self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
 
         # recalculate xticks (if desired) for better spacing
         if plot_characteristics['xtick_alteration']['define']:
@@ -692,6 +692,12 @@ class Plot:
                     if end_date > timeseries_end_date:
                         timeseries_end_date = end_date
                 
+                # transform to pandas timestamps
+                if not isinstance(timeseries_end_date, pd._libs.tslibs.timestamps.Timestamp):
+                    timeseries_end_date = pd.to_datetime(timeseries_end_date)
+                if not isinstance(timeseries_start_date, pd._libs.tslibs.timestamps.Timestamp):
+                    timeseries_start_date = pd.to_datetime(timeseries_start_date)                
+
                 # get steps for all data labels
                 steps = pd.date_range(timeseries_start_date, timeseries_end_date, 
                                       freq=self.read_instance.active_frequency_code)
