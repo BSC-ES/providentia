@@ -1263,8 +1263,8 @@ class Plot:
             if not self.read_instance.offline:
                 self.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
-    def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
-                   plot_options=[]):
+    def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics,
+                   plot_characteristics_legend, plot_options=[]):
         """Add statistical annotations to plot
 
         :param relevant_axis: axis to plot on 
@@ -1277,6 +1277,8 @@ class Plot:
         :type base_plot_type: str
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
+        :param plot_characteristics_legend: legend plot characteristics  
+        :type plot_characteristics_legend: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
         """
@@ -1332,7 +1334,7 @@ class Plot:
             # generate annotation
             if plot_characteristics['annotate_text']['exp_labels']:
                 if data_label == 'observations':
-                    str_to_annotate.append('Observations' + ' | ' + ', '.join(stats_annotate))
+                    str_to_annotate.append(plot_characteristics_legend['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate))
                 else:
                     str_to_annotate.append(self.read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate))
             else:

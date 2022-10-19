@@ -453,7 +453,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             if 'annotate' in plot_options:
                                 self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
                                                      base_plot_type, self.plot_characteristics[plot_type],
-                                                     plot_options=plot_options)
+                                                     self.plot_characteristics['legend'], plot_options=plot_options)
                                 # annotate in first axis
                                 if base_plot_type in ['periodic', 'periodic-violin']:
                                     break
