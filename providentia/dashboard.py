@@ -780,7 +780,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 self.position_5 = 'None'
 
             # remove axis elements for previous plot type, and from active_dashboard_plots
-            if (previous_plot_type in self.mpl_canvas.active_dashboard_plots) & (previous_plot_type in self.mpl_canvas.plot_axes):
+            if (previous_plot_type in self.active_dashboard_plots) & (previous_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[previous_plot_type]
                 if type(ax) == dict:
                     for sub_ax in ax.values():
@@ -789,10 +789,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                 else:
                     self.mpl_canvas.remove_axis_elements(ax, previous_plot_type)
                     ax.remove()
-                self.mpl_canvas.active_dashboard_plots.remove(previous_plot_type)
+                self.active_dashboard_plots.remove(previous_plot_type)
 
             # if changed_plot_type already axis on another axis then remove those axis elements
-            if (changed_plot_type in self.mpl_canvas.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
+            if (changed_plot_type in self.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
                 if type(ax) == dict:
                     for sub_ax in ax.values():
@@ -804,13 +804,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
             # otherwise add plot_type to active_dashboard_plots
             elif changed_plot_type != 'None': 
-                self.mpl_canvas.active_dashboard_plots.append(changed_plot_type)
+                self.active_dashboard_plots.append(changed_plot_type)
 
             # update plot axis for new plot type
             self.update_plot_axis(event_source, changed_plot_type)
 
             # hide axis for new plot type before replot
-            if (changed_plot_type in self.mpl_canvas.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
+            if (changed_plot_type in self.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
                 if type(ax) == dict:
                     for sub_ax in ax.values():
