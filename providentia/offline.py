@@ -256,7 +256,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                         if subsection_ind == 0:
                             # update plot characteristics
-                            self.plot.set_plot_characteristics(self.summary_plots_to_make, speci=networkspeci.split('|')[-1])
+                            self.plot.set_plot_characteristics(self.summary_plots_to_make)
                         
                             # setup plotting geometry for summary plots per networkspeci (for all subsections)
                             self.setup_plot_geometry('summary', networkspeci, networkspeci_ii)
@@ -281,7 +281,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     if self.report_stations:               
 
                         # update plot characteristics
-                        self.plot.set_plot_characteristics(self.station_plots_to_make, speci=networkspeci.split('|')[-1])
+                        self.plot.set_plot_characteristics(self.station_plots_to_make)
 
                         # get valid station inds for networkspeci / subsection
                         if self.temporal_colocation:
@@ -350,9 +350,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
             # iterate through networks and species
             for networkspeci_ii, networkspeci in enumerate(networkspecies): 
-
-                # update plot characteristics
-                self.plot.set_plot_characteristics(list(self.plot_characteristics.keys()), speci=networkspeci.split('|')[-1])
 
                 # iterate through plot types
                 for plot_type in list(self.plot_characteristics.keys()):
@@ -453,7 +450,6 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             if 'annotate' in plot_options:
                                 self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
                                                      base_plot_type, self.plot_characteristics[plot_type],
-                                                     self.plot_characteristics[plot_type]['legend'], 
                                                      plot_options=plot_options)
                                 # annotate in first axis
                                 if base_plot_type in ['periodic', 'periodic-violin']:
@@ -871,24 +867,83 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                 # get relevant axis
                 relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
 
-                # set axis title
+                # set axis title (only if not previously set)
                 if isinstance(relevant_axis, dict):
-                    for sub_ax in relevant_axis.values():
-                        axis_title = sub_ax.get_title()
-                        break
+                    for relevant_temporal_resolution, sub_ax in relevant_axis.items():
+                        if relevant_temporal_resolution == 'hour':
+                            axis_title = sub_ax.get_title()
+                            break
                 else:
                     axis_title = relevant_axis.get_title()
-        
+                # axis title is empty?
                 if axis_title == '':
                     if plotting_paradigm == 'summary':
                         axis_title_label = self.subsection
-                    elif plotting_paradigm == 'station': 
+                    elif plotting_paradigm == 'station':
                         axis_title_label = '{} ({:.{}f}, {:.{}f})'.format(self.current_station_name, 
                                                                           self.current_lon,
                                                                           self.plot_characteristics[plot_type]['round_decimal_places'],
                                                                           self.current_lat,
                                                                           self.plot_characteristics[plot_type]['round_decimal_places'])
-                    self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+                    # set title
+                    if isinstance(relevant_axis, dict):
+                        self.plot.set_axis_title(sub_ax, axis_title_label, self.plot_characteristics[plot_type])
+                    else:
+                        self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+
+                # set xlabel and ylabel (only if not previously set)
+                if isinstance(relevant_axis, dict):
+                    for relevant_temporal_resolution, sub_ax in relevant_axis.items():
+                        if relevant_temporal_resolution in ['hour','month']:
+                            axis_xlabel = 'NaN'
+                            axis_ylabel = sub_ax.get_ylabel()
+                            break
+                else:
+                    axis_xlabel = sub_ax.get_xlabel()
+                    axis_ylabel = sub_ax.get_ylabel()
+
+                # axis xlabel is empty?
+                if axis_xlabel == '':
+                    if 'xlabel' in self.plot_characteristics[plot_type]:
+                        if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
+                            xlabel = self.measurement_units[networkspeci.split('|')[-1]]
+                        else:
+                            xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                    else:
+                        xlabel = ''
+                    # set xlabel
+                    if xlabel != '':
+                        self.plot.set_axis_label(relevant_axis, 'x', ylabel, self.plot_characteristics[plot_type])
+
+                # axis ylabel is empty?
+                if axis_ylabel == '':
+                    if base_plot_type in ['periodic']:
+                        if z_statistic_type == 'basic':
+                            ylabel = basic_stats[base_zstat]['label']
+                            ylabel_units = basic_stats[base_zstat]['units']
+                        else:
+                            ylabel = expbias_stats[base_zstat]['label']
+                            ylabel_units = expbias_stats[base_zstat]['units']
+                        if ylabel_units == 'measurement_units':
+                            ylabel_units = self.measurement_units[networkspeci.split('|')[-1]] 
+                        if ylabel_units != '':
+                            ylabel = copy.deepcopy(ylabel_units)
+                    else:
+                        if 'ylabel' in self.plot_characteristics[plot_type]:
+                            if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
+                                ylabel = self.measurement_units[networkspeci.split('|')[-1]]
+                            else:
+                                ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                        else:
+                            ylabel = ''
+                    # set ylabel
+                    if ylabel != '':
+                        if isinstance(relevant_axis, dict):
+                            for relevant_temporal_resolution, sub_ax in relevant_axis.items():
+                                if relevant_temporal_resolution in ['hour','month']:
+                                    self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics[plot_type])
+                        else:
+                            self.plot.set_axis_label(relevant_axis, 'y', ylabel, self.plot_characteristics[plot_type])
 
                 # make plot if there is data
                 if not self.selected_station_data[networkspeci]:
@@ -925,6 +980,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         # skip observational array if plotting bias stat
                         if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                             continue
+                            
                         if data_label in self.selected_station_data[networkspeci]:
                             if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
                                 if base_plot_type == 'periodic':
@@ -937,7 +993,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                             plot_options=plot_options, first_data_label=first_data_label)
                                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)
                                 first_data_label = False
-                                
+
                     # other plot types (except heatmap and table) 
                     else:
                         # skip observational array for bias/scatter plots
@@ -950,10 +1006,10 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
                                     plot_options=plot_options, first_data_label=first_data_label) 
                                 first_data_label = False
-                                self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)              
+                                self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)        
 
             # iterate number of plots made for current type of plot 
-            self.current_plot_ind += 1
+            self.current_plot_ind += 1     
 
         # then make plot heatmap/table plot
         if (base_plot_type in ['heatmap', 'table']):
@@ -1003,16 +1059,13 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                                           self.plot_characteristics[plot_type]['round_decimal_places'])
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
-                # turn off relevant axis if dataframe is empty or all NaN
-                if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
-                    relevant_axis.set_axis_off()
-                else:
-                    # round dataframe
-                    stats_df = stats_df.round(self.plot_characteristics[plot_type]['round_decimal_places'])
-
-                    # make plot
-                    func = getattr(self.plot, 'make_{}'.format(base_plot_type))
-                    func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
+            #turn off relevant axis if dataframe is empty or all NaN
+            if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
+                relevant_axis.set_axis_off()
+            else:
+                #make plot
+                func = getattr(self.plot, 'make_{}'.format(base_plot_type))
+                func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
 
     def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
         """get relevant page and axis for current plot type/subsection/axis index"""

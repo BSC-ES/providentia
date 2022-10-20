@@ -49,7 +49,7 @@ class ProvConfiguration(object):
         self.end_date = kwargs.get('end_date', '')
         self.position_1 = kwargs.get('position_1', 'map')
         self.position_2 = kwargs.get('position_2', 'timeseries')
-        self.position_3 = kwargs.get('position_3', 'metadata')
+        self.position_3 = kwargs.get('position_3', 'statsummary')
         self.position_4 = kwargs.get('position_4', 'distribution')
         self.position_5 = kwargs.get('position_5', 'periodic')
         self.experiments = kwargs.get('experiments', '')
@@ -62,6 +62,8 @@ class ProvConfiguration(object):
         self.report_title = kwargs.get('report_title ', 'Report')
         self.report_filename = kwargs.get('report_filename', 'PROVIDENTIA_Report')
         self.map_extent = kwargs.get('map_extent', '-180, 180, -90, 90')
+        self.active_dashboard_plots = kwargs.get('active_dashboard_plots', 
+                                                 'timeseries, statsummary, distribution, periodic')
         self.plot_characteristics_filename = kwargs.get('plot_characteristics_filename', '')
         self.fixed_section_vars =  ['network', 'species', 'resolution', 'start_date', 'end_date', 'experiments', 
                                     'spatial_colocation', 'report_type', 'report_summary', 'report_stations',
