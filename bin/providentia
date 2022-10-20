@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # init
-cores=16
+cores=1
 jobname="PRV"
 queue="debug"
 mem="20Gb"
