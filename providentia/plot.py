@@ -632,13 +632,13 @@ class Plot:
         ts_nonan = ts.dropna()
         
         # make timeseries plot
-        timeseries_plot = relevant_axis.plot(ts_nonan, 
-                                             color=self.read_instance.plotting_params[data_label]['colour'], 
-                                             **plot_characteristics['plot'])
+        self.timeseries_plot = relevant_axis.plot(ts_nonan, 
+                                                  color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                  **plot_characteristics['plot'])
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'timeseries', 'plot', timeseries_plot, bias=bias)
+            self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
 
         # recalculate xticks (if desired) for better spacing
         if plot_characteristics['xtick_alteration']['define']:
@@ -661,6 +661,12 @@ class Plot:
                     if end_date > timeseries_end_date:
                         timeseries_end_date = end_date
                 
+                # transform to pandas timestamps
+                if not isinstance(timeseries_end_date, pd._libs.tslibs.timestamps.Timestamp):
+                    timeseries_end_date = pd.to_datetime(timeseries_end_date)
+                if not isinstance(timeseries_start_date, pd._libs.tslibs.timestamps.Timestamp):
+                    timeseries_start_date = pd.to_datetime(timeseries_start_date)                
+
                 # get steps for all data labels
                 steps = pd.date_range(timeseries_start_date, timeseries_end_date, 
                                       freq=self.read_instance.active_frequency_code)
@@ -1281,8 +1287,8 @@ class Plot:
             if not self.read_instance.offline:
                 self.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
-    def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
-                   plot_options=[]):
+    def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics,
+                   plot_characteristics_legend, plot_options=[]):
         """Add statistical annotations to plot
 
         :param relevant_axis: axis to plot on 
@@ -1295,6 +1301,8 @@ class Plot:
         :type base_plot_type: str
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
+        :param plot_characteristics_legend: legend plot characteristics  
+        :type plot_characteristics_legend: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
         """
@@ -1350,11 +1358,7 @@ class Plot:
             # generate annotation
             if (plot_characteristics['annotate_text']['exp_labels']):
                 if data_label == 'observations':
-                    if 'legend' in plot_characteristics:
-                        obs_label = plot_characteristics['legend']['handles']['obs_label']
-                    else:
-                        obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label']
-                    str_to_append = obs_label + ' | ' + ', '.join(stats_annotate)
+                    str_to_append = plot_characteristics_legend['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate)
                 else:
                     str_to_append = self.read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate)
             else:

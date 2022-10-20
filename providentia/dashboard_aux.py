@@ -213,13 +213,16 @@ class PopUpWindow(QtWidgets.QWidget):
             menu_types.append('rangeboxes')
         if 'checkboxes' in menu_current_keys:
             menu_types.append('checkboxes')
-        # have at least1 menu type?
-        if len(menu_types) > 0:
-            # create grid of menu types (horizontally concatenating different menu type grids)
-            grid = self.create_grid(menu_types)
-            # add grid to parent layout
-            parent_layout.addLayout(grid)
 
+        # have at least 1 menu type?
+        if len(menu_types) > 0:
+
+            # create grid of menu types (horizontally concatenating different menu type grids)
+            horizontal_parent = self.create_grid(menu_types)
+
+            # add grid to parent layout
+            parent_layout.addLayout(horizontal_parent)
+ 
         # set finalised layout
         self.setLayout(parent_layout)
 
@@ -240,8 +243,10 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # create horizontal layout to place all menu types within
         horizontal_parent = QtWidgets.QHBoxLayout()
+        
         # set spacing between different menu type grids
         horizontal_parent.setSpacing(25)
+
         # align grids to centre and top
         horizontal_parent.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
         
@@ -253,9 +258,11 @@ class PopUpWindow(QtWidgets.QWidget):
         for menu_type in menu_types:
 
             # create empty grid
-            grid = QtWidgets.QGridLayout()
-            # align grid to top
-            grid.setAlignment(QtCore.Qt.AlignTop)
+            scroll_area_content = QtWidgets.QWidget()
+            grid = QtWidgets.QGridLayout(scroll_area_content)
+
+            # align grid to center and top
+            grid.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignCenter)
 
             # initialise indices used for indexing objects in grid
             start_row_n = 0
@@ -432,8 +439,16 @@ class PopUpWindow(QtWidgets.QWidget):
                         grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Max'), formatting_dict['column_header_label_popup']), 0, column_number+2, QtCore.Qt.AlignCenter)
                         grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='A'), formatting_dict['column_header_label_popup']), 0, column_number+3, QtCore.Qt.AlignCenter)
 
-            # add menu type grid to horizontal layout
-            horizontal_parent.addLayout(grid)
+            # set horizontal scroll properties
+            scroll_area = QtWidgets.QScrollArea() 
+            scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+            scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+            scroll_area.setWidgetResizable(True)
+            scroll_area.setFrameShape(0)
+
+            # add horizontal scroll
+            scroll_area.setWidget(scroll_area_content)
+            horizontal_parent.addWidget(scroll_area)
 
         # return horizontally concatenated menu type grids
         return horizontal_parent
