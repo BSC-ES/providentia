@@ -105,7 +105,9 @@ class Stats(object):
         max_gap_pc = []
 
         for station_data in data:
-            mask = np.concatenate(([False], np.isnan(station_data), [False]))
+            mask = np.concatenate((np.full((station_data.shape[0], station_data.shape[1]), False), 
+                                   np.isnan(station_data), 
+                                   np.full((station_data.shape[0], station_data.shape[1]), False)))
             if ~mask.any():
                 max_gap_pc.append(0)
             else:
