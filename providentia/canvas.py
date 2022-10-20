@@ -19,17 +19,15 @@ import matplotlib
 from matplotlib.offsetbox import AnchoredOffsetbox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
         as FigureCanvas
-
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.path import Path
 from matplotlib.widgets import LassoSelector, Slider
 import matplotlib.gridspec as gridspec
-from pandas.plotting import register_matplotlib_converters
-from PyQt5 import QtCore, QtGui, QtWidgets 
-
 import numpy as np
 import pandas as pd
+from pandas.plotting import register_matplotlib_converters
+from PyQt5 import QtCore, QtGui, QtWidgets 
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
@@ -892,7 +890,8 @@ class MPLCanvas(FigureCanvas):
         # remove tracked plot elements
         if plot_type in self.plot_elements:
             self.plot_elements[plot_type]['absolute'] = {}
-            self.plot_elements[plot_type]['bias'] = {} 
+            if 'bias' in self.plot_elements[plot_type]:
+                del self.plot_elements[plot_type]['bias'] 
 
         # hide axis
         ax.axis('off')
@@ -2591,7 +2590,6 @@ class MPLCanvas(FigureCanvas):
                                                      list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                                      plot_type,
                                                      self.plot_characteristics[plot_type], 
-                                                     self.plot_characteristics['legend'], 
                                                      plot_options=plot_options)
                                 break
                     else:
@@ -2600,7 +2598,6 @@ class MPLCanvas(FigureCanvas):
                                              list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                              plot_type,
                                              self.plot_characteristics[plot_type], 
-                                             self.plot_characteristics['legend'], 
                                              plot_options=plot_options)
 
             # option 'smooth'
@@ -2777,7 +2774,7 @@ class MPLCanvas(FigureCanvas):
                                                          relim=True)
                 else:
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
-                                                         plot_options, relim=True, autoscale=True)                                
+                                                         plot_options, relim=True, autoscale=True)                             
 
             # draw changes
             self.figure.canvas.draw()
@@ -2807,7 +2804,6 @@ class MPLCanvas(FigureCanvas):
                                                  data_labels, 
                                                  plot_type,
                                                  self.plot_characteristics[plot_type], 
-                                                 self.plot_characteristics['legend'], 
                                                  plot_options=plot_options)
                             break
                 else:
@@ -2816,7 +2812,6 @@ class MPLCanvas(FigureCanvas):
                                          data_labels, 
                                          plot_type,
                                          self.plot_characteristics[plot_type],
-                                         self.plot_characteristics['legend'],  
                                          plot_options=plot_options)
 
             elif plot_option == 'smooth':
@@ -3425,8 +3420,8 @@ class MPLCanvas(FigureCanvas):
                 # iterate through plot types stored in plot_elements (if have selected stations)
                 if len(self.relative_selected_station_inds) > 0:
                     for plot_type in self.plot_elements:
-                        if plot_type not in ['data_labels_active', 'metadata', 'map', 'boxplot', 'heatmap', 
-                                             'table' 'statsummary']:
+                        if plot_type not in ['data_labels_active', 'metadata', 'map', 'heatmap', 
+                                             'table', 'statsummary']:
 
                             # correct perodic-violin name for plot_options
                             if plot_type == 'periodic-violin':
