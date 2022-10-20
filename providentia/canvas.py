@@ -3276,7 +3276,7 @@ class MPLCanvas(FigureCanvas):
     def hover_timeseries_annotation(self, event):
 
         # activate hover over timeseries
-        if ('timeseries' in self.selected_station_plots):
+        if ('timeseries' in self.read_instance.active_dashboard_plots):
             if event.inaxes == self.plot_axes['timeseries']:
                 if ((hasattr(self.plot, 'timeseries_plot')) and ('timeseries' in self.plot_elements)
                     and (self.lock_timeseries_annotation == False)):
