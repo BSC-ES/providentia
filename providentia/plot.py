@@ -683,20 +683,30 @@ class Plot:
                 timeseries_start_date = pd.to_datetime(ts_nonan.index.values[0])
                 timeseries_end_date = pd.to_datetime(ts_nonan.index.values[-1])
 
+                # transform to pandas timestamps
+                if not isinstance(timeseries_start_date, pd._libs.tslibs.timestamps.Timestamp):
+                    timeseries_start_date = pd.to_datetime(timeseries_start_date)   
+                if not isinstance(timeseries_end_date, pd._libs.tslibs.timestamps.Timestamp):
+                    timeseries_end_date = pd.to_datetime(timeseries_end_date)    
+
                 # get start and end dates for all data labels
                 for data_label in self.read_instance.data_labels:
+
+                    # get start and end dates for each label
                     start_date = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna().index.values[0]
                     end_date = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna().index.values[-1]
+                    
+                    # transform to pandas timestamps
+                    if not isinstance(start_date, pd._libs.tslibs.timestamps.Timestamp):
+                        start_date = pd.to_datetime(start_date)  
+                    if not isinstance(end_date, pd._libs.tslibs.timestamps.Timestamp):
+                        end_date = pd.to_datetime(end_date)
+
+                    # compare and get wider range
                     if start_date < timeseries_start_date:
                         timeseries_start_date = start_date
                     if end_date > timeseries_end_date:
-                        timeseries_end_date = end_date
-                
-                # transform to pandas timestamps
-                if not isinstance(timeseries_end_date, pd._libs.tslibs.timestamps.Timestamp):
-                    timeseries_end_date = pd.to_datetime(timeseries_end_date)
-                if not isinstance(timeseries_start_date, pd._libs.tslibs.timestamps.Timestamp):
-                    timeseries_start_date = pd.to_datetime(timeseries_start_date)                
+                        timeseries_end_date = end_date             
 
                 # get steps for all data labels
                 steps = pd.date_range(timeseries_start_date, timeseries_end_date, 
