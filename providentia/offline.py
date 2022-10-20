@@ -453,7 +453,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             if 'annotate' in plot_options:
                                 self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
                                                      base_plot_type, self.plot_characteristics[plot_type],
-                                                     self.plot_characteristics['legend'], plot_options=plot_options)
+                                                     self.plot_characteristics[plot_type]['legend'], 
+                                                     plot_options=plot_options)
                                 # annotate in first axis
                                 if base_plot_type in ['periodic', 'periodic-violin']:
                                     break
@@ -801,11 +802,11 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     relevant_axis.set_visible(False)
                 else:
                     # calculate z statistic
-                    z_statistic, active_map_valid_station_inds = calculate_z_statistic(self, z1, z2, zstat, networkspeci)
+                    self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(self, z1, z2, zstat, networkspeci)
                     self.active_map_valid_station_inds = active_map_valid_station_inds
 
                     # make map plot
-                    self.plot.make_map(relevant_axis, networkspeci, z_statistic, self.plot_characteristics[plot_type], 
+                    self.plot.make_map(relevant_axis, networkspeci, self.z_statistic, self.plot_characteristics[plot_type], 
                                        plot_options=plot_options)
                     if z2 == '':
                         self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z1)
