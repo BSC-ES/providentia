@@ -11,6 +11,8 @@ import json
 import os
 import sys
 import time
+import datetime
+import math
 from weakref import WeakKeyDictionary
 
 import matplotlib
@@ -124,16 +126,22 @@ class MPLCanvas(FigureCanvas):
 
         # setup interactive lasso on map
         self.lasso_left = LassoSelector(self.plot_axes['map'], onselect=self.onlassoselect_left,
-                                   useblit=True, lineprops=self.lasso, button=[1])
+                                        useblit=True, lineprops=self.lasso, button=[1])
         self.lasso_right = LassoSelector(self.plot_axes['map'], onselect=self.onlassoselect_right,
-                                   useblit=True, lineprops=self.lasso, button=[3])
+                                         useblit=True, lineprops=self.lasso, button=[3])
 
         # setup station annotations
         self.create_station_annotation()
-        self.annotation_visible = False
-        self.lock_annotation = False
-        self.station_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
-                                        self.hover_station_annotation)
+        self.map_annotation_visible = False
+        self.lock_map_annotation = False
+        self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', self.hover_map_annotation)
+
+        # setup timeseries annotation
+        self.create_timeseries_annotation()
+        self.timeseries_annotation_visible = False
+        self.lock_timeseries_annotation = False
+        self.timeseries_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                          self.hover_timeseries_annotation)
 
         # setup zoom on scroll wheel on map
         self.lock_zoom = False
@@ -2582,6 +2590,7 @@ class MPLCanvas(FigureCanvas):
                                                      list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                                      plot_type,
                                                      self.plot_characteristics[plot_type], 
+                                                     self.plot_characteristics['legend'], 
                                                      plot_options=plot_options)
                                 break
                     else:
@@ -2590,6 +2599,7 @@ class MPLCanvas(FigureCanvas):
                                              list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                              plot_type,
                                              self.plot_characteristics[plot_type], 
+                                             self.plot_characteristics['legend'], 
                                              plot_options=plot_options)
 
             # option 'smooth'
@@ -2796,6 +2806,7 @@ class MPLCanvas(FigureCanvas):
                                                  data_labels, 
                                                  plot_type,
                                                  self.plot_characteristics[plot_type], 
+                                                 self.plot_characteristics['legend'], 
                                                  plot_options=plot_options)
                             break
                 else:
@@ -2803,7 +2814,8 @@ class MPLCanvas(FigureCanvas):
                                          self.read_instance.networkspeci,
                                          data_labels, 
                                          plot_type,
-                                         self.plot_characteristics[plot_type], 
+                                         self.plot_characteristics[plot_type],
+                                         self.plot_characteristics['legend'],  
                                          plot_options=plot_options)
 
             elif plot_option == 'smooth':
@@ -3158,14 +3170,14 @@ class MPLCanvas(FigureCanvas):
 
         return None
         
-    def hover_station_annotation(self, event):
+    def hover_map_annotation(self, event):
         """ Show or hide annotation for each station that is hovered. """
 
         # activate hover over map if any
         if event.inaxes == self.plot_axes['map']:
-            if (hasattr(self.plot, 'stations_scatter')) and (self.lock_annotation == False):
+            if (hasattr(self.plot, 'stations_scatter')) and (self.lock_map_annotation == False):
                 # lock annotation
-                self.lock_annotation = True
+                self.lock_map_annotation = True
 
                 if not self.lock_zoom:
                     
@@ -3175,19 +3187,135 @@ class MPLCanvas(FigureCanvas):
                         # update annotation if hovered
                         self.update_station_annotation(annotation_index)
                         self.station_annotation.set_visible(True)
-                        self.annotation_visible = True
+                        self.map_annotation_visible = True
                     else:
                         # hide annotation if not hovered
-                        if self.annotation_visible:
+                        if self.map_annotation_visible:
                             self.station_annotation.set_visible(False)
-                            self.annotation_visible = False
+                            self.map_annotation_visible = False
 
                     # redraw points
                     self.figure.canvas.draw()
                     self.figure.canvas.flush_events()
                 
                 # unlock annotation 
-                self.lock_annotation = False
+                self.lock_map_annotation = False
+
+        return None
+
+    def create_timeseries_annotation(self):
+        """ Create annotation at (0, 0) that will be updated later. """
+
+        # in the newest version of matplotlib, s corresponds to text
+        self.timeseries_annotation = self.plot_axes['timeseries'].annotate(s='', xy=(0, 0), xycoords='data',
+                                                                           **self.plot_characteristics['timeseries']['marker_annotate'],
+                                                                           bbox={**self.plot_characteristics['timeseries']['marker_annotate_bbox']},
+                                                                           arrowprops={**self.plot_characteristics['timeseries']['marker_annotate_arrowprops']})
+
+        return None
+
+    def update_timeseries_annotation(self, annotation_index):
+        """ Update annotation for each timeseries point that is hovered. """
+        
+        for data_label in self.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.timeseries_annotate_data_label:
+                
+                # skip observations for bias plot
+                if self.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
+                    continue
+
+                # retrieve time and concentration
+                line = self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']][data_label]['plot'][0]
+                time = line.get_xdata()[annotation_index['ind'][0]]
+                concentration = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.timeseries_annotation.xy = (time, concentration)
+
+                # update bbox position
+                time_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if time > time_middle:
+                    self.timeseries_annotation.set_x(-10)
+                    self.timeseries_annotation.set_ha('right')
+                else:
+                    self.timeseries_annotation.set_x(10)
+                    self.timeseries_annotation.set_ha('left')
+
+                # add vertical line
+                self.timeseries_vline = self.plot_axes['timeseries'].axvline(time, 
+                                                                             **self.plot_characteristics['timeseries']['marker_annotate_vline'])
+
+                # create annotation text
+                text_label = ('Time: {0}').format(time.astype('datetime64[us]').astype(datetime.datetime).strftime("%m/%d/%Y %H:%M:%S"))
+        
+        for data_label in self.plot_elements['data_labels_active']:
+            
+            # skip observations for bias plot
+            if self.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
+                continue
+
+            # retrieve time and concentration
+            line = self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']][data_label]['plot'][0]
+            concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
+
+            # for all labels if there is data
+            if len(concentration) >= 1:
+                if data_label != 'observations':
+                    exp_alias = self.read_instance.experiments[data_label]
+                    text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration[0])
+                else:
+                    text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
+                                                            concentration[0])
+
+        self.timeseries_annotation.set_text(text_label)
+
+        return None
+
+    def hover_timeseries_annotation(self, event):
+
+        # activate hover over timeseries
+        if ('timeseries' in self.selected_station_plots):
+            if event.inaxes == self.plot_axes['timeseries']:
+                if ((hasattr(self.plot, 'timeseries_plot')) and ('timeseries' in self.plot_elements)
+                    and (self.lock_timeseries_annotation == False)):
+
+                    # lock annotation
+                    self.lock_timeseries_annotation = True
+
+                    for data_label in self.plot_elements['data_labels_active']:
+                        # skip observations for bias plot
+                        if self.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
+                            continue
+                        line = self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']][data_label]['plot'][0]
+                        is_contained, annotation_index = line.contains(event)
+                        if is_contained:
+                            self.timeseries_annotate_data_label = data_label
+                            break
+                    
+                    if is_contained:
+                        # update annotation if hovered
+                        self.update_timeseries_annotation(annotation_index)
+                        self.timeseries_annotation.set_visible(True)
+                        self.timeseries_annotation_visible = True
+                    else:
+                        # hide annotation if not hovered
+                        if self.timeseries_annotation_visible:
+                            self.timeseries_annotation.set_visible(False)
+                            self.timeseries_annotation_visible = False
+                            self.timeseries_vline.set_visible(False)
+                            # remove vertical lines
+                            for line in self.plot_axes['timeseries'].get_lines():
+                                if line.get_xdata()[0] == line.get_xdata()[1]: 
+                                    line.remove()
+
+                    # redraw points
+                    self.figure.canvas.draw()
+                    self.figure.canvas.flush_events()
+                        
+                    # unlock annotation 
+                    self.lock_timeseries_annotation = False
 
         return None
 
@@ -3197,6 +3325,7 @@ class MPLCanvas(FigureCanvas):
         if event.inaxes == self.plot_axes['map']:
             
             if self.lock_zoom == False:
+
                 # lock zoom
                 self.lock_zoom = True
 
