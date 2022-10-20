@@ -123,13 +123,12 @@ class MPLCanvas(FigureCanvas):
 
         # setup station annotations
         self.create_station_annotation()
-        self.map_annotation_visible = False
         self.lock_map_annotation = False
         self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', self.hover_map_annotation)
 
         # setup timeseries annotation
         self.create_timeseries_annotation()
-        self.timeseries_annotation_visible = False
+        self.create_timeseries_annotation_vline()
         self.lock_timeseries_annotation = False
         self.timeseries_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
                                                                           self.hover_timeseries_annotation)
@@ -309,7 +308,7 @@ class MPLCanvas(FigureCanvas):
         zstat = get_z_statistic_comboboxes(base_zstat, second_data_label=self.read_instance.cb_z2.currentText())
 
         # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
-        z_statistic, active_map_valid_station_inds = calculate_z_statistic(self.read_instance, self.read_instance.cb_z1.currentText(), self.read_instance.cb_z2.currentText(), zstat, self.read_instance.networkspeci)
+        self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(self.read_instance, self.read_instance.cb_z1.currentText(), self.read_instance.cb_z2.currentText(), zstat, self.read_instance.networkspeci)
         self.active_map_valid_station_inds = active_map_valid_station_inds 
         
         # update absolute selected plotted station indices with respect to new active map valid station indices
@@ -356,7 +355,7 @@ class MPLCanvas(FigureCanvas):
                                                                  self.absolute_selected_station_inds))[0]
 
             # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, z_statistic, self.plot_characteristics['map'])
+            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, self.plot_characteristics['map'])
 
             # create 2D numpy array of plotted station coordinates
             self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.read_instance.networkspeci][self.active_map_valid_station_inds], 
@@ -802,7 +801,9 @@ class MPLCanvas(FigureCanvas):
             ax.collections = [] 
 
         elif plot_type == 'timeseries':
-            ax.lines = []
+            for line in ax.lines:
+                if line != self.timeseries_vline:
+                    line.remove()
             ax.artists = []
             self.timeseries_menu_button.hide()
             self.timeseries_save_button.hide()
@@ -2843,6 +2844,8 @@ class MPLCanvas(FigureCanvas):
                                                                   bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
                                                                   arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
 
+        self.station_annotation.set_visible(False)
+
         return None
 
     def update_station_annotation(self, annotation_index):
@@ -2852,6 +2855,7 @@ class MPLCanvas(FigureCanvas):
         station_names = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds][annotation_index['ind'][0]]
         station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds][annotation_index['ind'][0]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
+        station_value = self.z_statistic[annotation_index['ind'][0]]
 
         # update location
         self.station_annotation.xy = station_location
@@ -2870,7 +2874,8 @@ class MPLCanvas(FigureCanvas):
         text_label = ('Station: {0}\n').format(station_names[pd.notnull(station_names)][0])
         text_label += ('Reference: {0}\n').format(station_reference)
         text_label += ('Longitude: {0:.2f}\n').format(station_location[0])
-        text_label += ('Latitude: {0:.2f}').format(station_location[1])
+        text_label += ('Latitude: {0:.2f}\n').format(station_location[1])
+        text_label += ('{0}: {1:.2f}').format(self.read_instance.cb_z_stat.currentText(), station_value)
         self.station_annotation.set_text(text_label)
 
         return None
@@ -2892,12 +2897,10 @@ class MPLCanvas(FigureCanvas):
                         # update annotation if hovered
                         self.update_station_annotation(annotation_index)
                         self.station_annotation.set_visible(True)
-                        self.map_annotation_visible = True
                     else:
                         # hide annotation if not hovered
-                        if self.map_annotation_visible:
+                        if self.station_annotation.get_visible():
                             self.station_annotation.set_visible(False)
-                            self.map_annotation_visible = False
 
                     # redraw points
                     self.figure.canvas.draw()
@@ -2916,6 +2919,17 @@ class MPLCanvas(FigureCanvas):
                                                                            **self.plot_characteristics['timeseries']['marker_annotate'],
                                                                            bbox={**self.plot_characteristics['timeseries']['marker_annotate_bbox']},
                                                                            arrowprops={**self.plot_characteristics['timeseries']['marker_annotate_arrowprops']})
+        self.timeseries_annotation.set_visible(False)
+
+        return None
+
+    def create_timeseries_annotation_vline(self):
+        """ Create annotation vertical line at (0, 0) that will be updated later. """
+
+        # add vertical line
+        self.timeseries_vline = self.plot_axes['timeseries'].axvline(0, 
+                                                                     **self.plot_characteristics['timeseries']['marker_annotate_vline'])
+        self.timeseries_vline.set_visible(False)
 
         return None
 
@@ -2938,6 +2952,7 @@ class MPLCanvas(FigureCanvas):
 
                 # update location
                 self.timeseries_annotation.xy = (time, concentration)
+                self.timeseries_vline.set_xdata(time)
 
                 # update bbox position
                 time_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
@@ -2947,10 +2962,6 @@ class MPLCanvas(FigureCanvas):
                 else:
                     self.timeseries_annotation.set_x(10)
                     self.timeseries_annotation.set_ha('left')
-
-                # add vertical line
-                self.timeseries_vline = self.plot_axes['timeseries'].axvline(time, 
-                                                                             **self.plot_characteristics['timeseries']['marker_annotate_vline'])
 
                 # create annotation text
                 text_label = ('Time: {0}').format(time.astype('datetime64[us]').astype(datetime.datetime).strftime("%m/%d/%Y %H:%M:%S"))
@@ -3003,18 +3014,13 @@ class MPLCanvas(FigureCanvas):
                         # update annotation if hovered
                         self.update_timeseries_annotation(annotation_index)
                         self.timeseries_annotation.set_visible(True)
-                        self.timeseries_annotation_visible = True
+                        self.timeseries_vline.set_visible(True)
                     else:
                         # hide annotation if not hovered
-                        if self.timeseries_annotation_visible:
+                        if self.timeseries_annotation.get_visible():
                             self.timeseries_annotation.set_visible(False)
-                            self.timeseries_annotation_visible = False
                             self.timeseries_vline.set_visible(False)
-                            # remove vertical lines
-                            for line in self.plot_axes['timeseries'].get_lines():
-                                if line.get_xdata()[0] == line.get_xdata()[1]: 
-                                    line.remove()
-
+                            
                     # redraw points
                     self.figure.canvas.draw()
                     self.figure.canvas.flush_events()
