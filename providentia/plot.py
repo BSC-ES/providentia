@@ -53,15 +53,13 @@ class Plot:
         self.canvas_instance.periodic_xticks = periodic_xticks()
         self.canvas_instance.periodic_labels = periodic_labels()
 
-    def set_plot_characteristics(self, plot_types, speci=False, zstat=False):
+    def set_plot_characteristics(self, plot_types, zstat=False):
         """
         Iterate through all plots to make, and determine if they can and cannot be made.
         Update plot characteristics associated with specific plot types due to plot options. 
 
         :param plot_types: plot types to create 
         :type plot_types: list  
-        :param speci: speci str 
-        :type speci: str
         :param zstat: z statistic str 
         :type zstat: str
         """
@@ -128,29 +126,6 @@ class Plot:
                         else:
                             self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'] = '{} {}'.format(self.canvas_instance.plot_characteristics[plot_type]['page_title']['t'], 
                                                                                                                      stats_dict[base_zstat]['label'])
-
-                # set ylabel for periodic plots
-                if base_plot_type == 'periodic':
-                    if z_statistic_type == 'basic':
-                        if base_zstat not in ['Data%', 'Exceedances']:
-                            if speci:
-                                self.canvas_instance.plot_characteristics[plot_type]['ylabel']['ylabel'] = self.read_instance.measurement_units[speci] 
-                        else:
-                            self.canvas_instance.plot_characteristics[plot_type]['ylabel']['ylabel'] = basic_stats[base_zstat]['label']
-                    else:
-                        self.canvas_instance.plot_characteristics[plot_type]['ylabel']['ylabel'] = expbias_stats[base_zstat]['label']
-
-                # get colourbar label for heatmap
-                if base_plot_type == 'heatmap':
-                    if z_statistic_type == 'basic':
-                        if base_zstat not in ['Data%', 'Exceedances']:
-                            if speci:
-                                self.canvas_instance.plot_characteristics[plot_type]['cb_label']['label'] = self.read_instance.measurement_units[speci]
-                        else:
-                            self.canvas_instance.plot_characteristics[plot_type]['cb_label']['label'] = basic_stats[base_zstat]['label']
-                    else:
-                        self.canvas_instance.plot_characteristics[plot_type]['cb_label']['label'] = expbias_stats[base_zstat]['label']
-
             # add new keys for plots without stats
             else:
 
@@ -187,16 +162,6 @@ class Plot:
                     self.canvas_instance.plot_characteristics[plot_type]['figure']['figsize'] = self.canvas_instance.landscape_figsize
                 elif self.canvas_instance.plot_characteristics[plot_type]['orientation'] == 'portrait':
                     self.canvas_instance.plot_characteristics[plot_type]['figure']['figsize'] = self.canvas_instance.portrait_figsize
-
-            # add measurement units to xlabel/ylabel if needed
-            if 'xlabel' in self.canvas_instance.plot_characteristics[plot_type]:
-                if self.canvas_instance.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
-                    if speci:
-                        self.canvas_instance.plot_characteristics[plot_type]['xlabel']['xlabel'] = self.read_instance.measurement_units[speci] 
-            if 'ylabel' in self.canvas_instance.plot_characteristics[plot_type]:
-                if self.canvas_instance.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
-                    if speci: 
-                        self.canvas_instance.plot_characteristics[plot_type]['ylabel']['ylabel'] = self.read_instance.measurement_units[speci]
 
     def format_axis(self, ax, base_plot_type, plot_characteristics, relevant_temporal_resolution='hour', col_ii=0, last_valid_row=True, last_row_on_page=True):
         """Format a plotting axis.
@@ -292,7 +257,7 @@ class Plot:
                 ax.set_xticks(plot_characteristics['xticks'])
                 ax.set_xticklabels([self.canvas_instance.temporal_axis_mapping_dict[relevant_temporal_resolution][xtick] for xtick
                                                                             in self.canvas_instance.periodic_xticks[relevant_temporal_resolution]])
-        
+        # map specific formatting
         elif base_plot_type == 'map':
 
             # add land polygons
@@ -592,6 +557,10 @@ class Plot:
 
         # automatically sets limit as figure width
         plot_txt._get_wrap_line_width = lambda: ax_width_px
+
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            self.track_plot_elements('observations', 'metadata', 'plot', plot_txt, bias=False)
 
     def make_map(self, relevant_axis, networkspeci, z_statistic, plot_characteristics, plot_options=[],
                  first_data_label=False):
@@ -1091,7 +1060,7 @@ class Plot:
                         if 'legend' in plot_characteristics:
                             obs_label = plot_characteristics['legend']['handles']['obs_label']
                         else:
-                            obs_label = self.canvas_instance.plot_characteristics_templates['legend']['plot']['handles']['obs_label']
+                            obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label']
                         data_labels_to_plot[dl_ii] = obs_label
                     else:
                         data_labels_to_plot[dl_ii] = self.read_instance.experiments[dl]
@@ -1124,17 +1093,30 @@ class Plot:
         else:
             annotate = False
 
+        # bias plot?
+        if 'bias' in plot_options:
+            bias = True
+        else:
+            bias = False
+
+        #round dataframe
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+
         # plot heatmap
-        ax = sns.heatmap(stats_df, 
-                         ax=relevant_axis, 
-                         annot=annotate,
-                         **plot_characteristics['plot'])
+        heatmap = sns.heatmap(stats_df, 
+                              ax=relevant_axis, 
+                              annot=annotate,
+                              **plot_characteristics['plot'])
 
         # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
         bottom, top = relevant_axis.get_ylim()
         relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
 
-    def make_table(self, relevant_axis, stats_df, plot_characteristics, plot_options=[]):
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            self.track_plot_elements('observations', 'heatmap', 'plot', heatmap, bias=bias)
+
+    def make_table(self, relevant_axis, stats_df, plot_characteristics, plot_options=[], statsummary=False):
         """Make table plot
 
         :param relevant_axis: axis to plot on 
@@ -1145,19 +1127,73 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plot  
         :type plot_options: list
+        :param statsummary: boolean indiciating if making alternative statistical summary table plot  
+        :type statsummary: boolean
         """
 
         # turn off axis to make table
         relevant_axis.axis('off')
 
+        # get column and row labels
+        col_labels = stats_df.columns.tolist()
+        row_labels = stats_df.index.tolist()
+
+        # bias plot?
+        if 'bias' in plot_options:
+            bias = True
+        else:
+            bias = False
+
+        #round dataframe
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+
+        #set row_colours
+        if 'row_colours' in plot_characteristics:
+            if plot_characteristics['row_colours']:
+                plot_characteristics['plot']['rowColours'] = ['white' if data_label == 'observations' else 
+                                                              self.read_instance.plotting_params[data_label]['colour'] 
+                                                              for data_label in row_labels]
+
+        # if plot is statsummary, then remove bias from col_labels, and use alises for row_labels
+        if statsummary:
+            col_labels = [col_label.split('_bias')[0] if '_bias' in col_label else col_label for col_label in col_labels]
+            for row_label_ii, row_label in enumerate(row_labels):
+                if row_label == 'observations':
+                    if 'legend' in plot_characteristics:
+                        row_labels[row_label_ii] = plot_characteristics['legend']['handles']['obs_label'] 
+                    else:
+                        row_labels[row_label_ii] = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
+                else:
+                    row_labels[row_label_ii] = self.read_instance.experiments[row_label]  
+
         # make table
         table = relevant_axis.table(cellText=stats_df.values, 
-                                    colLabels=stats_df.columns, 
-                                    rowLabels=stats_df.index, 
-                                    loc='center')
-        
+                                    colLabels=col_labels, 
+                                    rowLabels=row_labels, 
+                                    **plot_characteristics['plot'])
+
         # adjust cell height
-        table.scale(1, plot_characteristics['plot']['cell_height'])
+        if 'cell_height' in plot_characteristics:
+            table.scale(1, plot_characteristics['cell_height'])
+
+        # adjust cell padding ()
+        if 'cell_pad_rowlabel' in plot_characteristics:
+            for key, cell in table.get_celld().items():    
+                if key[1] == -1:             
+                    cell.PAD = plot_characteristics['cell_pad_rowlabel']
+
+        # adjust fontsize
+        if 'fontsize' in plot_characteristics:
+            table.auto_set_font_size(False)
+            table.set_fontsize(plot_characteristics['fontsize'])
+            table.auto_set_column_width(np.arange(-1, len(col_labels)+1))
+
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            if statsummary:
+                self.track_plot_elements('observations', 'statsummary', 'plot', [table], bias=bias)
+            else:
+                self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
 
     def log_axes(self, relevant_axis, log_ax, base_plot_type, plot_characteristics, 
                  undo=False):
@@ -1274,7 +1310,7 @@ class Plot:
                 self.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
     def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics,
-                   plot_characteristics_legend, plot_options=[]):
+                   plot_options=[]):
         """Add statistical annotations to plot
 
         :param relevant_axis: axis to plot on 
@@ -1287,8 +1323,6 @@ class Plot:
         :type base_plot_type: str
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
-        :param plot_characteristics_legend: legend plot characteristics  
-        :type plot_characteristics_legend: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
         """
@@ -1342,13 +1376,17 @@ class Plot:
             colours.append(self.read_instance.plotting_params[data_label]['colour'])
 
             # generate annotation
-            if plot_characteristics['annotate_text']['exp_labels']:
+            if (plot_characteristics['annotate_text']['exp_labels']):
                 if data_label == 'observations':
-                    str_to_annotate.append(plot_characteristics_legend['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate))
+                    if 'legend' in plot_characteristics:
+                        str_to_append = plot_characteristics['legend']['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate)
+                    else:
+                        str_to_append = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate)
                 else:
-                    str_to_annotate.append(self.read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate))
+                    str_to_append = self.read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate)
             else:
-                str_to_annotate.append(', '.join(stats_annotate))
+                str_to_append = ', '.join(stats_annotate)
+            str_to_annotate.append(str_to_append)
 
         if plot_characteristics['annotate_text']['color'] != "":
             colours = [plot_characteristics['annotate_text']['color']]*len(data_labels)
@@ -1457,13 +1495,27 @@ class Plot:
             return 
 
         # track plot elements
-        if base_plot_type in ['periodic', 'periodic-violin']:
+        # periodic plot specific elements 
+        if (base_plot_type in ['periodic', 'periodic-violin']) & (data_label != 'ALL'):
             # add list of collections
             if isinstance(plot_object, dict):
                 self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['bodies']
             # add list of lines
             elif isinstance(plot_object, list):
                 self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object
+        # boxplot plot specific elements
+        elif (base_plot_type == 'boxplot') & (data_label != 'ALL'):
+            # add lines for all boxplot elements
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['boxes']
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['medians']
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['whiskers']
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['caps']
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['fliers']
+            self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['means']
+        # do not save elements for plot objects that can not be made invisisble
+        elif (base_plot_type in ['metadata', 'map']) & (data_label != 'ALL'):
+            pass
+        # all other plot elements
         else:
             # add list of lines
             self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object

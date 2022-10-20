@@ -63,12 +63,6 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="run Providentia offline")
-            self.parser.add_argument("--available_resolutions",
-                                     dest="available_resolutions",
-                                     help="define available temporal resolutions")
-            self.parser.add_argument("--available_networks",
-                                     dest="available_networks",
-                                     help="define available networks")
             self.parser.add_argument("--network",
                                      dest="network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
