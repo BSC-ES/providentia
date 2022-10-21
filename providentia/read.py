@@ -94,7 +94,8 @@ class DataReader:
                                                  np.full((len(self.read_instance.data_labels),
                                                           len(self.read_instance.station_references['{}|{}'.format(network,speci)]),
                                                           len(self.read_instance.time_array)),
-                                                          np.NaN, dtype=np.float32) for network, speci in zip(self.read_instance.network, self.read_instance.species)}
+                                                          np.NaN, dtype=np.float32) for network, speci in zip(self.read_instance.network, 
+                                                                                                              self.read_instance.species)}
 
             # GHOST data --> data variables which change per measurement (for filtering)
             if self.read_instance.reading_ghost:
@@ -102,31 +103,31 @@ class DataReader:
                 # set ghost data variables to read (dependent on data resolution)
                 if (self.read_instance.resolution == 'hourly') or (self.read_instance.resolution == 'hourly_instantaneous'):
                     self.read_instance.ghost_data_vars_to_read = ['hourly_native_representativity_percent',
-                                                                'daily_native_representativity_percent',
-                                                                'monthly_native_representativity_percent',
-                                                                'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
-                                                                'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                                                'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                                                'season_code']
+                                                                  'daily_native_representativity_percent',
+                                                                  'monthly_native_representativity_percent',
+                                                                  'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
+                                                                  'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                                                  'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                                                  'season_code']
                 elif (self.read_instance.resolution == '3hourly') or \
                         (self.read_instance.resolution == '6hourly') or (self.read_instance.resolution == '3hourly_instantaneous') or \
                         (self.read_instance.resolution == '6hourly_instantaneous'):
                     self.read_instance.ghost_data_vars_to_read = ['daily_native_representativity_percent',
-                                                                'monthly_native_representativity_percent',
-                                                                'annual_native_representativity_percent',
-                                                                'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                                                'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
-                                                                'season_code']
+                                                                  'monthly_native_representativity_percent',
+                                                                  'annual_native_representativity_percent',
+                                                                  'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                                                  'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                                                  'season_code']
                 elif self.read_instance.resolution == 'daily':
                     self.read_instance.ghost_data_vars_to_read = ['daily_native_representativity_percent',
-                                                                'monthly_native_representativity_percent',
-                                                                'annual_native_representativity_percent',
-                                                                'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                                                'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code']
+                                                                  'monthly_native_representativity_percent',
+                                                                  'annual_native_representativity_percent',
+                                                                  'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
+                                                                  'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code']
                 elif self.read_instance.resolution == 'monthly':
                     self.read_instance.ghost_data_vars_to_read = ['monthly_native_representativity_percent',
-                                                                'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
-                                                                'annual_native_max_gap_percent', 'season_code']
+                                                                  'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
+                                                                  'annual_native_max_gap_percent', 'season_code']
 
                 self.read_instance.ghost_data_in_memory = {'{}|{}'.format(network,speci):
                                         np.full((len(self.read_instance.ghost_data_vars_to_read),
@@ -491,11 +492,11 @@ class DataReader:
                     if '/' in network:
                         file_root = \
                             '%s/%s/%s/%s/%s/*%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                       data_label, resolution, speci, network.split('/')[0].upper(), speci)
+                                                        data_label, resolution, speci, network.split('/')[0].upper(), speci)
                     else:
                         file_root = \
                             '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                    data_label, resolution, speci, network, speci)
+                                                       data_label, resolution, speci, network, speci)
                     try:
                         available_yearmonths = self.read_instance.available_experiment_data[network][resolution][speci][data_label]
                     except KeyError:

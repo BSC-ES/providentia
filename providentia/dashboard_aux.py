@@ -369,10 +369,12 @@ class PopUpWindow(QtWidgets.QWidget):
 
                 # add label to left of checkboxes / rangeboxes, and also add a tooltip (if exists)
                 if menu_type in ['checkboxes', 'rangeboxes']:
-                    rangebox_label = set_formatting(QtWidgets.QLabel(self, text = label), formatting_dict['rangebox_label_popup'])
+                    rangebox_label = set_formatting(QtWidgets.QLabel(self, text = label), 
+                                                    formatting_dict['rangebox_label_popup'])
                     if menu_type == 'rangeboxes':
                         if len(menu_current_type['tooltips']) > 0:
-                            rangebox_label.setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], self.main_window_geometry.width()))
+                            rangebox_label.setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], 
+                                                                        self.main_window_geometry.width()))
                     grid.addWidget(rangebox_label, start_row_n+row_n, column_n, QtCore.Qt.AlignLeft)
 
                 # create all elements in column, per row
@@ -485,7 +487,8 @@ class PopUpWindow(QtWidgets.QWidget):
         """function that returns pop-up window to previous menu level page"""
 
         # create new pop-up page for previous menu level
-        self.new_window = PopUpWindow(self.menu_root, self.menu_levels[:-1], self.main_window_geometry)
+        self.new_window = PopUpWindow(self.menu_root, self.menu_levels[:-1], 
+                                      self.main_window_geometry)
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
         # close current pop-up page
