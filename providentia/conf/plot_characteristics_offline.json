@@ -241,7 +241,7 @@
             "round_decimal_places": 2},
 
 "heatmap": {"orientation": "landscape",
-            "figure": {"ncols": 1, "nrows": 2},
+            "figure": {"ncols": 2, "nrows": 1},
             "page_title": {"t": "Heatmap", "fontsize": 15, "ha": "left", "x": 0.05, "y": 0.98},
             "axis_title": {"label": "", "fontsize": 8}, 
             "xtick_params": {"which": "both", "labelsize": 7}, 
