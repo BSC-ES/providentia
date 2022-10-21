@@ -275,7 +275,17 @@ class Plot:
                 self.read_instance.map_extent = map_extent
             if isinstance(map_extent, str):
                 map_extent = [float(c) for c in map_extent.split(',')]
-            ax.set_extent(map_extent, crs=self.canvas_instance.datacrs)
+
+            # set map extent, done in a complicated way to avoid axis cutting off 
+            # (https://github.com/SciTools/cartopy/issues/697)
+            mlon = np.mean(map_extent[:2])
+            mlat = np.mean(map_extent[2:])
+            xtrm_data = np.array([[map_extent[0], mlat], [mlon, map_extent[2]], [map_extent[1], mlat], [mlon, map_extent[3]]])
+            proj_to_data = self.canvas_instance.datacrs._as_mpl_transform(ax) - ax.transData
+            xtrm = proj_to_data.transform(xtrm_data)
+            ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
+            ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
+
 
     def set_equal_axes(self, ax):
         """ Set equal aspect and limits (useful for scatter plots)
@@ -1591,7 +1601,6 @@ class Plot:
                 relevant_axs = [relevant_axs]
             # transform dictionaries into lists
             else:
-                print(self.read_instance.relevant_temporal_resolutions)
                 relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
                                 relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
 
@@ -1602,12 +1611,10 @@ class Plot:
             else:
                 ax.set_aspect('auto')
             if relim:
-                print('relim')
                 ax.relim(visible_only=True)
             if autoscale:
                 ax.autoscale(tight=False)
             if autoscale_x:
-                print('autoscale_x')
                 ax.autoscale(axis='x', tight=False)
             if autoscale_y:
                 ax.autoscale(axis='y', tight=False)
