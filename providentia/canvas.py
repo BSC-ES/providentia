@@ -2813,7 +2813,6 @@ class MPLCanvas(FigureCanvas):
         for plot_option in plot_options:
 
             if plot_option == 'annotate':
-
                 if isinstance(self.plot_axes[plot_type], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
@@ -3252,6 +3251,10 @@ class MPLCanvas(FigureCanvas):
                 # skip observations for bias plot
                 if self.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
                     continue
+                
+                # do not annotate if plot is cleared
+                if data_label not in self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']].keys():
+                    continue
 
                 # retrieve time and concentration
                 line = self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']][data_label]['plot'][0]
@@ -3367,14 +3370,14 @@ class MPLCanvas(FigureCanvas):
                     # exceptions
                     scale_factor = 1
                 
-                if scale_factor != 1:
-                
+                if event.button == 'up' or event.button == 'down':
+                    
                     # set new limits
                     self.plot_axes['map'].set_xlim([xdata - (xdata - current_xlim[0]) / scale_factor, 
                                                     xdata + (current_xlim[1] - xdata) / scale_factor])
                     self.plot_axes['map'].set_ylim([ydata - (ydata - current_ylim[0]) / scale_factor, 
                                                     ydata + (current_ylim[1] - ydata) / scale_factor])
-
+                    
                     # save map extent
                     self.read_instance.map_extent = self.plot_axes['map'].get_extent(crs=self.datacrs)
 

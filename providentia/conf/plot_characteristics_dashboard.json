@@ -74,7 +74,6 @@
         "land_polygon": {"facecolor": "0.85"},
         "projection": "Robinson",
         "gridlines": {"linestyle": "-", "alpha": 0.4},
-        "map_extent": [-180, 180, -90, 90],
         "axis_title": {"label": "", "fontsize": 8.5, "pad": 3, "loc": "center"},
         "cb": {"vmin_absolute": "", "vmax_absolute": "", "vmin_bias": "", "vmax_bias": "", "cmap_absolute": "", 
                "cmap_bias": "", "n_ticks": 8, "orientation": "horizontal", "discrete": true, "n_discrete": 7},
