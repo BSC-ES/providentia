@@ -597,6 +597,9 @@ class MPLCanvas(FigureCanvas):
 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
+            
+            # update map plot options
+            self.update_plot_options(plot_types=['map'])
 
     def update_experiment_domain_edges(self):
         """Function that plots grid domain edges of experiments in memory"""
@@ -1127,7 +1130,8 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
-            
+
+            # get map extent (should be transforming xlim and ylim from ax --> to do)            
             self.read_instance.map_extent = self.plot_axes['map'].get_extent(crs=self.datacrs)
 
             # make copy of current full array relative selected stations indices, before selecting new ones
