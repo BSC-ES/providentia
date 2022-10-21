@@ -1591,7 +1591,6 @@ class Plot:
                 relevant_axs = [relevant_axs]
             # transform dictionaries into lists
             else:
-                print(self.read_instance.relevant_temporal_resolutions)
                 relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
                                 relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
 
@@ -1602,12 +1601,10 @@ class Plot:
             else:
                 ax.set_aspect('auto')
             if relim:
-                print('relim')
                 ax.relim(visible_only=True)
             if autoscale:
                 ax.autoscale(tight=False)
             if autoscale_x:
-                print('autoscale_x')
                 ax.autoscale(axis='x', tight=False)
             if autoscale_y:
                 ax.autoscale(axis='y', tight=False)
