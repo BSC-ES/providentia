@@ -21,7 +21,10 @@ from .init_standards import InitStandards
 from providentia import aux
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
- 
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
+
+
 class ProvidentiaOffline(ProvConfiguration, InitStandards):
     """Run Providentia offline reports"""
 
@@ -899,8 +902,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                             axis_ylabel = sub_ax.get_ylabel()
                             break
                 else:
-                    axis_xlabel = sub_ax.get_xlabel()
-                    axis_ylabel = sub_ax.get_ylabel()
+                    axis_xlabel = relevant_axis.get_xlabel()
+                    axis_ylabel = relevant_axis.get_ylabel()
 
                 # axis xlabel is empty?
                 if axis_xlabel == '':
@@ -913,7 +916,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         xlabel = ''
                     # set xlabel
                     if xlabel != '':
-                        self.plot.set_axis_label(relevant_axis, 'x', ylabel, self.plot_characteristics[plot_type])
+                        self.plot.set_axis_label(relevant_axis, 'x', xlabel, self.plot_characteristics[plot_type])
 
                 # axis ylabel is empty?
                 if axis_ylabel == '':
