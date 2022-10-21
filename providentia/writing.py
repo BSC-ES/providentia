@@ -5,25 +5,6 @@ import sys
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset, num2date
-<<<<<<< HEAD
-from .config import write_conf
-
-
-def export_data_npz(mpl_canvas, fname):
-    """Function that writes out current data in memory to .npy file"""
-
-    if mpl_canvas.read_instance.reading_nonghost:
-        mdata = mpl_canvas.read_instance.datareader.nonghost_metadata
-    else:
-        mdata = mpl_canvas.read_instance.datareader.metadata_in_memory
-
-    np.savez(fname, data=mpl_canvas.read_instance.data_in_memory_filtered,
-             metadata=mdata,
-             data_resolution=mpl_canvas.read_instance.active_resolution)
-
-
-def export_netcdf(mpl_canvas, fname):
-=======
 from .configuration import write_conf
 
 
@@ -58,7 +39,6 @@ def export_data_npz(canvas_instance, fname):
     np.savez(fname, **save_data_dict)
 
 def export_netcdf(canvas_instance, fname):
->>>>>>> master
     """Write data and metadata to netcdf file"""
 
     #set up some structural variables
@@ -69,47 +49,11 @@ def export_netcdf(canvas_instance, fname):
     parameter_dictionary = {}
     for _, param_dict in standard_parameters.items():
         parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
-<<<<<<< HEAD
-
-    speci = instance.active_species
-    network = instance.active_network
-    start = instance.le_start_date.text()
-    end = instance.le_end_date.text()
-    relevant_yearmonths = instance.relevant_yearmonths
-
-    # frequency for pandas
-    fq = instance.datareader.active_frequency_code
-
-    # create time array in selected resolution between start and end date
-    pd_time = pd.date_range(start=start, end=end, freq=fq)[:-1]
-    time = np.arange(len(pd_time))
-
-=======
     
->>>>>>> master
     # dictionary to map python types to netcdf types
     type_map = {np.uint8: 'u1', np.uint32: 'u4', np.object: str,
                 np.float32: 'f4', np.float64: 'f8'}
 
-<<<<<<< HEAD
-    parameter_details = parameter_dictionary[speci]
-    metadata_format_dict = get_standard_metadata(parameter_details)
-    data_format_dict = get_standard_data(parameter_details)
-
-    metadata_keys = instance.metadata_vars_to_read
-    data_arr = instance.data_in_memory_filtered['observations'][speci]
-    metadata_arr = instance.datareader.metadata_in_memory
-    expids = instance.experiments_menu['checkboxes']['keep_selected']
-    exp_to_write = []
-    # change some vars if we're treating nonghost
-    if instance.reading_nonghost:
-        network = instance.active_network.replace("*", "")
-        # metadata_keys = ['station_name', 'latitude', 'longitude', 'altitude']
-        metadata_arr = instance.datareader.nonghost_metadata
-        metadata_keys = list(metadata_arr.dtype.names)
-
-=======
->>>>>>> master
     # start file
     fout = Dataset(fname+".nc", 'w', format="NETCDF4")
 
@@ -238,10 +182,6 @@ def export_netcdf(canvas_instance, fname):
     # close writing to netCDF
     fout.close()
 
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 def export_configuration(prv, cname, separator="||"):
     """
     Create all items to be written in configuration file
@@ -283,61 +223,6 @@ def export_configuration(prv, cname, separator="||"):
 
     # experiments
     if prv.experiments_menu['checkboxes']['keep_selected']:
-<<<<<<< HEAD
-        options['experiments'] = ",".join(str(i) for i in prv.experiments_menu['checkboxes']['keep_selected'])
-
-    # representativity
-    for i, label in enumerate(prv.representativity_menu['rangeboxes']['labels']):
-        if 'max_gap' in label:
-            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '100':
-                options[label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
-        else:
-            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '0':
-                options[label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
-
-    # period
-    if prv.period_menu['checkboxes']['keep_selected'] or prv.period_menu['checkboxes']['remove_selected']:
-        period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + separator
-        period_r = " remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + separator
-        options['period'] = period_k + period_r
-
-    # bounds
-    if np.float32(prv.le_minimum_value.text()) != \
-            np.float32(prv.parameter_dictionary[prv.active_species]['extreme_lower_limit']):
-        options['lower_bound'] = prv.le_minimum_value.text()
-    if np.float32(prv.le_maximum_value.text()) != \
-            np.float32(prv.parameter_dictionary[prv.active_species]['extreme_upper_limit']):
-        options['upper_bound'] = prv.le_maximum_value.text()
-
-    # metadata
-    for menu_type in prv.metadata_types:
-        # treat ranges first
-        for i, label in enumerate(prv.metadata_menu[menu_type]['rangeboxes']['labels']):
-            lower_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_lower'][i]
-            lower_def = prv.metadata_menu[menu_type]['rangeboxes']['lower_default'][i]
-            upper_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_upper'][i]
-            upper_def = prv.metadata_menu[menu_type]['rangeboxes']['upper_default'][i]
-            if (lower_cur != lower_def) or (upper_cur != upper_def):
-                options[label] = lower_cur + ", " + upper_cur
-
-        # and then treat the keep/remove
-        for label in prv.metadata_menu[menu_type]['navigation_buttons']['labels']:
-            #         keeps, removes = split_options(getattr(self, label))
-            keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
-            removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
-
-            if keeps or removes:
-                meta_keep = "keep: " + ",".join(str(i) for i in keeps) + separator
-                meta_remove = " remove: " + ",".join(str(i) for i in removes) + separator
-                options[label] = meta_keep + meta_remove
-
-    # map z
-    if prv.cb_z_stat.currentText() != prv.basic_z_stats[0]:
-        options['map_z'] = prv.cb_z_stat.currentText()
-
-    section_name = cname[cname.rfind("/")+1:]
-    write_conf(section_name, cname+".conf", options)
-=======
         options['section']['experiments'] = ",".join(str(i) for i in prv.experiments_menu['checkboxes']['keep_selected'])
 
     # add information about colocation
@@ -419,4 +304,3 @@ def export_configuration(prv, cname, separator="||"):
                     options['subsection'][label] = meta_keep + meta_remove
     
     write_conf(section, subsection, cname + '.conf', options)
->>>>>>> master

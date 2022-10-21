@@ -31,13 +31,8 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is
 # optional.
 # See `man getopt'.
-<<<<<<< HEAD
-SHORT=uc:J:q:m:
-LONG=usage,cores:,jobname:,queue:,mem:,sequential_colourmap::,help::,version::,config::,section::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,obs_root::,nonghost_root::,exp_root::,offline::,sequential_colourmap::,sequential_colourmap_warm::,diverging_colourmap::,unsel_station_markersize::,sel_station_markersize::,legend_markersize::,time_series_markersize::,temp_agg_markersize::,temp_agg_expbias_markersize::,available_networks::
-=======
 SHORT=uc:J:q:m:constraint
 LONG=usage,cores:,jobname:,queue:,mem:,constraint:,help::,version::,config::,section::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,ghost_root::,nonghost_root::,exp_root::,offline::,network::,species::,resolution::,start_date::,end_date::,experiments::,temporal_colocation::,spatial_colocation::,filter_species::,report_type::,report_summary::,report_stations::,report_title::,report_filename::,map_extent::,active_dashboard_plots::,plot_characteristics_filename::
->>>>>>> master
 
 # - Temporarily store output to be able to check for errors.
 # - Activate advanced mode getopt quoting e.g. via "--options".
