@@ -707,12 +707,15 @@ class Plot:
                 else:
                     months = months_start
 
+                # show hours if number of days is less than 7
+                if n_days < 7:
+                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+                else:
+                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
+
                 # define time slices
                 if n_months >= 3:
                     steps = months
-                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
-                elif n_days < 7:
-                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
                 slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
 
                 # use default axes if the number of timesteps is lower than the number of slices
