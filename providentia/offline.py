@@ -404,7 +404,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                         # get all relevant axes for plot_type/paradigm
                         if base_plot_type in ['periodic', 'periodic-violin']:
-                            ax_types = ['hour', 'month', 'dayofweek']
+                            ax_types = ['hour', 'dayofweek', 'month']
                         else:
                             ax_types = ['']
                         

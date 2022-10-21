@@ -133,7 +133,7 @@
              "annotate_stats": ["Min", "Max"],
              "annotate_text": {"s": "", "loc": "upper right", "fontsize": 8, "n_stations": false, "exp_labels": true, 
                                "color": "", "round_decimal_places": 2},
-             "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 200},
+             "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
              "bias_line": {"linestyle": "--", "linewidth": 1.0, "color": "black", "zorder": 2},
              "plot": {"marker": "o", "markersize": 3, "linewidth": 0.5},
              "plot_options": ["annotate", "bias", "logy"]},
