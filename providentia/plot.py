@@ -1412,11 +1412,12 @@ class Plot:
         # add annotation to plot
         # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
         lines = [TextArea(line, textprops=dict(color=colour, 
-                            size=plot_characteristics['annotate_text']['fontsize'])) 
+                                               size=plot_characteristics['annotate_text']['fontsize'])) 
                     for line, colour in zip(str_to_annotate, colours)]
         bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
-                                    loc=plot_characteristics['annotate_text']['loc'],
-                                    bbox_transform=relevant_axis.transAxes)
+                                 loc=plot_characteristics['annotate_text']['loc'],
+                                 bbox_transform=relevant_axis.transAxes)
+        bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
         bbox.patch.set(**plot_characteristics['annotate_bbox'])
         relevant_axis.add_artist(bbox)
 
@@ -1590,6 +1591,7 @@ class Plot:
                 relevant_axs = [relevant_axs]
             # transform dictionaries into lists
             else:
+                print(self.read_instance.relevant_temporal_resolutions)
                 relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
                                 relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
 
@@ -1600,10 +1602,12 @@ class Plot:
             else:
                 ax.set_aspect('auto')
             if relim:
+                print('relim')
                 ax.relim(visible_only=True)
             if autoscale:
                 ax.autoscale(tight=False)
             if autoscale_x:
+                print('autoscale_x')
                 ax.autoscale(axis='x', tight=False)
             if autoscale_y:
                 ax.autoscale(axis='y', tight=False)
