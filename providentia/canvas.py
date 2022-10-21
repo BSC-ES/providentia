@@ -73,34 +73,28 @@ class MPLCanvas(FigureCanvas):
         self.gridspec = gridspec.GridSpec(self.gridspec_nrows, self.gridspec_ncols)
         self.gridspec.update(**self.gridspec_format)
 
-        # create plot axes on grid
-        self.plot_axes = {}
-        self.plot_axes['map'] = self.figure.add_subplot(self.gridspec.new_subplotspec((2, 0), 
-                                    rowspan=44, colspan=42), projection=self.plotcrs)
-        self.plot_axes['legend'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 47), 
-                                       rowspan=8, colspan=53))
-        self.plot_axes['timeseries'] = self.figure.add_subplot(self.gridspec.new_subplotspec((12, 50), 
-                                           rowspan=34, colspan=50))
-        self.plot_axes['periodic'] = {}
-        self.plot_axes['periodic']['hour'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 70), 
-                                                 rowspan=20, colspan=29))
-        self.plot_axes['periodic']['dayofweek'] = self.figure.add_subplot(self.gridspec.new_subplotspec((82, 89), 
-                                                      rowspan=20, colspan=10))
-        self.plot_axes['periodic']['month'] = self.figure.add_subplot(self.gridspec.new_subplotspec((82, 70), 
-                                                  rowspan=20, colspan=17))
-        self.plot_axes['distribution'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 35), 
-                                             rowspan=44, colspan=29))
-        self.plot_axes['statsummary'] = self.figure.add_subplot(self.gridspec.new_subplotspec((56, 10), 
-                                         rowspan=44, colspan=19))
-        self.plot_axes['cb'] = self.figure.add_axes([0.0455, 0.536, 0.3794, 0.02])
+        # define all possible plots
+        self.all_plots = ['legend', 'map', 'timeseries', 'periodic-violin', 'periodic', 
+                          'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot']
 
         # parse active dashboard plot string        
         if isinstance(self.read_instance.active_dashboard_plots, str):
             self.read_instance.active_dashboard_plots = [c.strip() for c in self.read_instance.active_dashboard_plots.split(',')]
+        
+        # stop running if plot type in active_dashboard_plots does not exist
+        for plot_type in self.read_instance.active_dashboard_plots:
+            if plot_type not in self.all_plots:
+                msg = "Error: Plot type {0} is not an option. ".format(plot_type)
+                msg += "The available plots are: {0}.".format(self.all_plots)
+                print(msg)
+                sys.exit()
 
-        # define all possible plots
-        self.all_plots = ['legend', 'map', 'timeseries', 'periodic-violin', 'periodic', 
-                          'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot']
+        # initialize layout positions
+        self.read_instance.position_1 = 'map'
+        self.read_instance.position_2 = self.read_instance.active_dashboard_plots[0]
+        self.read_instance.position_3 = self.read_instance.active_dashboard_plots[1]
+        self.read_instance.position_4 = self.read_instance.active_dashboard_plots[2]
+        self.read_instance.position_5 = self.read_instance.active_dashboard_plots[3]
 
         # update plot characteristics for all plots
         for plot_type in self.all_plots:
@@ -109,6 +103,21 @@ class MPLCanvas(FigureCanvas):
                 self.plot.set_plot_characteristics([plot_type], zstat='Mean')
             else:
                 self.plot.set_plot_characteristics([plot_type])
+
+        # create map, colorbar and legend plot axes
+        self.plot_axes = {}
+        self.plot_axes['map'] = self.figure.add_subplot(self.gridspec.new_subplotspec((2, 0), 
+                                                        rowspan=44, colspan=42), projection=self.plotcrs)
+        self.plot_axes['cb'] = self.figure.add_axes([0.0455, 0.536, 0.3794, 0.02])
+        self.plot_axes['legend'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 47), 
+                                                           rowspan=8, colspan=53))
+        
+        # create rest of plot axes (default: timeseries, statsummary, distribution, periodic)
+        for position, plot_type in enumerate(self.read_instance.active_dashboard_plots):
+            self.read_instance.update_plot_axis(self, position + 2, plot_type)
+        
+        # update layout fields
+        self.read_instance.update_layout_fields()
 
         # initialise variable of valid station indices plotted on map as empty list
         self.active_map_valid_station_inds = np.array([], dtype=np.int)
@@ -132,13 +141,6 @@ class MPLCanvas(FigureCanvas):
         self.create_station_annotation()
         self.lock_map_annotation = False
         self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', self.hover_map_annotation)
-
-        # setup timeseries annotation
-        self.create_timeseries_annotation()
-        self.create_timeseries_annotation_vline()
-        self.lock_timeseries_annotation = False
-        self.timeseries_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
-                                                                          self.hover_timeseries_annotation)
 
         # setup zoom on scroll wheel on map
         self.lock_zoom = False
