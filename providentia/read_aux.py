@@ -68,7 +68,8 @@ def read_netcdf_data(tuple_arguments):
     file_timestamp = file_time.asi8
 
     # get valid file time indices (i.e. those times in active full time array)
-    valid_file_time_indices = np.where(np.logical_and(file_timestamp>=shared_memory_vars['timestamp_array'][0], file_timestamp<=shared_memory_vars['timestamp_array'][-1]))[0]
+    valid_file_time_indices = np.where(np.logical_and(file_timestamp>=shared_memory_vars['timestamp_array'][0], 
+                                                      file_timestamp<=shared_memory_vars['timestamp_array'][-1]))[0]
 
     # get indices relative to active full timestamp array
     full_array_time_indices = np.searchsorted(shared_memory_vars['timestamp_array'], file_timestamp[valid_file_time_indices])

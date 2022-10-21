@@ -471,7 +471,7 @@ class MPLCanvas(FigureCanvas):
                 elif plot_type in ['statsummary']:
                     # get list of statistics to create lists for
                     relevant_zstats = self.plot_characteristics[plot_type]['basic']
-                    stat_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
+                    stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
                     xlabel = ''
                     ylabel = ''
                 # setup xlabel / ylabel for other plot_types
@@ -504,12 +504,13 @@ class MPLCanvas(FigureCanvas):
                         # skip observational array if bias stat and data array is observations
                         if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                             continue
-                        func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options, first_data_label=first_data_label)
+                        func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], 
+                             zstat=zstat, plot_options=plot_options, first_data_label=first_data_label)
                         first_data_label = False
                     # gather data for statsummary plot
                     elif plot_type in ['statsummary']:
                         for relevant_zstat in relevant_zstats:
-                            stat_df[relevant_zstat].append(self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0])
+                            stats_df[relevant_zstat].append(self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0])
                     # other plots
                     else: 
                         if plot_type == 'metadata':
@@ -518,13 +519,14 @@ class MPLCanvas(FigureCanvas):
                         if plot_type == 'scatter':
                             if data_label == 'observations':
                                 continue
-                        func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options, first_data_label=first_data_label)
+                        func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], 
+                             plot_options=plot_options, first_data_label=first_data_label)
                         first_data_label = False
 
                 # make statsummary plot
                 if plot_type in ['statsummary']:
-                    stat_df = pd.DataFrame(data=stat_df,index=self.selected_station_data[self.read_instance.networkspeci])
-                    func(ax, stat_df, self.plot_characteristics[plot_type], plot_options=plot_options, statsummary=True)
+                    stats_df = pd.DataFrame(data=stats_df, index=self.selected_station_data[self.read_instance.networkspeci])
+                    func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, statsummary=True)
 
                 # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
                 if type(ax) == dict:
@@ -587,7 +589,8 @@ class MPLCanvas(FigureCanvas):
             if len(self.relative_selected_station_inds) > 0:
 
                 # put selected data for each data array into pandas dataframes
-                to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, networkspecies=[self.read_instance.networkspeci])
+                to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
+                                    networkspecies=[self.read_instance.networkspeci])
 
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
@@ -619,7 +622,8 @@ class MPLCanvas(FigureCanvas):
         legend_plot_characteristics = self.plot.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
 
         # plot legend
-        self.legend = self.plot_axes['legend'].legend(**legend_plot_characteristics['plot'], prop=legend_plot_characteristics['prop'])
+        self.legend = self.plot_axes['legend'].legend(**legend_plot_characteristics['plot'], 
+                                                      prop=legend_plot_characteristics['prop'])
 
         # un-hide legend
         self.activate_axis(self.plot_axes['legend'], 'legend')
@@ -769,11 +773,14 @@ class MPLCanvas(FigureCanvas):
                         # skip observational array if bias stat
                         if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                             continue
-                        self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, data_label, self.plot_characteristics['periodic'], zstat=zstat, first_data_label=first_data_label)
+                        self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, data_label, 
+                                                self.plot_characteristics['periodic'], zstat=zstat, 
+                                                first_data_label=first_data_label)
                         first_data_label = False
 
                     # harmonise axes limits across subplots 
-                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'], 
+                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
+                                                         self.plot_characteristics['periodic'], 
                                                          plot_options, relim=True, autoscale=True)
                     set_title = False
                     # un-hide axes, and reset navigation toolbar stack, and set axis title and ylabel
@@ -784,7 +791,8 @@ class MPLCanvas(FigureCanvas):
                             if relevant_temporal_resolution in ['hour','month']:
                                 self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics['periodic'])
                                 if not set_title:
-                                    title = self.plot.set_axis_title(sub_ax, 'periodic', self.plot_characteristics['periodic'])
+                                    title = self.plot.set_axis_title(sub_ax, 'periodic', 
+                                                                     self.plot_characteristics['periodic'])
                                     self.plot_characteristics['periodic']['axis_title']['label'] = title
                                     set_title = True
                             elif relevant_temporal_resolution == 'dayofweek':
@@ -2667,7 +2675,7 @@ class MPLCanvas(FigureCanvas):
 
                         # create structure to store data for statsummary plot
                         relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
-                        stat_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
+                        stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
 
                     # get plotting function for specific plot
                     if plot_type == 'statsummary':
@@ -2710,27 +2718,32 @@ class MPLCanvas(FigureCanvas):
                                         stat_val = np.NaN
                                     else:
                                         stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
-                                    stat_df[relevant_zstat].append(stat_val)
+                                    stats_df[relevant_zstat].append(stat_val)
 
                             # other plot types
                             else:
                                 # call plotting function
                                 if plot_type in ['periodic']:
-                                    func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options, first_data_label=first_data_label)
+                                    func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
+                                         self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options, 
+                                         first_data_label=first_data_label)
                                 else: 
-                                    func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], plot_options=plot_options, first_data_label=first_data_label)
+                                    func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
+                                         self.plot_characteristics[plot_type], plot_options=plot_options, 
+                                         first_data_label=first_data_label)
                                 first_data_label = False
 
                     # make statsummary bias plot (if not previously made)
                     if (plot_type in ['statsummary']) & ('bias' not in self.plot_elements[plot_type]):
-                        if len(stat_df[list(stat_df.keys())[0]]) > 0:
+                        if len(stats_df[list(stats_df.keys())[0]]) > 0:
                             index = [data_label for data_label in self.selected_station_data[self.read_instance.networkspeci] if data_label != 'observations']
-                            stat_df = pd.DataFrame(data=stat_df,index=index)
-                            func(self.plot_axes[plot_type], stat_df, self.plot_characteristics[plot_type], plot_options=plot_options, statsummary=True)
+                            stats_df = pd.DataFrame(data=stats_df,index=index)
+                            func(self.plot_axes[plot_type], stats_df, self.plot_characteristics[plot_type], 
+                                 plot_options=plot_options, statsummary=True)
 
                     # create other active plot option elements for bias plot (if do not already exist)
                     self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                plot_type, 'bias', plot_options)
+                                               plot_type, 'bias', plot_options)
 
                 # if bias option is not enabled then hide bias plot elements and show absolute plots again
                 else:
@@ -2762,21 +2775,24 @@ class MPLCanvas(FigureCanvas):
             # update axis scaling
             if type(self.plot_axes[plot_type]) == dict:
                 if plot_type == 'periodic-violin':
-                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
-                                                         plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                             self.selected_station_data_max[self.read_instance.networkspeci]],
+                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                         self.plot_characteristics[plot_type], plot_options, 
+                                                         ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                               self.selected_station_data_max[self.read_instance.networkspeci]],
                                                          relim=True, autoscale_x=True)
                 else:
-                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
-                                                         plot_options, relim=True, autoscale=True)
+                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                         self.plot_characteristics[plot_type], plot_options, 
+                                                         relim=True, autoscale=True)
             else:
                 if plot_type == 'scatter':
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                          self.plot_characteristics[plot_type], plot_options, 
                                                          relim=True)
                 else:
-                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
-                                                         plot_options, relim=True, autoscale=True)                             
+                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                         self.plot_characteristics[plot_type], plot_options, 
+                                                         relim=True, autoscale=True)                             
 
             # draw changes
             self.figure.canvas.draw()
@@ -3132,9 +3148,9 @@ class MPLCanvas(FigureCanvas):
 
         # in the newest version of matplotlib, s corresponds to text
         self.station_annotation = self.plot_axes['map'].annotate(s='', xy=(0, 0), xycoords=transform,
-                                                                  **self.plot_characteristics['map']['stations_annotate'],
-                                                                  bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
-                                                                  arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
+                                                                 **self.plot_characteristics['map']['stations_annotate'],
+                                                                 bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
+                                                                 arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
 
         self.station_annotation.set_visible(False)
 
@@ -3452,19 +3468,24 @@ class MPLCanvas(FigureCanvas):
                             # update axis scaling 
                             if type(self.plot_axes[plot_type]) == dict:
                                 if plot_type == 'periodic-violin':
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
-                                                                         plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                                             self.selected_station_data_max[self.read_instance.networkspeci]],
+                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                         self.plot_characteristics[plot_type], 
+                                                                         plot_options, 
+                                                                         ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                               self.selected_station_data_max[self.read_instance.networkspeci]],
                                                                          relim=True, autoscale_x=True)
                                 else:
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
+                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                         self.plot_characteristics[plot_type], 
                                                                          plot_options, relim=True, autoscale=True)
                             else:
                                 if plot_type == 'scatter':
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
+                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                         self.plot_characteristics[plot_type], 
                                                                          plot_options, relim=True)
                                 else: 
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type], 
+                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                         self.plot_characteristics[plot_type], 
                                                                          plot_options, relim=True, autoscale=True)
 
                 # change font weight of label
