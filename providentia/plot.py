@@ -1087,6 +1087,7 @@ class Plot:
         :param plot_options: list of options to configure plot  
         :type plot_options: list
         """
+
         # determine if want to add annotations or not from plot_options
         if 'annotate' in plot_options:
             annotate = True
@@ -1099,7 +1100,7 @@ class Plot:
         else:
             bias = False
 
-        #round dataframe
+        # round dataframe
         stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
 
         # plot heatmap
@@ -1144,15 +1145,18 @@ class Plot:
         else:
             bias = False
 
-        #round dataframe
+        # round dataframe
         stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
 
-        #set row_colours
+        # set row_colours
         if 'row_colours' in plot_characteristics:
             if plot_characteristics['row_colours']:
-                plot_characteristics['plot']['rowColours'] = ['white' if data_label == 'observations' else 
-                                                              self.read_instance.plotting_params[data_label]['colour'] 
-                                                              for data_label in row_labels]
+                for data_label in col_labels:
+                    if data_label == 'observations':
+                        plot_characteristics['plot']['rowColours'] = ['white']
+                    else:
+                        exp_label = list(self.read_instance.experiments.keys())[list(self.read_instance.experiments.values()).index(data_label)]
+                        plot_characteristics['plot']['rowColours'] = [self.read_instance.plotting_params[exp_label]['colour']]
 
         # if plot is statsummary, then remove bias from col_labels, and use alises for row_labels
         if statsummary:
