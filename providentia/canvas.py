@@ -2789,7 +2789,7 @@ class MPLCanvas(FigureCanvas):
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                          self.plot_characteristics[plot_type], plot_options, 
                                                          relim=True)
-                else:
+                elif plot_type != 'map':
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                          self.plot_characteristics[plot_type], plot_options, 
                                                          relim=True, autoscale=True)                             
@@ -3312,9 +3312,15 @@ class MPLCanvas(FigureCanvas):
                     self.lock_timeseries_annotation = True
 
                     for data_label in self.plot_elements['data_labels_active']:
+
                         # skip observations for bias plot
                         if self.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
                             continue
+
+                        # do not annotate if plot is cleared
+                        if data_label not in self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']].keys():
+                            continue
+
                         line = self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']][data_label]['plot'][0]
                         is_contained, annotation_index = line.contains(event)
                         if is_contained:
