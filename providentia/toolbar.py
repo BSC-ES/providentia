@@ -52,11 +52,8 @@ class NavigationToolbar(NavigationToolbar2QT):
         startpath = os.path.expanduser(matplotlib.rcParams['savefig.directory'])
         daterange = self.canvas_instance.read_instance.le_start_date.text() + "_" \
                     + self.canvas_instance.read_instance.le_end_date.text()
-        try:
-            eg_name = "PRV_" + self.canvas_instance.read_instance.species + "_" + daterange
-        except:
-            eg_name = "default_filename"
-        start = os.path.join(startpath, eg_name)
+        default_name = "PRV_" + str(self.canvas_instance.read_instance.species[0]) + "_" + daterange
+        start = os.path.join(startpath, default_name)
 
         filter_ext = ['%s (%s)' % (name, '*.%s' % ext) for name, ext in sorted_filetypes]
         filter_ext = ';;'.join(filter_ext)
@@ -79,7 +76,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                     QtWidgets.QApplication.restoreOverrideCursor()
                 except Exception as e:
                     QtWidgets.QMessageBox.critical(self.canvas_instance, "Error saving file", str(e),
-                                                QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+                                                   QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
 
     def conf_dialogs(self):
         """Pops window for selecting configuration file. If file selcted, pops an
