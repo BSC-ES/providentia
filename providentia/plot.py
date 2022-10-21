@@ -1059,8 +1059,10 @@ class Plot:
                     if dl == 'observations':
                         if 'legend' in plot_characteristics:
                             obs_label = plot_characteristics['legend']['handles']['obs_label']
-                        else:
+                        elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
                             obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label']
+                        else:
+                            obs_label = 'Observations'
                         data_labels_to_plot[dl_ii] = obs_label
                     else:
                         data_labels_to_plot[dl_ii] = self.read_instance.experiments[dl]
@@ -1173,8 +1175,10 @@ class Plot:
                 if row_label == 'observations':
                     if 'legend' in plot_characteristics:
                         row_labels[row_label_ii] = plot_characteristics['legend']['handles']['obs_label'] 
-                    else:
+                    elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
                         row_labels[row_label_ii] = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
+                    else:
+                        row_labels[row_label_ii] = 'Observations'
                 else:
                     row_labels[row_label_ii] = self.read_instance.experiments[row_label]  
 
@@ -1392,8 +1396,10 @@ class Plot:
                 if data_label == 'observations':
                     if 'legend' in plot_characteristics:
                         str_to_append = plot_characteristics['legend']['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate)
-                    else:
+                    elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
                         str_to_append = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate)
+                    else:
+                        str_to_append = 'Observations | ' + ', '.join(stats_annotate)
                 else:
                     str_to_append = self.read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate)
             else:

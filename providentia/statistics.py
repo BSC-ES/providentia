@@ -104,9 +104,13 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
                 
                 # take cross station median of selected data for data array, and place it in a pandas dataframe 
                 if station_index:
-                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(data_array, index=read_instance.time_array, columns=['data'])
+                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(data_array, 
+                                                                                                                index=read_instance.time_array, 
+                                                                                                                columns=['data'])
                 else:
-                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), index=read_instance.time_array, columns=['data'])
+                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), 
+                                                                                                                index=read_instance.time_array, 
+                                                                                                                columns=['data'])
 
                 # get min / max across all selected station data per network / species
                 current_min = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].min()
