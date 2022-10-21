@@ -1153,18 +1153,19 @@ class Plot:
             if 'row_colours' in plot_characteristics:
                 if plot_characteristics['row_colours']:
                     plot_characteristics['plot']['rowColours'] = ['white' if data_label == 'observations' else 
-                                                                self.read_instance.plotting_params[data_label]['colour'] 
-                                                                for data_label in row_labels]
+                                                                  self.read_instance.plotting_params[data_label]['colour'] 
+                                                                  for data_label in row_labels]
         else:
             if 'col_colours' in plot_characteristics:
                 if plot_characteristics['col_colours']:
+                    plot_characteristics['plot']['colColours'] = []
                     for data_label in col_labels:
                         if data_label == 'observations':
-                            plot_characteristics['plot']['colColours'] = ['white']
+                            plot_characteristics['plot']['colColours'].extend(['white'])
                         else:
                             exp_label = list(self.read_instance.experiments.keys())[list(self.read_instance.experiments.values()).index(data_label)]
-                            plot_characteristics['plot']['colColours'] = [self.read_instance.plotting_params[exp_label]['colour']]
-    
+                            plot_characteristics['plot']['colColours'].extend([self.read_instance.plotting_params[exp_label]['colour']])
+        
         # if plot is statsummary, then remove bias from col_labels, and use alises for row_labels
         if statsummary:
             col_labels = [col_label.split('_bias')[0] if '_bias' in col_label else col_label for col_label in col_labels]
