@@ -31,33 +31,11 @@ class ProvConfiguration(object):
         self.nonghost_root = kwargs.get('nonghost_root', '')
         self.exp_root = kwargs.get('exp_root', '')
         self.offline = kwargs.get('offline', '')
-<<<<<<< HEAD
-        self.sequential_colourmap = kwargs.get('sequential_colourmap',
-                                               'viridis')
-        self.sequential_colourmap_warm = \
-            kwargs.get('sequential_colourmap_warm', 'Reds')
-
-        self.diverging_colourmap = kwargs.get('diverging_colourmap', 'bwr')
-        self.unsel_station_markersize = \
-            kwargs.get('unsel_station_markersize', 3)
-        self.sel_station_markersize = \
-            kwargs.get('sel_station_markersize', 8)
-        self.legend_markersize = kwargs.get('legend_markersize', 11)
-        self.time_series_markersize = \
-            kwargs.get('time_series_markersize', 1.1)
-        self.temp_agg_markersize = \
-            kwargs.get('temp_agg_markersize', 3)
-        self.temp_agg_expbias_markersize = \
-            kwargs.get('temp_agg_expbias_markersize', 3)
-        self.map_coastline_resolution = \
-            kwargs.get('map_coastline_resolution', 'low')
-=======
         self.available_resolutions =\
             kwargs.get('available_resolutions',
                        ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                        '3hourly_instantaneous', '6hourly_instantaneous',
                        'daily', 'monthly'])
->>>>>>> master
         self.available_networks =\
             kwargs.get('available_networks',
                        ['AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN','CHILE_SINCA',
