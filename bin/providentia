@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
 # init
-cores=16
+cores=1
 jobname="PRV"
 queue="debug"
-mem="50Gb"
+mem="20Gb"
+constraint="medmem"
 
 function usage () {
 echo "Usage: providentia [-u|--usage] [-c|--cores NUM_CORES (default=16)]"
 echo "    [-J|--jobname JOB_NAME (default=PRV)] [-q|--queue QUEUE_NAME (default=debug)]"
-echo "    [-m|--mem MEMORY (only valid on P9, default=50Gb)]"
+echo "    [-m|--mem MEMORY (only valid on P9, default=20Gb)]"
+echo "    [--constraint CONSTRAINT (default=medmem)]"
 }
 
 getopt --test 2> /dev/null
@@ -21,7 +23,7 @@ if [[ $? -ne 4 ]]; then
     exit 1
 fi
 
-#bash strict mode: see http://redsymbol.net/articles/unofficial-bash-strict-mode/ for info
+# bash strict mode: see http://redsymbol.net/articles/unofficial-bash-strict-mode/ for info
 set -eo pipefail
 IFS=$'\n\t'
 
@@ -29,8 +31,13 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is
 # optional.
 # See `man getopt'.
+<<<<<<< HEAD
 SHORT=uc:J:q:m:
 LONG=usage,cores:,jobname:,queue:,mem:,sequential_colourmap::,help::,version::,config::,section::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,obs_root::,nonghost_root::,exp_root::,offline::,sequential_colourmap::,sequential_colourmap_warm::,diverging_colourmap::,unsel_station_markersize::,sel_station_markersize::,legend_markersize::,time_series_markersize::,temp_agg_markersize::,temp_agg_expbias_markersize::,available_networks::
+=======
+SHORT=uc:J:q:m:constraint
+LONG=usage,cores:,jobname:,queue:,mem:,constraint:,help::,version::,config::,section::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,ghost_root::,nonghost_root::,exp_root::,offline::,network::,species::,resolution::,start_date::,end_date::,experiments::,temporal_colocation::,spatial_colocation::,filter_species::,report_type::,report_summary::,report_stations::,report_title::,report_filename::,map_extent::,active_dashboard_plots::,plot_characteristics_filename::
+>>>>>>> master
 
 # - Temporarily store output to be able to check for errors.
 # - Activate advanced mode getopt quoting e.g. via "--options".
@@ -40,7 +47,7 @@ LONG=usage,cores:,jobname:,queue:,mem:,sequential_colourmap::,help::,version::,c
 PARSED=$(getopt --options ${SHORT} \
                 --longoptions ${LONG} \
                 --name "$0" \
-                -- "$@")         #Pass all the args to this script to getopt
+                -- "$@")         # pass all the args to this script to getopt
 
 if [[ $? -ne 0 ]]; then
     # e.g. $? == 1
@@ -69,35 +76,37 @@ while [[ $# -gt 0 ]]; do
     shift  # Expose the next argument
 done
 
-echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
-
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
-srun_command="srun -t 02:00:00 -n 1 -c $cores -J $jobname --x11=first"
-bsub_command="bsub -W 2:00 -n 16 -M 3000 -q x11 xterm -T Providentia -e"
+constraint_option="--constraint=$constraint"
+load_command="source load_modules.sh"
+salloc_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
 python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $@"
 
-#set QT scale to avoid magnifying issues
+# set QT scale to avoid magnifying issues
 if [ "${BSC_MACHINE}" != "nord3" ]; then
     export QT_AUTO_SCREEN_SCALE_FACTOR=0
 fi
 
-#CTE POWER
+# load modules
+eval "${load_command}"
+
+# CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
-    #get allocation of resources on CTE-POWER machine
-    eval "${srun_command} ${queue_option} ${memory_option} ${python_command}"
-#Marenustrum4
+    # get allocation of resources on CTE-POWER
+    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+    eval "${salloc_command} ${queue_option} ${memory_option} srun ${python_command}"
+# Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
-    #get allocation of resources on MN4 machine
-    eval "${srun_command} ${queue_option} ${python_command}"
-#Nord3
-elif [ "${BSC_MACHINE}" == "nord3" ]; then
-    #get allocation of resources on MN4 machine
-    eval "${bsub_command} ${python_command}"
-#Workstations
-elif [ "${HOST}" == "bsceslogin01" ]; then
-    echo "Warning: running in Fat Nodes may make Providentia slower ..."
-    eval "${srun_command} ${python_command}"
+    # get allocation of resources on MN4
+    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+    eval "${salloc_command} ${queue_option} srun ${python_command}"
+# Nord3v2
+elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
+    # get allocation of resources on Nord3v2
+    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+    eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+# Workstations
 else
     echo "Warning: running in your workstation/laptop may make Providentia slower ..."
     eval "${python_command}"
