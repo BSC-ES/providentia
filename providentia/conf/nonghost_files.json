@@ -1,0 +1,75 @@
+{
+    "nasa-aeronet/directsun_v3-lev15": {
+        "3hourly": {
+            "od550aero": [],
+            "ae440-870aero": []
+            },
+        "hourly": {
+            "od550aero": [],
+            "ae440-870aero": []
+            }
+        },
+
+    "nasa-aeronet/directsun_v2-lev20": {
+        "3hourly": {
+            "od550aero": [],
+            "ae440-870aero": []
+            }
+        },
+
+    "nasa-aeronet/oneill_v3-lev15": {
+        "3hourly": {
+            "od500aero": [],
+            "od500aerocoarse": [],
+            "od500aerofine": []
+            },
+        "hourly": {
+            "od500aero": [],
+            "od500aerocoarse": [],
+            "od500aerofine": []
+            }
+        },
+
+    "eea/eionet": {
+        "hourly": {
+            "pm10": [],
+            "pm2p5": [],
+            "sconcco": [],
+            "sconcno": [],
+            "sconcno2": [],
+            "sconco3": [],
+            "sconcso2": []
+            }
+        },
+
+    "eea/eionet-valid": {
+        "hourly": {
+            "pm10": [],
+            "pm2p5": [],
+            "sconcco": [],
+            "sconcno": [],
+            "sconcno2": [],
+            "sconco3": [],
+            "sconcso2": []
+            }
+        },
+
+    "cnrs-lisa/indaaf": {
+        "hourly": {
+            "pm10": [],
+            "pm10du": []
+            }
+        },
+
+    "port_barcelona/port-barcelona": {
+        "hourly": {
+            "sconcno2": []
+            }
+        },
+
+    "csic/csic": {
+        "monthly": {
+            "sconcnh3": []
+            }
+        }
+}

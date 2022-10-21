@@ -1,0 +1,1116 @@
+import os
+import sys
+import json
+import copy
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+from matplotlib.backends.backend_pdf import PdfPages
+
+from .read import DataReader
+from .filter import DataFilter
+from .plot import Plot
+from .statistics import to_pandas_dataframe
+from .statistics import calculate_z_statistic
+from .statistics import generate_colourbar
+from .statistics import get_z_statistic_info
+from .configuration import ProvConfiguration
+from .init_standards import InitStandards
+from providentia import aux
+
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
+
+
+class ProvidentiaOffline(ProvConfiguration, InitStandards):
+    """Run Providentia offline reports"""
+
+    def __init__(self, **kwargs):
+        ProvConfiguration.__init__(self, **kwargs)
+
+        print("Starting Providentia offline...")
+
+        # update from config file
+        if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
+            aux.load_conf(self, kwargs['config'])
+        elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
+            error = 'Error: The path to the configuration file specified in the command line does not exist.'
+            sys.exit(error)
+        else:
+            error = "Error: No configuration file found. The path to the config file must be added as an argument."
+            sys.exit(error)
+
+        # update self from command line arguments
+        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
+
+        # init GHOST standards
+        InitStandards.__init__(self, ghost_root=self.ghost_root, ghost_version=self.ghost_version)
+        
+        # create dictionary of all available observational GHOST data
+        self.all_observation_data = aux.get_ghost_observational_tree(self)
+
+        # load dictionary with non-GHOST esarchive files to read
+        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, 'conf/nonghost_files.json')))
+        # and merge to existing GHOST observational data dict if we have the path
+        if self.nonghost_root is not None:
+            nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
+            self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
+
+        # load necessary dictionaries
+        self.report_plots = json.load(open(os.path.join(
+            CURRENT_PATH, 'conf/report_plots.json')))
+
+        # initialise DataReader class
+        self.datareader = DataReader(self)
+
+        # check for self defined plot characteristics file
+        if self.plot_characteristics_filename == '':
+            self.plot_characteristics_filename = os.path.join(
+                CURRENT_PATH, 'conf/plot_characteristics_offline.json')
+        self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
+        self.plot_characteristics = {}
+
+        # add general plot characteristics to self
+        for k, val in self.plot_characteristics_templates['general'].items():
+            setattr(self, k, val)
+
+        # initialise Plot class
+        self.plot = Plot(read_instance=self, canvas_instance=self)
+
+        # iterate through configuration sections
+        for filename, section in zip(self.filenames, self.parent_section_names):
+
+            # update for new section parameters
+            self.report_filename = filename
+            self.section = section
+            self.section_opts = self.sub_opts[self.section]
+
+            # initialize plot characteristics
+            self.plot_characteristics = dict()
+
+            # remove old parameters
+            other_sections = [value for value in self.all_sections if value != self.section]
+            for other_section in other_sections:
+                for k in self.sub_opts[other_section]:
+                    try:
+                        vars(self).pop(k)
+                    except:
+                        pass
+
+            # update self with section variables
+            vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.section_opts.items()})
+
+            # update self from command line arguments
+            vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
+
+            # get key configuration variables
+            aux.get_parameters(self) 
+            self.qa = aux.which_qa(self)
+            self.flags = aux.which_flags(self)
+            self.experiments = aux.get_experiments(self)
+            self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
+            self.data_labels = ['observations'] + list(self.experiments.keys())
+
+            # if have no experiments, force temporal colocation to be False
+            if len(self.experiments) == 0:
+                self.temporal_colocation = False    
+                for k in self.sub_opts.keys():
+                    self.sub_opts[k]['temporal_colocation'] = False
+
+            # get valid observations in date range
+            aux.get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
+
+            # update available experiments for selected fields
+            aux.get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
+                                      self.network, self.species)
+
+            # read data
+            self.datareader.read_setup(['reset'])
+
+            # initialise/reinitialise structures to store % data representativity, data periods and metadata
+            aux.init_representativity(self)
+            aux.init_period(self)
+            aux.init_metadata(self)
+
+            # set plot characteristics
+            try:
+                plot_types = self.report_plots[self.report_type]
+            except KeyError:
+                msg = 'Error: The report type {0} cannot be found in conf/report_plots.json. '.format(self.report_type)
+                msg += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
+                sys.exit(msg)
+            self.plot.set_plot_characteristics(plot_types)
+
+            # define dictionary to store plot figures per page
+            self.plot_dictionary = {}
+
+            # set plots that need to be made (summary and station specific)
+            self.summary_plots_to_make = list(self.plot_characteristics.keys())
+            self.station_plots_to_make = []
+            for plot_type in self.summary_plots_to_make:
+                # there can be no station specific plots for map plot type
+                if plot_type[:4] != 'map-':
+                    self.station_plots_to_make.append(plot_type)
+
+            # start making PDF
+            self.start_pdf()
+
+    def start_pdf(self):
+
+        # get path where reports will be saved
+        if '/' in self.report_filename:
+            if os.path.isdir(os.path.dirname(self.report_filename)):
+                reports_path = self.report_filename
+        else:
+            reports_path = (os.path.join(CURRENT_PATH, '../reports/')) + self.report_filename
+
+        # create reports folder
+        if not os.path.exists(os.path.dirname(reports_path)):
+            if '/' in self.report_filename:
+                print('Path {0} does not exist and it will be created.'.format(os.path.dirname(self.report_filename)))
+            os.makedirs(os.path.dirname(reports_path))
+
+        # add termination .pdf to filenames
+        if '.pdf' not in reports_path:
+            reports_path += '.pdf'
+
+        # open new PDF file
+        with PdfPages(reports_path) as pdf:
+            
+            self.pdf = pdf
+
+            # initialise dictionaries to store relevant page numebrs
+            if self.report_summary:
+                self.summary_pages = {}
+            if self.report_stations:
+                self.station_pages = {}
+
+            # get list of all networks and species strings
+            networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
+
+            # get subsections
+            self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
+                                           if self.section == subsection_name.split('|')[0]]
+            if len(self.child_subsection_names) > 0:
+                self.subsections = self.child_subsection_names
+            else:
+                self.subsections = [self.section]
+
+            # make header
+            self.plot.set_plot_characteristics(['header'])
+            self.plot.make_header(self.pdf, self.plot_characteristics['header'])
+
+            # define dictionary to store stats from all subsections for heatmap and table plots
+            self.subsection_stats_summary = {}
+            self.subsection_stats_station = {}
+
+            # iterate through subsections
+            for subsection_ind, subsection in enumerate(self.subsections):
+
+                self.subsection_ind = subsection_ind
+                self.subsection = subsection
+
+                # update the conf options for this subsection
+                if len(self.child_subsection_names) > 0:
+                    for section in self.all_sections:
+                        for k in self.sub_opts[section]:
+                            if k not in self.fixed_section_vars:
+                                try:
+                                    vars(self).pop(k)
+                                except:
+                                    continue
+                    vars(self).update({(k, self.parse_parameter(k, val)) for k, val in
+                                      self.sub_opts[self.subsection].items() if k not in self.fixed_section_vars})
+
+                # update map extent per subsection
+                if hasattr(self, 'map_extent'):
+                    if isinstance(self.map_extent, str):
+                        self.map_extent = [float(c) for c in self.map_extent.split(',')]
+
+                # update fields available for filtering
+                aux.update_representativity_fields(self)
+                aux.representativity_conf(self)
+                aux.update_period_fields(self)
+                aux.period_conf(self)
+                aux.update_metadata_fields(self)
+                aux.metadata_conf(self)
+                
+                # filter dataset for current subsection
+                print('\nFiltering data for {} subsection'.format(self.subsection))
+                DataFilter(self)
+
+                # iterate through all desired plots, making each one (summary or station specific plots)
+                print('Making {} subsection plots'.format(self.subsection))  
+
+                self.n_total_pages = 0
+                
+                # iterate through networks and species
+                for networkspeci_ii, networkspeci in enumerate(networkspecies):
+                    
+                    # make summary plots?
+                    if self.report_summary:
+
+                        if networkspeci_ii == 0:
+                            # get median timeseries across data from filtered data, and place it pandas dataframe
+                            to_pandas_dataframe(read_instance=self, canvas_instance=self, networkspecies=networkspecies)
+
+                        if subsection_ind == 0:
+                            # update plot characteristics
+                            self.plot.set_plot_characteristics(self.summary_plots_to_make)
+                        
+                            # setup plotting geometry for summary plots per networkspeci (for all subsections)
+                            self.setup_plot_geometry('summary', networkspeci, networkspeci_ii)
+
+                        # iterate through plots to make
+                        for plot_type in self.summary_plots_to_make:
+                            
+                            #get options defined to configure plot (e.g. bias, individual, annotate, etc.)
+                            plot_options = plot_type.split('_')[1:]
+
+                            # if a multispecies plot is wanted then only make this when networkspeci_ii == 0
+                            if ('multispecies' in plot_options) & (networkspeci_ii != 0):
+                                continue
+
+                            # make plot
+                            print('Making summary {0}'.format(plot_type))
+                            self.make_plot('summary', plot_type, plot_options, networkspeci)
+
+                        self.n_total_pages = len(self.plot_dictionary)
+
+                    # make station specific plots?
+                    if self.report_stations:               
+
+                        # update plot characteristics
+                        self.plot.set_plot_characteristics(self.station_plots_to_make)
+
+                        # get valid station inds for networkspeci / subsection
+                        if self.temporal_colocation:
+                            valid_station_inds = self.valid_station_inds_temporal_colocation[networkspeci]['observations']
+                        else:
+                            valid_station_inds = self.valid_station_inds[networkspeci]['observations']
+
+                        #  setup plotting geometry for station plots per networkspeci (for one subsection)
+                        self.setup_plot_geometry('station', networkspeci, networkspeci_ii, n_stations=len(valid_station_inds))
+
+                        # iterate through plots to make
+                        for plot_type in self.station_plots_to_make:
+                            
+                            # initialise station ind as -1
+                            self.station_ind = -1
+
+                            for i, valid_station_ind in enumerate(valid_station_inds):
+                                
+                                # gather some information about current station
+                                self.station_ind += 1
+                                valid_station_references = self.metadata_in_memory[networkspeci]['station_reference'][valid_station_ind, :]
+                                self.current_station_reference = valid_station_references[pd.notnull(valid_station_references)][0]
+                                valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][valid_station_ind, :]
+                                self.current_station_name = valid_station_names[pd.notnull(valid_station_names)][0]
+                                current_lons = self.metadata_in_memory[networkspeci]['longitude'][valid_station_ind, :]
+                                self.current_lon = round(current_lons[pd.notnull(current_lons)][0], 2)
+                                current_lats = self.metadata_in_memory[networkspeci]['latitude'][valid_station_ind, :]
+                                self.current_lat = round(current_lats[pd.notnull(current_lats)][0], 2)
+                                
+                                # put station data in pandas dataframe
+                                # put multiple species data in pandas dataframe if a multispecies plot is wanted (spatial colocation must also be active)
+                                have_multispecies_option = np.any(['multispecies' in plot_type.split('_')[1:] for plot_type in self.station_plots_to_make])
+                                
+                                if (have_multispecies_option) & (networkspeci_ii == 0) & (self.spatial_colocation):
+                                    to_pandas_dataframe(read_instance=self, canvas_instance=self, networkspecies=networkspecies, station_index=valid_station_ind)
+                                else:
+                                    to_pandas_dataframe(read_instance=self, canvas_instance=self, networkspecies=[networkspeci], station_index=valid_station_ind)
+                                
+                                # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
+                                plot_options = plot_type.split('_')[1:]
+
+                                # if a multispecies plot is wanted then only make this when networkspeci_ii == 0
+                                # if making a multispecies plot per specific station, spatial colocation must be also active
+                                if 'multispecies' in plot_options: 
+                                    if (networkspeci_ii != 0) or (not self.spatial_colocation):
+                                        continue
+                                
+                                # make plot
+                                print('Making station {2} for {3} ({0}/{1})'.format(i+1, 
+                                                                                    len(valid_station_inds),
+                                                                                    plot_type, 
+                                                                                    self.current_station_name))                                
+                                self.make_plot('station', plot_type, plot_options, networkspeci)
+
+            # do formatting to axes per networkspeci
+            # create colourbars
+            # harmonise xy limits(not for map, heatmap or table, or when xlim and ylim defined)
+            # log axes
+            # annotation
+            # regression line
+            # smooth line
+
+            # remove header from plot characteristics dictionary
+            if 'header' in list(self.plot_characteristics.keys()):
+                del self.plot_characteristics['header']
+
+            # iterate through networks and species
+            for networkspeci_ii, networkspeci in enumerate(networkspecies): 
+
+                # iterate through plot types
+                for plot_type in list(self.plot_characteristics.keys()):
+
+                    # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
+                    plot_options = plot_type.split('_')[1:]
+
+                    # if a multispecies plot is wanted then this is only made when networkspeci_ii == 0
+                    if ('multispecies' in plot_options) & (networkspeci_ii != 0):
+                        continue
+
+                    # get zstat information from plot_type
+                    zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+
+                    # get base plot type (without stat and options)
+                    if zstat:
+                        base_plot_type = plot_type.split('-')[0] 
+                    else:
+                        base_plot_type = plot_type.split('_')[0] 
+
+                    # get relevant paradigm pages to harmonise axes limits for
+                    if (self.report_summary) & (self.report_stations):
+                        summary_pages = [self.summary_pages[plot_type][networkspeci]]
+                        # for multispecies plots of specific stations, spatial colocation needs to be on.
+                        # if not, the plots will not exist so handle this
+                        if ('multispecies' in plot_options) & (not self.spatial_colocation) & (plot_type not in self.station_pages):
+                            station_pages = []
+                        else:
+                            if plot_type in self.station_plots_to_make:
+                                station_pages = [self.station_pages[plot_type][networkspeci][subsection] for subsection in self.subsections]
+                            else:
+                                station_pages = []
+                        paradigm_pages = summary_pages + station_pages
+                    elif self.report_summary:
+                        paradigm_pages = [self.summary_pages[plot_type][networkspeci]]
+                    elif self.report_stations:
+                        # for multispecies plots of specific stations, spatial colocation needs to be on.
+                        # if not, the plots will not exist so handle this
+                        if ('multispecies' in plot_options) & (not self.spatial_colocation) & (plot_type not in self.station_pages):
+                            paradigm_pages = []
+                        else:
+                            if plot_type in self.station_plots_to_make:
+                                paradigm_pages = [self.station_pages[plot_type][networkspeci][subsection] for subsection in self.subsections]
+                            else:
+                                paradigm_pages = []
+
+                    # iterate through paradigm pages
+                    for relevant_pages in paradigm_pages:
+
+                        # get all relevant axes for plot_type/paradigm
+                        if base_plot_type in ['periodic', 'periodic-violin']:
+                            ax_types = ['hour', 'dayofweek', 'month']
+                        else:
+                            ax_types = ['']
+                        
+                        relevant_axs = []
+                        relevant_data_labels = []
+                        for ax_type in ax_types:
+                            for relevant_page in relevant_pages:
+                                if base_plot_type in ['periodic', 'periodic-violin']:
+                                    for ax in self.plot_dictionary[relevant_page]['axs']:
+                                        relevant_axs.append(ax['handle'][ax_type])
+                                        relevant_data_labels.append(ax['data_labels'])
+                                else:
+                                    for ax in self.plot_dictionary[relevant_page]['axs']:
+                                        relevant_axs.append(ax['handle'])
+                                        relevant_data_labels.append(ax['data_labels'])
+
+                        # generate colourbars for required plots in paradigm on each relevant page
+                        if 'cb' in list(self.plot_characteristics[plot_type].keys()):
+                            # get all cb_axs for plot_type across relevant pages
+                            cb_axs = [self.plot_dictionary[relevant_page]['cb_ax'] for relevant_page in relevant_pages]
+                            generate_colourbar(self, relevant_axs, cb_axs, zstat, self.plot_characteristics[plot_type], 
+                                               networkspeci.split('|')[-1])
+
+                        # iterate through all relevant axes for plot type in paradigm
+                        for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
+
+                            # log axes?
+                            if 'logx' in plot_options:
+                                log_validity = self.plot.log_validity(relevant_ax, 'logx')
+                                if log_validity:
+                                    self.plot.log_axes(relevant_ax, 'logx', base_plot_type, self.plot_characteristics[plot_type])
+                                else:
+                                    msg = "Warning: It is not possible to log the x-axis "
+                                    msg += "in {0} with negative values.".format(plot_type)
+                                    print(msg)
+                            if 'logy' in plot_options:
+                                log_validity = self.plot.log_validity(relevant_ax, 'logy')
+                                if log_validity:
+                                    self.plot.log_axes(relevant_ax, 'logy', base_plot_type, self.plot_characteristics[plot_type])
+                                else:
+                                    msg = "Warning: It is not possible to log the y-axis "
+                                    msg += "in {0} with negative values.".format(plot_type)
+                                    print(msg)
+
+                            # annotation
+                            if 'annotate' in plot_options:
+                                self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
+                                                     base_plot_type, self.plot_characteristics[plot_type],
+                                                     plot_options=plot_options)
+                                # annotate in first axis
+                                if base_plot_type in ['periodic', 'periodic-violin']:
+                                    break
+
+                            # regression line
+                            if 'regression' in plot_options:
+                                self.plot.linear_regression(relevant_ax, networkspeci, 
+                                                            relevant_data_labels[relevant_ax_ii], 
+                                                            base_plot_type,
+                                                            self.plot_characteristics[plot_type], 
+                                                            plot_options=plot_options)
+
+                            # smooth line
+                            if 'smooth' in plot_options:
+                                self.plot.smooth(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
+                                                 base_plot_type, self.plot_characteristics[plot_type], 
+                                                 plot_options=plot_options)
+
+                        # harmonise xy limits for plot paradigm
+                        if base_plot_type not in ['map', 'heatmap', 'table']: 
+                            if base_plot_type == 'periodic-violin':
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     ylim=[self.selected_station_data_min[networkspeci], 
+                                                                           self.selected_station_data_max[networkspeci]],
+                                                                     relim=True, autoscale_x=True)
+                            elif base_plot_type == 'scatter':
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True)
+                            else:
+                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
+                                                                     self.plot_characteristics[plot_type], plot_options, 
+                                                                     relim=True, autoscale=True)
+            # save page figures
+            print('WRITING PDF')
+            for page in self.plot_dictionary:
+                fig = self.plot_dictionary[page]['fig']
+                self.pdf.savefig(fig, dpi=self.dpi)
+                plt.close(fig)
+
+    def setup_plot_geometry(self, plotting_paradigm, networkspeci, networkspeci_ii, n_stations=0):
+        """setup plotting geometry for summary or station specific plots, per network/species"""
+
+        # depending on plot type set plots to make
+        if plotting_paradigm == 'summary':
+            self.plots_to_make = self.summary_plots_to_make
+        elif plotting_paradigm == 'station':
+            self.plots_to_make = self.station_plots_to_make
+
+        # iterate through plot types to make
+        for plot_type in self.plots_to_make:
+
+            # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
+            plot_options = plot_type.split('_')[1:]
+            
+            # if a multispecies plot is wanted then only make this when networkspeci_ii == 0
+            # if making a multispecies plot per specific station, spatial colocation must be also active
+            if 'multispecies' in plot_options:
+                if plotting_paradigm == 'summary':
+                    if networkspeci_ii != 0:
+                        continue
+                elif plotting_paradigm == 'station':
+                    if (networkspeci_ii != 0) or (not self.spatial_colocation):
+                        continue
+            
+            # create variables to store list of page numbers per plot type / networkspeci / subsection (if do not exist)
+            if plotting_paradigm == 'summary':
+                if plot_type not in self.summary_pages:
+                    self.summary_pages[plot_type] = {}
+                if networkspeci not in self.summary_pages[plot_type]:
+                    self.summary_pages[plot_type][networkspeci] = []
+            if plotting_paradigm == 'station':
+                if plot_type not in self.station_pages:
+                    self.station_pages[plot_type] = {}
+                if networkspeci not in self.station_pages[plot_type]:
+                    self.station_pages[plot_type][networkspeci] = {}
+                if self.subsection not in self.station_pages[plot_type][networkspeci]:
+                    self.station_pages[plot_type][networkspeci][self.subsection] = []
+
+            # get zstat information from plot_type
+            zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+
+            # get base plot type (without stat and options)
+            if zstat:
+                base_plot_type = plot_type.split('-')[0] 
+            else:
+                base_plot_type = plot_type.split('_')[0] 
+
+            # get copy of plot characteristics for plot type
+            plot_characteristics = copy.deepcopy(self.plot_characteristics[plot_type])
+            plot_characteristics_vars = list(plot_characteristics.keys())
+
+            # update page title depending on plot paradigm
+            if plotting_paradigm == 'summary':
+                if 'multispecies' in plot_options:
+                    plot_characteristics['page_title']['t'] = '{} (Summary)\nmultispecies'.format(plot_characteristics['page_title']['t']) 
+                else:
+                    plot_characteristics['page_title']['t'] = '{} (Summary)\n{}'.format(plot_characteristics['page_title']['t'], networkspeci) 
+            elif plotting_paradigm == 'station':
+                if 'multispecies' in plot_options:
+                    plot_characteristics['page_title']['t'] = '{} (Per Station)\n{}\nmultispecies'.format(plot_characteristics['page_title']['t'], self.subsection) 
+                else:
+                    plot_characteristics['page_title']['t'] = '{} (Per Station)\n{}\n{}'.format(plot_characteristics['page_title']['t'], self.subsection, networkspeci) 
+
+            # define number of plots per type
+            n_plots_per_plot_type = False
+            if base_plot_type == 'map':
+                if 'obs' in plot_options:
+                    n_plots_per_plot_type = len(self.subsections)
+                elif z_statistic_sign == 'bias':
+                    n_plots_per_plot_type = len(self.subsections) * \
+                                            (len(self.data_labels) - 1)
+                else:
+                    n_plots_per_plot_type = len(self.subsections) * \
+                                            len(self.data_labels)
+            elif base_plot_type in ['heatmap', 'table']:
+                if plotting_paradigm == 'summary':
+                    n_plots_per_plot_type = 1
+                elif plotting_paradigm == 'station':
+                    n_plots_per_plot_type = n_stations
+            else:
+                if plotting_paradigm == 'summary':
+                    if 'individual' in plot_options:
+                        if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                            n_plots_per_plot_type = len(self.subsections) * \
+                                                    (len(self.data_labels) - 1)
+                        else:
+                            n_plots_per_plot_type = len(self.subsections) * \
+                                                    len(self.data_labels)
+                    else:
+                        n_plots_per_plot_type = len(self.subsections) 
+                elif plotting_paradigm == 'station':
+                    if 'individual' in plot_options:
+                        if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                            n_plots_per_plot_type = n_stations * \
+                                                    (len(self.data_labels) - 1) 
+                        else:
+                            n_plots_per_plot_type = n_stations * \
+                                                    len(self.data_labels) 
+                    else:
+                        n_plots_per_plot_type = n_stations 
+
+            # get n pages per plot type
+            n_pages_per_plot_type = int(np.ceil(n_plots_per_plot_type / (
+                                    plot_characteristics['figure']['ncols'] * plot_characteristics['figure']['nrows'])))
+            plot_ii_per_type = 0
+
+            # iterate through n pages per plot type
+            for page_n in range(self.n_total_pages, self.n_total_pages + n_pages_per_plot_type):
+
+                if base_plot_type == 'map':
+                    plot_characteristics['figure']['subplot_kw'] = {'projection': self.plotcrs}
+                fig, axs = plt.subplots(**plot_characteristics['figure'])
+
+                # each page is handled as 1 figure
+                self.plot_dictionary[page_n] = {'fig': fig, 'plot_type': plot_type, 'axs': []}
+
+                # make page title?
+                if 'page_title' in plot_characteristics_vars:
+                    st = fig.suptitle(**plot_characteristics['page_title'])
+
+                # iterate through axes (by row, then column)
+                row_ii = -1
+                col_ii = copy.deepcopy(plot_characteristics['figure']['ncols'])
+                
+                for ax_ii, ax in enumerate(axs.flatten()):
+
+                    if col_ii == plot_characteristics['figure']['ncols']:
+                        row_ii += 1
+                        col_ii = 0
+                    if row_ii == (plot_characteristics['figure']['nrows'] - 1):
+                        last_row_on_page = True
+                    else:
+                        last_row_on_page = False
+
+                    # force rasterized (bitmap) drawing in vector backend output.
+                    ax.set_rasterized(True)
+
+                    # keep iteratively plotting until have satisfied needed plots per type
+                    if plot_ii_per_type < n_plots_per_plot_type:
+                        
+                        # determine if are on last valid row to plot
+                        if (n_plots_per_plot_type - plot_ii_per_type) <= plot_characteristics['figure']['ncols']:
+                            last_valid_row = True
+                        else:
+                            last_valid_row = False
+
+                        # setup periodic plot type gridspec
+                        if base_plot_type in ['periodic', 'periodic-violin']:
+                            gs = gridspec.GridSpecFromSubplotSpec(20, 20, subplot_spec=ax)
+                            grid_dict = dict()
+                            grid_dict['hour'] = fig.add_subplot(gs[:9, :])
+                            grid_dict['month'] = fig.add_subplot(gs[11:, :11])
+                            grid_dict['dayofweek'] = fig.add_subplot(gs[11:, 13:])
+                            self.plot_dictionary[page_n]['axs'].append({'handle':grid_dict, 'data_labels':[]})
+                            ax.spines['top'].set_color('none')
+                            ax.spines['bottom'].set_color('none')
+                            ax.spines['left'].set_color('none')
+                            ax.spines['right'].set_color('none')
+                            ax.tick_params(labelcolor='w', top=False, bottom=False, left=False, right=False)
+                            grid_dict['hour'].set_axis_off()
+                            grid_dict['month'].set_axis_off()
+                            grid_dict['dayofweek'].set_axis_off()
+
+                            # turn on all axes that will be plotted on, and add yaxis grid to each axis, and change axis label tick sizes
+                            for relevant_temporal_resolution_ii, relevant_temporal_resolution in enumerate(self.relevant_temporal_resolutions):
+                                # turn axis on
+                                grid_dict[relevant_temporal_resolution].set_axis_on()
+                                # format axis
+                                self.plot.format_axis(grid_dict[relevant_temporal_resolution], base_plot_type, 
+                                                      plot_characteristics, 
+                                                      relevant_temporal_resolution=relevant_temporal_resolution, 
+                                                      col_ii=col_ii, last_valid_row=last_valid_row, 
+                                                      last_row_on_page=last_row_on_page)
+
+                            grid_dict['dayofweek'].yaxis.set_tick_params(which='both', labelleft=False)
+                            grid_dict['dayofweek'].set_ylabel('')
+
+                        # rest of plot types
+                        else:
+                            self.plot_dictionary[page_n]['axs'].append({'handle':ax, 'data_labels':[]})
+                            # format axis 
+                            self.plot.format_axis(ax, base_plot_type, plot_characteristics, col_ii=col_ii, 
+                                                  last_valid_row=last_valid_row, last_row_on_page=last_row_on_page)
+
+                    # no more plots to make on page? 
+                    # then turn off unneeded axes
+                    else:
+                        ax.axis('off')
+                        ax.set_visible(False)
+                        ax.grid(False)
+
+                    plot_ii_per_type += 1
+                    col_ii += 1
+
+                # set figure attributes
+                # adjust subplots?
+                if 'subplots_adjust' in plot_characteristics_vars:
+                    fig.subplots_adjust(**plot_characteristics['subplots_adjust'])
+
+                # make legend?
+                if 'legend' in plot_characteristics_vars:
+                    plot_characteristics['legend'] = self.plot.make_legend_handles(plot_characteristics['legend'])
+                    fig.legend(**plot_characteristics['legend']['plot'])
+
+                # add colourbar axis to plot dictionary?
+                if 'cb' in plot_characteristics_vars:
+                    self.plot_dictionary[page_n]['cb_ax'] = fig.add_axes(plot_characteristics['cb']['position'])
+                    self.plot_dictionary[page_n]['cb_ax'].set_rasterized(True)
+                            
+                # add current page number
+                if plotting_paradigm == 'summary':
+                    self.summary_pages[plot_type][networkspeci].append(page_n)
+                elif plotting_paradigm == 'station':
+                    self.station_pages[plot_type][networkspeci][self.subsection].append(page_n)
+                
+                # add to total number of pages
+                self.n_total_pages += 1
+
+    def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
+        """Function that calls making of any type of plot"""
+
+        self.current_plot_ind = 0
+        
+        # get zstat information from plot_type
+        zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+
+        # get base plot type (without stat and options)
+        if zstat:
+            base_plot_type = plot_type.split('-')[0] 
+        else:
+            base_plot_type = plot_type.split('_')[0] 
+
+        # if are making bias plot, and have no valid experiment data then cannot make plot type
+        if ('bias' in plot_options) & (len(self.selected_station_data[networkspeci]) < 2):
+            return
+
+        # iterate through all data arrays
+        first_data_label = True 
+        for n_data_label, data_label in enumerate(self.data_labels):
+
+            # set how experiment should be referred to in heatmap/table
+            if data_label == 'observations':
+                data_label_legend = copy.deepcopy(data_label)
+            else:    
+                data_label_legend = self.experiments[data_label]
+
+            # do not show experiment data with 'obs' option set
+            if ('obs' in plot_options) & (data_label != 'observations'):
+                continue
+
+            # skip observations data label when plotting bias
+            if (z_statistic_sign == 'bias') & (data_label == 'observations'):
+                continue
+                
+            # map plots (1 plot per data array/s (1 array if absolute plot,
+            # 2 arrays if making bias plot), per subsection)
+            if base_plot_type == 'map':
+                
+                # get necessary data labels to plot
+                if z_statistic_sign == 'bias':
+                    z1 = 'observations'
+                    z2 = copy.deepcopy(data_label)
+                else:
+                    z1 = copy.deepcopy(data_label)
+                    z2 = ''
+
+                # get relevant page/axis to plot on
+                axis_ind = (self.current_plot_ind * len(self.subsections)) + self.subsection_ind
+                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
+                                                                           axis_ind)
+
+                # calculate number of created axis
+                n_axes_plot_type = 0
+                for page in self.plot_dictionary:
+                    # get number of axes until current page
+                    if page < relevant_page:
+                        # avoid axes from other plot types
+                        if plotting_paradigm == 'station':
+                            if page >= self.station_pages[plot_type][networkspeci][self.subsection][0]:
+                                for axis in self.plot_dictionary[page]['axs']:
+                                    n_axes_plot_type += 1
+                        elif plotting_paradigm == 'summary':
+                            if page >= self.summary_pages[plot_type][networkspeci][0]:
+                                for axis in self.plot_dictionary[page]['axs']:
+                                    n_axes_plot_type += 1
+
+                # get corresponding page index given an axis index
+                if axis_ind >= len(self.plot_dictionary[relevant_page]['axs']):
+                    page_ind = axis_ind - n_axes_plot_type
+                else:
+                    page_ind = axis_ind 
+                
+                # set axis title
+                if relevant_axis.get_title() == '':
+                    axis_title_label = '{}\n{}'.format(data_label, self.subsection)
+                    self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+
+                # set map extent
+                relevant_axis.set_extent(self.map_extent, crs=self.datacrs)
+
+                # make map if there are data
+                if not self.selected_station_data[networkspeci]:
+                    relevant_axis.set_axis_off()
+                    relevant_axis.set_visible(False)
+                else:
+                    # calculate z statistic
+                    self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(self, z1, z2, zstat, networkspeci)
+                    self.active_map_valid_station_inds = active_map_valid_station_inds
+
+                    # make map plot
+                    self.plot.make_map(relevant_axis, networkspeci, self.z_statistic, self.plot_characteristics[plot_type], 
+                                       plot_options=plot_options)
+                    if z2 == '':
+                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z1)
+                    else:
+                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z2)
+
+            # heatmap and table
+            elif base_plot_type in ['heatmap', 'table']:
+
+                # create nested dictionary to store statistical information across all subsections
+                if plotting_paradigm == 'summary':
+                    if zstat not in self.subsection_stats_summary:
+                        self.subsection_stats_summary[zstat] = {}
+                    if data_label_legend not in self.subsection_stats_summary[zstat]:
+                        self.subsection_stats_summary[zstat][data_label_legend] = {}
+                elif plotting_paradigm == 'station':
+                    if self.current_station_reference not in self.subsection_stats_station:
+                        self.subsection_stats_station[self.current_station_reference] = {}
+                    if zstat not in self.subsection_stats_station[self.current_station_reference]:
+                        self.subsection_stats_station[self.current_station_reference][zstat] = {}
+                    if data_label_legend not in self.subsection_stats_station[self.current_station_reference][zstat]:
+                        self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend] = {}
+                
+                # add stat for current data array (if has been calculated correctly, otherwise append NaNs)                                         
+                if data_label in self.selected_station_data[networkspeci]:
+                    if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
+                        data_to_add = self.selected_station_data[networkspeci][data_label]['all'][zstat][0]
+                    else:
+                        data_to_add = np.NaN
+                else:
+                    data_to_add = np.NaN
+                
+                if plotting_paradigm == 'summary':
+                    if self.subsection not in self.subsection_stats_summary[zstat][data_label_legend]:
+                        self.subsection_stats_summary[zstat][data_label_legend][self.subsection] = data_to_add
+                elif plotting_paradigm == 'station':
+                    if self.subsection not in self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend]:
+                        self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend][self.subsection] = data_to_add
+
+            # other plots (1 plot per subsection with multiple data arrays for summary paradigm, 1 plot per subsection per station for station paradigm)
+            elif plot_type != 'statsummary':
+                # get relevant axis to plot on
+                if plotting_paradigm == 'summary':
+                    if 'individual' in plot_options:
+                        if ((base_plot_type == 'scatter') or ('bias' in plot_options) or 
+                            (z_statistic_sign == 'bias')):
+                                axis_ind = (self.current_plot_ind + self.subsection_ind + (len(self.experiments) - 1) * self.subsection_ind)
+                        else:
+                            axis_ind = (self.current_plot_ind + self.subsection_ind + len(self.experiments) * self.subsection_ind)
+                    else:
+                        axis_ind = self.subsection_ind
+                elif plotting_paradigm == 'station':
+                    if 'individual' in plot_options:
+                        if ((base_plot_type == 'scatter') or ('bias' in plot_options) or 
+                            (z_statistic_sign == 'bias')):
+                            axis_ind = (self.current_plot_ind + self.station_ind + (len(self.experiments) - 1) * self.station_ind)
+                        else:
+                            axis_ind = (self.current_plot_ind + self.station_ind + len(self.experiments) * self.station_ind)
+                    else:
+                        axis_ind = self.station_ind
+                
+                # get relevant axis
+                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
+
+                # set axis title (only if not previously set)
+                if isinstance(relevant_axis, dict):
+                    for relevant_temporal_resolution, sub_ax in relevant_axis.items():
+                        if relevant_temporal_resolution == 'hour':
+                            axis_title = sub_ax.get_title()
+                            break
+                else:
+                    axis_title = relevant_axis.get_title()
+                # axis title is empty?
+                if axis_title == '':
+                    if plotting_paradigm == 'summary':
+                        axis_title_label = self.subsection
+                    elif plotting_paradigm == 'station':
+                        axis_title_label = '{} ({:.{}f}, {:.{}f})'.format(self.current_station_name, 
+                                                                          self.current_lon,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'],
+                                                                          self.current_lat,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'])
+                    # set title
+                    if isinstance(relevant_axis, dict):
+                        self.plot.set_axis_title(sub_ax, axis_title_label, self.plot_characteristics[plot_type])
+                    else:
+                        self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+
+                # set xlabel and ylabel (only if not previously set)
+                if isinstance(relevant_axis, dict):
+                    for relevant_temporal_resolution, sub_ax in relevant_axis.items():
+                        if relevant_temporal_resolution in ['hour','month']:
+                            axis_xlabel = 'NaN'
+                            axis_ylabel = sub_ax.get_ylabel()
+                            break
+                else:
+                    axis_xlabel = relevant_axis.get_xlabel()
+                    axis_ylabel = relevant_axis.get_ylabel()
+
+                # axis xlabel is empty?
+                if axis_xlabel == '':
+                    if 'xlabel' in self.plot_characteristics[plot_type]:
+                        if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
+                            xlabel = self.measurement_units[networkspeci.split('|')[-1]]
+                        else:
+                            xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                    else:
+                        xlabel = ''
+                    # set xlabel
+                    if xlabel != '':
+                        self.plot.set_axis_label(relevant_axis, 'x', xlabel, self.plot_characteristics[plot_type])
+
+                # axis ylabel is empty?
+                if axis_ylabel == '':
+                    if base_plot_type in ['periodic']:
+                        if z_statistic_type == 'basic':
+                            ylabel = basic_stats[base_zstat]['label']
+                            ylabel_units = basic_stats[base_zstat]['units']
+                        else:
+                            ylabel = expbias_stats[base_zstat]['label']
+                            ylabel_units = expbias_stats[base_zstat]['units']
+                        if ylabel_units == 'measurement_units':
+                            ylabel_units = self.measurement_units[networkspeci.split('|')[-1]] 
+                        if ylabel_units != '':
+                            ylabel = copy.deepcopy(ylabel_units)
+                    else:
+                        if 'ylabel' in self.plot_characteristics[plot_type]:
+                            if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
+                                ylabel = self.measurement_units[networkspeci.split('|')[-1]]
+                            else:
+                                ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                        else:
+                            ylabel = ''
+                    # set ylabel
+                    if ylabel != '':
+                        if isinstance(relevant_axis, dict):
+                            for relevant_temporal_resolution, sub_ax in relevant_axis.items():
+                                if relevant_temporal_resolution in ['hour','month']:
+                                    self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics[plot_type])
+                        else:
+                            self.plot.set_axis_label(relevant_axis, 'y', ylabel, self.plot_characteristics[plot_type])
+
+                # make plot if there is data
+                if not self.selected_station_data[networkspeci]:
+                    # relevant axis is a dict of the different temporal aggregations in some cases (e.g. periodic plots)
+                    if isinstance(relevant_axis, dict):
+                        for temporal_aggregation_resolution, temporal_aggregation_relevant_axis in relevant_axis.items():
+                            temporal_aggregation_relevant_axis.set_axis_off()
+                    else:
+                        relevant_axis.set_axis_off()
+                else: 
+                    # calculate number of created axis
+                    n_axes_plot_type = 0
+                    for page in self.plot_dictionary:
+                        # get number of axes until current page
+                        if page < relevant_page:
+                            # avoid axes from other plot types
+                            if plotting_paradigm == 'station':
+                                if page >= self.station_pages[plot_type][networkspeci][self.subsection][0]:
+                                    for axis in self.plot_dictionary[page]['axs']:
+                                        n_axes_plot_type += 1
+                            elif plotting_paradigm == 'summary':
+                                if page >= self.summary_pages[plot_type][networkspeci][0]:
+                                    for axis in self.plot_dictionary[page]['axs']:
+                                        n_axes_plot_type += 1
+
+                    # get corresponding page index given an axis index
+                    if axis_ind >= len(self.plot_dictionary[relevant_page]['axs']):
+                        page_ind = axis_ind - n_axes_plot_type
+                    else:
+                        page_ind = axis_ind 
+                    
+                    # periodic plots
+                    if base_plot_type in ['periodic', 'periodic-violin']:
+                        # skip observational array if plotting bias stat
+                        if (z_statistic_sign == 'bias') & (data_label == 'observations'):
+                            continue
+                            
+                        if data_label in self.selected_station_data[networkspeci]:
+                            if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
+                                if base_plot_type == 'periodic':
+                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
+                                                            self.plot_characteristics[plot_type], zstat=zstat, 
+                                                            plot_options=plot_options, 
+                                                            first_data_label=first_data_label)
+                                elif base_plot_type == 'periodic-violin':
+                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
+                                                            self.plot_characteristics[plot_type], 
+                                                            plot_options=plot_options, 
+                                                            first_data_label=first_data_label)
+                                self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)
+                                first_data_label = False
+
+                    # other plot types (except heatmap, table and statsummary) 
+                    else:
+                        # skip observational array for bias/scatter plots
+                        if data_label == 'observations' and ('bias' in plot_options or base_plot_type == 'scatter'):
+                            continue
+                        else:
+                            func = getattr(self.plot, 'make_{}'.format(base_plot_type))
+                        if data_label in self.selected_station_data[networkspeci]:
+                            if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
+                                func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
+                                     plot_options=plot_options, first_data_label=first_data_label) 
+                                first_data_label = False
+                                self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)        
+
+            # iterate number of plots made for current type of plot 
+            self.current_plot_ind += 1     
+
+        # then make plot heatmap/table plot
+        if base_plot_type in ['heatmap', 'table', 'statsummary']:
+            
+            # get relevant axis to plot on
+            if plotting_paradigm == 'summary':
+                axis_ind = 0
+            elif plotting_paradigm == 'station':
+                axis_ind = self.station_ind
+            relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
+                                                                       axis_ind)
+
+            if ((plotting_paradigm == 'summary' and self.subsection_ind == (len(self.subsections) - 1)) or 
+                (plotting_paradigm == 'station')):
+                
+                if base_plot_type in ['heatmap', 'table']:
+               
+                    # convert subsection_stats dicts to dataframe, with subsection names as indices
+                    if plotting_paradigm == 'summary':
+                        stats_to_plot = copy.deepcopy(self.subsection_stats_summary)
+                        for data_label in stats_to_plot[zstat].keys():
+                            stats_per_data_label = []
+                            for subsection, stat in stats_to_plot[zstat][data_label].items():
+                                stats_per_data_label.append(stat)
+                        stats_to_plot[zstat][data_label] = stats_per_data_label
+                        stats_df = pd.DataFrame(data=stats_to_plot[zstat],
+                                                index=self.subsections)
+                    elif plotting_paradigm == 'station':
+                        if self.current_station_reference not in self.subsection_stats_station:
+                            stats_df = pd.DataFrame()
+                        else:
+                            stats_to_plot = copy.deepcopy(self.subsection_stats_station)
+                            for data_label in stats_to_plot[self.current_station_reference][zstat].keys():
+                                stats_per_data_label = []
+                                for subsection, stat in stats_to_plot[self.current_station_reference][zstat][data_label].items():
+                                    stats_per_data_label.append(stat)
+                            stats_to_plot[self.current_station_reference][zstat][data_label] = stats_per_data_label
+                            stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
+                                                    index=[self.subsection])
+        
+                elif base_plot_type in 'statsummary':
+                    # create structure to store data for statsummary plot
+                    if 'bias' in plot_options:
+                        relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
+                    else:
+                        relevant_zstats = self.plot_characteristics[plot_type]['basic']
+                    stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
+                    for data_label in self.selected_station_data[networkspeci]:
+                        for relevant_zstat in relevant_zstats:
+                            stats_df[relevant_zstat].append(self.selected_station_data[networkspeci][data_label]['all'][relevant_zstat][0])
+                    stats_df = pd.DataFrame(data=stats_df, index=self.selected_station_data[networkspeci])
+
+                # set axis title
+                if relevant_axis.get_title() == '':
+                    if plotting_paradigm == 'summary':
+                        axis_title_label = ''
+                    elif plotting_paradigm == 'station':
+                        axis_title_label = '{} ({:.{}f}, {:.{}f})'.format(self.current_station_name, 
+                                                                          self.current_lon,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'],
+                                                                          self.current_lat,
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places'])
+                    self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+        
+            # turn off relevant axis if dataframe is empty or all NaN
+            if 'stats_df' in locals():
+                if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
+                    relevant_axis.set_axis_off()
+                else:
+                    # make plot
+                    if plot_type == 'statsummary':
+                        func = getattr(self.plot, 'make_table')
+                        func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
+                             statsummary=True)
+                    else:
+                        func = getattr(self.plot, 'make_{}'.format(base_plot_type))
+                        func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
+
+    def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
+        """get relevant page and axis for current plot type/subsection/axis index"""
+
+        # get axes associated with plot type
+        if plotting_paradigm == 'summary':
+            relevant_pages = self.summary_pages[plot_type][networkspeci]
+        elif plotting_paradigm == 'station':
+            relevant_pages = self.station_pages[plot_type][networkspeci][self.subsection]
+
+        all_relevant_pages = []
+        relevant_axes = []         
+        for relevant_page in relevant_pages:
+            relevant_axes.extend(self.plot_dictionary[relevant_page]['axs'])
+            all_relevant_pages.extend([relevant_page]*len(self.plot_dictionary[relevant_page]['axs']))
+
+        return all_relevant_pages[axis_ind], relevant_axes[axis_ind]['handle']
+
+def main(**kwargs):
+    """Main function when running offine reports"""
+    ProvidentiaOffline(**kwargs)

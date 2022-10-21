@@ -1,10 +1,10 @@
 *.pyc
-.idea
-test-reports
 providentia.egg-info
 .vscode
 .pytest_cache
 .eggs
 .coverage
 __pycache__
-dist
+reports/*
+configurations/idea.conf
+!reports/PROVIDENTIA_Report.pdf
