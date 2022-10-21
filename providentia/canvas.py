@@ -85,7 +85,7 @@ class MPLCanvas(FigureCanvas):
         for plot_type in self.read_instance.active_dashboard_plots:
             if plot_type not in self.all_plots:
                 msg = "Error: Plot type {0} is not an option. ".format(plot_type)
-                msg += "The available plots are: {0}.".format(self.all_plots)
+                msg += "The available plots are: {0}.".format(self.all_plots[2:])
                 print(msg)
                 sys.exit()
 
