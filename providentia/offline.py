@@ -764,7 +764,8 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
 
                 # get relevant page/axis to plot on
                 axis_ind = (self.current_plot_ind * len(self.subsections)) + self.subsection_ind
-                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
+                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
+                                                                           axis_ind)
 
                 # calculate number of created axis
                 n_axes_plot_type = 0
@@ -846,7 +847,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend][self.subsection] = data_to_add
 
             # other plots (1 plot per subsection with multiple data arrays for summary paradigm, 1 plot per subsection per station for station paradigm)
-            else:
+            elif plot_type != 'statsummary':
                 # get relevant axis to plot on
                 if plotting_paradigm == 'summary':
                     if 'individual' in plot_options:
@@ -979,7 +980,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         page_ind = axis_ind 
                     
                     # periodic plots
-                    if base_plot_type in ['periodic','periodic-violin']:
+                    if base_plot_type in ['periodic', 'periodic-violin']:
                         # skip observational array if plotting bias stat
                         if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                             continue
@@ -989,15 +990,17 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                 if base_plot_type == 'periodic':
                                     self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
                                                             self.plot_characteristics[plot_type], zstat=zstat, 
-                                                            plot_options=plot_options, first_data_label=first_data_label)
+                                                            plot_options=plot_options, 
+                                                            first_data_label=first_data_label)
                                 elif base_plot_type == 'periodic-violin':
                                     self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
                                                             self.plot_characteristics[plot_type], 
-                                                            plot_options=plot_options, first_data_label=first_data_label)
+                                                            plot_options=plot_options, 
+                                                            first_data_label=first_data_label)
                                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)
                                 first_data_label = False
 
-                    # other plot types (except heatmap and table) 
+                    # other plot types (except heatmap, table and statsummary) 
                     else:
                         # skip observational array for bias/scatter plots
                         if data_label == 'observations' and ('bias' in plot_options or base_plot_type == 'scatter'):
@@ -1007,7 +1010,7 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                         if data_label in self.selected_station_data[networkspeci]:
                             if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
                                 func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options, first_data_label=first_data_label) 
+                                     plot_options=plot_options, first_data_label=first_data_label) 
                                 first_data_label = False
                                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)        
 
@@ -1015,40 +1018,56 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
             self.current_plot_ind += 1     
 
         # then make plot heatmap/table plot
-        if (base_plot_type in ['heatmap', 'table']):
+        if base_plot_type in ['heatmap', 'table', 'statsummary']:
+            
+            # get relevant axis to plot on
+            if plotting_paradigm == 'summary':
+                axis_ind = 0
+            elif plotting_paradigm == 'station':
+                axis_ind = self.station_ind
+            relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
+                                                                       axis_ind)
+
             if ((plotting_paradigm == 'summary' and self.subsection_ind == (len(self.subsections) - 1)) or 
                 (plotting_paradigm == 'station')):
-                    
-                # get relevant axis to plot on
-                if plotting_paradigm == 'summary':
-                    axis_ind = 0
-                elif plotting_paradigm == 'station':
-                    axis_ind = self.station_ind
-                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
                 
-                # convert subsection_stats dicts to dataframe, with subsection names as indices
-                if plotting_paradigm == 'summary':
-                    stats_to_plot = copy.deepcopy(self.subsection_stats_summary)
-                    for data_label in stats_to_plot[zstat].keys():
-                        stats_per_data_label = []
-                        for subsection, stat in stats_to_plot[zstat][data_label].items():
-                            stats_per_data_label.append(stat)
-                    stats_to_plot[zstat][data_label] = stats_per_data_label
-                    stats_df = pd.DataFrame(data=stats_to_plot[zstat],
-                                            index=self.subsections)
-                elif plotting_paradigm == 'station':
-                    if self.current_station_reference not in self.subsection_stats_station:
-                        stats_df = pd.DataFrame()
-                    else:
-                        stats_to_plot = copy.deepcopy(self.subsection_stats_station)
-                        for data_label in stats_to_plot[self.current_station_reference][zstat].keys():
+                if base_plot_type in ['heatmap', 'table']:
+               
+                    # convert subsection_stats dicts to dataframe, with subsection names as indices
+                    if plotting_paradigm == 'summary':
+                        stats_to_plot = copy.deepcopy(self.subsection_stats_summary)
+                        for data_label in stats_to_plot[zstat].keys():
                             stats_per_data_label = []
-                            for subsection, stat in stats_to_plot[self.current_station_reference][zstat][data_label].items():
+                            for subsection, stat in stats_to_plot[zstat][data_label].items():
                                 stats_per_data_label.append(stat)
-                        stats_to_plot[self.current_station_reference][zstat][data_label] = stats_per_data_label
-                        stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
-                                                index=[self.subsection])
-    
+                        stats_to_plot[zstat][data_label] = stats_per_data_label
+                        stats_df = pd.DataFrame(data=stats_to_plot[zstat],
+                                                index=self.subsections)
+                    elif plotting_paradigm == 'station':
+                        if self.current_station_reference not in self.subsection_stats_station:
+                            stats_df = pd.DataFrame()
+                        else:
+                            stats_to_plot = copy.deepcopy(self.subsection_stats_station)
+                            for data_label in stats_to_plot[self.current_station_reference][zstat].keys():
+                                stats_per_data_label = []
+                                for subsection, stat in stats_to_plot[self.current_station_reference][zstat][data_label].items():
+                                    stats_per_data_label.append(stat)
+                            stats_to_plot[self.current_station_reference][zstat][data_label] = stats_per_data_label
+                            stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
+                                                    index=[self.subsection])
+        
+                elif base_plot_type in 'statsummary':
+                    # create structure to store data for statsummary plot
+                    if 'bias' in plot_options:
+                        relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
+                    else:
+                        relevant_zstats = self.plot_characteristics[plot_type]['basic']
+                    stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
+                    for data_label in self.selected_station_data[networkspeci]:
+                        for relevant_zstat in relevant_zstats:
+                            stats_df[relevant_zstat].append(self.selected_station_data[networkspeci][data_label]['all'][relevant_zstat][0])
+                    stats_df = pd.DataFrame(data=stats_df, index=self.selected_station_data[networkspeci])
+
                 # set axis title
                 if relevant_axis.get_title() == '':
                     if plotting_paradigm == 'summary':
@@ -1060,15 +1079,20 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                                                                           self.current_lat,
                                                                           self.plot_characteristics[plot_type]['round_decimal_places'])
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
-
+        
             # turn off relevant axis if dataframe is empty or all NaN
             if 'stats_df' in locals():
                 if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
                     relevant_axis.set_axis_off()
                 else:
                     # make plot
-                    func = getattr(self.plot, 'make_{}'.format(base_plot_type))
-                    func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
+                    if plot_type == 'statsummary':
+                        func = getattr(self.plot, 'make_table')
+                        func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
+                             statsummary=True)
+                    else:
+                        func = getattr(self.plot, 'make_{}'.format(base_plot_type))
+                        func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
 
     def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
         """get relevant page and axis for current plot type/subsection/axis index"""
