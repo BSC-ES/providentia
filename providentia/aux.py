@@ -853,6 +853,7 @@ def update_metadata_fields(instance):
             # set defaults to be empty
             instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
             instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []
+
         # for numeric fields get the minimum and maximum boundaries of each metadata variable
         # if previous set values vary from min/max boundaries, copy across the values
         # set as min/max as nan if have no numeric metadata for variable
@@ -1570,3 +1571,4 @@ def get_basic_metadata(instance, networks, species, resolution):
 
 def filter_by_species():
     pass
+    
