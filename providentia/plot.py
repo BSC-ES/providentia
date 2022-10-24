@@ -276,8 +276,8 @@ class Plot:
             if isinstance(map_extent, str):
                 map_extent = [float(c) for c in map_extent.split(',')]
 
-            # set map extent, done in a complicated way to avoid axis cutting off 
-            # (https://github.com/SciTools/cartopy/issues/697)
+            # set map extent, done set_xlim and set_ylim rather than set_extent 
+            # to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697)
             mlon = np.mean(map_extent[:2])
             mlat = np.mean(map_extent[2:])
             xtrm_data = np.array([[map_extent[0], mlat], [mlon, map_extent[2]], [map_extent[1], mlat], [mlon, map_extent[3]]])
@@ -285,7 +285,6 @@ class Plot:
             xtrm = proj_to_data.transform(xtrm_data)
             ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
             ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
-
 
     def set_equal_axes(self, ax):
         """ Set equal aspect and limits (useful for scatter plots)
