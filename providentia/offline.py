@@ -793,8 +793,15 @@ class ProvidentiaOffline(ProvConfiguration, InitStandards):
                     axis_title_label = '{}\n{}'.format(data_label, self.subsection)
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
-                # set map extent
-                relevant_axis.set_extent(self.map_extent, crs=self.datacrs)
+                # set map extent, done set_xlim and set_ylim rather than set_extent 
+                # to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697)
+                mlon = np.mean(self.map_extent[:2])
+                mlat = np.mean(self.map_extent[2:])
+                xtrm_data = np.array([[self.map_extent[0], mlat], [mlon, self.map_extent[2]], [self.map_extent[1], mlat], [mlon, self.map_extent[3]]])
+                proj_to_data = self.datacrs._as_mpl_transform(relevant_axis) - relevant_axis.transData
+                xtrm = proj_to_data.transform(xtrm_data)
+                relevant_axis.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
+                relevant_axis.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
 
                 # make map if there are data
                 if not self.selected_station_data[networkspeci]:
