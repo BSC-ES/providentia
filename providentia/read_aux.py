@@ -42,13 +42,16 @@ def read_netcdf_data(tuple_arguments):
 
     # assign arguments from tuple to variables
     relevant_file, station_references, speci, data_label, data_labels, \
-    reading_ghost, ghost_data_vars_to_read, metadata_dtype, metadata_vars_to_read = tuple_arguments
+    reading_ghost, ghost_data_vars_to_read, metadata_dtype, metadata_vars_to_read, default_qa = tuple_arguments
 
     #wrap shared arrays as numpy arrays to more easily manipulate the data
-    data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'])
+    data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])
     if (reading_ghost) & (data_label == 'observations'): 
-        ghost_data_in_memory = np.frombuffer(shared_memory_vars['ghost_data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'])
-
+        ghost_data_in_memory = np.frombuffer(shared_memory_vars['ghost_data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'][:])
+        qa = np.frombuffer(shared_memory_vars['qa'], dtype=np.uint8)
+        flags = np.frombuffer(shared_memory_vars['flag'], dtype=np.uint8)
+    timestamp_array = np.frombuffer(shared_memory_vars['timestamp_array'], dtype=np.int64)
+ 
     # read netCDF frame, if files doesn't exist, return with None
     ncdf_root = Dataset(relevant_file)
 
@@ -68,11 +71,11 @@ def read_netcdf_data(tuple_arguments):
     file_timestamp = file_time.asi8
 
     # get valid file time indices (i.e. those times in active full time array)
-    valid_file_time_indices = np.where(np.logical_and(file_timestamp>=shared_memory_vars['timestamp_array'][0], 
-                                                      file_timestamp<=shared_memory_vars['timestamp_array'][-1]))[0]
+    valid_file_time_indices = np.where(np.logical_and(file_timestamp>=timestamp_array[0], 
+                                                      file_timestamp<=timestamp_array[-1]))[0]
 
     # get indices relative to active full timestamp array
-    full_array_time_indices = np.searchsorted(shared_memory_vars['timestamp_array'], file_timestamp[valid_file_time_indices])
+    full_array_time_indices = np.searchsorted(timestamp_array, file_timestamp[valid_file_time_indices])
 
     # get all station references in file (do little extra work to get non-GHOST observational station references)
     if (not reading_ghost) & (data_label == 'observations'):
@@ -101,8 +104,10 @@ def read_netcdf_data(tuple_arguments):
         # GHOST
         if reading_ghost:
             # if need to filter by qa load non-filtered array, otherwise load prefiltered array (if available)
-            if (len(shared_memory_vars['qa']) == 0) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
+            if (default_qa) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
                 species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][current_file_station_indices, valid_file_time_indices]
+                # set qa to None as not filtering by them
+                qa = None
             else:
                 species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
         # non-GHOST (transpose array to swap station and time dimensions)
@@ -118,14 +123,15 @@ def read_netcdf_data(tuple_arguments):
                     ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
 
             # if some qa flags selected then screen observations
-            if len(shared_memory_vars['qa']) > 0:
-                # screen out observations which are associated with any of the selected qa flags
-                species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['qa']).any(axis=2)] = np.NaN
-            
+            if qa is not None:
+                if len(qa) > 0:
+                    # screen out observations which are associated with any of the selected qa flags
+                    species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], qa).any(axis=2)] = np.NaN
+                
             # if some data provider flags selected then screen observations
-            if len(shared_memory_vars['flag']) > 0:
+            if len(flags) > 0:
                 # screen out observations which are associated with any of the selected data provider flags
-                species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['flag']).any(axis=2)] = np.NaN
+                species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], flags).any(axis=2)] = np.NaN
 
         # write filtered species data to shared file data
         data_in_memory[data_labels.index('observations'), full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] = species_data

@@ -4,10 +4,6 @@ Currently, it includes function related to the initialization and update
 of metadata, checks fields coming from conf files etc.
 """
 
-from .configuration import split_options
-from .configuration import parse_path
-from .configuration import read_conf
-
 from glob import glob
 import os
 import copy
@@ -66,66 +62,19 @@ def which_bounds(instance, speci):
 
     return np.float32(lower), np.float32(upper)
 
-def which_qa(instance, return_defaults=False):
-    """Returns QA flags for the species selected. If return_defaults
-    is set to true, it will just return the default values according
-    to GHOST standards. If there is a config file which has QA defined,
-    it will return those.
+def get_default_qa(instance, speci):
+    """Returns the default values according to GHOST standards. 
 
     :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
     :type instance: object
-    :param return_defaults: flag for just returning the default QA
-    :type return_defaults: bool
     :return: QA flags' codes in list
     :rtype: list
     """
 
-    if (return_defaults) or (not hasattr(instance, 'qa')):
-        if instance.species in instance.met_parameters:
-            return sorted(instance.default_qa_met)
-        else:
-            return sorted(instance.default_qa_standard)
-
-    if hasattr(instance, 'qa'):
-        # if conf has only 1 QA
-        if isinstance(instance.qa, int):
-            return [instance.qa]
-        # empty string
-        elif instance.qa == "":
-            return []
-        # if the QAs are written with their names
-        elif isinstance(instance.qa, str):
-            return sorted([instance.standard_QA_name_to_QA_code[q.strip()] for q in instance.qa.split(",")])
-        # list of integer codes
-        else:
-            return sorted(list(instance.qa))
-
-def which_flags(instance):
-    """If there are flags coming from a config file,
-    select those. Otherwise, return empty list.
-
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :return: list of flags' codes
-    :rtype: list
-    """
-
-    if hasattr(instance, 'flags'):
-        # if conf has only one flag
-        if isinstance(instance.flags, int):
-            return [instance.flags]
-        # empty string
-        elif instance.flags == "":
-            return []
-        # if the flags are written with their names
-        elif isinstance(instance.flags, str):
-            return [instance.standard_data_flag_name_to_data_flag_code[f.strip()]
-                    for f in instance.flags.split(",")]
-        # list of integer codes
-        else:
-            return list(instance.flags)
+    if speci in instance.met_parameters:
+        return sorted(instance.default_qa_met)
     else:
-        return []
+        return sorted(instance.default_qa_standard)
 
 def multi_species_mapping(species):
     """Map species special case str to multiple species names"""
@@ -134,186 +83,6 @@ def multi_species_mapping(species):
     multi_species_map = {'vconcaerobin*':['vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
 
     return multi_species_map[species]
-
-def get_parameters(instance):
-    """
-    Handle parsing of required config parameters.
-
-    Throw errors if parameters do not exist or are empty strings.
-
-    If have multiple networks / species, parse these correctly.
-    Also handling special case strings which map to binned species.
-
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    """
-
-    # network
-    if hasattr(instance, 'network'):
-        # throw error if network is empty str
-        if instance.network.strip() == '':
-            error = 'Error: "network" field is empty in .conf file'
-            sys.exit(error)
-        # parse multiple networks
-        elif ',' in instance.network:
-            instance.network = [network.strip() for network in instance.network.split(',')]
-        else:
-            instance.network = [instance.network.strip()]
-    else:
-        error = 'Error: "network" field must be defined in .conf file'
-        sys.exit(error)
-
-    # species
-    if hasattr(instance, 'species'):
-        # throw error if species is empty str
-        if instance.species.strip() == '':
-            error = 'Error: "species" field is empty in .conf file'
-            sys.exit(error)
-        # parse multiple species
-        elif ',' in instance.species:
-            instance.species = [speci.strip() for speci in instance.species.split(',')]
-        else:
-            instance.species = [instance.species.strip()]
-    # throw error if species is not defined
-    else:
-        error = 'Error: "species" field must be defined in .conf file'
-        sys.exit(error)
-
-    # if number of networks and species is not the same,
-    # and len of one of network or species == 1,
-    # then duplicate respestive network/species
-    if len(instance.network) != len(instance.species):
-
-        # 1 network?
-        if len(instance.network) == 1:
-            # duplicate network to match species len
-            instance.network = instance.network * len(instance.species)
-
-        # 1 species?
-        elif len(instance.species) == 1:
-            # duplicate species to match network len
-            instance.species = instance.species * len(instance.network)
-
-        # otherwise throw error
-        else:
-            error = 'Error: The number of networks and species is not the same.'
-            sys.exit(error)
-
-    # throw error if one of networks are non all GHOST or non-GHOST
-    for network_ii, network in enumerate(instance.network):
-        if network_ii == 0:
-            previous_is_ghost = check_for_ghost(network)
-        else:
-            is_ghost = check_for_ghost(network)
-            if is_ghost != previous_is_ghost:
-                error = 'Error: Networks must be all GHOST or non-GHOST'
-                sys.exit(error)
-            previous_is_ghost = is_ghost
-
-    # resolution
-    if hasattr(instance, 'resolution'):
-        # throw error if species if empty str
-        if instance.resolution.strip() == '':
-            error = 'Error: "resolution" field is empty in .conf file'
-            sys.exit(error)
-    # throw error if resolution is not defined
-    else:
-        error = 'Error: "resolution" field must be defined in .conf file'
-        sys.exit(error)
-
-    # start_date
-    if hasattr(instance, 'start_date'):
-        # throw error if start_date if empty str
-        if str(instance.start_date).strip() == '':
-            error = 'Error: "start_date" field is empty in .conf file'
-            sys.exit(error)
-    # throw error if start_date is not defined
-    else:
-        error = 'Error: "start_date" field must be defined in .conf file'
-        sys.exit(error)
-
-    # end_date
-    if hasattr(instance, 'end_date'):
-        # throw error if start_date if empty str
-        if str(instance.end_date).strip() == '':
-            error = 'Error: "end_date" field is empty in .conf file'
-            sys.exit(error)
-    # throw error if end_date is not defined
-    else:
-        error = 'Error: "end_date" field must be defined in .conf file'
-        sys.exit(error)
-
-    # map to multiple species if have * wildcard
-    # also duplicate out associated network
-    # remove any species for which there exists no data
-    new_species = copy.deepcopy(instance.species)
-    for speci_ii, speci in enumerate(instance.species): 
-        if '*' in speci:
-            mapped_species = multi_species_mapping(speci)
-            del new_species[speci_ii]
-            new_species[speci_ii:speci_ii] = mapped_species
-            network_to_duplicate = instance.network[speci_ii]
-            del instance.network[speci_ii]
-            instance.network[speci_ii:speci_ii] = [network_to_duplicate]*len(mapped_species)
-    instance.species = copy.deepcopy(new_species)
-
-    # if are using dashboard then just take first network/species pair, as multivar not supported yet
-    if (len(instance.network) > 1) & (len(instance.species) > 1) & (not instance.offline):
-      instance.network = [instance.network[0]]
-      instance.species = [instance.species[0]]
-      print('Warning: Mutiple networks/species not supported for dashboard.\nFirst network / species taken.')
-
-def get_experiments(instance):
-    """If there are experiments coming from a config file,
-    select those. Otherwise, return empty dict.
-
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :return: dict (exp:exp_legend_name)
-    :rtype: dict
-    """
-
-    if hasattr(instance, 'experiments'):
-        # empty string
-        if instance.experiments.strip() == "":
-            return {}
-        # split experiments
-        else:
-            # have alternative experiment names for the legend, then parse them?
-            if ('(' in instance.experiments) & (')' in instance.experiments):
-                exps = [exp.strip() for exp in instance.experiments.split('(')[0].strip().split(",")]
-                exps_legend = [exp_legend.strip() for exp_legend in instance.experiments.split('(')[1].split(')')[0].strip().split(",")]
-            # otherwise set legend names as given experiment names in full
-            else: 
-                exps = [exp.strip() for exp in instance.experiments.split(",")]
-                exps_legend = copy.deepcopy(exps)
-            return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
-    else:
-        return {}
-
-def get_default_qa_codes(instance):
-    """Retrieve default QA codes from GHOST_standards using the QA flags' names.
-
-    A specific selection of qa are defined for met. parameters
-
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :return: three lists which contain flags' codes
-    :rtype: list
-    """
-
-    # get defaukt names from json files
-    standard_qa_names = json.load(open(
-        "providentia/conf/default_qa.json"))['standard']
-    met_qa_names = json.load(open(
-        "providentia/conf/default_qa.json"))['met']
-    # get qa codes
-    standard_qa = [instance.standard_QA_name_to_QA_code[qa_name]
-                   for qa_name in standard_qa_names]
-    met_qa = [instance.standard_QA_name_to_QA_code[qa_name]
-              for qa_name in met_qa_names]
-
-    return standard_qa, met_qa
 
 def exceedance_lim(species):
     """Returns the exceedance limit depending on the species input. If
@@ -918,6 +687,8 @@ def period_conf(instance):
     :type instance: object
     """
 
+    from .configuration import split_options
+
     if hasattr(instance, 'period'):
         keeps, removes = split_options(instance.period)
         instance.period_menu['checkboxes']['keep_selected'] = keeps
@@ -933,6 +704,8 @@ def metadata_conf(instance):
     :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
     :type instance: object
     """
+
+    from .configuration import split_options
 
     for menu_type in instance.metadata_types:
         # treat first ranges
@@ -985,6 +758,8 @@ def check_for_ghost(network_name):
 def load_conf(self, fpath=None):
     """Load existing configurations from file
     for running offline Providentia."""
+
+    from .configuration import read_conf
 
     if fpath is None:
         print("No configuration file found")
