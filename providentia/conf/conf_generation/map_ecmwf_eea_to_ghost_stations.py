@@ -33,19 +33,18 @@ def cross_check(stations_unfound, ghost_stations, associated_networks, mapped_st
 
     return stations_unfound, mapped_stations
 
-def create_config_file(fname, eval_type, network, resolution, matrix, species, start_date, end_date, mapped_stations):
+def create_config_file(fname, eval_type, network, resolution, species, start_date, end_date, mapped_stations):
   
     mapped_stations_str = ', '.join([str(elem) for elem in sorted(list(mapped_stations.values()))])
 
     config_file = open('generated_confs/{}'.format(fname), "w")
     config_file.write('[{}]\n'.format(eval_type))
     config_file.write('network = {}\n'.format(network))
-    config_file.write('resolution = {}\n'.format(resolution))
-    config_file.write('matrix = {}\n'.format(matrix))
     config_file.write('species = {}\n'.format(species))
+    config_file.write('resolution = {}\n'.format(resolution))
     config_file.write('start_date = {}\n'.format(start_date))
     config_file.write('end_date = {}\n'.format(end_date))
-    config_file.write('station_reference = keep:{};'.format(mapped_stations_str))
+    config_file.write('station_reference = keep:{} ||'.format(mapped_stations_str))
     config_file.close()
 
 stations_files = sorted(glob.glob('/esarchive/obs/ecmwf/eea-cams50/original_files/stations/*'))
@@ -63,12 +62,6 @@ for stations_file in stations_files:
     mapped_stations = {}
 
     species = species_map[stations_file.split('.')[1]]
-    if species == 'pm10':
-        matrix = 'pm10'
-    elif species == 'pm2p5':
-        matrix = 'pm2.5'
-    else:
-        matrix = 'gas'
 
     conf_fname = 'ecmwf_cams2_40_eea_{}_background_{}_set10.conf'.format(species,eval_type)
 
@@ -87,5 +80,4 @@ for stations_file in stations_files:
 
         root.close()
 
-    create_config_file(conf_fname, eval_type, 'EEA_AQ_eReporting', 'hourly', matrix, species, '20180101', '20190101', mapped_stations)
-
+    create_config_file(conf_fname, eval_type, 'EEA_AQ_eReporting', 'hourly', species, '20200101', '20210101', mapped_stations)

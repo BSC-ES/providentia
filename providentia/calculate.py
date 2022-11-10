@@ -94,8 +94,9 @@ class Stats(object):
         :return: data availability percent
         :rtype: numpy.float64
         """
-        return (100. / np.array(data).shape[-1]) * \
-               (np.count_nonzero(~np.isnan(data), axis=-1))
+
+        return (100. / np.array(data).shape[0]) * \
+               (np.count_nonzero(~np.isnan(data), axis=0))
 
     @staticmethod
     def calculate_data_avail_number(data):
@@ -108,18 +109,15 @@ class Stats(object):
     def max_repeated_nans_fraction(data):
         """Get % of total period of the maximum run of consecutive NaNs in array"""
         max_gap_pc = []
-
-        for station_data in data:
-            mask = np.concatenate((np.full((station_data.shape[0], station_data.shape[1]), False), 
-                                   np.isnan(station_data), 
-                                   np.full((station_data.shape[0], station_data.shape[1]), False)))
+        for station_ind in range(data.shape[1]):
+            mask = np.concatenate(([False],np.isnan(data[:,station_ind]),[False]))
             if ~mask.any():
                 max_gap_pc.append(0)
             else:
                 idx = np.nonzero(mask[1:] != mask[:-1])[0]
                 max_gap_pc.append((idx[1::2] - idx[::2]).max())
 
-        return np.array(max_gap_pc) * (100. / data.shape[1])
+        return np.array(max_gap_pc) * (100. / data.shape[0])
 
     @staticmethod
     def calculate_exceedances(data, threshold=0):
