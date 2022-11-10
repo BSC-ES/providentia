@@ -90,6 +90,12 @@ class Plot:
                         print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created')
                         continue
 
+            # if are making an experiment bias plot, and temporal_colocation is off, then remove plot
+            if (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
+                if self.read_instance.offline:
+                    print(f'Warning: To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created')
+                    continue
+
             # add new keys to make plots with stats (map, periodic, heatmap, table)
             if zstat:
 
@@ -138,12 +144,12 @@ class Plot:
                         print(f'Warning: {plot_type} cannot be created as some plot options are not valid')
                         continue
                 # warning for scatter plot if the temporal colocation is not active
-                elif ('scatter' == base_plot_type) & (self.read_instance.temporal_colocation == False):
+                elif ('scatter' == base_plot_type) & (not self.read_instance.temporal_colocation):
                     if self.read_instance.offline:
                         print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
                         continue
                 # warning for timeseries bias plot if the temporal colocation is not active
-                elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (self.read_instance.temporal_colocation == False):
+                elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
                     if self.read_instance.offline:
                         print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
                         continue
@@ -163,7 +169,9 @@ class Plot:
                 elif self.canvas_instance.plot_characteristics[plot_type]['orientation'] == 'portrait':
                     self.canvas_instance.plot_characteristics[plot_type]['figure']['figsize'] = self.canvas_instance.portrait_figsize
 
-    def format_axis(self, ax, base_plot_type, plot_characteristics, relevant_temporal_resolution='hour', col_ii=0, last_valid_row=True, last_row_on_page=True):
+    def format_axis(self, ax, base_plot_type, plot_characteristics, 
+                    col_ii=0, last_valid_row=True, last_row_on_page=True, set_extent=True,
+                    relevant_temporal_resolutions=['hour','dayofweek','month']):
         """Format a plotting axis.
         
         :param ax: axis object
@@ -172,119 +180,133 @@ class Plot:
         :type base_plot_type: str  
         :param plot_characteristics: plot characteristics
         :type plot_characteristics: dict
-        :param relevant_temporal_resolution: the relevant temporal resolution of axis (for periodic plots) 
-        :type relevant_temporal_resolution: str 
         :param col_ii: column index (for offline report)
         :type col_ii: int
         :param last_valid_row: boolean informing if last valid row to plot on (for offline report)
         :type last_valid_row: boolean
         :param last_row_on_page: boolean informing if last valid row on page (for offline report)
         :type last_row_on_page: boolean
+        :param map_extent: boolean informing if wanting to set map_extent or not
+        :type map_extent: boolean
+        :param relevant_temporal_resolutions: list of relevant temporal resolutions
+        :type relevant_temporal_resolutions: list
         """
 
         # get plot characteristics vars
         plot_characteristics_vars = list(plot_characteristics.keys())
 
-        # set axis ticks and gridlines below all artists
-        ax.set_axisbelow(True)
-        
-        # make axis xlabel (only on last row on page/last valid row of visible axes)?
-        if 'xlabel' in plot_characteristics_vars:
-            if last_valid_row or last_row_on_page:
-                ax.set_xlabel(**plot_characteristics['xlabel'])
+        # get appropriate axes for nested axes
+        axs_to_format = []
+        temporal_resolutions_per_ax = []
+        if isinstance(ax, dict):
+            for relevant_temporal_resolution, sub_ax in ax.items():
+                if relevant_temporal_resolution in relevant_temporal_resolutions:
+                    axs_to_format.append(sub_ax)
+                    temporal_resolutions_per_ax.append(relevant_temporal_resolution)
+        else:
+            axs_to_format.append(ax)
+            temporal_resolutions_per_ax.append('')
 
-        # make axis ylabel (only on leftmost column of visible axes)?
-        if ('ylabel' in plot_characteristics_vars) & (col_ii == 0):
-            ax.set_ylabel(**plot_characteristics['ylabel'])
+        # iterate though relevant axes (and relevant temporal resolutions for periodic plots)
+        for ax_to_format, relevant_temporal_resolution in zip(axs_to_format, temporal_resolutions_per_ax): 
 
-        # set xtick params ?
-        if 'xtick_params' in plot_characteristics_vars:
-            ax.xaxis.set_tick_params(**plot_characteristics['xtick_params'])
+            # set axis ticks and gridlines below all artists
+            ax_to_format.set_axisbelow(True)
 
-        # set ytick params ?
-        if 'ytick_params' in plot_characteristics_vars:
-            ax.yaxis.set_tick_params(**plot_characteristics['ytick_params'])
+            # make axis xlabel?
+            if 'xlabel' in plot_characteristics_vars:
+                ax_to_format.set_xlabel(**plot_characteristics['xlabel'])
 
-        # if are sharing xticks, and not on last row on page/last
-        # valid row, then ensure current axis xticks are hidden
-        if ('xtick_share' in plot_characteristics_vars) and (not last_valid_row) and (not last_row_on_page):
-            plt.setp(ax.get_xticklabels(), visible=False)
+            # make axis ylabel (only on leftmost column of visible axes)?
+            if 'ylabel' in plot_characteristics_vars:
+                ax_to_format.set_ylabel(**plot_characteristics['ylabel'])
 
-        # if are sharing yticks, and not on left column, then ensure current axis yticks are hidden
-        if ('ytick_share' in plot_characteristics_vars) and (col_ii != 0):
-            plt.setp(ax.get_yticklabels(), visible=False)
+            # set xtick params ?
+            if 'xtick_params' in plot_characteristics_vars:
+                ax_to_format.xaxis.set_tick_params(**plot_characteristics['xtick_params'])
 
-        # set xlim?
-        if 'xlim' in plot_characteristics_vars:
-            ax.set_xlim(**plot_characteristics_vars['xlim'])
+            # set ytick params ?
+            if 'ytick_params' in plot_characteristics_vars:
+                ax_to_format.yaxis.set_tick_params(**plot_characteristics['ytick_params'])
 
-        # set ylim? 
-        if 'ylim' in plot_characteristics_vars:
-            ax.set_ylim(**plot_characteristics_vars['ylim'])
+            # if are sharing xticks, and not on last row on page/last
+            # valid row, then ensure current axis xticks are hidden
+            if ('xtick_share' in plot_characteristics_vars) and (not last_valid_row) and (not last_row_on_page):
+                plt.setp(ax_to_format.get_xticklabels(), visible=False)
 
-        # add gridlines (x and y)?
-        if 'grid' in plot_characteristics_vars:
-            ax.grid(**plot_characteristics['grid'])
+            # if are sharing yticks, and not on left column, then ensure current axis yticks are hidden
+            if ('ytick_share' in plot_characteristics_vars) and (col_ii != 0):
+                plt.setp(ax_to_format.get_yticklabels(), visible=False)
 
-        # add x gridlines?
-        if 'xgrid' in plot_characteristics_vars:
-            ax.xaxis.grid(**plot_characteristics['xgrid'])
+            # set xlim?
+            if 'xlim' in plot_characteristics_vars:
+                ax_to_format.set_xlim(**plot_characteristics_vars['xlim'])
 
-        # add y gridlines?
-        if 'ygrid' in plot_characteristics_vars:
-            ax.yaxis.grid(**plot_characteristics['ygrid'])
+            # set ylim? 
+            if 'ylim' in plot_characteristics_vars:
+                ax_to_format.set_ylim(**plot_characteristics_vars['ylim'])
 
-        # remove spines?
-        if 'remove_spines' in plot_characteristics_vars:
-            for side in plot_characteristics['remove_spines']:
-                ax.spines[side].set_visible(False)
+            # add gridlines (x and y)?
+            if 'grid' in plot_characteristics_vars:
+                ax_to_format.grid(**plot_characteristics['grid'])
 
-            for side in list(set(['top', 'bottom', 'right', 'left']).symmetric_difference(plot_characteristics['remove_spines'])):
-                ax.spines[side].set_visible(True)
+            # add x gridlines?
+            if 'xgrid' in plot_characteristics_vars:
+                ax_to_format.xaxis.grid(**plot_characteristics['xgrid'])
 
-        # handle formatting specific to plot types
-        if base_plot_type in ['periodic','periodic-violin']:
+            # add y gridlines?
+            if 'ygrid' in plot_characteristics_vars:
+                ax_to_format.yaxis.grid(**plot_characteristics['ygrid'])
 
-            # add axis resolution label 
-            ax.annotate(self.canvas_instance.periodic_labels[relevant_temporal_resolution], **plot_characteristics['label'])
+            # remove spines?
+            if 'remove_spines' in plot_characteristics_vars:
+                for side in plot_characteristics['remove_spines']:
+                    ax_to_format.spines[side].set_visible(False)
 
-            # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
-            if relevant_temporal_resolution == 'hour':
-                plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution][::3]
-                ax.set_xticks(plot_characteristics['xticks'])
-            else:
-                plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
-                ax.set_xticks(plot_characteristics['xticks'])
-                ax.set_xticklabels([self.canvas_instance.temporal_axis_mapping_dict[relevant_temporal_resolution][xtick] for xtick
-                                                                            in self.canvas_instance.periodic_xticks[relevant_temporal_resolution]])
-        # map specific formatting
-        elif base_plot_type == 'map':
+                for side in list(set(['top', 'bottom', 'right', 'left']).symmetric_difference(plot_characteristics['remove_spines'])):
+                    ax_to_format.spines[side].set_visible(True)
 
-            # add land polygons
-            ax.add_feature(self.canvas_instance.feature)
+            # handle formatting specific to plot types
+            if base_plot_type in ['periodic','periodic-violin']:
 
-            # add gridlines ?
-            if 'gridlines' in plot_characteristics_vars:
-                ax.gridlines(crs=self.canvas_instance.datacrs, **plot_characteristics['gridlines'])
+                # add axis resolution label 
+                ax_to_format.annotate(self.canvas_instance.periodic_labels[relevant_temporal_resolution], **plot_characteristics['label'])
 
-            # set map_extent
-            if hasattr(self.read_instance, 'map_extent'):
-                map_extent = self.read_instance.map_extent
-            else:
-                map_extent = plot_characteristics['map_extent']
-                self.read_instance.map_extent = map_extent
-            if isinstance(map_extent, str):
-                map_extent = [float(c) for c in map_extent.split(',')]
+                # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
+                if relevant_temporal_resolution == 'hour':
+                    plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution][::3]
+                    ax_to_format.set_xticks(plot_characteristics['xticks'])
+                else:
+                    plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
+                    ax_to_format.set_xticks(plot_characteristics['xticks'])
+                    ax_to_format.set_xticklabels([self.canvas_instance.temporal_axis_mapping_dict[relevant_temporal_resolution][xtick] for xtick
+                                                  in self.canvas_instance.periodic_xticks[relevant_temporal_resolution]])
+            # map specific formatting
+            elif base_plot_type == 'map':
 
-            # set map extent, done set_xlim and set_ylim rather than set_extent 
-            # to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697)
-            mlon = np.mean(map_extent[:2])
-            mlat = np.mean(map_extent[2:])
-            xtrm_data = np.array([[map_extent[0], mlat], [mlon, map_extent[2]], [map_extent[1], mlat], [mlon, map_extent[3]]])
-            proj_to_data = self.canvas_instance.datacrs._as_mpl_transform(ax) - ax.transData
-            xtrm = proj_to_data.transform(xtrm_data)
-            ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
-            ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
+                # add land polygons
+                ax_to_format.add_feature(self.canvas_instance.feature)
+
+                # add gridlines ?
+                if 'gridlines' in plot_characteristics_vars:
+                    ax_to_format.gridlines(crs=self.canvas_instance.datacrs, **plot_characteristics['gridlines'])
+
+                # set map extent (if wanted)
+                if set_extent:
+                    self.set_map_extent(ax_to_format)
+
+    def set_map_extent(self, ax):
+        """set map extent, done set_xlim and set_ylim rather than set_extent 
+           to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697)
+        """
+
+        mlon = np.mean(self.read_instance.map_extent[:2])
+        mlat = np.mean(self.read_instance.map_extent[2:])
+        xtrm_data = np.array([[self.read_instance.map_extent[0], mlat], [mlon, self.read_instance.map_extent[2]], [self.read_instance.map_extent[1], mlat], [mlon, self.read_instance.map_extent[3]]])
+        proj_to_data = self.canvas_instance.datacrs._as_mpl_transform(ax) - ax.transData
+        xtrm = proj_to_data.transform(xtrm_data)
+        ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
+        ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
 
     def set_equal_axes(self, ax):
         """ Set equal aspect and limits (useful for scatter plots)
@@ -403,11 +425,7 @@ class Plot:
 
         # set header title
         page = plt.figure(**plot_characteristics['figure'])
-        if hasattr(self.read_instance, 'report_title'):
-            txt = self.read_instance.report_title
-        else:
-            txt = 'Providentia Offline Report'
-        plot_characteristics['page_title']['s'] = txt   
+        plot_characteristics['page_title']['s'] = self.read_instance.report_title 
         plot_characteristics['page_title']['transform'] = page.transFigure
         page.text(**plot_characteristics['page_title'])
 
@@ -434,7 +452,7 @@ class Plot:
         plt.close(page)
 
     def make_metadata(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
-                      first_data_label=False):
+                      first_data_label=False, station_inds=[]):
         """Make metadata summary plot
 
         :param relevant_axis: axis to plot on 
@@ -449,18 +467,16 @@ class Plot:
         :type plot_options: list
         :param first_data_label: boolean informing if first plotted data_label on axis
         :type first_data_label: boolean
+        :param station_inds: list of relevant station indices
+        :type station_inds: list
         """
 
         # initialise string to plot on axis
         str_to_plot = ''
         
+        # get relevant station indices
         if not self.read_instance.offline:
             station_inds = self.canvas_instance.relative_selected_station_inds
-        else:
-            if self.read_instance.temporal_colocation and len(self.read_instance.data_labels) > 1:
-                station_inds = self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
-            else:
-                station_inds = self.read_instance.valid_station_inds[networkspeci][data_label]
 
         # setup some variables for handling if just one or multiple stations selected
         if len(station_inds) == 1:
@@ -636,7 +652,7 @@ class Plot:
         else:
             bias = False
             ts = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']
-            
+
         # get ts with no NaNs
         ts_nonan = ts.dropna()
         
@@ -668,7 +684,7 @@ class Plot:
                     timeseries_end_date = pd.to_datetime(timeseries_end_date)    
 
                 # get start and end dates for all data labels
-                for data_label in self.read_instance.data_labels:
+                for data_label in self.canvas_instance.selected_station_data[networkspeci]:
 
                     # get start and end dates for each label
                     start_date = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna().index.values[0]
@@ -864,7 +880,7 @@ class Plot:
                     self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), periodic_plot, bias=bias)
 
     def make_distribution(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
-                          first_data_label=False):
+                          first_data_label=False, data_range_min=False, data_range_max=False):
         """Make distribution plot
 
         :param relevant_axis: axis to plot on 
@@ -879,17 +895,28 @@ class Plot:
         :type plot_options: list
         :param first_data_label: boolean informing if first plotted data_label on axis
         :type first_data_label: boolean
+        :param data_range_min: minimum data range of distribution plot grid 
+        :type data_range_min: float
+        :param data_range_max: maximum data range of distribution plot grid 
+        :type data_range_max: float
         """
 
+        # set data ranges for distribution plot grid if not set explicitely
+        if not data_range_min:
+            data_range_min = self.canvas_instance.selected_station_data_min[networkspeci]
+
+        if not data_range_max:
+            data_range_max = self.canvas_instance.selected_station_data_max[networkspeci]
+
         # make distribution plot
-        minmax_diff = self.canvas_instance.selected_station_data_max[networkspeci] - self.canvas_instance.selected_station_data_min[networkspeci]
+        minmax_diff = data_range_max - data_range_min
         if pd.isnull(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']):
             n_samples = plot_characteristics['pdf_min_samples']
         else:
             n_samples = int(np.around(minmax_diff/(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']/4.0),0))
             if n_samples < plot_characteristics['pdf_min_samples']:
                 n_samples = plot_characteristics['pdf_min_samples']
-        x_grid = np.linspace(self.canvas_instance.selected_station_data_min[networkspeci], self.canvas_instance.selected_station_data_max[networkspeci], n_samples, endpoint=True)
+        x_grid = np.linspace(data_range_min, data_range_max, n_samples, endpoint=True)
 
         PDF_sampled_calculated = False
 
@@ -1124,8 +1151,13 @@ class Plot:
                               **plot_characteristics['plot'])
 
         # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
-        bottom, top = relevant_axis.get_ylim()
-        relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+        if len(stats_df.index) > 1:
+            bottom, top = relevant_axis.get_ylim()
+            relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+
+        # vertically align yticklabels due to bug again in matplotlib - hack fix. Remove in Future!
+        for tick in relevant_axis.get_yticklabels():
+            tick.set_verticalalignment("center")
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
@@ -1677,10 +1709,10 @@ class Plot:
                     if temporal_resolution == 'hour':
                         xlim_lower = first_valid_x - 0.65
                         xlim_upper = last_valid_x + 0.65
-                    elif temporal_resolution == 'month':
+                    elif temporal_resolution == 'dayofweek':
                         xlim_lower = first_valid_x - 0.55
                         xlim_upper = last_valid_x + 0.55
-                    elif temporal_resolution == 'dayofweek':
+                    elif temporal_resolution == 'month':
                         xlim_lower = first_valid_x - 0.55
                         xlim_upper = last_valid_x + 0.55
                     xlim = xlim_lower, xlim_upper
@@ -1690,7 +1722,8 @@ class Plot:
                 for temporal_resolution, sub_ax in zip(mapped_resolutions, relevant_axs):
                     sub_ax.set_xlim(xlim)
 
-    def set_axis_title(self, relevant_axis, title, plot_characteristics):
+    def set_axis_title(self, relevant_axis, title, plot_characteristics, 
+                       relevant_temporal_resolutions=['hour']):
         """Set title of plot axis
 
         :param relevant_axis: axis to plot on 
@@ -1699,31 +1732,32 @@ class Plot:
         :type title: str
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
+        :param relevant_temporal_resolutions: relevant temporal resolutions to plot title on   
+        :type relevant_temporal_resolutions: list
         """    
 
         # return if title is empty str
         if title == '':
             return
 
-        # get appropriate axis for plotting label for plots with multiple sub-axes (hour axis)
+        # get appropriate axis for plotting label for plots with multiple sub-axes
         axs_to_set_title = []
-        if type(relevant_axis) == dict:
+        if isinstance(relevant_axis, dict):
             for relevant_temporal_resolution, sub_ax in relevant_axis.items():
-                if relevant_temporal_resolution in ['hour']:
+                if relevant_temporal_resolution in relevant_temporal_resolutions:
                     axs_to_set_title.append(sub_ax)
+                    break
         else:
             axs_to_set_title.append(relevant_axis)
 
         # set title for appropriate axes
         axis_title_characteristics = copy.deepcopy(plot_characteristics['axis_title'])
         axis_title_characteristics['label'] = title
-
         for relevant_axis in axs_to_set_title:
             relevant_axis.set_title(**axis_title_characteristics)
-        
-        return title
 
-    def set_axis_label(self, relevant_axis, label_ax, label, plot_characteristics):
+    def set_axis_label(self, relevant_axis, label_ax, label, plot_characteristics, 
+                       relevant_temporal_resolutions=['hour', 'month']):
         """Set label of plot axis
 
         :param relevant_axis: axis to plot on 
@@ -1742,10 +1776,14 @@ class Plot:
 
         # get appropriate axis for plotting label for plots with multiple sub-axes (hour and month axes)
         axs_to_set_label = []
-        if type(relevant_axis) == dict:
+        if isinstance(relevant_axis, dict):
             for relevant_temporal_resolution, sub_ax in relevant_axis.items():
-                if relevant_temporal_resolution in ['hour', 'month']:
+                if relevant_temporal_resolution in relevant_temporal_resolutions:
                     axs_to_set_label.append(sub_ax)
+                # remove day of week axis label if setting ylabel
+                if (relevant_temporal_resolution == 'dayofweek') & (label_ax == 'y'):                           
+                    sub_ax.yaxis.set_tick_params(which='both', labelleft=False)
+                    sub_ax.set_ylabel('')
         else:
             axs_to_set_label.append(relevant_axis)
 

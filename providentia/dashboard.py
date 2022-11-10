@@ -1,6 +1,5 @@
 """ Module which provides main window """
 from .configuration import ProvConfiguration
-from .init_standards import InitStandards
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
 from .dashboard_aux import ComboBox
@@ -32,7 +31,7 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
-class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards):
+class ProvidentiaMainWindow(QtWidgets.QWidget):
     """Define class that generates Providentia dashboard"""
 
     # create signals that are fired upon resizing/moving of main Providentia window
@@ -40,21 +39,24 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
     move = QtCore.pyqtSignal()
 
     def __init__(self, **kwargs):
+
+        # allow access to methods of parent class QtWidgets.QWidget
         super(ProvidentiaMainWindow, self).__init__()
-        ProvConfiguration.__init__(self, **kwargs)
 
-        # store options to be restored at the end
-        dconf_path = (os.path.join(CURRENT_PATH, 'conf/default.conf'))
+        # initialise default configuration variables
+        # modified by commandline arguments, if given
+        provconf = ProvConfiguration(self, **kwargs)
 
-        # update from config file (if available)
+        # update variables from config file (if available)
+        self.from_conf = False
+        self.current_config = {}
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             if 'section' in kwargs:
                 # config and section defined 
-                self.from_conf = True
-                self.from_section = True
                 aux.load_conf(self, fpath=kwargs['config'])
                 if kwargs['section'] in self.all_sections:
-                    vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[kwargs['section']].items()})
+                    self.from_conf = True
+                    self.current_config = self.sub_opts[kwargs['section']]
                 else:
                     error = 'Error: The section specified in the command line does not exist.'
                     tip = 'Tip: For subsections, add the name of the parent section followed by a vertical bar (|) before the subsection name (e.g. SECTIONA|Spain).'
@@ -62,8 +64,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
             elif 'section' not in kwargs:
                 # config defined, section undefined
-                self.from_conf = True
-                self.from_section = False
                 aux.load_conf(self, fpath=kwargs['config'])    
                 all_sections = self.sub_opts.keys()
                 if len(all_sections) == 1:
@@ -74,20 +74,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
                                                                                  'Select section to load',  
                                                                                  all_sections, 0, False)
                 if okpressed or (len(all_sections) == 1):
-                    vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts[selected_section].items()})
+                    self.from_conf = True
+                    self.current_config = self.sub_opts[selected_section]
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
-        else:
-            if os.path.isfile(dconf_path):
-                # config undefined
-                self.from_conf = False
-                self.from_section = False
-                aux.load_conf(self, fpath=dconf_path)
-                vars(self).update({(k, self.parse_parameter(k, val)) for k, val in self.sub_opts['default'].items()})
         
-        # update from command line
-        vars(self).update({(k, self.parse_parameter(k, val)) for k, val in kwargs.items()})
+        # update variables from defined config file
+        if self.current_config:
+            vars(self).update({(k, provconf.parse_parameter(k, val)) for k, val in self.current_config.items()})
+
+        # now all variables have been parsed, check validity of those, throwing errors where necessary
+        provconf.check_validity()
 
         # load characteristics per plot type
         # check for self defined plot characteristics file
@@ -98,10 +96,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
 
         # arguments are only local
         self.main_window_geometry = None
-        
-        # init GHOST standards
-        InitStandards.__init__(self, ghost_root=self.ghost_root,
-                               ghost_version=self.ghost_version)
 
         # create dictionary of all available observational GHOST data
         self.all_observation_data = aux.get_ghost_observational_tree(self)
@@ -471,7 +465,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.cb_position_5.currentTextChanged.connect(self.handle_layout_update)
 
         # Generate MPL navigation toolbar
-        self.navi_toolbar = NavigationToolbar(self, canvas_instance=self.mpl_canvas)
+        self.navi_toolbar = NavigationToolbar(read_instance=self, canvas_instance=self.mpl_canvas)
         self.navi_toolbar._nav_stack.push(
             WeakKeyDictionary({self.mpl_canvas.plot_axes['map']: (self.mpl_canvas.plot_axes['map']._get_view(), 
                                                                   (self.mpl_canvas.plot_axes['map'].get_position(True).frozen(), 
@@ -517,9 +511,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
 
-            # parse initial config variables (checking for presence of key variables)
-            aux.get_parameters(self)
-
             # set initial selected start-end date as default
             self.le_start_date.setText(str(self.start_date))
             self.le_end_date.setText(str(self.end_date))
@@ -550,11 +541,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # create dictionary of available observational data inside date range
             aux.get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
 
-            # set qa / flags
-            self.flags = aux.which_flags(self)
-            self.qa = aux.which_qa(self)
+            # update qa / flags checkboxes 
             self.flag_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.flags)
-            self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa)
+            self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa_per_species[self.selected_species])
 
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
@@ -622,10 +611,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         
         # update experiments -- keeping previously selected experiments if available
         if self.config_bar_initialisation:   
-            experiments = aux.get_experiments(self)
-            self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in experiments
+            self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in self.experiments
                                                                     if experiment in self.experiments_menu['checkboxes']['map_vars']]
-            self.experiments = {experiment:experiment_alias for experiment, experiment_alias in experiments.items()
+            self.experiments = {experiment:experiment_alias for experiment, experiment_alias in self.experiments.items()
                                 if experiment in self.experiments_menu['checkboxes']['map_vars']}
 
         self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for
@@ -637,7 +625,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.experiments = {exp:previous_experiments[exp] if exp in previous_experiments else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
         
         # update default qa
-        default_qa = aux.which_qa(self, return_defaults=True)
+        default_qa = aux.get_default_qa(self, self.selected_species)
         self.qa_menu['checkboxes']['remove_default'] = default_qa
 
         # update layout fields
@@ -782,24 +770,22 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # remove axis elements for previous plot type, and from active_dashboard_plots
             if (previous_plot_type in self.active_dashboard_plots) & (previous_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[previous_plot_type]
-                if type(ax) == dict:
+                self.mpl_canvas.remove_axis_elements(ax, previous_plot_type)
+                if isinstance(ax, dict):
                     for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, previous_plot_type)
                         sub_ax.remove()
                 else:
-                    self.mpl_canvas.remove_axis_elements(ax, previous_plot_type)
                     ax.remove()
                 self.active_dashboard_plots.remove(previous_plot_type)
 
             # if changed_plot_type already axis on another axis then remove those axis elements
             if (changed_plot_type in self.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
-                if type(ax) == dict:
+                self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
+                if isinstance(ax, dict):
                     for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type)
                         sub_ax.remove()
                 else:
-                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
                     ax.remove()
 
             # otherwise add plot_type to active_dashboard_plots
@@ -812,28 +798,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             # hide axis for new plot type before replot
             if (changed_plot_type in self.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
-                if type(ax) == dict:
-                    for sub_ax in ax.values():
-                        self.mpl_canvas.remove_axis_elements(sub_ax, changed_plot_type)
-                else:
-                    self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
+                self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
 
             # update plot if changed_plot_type != None
             if changed_plot_type != 'None':
 
-                # format axis
-                ax = self.mpl_canvas.plot_axes[changed_plot_type]
-                if type(ax) == dict:
-                    for relevant_temporal_resolution, sub_ax in ax.items():
-                        self.mpl_canvas.plot.format_axis(sub_ax, 
-                                                         changed_plot_type, 
-                                                         self.mpl_canvas.plot_characteristics[changed_plot_type], 
-                                                         relevant_temporal_resolution=relevant_temporal_resolution, 
-                                                         col_ii=-1)
-                else:
-                    self.mpl_canvas.plot.format_axis(ax, 
-                                                     changed_plot_type, 
-                                                     self.mpl_canvas.plot_characteristics[changed_plot_type])
+                # format axis                
+                self.mpl_canvas.plot.format_axis(self.mpl_canvas.plot_axes[changed_plot_type], 
+                                                 changed_plot_type, 
+                                                 self.mpl_canvas.plot_characteristics[changed_plot_type])
                 
                 # make plot
                 self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
@@ -855,21 +828,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         if changed_position == self.cb_position_2 or changed_position == 2:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((10, 50), rowspan=17, colspan=48))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((32, 82), rowspan=17, colspan=16))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((32, 50), rowspan=17, colspan=28))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=15, colspan=49))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 81), rowspan=15, colspan=18))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=30))
             elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 61), rowspan=34, colspan=39))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=34))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=50))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=49))
             
         # position 3 (bottom left)
         if changed_position == self.cb_position_3 or changed_position == 3:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 canvas_instance.plot_axes[changed_plot_type] = {}
                 canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 0), rowspan=20, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 19), rowspan=20, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 0), rowspan=20, colspan=17))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 19), rowspan=20, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 0), rowspan=20, colspan=18))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 10), rowspan=44, colspan=19))
             elif changed_plot_type != 'None':
@@ -880,8 +853,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 canvas_instance.plot_axes[changed_plot_type] = {}
                 canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 35), rowspan=20, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 54), rowspan=20, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 35), rowspan=20, colspan=17))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 54), rowspan=20, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 35), rowspan=20, colspan=18))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 45),  rowspan=44, colspan=19))
             elif changed_plot_type != 'None':
@@ -892,8 +865,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 canvas_instance.plot_axes[changed_plot_type] = {}
                 canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 89), rowspan=20, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 70), rowspan=20, colspan=17))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 89), rowspan=20, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 80),  rowspan=44, colspan=19))
             elif changed_plot_type != 'None':
@@ -959,6 +932,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.species = [self.selected_species]  
         self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
         self.qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
+        self.qa_per_species[self.selected_species] = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
         self.data_labels = ['observations'] + list(self.experiments.keys())
         self.networkspeci = '{}|{}'.format(self.network[0],self.species[0])
@@ -1049,7 +1023,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
             if self.clear_canvas:
                 # clear axes
                 for plot_type, ax in self.mpl_canvas.plot_axes.items():
-                    if type(ax) == dict:
+                    if isinstance(ax, dict):
                         for sub_ax in ax.values():
                             sub_ax.remove()
                     else:
@@ -1116,7 +1090,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget, ProvConfiguration, InitStandards)
         self.mpl_canvas.update_MPL_canvas()
 
         # if first read, then set this now to be False
-        # if colocate checkbox is ticked, then 
+        # also ,if colocate checkbox is ticked, then apply temporal colocation
         if self.first_read:
             self.first_read = False
             if self.ch_colocate.checkState() == QtCore.Qt.Checked:

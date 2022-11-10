@@ -259,16 +259,17 @@ class DataFilter:
                             # max gap variable?
                             if 'max_gap' in var:
                                 max_gap_percent = Stats.max_repeated_nans_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][:,:,period_inds])
-                                inds_to_screen = max_gap_percent > data_availability_lower_bounds[var_ii]
-                                self.read_instance.data_in_memory_filtered[networkspeci][inds_to_screen] = np.NaN
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds])
+                                inds_to_screen = np.where(max_gap_percent > data_availability_lower_bounds[var_ii])[0]
+                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
+
                             # data representativity variable?
                             else:
                                 data_availability_percent = Stats.calculate_data_avail_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][:,:,period_inds])
-                                inds_to_screen = data_availability_percent < data_availability_lower_bounds[var_ii]
-                                self.read_instance.data_in_memory_filtered[networkspeci][inds_to_screen] = np.NaN
-    
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds])
+                                inds_to_screen = np.where(data_availability_percent < data_availability_lower_bounds[var_ii])[0]
+                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
+
     def filter_by_metadata(self):
         """Filters data by selected metadata"""
 
@@ -421,7 +422,7 @@ class DataFilter:
 
                 # get all instances observations is NaN
                 nan_obs = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:])
-                
+
                 # update obs_all_nan array, making True all instances where have NaNs
                 obs_all_nan = np.any([obs_all_nan, nan_obs], axis=0)
 
@@ -527,3 +528,5 @@ class DataFilter:
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
                         valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
+
+                

@@ -1,5 +1,5 @@
 from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data
-from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters
+from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, get_default_qa
 
 import sys
 import os
@@ -509,15 +509,12 @@ class DataReader:
                 yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
                 self.files_to_read['{}|{}'.format(network,speci)][data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])
 
-            # if active qa == default qa, no need to screen by qa, so set selected qa to None
-            if speci in self.read_instance.met_parameters:
-                default_qa = self.read_instance.default_qa_met
+            # if active qa == default qa, no need to screen by QA, so inform reading function of this
+            default_qa = get_default_qa(self.read_instance, speci)
+            if self.read_instance.qa_per_species[speci] == default_qa:
+                default_qa_active = True
             else:
-                default_qa = self.read_instance.default_qa_standard
-            if self.read_instance.qa == default_qa:
-                qa_to_filter = []
-            else:
-                qa_to_filter = self.read_instance.qa 
+                default_qa_active = False
 
             # create network/ speci specific arrays to share across processes (for parallel multiprocessing use)
             # this only works for numerical dtypes, i.e. not strings
@@ -526,7 +523,7 @@ class DataReader:
             if (self.read_instance.reading_ghost) & ('observations' in data_labels):
                 ghost_data_in_memory_shared_shape = (len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references['{}|{}'.format(network,speci)]), len(self.read_instance.time_array))
                 ghost_data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, ghost_data_in_memory_shared_shape[0] * ghost_data_in_memory_shared_shape[1] * ghost_data_in_memory_shared_shape[2])  
-                qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(qa_to_filter))
+                qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.qa_per_species[speci]))
             else:
                 ghost_data_in_memory_shared_shape = None
                 ghost_data_in_memory_shared = None
@@ -540,7 +537,7 @@ class DataReader:
             np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory['{}|{}'.format(network,speci)][data_label_indices, :, :])
             if (self.read_instance.reading_ghost) & ('observations' in data_labels):
                 np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory['{}|{}'.format(network,speci)])        
-                qa_shared[:] = qa_to_filter
+                qa_shared[:] = self.read_instance.qa_per_species[speci]
 
             # iterate and read species data in all relevant netCDF files (either in serial/parallel)
             s = time.time()
@@ -554,7 +551,7 @@ class DataReader:
             # read netCDF files in parallel
             tuple_argument_fields = ['filename', 'station_references', 'speci', 'data_label', 'data_labels', 
                                      'reading_ghost', 'ghost_data_vars_to_read', 'metadata_dtype', 
-                                     'metadata_vars_to_read']
+                                     'metadata_vars_to_read', 'default_qa_active']
             tuple_arguments = []
 
             for data_label in self.files_to_read['{}|{}'.format(network, speci)]:
@@ -563,7 +560,8 @@ class DataReader:
                                             speci, data_label, data_labels, self.read_instance.reading_ghost, 
                                             self.read_instance.ghost_data_vars_to_read, 
                                             self.read_instance.metadata_dtype, 
-                                            self.read_instance.metadata_vars_to_read))
+                                            self.read_instance.metadata_vars_to_read,
+                                            default_qa_active))
 
             returned_data = pool.map(read_netcdf_data, tuple_arguments)
 
