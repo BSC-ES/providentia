@@ -20,7 +20,8 @@ basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
 
-def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_index=False):
+def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, 
+                        station_index=False, data_range_min=False, data_range_max=False):
     """Function that takes data in memory puts it in a pandas dataframe, per network / species, per data label.
     For summary plots this involves take the median timeseries across the timeseries.
     For station plots it is just the station in question.
@@ -37,22 +38,33 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
     :type networkspecies: list
     :param station_index: Indices of stations to keep per network/species
     :type station_index: list
+    :param data_range_min: current minimum of data range per networkspecies
+    :type data_range_min: dict
+    :param data_range_max: current maximum of data range per networkspecies
+    :type data_range_max: dict
     """
 
     # create new dictionary to store selection station data by network / species, per data label
     canvas_instance.selected_station_data = {}
+    canvas_instance.selected_station_data_number_non_nan = {}
     canvas_instance.selected_station_data_min = {}
     canvas_instance.selected_station_data_max = {}
-    canvas_instance.selected_station_data_number_non_nan = {}
 
     # iterate through networks / species  
     for networkspeci_ii, networkspeci in enumerate(networkspecies):
 
         # add nested dictionary for networkspeci in selected station data dictionary
         canvas_instance.selected_station_data[networkspeci] = {}
-        canvas_instance.selected_station_data_min[networkspeci] = np.inf
-        canvas_instance.selected_station_data_max[networkspeci] = 0
         canvas_instance.selected_station_data_number_non_nan[networkspeci] = []
+        if data_range_min:
+            canvas_instance.selected_station_data_min[networkspeci] = data_range_min[networkspeci]
+        else:
+            canvas_instance.selected_station_data_min[networkspeci] = np.inf
+        if data_range_max:
+            canvas_instance.selected_station_data_max[networkspeci] = data_range_max[networkspeci]
+        else:
+            canvas_instance.selected_station_data_max[networkspeci] = 0.0
+
 
         # iterate through data labels
         for data_label in read_instance.data_labels:
@@ -131,7 +143,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, station_
         # if have some experiment data associated with selected stations, calculate
         # temporally aggregated basic statistic differences and bias statistics between
         # observations and experiment data arrays
-        if len(read_instance.data_labels) > 1:
+        if len(canvas_instance.selected_station_data[networkspeci]) > 1:
             calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_instance, networkspeci)
             
 def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):

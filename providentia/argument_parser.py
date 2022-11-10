@@ -46,9 +46,6 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--cartopy_data_dir",
                                      dest="cartopy_data_dir",
                                      help="set cartopy data directory")
-            self.parser.add_argument("--n_cpus",
-                                     dest="n_cpus",
-                                     help="Define number of CPUs to process on")
             self.parser.add_argument("--ghost_root",
                                      dest="ghost_root",
                                      help="root directory where GHOST observations are stored")
@@ -108,6 +105,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--map_extent",
                                      dest="map_extent",
                                      help="map extent for plots involving any maps")
+            self.parser.add_argument("--active_dashboard_plots",
+                                     dest="active_dashboard_plots",
+                                     help="active plots on dashboard upon launch")                     
             self.parser.add_argument("--plot_characteristics_filename",
                                      dest="plot_characteristics_filename",
                                      help="set filename for plot characteristics")

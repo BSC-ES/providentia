@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # init
-cores=16
+cores=12
 jobname="PRV"
 queue="debug"
 mem="20Gb"
@@ -28,47 +28,54 @@ set -eo pipefail
 IFS=$'\n\t'
 
 # An option followed by a single colon ':' means that it *needs* an argument.
-# An option followed by double colons '::' means that its argument is
-# optional.
+# An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
-SHORT=uc:J:q:m:constraint
-LONG=usage,cores:,jobname:,queue:,mem:,constraint:,help::,version::,config::,section::,config_dir::,ghost_version::,cartopy_data_dir::,available_cpus::,n_cpus::,ghost_root::,nonghost_root::,exp_root::,offline::,network::,species::,resolution::,start_date::,end_date::,experiments::,temporal_colocation::,spatial_colocation::,filter_species::,report_type::,report_summary::,report_stations::,report_title::,report_filename::,map_extent::,active_dashboard_plots::,plot_characteristics_filename::
+SHORT=uc:J:q:m:V
+LONG=usage,cores:,jobname:,queue:,mem:,constraint:,help,version,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,offline:,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
 
-# - Temporarily store output to be able to check for errors.
-# - Activate advanced mode getopt quoting e.g. via "--options".
-# - Pass arguments only via   -- "$@"   to separate them correctly.
-# - getopt auto-adds "--" at the end of ${PARSED}, which is then later set to
-#   "$@" using the set command.
+# parse arguments
 PARSED=$(getopt --options ${SHORT} \
                 --longoptions ${LONG} \
                 --name "$0" \
                 -- "$@")         # pass all the args to this script to getopt
 
+# exit if getopt has complained about wrong arguments to stdout
 if [[ $? -ne 0 ]]; then
-    # e.g. $? == 1
-    #  then getopt has complained about wrong arguments to stdout
     exit 2
 fi
 
-
-while [[ $# -gt 0 ]]; do
-#    echo "parsing arg: $1"
-    case "$1" in
+# update key arguments for job submission
+OTHEROPTS=""
+while [ $# -gt 0 ]; do
+  #parse equals sign in arguments
+  OPT="$1"
+  if [[ $OPT == *"="* ]]; then
+      OPTNAME=${OPT%=*}
+      OPTARG=${OPT#*=}
+  else
+      OPTNAME=$OPT 
+      OPTARG=""
+  fi
+  case $OPTNAME in
         -u|--usage) shift
                     usage 
                     exit 0
                     ;;
         -c|--cores) shift
-                    cores="$1";;
+                    cores=$OPTARG;;
         -J|--jobname) shift
-                    jobname="$1";;
+                    jobname=$OPTARG;;
         -q|--queue) shift
-                    queue="$1";;
+                    queue=$OPTARG;;
         -m|--mem) shift
-                    mem="$1";;
-        *) break ;;
-    esac
-    shift  # Expose the next argument
+                  mem=$OPTARG;;
+        --constraint) shift 
+                      constraint=$OPTARG;;
+        -*) shift
+            OTHEROPTS+="$OPT ";;
+        * ) echo "ALL OPTIONS MUST BE PREFIXED WITH '-' or '--', AND ARGUMENTS MUST BE PREFIXED WITH '=', e.g. '--cores=10'" 
+            exit 2
+  esac
 done
 
 queue_option="--qos=$queue"
@@ -76,7 +83,7 @@ memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
 load_command="source load_modules.sh"
 salloc_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
-python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $@"
+python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $OTHEROPTS"
 
 # set QT scale to avoid magnifying issues
 if [ "${BSC_MACHINE}" != "nord3" ]; then
@@ -86,6 +93,7 @@ fi
 # load modules
 eval "${load_command}"
 
+# execution
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
     # get allocation of resources on CTE-POWER
@@ -95,12 +103,20 @@ if [ "${BSC_MACHINE}" == "power" ]; then
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     # get allocation of resources on MN4
     echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-    eval "${salloc_command} ${queue_option} srun ${python_command}"
+    if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+        eval "${salloc_command} ${queue_option} srun ${python_command}"
+    else
+        eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+    fi
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
     # get allocation of resources on Nord3v2
     echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-    eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+    if [[ "${constraint}" == "lowmem" ]]; then
+        eval "${salloc_command} ${queue_option} srun ${python_command}"
+    else
+        eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+    fi
 # Workstations
 else
     echo "Warning: running in your workstation/laptop may make Providentia slower ..."

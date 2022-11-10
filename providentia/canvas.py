@@ -148,22 +148,11 @@ class MPLCanvas(FigureCanvas):
 
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
-            ax = self.plot_axes[plot_type]
-            if type(ax) == dict:
-                for relevant_temporal_resolution, sub_ax in ax.items():
-                    self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], 
-                                          relevant_temporal_resolution=relevant_temporal_resolution, 
-                                          col_ii=-1)
-            else:
-                self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
+            self.plot.format_axis(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type])
 
         # hide all plot axes
         for plot_type, ax in self.plot_axes.items():
-            if type(ax) == dict:
-                for relevant_temporal_resolution, sub_ax in ax.items():
-                    self.remove_axis_elements(sub_ax, plot_type)
-            else:
-                self.remove_axis_elements(ax, plot_type)
+            self.remove_axis_elements(ax, plot_type)
 
     def update_MPL_canvas(self):
         """Function that updates MPL canvas upon clicking
@@ -172,11 +161,7 @@ class MPLCanvas(FigureCanvas):
 
         # clear and then hide all axes 
         for plot_type, ax in self.plot_axes.items():
-            if type(ax) == dict:
-                for sub_ax in ax.values():
-                    self.remove_axis_elements(sub_ax, plot_type)
-            else:
-                self.remove_axis_elements(ax, plot_type)
+            self.remove_axis_elements(ax, plot_type)
 
         # reset relative index lists of selected station on map as empty lists
         self.previous_relative_selected_station_inds = np.array([], dtype=np.int)
@@ -210,23 +195,34 @@ class MPLCanvas(FigureCanvas):
         """Function which resets the navigation toolbar stack
         for a given axis with the current view limits"""
 
-        # check if have axes dictionaries in stack list
-        if len(self.read_instance.navi_toolbar._nav_stack) == 0:
-            # if don't have an axes dictionary in stack list, create one with current
-            # axis in dictionary with current view limits
-            self.read_instance.navi_toolbar._nav_stack.push(
-                WeakKeyDictionary({ax: (ax._get_view(), (ax.get_position(True).frozen(), ax.get_position().frozen()))}))
-
-        # if have existing axes dictionaries in stack list, iterate through stack list
-        # removing given axis from all stack list dictionaries
+        # get appropriate axes for nested axes
+        axs_to_reset = []
+        if isinstance(ax, dict):
+            for relevant_temporal_resolution, sub_ax in ax.items():
+                if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                    axs_to_reset.append(sub_ax)
         else:
-            for axes_dict in self.read_instance.navi_toolbar._nav_stack:
-                if ax in axes_dict.keyrefs():
-                    axes_dict.pop(ax)
+            axs_to_reset.append(ax)
 
-            # now add axis to first dictionary in stack, with the current view limits
-            self.read_instance.navi_toolbar._nav_stack[0][ax] = \
-                (ax._get_view(), (ax.get_position(True).frozen(), ax.get_position().frozen()))
+        # check if have axes dictionaries in stack list
+        for ax_to_reset in axs_to_reset:
+
+            if len(self.read_instance.navi_toolbar._nav_stack) == 0:
+                # if don't have an axes dictionary in stack list, create one with current
+                # axis in dictionary with current view limits
+                self.read_instance.navi_toolbar._nav_stack.push(
+                    WeakKeyDictionary({ax_to_reset: (ax_to_reset._get_view(), (ax_to_reset.get_position(True).frozen(), ax_to_reset.get_position().frozen()))}))
+
+            # if have existing axes dictionaries in stack list, iterate through stack list
+            # removing given axis from all stack list dictionaries
+            else:
+                for axes_dict in self.read_instance.navi_toolbar._nav_stack:
+                    if ax_to_reset in axes_dict.keyrefs():
+                        axes_dict.pop(ax_to_reset)
+
+                # now add axis to first dictionary in stack, with the current view limits
+                self.read_instance.navi_toolbar._nav_stack[0][ax_to_reset] = \
+                    (ax_to_reset._get_view(), (ax_to_reset.get_position(True).frozen(), ax_to_reset.get_position().frozen()))
 
         return None
 
@@ -405,6 +401,7 @@ class MPLCanvas(FigureCanvas):
             axis_title_label = '{} Selected Stations of {} Available'.format(
                 len(self.relative_selected_station_inds), len(self.active_map_valid_station_inds))
         self.plot.set_axis_title(self.plot_axes['map'], axis_title_label, self.plot_characteristics['map'])
+        self.plot_characteristics['map']['axis_title']['label'] = axis_title_label
 
         # reset alphas and marker sizes of stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
@@ -466,6 +463,7 @@ class MPLCanvas(FigureCanvas):
                         ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
                     if ylabel_units != '':
                         ylabel = copy.deepcopy(ylabel_units)
+                    xlabel = ''
 
                 # create structure to store data for statsummary plot
                 elif plot_type in ['statsummary']:
@@ -528,46 +526,38 @@ class MPLCanvas(FigureCanvas):
                     stats_df = pd.DataFrame(data=stats_df, index=self.selected_station_data[self.read_instance.networkspeci])
                     func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, statsummary=True)
 
-                # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
-                if type(ax) == dict:
-                    if plot_type == 'periodic-violin':
-                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                             plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                                 self.selected_station_data_max[self.read_instance.networkspeci]],
-                                                             relim=True, autoscale_x=True)
-                    else:
-                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                             plot_options, relim=True, autoscale=True)
-
-                    set_title = False
-                    for relevant_temporal_resolution, sub_ax in ax.items():
-                        #do not show axis if temporal resolution is not relevant
-                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                            # set ylabel (if sub_ax in first column) and title (if sub_ax in first column and not previously set)   
-                            if relevant_temporal_resolution in ['hour', 'month']:
-                                self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics[plot_type])
-                                if not set_title:
-                                    title = self.plot.set_axis_title(sub_ax, plot_type, self.plot_characteristics[plot_type])
-                                    self.plot_characteristics[plot_type]['axis_title']['label'] = title
-                                    set_title = True
-                            elif relevant_temporal_resolution == 'dayofweek':
-                                sub_ax.set_ylabel('')
-                                sub_ax.yaxis.set_tick_params(which='both', labelleft=False)
-                            self.activate_axis(sub_ax, plot_type)
-                            self.reset_ax_navigation_toolbar_stack(sub_ax)
-                else:
-                    if plot_type == 'scatter':
+                # reset axes limits (harmonising across subplots for periodic plots) 
+                if plot_type == 'periodic-violin':
+                    self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
+                                                         plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                             self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                         relim=True, autoscale_x=True)
+                elif plot_type == 'scatter':
                         self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, relim=True)
-                    else: 
-                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                             plot_options, relim=True, autoscale=True)
-                    title = self.plot.set_axis_title(ax, plot_type, self.plot_characteristics[plot_type])
-                    self.plot_characteristics[plot_type]['axis_title']['label'] = title
-                    self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
-                    self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
-                    self.activate_axis(ax, plot_type)
-                    self.reset_ax_navigation_toolbar_stack(ax)
+                else:
+                    self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
+                                                         plot_options, relim=True, autoscale=True)
+
+                # set title
+                if 'hour' in self.read_instance.relevant_temporal_resolutions:
+                    relevant_temporal_resolutions_title = ['hour']
+                else:
+                    relevant_temporal_resolutions_title = ['month']
+                self.plot.set_axis_title(ax, plot_type, self.plot_characteristics[plot_type], relevant_temporal_resolutions=relevant_temporal_resolutions_title)
+                self.plot_characteristics[plot_type]['axis_title']['label'] = plot_type
+
+                # set xlabel
+                self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
+
+                # set ylabel
+                self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
+
+                # activate axis
+                self.activate_axis(ax, plot_type)
+
+                # reset navigation toolbar stack for plot
+                self.reset_ax_navigation_toolbar_stack(ax)
 
                 # update plot options
                 self.update_plot_options(plot_types=[plot_type])
@@ -577,12 +567,7 @@ class MPLCanvas(FigureCanvas):
 
         # clear all previously plotted artists from selected station plots and hide axes 
         for plot_type in self.read_instance.active_dashboard_plots:
-            ax = self.plot_axes[plot_type]
-            if type(ax) == dict:
-                for sub_ax in ax.values():
-                    self.remove_axis_elements(sub_ax, plot_type)
-            else:
-                self.remove_axis_elements(ax, plot_type)
+            self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
 
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
@@ -750,8 +735,7 @@ class MPLCanvas(FigureCanvas):
                 if len(self.relative_selected_station_inds) > 0:
 
                     # clear and turn off all relevant axes before updating
-                    for sub_ax in self.plot_axes['periodic'].values():
-                        self.remove_axis_elements(sub_ax, 'periodic')
+                    self.remove_axis_elements(self.plot_axes['periodic'], 'periodic')
 
                     # get zstat information 
                     zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
@@ -781,28 +765,27 @@ class MPLCanvas(FigureCanvas):
                                                 first_data_label=first_data_label)
                         first_data_label = False
 
-                    # harmonise axes limits across subplots 
+                    # reset axes limits (harmonising across subplots for periodic plots) 
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
                                                          self.plot_characteristics['periodic'], 
                                                          plot_options, relim=True, autoscale=True)
-                    set_title = False
-                    # un-hide axes, and reset navigation toolbar stack, and set axis title and ylabel
-                    for relevant_temporal_resolution, sub_ax in self.plot_axes['periodic'].items():
-                        # do not show axis if temporal resolution is not relevant
-                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                            # set ylabel (if sub_ax in first column) and title (if sub_ax in first column and not previously set)   
-                            if relevant_temporal_resolution in ['hour','month']:
-                                self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics['periodic'])
-                                if not set_title:
-                                    title = self.plot.set_axis_title(sub_ax, 'periodic', 
-                                                                     self.plot_characteristics['periodic'])
-                                    self.plot_characteristics['periodic']['axis_title']['label'] = title
-                                    set_title = True
-                            elif relevant_temporal_resolution == 'dayofweek':
-                                sub_ax.set_ylabel('')
-                                sub_ax.yaxis.set_tick_params(which='both', labelleft=False)
-                            self.activate_axis(sub_ax, 'periodic')
-                            self.reset_ax_navigation_toolbar_stack(sub_ax)
+
+                    # set title
+                    if 'hour' in self.read_instance.relevant_temporal_resolutions:
+                        relevant_temporal_resolutions_title = ['hour']
+                    else:
+                        relevant_temporal_resolutions_title = ['month']
+                    self.plot.set_axis_title(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'], relevant_temporal_resolutions=relevant_temporal_resolutions_title)
+                    self.plot_characteristics['periodic']['axis_title']['label'] = 'periodic'
+
+                    # set ylabel
+                    self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
+
+                    # activate axis
+                    self.activate_axis(self.plot_axes['periodic'], 'periodic')
+
+                    # reset navigation toolbar stack for plot
+                    self.reset_ax_navigation_toolbar_stack(self.plot_axes['periodic'])
 
                     # update plot options
                     self.update_plot_options(plot_types=['periodic'])
@@ -817,77 +800,109 @@ class MPLCanvas(FigureCanvas):
             and hide axis.
         """
        
-        #remove all plotted axis elements
-        if plot_type == 'legend':
-            leg = ax.get_legend()
-            if leg:
-                leg.remove()
+        # get appropriate axes for nested axes
+        axs_to_remove = []
+        if isinstance(ax, dict):
+            for relevant_temporal_resolution, sub_ax in ax.items():
+                axs_to_remove.append(sub_ax)
+        else:
+            axs_to_remove.append(ax)
 
-        elif plot_type == 'map':
-            inds_to_remove = []
-            for artist_ii, artist in enumerate(ax.artists):         
-                if type(artist) == AnchoredOffsetbox:
-                    inds_to_remove.append(artist_ii)
-            ax.artists = list(np.delete(np.array(ax.artists), inds_to_remove))
+        # iterate through axes
+        for ax_to_remove in axs_to_remove:
 
-            inds_to_remove = []
-            for col_ii, col in enumerate(ax.collections):            
-                if isinstance(col, matplotlib.collections.PathCollection):
-                    inds_to_remove.append(col_ii)
-            ax.collections = list(np.delete(np.array(ax.collections), inds_to_remove))
+            #remove all plotted axis elements
+            if plot_type == 'legend':
+                leg = ax_to_remove.get_legend()
+                if leg:
+                    leg.remove()
+
+            elif plot_type == 'map':
+                inds_to_remove = []
+                for artist_ii, artist in enumerate(ax_to_remove.artists):         
+                    if type(artist) == AnchoredOffsetbox:
+                        inds_to_remove.append(artist_ii)
+                ax_to_remove.artists = list(np.delete(np.array(ax_to_remove.artists), inds_to_remove))
+
+                inds_to_remove = []
+                for col_ii, col in enumerate(ax_to_remove.collections):            
+                    if isinstance(col, matplotlib.collections.PathCollection):
+                        inds_to_remove.append(col_ii)
+                ax_to_remove.collections = list(np.delete(np.array(ax_to_remove.collections), inds_to_remove))
+
+            elif plot_type == 'cb':
+                ax_to_remove.artists = []
+                ax_to_remove.collections = [] 
+
+            elif plot_type == 'timeseries':
+                ax_to_remove.lines = [self.timeseries_vline]
+                ax_to_remove.artists = []
+            
+            elif plot_type == 'periodic':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+
+            elif plot_type == 'periodic-violin':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+                ax_to_remove.collections = []
+
+            elif plot_type == 'metadata':
+                ax_to_remove.texts = []
+
+            elif plot_type == 'distribution':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+
+            elif plot_type == 'scatter':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+
+            elif plot_type == 'statsummary':
+                ax_to_remove.tables = []
+
+            elif plot_type == 'boxplot':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+
+            # hide axis
+            ax_to_remove.axis('off')
+            ax_to_remove.set_visible(False)
+
+        # hide plot buttons
+        if plot_type == 'map':
             self.map_menu_button.hide()
             self.map_save_button.hide()
 
-        elif plot_type == 'cb':
-            ax.artists = []
-            ax.collections = [] 
-
         elif plot_type == 'timeseries':
-            for line in ax.lines:
-                if line != self.timeseries_vline:
-                    line.remove()
-            ax.artists = []
             self.timeseries_menu_button.hide()
             self.timeseries_save_button.hide()
         
         elif plot_type == 'periodic':
-            ax.lines = []
-            ax.artists = []
             self.periodic_menu_button.hide()
             self.periodic_save_button.hide()
 
         elif plot_type == 'periodic-violin':
-            ax.lines = []
-            ax.artists = []
-            ax.collections = []
             self.periodic_violin_menu_button.hide()
             self.periodic_violin_save_button.hide()
 
         elif plot_type == 'metadata':
-            ax.texts = []
             self.metadata_menu_button.hide()
             self.metadata_save_button.hide()
 
         elif plot_type == 'distribution':
-            ax.lines = []
-            ax.artists = []
             self.distribution_menu_button.hide()
             self.distribution_save_button.hide()
 
         elif plot_type == 'scatter':
-            ax.lines = []
-            ax.artists = []
             self.scatter_menu_button.hide()
             self.scatter_save_button.hide()
 
         elif plot_type == 'statsummary':
-            ax.tables = []
             self.statsummary_menu_button.hide()
             self.statsummary_save_button.hide()
 
         elif plot_type == 'boxplot':
-            ax.lines = []
-            ax.artists = []
             self.boxplot_menu_button.hide()
             self.boxplot_save_button.hide()
 
@@ -906,23 +921,28 @@ class MPLCanvas(FigureCanvas):
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias'] 
 
-        # hide axis
-        ax.axis('off')
-        ax.set_visible(False)
-        ax.grid(False)
-
         return None
 
     def activate_axis(self, ax, plot_type):
         """Un-hide axis"""
 
-        # un-hide axis
-        ax.axis('on')
-        ax.set_visible(True)
+        # get appropriate axes for nested axes
+        axs_to_activate = []
+        if isinstance(ax, dict):
+            for relevant_temporal_resolution, sub_ax in ax.items():
+                if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                    axs_to_activate.append(sub_ax)
+        else:
+            axs_to_activate.append(ax)
 
-        if plot_type not in ['legend', 'cb', 'metadata', 'statsummary']:
-            ax.grid(True)
+        # iterate through axes
+        for ax_to_activate in axs_to_activate:
 
+            # un-hide axis
+            ax_to_activate.axis('on')
+            ax_to_activate.set_visible(True)
+
+        # show plot buttons
         if plot_type == 'map':
             self.map_menu_button.show()
             self.map_save_button.show()
@@ -946,7 +966,7 @@ class MPLCanvas(FigureCanvas):
         elif plot_type == 'distribution':
             self.distribution_menu_button.show()
             self.distribution_save_button.show()
-       
+    
         elif plot_type == 'scatter':
             self.scatter_menu_button.show()
             self.scatter_save_button.show()
@@ -2797,27 +2817,22 @@ class MPLCanvas(FigureCanvas):
                     self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                                plot_type, 'absolute', plot_options)
 
-            # update axis scaling
-            if type(self.plot_axes[plot_type]) == dict:
+            # reset axes limits (harmonising across subplots for periodic plots) 
+            if plot_type != 'map':
                 if plot_type == 'periodic-violin':
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                          self.plot_characteristics[plot_type], plot_options, 
                                                          ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
                                                                self.selected_station_data_max[self.read_instance.networkspeci]],
                                                          relim=True, autoscale_x=True)
-                else:
-                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                         self.plot_characteristics[plot_type], plot_options, 
-                                                         relim=True, autoscale=True)
-            else:
-                if plot_type == 'scatter':
+                elif plot_type == 'scatter':
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                          self.plot_characteristics[plot_type], plot_options, 
                                                          relim=True)
-                elif plot_type != 'map':
+                else:
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                          self.plot_characteristics[plot_type], plot_options, 
-                                                         relim=True, autoscale=True)                             
+                                                         relim=True, autoscale=True)                       
 
             # draw changes
             self.figure.canvas.draw()
@@ -2878,7 +2893,7 @@ class MPLCanvas(FigureCanvas):
         # set markersize
         if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin']:
 
-            if type(ax) == dict:
+            if isinstance(ax, dict):
                 for sub_ax in ax.values():
                     for line in sub_ax.lines:
                         line.set_markersize(markersize)
@@ -3005,7 +3020,7 @@ class MPLCanvas(FigureCanvas):
         """ Update line widths for each plot type. """
         
         # set linewidth
-        if type(ax) == dict:
+        if isinstance(ax, dict):
             for sub_ax in ax.values():
                 for line in sub_ax.lines:
                     line.set_linewidth(linewidth)
@@ -3030,7 +3045,7 @@ class MPLCanvas(FigureCanvas):
         
         # set violin widths
         if plot_type == 'periodic-violin':
-            if type(ax) == dict:
+            if isinstance(ax, dict):
                 for sub_ax in ax.values():
                     widths = np.full(len(self.active_map_valid_station_inds), width)
                     for collection in sub_ax.collections:
@@ -3512,28 +3527,22 @@ class MPLCanvas(FigureCanvas):
                                         else:
                                             plot_element.set_visible(False)
 
-                            # update axis scaling 
-                            if type(self.plot_axes[plot_type]) == dict:
-                                if plot_type == 'periodic-violin':
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                         self.plot_characteristics[plot_type], 
-                                                                         plot_options, 
-                                                                         ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                               self.selected_station_data_max[self.read_instance.networkspeci]],
-                                                                         relim=True, autoscale_x=True)
-                                else:
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                         self.plot_characteristics[plot_type], 
-                                                                         plot_options, relim=True, autoscale=True)
-                            else:
-                                if plot_type == 'scatter':
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                         self.plot_characteristics[plot_type], 
-                                                                         plot_options, relim=True)
-                                else: 
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                         self.plot_characteristics[plot_type], 
-                                                                         plot_options, relim=True, autoscale=True)
+                            # reset axes limits (harmonising across subplots for periodic plots) 
+                            if plot_type == 'periodic-violin':
+                                self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                     self.plot_characteristics[plot_type], 
+                                                                     plot_options, 
+                                                                     ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                           self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                                     relim=True, autoscale_x=True)
+                            elif plot_type == 'scatter':
+                                self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                     self.plot_characteristics[plot_type], 
+                                                                     plot_options, relim=True)
+                            else: 
+                                self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                     self.plot_characteristics[plot_type], 
+                                                                     plot_options, relim=True, autoscale=True)
 
                 # change font weight of label
                 legend_label._fontproperties = self.legend.get_texts()[0]._fontproperties.copy()

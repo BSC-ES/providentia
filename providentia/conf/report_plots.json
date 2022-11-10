@@ -1,5 +1,6 @@
 {       
-    "debug": ["scatter_annotate"],
+    
+    "debug": ["metadata", "map-p50", "map-p95_bias", "timeseries", "timeseries_bias", "map-RMSE", "periodic-Mean", "periodic-r", "periodic-violin", "distribution", "distribution_bias", "scatter", "boxplot", "heatmap-p50_annotate","heatmap-r_annotate", "table-p99","table-Mean_bias", "statsummary", "statsummary_bias"],
 
     "training": ["timeseries", "timeseries_individual", "scatter_annotate", "map-p95", 
                  "periodic-violin", "distribution_bias"],
