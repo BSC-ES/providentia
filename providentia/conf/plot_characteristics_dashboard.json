@@ -24,7 +24,9 @@
 
 "metadata": {"non-ghost_vars": {"longitude": {"name_one": "Longitude", "dp": 4},
                                 "latitude":  {"name_one": "Latitude", "dp": 4},
-                                "station_name": {"name_one": "Station Name"}
+                                "station_name": {"name_one": "Station Name"},
+                                "area_classification": {"name_one": "Area Class"},
+                                "station_classification": {"name_one": "Station Class"}
                                 },
              "ghost_vars": {"station_name":                        {"name_one": "Station Name"},
                             "longitude":                           {"name_one": "Longitude", "dp": 4},

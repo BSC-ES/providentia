@@ -83,7 +83,7 @@ class DataReader:
                     for month_ii, start_yyyymm in enumerate(self.read_instance.yearmonths)])
 
                 # get unique basic metadata across networks / species
-                self.read_instance.station_references, self.read_instance.station_longitudes, self.read_instance.station_latitudes =\
+                self.read_instance.station_references, self.read_instance.station_longitudes, self.read_instance.station_latitudes, self.read_instance.station_classifications, self.read_instance.area_classifications =\
                     get_basic_metadata(self.read_instance, self.read_instance.network, self.read_instance.species, self.read_instance.resolution) 
 
         # need to reset all data structures 
