@@ -1272,6 +1272,8 @@ def get_basic_metadata(instance, networks, species, resolution):
     station_references = {}
     station_longitudes = {}
     station_latitudes = {}
+    station_classifications = {}
+    area_classifications = {}
 
     # iterate through network, speci pair
     for network, speci in zip(networks, species):
@@ -1316,20 +1318,51 @@ def get_basic_metadata(instance, networks, species, resolution):
         
         # non-GHOST
         else:
-            
+
             ncdf_root = Dataset(relevant_files[0])
-            if ncdf_root['station_name'].dtype == np.str:
+            
+            if ncdf_root['station_name'][:].dtype == np.str:
                 station_references['{}|{}'.format(network, speci)] = ncdf_root['station_name'][:]
             else:
-                station_references['{}|{}'.format(network, speci)] = np.array(
-                    [st_name.tostring().decode('ascii').replace('\x00', '')
-                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+                if ncdf_root['station_name'][:].dtype != np.dtype(object):
+                    station_references['{}|{}'.format(network, speci)] = np.array(
+                        [st_name.tostring().decode('ascii').replace('\x00', '')
+                        for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+                else:
+                    station_references['{}|{}'.format(network, speci)] = np.array([''.join(val) 
+                                                                                   for val in ncdf_root['station_name'][:]])
+                
             if "latitude" in ncdf_root.variables:
                 station_longitudes['{}|{}'.format(network, speci)] = ncdf_root['longitude'][:]
                 station_latitudes['{}|{}'.format(network, speci)] = ncdf_root['latitude'][:]
             else:
                 station_longitudes['{}|{}'.format(network, speci)] = ncdf_root['lon'][:]
                 station_latitudes['{}|{}'.format(network, speci)] = ncdf_root['lat'][:]
+            
+            if "station_classification" in ncdf_root.variables:
+                if ncdf_root['station_classification'][:].dtype == np.str:
+                    station_classifications['{}|{}'.format(network, speci)] = ncdf_root['station_classification'][:]
+                else:
+                    if ncdf_root['station_classification'][:].dtype != np.dtype(object):
+                        station_classifications['{}|{}'.format(network, speci)] = np.array(
+                            [st_classification.tostring().decode('ascii').replace('\x00', '')
+                            for st_classification in ncdf_root['station_classification'][:]], dtype=np.str)
+                    else:
+                        station_classifications['{}|{}'.format(network, speci)] = np.array([''.join(val) 
+                                                                                            for val in ncdf_root['station_classification'][:]])
+
+            if "area_classification" in ncdf_root.variables:
+                if ncdf_root['area_classification'][:].dtype == np.str:
+                    area_classifications['{}|{}'.format(network, speci)] = ncdf_root['area_classification'][:]
+                else:
+                    if ncdf_root['area_classification'][:].dtype != np.dtype(object):
+                        area_classifications['{}|{}'.format(network, speci)] = np.array(
+                            [area_classification.tostring().decode('ascii').replace('\x00', '')
+                            for area_classification in ncdf_root['area_classification'][:]], dtype=np.str)
+                    else:
+                        area_classifications['{}|{}'.format(network, speci)] = np.array([''.join(val) 
+                                                                                         for val in ncdf_root['area_classification'][:]]) 
+            
             ncdf_root.close()
 
     # if have more than 1 species to read, and spatial_colocation is active,
@@ -1342,7 +1375,7 @@ def get_basic_metadata(instance, networks, species, resolution):
             station_longitudes[networkspecies] = intersecting_station_longitudes
             station_latitudes[networkspecies] = intersecting_station_latitudes
 
-    return station_references, station_longitudes, station_latitudes
+    return station_references, station_longitudes, station_latitudes, station_classifications, area_classifications
 
 def filter_by_species():
     pass
