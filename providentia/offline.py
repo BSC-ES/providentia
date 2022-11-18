@@ -92,7 +92,7 @@ class ProvidentiaOffline:
             provconf = ProvConfiguration(self, **self.commandline_arguments)
 
             # update self with section variables
-            vars(self).update({(k, provconf.parse_parameter(k, val)) for k, val in self.section_opts.items()})
+            vars(self).update(dict((k, provconf.parse_parameter(k, val)) for k, val in self.section_opts.items()))
 
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             provconf.check_validity()
@@ -605,7 +605,7 @@ class ProvidentiaOffline:
                 provconf = ProvConfiguration(self, **self.commandline_arguments)
 
                 # update subsection variables
-                vars(self).update({(k, provconf.parse_parameter(k, val)) for k, val in self.subsection_opts.items()})
+                vars(self).update(dict((k, provconf.parse_parameter(k, val)) for k, val in self.subsection_opts.items()))
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
                 provconf.check_validity()

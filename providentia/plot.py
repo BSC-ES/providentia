@@ -492,18 +492,73 @@ class Plot:
         # non-GHOST (add longitude and latitude)
         if not self.read_instance.reading_ghost:
             if len(station_inds) == 1:
+                
+                # if are on limit of vars allowed per line then break to new line
+                if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
+                    str_to_plot += '\n'
+                    current_n_vars_per_line = 0
+
                 # spacing
                 str_to_plot += (' '*plot_characteristics['var_spacing'])
+
                 # lon
                 str_to_plot += '{}: {:.{}f}'.format(plot_characteristics['non-ghost_vars']['longitude']['name_one'],
                                                     self.read_instance.station_longitudes[networkspeci][station_inds][0], 
                                                     plot_characteristics['non-ghost_vars']['longitude']['dp'])
+                # iterate current_n_vars_per_line
+                current_n_vars_per_line += 1
+
+                # if are on limit of vars allowed per line then break to new line
+                if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
+                    str_to_plot += '\n'
+                    current_n_vars_per_line = 0
+
                 # spacing
                 str_to_plot += (' '*plot_characteristics['var_spacing'])
+
                 # lat
                 str_to_plot += '{}: {:.{}f}'.format(plot_characteristics['non-ghost_vars']['latitude']['name_one'],
                                                     self.read_instance.station_latitudes[networkspeci][station_inds][0], 
                                                     plot_characteristics['non-ghost_vars']['latitude']['dp'])
+
+                # iterate current_n_vars_per_line
+                current_n_vars_per_line += 1
+
+                # show area classification if it exists
+                if 'area_classification' in plot_characteristics['non-ghost_vars'].keys() and self.read_instance.area_classifications != {}:
+                    
+                    # if are on limit of vars allowed per line then break to new line
+                    if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
+                        str_to_plot += '\n'
+                        current_n_vars_per_line = 0
+
+                    # spacing
+                    str_to_plot += (' '*plot_characteristics['var_spacing'])
+                    
+                    # area classification
+                    str_to_plot += '{}: {}'.format(plot_characteristics['non-ghost_vars']['area_classification']['name_one'],
+                                                   self.read_instance.area_classifications[networkspeci][station_inds][0])
+
+                    # iterate current_n_vars_per_line
+                    current_n_vars_per_line += 1
+
+                # show station classification if it exists
+                if 'station_classification' in plot_characteristics['non-ghost_vars'].keys() and self.read_instance.station_classifications != {}:
+                    
+                    # if are on limit of vars allowed per line then break to new line
+                    if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
+                        str_to_plot += '\n'
+                        current_n_vars_per_line = 0
+
+                    # spacing
+                    str_to_plot += (' '*plot_characteristics['var_spacing'])
+                    
+                    # area classification
+                    str_to_plot += '{}: {}'.format(plot_characteristics['non-ghost_vars']['station_classification']['name_one'],
+                                                   self.read_instance.station_classifications[networkspeci][station_inds][0])
+
+                    # iterate current_n_vars_per_line
+                    current_n_vars_per_line += 1
 
         # GHOST
         else:
