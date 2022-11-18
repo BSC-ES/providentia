@@ -82,7 +82,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         
         # update variables from defined config file
         if self.current_config:
-            vars(self).update({(k, provconf.parse_parameter(k, val)) for k, val in self.current_config.items()})
+            vars(self).update(dict((k, provconf.parse_parameter(k, val)) for k, val in self.current_config.items()))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()

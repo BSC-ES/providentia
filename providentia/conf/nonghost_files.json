@@ -71,5 +71,19 @@
         "monthly": {
             "sconcnh3": []
             }
+        },
+
+    "MITECO_VOC/MITECO_VOC": {
+        "hourly": {
+            "sconcc6h6": [],
+            "sconcc7h8": []
+            },
+        "daily": {
+            "sconcc2h4": [],
+            "sconcc2h6": [],
+            "sconcc6h6": [],
+            "sconcc7h8": [],
+            "sconcisop": []
         }
+    }
 }
