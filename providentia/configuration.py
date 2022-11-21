@@ -474,7 +474,7 @@ def read_conf(fpath=None):
                         continue
     
                 if copy:
-                    if line.strip() != '':
+                    if line.strip() != '' and '#' not in line.strip():
                         key = line.split('=')[0].strip()
                         value = line.split('=')[1].strip()
                         config[section_modified][key] = value
