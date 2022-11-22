@@ -19,49 +19,6 @@ import pyproj
 from scipy.spatial import cKDTree
 import seaborn as sns
 
-def which_bounds(instance, speci):
-    """Returns lower/upper bounds for speci. 
-    
-    If there are bounds defined in a config file, take those values.
-    Otherwise take default GHOST values
-
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :param speci: The species current selected for evaluation (e.g. sconco3)
-    :type speci: str
-    :return: The lower and upper bound
-    :rtype: np.float32
-    """
-
-    lower = np.float32(instance.parameter_dictionary[speci]['extreme_lower_limit'])
-    upper = np.float32(instance.parameter_dictionary[speci]['extreme_upper_limit'])
-
-    speci_index = instance.species.index(speci)
-
-    if hasattr(instance, 'lower_bound'):
-        lower_bound_split = [bound.strip() for bound in instance.lower_bound.split(',')]
-
-        if len(lower_bound_split) > 1:
-            if len(instance.species) != len(lower_bound_split):
-                error = 'Error: "lower_bound" variable must be same length of number of species read.'
-                sys.exit(error)
-            lower = lower_bound_split[speci_index]
-        else:
-            lower = lower_bound_split[0]
-
-    if hasattr(instance, 'upper_bound'):
-        upper_bound_split = [bound.strip() for bound in instance.upper_bound.split(',')]
-
-        if len(upper_bound_split) > 1:
-            if len(instance.species) != len(upper_bound_split):
-                error = 'Error: "upper_bound" variable must be same length of number of species read.'
-                sys.exit(error)
-            upper = upper_bound_split[speci_index]
-        else:
-            upper = upper_bound_split[0]
-
-    return np.float32(lower), np.float32(upper)
-
 def get_default_qa(instance, speci):
     """Returns the default values according to GHOST standards. 
 
@@ -81,7 +38,7 @@ def multi_species_mapping(species):
 
     #multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4','vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
     multi_species_map = {'vconcaerobin*':['vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
-
+    
     return multi_species_map[species]
 
 def exceedance_lim(species):
@@ -382,18 +339,19 @@ def update_representativity_fields(instance):
                                                                         'all_representativity_percent', 
                                                                         'all_max_gap_percent']
             
-            instance.representativity_menu['rangeboxes']['labels'] = ['Min Hourly Rep. %',
-                                                                      'Max Hourly Gap %',
-                                                                      'Min Daily Rep. %',
-                                                                      'Max Daily Gap %',
-                                                                      'Min Monthly Rep. %',
-                                                                      'Max Monthly Gap %',
-                                                                      'Min Daily Rep. %',
-                                                                      'Max Daily Gap %',
-                                                                      'Min Monthly Rep. %',
-                                                                      'Max Monthly Gap %',
-                                                                      'Min All Rep. %',
-                                                                      'Max All Gap %']
+            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Hourly Rep. %',
+            #                                                          'Max Hourly Gap %',
+            #                                                          'Min Daily Rep. %',
+            #                                                          'Max Daily Gap %',
+            #                                                          'Min Monthly Rep. %',
+            #                                                          'Max Monthly Gap %',
+            #                                                          'Min Daily Rep. %',
+            #                                                          'Max Daily Gap %',
+            #                                                          'Min Monthly Rep. %',
+            #                                                          'Max Monthly Gap %',
+            #                                                          'Min All Rep. %',
+            #                                                          'Max All Gap %']
+            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
             instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 6]
@@ -407,19 +365,13 @@ def update_representativity_fields(instance):
                                                                         'all_representativity_percent', 
                                                                         'all_max_gap_percent']
 
-            instance.representativity_menu['rangeboxes']['labels'] = ['Daily',
-                                                                      'Daily Max Gap',
-                                                                      'Monthly',
-                                                                      'Monthly Max Gap',
-                                                                      'All',
-                                                                      'All Max Gap']   
-
-            instance.representativity_menu['rangeboxes']['labels'] = ['Min Daily Rep. %',
-                                                                      'Max Daily Gap %',
-                                                                      'Min Monthly Rep. %',
-                                                                      'Max Monthly Gap %',
-                                                                      'Min All Rep. %',
-                                                                      'Max All Gap %']
+            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Daily Rep. %',
+            #                                                          'Max Daily Gap %',
+            #                                                          'Min Monthly Rep. %',
+            #                                                          'Max Monthly Gap %',
+            #                                                          'Min All Rep. %',
+            #                                                          'Max All Gap %']
+            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
             instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0]                                                                   
@@ -439,14 +391,15 @@ def update_representativity_fields(instance):
                                                                         'all_representativity_percent', 
                                                                         'all_max_gap_percent']
 
-            instance.representativity_menu['rangeboxes']['labels'] = ['Min Daily Rep. %',
-                                                                      'Max Daily Gap %',
-                                                                      'Min Monthly Rep. %',
-                                                                      'Max Monthly Gap %',
-                                                                      'Min Monthly Rep. %',
-                                                                      'Max Monthly Gap %',
-                                                                      'Min All Rep. %',
-                                                                      'Max All Gap %']
+            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Daily Rep. %',
+            #                                                          'Max Daily Gap %',
+            #                                                          'Min Monthly Rep. %',
+            #                                                          'Max Monthly Gap %',
+            #                                                          'Min Monthly Rep. %',
+            #                                                          'Max Monthly Gap %',
+            #                                                          'Min All Rep. %',
+            #                                                          'Max All Gap %']
+            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
             instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 4]
@@ -458,10 +411,11 @@ def update_representativity_fields(instance):
                                                                         'all_representativity_percent', 
                                                                         'all_max_gap_percent']
 
-            instance.representativity_menu['rangeboxes']['labels'] = ['Min Monthly Rep. %',
-                                                                      'Max Monthly Gap %',
-                                                                      'Min All Rep. %',
-                                                                      'Max All Gap %'] 
+            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Monthly Rep. %',
+            #                                                          'Min All Rep. %',
+            #                                                          'Max Monthly Gap %',
+            #                                                          'Max All Gap %'] 
+            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
             instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0] 
@@ -475,10 +429,11 @@ def update_representativity_fields(instance):
                                                                         'all_representativity_percent', 
                                                                         'all_max_gap_percent']
 
-            instance.representativity_menu['rangeboxes']['labels'] = ['Min Monthly Rep. %',
-                                                                      'Max Monthly Gap %',
-                                                                      'Min All Rep. %',
-                                                                      'Max All Gap %'] 
+            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Monthly Rep. %',
+            #                                                          'Max Monthly Gap %',
+            #                                                          'Min All Rep. %',
+            #                                                          'Max All Gap %'] 
+            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
             instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 2]  
@@ -488,8 +443,9 @@ def update_representativity_fields(instance):
             instance.representativity_menu['rangeboxes']['map_vars'] = ['all_representativity_percent', 
                                                                         'all_max_gap_percent']
             
-            instance.representativity_menu['rangeboxes']['labels'] = ['Min All Rep. %',
-                                                                      'Max All Gap %'] 
+            #instance.representativity_menu['rangeboxes']['labels'] = ['Min All Rep. %',
+            #                                                          'Max All Gap %'] 
+            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
             instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0] 
@@ -585,8 +541,7 @@ def update_metadata_fields(instance):
         if isinstance(instance.species, str):
             instance.species = [instance.species]
 
-        for network, speci in zip(instance.network, instance.species):
-            networkspeci = '{}|{}'.format(network, speci)
+        for networkspeci in instance.networkspecies:
             meta_var_field.extend(instance.metadata_in_memory[networkspeci][meta_var].flatten())
         meta_var_field = np.array(meta_var_field)
         meta_var_field[np.where(meta_var_field == 'nan')[0]] = np.NaN
@@ -1132,6 +1087,119 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
         instance.experiments_menu['checkboxes']['labels'] = experiments_to_add
         instance.experiments_menu['checkboxes']['map_vars'] = experiments_to_add
 
+def get_basic_metadata(instance):     
+    """
+    Get basic unique metadata across networkspecies wanting to read
+    The basic fields are: station_reference, longitude, latitude
+
+    If have multiple species, then spatially cocolocate across species 
+    to get matching stations across stations.
+
+    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+    :type instance: object
+    :return: station_references per networkspecies, longitudes per networkspecies, latitudes per networkspecies 
+    :rtype: dict, dict, dict
+    """
+
+    # define dictionaries for storing basic metadata across all species to read
+    station_references = {}
+    station_longitudes = {}
+    station_latitudes = {}
+
+    # iterate through network, speci pairs
+    for networkspeci in (instance.networkspecies + instance.filter_networkspecies):
+    
+        # get indivudual network and species strings
+        network = networkspeci.split('|')[0]
+        speci = networkspeci.split('|')[1]
+
+        # get species matrix
+        matrix = instance.parameter_dictionary[speci]['matrix']
+
+        # get file root
+        # GHOST
+        if instance.reading_ghost:
+            file_root = '%s/%s/%s/%s/%s/%s_' % (instance.ghost_root, network,
+                                                instance.ghost_version, instance.resolution,
+                                                speci, speci)
+        # non-GHOST
+        else:
+            file_root = '%s/%s/%s/%s/%s_' % (instance.nonghost_root, network,
+                                             instance.resolution, speci, speci)
+
+        # get relevant files
+        relevant_files = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in instance.yearmonths])
+    
+        # if have 0 files to read for networkspeci, then drop networkspeci
+        if len(relevant_files) == 0:
+            if networkspeci in instance.networkspecies:
+                instance.networkspecies.remove(networkspeci)
+                print('Warning: There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci))
+            elif networkspeci in instance.filter_networkspecies:
+                instance.filter_networkspecies.remove(networkspeci)
+                del instance.filter_species[networkspeci]
+                print('Warning: There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci))
+            continue
+            
+        # get station references, longitudes and latitudes for speci
+        # GHOST
+        if instance.reading_ghost:
+            
+            # define arrays for storing speci metadata
+            speci_station_references = []
+            speci_station_longitudes = []
+            speci_station_latitudes = []
+
+            for relevant_file in relevant_files:
+                ncdf_root = Dataset(relevant_file)
+                speci_station_references = np.append(speci_station_references, ncdf_root['station_reference'][:])
+                speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
+                speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
+                ncdf_root.close()
+
+            speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
+            station_references[networkspeci] = speci_station_references
+            station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
+            station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
+        
+        # non-GHOST
+        else:
+            
+            ncdf_root = Dataset(relevant_files[0])
+            if ncdf_root['station_name'].dtype == np.str:
+                station_references[networkspeci] = ncdf_root['station_name'][:]
+            else:
+                station_references[networkspeci] = np.array(
+                    [st_name.tostring().decode('ascii').replace('\x00', '')
+                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+            if "latitude" in ncdf_root.variables:
+                station_longitudes[networkspeci] = ncdf_root['longitude'][:]
+                station_latitudes[networkspeci] = ncdf_root['latitude'][:]
+            else:
+                station_longitudes[networkspeci] = ncdf_root['lon'][:]
+                station_latitudes[networkspeci] = ncdf_root['lat'][:]
+            ncdf_root.close()
+
+    # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
+    # then spatially colocate stations across species
+    if (len((instance.networkspecies + instance.filter_networkspecies)) > 1) & (instance.spatial_colocation):
+        # get intersecting station information across species
+        intersecting_station_references, intersecting_station_longitudes, intersecting_station_latitudes = \
+            spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes)
+        for ns in station_references:
+            # if using GHOST data then add method abberivations per species to intersecting station references
+            if instance.reading_ghost:
+                station_references_no_method = ['_'.join(ref.split('_')[:-1]) for ref in station_references[ns]]
+                methods = [ref.split('_')[-1] for ref in station_references[ns]]
+                intersecting_station_references_methods = ['{}_{}'.format(ref, methods[station_references_no_method.index(ref)]) for ref in intersecting_station_references]
+            else:
+                intersecting_station_references_methods = intersecting_station_references
+            station_references[ns] = np.array(intersecting_station_references_methods)
+            station_longitudes[ns] = np.array(intersecting_station_longitudes)
+            station_latitudes[ns] = np.array(intersecting_station_latitudes)    
+
+    return station_references, station_longitudes, station_latitudes
+
 def spatial_colocation(reading_ghost, station_references, longitudes, latitudes):
     """ 
     Given multiple species, return intersecting station_references, longitudes and latitudes 
@@ -1156,7 +1224,7 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
     :rtype: list, list, list
     """
 
-    # if are reading ghost data remove method abbreviation from station_references
+    # if are reading GHOST data remove method abbreviation from station_references
     if reading_ghost:
         station_references_no_method = {}
         for networkspecies in station_references:
@@ -1246,103 +1314,3 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
     intersecting_latitudes = intersecting_latitudes[sorted_inds]
 
     return intersecting_station_references, intersecting_longitudes, intersecting_latitudes
-
-def get_basic_metadata(instance, networks, species, resolution):     
-    """
-    Get basic unique metadata across networks / species wanting to read
-    The basic fields are: station_reference, longitude, latitude
-
-    If have multiple species, then spatially cocolocate across species 
-    to get matching stations across stations.
-
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-
-    :param networks: list of networks
-    :type networks: list
-    :param species: list of species
-    :type species: list
-    :param resolution: selected temporal resolution
-    :type resolution: str
-    :return: station_references per network/species, longitudes per network/species, latitudes per network/species 
-    :rtype: dict, dict, dict
-    """
-
-    # define dictionaries for storing basic metadata across all species to read
-    station_references = {}
-    station_longitudes = {}
-    station_latitudes = {}
-
-    # iterate through network, speci pair
-    for network, speci in zip(networks, species):
-    
-        # get species matrix
-        matrix = instance.parameter_dictionary[speci]['matrix']
-
-        # get file root
-        # GHOST
-        if instance.reading_ghost:
-            file_root = '%s/%s/%s/%s/%s/%s_' % (instance.ghost_root, network,
-                                                instance.ghost_version, resolution,
-                                                speci, speci)
-        # non-GHOST
-        else:
-            file_root = '%s/%s/%s/%s/%s_' % (instance.nonghost_root, network,
-                                                resolution, speci, speci)
-
-        # get relevant files
-        relevant_files = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in instance.yearmonths])
-    
-        # get station references, longitudes and latitudes for speci
-        # GHOST
-        if instance.reading_ghost:
-            
-            # define arrays for storing speci metadata
-            speci_station_references = []
-            speci_station_longitudes = []
-            speci_station_latitudes = []
-
-            for relevant_file in relevant_files:
-                ncdf_root = Dataset(relevant_file)
-                speci_station_references = np.append(speci_station_references, ncdf_root['station_reference'][:])
-                speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
-                speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
-                ncdf_root.close()
-
-            speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
-            station_references['{}|{}'.format(network, speci)] = speci_station_references
-            station_longitudes['{}|{}'.format(network, speci)] = speci_station_longitudes[station_unique_indices]
-            station_latitudes['{}|{}'.format(network, speci)] = speci_station_latitudes[station_unique_indices]
-        
-        # non-GHOST
-        else:
-            
-            ncdf_root = Dataset(relevant_files[0])
-            if ncdf_root['station_name'].dtype == np.str:
-                station_references['{}|{}'.format(network, speci)] = ncdf_root['station_name'][:]
-            else:
-                station_references['{}|{}'.format(network, speci)] = np.array(
-                    [st_name.tostring().decode('ascii').replace('\x00', '')
-                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
-            if "latitude" in ncdf_root.variables:
-                station_longitudes['{}|{}'.format(network, speci)] = ncdf_root['longitude'][:]
-                station_latitudes['{}|{}'.format(network, speci)] = ncdf_root['latitude'][:]
-            else:
-                station_longitudes['{}|{}'.format(network, speci)] = ncdf_root['lon'][:]
-                station_latitudes['{}|{}'.format(network, speci)] = ncdf_root['lat'][:]
-            ncdf_root.close()
-
-    # if have more than 1 species to read, and spatial_colocation is active,
-    # then spatially colocate stations across species
-    if (len(species) > 1) & (instance.spatial_colocation):
-        intersecting_station_references, intersecting_station_longitudes, intersecting_station_latitudes = \
-            spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes)
-        for networkspecies in station_references:
-            station_references[networkspecies] = intersecting_station_references
-            station_longitudes[networkspecies] = intersecting_station_longitudes
-            station_latitudes[networkspecies] = intersecting_station_latitudes
-
-    return station_references, station_longitudes, station_latitudes
-
-def filter_by_species():
-    pass

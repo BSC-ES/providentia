@@ -315,13 +315,16 @@ class Plot:
         # set aspect
         ax.set_aspect('equal', adjustable='box')
 
+        if len(ax.lines) == 0:
+            return None
+
         # Get min and max values for ticks
         for i, line in enumerate(ax.lines):
             line_xdata = line.get_xdata()
             line_ydata = line.get_ydata()
             if list(line_xdata) != [0, 1] and list(line_xdata) != [0, 0.5]:
                 break
-
+            
         xtickmin = np.nanmin(line_xdata)
         xtickmax = np.nanmax(line_xdata)
         ytickmin = np.nanmin(line_ydata)
@@ -434,16 +437,30 @@ class Plot:
         species_to_write = np.unique(self.read_instance.species)
 
         #set header main text
-        txt = 'Network = {}\nTemporal Resolution = {}\n' \
-              'Species = {}\nDate Range = {} - {}\nExperiments = {}\n' \
-              'Subsections = {}\n' \
-            .format(network_to_write,
-                    self.read_instance.resolution,
-                    species_to_write,
-                    self.read_instance.start_date,
-                    self.read_instance.end_date, 
-                    list(self.read_instance.experiments.values()),
-                    self.read_instance.subsections)
+        txt = 'Network : {}\n' \
+              'Species : {}\n' \
+              'Temporal Resolution : {}\n' \
+              'Date Range : {} - {}\n' \
+              'Experiments : {}\n' \
+              'Temporal Colocation : {}\n' \
+              'Spatial Colocation : {}\n' \
+              .format(network_to_write,
+                      species_to_write,
+                      self.read_instance.resolution,
+                      self.read_instance.start_date,
+                      self.read_instance.end_date,
+                      list(self.read_instance.experiments.values()),
+                      self.read_instance.temporal_colocation,
+                      self.read_instance.spatial_colocation 
+                      )
+
+        # add filter species to header if have it set
+        if self.read_instance.filter_species: 
+            txt += 'Filter Species : {}\n'.format(self.read_instance.filter_species)
+
+        # add subsections to header
+        txt += 'Subsections : {}\n'.format(self.read_instance.subsections)
+
         plot_characteristics['page_text']['s'] = txt   
         plot_characteristics['page_text']['transform'] = page.transFigure
         page.text(**plot_characteristics['page_text'])
@@ -1040,7 +1057,6 @@ class Plot:
 
         # make boxplot for data_label for multispecies
         if 'multispecies' in plot_options:
-            networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.read_instance.network, self.read_instance.species)]
             widths = plot_characteristics['group_widths']['multispecies'] / (len(self.read_instance.data_labels) + 1)
             gap_after_plot = widths / len(self.read_instance.data_labels)
             if ('individual' in plot_options) or ('obs' in plot_options):
@@ -1048,7 +1064,7 @@ class Plot:
             else:
                 offset = ((widths * (self.read_instance.data_labels.index(data_label) + 1)) - (widths/2.0)) + (gap_after_plot * (self.read_instance.data_labels.index(data_label)))
 
-            for ns_ii, ns in enumerate(networkspecies):
+            for ns_ii, ns in enumerate(self.read_instance.networkspecies):
                 positions = [(ns_ii - (plot_characteristics['group_widths']['multispecies'] / 2.0)) + (offset)]
                 # make boxplot
                 boxplot = relevant_axis.boxplot(self.canvas_instance.selected_station_data[ns][data_label]['pandas_df']['data'].dropna(), 
@@ -1083,14 +1099,14 @@ class Plot:
         # set xticklabels (if not already plotted)
         if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
             if 'multispecies' in plot_options:
-                relevant_axis.set_xticks(np.arange(len(networkspecies)))
+                relevant_axis.set_xticks(np.arange(len(self.read_instance.networkspecies)))
                 #if all networks or species are same, drop them from xtick label
                 if len(np.unique(self.read_instance.network)) == 1:
                     networkspecies_labels = copy.deepcopy(self.read_instance.species)
                 elif len(np.unique(self.read_instance.species)) == 1:
                     networkspecies_labels = copy.deepcopy(self.read_instance.network)
                 else:
-                    networkspecies_labels = networkspecies
+                    networkspecies_labels = copy.deepcopy(self.read_instance.networkspecies)
                 relevant_axis.set_xticklabels(networkspecies_labels)
             else:
                 data_labels_to_plot = copy.deepcopy(self.read_instance.data_labels)
@@ -1392,7 +1408,7 @@ class Plot:
 
         # if no stats defined, then return
         if len(stats) == 0:
-            print(f'No annotation statistics have not been defined for {base_plot_type} in plot_characteristics_offline.py')
+            print(f'Warning: No annotation statistics have not been defined for {base_plot_type} in plot_characteristics_offline.py')
             return
 
         # initialise list of strs to annotate, and colours of annotations

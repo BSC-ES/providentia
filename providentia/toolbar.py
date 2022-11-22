@@ -141,8 +141,6 @@ class NavigationToolbar(NavigationToolbar2QT):
         for k, val in self.read_instance.current_config.items():
             setattr(self.read_instance, k, provconf.parse_parameter(k, val))            
 
-        #vars(self.read_instance).update({(k, provconf.parse_parameter(k, val)) for k, val in self.read_instance.current_config.items()})
-
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
 
