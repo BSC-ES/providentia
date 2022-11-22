@@ -65,7 +65,6 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
         else:
             canvas_instance.selected_station_data_max[networkspeci] = 0.0
 
-
         # iterate through data labels
         for data_label in read_instance.data_labels:
 

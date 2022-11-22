@@ -82,7 +82,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         
         # update variables from defined config file
         if self.current_config:
-            vars(self).update({(k, provconf.parse_parameter(k, val)) for k, val in self.current_config.items()})
+            for k, val in self.current_config.items():
+                setattr(self, k, provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
@@ -185,7 +186,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def init_ui(self, **kwargs):
         """Initialise user interface"""
 
-        print("Starting Providentia online...")
+        print("Starting Providentia dashboard...")
 
         # set window title
         self.window_title = "Providentia"
@@ -623,7 +624,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                 self.experiments_menu['checkboxes']['map_vars']]
         previous_experiments = self.experiments
         self.experiments = {exp:previous_experiments[exp] if exp in previous_experiments else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
-        
+
         # update default qa
         default_qa = aux.get_default_qa(self, self.selected_species)
         self.qa_menu['checkboxes']['remove_default'] = default_qa
@@ -923,6 +924,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
+        self.previous_filter_species = {}
         
         #set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
@@ -934,9 +936,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
         self.qa_per_species[self.selected_species] = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
-        self.data_labels = ['observations'] + list(self.experiments.keys())
         self.networkspeci = '{}|{}'.format(self.network[0],self.species[0])
-        
+        self.networkspecies = [self.networkspeci]
+        self.data_labels = ['observations'] + list(self.experiments.keys())
+        # upddate filter_species here with contents of filter_species pop-up menu
+        #self.filter_species = 
+
+        # if spatial_colocation is not active, force filter_species to be empty dict if it is not akready
+        # inform user of this
+        if (self.filter_species) and (not self.spatial_colocation):
+            self.filter_species = {} 
+            print('Warning: "spatial_colocation" must be set to True if wanting to use "filter_species" option.')
+
         #set read operations to be empty list initially
         read_operations = []
 
@@ -945,13 +956,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             read_operations = ['reset']
 
         # determine if any of the key variables have changed 
-        # (network, resolution, species, qa, flags)
+        # (network, resolution, species, qa, flags, filter_species)
         # if any have changed, observations and any selected experiments have to be re-read entirely
         elif (self.network[0] != self.previous_network[0]) or (
                 self.resolution != self.previous_resolution) or (
                 self.species[0] != self.previous_species[0]) or (
                 np.array_equal(self.qa, self.previous_qa) == False) or (
-                np.array_equal(self.flags, self.previous_flags) == False):
+                np.array_equal(self.flags, self.previous_flags) == False) or (
+                list(self.filter_species.keys()) != list(self.previous_filter_species.keys())):
             read_operations = ['reset']
 
         # key variables have not changed, has start/end date?
@@ -1019,8 +1031,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, 
                                        experiments_to_read=experiments_to_read)
             
-            #clear canvas entirely if have no valid data
-            if self.clear_canvas:
+            #clear canvas entirely if have no valid data after read
+            if self.invalid_read:
                 # clear axes
                 for plot_type, ax in self.mpl_canvas.plot_axes.items():
                     if isinstance(ax, dict):
@@ -1042,16 +1054,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             #update relevant temporal resolutions 
             self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
 
-        # if species has changed, or first read, update default species specific lower/upper limits
+        # if species has changed, or first read, update species specific lower/upper limits
         if (self.first_read) or (self.species[0] != self.previous_species[0]):
-            # update default lower/upper species specific limits and filter data outside limits
-            species_lower_limit, species_upper_limit = aux.which_bounds(self, self.species[0])
-            # set default limits
-            self.le_minimum_value.setText(str(species_lower_limit))
-            self.le_maximum_value.setText(str(species_upper_limit))
+            # get default GHOST limits
+            self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
+            self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
+            self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
+            self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
 
-        # run function to filter data outside lower/upper limits, not using desired
-        # measurement methods, and < desired minimum data availability
+        # run function to update filter
         self.mpl_canvas.handle_data_filter_update()
         
         # update map z combobox fields based on data in memory
@@ -1090,7 +1101,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.mpl_canvas.update_MPL_canvas()
 
         # if first read, then set this now to be False
-        # also ,if colocate checkbox is ticked, then apply temporal colocation
+        # also, if colocate checkbox is ticked, then apply temporal colocation
         if self.first_read:
             self.first_read = False
             if self.ch_colocate.checkState() == QtCore.Qt.Checked:
