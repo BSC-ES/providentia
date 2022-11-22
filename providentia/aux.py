@@ -1090,21 +1090,23 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
 def get_basic_metadata(instance):     
     """
     Get basic unique metadata across networkspecies wanting to read
-    The basic fields are: station_reference, longitude, latitude
+    The basic fields are: station_reference, longitude, latitude, station_classification and area_classification
 
     If have multiple species, then spatially cocolocate across species 
     to get matching stations across stations.
 
     :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
     :type instance: object
-    :return: station_references per networkspecies, longitudes per networkspecies, latitudes per networkspecies 
-    :rtype: dict, dict, dict
+    :return: station_references per networkspecies, longitudes per networkspecies, latitudes per networkspecies, station_classifications per networkspecies, area_classifications per networkspecies 
+    :rtype: dict, dict, dict, dict, dict
     """
 
     # define dictionaries for storing basic metadata across all species to read
     station_references = {}
     station_longitudes = {}
     station_latitudes = {}
+    station_classifications = {}
+    area_classifications = {}
 
     # iterate through network, speci pairs
     for networkspeci in (instance.networkspecies + instance.filter_networkspecies):
@@ -1149,18 +1151,24 @@ def get_basic_metadata(instance):
             speci_station_references = []
             speci_station_longitudes = []
             speci_station_latitudes = []
+            speci_station_classifications = []
+            speci_area_classifications = []
 
             for relevant_file in relevant_files:
                 ncdf_root = Dataset(relevant_file)
                 speci_station_references = np.append(speci_station_references, ncdf_root['station_reference'][:])
                 speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
                 speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
+                speci_station_classifications = np.append(speci_station_classifications, ncdf_root['station_classification'][:])
+                speci_area_classifications = np.append(speci_area_classifications, ncdf_root['area_classification'][:])
                 ncdf_root.close()
 
             speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
             station_references[networkspeci] = speci_station_references
             station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
             station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
+            station_classifications[networkspeci] = speci_station_classifications[station_unique_indices]
+            area_classifications[networkspeci] = speci_area_classifications[station_unique_indices]
         
         # non-GHOST
         else:
@@ -1178,14 +1186,37 @@ def get_basic_metadata(instance):
             else:
                 station_longitudes[networkspeci] = ncdf_root['lon'][:]
                 station_latitudes[networkspeci] = ncdf_root['lat'][:]
+
+            if "station_classification" in ncdf_root.variables:
+                if ncdf_root['station_classification'][:].dtype == np.str:
+                    station_classifications[networkspeci] = ncdf_root['station_classification'][:]
+                else:
+                    if ncdf_root['station_classification'][:].dtype != np.dtype(object):
+                        station_classifications[networkspeci] = np.array(
+                            [st_classification.tostring().decode('ascii').replace('\x00', '')
+                            for st_classification in ncdf_root['station_classification'][:]], dtype=np.str)
+                    else:
+                        station_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_classification'][:]])
+
+            if "area_classification" in ncdf_root.variables:
+                if ncdf_root['area_classification'][:].dtype == np.str:
+                    area_classifications[networkspeci] = ncdf_root['area_classification'][:]
+                else:
+                    if ncdf_root['area_classification'][:].dtype != np.dtype(object):
+                        area_classifications[networkspeci] = np.array(
+                            [area_classification.tostring().decode('ascii').replace('\x00', '')
+                            for area_classification in ncdf_root['area_classification'][:]], dtype=np.str)
+                    else:
+                        area_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['area_classification'][:]]) 
+            
             ncdf_root.close()
 
     # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
     # then spatially colocate stations across species
     if (len((instance.networkspecies + instance.filter_networkspecies)) > 1) & (instance.spatial_colocation):
         # get intersecting station information across species
-        intersecting_station_references, intersecting_station_longitudes, intersecting_station_latitudes = \
-            spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes)
+        intersecting_station_references, intersecting_station_longitudes, intersecting_station_latitudes, intersecting_station_classifications, intersecting_area_classifications = \
+            spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes, station_classifications, area_classifications)
         for ns in station_references:
             # if using GHOST data then add method abberivations per species to intersecting station references
             if instance.reading_ghost:
@@ -1197,13 +1228,15 @@ def get_basic_metadata(instance):
             station_references[ns] = np.array(intersecting_station_references_methods)
             station_longitudes[ns] = np.array(intersecting_station_longitudes)
             station_latitudes[ns] = np.array(intersecting_station_latitudes)    
+            station_classifications[ns] = np.array(intersecting_station_classifications)  
+            area_classifications[ns] =  np.array(intersecting_area_classifications)  
 
-    return station_references, station_longitudes, station_latitudes
+    return station_references, station_longitudes, station_latitudes, station_classifications, area_classifications
 
-def spatial_colocation(reading_ghost, station_references, longitudes, latitudes):
+def spatial_colocation(reading_ghost, station_references, longitudes, latitudes, station_classifications, area_classifications):
     """ 
-    Given multiple species, return intersecting station_references, longitudes and latitudes 
-    across species.
+    Given multiple species, return intersecting station_references, longitudes, latitudes, 
+    station_classifications and area_classifications across species.
 
     This is done by 
         1. Cross-checking the station references between species to get matching station_references
@@ -1220,8 +1253,11 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
     :type longitudes: dict
     :param latitudes: dictionary of latitudes per network/species
     :type latitudes: dict
-    :return: intersecting station_references, intersecting longitudes, intersecting latitudes 
-    :rtype: list, list, list
+    :param latitudes: dictionary of latitudes per network/species
+    :type latitudes: dict
+
+    :return: intersecting station_references, intersecting longitudes, intersecting latitudes, 
+    :rtype: list, list, list, list, list
     """
 
     # if are reading GHOST data remove method abbreviation from station_references
@@ -1245,10 +1281,14 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
         intersecting_station_references = np.array(station_references_no_method[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
         intersecting_longitudes = np.array(longitudes[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
         intersecting_latitudes = np.array(latitudes[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
+        intersecting_station_classifications = np.array(station_classifications[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
+        intersecting_area_classifications = np.array(area_classifications[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
     else:
         intersecting_station_references = np.array([])
         intersecting_longitudes = np.array([])
         intersecting_latitudes = np.array([])
+        intersecting_station_classifications = np.array([])
+        intersecting_area_classifications = np.array([])
 
     # if non-intersecting indices unaccounted for across species, 
     # then attempt to resolve them by matching longitudes / latitudes
@@ -1261,11 +1301,16 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
         non_intersecting_station_references = {networkspecies: (np.delete(station_references_no_method[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(station_references_no_method[networkspecies])) for networkspecies in station_references_no_method}
         non_intersecting_longitudes = {networkspecies: (np.delete(longitudes[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(longitudes[networkspecies])) for networkspecies in longitudes}
         non_intersecting_latitudes = {networkspecies: (np.delete(latitudes[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(latitudes[networkspecies])) for networkspecies in latitudes}
+        non_intersecting_station_classifications = {networkspecies: (np.delete(station_classifications[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(station_classifications[networkspecies])) for networkspecies in station_classifications}
+        non_intersecting_area_classifications = {networkspecies: (np.delete(area_classifications[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(area_classifications[networkspecies])) for networkspecies in area_classifications}
 
         # get non-intersecting station references, longitudes and latitudes for first speci
         speci_non_intersecting_station_references = non_intersecting_station_references[firstnetworkspecies]
         speci_non_intersecting_longitudes = non_intersecting_longitudes[firstnetworkspecies]
         speci_non_intersecting_latitudes = non_intersecting_latitudes[firstnetworkspecies]
+        speci_non_intersecting_station_classifications = non_intersecting_station_classifications[firstnetworkspecies]    
+        speci_non_intersecting_area_classifications = non_intersecting_area_classifications[firstnetworkspecies]
+
         # convert speci longitude and latitudes in geogroahic coordinates to cartesian ECEF 
         # (Earth Centred, Earth Fixed) coordinates assuming WGS84 datum and ellipsoid, and that all heights equal zero
         # ECEF coordiantes represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
@@ -1306,11 +1351,15 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
             intersecting_station_references = np.append(intersecting_station_references, speci_non_intersecting_station_references[intersecting_indices_lonlat])
             intersecting_longitudes = np.append(intersecting_longitudes, speci_non_intersecting_longitudes[intersecting_indices_lonlat])
             intersecting_latitudes = np.append(intersecting_latitudes, speci_non_intersecting_latitudes[intersecting_indices_lonlat])
-        
+            intersecting_station_classifications = np.append(intersecting_station_classifications, speci_non_intersecting_station_classifications[intersecting_indices_lonlat])
+            intersecting_area_classifications = np.append(intersecting_area_classifications, speci_non_intersecting_area_classifications[intersecting_indices_lonlat])
+            
     # sort arrays by station references (alphabetically)
     sorted_inds = intersecting_station_references.argsort()
     intersecting_station_references = intersecting_station_references[sorted_inds]
     intersecting_longitudes = intersecting_longitudes[sorted_inds]
     intersecting_latitudes = intersecting_latitudes[sorted_inds]
+    intersecting_station_classifications = intersecting_station_classifications[sorted_inds]
+    intersecting_area_classifications = intersecting_area_classifications[sorted_inds]
 
-    return intersecting_station_references, intersecting_longitudes, intersecting_latitudes
+    return intersecting_station_references, intersecting_longitudes, intersecting_latitudes, intersecting_station_classifications, intersecting_area_classifications
