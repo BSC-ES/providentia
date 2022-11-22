@@ -61,12 +61,18 @@ class DataReader:
 
             # show warning when the data consists only of less than 2 timesteps
             if len(self.read_instance.time_array) < 2:
-                self.read_instance.clear_canvas = True
-                print('Warning: Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots.')
+                self.read_instance.invalid_read = True
+                print('Error: Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots.')
                 return
             else:
-                self.read_instance.clear_canvas = False
-
+                # get list of extra networkspecies to read, used for filtering data
+                # read only networkspecies not present in current networkspecies to read
+                self.read_instance.filter_networkspecies = []
+                if self.read_instance.filter_species:
+                    for networkspeci in self.read_instance.filter_species:
+                        if networkspeci not in self.read_instance.networkspecies:
+                            self.read_instance.filter_networkspecies.append(networkspeci)
+                
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)
                 self.read_instance.yearmonths = list(np.unique(['{}0{}'.format(dti.year,dti.month) if len(str(dti.month)) == 1 else '{}{}'.format(dti.year,dti.month) \
                                                                 for dti in self.read_instance.time_array]))
@@ -82,20 +88,49 @@ class DataReader:
                     self.read_instance.time_array >= datetime.datetime.strptime(start_yyyymm+'01','%Y%m%d')) 
                     for month_ii, start_yyyymm in enumerate(self.read_instance.yearmonths)])
 
-                # get unique basic metadata across networks / species
+                # get unique basic metadata across networkspecies
+                # for this step include filter networkspecies
                 self.read_instance.station_references, self.read_instance.station_longitudes, self.read_instance.station_latitudes =\
-                    get_basic_metadata(self.read_instance, self.read_instance.network, self.read_instance.species, self.read_instance.resolution) 
+                    get_basic_metadata(self.read_instance) 
+
+                # iterate through station_references per networkspecies
+                # if have 0 valid stations then drop  
+                for networkspeci, stn_refs in self.read_instance.station_references.items():
+                    if len(stn_refs) == 0:
+                        if networkspeci in self.read_instance.networkspecies:
+                            self.read_instance.networkspecies.remove(networkspeci)
+                            print('Warning: There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci))
+                        elif networkspeci in self.read_instance.filter_networkspecies:
+                            self.read_instance.filter_networkspecies.remove(networkspeci)
+                            print('Warning: There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci))
+
+                # if have zero networkspecies left, then return with invalid_read
+                if len(self.read_instance.networkspecies) == 0:
+                    self.read_instance.invalid_read = True
+                    return
+
+                # set invalid_read to be False if have data to read
+                self.read_instance.invalid_read = False
 
         # need to reset all data structures 
         if 'reset' in operations:  
 
             # data
-            self.read_instance.data_in_memory = {'{}|{}'.format(network,speci): 
+            self.read_instance.data_in_memory = {networkspeci: 
                                                  np.full((len(self.read_instance.data_labels),
-                                                          len(self.read_instance.station_references['{}|{}'.format(network,speci)]),
+                                                          len(self.read_instance.station_references[networkspeci]),
                                                           len(self.read_instance.time_array)),
-                                                          np.NaN, dtype=np.float32) for network, speci in zip(self.read_instance.network, 
-                                                                                                              self.read_instance.species)}
+                                                          np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies}
+
+            # filter data (if active)
+            if self.read_instance.filter_species:
+                
+                self.read_instance.filter_data_in_memory = {networkspeci: 
+                                                            np.full((len(self.read_instance.station_references[networkspeci]),
+                                                                     len(self.read_instance.time_array)),
+                                                                     np.NaN, dtype=np.float32) for networkspeci in self.read_instance.filter_networkspecies}
+            else:
+                self.read_instance.filter_data_in_memory = {}
 
             # GHOST data --> data variables which change per measurement (for filtering)
             if self.read_instance.reading_ghost:
@@ -129,13 +164,14 @@ class DataReader:
                                                                   'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
                                                                   'annual_native_max_gap_percent', 'season_code']
 
-                self.read_instance.ghost_data_in_memory = {'{}|{}'.format(network,speci):
+                self.read_instance.ghost_data_in_memory = {networkspeci:
                                         np.full((len(self.read_instance.ghost_data_vars_to_read),
-                                        len(self.read_instance.station_references['{}|{}'.format(network,speci)]),
-                                        len(self.read_instance.time_array)),
-                                        np.NaN, dtype=np.float32) for network, speci in zip(self.read_instance.network, self.read_instance.species)} 
+                                                 len(self.read_instance.station_references[networkspeci]),
+                                                 len(self.read_instance.time_array)),
+                                                 np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies} 
 
             else:
+                self.read_instance.ghost_data_in_memory = {}
                 self.read_instance.ghost_data_vars_to_read = []
 
             # metadata 
@@ -151,18 +187,18 @@ class DataReader:
                 self.read_instance.metadata_dtype = self.read_instance.ghost_metadata_dtype
                 self.read_instance.metadata_vars_to_read = self.read_instance.ghost_metadata_vars_to_read
 
-            self.read_instance.metadata_in_memory = {'{}|{}'.format(network,speci): 
-                                                     np.full((len(self.read_instance.station_references['{}|{}'.format(network,speci)]),
+            self.read_instance.metadata_in_memory = {networkspeci: 
+                                                     np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
                                                               len(self.read_instance.yearmonths)),
-                                                              np.NaN, dtype=self.read_instance.metadata_dtype) for network, speci in zip(self.read_instance.network, self.read_instance.species)}
+                                                              np.NaN, dtype=self.read_instance.metadata_dtype) 
+                                                              for networkspeci in self.read_instance.networkspecies}
 
             # get list of yearmonths to read
             yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
                                                         self.read_instance.end_date, self.read_instance.resolution)
 
             # read data 
-            self.read_data(self.read_instance.network, self.read_instance.species, self.read_instance.resolution, 
-                           yearmonths_to_read, self.read_instance.data_labels)
+            self.read_data(yearmonths_to_read, self.read_instance.data_labels)
 
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
             self.read_instance.measurement_units = {speci:self.read_instance.parameter_dictionary[speci]['standard_units'] for speci in self.read_instance.species}
@@ -174,7 +210,7 @@ class DataReader:
                 self.read_instance.plotting_params[data_label] = {}
                 # get experiment specific grid edges for exp, from first relevant file
                 if data_label != 'observations':
-                    exp_nc_root = Dataset(self.files_to_read['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])][data_label][0])
+                    exp_nc_root = Dataset(self.files_to_read[self.read_instance.networkspecies[0]][data_label][0])
                     self.read_instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
                     self.read_instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
                     exp_nc_root.close()
@@ -187,45 +223,57 @@ class DataReader:
 
             # if station references array has changed then as cutting / appending to
             # need to rearrange existing metadata/data arrays accordingly
-            if not np.array_equal(self.read_instance.previous_station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])], \
-                                    self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]):
+            if not np.array_equal(self.read_instance.previous_station_references[self.read_instance.networkspecies[0]], \
+                                    self.read_instance.station_references[self.read_instance.networkspecies[0]]):
 
                 # get indices of stations in previous station references array in current station references array
-                old_station_inds = np.where(np.in1d(self.read_instance.previous_station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])],
-                                                    self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]))[0]
+                old_station_inds = np.where(np.in1d(self.read_instance.previous_station_references[self.read_instance.networkspecies[0]],
+                                                    self.read_instance.station_references[self.read_instance.networkspecies[0]]))[0]
                                                     
                 # get indices of stations in current station references array
                 # that were in previous station references array
-                new_station_inds = np.where(np.in1d(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])],
-                                                    self.read_instance.previous_station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]))[0]
+                new_station_inds = np.where(np.in1d(self.read_instance.station_references[self.read_instance.networkspecies[0]],
+                                                    self.read_instance.previous_station_references[self.read_instance.networkspecies[0]]))[0]
 
                 #rearrange metadata station dimension
-                new_metadata_in_memory = np.full((len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]),
+                new_metadata_in_memory = np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]),
                                                   len(self.read_instance.previous_yearmonths)),
                                                   np.NaN, dtype=self.read_instance.metadata_dtype)
-                new_metadata_in_memory[new_station_inds, :] = self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])][old_station_inds, :]
-                self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = new_metadata_in_memory
+                new_metadata_in_memory[new_station_inds, :] = self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]][old_station_inds, :]
+                self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = new_metadata_in_memory
 
                 # rearrage data array station dimension
                 new_data_in_memory = np.full((len(self.read_instance.previous_data_labels),
-                                              len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]),
+                                              len(self.read_instance.station_references[self.read_instance.networkspecies[0]]),
                                               len(self.read_instance.previous_time_array)),
                                               np.NaN, dtype=np.float32)
                 # put the old data into new array in the correct positions
-                new_data_in_memory[:, new_station_inds, :] = self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])][:, old_station_inds, :]
+                new_data_in_memory[:, new_station_inds, :] = self.read_instance.data_in_memory[self.read_instance.networkspecies[0]][:, old_station_inds, :]
                 # overwrite data array with reshaped version
-                self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = new_data_in_memory
+                self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = new_data_in_memory
+
+                # rearrage filter data array station dimension
+                # iterate through all filter networkspecies
+                if self.read_instance.filter_species:    
+                    for filter_networkspeci in self.read_instance.filter_networkspecies:            
+                        new_filter_data_in_memory = np.full((len(self.read_instance.station_references[filter_networkspeci]),
+                                                             len(self.read_instance.previous_time_array)),
+                                                             np.NaN, dtype=np.float32)
+                        # put the old data into new array in the correct positions
+                        new_filter_data_in_memory[new_station_inds, :] = self.read_instance.filter_data_in_memory[filter_networkspeci][old_station_inds, :]
+                        # overwrite data array with reshaped version
+                        self.read_instance.filter_data_in_memory[filter_networkspeci] = new_filter_data_in_memory
 
                 # rearrage ghost data array station dimension
                 if self.read_instance.reading_ghost:
                     new_ghost_data_in_memory = np.full((len(self.read_instance.ghost_data_vars_to_read),
-                                                        len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]),
+                                                        len(self.read_instance.station_references[self.read_instance.networkspecies[0]]),
                                                         len(self.read_instance.previous_time_array)),
                                                         np.NaN, dtype=np.float32)
                     # put the old ghost data into new array in the correct positions
-                    new_ghost_data_in_memory[:, new_station_inds, :] = self.read_instance.ghost_data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])][:, old_station_inds, :]
+                    new_ghost_data_in_memory[:, new_station_inds, :] = self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]][:, old_station_inds, :]
                     # overwrite ghost data array with reshaped version
-                    self.read_instance.ghost_data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = new_ghost_data_in_memory
+                    self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = new_ghost_data_in_memory
 
             # need to cut on left / cut on right
             if ('cut_left' in operations) or ('cut_right' in operations):
@@ -264,20 +312,25 @@ class DataReader:
 
                 # cut edges of metadata array
                 if metadata_left_edge_ind == metadata_right_edge_ind:
-                    self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                        self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])][:, [metadata_left_edge_ind]]
+                    self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
+                        self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]][:, [metadata_left_edge_ind]]
                 else:
-                    self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                        self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])][:, metadata_left_edge_ind:metadata_right_edge_ind]
+                    self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
+                        self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]][:, metadata_left_edge_ind:metadata_right_edge_ind]
 
                 # cut edges of data array
-                self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                    self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])][:, :, data_left_edge_ind:data_right_edge_ind]
+                self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
+                    self.read_instance.data_in_memory[self.read_instance.networkspecies[0]][:, :, data_left_edge_ind:data_right_edge_ind]
+
+                # cut edges of filter data array
+                if self.read_instance.filter_species:  
+                    self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]] = \
+                        self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]][:, data_left_edge_ind:data_right_edge_ind]
 
                 #cut edges of ghost data array
                 if self.read_instance.reading_ghost:
-                    self.read_instance.ghost_data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                        self.read_instance.ghost_data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])][:, :, data_left_edge_ind:data_right_edge_ind]
+                    self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
+                        self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]][:, :, data_left_edge_ind:data_right_edge_ind]
 
             # need to read on left / read on right
             if ('read_left' in operations) or ('read_right' in operations):
@@ -310,20 +363,26 @@ class DataReader:
                     if len(yearmonths_to_read) > 0:
 
                         #add space for new data on left edge of the metadata array
-                        self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                            np.concatenate((np.full((len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), len(yearmonths_to_read)), 
-                                np.NaN, dtype=self.read_instance.metadata_dtype), self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), axis=1)
+                        self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
+                                np.NaN, dtype=self.read_instance.metadata_dtype), self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]]), axis=1)
 
                         # insert space for new data on left edge of the data array
-                        self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                            np.concatenate((np.full((len(self.read_instance.previous_data_labels), len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), n_new_left_data_inds), 
-                                np.NaN, dtype=np.float32), self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), axis=2)
+                        self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((np.full((len(self.read_instance.previous_data_labels), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
+                                np.NaN, dtype=np.float32), self.read_instance.data_in_memory[self.read_instance.networkspecies[0]]), axis=2)
+
+                        #add space for new data on left edge of the filter data array
+                        if self.read_instance.filter_species:  
+                            self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]] = \
+                                np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
+                                    np.NaN, dtype=np.float32), self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]]), axis=1)
 
                         # insert space for new ghost data on left edge of the ghost data array
                         if self.read_instance.reading_ghost:
-                            self.read_instance.ghost_data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                                np.concatenate((np.full((len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), n_new_left_data_inds), 
-                                    np.NaN, dtype=np.float32), self.read_instance.ghost_data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), axis=2)
+                            self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
+                                np.concatenate((np.full((len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
+                                    np.NaN, dtype=np.float32), self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]]), axis=2)
                         
                         # add yearmonths_to_read to list for both edges
                         all_yearmonths_to_read.extend(yearmonths_to_read)
@@ -354,57 +413,79 @@ class DataReader:
                     if len(yearmonths_to_read) > 0:
 
                         #add space for new data on right edge of the metadata array
-                        self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                            np.concatenate((self.read_instance.metadata_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])], 
-                                np.full((len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), len(yearmonths_to_read)), 
+                        self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]], 
+                                np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
                                     np.NaN, dtype=self.read_instance.metadata_dtype)), axis=1)
 
                         # insert space for new data on right edge of the data array
-                        self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                            np.concatenate((self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])], 
-                                np.full((len(self.read_instance.previous_data_labels), len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), n_new_right_data_inds), 
+                        self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], 
+                                np.full((len(self.read_instance.previous_data_labels), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_right_data_inds), 
                                     np.NaN, dtype=np.float32)), axis=2)
+
+                        # insert space for new data on right edge of the filter data array
+                        if self.read_instance.filter_species: 
+                            self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]] = \
+                                np.concatenate((self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]], 
+                                    np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_right_data_inds), 
+                                        np.NaN, dtype=np.float32)), axis=1)
 
                         # insert space for new ghost data on right edge of the ghost data array
                         if self.read_instance.reading_ghost:
-                            self.read_instance.ghost_data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                                np.concatenate((self.read_instance.ghost_data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])], 
-                                    np.full((len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), n_new_right_data_inds), 
+                            self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
+                                np.concatenate((self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]], 
+                                    np.full((len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_right_data_inds), 
                                         np.NaN, dtype=np.float32)), axis=2)    
 
                         # add yearmonths_to_read to list for both edges
                         all_yearmonths_to_read.extend(yearmonths_to_read)
 
                 # read data 
-                self.read_data(self.read_instance.network, self.read_instance.species, self.read_instance.resolution, all_yearmonths_to_read, self.read_instance.previous_data_labels) 
+                self.read_data(all_yearmonths_to_read, self.read_instance.previous_data_labels) 
 
         # need to remove experiment/s ?
         if 'remove_exp' in operations: 
 
+            # get indices of experiments to remove
             experiments_to_remove_inds = [self.read_instance.previous_data_labels.index(experiment) for experiment in experiments_to_remove]
-            self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                np.delete(self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])], experiments_to_remove_inds, axis=0)
+            
+            # remove experiment data
+            self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
+                np.delete(self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], experiments_to_remove_inds, axis=0)
+
+            # remove plotting paramaters for experiments removed
+            for experiment in experiments_to_remove:
+                del self.read_instance.plotting_params[experiment]
+
+            # update plotting parameters colours and zorder
+            update_plotting_parameters(self.read_instance) 
 
         # need to read experiment/s ? 
         if 'read_exp' in operations: 
 
             # insert space for new experiments in data array
-            self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])] = \
-                np.concatenate((self.read_instance.data_in_memory['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])], \
-                np.full((len(experiments_to_read), len(self.read_instance.station_references['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])]), len(self.read_instance.time_array)), 
-                    np.NaN, dtype=np.float32)), axis=0)
+            for experiment in experiments_to_read:
+                experiments_to_read_ind = self.read_instance.data_labels.index(experiment) 
+                
+                self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
+                    np.insert(self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], 
+                                experiments_to_read_ind,
+                                np.full((1, len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(self.read_instance.time_array)), 
+                                np.NaN, dtype=np.float32),                     
+                                axis=0)
 
             # get list of yearmonths to read
             yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
                                                         self.read_instance.end_date, self.read_instance.resolution)
 
-            # read data 
-            self.read_data(self.read_instance.network, self.read_instance.species, self.read_instance.resolution, yearmonths_to_read, experiments_to_read)       
+            # read data
+            self.read_data(yearmonths_to_read, experiments_to_read)       
 
             # add experiment specific grid edges for exp to plotting params
             for experiment_to_read in experiments_to_read:
                 self.read_instance.plotting_params[experiment_to_read] = {}
-                exp_nc_root = Dataset(self.files_to_read['{}|{}'.format(self.read_instance.network[0],self.read_instance.species[0])][experiment_to_read][0])
+                exp_nc_root = Dataset(self.files_to_read[self.read_instance.networkspecies[0]][experiment_to_read][0])
                 self.read_instance.plotting_params[experiment_to_read]['grid_edge_longitude'] = \
                     exp_nc_root['grid_edge_longitude'][:]
                 self.read_instance.plotting_params[experiment_to_read]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
@@ -413,22 +494,14 @@ class DataReader:
             # update plotting parameters colours and zorder
             update_plotting_parameters(self.read_instance) 
 
-    def read_data(self, networks, species, resolution, yearmonths_to_read, data_labels, filter=False):
+    def read_data(self, yearmonths_to_read, data_labels):
         """
         Function that handles reading of observational/experiment data.
 
-        :param networks: list of networks to read
-        :type networks: list
-        :param species: list of species to read
-        :type species: list
-        :param resolution: temporal resolution to read
-        :type resolution: str
         :param yearmonths_to_read: list of yearmonths to read
         :type yearmonths_to_read: list
         :param data_labels: data labels to read
         :type data_labels: list
-        :param filter: boolean informing whether are reading a variable to filter by or not
-        :type filter: boolean
         """
 
         # create arrays to share across processes (for parallel multiprocessing use)
@@ -446,11 +519,21 @@ class DataReader:
         # create dictionary for saving files to read
         self.files_to_read = {}
 
-        # iterate through networks and species
-        for network, speci in zip(networks, species):
+        # iterate through networkspecies + filter_networkspecies
+        for networkspeci in (self.read_instance.networkspecies + self.read_instance.filter_networkspecies):
+
+            # determine if filter networkspecies or not
+            if networkspeci in self.read_instance.filter_networkspecies:
+                filter_read = True
+            else:
+                filter_read = False
+
+            # get indivudual network and species strings
+            network = networkspeci.split('|')[0]
+            speci = networkspeci.split('|')[1]
 
             # add dictionary of files to read per network-speci 
-            self.files_to_read['{}|{}'.format(network,speci)] = {}
+            self.files_to_read[networkspeci] = {}
 
             # iterate through data labels
             for data_label in data_labels:
@@ -466,48 +549,43 @@ class DataReader:
                     if self.read_instance.reading_ghost:
                         file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.ghost_root, network,
                                                             self.read_instance.ghost_version,
-                                                            resolution, speci, speci)
+                                                            self.read_instance.resolution, speci, speci)
                         try:
-                            available_yearmonths = self.read_instance.available_observation_data[network][resolution][matrix][speci]
+                            available_yearmonths = self.read_instance.available_observation_data[network][self.read_instance.resolution][matrix][speci]
                         except KeyError:
-                            error = 'Error: The folder {0} does not exist.'.format(file_root[:-1])
-                            tip = 'Tip: Consider interpolating the network data for the given configuration using Providentia Interpolation.'
-                            print(error + '\n' + tip)
-                            sys.exit()
+                            continue
 
                     # non-GHOST
                     else:
                         file_root = '%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network, 
-                                                        resolution, speci, speci)
+                                                        self.read_instance.resolution, speci, speci)
                         try:
-                            available_yearmonths = self.read_instance.available_observation_data[network][resolution][matrix][speci]
+                            available_yearmonths = self.read_instance.available_observation_data[network][self.read_instance.resolution][matrix][speci]
                         except KeyError:
-                            error = 'Error: The folder {0} does not exist.'.format(file_root[:-1])
-                            tip = 'Tip: Consider interpolating the network data for the given configuration using Providentia Interpolation.'
-                            print(error + '\n' + tip)
-                            sys.exit()
+                            continue
 
-                # experiments
+                # experiments 
                 else:
-                    if '/' in network:
+                    #if are reading filter species continue to next data_label
+                    if filter_read:
+                        continue 
+
+                    elif '/' in network:
                         file_root = \
                             '%s/%s/%s/%s/%s/*%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                        data_label, resolution, speci, network.split('/')[0].upper(), speci)
+                                                        data_label, self.read_instance.resolution, speci, network.split('/')[0].upper(), speci)
                     else:
                         file_root = \
                             '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                       data_label, resolution, speci, network, speci)
+                                                       data_label, self.read_instance.resolution, speci, network, speci)
                     try:
-                        available_yearmonths = self.read_instance.available_experiment_data[network][resolution][speci][data_label]
+                        available_yearmonths = self.read_instance.available_experiment_data[network][self.read_instance.resolution][speci][data_label]
                     except KeyError:
-                        error = 'Error: The folder {0} does not exist.'.format(file_root[:-1])
-                        tip = 'Tip: Consider interpolating the network data for the given configuration using Providentia Interpolation.'
-                        print(error + '\n' + tip)
-                        sys.exit()
+                        continue
 
                 # get intersection of yearmonths_to_read and available_yearmonths
                 yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
-                self.files_to_read['{}|{}'.format(network,speci)][data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])
+                self.files_to_read[networkspeci][data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])
 
             # if active qa == default qa, no need to screen by QA, so inform reading function of this
             default_qa = get_default_qa(self.read_instance, speci)
@@ -516,31 +594,43 @@ class DataReader:
             else:
                 default_qa_active = False
 
-            # create network/ speci specific arrays to share across processes (for parallel multiprocessing use)
+            # create network/speci specific arrays to share across processes (for parallel multiprocessing use)
             # this only works for numerical dtypes, i.e. not strings
-            data_in_memory_shared_shape = (len(data_labels), len(self.read_instance.station_references['{}|{}'.format(network,speci)]), len(self.read_instance.time_array))
+            if not filter_read:
+                data_in_memory_shared_shape = (len(data_labels), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
+            else:
+                data_in_memory_shared_shape = (1, len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
             data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, data_in_memory_shared_shape[0] * data_in_memory_shared_shape[1] * data_in_memory_shared_shape[2])  
             if (self.read_instance.reading_ghost) & ('observations' in data_labels):
-                ghost_data_in_memory_shared_shape = (len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references['{}|{}'.format(network,speci)]), len(self.read_instance.time_array))
-                ghost_data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, ghost_data_in_memory_shared_shape[0] * ghost_data_in_memory_shared_shape[1] * ghost_data_in_memory_shared_shape[2])  
                 qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.qa_per_species[speci]))
+                if not filter_read:
+                    ghost_data_in_memory_shared_shape = (len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
+                    ghost_data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, ghost_data_in_memory_shared_shape[0] * ghost_data_in_memory_shared_shape[1] * ghost_data_in_memory_shared_shape[2])  
+                else:
+                    ghost_data_in_memory_shared_shape = None
+                    ghost_data_in_memory_shared = None
             else:
+                qa_shared = None
                 ghost_data_in_memory_shared_shape = None
                 ghost_data_in_memory_shared = None
-                qa_shared = None
+
             # wrap data_in_memory_shared and ghost_data_in_memory_shared as numpy arrays so we can easily manipulate the data.
             data_in_memory_shared_np = np.frombuffer(data_in_memory_shared, dtype=np.float32).reshape(data_in_memory_shared_shape)
-            if (self.read_instance.reading_ghost) & ('observations' in data_labels):
+            if (self.read_instance.reading_ghost) & ('observations' in data_labels) & (not filter_read):
                 ghost_data_in_memory_shared_np = np.frombuffer(ghost_data_in_memory_shared, dtype=np.float32).reshape(ghost_data_in_memory_shared_shape)
+            
             # fill arrays
-            data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]
-            np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory['{}|{}'.format(network,speci)][data_label_indices, :, :])
-            if (self.read_instance.reading_ghost) & ('observations' in data_labels):
-                np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory['{}|{}'.format(network,speci)])        
+            if not filter_read:
+                data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]
+                np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :])
+            else:
+                np.copyto(data_in_memory_shared_np, self.read_instance.filter_data_in_memory[networkspeci][:, :])
+            if (self.read_instance.reading_ghost) & ('observations' in data_labels):      
                 qa_shared[:] = self.read_instance.qa_per_species[speci]
+                if not filter_read:
+                    np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory[networkspeci])  
 
             # iterate and read species data in all relevant netCDF files (either in serial/parallel)
-            s = time.time()
 
             # read data in parallel
             # setup pool of N workers on N CPUs
@@ -551,17 +641,17 @@ class DataReader:
             # read netCDF files in parallel
             tuple_argument_fields = ['filename', 'station_references', 'speci', 'data_label', 'data_labels', 
                                      'reading_ghost', 'ghost_data_vars_to_read', 'metadata_dtype', 
-                                     'metadata_vars_to_read', 'default_qa_active']
+                                     'metadata_vars_to_read', 'default_qa_active', 'filter_read']
             tuple_arguments = []
 
-            for data_label in self.files_to_read['{}|{}'.format(network, speci)]:
-                for fname in self.files_to_read['{}|{}'.format(network, speci)][data_label]:
-                    tuple_arguments.append((fname, self.read_instance.station_references['{}|{}'.format(network,speci)], 
+            for data_label in self.files_to_read[networkspeci]:
+                for fname in self.files_to_read[networkspeci][data_label]:
+                    tuple_arguments.append((fname, self.read_instance.station_references[networkspeci], 
                                             speci, data_label, data_labels, self.read_instance.reading_ghost, 
                                             self.read_instance.ghost_data_vars_to_read, 
                                             self.read_instance.metadata_dtype, 
                                             self.read_instance.metadata_vars_to_read,
-                                            default_qa_active))
+                                            default_qa_active, filter_read))
 
             returned_data = pool.map(read_netcdf_data, tuple_arguments)
 
@@ -569,28 +659,42 @@ class DataReader:
             # wait for worker processes to terminate before continuing
             pool.join()
             
-            # iterate through read file data and place metadata into full array as appropriate
-            for returned_data_ii, returned_data_per_month in enumerate(returned_data):
-                returned_filename = tuple_arguments[returned_data_ii][tuple_argument_fields.index('filename')]
-                returned_data_label = tuple_arguments[returned_data_ii][tuple_argument_fields.index('data_label')]
-                returned_yearmonth = returned_filename.split('_')[-1][:6]
-                if returned_data_label == 'observations':
-                    self.read_instance.metadata_in_memory['{}|{}'.format(network,speci)][:, self.read_instance.yearmonths.index(returned_yearmonth)] = returned_data_per_month[:, 0]
+            # finalise assignment of non-filter species
+            if not filter_read:
+                # iterate through read file data and place metadata into full array as appropriate
+                for returned_data_ii, returned_data_per_month in enumerate(returned_data):
+                    returned_filename = tuple_arguments[returned_data_ii][tuple_argument_fields.index('filename')]
+                    returned_data_label = tuple_arguments[returned_data_ii][tuple_argument_fields.index('data_label')]
+                    returned_yearmonth = returned_filename.split('_')[-1][:6]
+                    if returned_data_label == 'observations':
+                        # if returned_data_per_month is empty list, do not add
+                        if len(returned_data_per_month) > 0:
+                            self.read_instance.metadata_in_memory[networkspeci][:, self.read_instance.yearmonths.index(returned_yearmonth)] = returned_data_per_month[:, 0]
 
-            # save to data in memory
-            self.read_instance.data_in_memory['{}|{}'.format(network,speci)][data_label_indices, :, :] = data_in_memory_shared_np
-            if (self.read_instance.reading_ghost) & ('observations' in data_labels):
-                self.read_instance.ghost_data_in_memory['{}|{}'.format(network,speci)] = ghost_data_in_memory_shared_np
+                # save to data in memory
+                self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :] = data_in_memory_shared_np
+                if (self.read_instance.reading_ghost) & ('observations' in data_labels):
+                    self.read_instance.ghost_data_in_memory[networkspeci] = ghost_data_in_memory_shared_np
 
-            # check if datasets consist of arrays full of -9999.0 or nan values or if they are empty
-            if (self.read_instance.data_in_memory['{}|{}'.format(network,speci)].size == 0) or \
-                (np.isin(self.read_instance.data_in_memory['{}|{}'.format(network,speci)].flatten(), [-9999.0, np.nan]).all()):
+                # set data array for final validation checks
+                data_array = self.read_instance.data_in_memory[networkspeci]
 
-                if self.read_instance.data_in_memory['{}|{}'.format(network,speci)].size == 0:
-                    error = 'Error: The observation or experiment datasets are empty.'
+            # finalise assignment of filter species
+            else:
+                # save to filter data in memory
+                self.read_instance.filter_data_in_memory[networkspeci][:, :] = data_in_memory_shared_np
+
+                # set data array for final validation checks
+                data_array = self.read_instance.filter_data_in_memory[networkspeci]
+
+            # check if read data array consist of arrays full of -9999.0 or nan values or if they are empty
+            if (data_array.size == 0) or \
+                (np.isin(data_array.flatten(), [-9999.0, np.nan]).all()):
+
+                if data_array.size == 0:
+                    error = 'Error: The observation and experiment arrays for {} are empty.'.format(networkspeci)
             
-                elif np.isin(self.read_instance.data_in_memory['{}|{}'.format(network,speci)].flatten(), [-9999.0, np.nan]).all():
-                    error = 'Error: The observation or experiment datasets are void.'
+                elif np.isin(data_array.flatten(), [-9999.0, np.nan]).all():
+                    error = 'Error: All observation and experiment arrays for {} are void.'.format(networkspeci)
 
-                tip = 'Tip: Check if the data from the observations was downloaded correctly and if the experiments were interpolated at the stations of the network of interest.'
-                sys.exit(error + '\n' + tip)
+                sys.exit(error)
