@@ -167,10 +167,6 @@ def read_netcdf_data(tuple_arguments):
                             meta_var_nc = 'latitude'
                     elif meta_var == 'station_reference':
                         meta_var_nc = 'station_code'
-                    elif meta_var == 'station_classification':
-                        meta_var_nc = 'station_type'
-                    elif meta_var == 'area_classification':
-                        meta_var_nc = 'station_area'
                     else:
                         meta_var_nc = meta_var
 
@@ -184,10 +180,13 @@ def read_netcdf_data(tuple_arguments):
                         meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
                     
                     # some extra str formatting
-                    if meta_var in ['station_reference', 'station_classification', 'area_classification' '']:
+                    if meta_var in ['station_reference', 'station_classification', 'area_classification', '']:
                         if meta_val.dtype != np.str:
-                            meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
-                                                for val in meta_val], dtype=np.str)
+                            if meta_val.dtype != np.dtype(object):
+                                meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
+                                                    for val in meta_val], dtype=np.str)
+                            else:
+                                meta_val = np.array([''.join(val) for val in meta_val])
 
                 # GHOST metadata
                 else:

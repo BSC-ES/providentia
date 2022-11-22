@@ -90,7 +90,7 @@ class DataReader:
 
                 # get unique basic metadata across networkspecies
                 # for this step include filter networkspecies
-                self.read_instance.station_references, self.read_instance.station_longitudes, self.read_instance.station_latitudes =\
+                self.read_instance.station_references, self.read_instance.station_longitudes, self.read_instance.station_latitudes, self.read_instance.station_classifications, self.read_instance.area_classifications =\
                     get_basic_metadata(self.read_instance) 
 
                 # iterate through station_references per networkspecies
