@@ -3,8 +3,10 @@ import sys
 import json
 import copy
 
+import datetime
 import numpy as np
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.backends.backend_pdf import PdfPages
@@ -22,7 +24,6 @@ from providentia import aux
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
-
 
 class ProvidentiaOffline:
     """Run Providentia offline reports"""
@@ -77,7 +78,9 @@ class ProvidentiaOffline:
         self.plot = Plot(read_instance=self, canvas_instance=self)
 
         # iterate through configuration sections
-        for filename, section in zip(self.filenames, self.parent_section_names):
+        for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
+
+            print('Starting to create PDF for {} section'.format(section))
 
             # update for new section parameters
             self.report_filename = filename
@@ -92,7 +95,8 @@ class ProvidentiaOffline:
             provconf = ProvConfiguration(self, **self.commandline_arguments)
 
             # update self with section variables
-            vars(self).update({(k, provconf.parse_parameter(k, val)) for k, val in self.section_opts.items()})
+            for k, val in self.section_opts.items():
+                setattr(self, k, provconf.parse_parameter(k, val))
 
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             provconf.check_validity()
@@ -100,6 +104,7 @@ class ProvidentiaOffline:
             # set some key configuration variables
             self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
             self.data_labels = ['observations'] + list(self.experiments.keys())
+            self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
 
             # get valid observations in date range
             aux.get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
@@ -110,6 +115,11 @@ class ProvidentiaOffline:
 
             # read data
             self.datareader.read_setup(['reset'])
+
+            # if no valid data has been found be to be read, then skip to next section
+            if self.invalid_read:
+                print('No valid data for {} section'.format(section))
+                continue
 
             # initialise/reinitialise structures to store % data representativity, data periods and metadata
             aux.init_representativity(self)
@@ -139,12 +149,13 @@ class ProvidentiaOffline:
             # start making PDF
             self.start_pdf()
 
-            # remove section variables from memory
-            for k in self.section_opts:
-                try:
-                    vars(self).pop(k)
-                except:
-                    pass
+            # remove section variables from memory (if not last section)
+            if section_ind != (len(self.parent_section_names) - 1):
+                for k in self.section_opts:
+                    try:
+                        vars(self).pop(k)
+                    except:
+                        pass
 
     def start_pdf(self):
 
@@ -176,9 +187,6 @@ class ProvidentiaOffline:
             if self.report_stations:
                 self.station_pages = {}
 
-            # get list of all networks and species strings
-            self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
-
             # get subsection names
             self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
                                            if self.section == subsection_name.split('|')[0]]
@@ -204,12 +212,13 @@ class ProvidentiaOffline:
             # make all plots per subsection (for all plot types except distribution plot)
             summary_plots_to_make_nondist = [plot_type for plot_type in self.summary_plots_to_make if 'distribution' not in plot_type]
             station_plots_to_make_nondist = [plot_type for plot_type in self.station_plots_to_make if 'distribution' not in plot_type]
-            self.make_plots_per_subsection(summary_plots_to_make_nondist, station_plots_to_make_nondist, plot_geometry_setup=True)
+            self.make_plots_per_subsection(summary_plots_to_make_nondist, station_plots_to_make_nondist, do_plot_geometry_setup=True)
 
             # make all plots per subsection (for only distribution plot types --> done so to calclulate data ranges across subsections first)
             summary_plots_to_make_dist = [plot_type for plot_type in self.summary_plots_to_make if 'distribution' in plot_type]
             station_plots_to_make_dist = [plot_type for plot_type in self.station_plots_to_make if 'distribution' in plot_type]
-            self.make_plots_per_subsection(summary_plots_to_make_dist, station_plots_to_make_dist)
+            if (len(summary_plots_to_make_dist) > 0) or (len(station_plots_to_make_dist) > 0):
+                self.make_plots_per_subsection(summary_plots_to_make_dist, station_plots_to_make_dist)
             
             # do formatting to axes per networkspeci
             # create colourbars
@@ -223,8 +232,12 @@ class ProvidentiaOffline:
             if 'header' in list(self.plot_characteristics.keys()):
                 del self.plot_characteristics['header']
 
+            # set variables to inform when have formatted 1 set of networkspecies plots for stations
+            formatted_networkspeci_plots = False        
+            did_formatting = False
+
             # iterate through networks and species
-            for networkspeci_ii, networkspeci in enumerate(self.networkspecies): 
+            for networkspeci in self.networkspecies: 
 
                 # iterate through plot types
                 for plot_type in list(self.plot_characteristics.keys()):
@@ -232,8 +245,8 @@ class ProvidentiaOffline:
                     # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                     plot_options = plot_type.split('_')[1:]
 
-                    # if a multispecies plot is wanted then this is only made when networkspeci_ii == 0
-                    if ('multispecies' in plot_options) & (networkspeci_ii != 0):
+                    # if a multispecies plot is wanted then this is only made on first instance of formatting a networkspeci 
+                    if ('multispecies' in plot_options) & (formatted_networkspeci_plots):
                         continue
 
                     # get zstat information from plot_type
@@ -248,18 +261,24 @@ class ProvidentiaOffline:
                     # get relevant paradigm pages to harmonise axes limits for
                     paradigm_pages = {'summary':[], 'station':[]}
                     if (self.report_summary) & (self.report_stations):
-                        paradigm_pages['summary'] = self.summary_pages[plot_type][networkspeci]
+                        if plot_type in self.summary_pages:
+                            if networkspeci in self.summary_pages[plot_type]:
+                                paradigm_pages['summary'] = self.summary_pages[plot_type][networkspeci]
                         # for multispecies plots of specific stations, spatial colocation needs to be on.
                         # if not, the plots will not exist so handle this
                         if ('multispecies' in plot_options) & (not self.spatial_colocation):
                             paradigm_pages['station'] = []
                         else:
-                            if plot_type in self.station_plots_to_make:
-                                for subsection in self.subsections:
-                                    paradigm_pages['station'].extend(self.station_pages[plot_type][networkspeci][subsection])
+                            if plot_type in self.station_pages:
+                                if networkspeci in self.station_pages[plot_type]:
+                                    for subsection in self.subsections:
+                                        if subsection in self.station_pages[plot_type][networkspeci]:
+                                            paradigm_pages['station'].extend(self.station_pages[plot_type][networkspeci][subsection])
 
                     elif self.report_summary:
-                        paradigm_pages['summary'] = self.summary_pages[plot_type][networkspeci]
+                        if plot_type in self.summary_pages:
+                            if networkspeci in self.summary_pages[plot_type]:
+                                paradigm_pages['summary'] = self.summary_pages[plot_type][networkspeci]
                     
                     elif self.report_stations:
                         # for multispecies plots of specific stations, spatial colocation needs to be on.
@@ -267,11 +286,14 @@ class ProvidentiaOffline:
                         if ('multispecies' in plot_options) & (not self.spatial_colocation):
                             paradigm_pages['station'] = []
                         else:
-                            if plot_type in self.station_plots_to_make:
-                                for subsection in self.subsections:
-                                    paradigm_pages['station'].extend(self.station_pages[plot_type][networkspeci][subsection])
+                            if plot_type in self.station_pages:
+                                if networkspeci in self.station_pages[plot_type]:
+                                    for subsection in self.subsections:
+                                        if subsection in self.station_pages[plot_type][networkspeci]:
+                                            paradigm_pages['station'].extend(self.station_pages[plot_type][networkspeci][subsection])
 
                     # iterate through paradigm pages
+                    did_plot_type_formatting = False
                     for plotting_paradigm, relevant_pages in paradigm_pages.items():                        
                         if len(relevant_pages) == 0:
                             continue
@@ -287,6 +309,10 @@ class ProvidentiaOffline:
                                 for ax in self.plot_dictionary[relevant_page]['axs']:
                                     relevant_axs.append(ax['handle'])
                                     relevant_data_labels.append(ax['data_labels'])
+
+                        # if have no relevant axs, continue to next paradigm
+                        if len(relevant_axs) == 0:
+                            continue
 
                         # get data ranges for plotting paradigm
                         if plotting_paradigm == 'summary':
@@ -348,6 +374,9 @@ class ProvidentiaOffline:
                                                  base_plot_type, self.plot_characteristics[plot_type], 
                                                  plot_options=plot_options)
 
+                            # update variable to refledt some formatting was performed
+                            did_formatting = True
+
                         # harmonise xy limits for plot paradigm
                         if base_plot_type not in ['map', 'heatmap', 'table']: 
                             if base_plot_type == 'periodic-violin':
@@ -363,36 +392,51 @@ class ProvidentiaOffline:
                                 self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
                                                                      self.plot_characteristics[plot_type], plot_options, 
                                                                      relim=True, autoscale=True)
-            # save page figures
-            print('\nWRITING PDF')
-            for page in self.plot_dictionary:
-                fig = self.plot_dictionary[page]['fig']
-                self.pdf.savefig(fig, dpi=self.dpi)
-                plt.close(fig)
 
-    def setup_plot_geometry(self, plotting_paradigm, networkspeci, networkspeci_ii):
+                # update variables to show if a networkspeci has been formatted
+                if did_formatting:
+                    formatted_networkspeci_plots = True
+
+            # save page figures
+            valid_page = False
+            for page in self.plot_dictionary:
+                # if page has no active data plotted, do not plot it
+                n_page_plotted_labels = 0
+                for ax_dict in self.plot_dictionary[page]['axs']:
+                    n_page_plotted_labels += len(ax_dict['data_labels'])
+                if n_page_plotted_labels > 0:
+                    if not valid_page:
+                        print('\nWriting PDF\n')
+                        valid_page = True
+                    fig = self.plot_dictionary[page]['fig']
+                    self.pdf.savefig(fig, dpi=self.dpi)
+                    plt.close(fig)
+            if not valid_page:
+                print('\n0 plots remain to write to PDF\n')
+
+    def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
         """setup plotting geometry for summary or station specific plots, per network/species"""
 
         # depending on plot type set plots to make
         if plotting_paradigm == 'summary':
-            self.plots_to_make = self.summary_plots_to_make
+            plots_to_make = copy.deepcopy(self.summary_plots_to_make)
         elif plotting_paradigm == 'station':
-            self.plots_to_make = self.station_plots_to_make
+            plots_to_make = copy.deepcopy(self.station_plots_to_make)
 
         # iterate through plot types to make
-        for plot_type in self.plots_to_make:
+        for plot_type in plots_to_make:
 
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
             
-            # if a multispecies plot is wanted then only make this when networkspeci_ii == 0
+            # if a multispecies plot is wanted then only make this on first instance of plotting a networkspecies
             # if making a multispecies plot per specific station, spatial colocation must be also active
             if 'multispecies' in plot_options:
                 if plotting_paradigm == 'summary':
-                    if networkspeci_ii != 0:
+                    if have_setup_multispecies:
                         continue
                 elif plotting_paradigm == 'station':
-                    if (networkspeci_ii != 0) or (not self.spatial_colocation):
+                    if (have_setup_multispecies) or (not self.spatial_colocation):
                         continue
             
             # create variables to store list of page numbers per plot type / networkspeci / subsection (if do not exist)
@@ -485,7 +529,9 @@ class ProvidentiaOffline:
                 fig, axs = plt.subplots(**plot_characteristics['figure'])
 
                 # each page is handled as 1 figure
-                self.plot_dictionary[page_n] = {'fig': fig, 'plot_type': plot_type, 'axs': []}
+                # intialise page if not yet done
+                if page_n not in self.plot_dictionary:
+                    self.plot_dictionary[page_n] = {'fig': fig, 'plot_type': plot_type, 'axs': []}
 
                 # make page title?
                 if 'page_title' in plot_characteristics_vars:
@@ -530,16 +576,19 @@ class ProvidentiaOffline:
                             ax.spines['left'].set_color('none')
                             ax.spines['right'].set_color('none')
                             ax.tick_params(labelcolor='w', top=False, bottom=False, left=False, right=False)
-                            grid_dict['hour'].set_axis_off()
-                            grid_dict['dayofweek'].set_axis_off()
-                            grid_dict['month'].set_axis_off()
-                            
-                            # turn on all axes that will be plotted on
-                            for relevant_temporal_resolution in self.relevant_temporal_resolutions:
-                                grid_dict[relevant_temporal_resolution].set_axis_on()
+                            grid_dict['hour'].axis('off')
+                            grid_dict['dayofweek'].axis('off')
+                            grid_dict['month'].axis('off')
                             
                             # format axis
                             self.plot.format_axis(grid_dict, base_plot_type, plot_characteristics, set_extent=False, relevant_temporal_resolutions=self.relevant_temporal_resolutions)
+
+                            #get references to periodic label annotations made, and then hide them
+                            for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                                annotations = [child for child in grid_dict[relevant_temporal_resolution].get_children() if isinstance(child, matplotlib.text.Annotation)]
+                                # hide annotations
+                                for annotation in annotations:
+                                    annotation.set_visible(False)
 
                         # rest of plot types
                         else:
@@ -548,13 +597,11 @@ class ProvidentiaOffline:
                             # format axis 
                             self.plot.format_axis(ax, base_plot_type, plot_characteristics, set_extent=False)
 
-                    # no more plots to make on page? 
-                    # then turn off unneeded axes
-                    else:
-                        ax.axis('off')
-                        ax.set_visible(False)
-                        ax.grid(False)
-
+                    # turn off axes until some data is plottted
+                    ax.axis('off')
+                    ax.set_visible(False)
+                    
+                    # iterate plot and column counts
                     plot_ii_per_type += 1
                     col_ii += 1
 
@@ -568,10 +615,11 @@ class ProvidentiaOffline:
                     plot_characteristics['legend'] = self.plot.make_legend_handles(plot_characteristics['legend'])
                     fig.legend(**plot_characteristics['legend']['plot'])
 
-                # add colourbar axis to plot dictionary?
+                # add colourbar axis to plot dictionary (if not already there)?
                 if 'cb' in plot_characteristics_vars:
-                    self.plot_dictionary[page_n]['cb_ax'] = fig.add_axes(plot_characteristics['cb']['position'])
-                    self.plot_dictionary[page_n]['cb_ax'].set_rasterized(True)
+                    if 'cb_ax' not in self.plot_dictionary[page_n]:
+                        self.plot_dictionary[page_n]['cb_ax'] = fig.add_axes(plot_characteristics['cb']['position'])
+                        self.plot_dictionary[page_n]['cb_ax'].set_rasterized(True)
                             
                 # add current page number
                 if plotting_paradigm == 'summary':
@@ -582,8 +630,11 @@ class ProvidentiaOffline:
                 # add to total number of pages
                 self.n_total_pages += 1
 
-    def make_plots_per_subsection(self, summary_plots_to_make, station_plots_to_make, plot_geometry_setup=False):
+    def make_plots_per_subsection(self, summary_plots_to_make, station_plots_to_make, do_plot_geometry_setup=False):
         """Function that calls making of all plots per subsection"""
+
+        # create variable to keep track if have setup summary plot geometry yet (done for all subsections at once)
+        summary_plot_geometry_setup = False
 
         # iterate through subsections
         for subsection_ind, subsection in enumerate(self.subsections):
@@ -605,7 +656,8 @@ class ProvidentiaOffline:
                 provconf = ProvConfiguration(self, **self.commandline_arguments)
 
                 # update subsection variables
-                vars(self).update({(k, provconf.parse_parameter(k, val)) for k, val in self.subsection_opts.items()})
+                for k, val in self.subsection_opts.items():
+                    setattr(self, k, provconf.parse_parameter(k, val))
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
                 provconf.check_validity()
@@ -625,46 +677,54 @@ class ProvidentiaOffline:
             # filter dataset for current subsection
             print('\nFiltering data for {} subsection'.format(self.subsection))
             DataFilter(self)
-
-            # iterate through all desired plots, making each one (summary or station specific plots)
-            print('Making {} subsection plots'.format(self.subsection))  
             
             # iterate through networks and species, creating plots
             self.n_total_pages = 0
 
-            for networkspeci_ii, networkspeci in enumerate(self.networkspecies):
-                
-                # get valid station inds for networkspeci 
-                if self.temporal_colocation and len(self.data_labels) > 1:
-                    self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci]['observations']
-                else:
-                    self.relevant_station_inds = self.valid_station_inds[networkspeci]['observations']  
+            # make summary plots?
+            if self.report_summary:
 
-                # get N stations for networkspeci
-                self.n_stations = len(self.relevant_station_inds)
+                # set variable to inform when have made 1 set of networkspecies plots for summary
+                made_networkspeci_summary_plots = False
 
-                # make summary plots?
-                if self.report_summary:
+                # iterate through networkspecies
+                for networkspeci in self.networkspecies:
 
-                    if networkspeci_ii == 0:
+                    # get valid station inds for networkspeci 
+                    if self.temporal_colocation and len(self.data_labels) > 1:
+                        self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci]['observations']
+                    else:
+                        self.relevant_station_inds = self.valid_station_inds[networkspeci]['observations']  
+
+                    # get N stations for networkspeci
+                    self.n_stations = len(self.relevant_station_inds)
+
+                    #if have 0 relevant stations, continue to next networkspeci
+                    if self.n_stations == 0:
+                        print('No valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
+                        continue
+                    else:
+                        print('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
+
+                    if not made_networkspeci_summary_plots:
                         # get median timeseries across data from filtered data, and place it pandas dataframe
                         to_pandas_dataframe(read_instance=self, canvas_instance=self, 
                                             networkspecies=self.networkspecies)
 
-                        # update data range min/maxes for summary paradigm
+                        # update data range min/maxes for summary paradigm 
                         for ns in self.networkspecies:
                             if self.selected_station_data_min[ns] < self.data_range_min_summary[ns]:
                                 self.data_range_min_summary[ns] = copy.deepcopy(self.selected_station_data_min[ns]) 
                             if self.selected_station_data_max[ns] > self.data_range_max_summary[ns]:
                                 self.data_range_max_summary[ns] = copy.deepcopy(self.selected_station_data_max[ns])
-
-                    if subsection_ind == 0:
-                        # update plot characteristics
-                        self.plot.set_plot_characteristics(summary_plots_to_make)
                     
-                        # setup plotting geometry for summary plots per networkspeci (for all subsections)
-                        if plot_geometry_setup:
-                            self.setup_plot_geometry('summary', networkspeci, networkspeci_ii)
+                    # if have no valid data across data labels, then continue 
+                    if not self.selected_station_data[networkspeci]:
+                        continue
+
+                    # setup plotting geometry for summary plots per networkspeci (for all subsections)
+                    if (not summary_plot_geometry_setup) & (do_plot_geometry_setup):
+                        self.setup_plot_geometry('summary', networkspeci, made_networkspeci_summary_plots)
                     
                     # iterate through plots to make
                     for plot_type in summary_plots_to_make:
@@ -672,8 +732,8 @@ class ProvidentiaOffline:
                         #get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                         plot_options = plot_type.split('_')[1:]
 
-                        # if a multispecies plot is wanted then only make this when networkspeci_ii == 0
-                        if ('multispecies' in plot_options) & (networkspeci_ii != 0):
+                        # if a multispecies plot is wanted then only make this on first instance of plotting a networkspecies
+                        if ('multispecies' in plot_options) & (made_networkspeci_summary_plots):
                             continue
 
                         # make plot
@@ -683,21 +743,43 @@ class ProvidentiaOffline:
                     # update N total pages 
                     self.n_total_pages = len(self.plot_dictionary)
 
-                # make station specific plots?
-                if self.report_stations:               
+                    # update variable now summary plots have been made for a networkspecies
+                    made_networkspeci_summary_plots = True
 
-                    # update plot characteristics
-                    self.plot.set_plot_characteristics(station_plots_to_make)
+            # make station specific plots?
+            if self.report_stations:      
 
-                    #  setup plotting geometry for station plots per networkspeci (for one subsection)
-                    if plot_geometry_setup:
-                        self.setup_plot_geometry('station', networkspeci, networkspeci_ii)
+               # set variable to inform when have made 1 set of networkspecies plots for stations
+               made_networkspeci_station_plots = False        
+
+               # iterate through networkspecies
+               for networkspeci in self.networkspecies:
+
+                    # get valid station inds for networkspeci 
+                    if self.temporal_colocation and len(self.data_labels) > 1:
+                        self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci]['observations']
+                    else:
+                        self.relevant_station_inds = self.valid_station_inds[networkspeci]['observations']  
+
+                    # get N stations for networkspeci
+                    self.n_stations = len(self.relevant_station_inds)
+
+                    #if have 0 relevant stations, continue to next networkspeci
+                    if self.n_stations == 0:
+                        print('No valid stations for {}, {}. Not making station plots'.format(networkspeci, self.subsection))
+                        continue
+                    else:
+                        print('Making {}, {} station plots'.format(networkspeci, self.subsection)) 
+
+                    # setup plotting geometry for station plots per networkspeci (for one subsection)
+                    if do_plot_geometry_setup:
+                        self.setup_plot_geometry('station', networkspeci, made_networkspeci_station_plots)
                         
                     # initialise station ind as -1
                     self.station_ind = -1
 
                     for i, relevant_station_ind in enumerate(self.relevant_station_inds):
-                        
+
                         # gather some information about current station
                         self.station_ind += 1
                         valid_station_references = self.metadata_in_memory[networkspeci]['station_reference'][relevant_station_ind, :]
@@ -715,13 +797,16 @@ class ProvidentiaOffline:
                                             station_index=relevant_station_ind, 
                                             data_range_min=self.data_range_min_station, 
                                             data_range_max=self.data_range_max_station)
+
+                        # if have no valid data across data labels, then continue 
+                        if not self.selected_station_data[networkspeci]:
+                            continue
                         
                         # update data range min/maxes for station paradigm
-                        for ns in self.networkspecies:
-                            if self.selected_station_data_min[ns] < self.data_range_min_station[ns]:
-                                self.data_range_min_station[ns] = copy.deepcopy(self.selected_station_data_min[ns]) 
-                            if self.selected_station_data_max[ns] > self.data_range_max_station[ns]:
-                                self.data_range_max_station[ns] = copy.deepcopy(self.selected_station_data_max[ns])
+                        if self.selected_station_data_min[networkspeci] < self.data_range_min_station[networkspeci]:
+                            self.data_range_min_station[networkspeci] = copy.deepcopy(self.selected_station_data_min[networkspeci]) 
+                        if self.selected_station_data_max[networkspeci] > self.data_range_max_station[networkspeci]:
+                            self.data_range_max_station[networkspeci] = copy.deepcopy(self.selected_station_data_max[networkspeci])
 
                         # iterate through plots to make
                         for plot_type in station_plots_to_make:
@@ -730,10 +815,10 @@ class ProvidentiaOffline:
                             plot_options = plot_type.split('_')[1:]
 
                             # if have multispecies option: 
-                            #   put multiple species data in pandas dataframe if networkspeci_ii == 0 and spatial_colocation is active 
+                            #   put multiple species data in pandas dataframe if first networkspeci being plotted and spatial_colocation is active 
                             #   if not, then continue
                             if 'multispecies' in plot_options: 
-                                if (networkspeci_ii == 0) & (self.spatial_colocation):
+                                if (not made_networkspeci_station_plots) & (self.spatial_colocation):
                                     to_pandas_dataframe(read_instance=self, canvas_instance=self, 
                                                         networkspecies=self.networkspecies, 
                                                         station_index=relevant_station_ind, 
@@ -756,13 +841,20 @@ class ProvidentiaOffline:
                                                                                 self.current_station_name))                                
                             self.make_plot('station', plot_type, plot_options, networkspeci)
 
-            # remove subsection variables from memory (if have one)
-            if len(self.child_subsection_names) > 0:
+                    # update variable now station plots have been made for a networkspecies
+                    made_networkspeci_station_plots = True
+
+            # remove subsection variables from memory (if have one, and not last subsection)
+            if (len(self.child_subsection_names) > 0) & (subsection_ind != (len(self.subsections) - 1)):
                 for k in self.subsection_opts:
                     try:
                         vars(self).pop(k)
                     except:
                         pass
+
+        # update variable to keep track if have setup summary plot geometry yet for a subsection
+        if made_networkspeci_summary_plots:
+            summary_plot_geometry_setup = True
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """Function that calls making of any type of plot"""
@@ -822,29 +914,8 @@ class ProvidentiaOffline:
 
                 # get relevant page/axis to plot on
                 axis_ind = (self.current_plot_ind * len(self.subsections)) + self.subsection_ind
-                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
+                relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
                                                                            axis_ind)
-
-                # calculate number of created axis
-                n_axes_plot_type = 0
-                for page in self.plot_dictionary:
-                    # get number of axes until current page
-                    if page < relevant_page:
-                        # avoid axes from other plot types
-                        if plotting_paradigm == 'station':
-                            if page >= self.station_pages[plot_type][networkspeci][self.subsection][0]:
-                                for axis in self.plot_dictionary[page]['axs']:
-                                    n_axes_plot_type += 1
-                        elif plotting_paradigm == 'summary':
-                            if page >= self.summary_pages[plot_type][networkspeci][0]:
-                                for axis in self.plot_dictionary[page]['axs']:
-                                    n_axes_plot_type += 1
-
-                # get corresponding page index given an axis index
-                if axis_ind >= len(self.plot_dictionary[relevant_page]['axs']):
-                    page_ind = axis_ind - n_axes_plot_type
-                else:
-                    page_ind = axis_ind 
                 
                 # set axis title
                 if relevant_axis.get_title() == '':
@@ -858,22 +929,28 @@ class ProvidentiaOffline:
                 if self.map_extent:
                     self.plot.set_map_extent(relevant_axis)
 
-                # make map if there are data
-                if not self.selected_station_data[networkspeci]:
-                    relevant_axis.set_axis_off()
-                    relevant_axis.set_visible(False)
-                else:
-                    # calculate z statistic
-                    self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(self, z1, z2, zstat, networkspeci)
-                    self.active_map_valid_station_inds = active_map_valid_station_inds
+                # do not make map if there is no valid data for relevant data label/s
+                if z1 not in self.selected_station_data[networkspeci]:
+                    continue
 
-                    # make map plot
-                    self.plot.make_map(relevant_axis, networkspeci, self.z_statistic, self.plot_characteristics[plot_type], 
-                                       plot_options=plot_options)
-                    if z2 == '':
-                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z1)
-                    else:
-                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z2)
+                if (z2 != '') & (z2 not in self.selected_station_data[networkspeci]): 
+                    continue
+
+                # calculate z statistic
+                self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(self, z1, z2, zstat, networkspeci)
+                self.active_map_valid_station_inds = active_map_valid_station_inds
+
+                # make map plot
+                self.plot.make_map(relevant_axis, networkspeci, self.z_statistic, self.plot_characteristics[plot_type], 
+                                    plot_options=plot_options)
+                if z2 == '':
+                    self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z1)
+                else:
+                    self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z2)
+
+                # turn axis on
+                relevant_axis.axis('on')
+                relevant_axis.set_visible(True)
 
             # heatmap and table
             elif base_plot_type in ['heatmap', 'table']:
@@ -933,7 +1010,7 @@ class ProvidentiaOffline:
                     station_inds = [self.relevant_station_inds[self.station_ind]]
                 
                 # get relevant axis
-                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
+                relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, axis_ind)
 
                 # set axis title (only if not previously set)
                 if isinstance(relevant_axis, dict):
@@ -1012,80 +1089,65 @@ class ProvidentiaOffline:
                     if ylabel != '':
                         self.plot.set_axis_label(relevant_axis, 'y', ylabel, self.plot_characteristics[plot_type])
 
-                # make plot if there is data
-                if not self.selected_station_data[networkspeci]:
-                    # relevant axis is a dict of the different temporal aggregations in some cases (e.g. periodic plots)
-                    if isinstance(relevant_axis, dict):
-                        for temporal_aggregation_resolution, temporal_aggregation_relevant_axis in relevant_axis.items():
-                            temporal_aggregation_relevant_axis.set_axis_off()
-                    else:
-                        relevant_axis.set_axis_off()
-                else: 
-                    # calculate number of created axis
-                    n_axes_plot_type = 0
-                    for page in self.plot_dictionary:
-                        # get number of axes until current page
-                        if page < relevant_page:
-                            # avoid axes from other plot types
-                            if plotting_paradigm == 'station':
-                                if page >= self.station_pages[plot_type][networkspeci][self.subsection][0]:
-                                    for axis in self.plot_dictionary[page]['axs']:
-                                        n_axes_plot_type += 1
-                            elif plotting_paradigm == 'summary':
-                                if page >= self.summary_pages[plot_type][networkspeci][0]:
-                                    for axis in self.plot_dictionary[page]['axs']:
-                                        n_axes_plot_type += 1
+                # periodic plots
+                if base_plot_type in ['periodic', 'periodic-violin']:
+                    # skip observational array if plotting bias stat
+                    if (z_statistic_sign == 'bias') & (data_label == 'observations'):
+                        continue
+                        
+                    if data_label in self.selected_station_data[networkspeci]:
+                        if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
+                            if base_plot_type == 'periodic':
+                                self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
+                                                        self.plot_characteristics[plot_type], zstat=zstat, 
+                                                        plot_options=plot_options, 
+                                                        first_data_label=first_data_label)
+                            elif base_plot_type == 'periodic-violin':
+                                self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
+                                                        self.plot_characteristics[plot_type], 
+                                                        plot_options=plot_options, 
+                                                        first_data_label=first_data_label)
+                            self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)
+                            first_data_label = False
 
-                    # get corresponding page index given an axis index
-                    if axis_ind >= len(self.plot_dictionary[relevant_page]['axs']):
-                        page_ind = axis_ind - n_axes_plot_type
-                    else:
-                        page_ind = axis_ind 
-                    
-                    # periodic plots
-                    if base_plot_type in ['periodic', 'periodic-violin']:
-                        # skip observational array if plotting bias stat
-                        if (z_statistic_sign == 'bias') & (data_label == 'observations'):
-                            continue
-                            
-                        if data_label in self.selected_station_data[networkspeci]:
-                            if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
-                                if base_plot_type == 'periodic':
-                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
-                                                            self.plot_characteristics[plot_type], zstat=zstat, 
-                                                            plot_options=plot_options, 
-                                                            first_data_label=first_data_label)
-                                elif base_plot_type == 'periodic-violin':
-                                    self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
-                                                            self.plot_characteristics[plot_type], 
-                                                            plot_options=plot_options, 
-                                                            first_data_label=first_data_label)
-                                self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)
-                                first_data_label = False
+                            # turn relevant axes on
+                            for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                                relevant_axis[relevant_temporal_resolution].axis('on')
+                                relevant_axis[relevant_temporal_resolution].set_visible(True)
 
-                    # other plot types (except heatmap, table and statsummary) 
-                    else:
-                        # skip observational array for bias/scatter plots
-                        if data_label == 'observations' and ('bias' in plot_options or base_plot_type == 'scatter'):
-                            continue
-                        else:
-                            func = getattr(self.plot, 'make_{}'.format(base_plot_type))
-                        if data_label in self.selected_station_data[networkspeci]:
-                            if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
-                                if base_plot_type == 'metadata':
-                                    func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                        plot_options=plot_options, first_data_label=first_data_label, station_inds=station_inds) 
-                                elif base_plot_type == 'distribution':
-                                    func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                        plot_options=plot_options, first_data_label=first_data_label,
-                                        data_range_min=data_range_min, 
-                                        data_range_max=data_range_max) 
-                                else:
-                                    func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                        plot_options=plot_options, first_data_label=first_data_label) 
-                                first_data_label = False
-                                self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)        
+                                #get references to periodic label annotations made, and then hide them
+                                annotations = [child for child in relevant_axis[relevant_temporal_resolution].get_children() if isinstance(child, matplotlib.text.Annotation)]
+                                # hide annotations
+                                for annotation in annotations:
+                                    annotation.set_visible(True)
 
+                # other plot types (except heatmap, table and statsummary) 
+                else:
+                    # skip observational array for bias/scatter plots
+                    if data_label == 'observations' and ('bias' in plot_options or base_plot_type == 'scatter'):
+                        continue
+                    else:
+                        func = getattr(self.plot, 'make_{}'.format(base_plot_type))
+                    if data_label in self.selected_station_data[networkspeci]:
+                        if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
+                            if base_plot_type == 'metadata':
+                                func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
+                                    plot_options=plot_options, first_data_label=first_data_label, station_inds=station_inds) 
+                            elif base_plot_type == 'distribution':
+                                func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
+                                    plot_options=plot_options, first_data_label=first_data_label,
+                                    data_range_min=data_range_min, 
+                                    data_range_max=data_range_max) 
+                            else:
+                                func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
+                                    plot_options=plot_options, first_data_label=first_data_label) 
+                            first_data_label = False
+                            self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)        
+
+                            # turn axis on
+                            relevant_axis.axis('on')
+                            relevant_axis.set_visible(True)
+                                
             # iterate number of plots made for current type of plot 
             self.current_plot_ind += 1     
 
@@ -1108,8 +1170,8 @@ class ProvidentiaOffline:
             
             # make plot ?
             if create_plot:
-                relevant_page, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
-                                                                       axis_ind)
+                relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, plot_type, 
+                                                                           axis_ind)
             
                 if base_plot_type in ['heatmap', 'table']:
                
@@ -1177,17 +1239,22 @@ class ProvidentiaOffline:
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
                 # turn off relevant axis if dataframe is empty or all NaN
-                if (len(stats_df.index) == 0) or (stats_df.isnull().values.all()):
-                    relevant_axis.set_axis_off()
-                else:
+                if (len(stats_df.index) > 0) & (not stats_df.isnull().values.all()):
                     # make plot
                     if base_plot_type == 'statsummary':
                         func = getattr(self.plot, 'make_table')
                         func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
                              statsummary=True)
+                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(stats_df.index.tolist())
+
                     else:
                         func = getattr(self.plot, 'make_{}'.format(base_plot_type))
                         func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
+                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(stats_df.columns.tolist())
+
+                    # turn axis on
+                    relevant_axis.axis('on')
+                    relevant_axis.set_visible(True)
 
     def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
         """get relevant page and axis for current plot type/subsection/axis index"""
@@ -1199,12 +1266,14 @@ class ProvidentiaOffline:
             relevant_pages = self.station_pages[plot_type][networkspeci][self.subsection]
 
         all_relevant_pages = []
-        relevant_axes = []         
+        relevant_axes = []     
+        page_inds = []    
         for relevant_page in relevant_pages:
             relevant_axes.extend(self.plot_dictionary[relevant_page]['axs'])
             all_relevant_pages.extend([relevant_page]*len(self.plot_dictionary[relevant_page]['axs']))
+            page_inds.extend(list(range(len(self.plot_dictionary[relevant_page]['axs']))))
 
-        return all_relevant_pages[axis_ind], relevant_axes[axis_ind]['handle']
+        return all_relevant_pages[axis_ind], page_inds[axis_ind], relevant_axes[axis_ind]['handle']
 
 def main(**kwargs):
     """Main function when running offine reports"""

@@ -86,7 +86,13 @@ class ProvArgumentParser(object):
                                      help="activate spatial colocation between multiple read species")
             self.parser.add_argument("--filter_species",
                                      dest="filter_species",
-                                     help="filter read species by other species within a data range")  
+                                     help="filter read species by other species within a given data range")
+            self.parser.add_argument("--lower_bound",
+                                     dest="lower_bound",
+                                     help="filter out data below this set lower bound")
+            self.parser.add_argument("--upper_bound",
+                                     dest="upper_bound",
+                                     help="filter out data above this set upper bound")
             self.parser.add_argument("--report_type",
                                      dest="report_type",
                                      help="define ")

@@ -10,6 +10,7 @@ import subprocess
 
 from .aux import check_for_ghost, multi_species_mapping, get_default_qa
 
+import numpy as np
 import pandas as pd
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
@@ -59,7 +60,9 @@ class ProvConfiguration:
             'temporal_colocation': False,
             'spatial_colocation': True,
             'map_extent': None, 
-            'filter_species': '',
+            'filter_species': {},
+            'lower_bound': None,
+            'upper_bound': None,
             'report_type': 'standard',
             'report_summary': True,
             'report_stations': False,
@@ -71,8 +74,9 @@ class ProvConfiguration:
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline',
                                     'available_resolutions', 'available_networks',
                                     'network', 'species', 'resolution', 'start_date', 'end_date', 'experiments', 
-                                    'spatial_colocation', 'report_type', 'report_summary', 'report_stations',
-                                    'report_title', 'report_filename', 'plot_characteristics_filename']
+                                    'temporal_colocation', 'spatial_colocation', 'report_type', 'report_summary', 
+                                    'report_stations', 'report_title', 'report_filename', 
+                                    'plot_characteristics_filename']
         }
 
         # if variable is given by command line, set that value, otherwise set as default value 
@@ -189,7 +193,6 @@ class ProvConfiguration:
 
         elif key == 'species':
             # parse species
-
             if isinstance(value, str):
                 # throw error if species is empty str
                 if value.strip() == '':
@@ -216,27 +219,20 @@ class ProvConfiguration:
             if value is not None:
                 # if conf has only 1 QA
                 if isinstance(value, int):
-                    qa = [value]
+                    return [value]
                 # empty string
                 elif value == "":
-                    qa = []
+                    return []
                 # if the QAs are written with their names
                 elif isinstance(value, str):
-                    qa = sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
+                    return sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
                 # list of integer codes
                 else:
-                    qa = sorted(list(value))
-                # set qa per species to be same across all parsed species
-                self.read_instance.qa_per_species = {speci:qa for speci in self.read_instance.species}
-
-            # otherwise, set default QA per species, set qa to be first of the species to be parsed
+                    return sorted(list(value))
+            # otherwise, set default QA per species (set later)
             else:
-                # set qa per species to be default qa for that species
-                self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) for speci in self.read_instance.species}
-                # set qa to be first species to be parsed
-                qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
-
-            return qa
+                # set qa to be empty dict (to be later filled)
+                return {}
 
         elif key == 'flags':
             # parse flags
@@ -290,8 +286,76 @@ class ProvConfiguration:
             # otherwise parse it
             else:
                 if isinstance(value, str):
-                    return [float(c) for c in value.split(',')]
+                    return [float(c.strip()) for c in value.split(',')]
 
+        elif key == 'filter_species':
+            # parse filter species
+
+            # per networkspecies to filter by, save in dict as networkspecies:[lower_limit, upper_limit] 
+            if isinstance(value, str):
+                # strip all whitespace
+                value_strip = "".join(value.split())
+                # return empty dict if empty str
+                if value_strip == '':
+                    return {}
+                else:
+                    # split per networkspecies
+                    networkspecies_split = value_strip.split('),')
+                    # iterate through networkspecies, saving list of limits per networkspecies
+                    filter_networkspecies_dict = {}
+                    for networkspeci_split in networkspecies_split:
+                        networkspeci_split_2 = networkspeci_split.split('(')
+                        # get networkspeci
+                        networkspeci = networkspeci_split_2[0].replace(':','|')
+                        # get lower and upper limits
+                        networkspeci_split_3 = networkspeci_split_2[1].split(',')
+                        lower_limit = float(networkspeci_split_3[0])
+                        upper_limit = float(networkspeci_split_3[1].replace(')',''))
+                        # save limits per networkspecies
+                        filter_networkspecies_dict[networkspeci] = [lower_limit, upper_limit]
+                    return filter_networkspecies_dict
+
+        elif key == 'lower_bound':
+            #parse lower_bound
+            
+            # if not None then set lower_bound by that given
+            # make sure it is a list of values
+            if value is not None:
+                if value == "":
+                    return []
+                elif isinstance(value, str):
+                    return [np.float32(c.strip()) for c in value.split(',')]
+                elif (isinstance(value, int)) or (isinstance(value, float)):
+                    return [value]
+                #otherwise must be a already a list of values
+                else:
+                    return value
+            # lower_bound empty?
+            # then set lower bound using GHOST extreme lower limit for all species in memory (set later)
+            else:
+                return {}
+
+        elif key == 'upper_bound':
+            # parse upper bound
+
+            # if not None then set upper_bound by that given
+            # make sure it is a list of values
+            if value is not None:
+                if value == "":
+                    return []
+                elif isinstance(value, str):
+                    return [np.float32(c.strip()) for c in value.split(',')]
+                elif (isinstance(value, int)) or (isinstance(value, float)):
+                    return [value]
+                #otherwise must be a already a list of values
+                else:
+                    return value
+            # upper_bound empty?
+            # then set upper bound using GHOST extreme upper limit for all species in memory (set later)
+            else:
+                return {}
+
+        # if no special parsing treatment for variable, simply return value
         return value
 
     def check_validity(self):
@@ -371,6 +435,12 @@ class ProvConfiguration:
             error = 'Error: "end_date" field must be defined in .conf file'
             sys.exit(error)
 
+        # if filter_species is active, and spatial_colocation is not active, then cannot filter by species
+        # set filter_species to empty dict and advise user of this
+        if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
+            self.read_instance.filter_species = {}
+            print('Warning: "spatial_colocation" must be set to True if wanting to use "filter_species" option.')
+
         # map to multiple species if have * wildcard
         # also duplicate out associated network
         # remove any species for which there exists no data
@@ -385,11 +455,80 @@ class ProvConfiguration:
                 self.read_instance.network[speci_ii:speci_ii] = [network_to_duplicate]*len(mapped_species)
         self.read_instance.species = copy.deepcopy(new_species)
 
+        # create variable for all unique species (plus filter species)
+        filter_species = []
+        species_plus_filter_species = copy.deepcopy(self.read_instance.species)
+        if self.read_instance.filter_species:
+            for networkspeci in self.read_instance.filter_species:
+                speci = networkspeci.split('|')[1]
+                if speci not in self.read_instance.species:
+                    filter_species.append(speci)
+                    species_plus_filter_species.append(speci)
+                    
+        # set lower_bound and upper_bound as dicts with limits per species (including filter species)
+        # if type is dict then set bound using GHOST extreme limits per species
+
+        # lower_bound
+        # type is dict, then set as default limit per species using GHOST limits
+        if isinstance(self.read_instance.lower_bound, dict):
+            self.read_instance.lower_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit']) for speci in species_plus_filter_species}
+        # otherwise set list values to dict, saving limits per species
+        # if have just 1 limit apply for all read species, but if have multiple, set limits per species
+        # throw error if have multiple lower bounds, but not equal to number of species to read  
+        else:      
+            lower_bound_dict = {}
+            if len(self.read_instance.lower_bound) == 1:
+                for speci in species_plus_filter_species:
+                    lower_bound_dict[speci] = self.read_instance.lower_bound[0]
+            elif len(self.read_instance.lower_bound) > 1:
+                if len(self.read_instance.species) != len(self.read_instance.lower_bound):
+                    error = 'Error: "lower_bound" variable must be same length as number of species read.'
+                    sys.exit(error)
+                else:
+                    for speci_ii, speci in enumerate(self.read_instance.species):
+                        lower_bound_dict[speci] = value[speci_ii] 
+                    # add filter_species (using GHOST limits)
+                    for speci in filter_species:
+                        lower_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit'])
+            self.read_instance.lower_bound = lower_bound_dict
+
+        # upper_bound
+        # type is dict, then set as default limit per species using GHOST limits
+        if isinstance(self.read_instance.upper_bound, dict):
+            self.read_instance.upper_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit']) for speci in species_plus_filter_species}
+        # otherwise set list values to dict, saving limits per species
+        # if have just 1 limit apply for all read species, but if have multiple, set limits per species
+        # throw error if have multiple upper bounds, but not equal to number of species to read  
+        else:      
+            upper_bound_dict = {}
+            if len(self.read_instance.upper_bound) == 1:
+                for speci in species_plus_filter_species:
+                    upper_bound_dict[speci] = self.read_instance.upper_bound[0]
+            elif len(self.read_instance.upper_bound) > 1:
+                if len(self.read_instance.species) != len(self.read_instance.upper_bound):
+                    error = 'Error: "upper_bound" variable must be same length as number of species read.'
+                    sys.exit(error)
+                else:
+                    for speci_ii, speci in enumerate(self.read_instance.species):
+                        upper_bound_dict[speci] = value[speci_ii] 
+                    # add filter_species (using GHOST limits)
+                    for speci in filter_species:
+                        upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
+            self.read_instance.upper_bound = upper_bound_dict
+
+        # create a variable to set qa per species (including filter species)
+        if isinstance(self.read_instance.qa, dict):
+            self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) for speci in species_plus_filter_species}
+            # set qa to be first of qa per species pairs
+            self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
+        else:
+            self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
+
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
         if (len(self.read_instance.network) > 1) & (len(self.read_instance.species) > 1) & (not self.read_instance.offline):
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
-            print('Warning: Mutiple networks/species not supported for dashboard.\nFirst network / species taken.')
+            print('Warning: Multiple networks/species not supported for dashboard. First network / species taken.')
 
 def read_conf(fpath=None):
     """Read configuration"""
@@ -399,6 +538,7 @@ def read_conf(fpath=None):
     config = {}
     all_sections = []
     all_sections_modified = []
+    all_sections_commented = []
     repeated_subsections = []
     repeated_subsections_modified = {}
     subsections = []
@@ -411,23 +551,31 @@ def read_conf(fpath=None):
         for line in file:
             if '[' in line and ']' in line and '[[' not in line and ']]' not in line:
                 section = line.strip()
-                section_modified = section.split('[')[1].split(']')[0]
-                if section_modified not in all_sections_modified:
-                    parent_sections.append(section_modified)
-                    all_sections_modified.append(section_modified)
-                else:
-                    print('Error: It is not possible to have two sections with the same name.')
-                    sys.exit()
+                #if first character is comment do not parse section
+                if section[0] != '#':
+                    section_modified = section.split('[')[1].split(']')[0]
+                    if section_modified not in all_sections_modified:
+                        parent_sections.append(section_modified)
+                        all_sections_modified.append(section_modified)
+                    else:
+                        error = 'Error: It is not possible to have two sections with the same name.'
+                        sys.exit(error)
             elif '[[' in line and ']]' in line:
                 subsection = line.strip()
-                subsection_modified = section_modified + '|' + line.split('[[')[1].split(']]')[0]
-                subsections.append(subsection)
-                subsections_modified.append(subsection_modified)
-                all_sections_modified.append(subsection_modified)
+                #if first character is comment do not parse subsection
+                if subsection[0] != '#':
+                    subsection_modified = section_modified + '|' + line.split('[[')[1].split(']]')[0]
+                    subsections.append(subsection)
+                    subsections_modified.append(subsection_modified)
+                    all_sections_modified.append(subsection_modified)
 
             if '[' in line and ']' in line:
-                all_sections.append(line.strip())
-    
+                #if first character is comment then add section to list to avoid parsing
+                if line.strip()[0] == '#':
+                    all_sections_commented.append(line.strip())
+                else:
+                    all_sections.append(line.strip())
+
     # get repeated elements
     repetition_counts = {section:subsections.count(section) for section in subsections}
     for section, counts in repetition_counts.items():
@@ -445,9 +593,12 @@ def read_conf(fpath=None):
         
         with open(fpath) as file:
             for line in file:
+                line_strip = line.strip()
+                # parsing all but last section 
                 if section_modified != all_sections_modified[-1]:
-                    if line.strip() == all_sections[i]:
-                        if line.strip() in repeated_subsections:
+                    # start of relevant section 
+                    if line_strip == all_sections[i]:
+                        if line_strip in repeated_subsections:
                             position = repeated_subsections_modified[section].index(section_modified)
                             if position == repetition:
                                 copy = True
@@ -457,12 +608,16 @@ def read_conf(fpath=None):
                         else:
                             copy = True
                         continue
-                    elif line.strip() == all_sections[i+1]:
+                    # start of next section, or commented section
+                    elif (line_strip == all_sections[i+1]) or (line_strip in all_sections_commented):
                         copy = False
                         continue
+                
+                # parsing last section
                 else:
-                    if line.strip() == all_sections[-1]:
-                        if line.strip() in repeated_subsections:
+                    # start of relevant section ?
+                    if line_strip == all_sections[-1]:
+                        if line_strip in repeated_subsections:
                             position = repeated_subsections_modified[section].index(section_modified)
                             if position == repetition:
                                 copy = True
@@ -472,11 +627,17 @@ def read_conf(fpath=None):
                         else:
                             copy = True
                         continue
-    
+
+                    #start of commented section
+                    elif line_strip in all_sections_commented:
+                        copy = False
+                        continue
+                
+                # set section attributes
                 if copy:
-                    if line.strip() != '':
-                        key = line.split('=')[0].strip()
-                        value = line.split('=')[1].strip()
+                    if line_strip != '':
+                        key = line_strip.split('=')[0].strip()
+                        value = line_strip.split('=')[1].strip()
                         config[section_modified][key] = value
 
     # add section attributes to subsection if do not exist there (e.g. add SECTIONA values to SECTIONA-Spain)
@@ -488,6 +649,9 @@ def read_conf(fpath=None):
             par_section = section_modified.split('|')[0]
             # add attributes from parent section
             for par_k, par_val in config[par_section].items():
+                # if first character of key is comment character (#), do not parse this attribute
+                if par_k[0] == '#':
+                    continue
                 try:
                     res_sub[par_k] = eval(par_val)
                 except:
@@ -501,7 +665,10 @@ def read_conf(fpath=None):
                 # store filename
                 if k == 'report_filename':
                     filenames.append(val)
-                    
+
+            # if first character of key is comment character (#), do not parse this attribute
+            if k[0] == '#':
+                continue
             # overwrite attributes from current subsection
             try:
                 res_sub[k] = eval(val)

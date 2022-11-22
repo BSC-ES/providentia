@@ -86,8 +86,7 @@ class MPLCanvas(FigureCanvas):
             if plot_type not in self.all_plots:
                 msg = "Error: Plot type {0} is not an option. ".format(plot_type)
                 msg += "The available plots are: {0}.".format(self.all_plots[2:])
-                print(msg)
-                sys.exit()
+                sys.exit(msg)
 
         # initialize layout positions
         self.read_instance.position_1 = 'map'
@@ -343,6 +342,12 @@ class MPLCanvas(FigureCanvas):
             self.absolute_selected_station_inds = np.array([], dtype=np.int)
             self.absolute_non_selected_station_inds = np.array([], dtype=np.int)
 
+            # plot map with 0 stations
+            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, self.plot_characteristics['map'])
+
+            # activate map
+            self.activate_axis(self.plot_axes['map'], 'map')
+
         # otherwise plot valid active map stations on map
         else:
             # if any of the currently selected stations are not in the current active map
@@ -396,7 +401,7 @@ class MPLCanvas(FigureCanvas):
         # update map title
         if len(self.relative_selected_station_inds) == 1:
             axis_title_label = '{} Selected'.format(
-                self.read_instance.station_references[self.read_instance.networkspeci][self.relative_selected_station_inds][0])
+                self.read_instance.station_references[self.read_instance.networkspeci][self.relative_selected_station_inds[0]])
         else:
             axis_title_label = '{} Selected Stations of {} Available'.format(
                 len(self.relative_selected_station_inds), len(self.active_map_valid_station_inds))
@@ -3199,8 +3204,8 @@ class MPLCanvas(FigureCanvas):
         """ Update annotation for each station that is hovered. """
 
         # retrieve stations references and coordinates
-        station_names = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds][annotation_index['ind'][0]]
-        station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds][annotation_index['ind'][0]]
+        station_names = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
+        station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
         station_value = self.z_statistic[annotation_index['ind'][0]]
 
