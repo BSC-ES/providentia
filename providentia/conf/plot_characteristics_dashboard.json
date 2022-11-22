@@ -24,7 +24,9 @@
 
 "metadata": {"non-ghost_vars": {"longitude": {"name_one": "Longitude", "dp": 4},
                                 "latitude":  {"name_one": "Latitude", "dp": 4},
-                                "station_name": {"name_one": "Station Name"}
+                                "station_name": {"name_one": "Station Name"},
+                                "area_classification": {"name_one": "Area Class"},
+                                "station_classification": {"name_one": "Station Class"}
                                 },
              "ghost_vars": {"station_name":                        {"name_one": "Station Name"},
                             "longitude":                           {"name_one": "Longitude", "dp": 4},
@@ -206,7 +208,7 @@
             "annotate_stats": ["Min", "Max"],
             "annotate_text": {"s": "", "loc": "upper left", "fontsize": 8, "n_stations": false, "exp_labels": true, 
                               "color": "", "round_decimal_places": 2},
-            "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1},
+            "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
             "group_widths": {"singlespecies":0.6, "multispecies":0.9}, 
             "plot": {"patch_artist": true, "manage_xticks": false, "showfliers": false},
             "plot_options": ["annotate", "logy"]},
