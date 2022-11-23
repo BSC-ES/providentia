@@ -1101,20 +1101,6 @@ class ProvidentiaOffline:
                                 for annotation in annotations:
                                     annotation.set_visible(True)
 
-                            # add annotation
-                            if first_data_label and 'annotate' in plot_options:
-                                if 'bias' in plot_options:
-                                    relevant_data_labels = list(self.experiments.keys())
-                                else:
-                                    relevant_data_labels = ['observations'] + list(self.experiments.keys())
-                                for relevant_temporal_resolution in self.relevant_temporal_resolutions:
-                                    self.plot.annotation(relevant_axis[relevant_temporal_resolution], networkspeci, 
-                                                         relevant_data_labels, base_plot_type, 
-                                                         self.plot_characteristics[plot_type], plot_options=plot_options,
-                                                         plotting_paradigm=plotting_paradigm)
-                                    # annotate only on first axis in periodic plots
-                                    break
-
                 # other plot types (except heatmap, table and statsummary) 
                 else:
                     # skip observational array for bias/scatter plots
@@ -1142,32 +1128,41 @@ class ProvidentiaOffline:
                             relevant_axis.axis('on')
                             relevant_axis.set_visible(True)
 
-                            # add annotation, regression line or smoothed line
-                            if first_data_label:
+                # add annotation, regression line or smoothed line
+                if first_data_label:
 
-                                # get data labels
-                                if 'bias' in plot_options:
-                                    relevant_data_labels = list(self.experiments.keys())
-                                else:
-                                    relevant_data_labels = ['observations'] + list(self.experiments.keys())
+                    # get data labels
+                    if 'bias' in plot_options:
+                        relevant_data_labels = list(self.experiments.keys())
+                    else:
+                        relevant_data_labels = ['observations'] + list(self.experiments.keys())
 
-                                # annotation
-                                if 'annotate' in plot_options:
-                                    self.plot.annotation(relevant_axis, networkspeci, relevant_data_labels, 
-                                                         base_plot_type, self.plot_characteristics[plot_type],
-                                                         plot_options=plot_options, plotting_paradigm=plotting_paradigm)
-                                
-                                # regression line
-                                if 'regression' in plot_options:
-                                    self.plot.linear_regression(relevant_axis, networkspeci, relevant_data_labels, 
-                                                                base_plot_type, self.plot_characteristics[plot_type], 
-                                                                plot_options=plot_options)
+                    # annotation
+                    if 'annotate' in plot_options:
+                        if base_plot_type in ['periodic', 'periodic-violin']:
+                            for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                                self.plot.annotation(relevant_axis[relevant_temporal_resolution], networkspeci, 
+                                                     relevant_data_labels, base_plot_type, 
+                                                     self.plot_characteristics[plot_type], plot_options=plot_options,
+                                                     plotting_paradigm=plotting_paradigm)
+                                # annotate only on first axis in periodic plots
+                                break
+                        else:
+                            self.plot.annotation(relevant_axis, networkspeci, relevant_data_labels, 
+                                                 base_plot_type, self.plot_characteristics[plot_type],
+                                                 plot_options=plot_options, plotting_paradigm=plotting_paradigm)
+                    
+                    # regression line
+                    if 'regression' in plot_options:
+                        self.plot.linear_regression(relevant_axis, networkspeci, relevant_data_labels, 
+                                                    base_plot_type, self.plot_characteristics[plot_type], 
+                                                    plot_options=plot_options)
 
-                                # smooth line
-                                if 'smooth' in plot_options:
-                                    self.plot.smooth(relevant_axis, networkspeci, relevant_data_labels,
-                                                     base_plot_type, self.plot_characteristics[plot_type], 
-                                                     plot_options=plot_options)
+                    # smooth line
+                    if 'smooth' in plot_options:
+                        self.plot.smooth(relevant_axis, networkspeci, relevant_data_labels,
+                                         base_plot_type, self.plot_characteristics[plot_type], 
+                                         plot_options=plot_options)
 
                 first_data_label = False
 
