@@ -1573,9 +1573,9 @@ class Plot:
             for element in self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type]:
                 element.set_visible(False)
 
-    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, xlim=None, 
-                                   ylim=None, relim=False, autoscale=False, autoscale_x=False, autoscale_y=False, 
-                                   bias_centre=False):
+    def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, 
+                                   xlim=None,  ylim=None, relim=False, autoscale=False, autoscale_x=False, 
+                                   autoscale_y=False, bias_centre=False):
         """Harmonises xy limits across paradigm of plot type, unless axis limits have been defined
         
         :param relevant_axs: relevant axes
@@ -1638,8 +1638,16 @@ class Plot:
             if autoscale_y:
                 ax.autoscale(axis='y', tight=False)
             if xlim is None and ('xlim' not in plot_characteristics):
-                if base_plot_type not in ['periodic','periodic-violin']:
+                if base_plot_type not in ['periodic', 'periodic-violin', 'timeseries']:
                     xlim_lower, xlim_upper = ax.get_xlim()
+                elif base_plot_type == 'timeseries':
+                    xlim_lower, xlim_upper = self.get_no_margin_lim(ax, 'xlim')
+                    try:
+                        xlim_lower = num2date(xlim_lower)
+                        xlim_upper = num2date(xlim_upper)
+                    except ValueError:
+                        continue
+                if base_plot_type not in ['periodic', 'periodic-violin']:
                     all_xlim_lower.append(xlim_lower)
                     all_xlim_upper.append(xlim_upper)
             if ylim is None and ('ylim' not in plot_characteristics):
@@ -1651,7 +1659,7 @@ class Plot:
         for ax in relevant_axs:
             # get xlim
             if xlim is None and ('xlim' not in plot_characteristics):
-                if base_plot_type not in ['periodic','periodic-violin']:
+                if base_plot_type not in ['periodic', 'periodic-violin']:
                     xlim_min = np.min(all_xlim_lower)
                     xlim_max = np.max(all_xlim_upper)
                     xlim = xlim_min, xlim_max
@@ -1660,68 +1668,7 @@ class Plot:
 
             # set xlim
             if xlim is not None:
-                if base_plot_type == 'timeseries':
-                    if plot_characteristics['xtick_alteration']['define']:
-                        
-                        # transform xlim from numbers to dates
-                        timeseries_start_date = num2date(xlim[0])
-                        timeseries_end_date = num2date(xlim[1])
-
-                        # get steps for all data labels
-                        steps = pd.date_range(timeseries_start_date, timeseries_end_date, 
-                                            freq=self.read_instance.active_frequency_code)
-
-                        # get number of months and days
-                        n_months = (12*(timeseries_end_date.year - timeseries_start_date.year) + (timeseries_end_date.month - 
-                                                                                                  timeseries_start_date.month))
-                        n_days = (timeseries_end_date - timeseries_start_date).days
-
-                        # get months that are complete
-                        months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
-                        months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
-                        if months_start.size > 1:
-                            if (timeseries_end_date - months_end[-1]).days >= 1:
-                                months = months_start[:-1]
-                            else:
-                                months = months_start
-                        else:
-                            months = months_start
-
-                        # show hours if number of days is less than 7
-                        if n_days < 7:
-                            ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
-                        else:
-                            ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
-
-                        # define time slices
-                        if n_months >= 3:
-                            steps = months
-                        slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
-
-                        # use default axes if the number of timesteps is lower than the number of slices
-                        if slices >= 1:
-                            xticks = steps[0::slices]
-                        else:
-                            xticks = ax.xaxis.get_ticks()
-
-                        # transform to numpy.datetime64
-                        if not isinstance(xticks[0], np.datetime64):
-                            xticks = [x.to_datetime64() for x in xticks]
-                        if not isinstance(timeseries_end_date, np.datetime64):
-                            timeseries_end_date = np.datetime64(timeseries_end_date)
-
-                        # add last step to xticks
-                        if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != timeseries_end_date):
-                            xticks = np.append(xticks, timeseries_end_date)
-
-                        # set modified xticks
-                        ax.xaxis.set_ticks(xticks)
-                    
-                    else:
-                        # set default xticks
-                        ax.set_xlim(xlim)
-
-                else:
+                if base_plot_type not in ['timeseries']:
                     ax.set_xlim(xlim)
 
             # get ylim
@@ -1745,7 +1692,7 @@ class Plot:
                 ax.set_ylim(ylim)
 
         # get minimum and maximum from all axes and set limits for periodic plots
-        if base_plot_type in ['periodic','periodic-violin']:
+        if base_plot_type in ['periodic', 'periodic-violin']:
             mapped_resolutions = self.read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(self.read_instance.relevant_temporal_resolutions)))
             if xlim is None and ('xlim' not in plot_characteristics):
                 for temporal_resolution, sub_ax in zip(mapped_resolutions, relevant_axs):
@@ -1768,6 +1715,59 @@ class Plot:
                 xlim = plot_characteristics['xlim']
                 for temporal_resolution, sub_ax in zip(mapped_resolutions, relevant_axs):
                     sub_ax.set_xlim(xlim)
+
+        # get minimum and maximum from all axes and set limits for timeseries
+        if base_plot_type == 'timeseries':
+            if plot_characteristics['xtick_alteration']['define']:
+            
+                # get steps for all data labels
+                steps = pd.date_range(xlim[0], xlim[1], freq=self.read_instance.active_frequency_code)
+
+                # get number of months and days
+                n_months = (12*(xlim[1].year - xlim[0].year) + (xlim[1].month - xlim[0].month))
+                n_days = (xlim[1] - xlim[0]).days
+
+                # get months that are complete
+                months_start = pd.date_range(xlim[0], xlim[1], freq='MS')
+                months_end = pd.date_range(xlim[0], xlim[1], freq='M')
+                if months_start.size > 1:
+                    if (xlim[1] - months_end[-1]).days >= 1:
+                        months = months_start[:-1]
+                    else:
+                        months = months_start
+                else:
+                    months = months_start
+
+                # show hours if number of days is less than 7
+                if n_days < 7:
+                    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+                else:
+                    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
+
+                # define time slices
+                if n_months >= 3:
+                    steps = months
+                slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
+
+                # use default axes if the number of timesteps is lower than the number of slices
+                if slices >= 1:
+                    xticks = steps[0::slices]
+                else:
+                    xticks = ax.xaxis.get_ticks()
+
+                # transform to numpy.datetime64
+                if not isinstance(xticks[0], np.datetime64):
+                    xticks = [x.to_datetime64() for x in xticks]
+                if not isinstance(xlim[1], np.datetime64):
+                    xlim = xlim[0], np.datetime64(xlim[1])
+
+                # add last step to xticks
+                if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != xlim[1]):
+                    xticks = np.append(xticks, xlim[1])
+
+                # set modified xticks
+                for ax in relevant_axs:
+                    ax.xaxis.set_ticks(xticks)
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics, 
                        relevant_temporal_resolutions=['hour']):

@@ -99,7 +99,7 @@
                                    "ncol": 4, "borderaxespad": 0, "fontsize": 10.0}, 
                           "handles": {"markersize": 10, "marker": "o", "color": "white", 
                                       "obs_label": "Observations"}},
-               "subplots_adjust": {"left": 0.06, "right": 0.98, "top": 0.86, "bottom": 0.06, "hspace": 0.33, 
+               "subplots_adjust": {"left": 0.06, "right": 0.97, "top": 0.86, "bottom": 0.06, "hspace": 0.33, 
                                    "wspace": 0.14},
                "annotate_stats": ["Mean", "StdDev", "r2", "RMSE", "MB"],
                "annotate_text": {"s": "", "loc": "upper right", "fontsize": 6, "n_stations": true, "exp_labels": true, 
