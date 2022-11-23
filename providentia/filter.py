@@ -411,7 +411,7 @@ class DataFilter:
     def temporally_colocate_data(self):
         """Define function which temporally colocates observational and experiment data.
            This is done across all networks / species if spatial colocation is active,
-           otherwise it is done inderpendently per network / species
+           otherwise it is done independently per network / species
            This in reality means storing the indices for the temporal colocation.
         """
 
@@ -443,7 +443,9 @@ class DataFilter:
                 nan_obs = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:])             
 
                 # update obs_all_nan array, making True all instances where have NaNs
-                obs_all_nan = np.any([obs_all_nan, nan_obs], axis=0)
+                # if all observations are nan then do not update
+                if not np.all(nan_obs):
+                    obs_all_nan = np.any([obs_all_nan, nan_obs], axis=0)
 
                 # iterate through experiment data arrays in data in memory dictionary
                 # save indices for colocation with observations
@@ -456,7 +458,9 @@ class DataFilter:
                     nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][exp_data_index,:,:])
 
                     # update exps_all_nan array, making True all instances where have NaNs
-                    exps_all_nan = np.any([exps_all_nan, nan_exp], axis=0)
+                    # if all experiment values are nan then do not update for that experiment
+                    if not np.all(nan_exp):
+                        exps_all_nan = np.any([exps_all_nan, nan_exp], axis=0)
 
                 # if spatial colocation is not active,
                 # get indices where one of observations and experiments per network /species is NaN
@@ -524,12 +528,12 @@ class DataFilter:
 
                     # get absolute data availability number per station in experiment data array
                     station_data_availability_number = Stats.calculate_data_avail_number(exp_data)
-                    
+
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
                         valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
 
-                    # get colocated experimental data array (if have experiments, first subset by valid observational stations)
+                    # get colocated experimental data array (first subset by valid observational stations)
                     exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
                     exp_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
                     exp_data = exp_data[valid_station_inds,:]
