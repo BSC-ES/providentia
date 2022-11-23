@@ -374,7 +374,7 @@ class ProvidentiaOffline:
                                                  base_plot_type, self.plot_characteristics[plot_type], 
                                                  plot_options=plot_options)
 
-                            # update variable to refledt some formatting was performed
+                            # update variable to reflect some formatting was performed
                             did_formatting = True
 
                         # harmonise xy limits for plot paradigm
@@ -687,8 +687,16 @@ class ProvidentiaOffline:
                 # set variable to inform when have made 1 set of networkspecies plots for summary
                 made_networkspeci_summary_plots = False
 
+                # determine if all plots are multispecies plots
+                all_multispecies_plots  = np.all([True if 'multispecies' in plot_type.split('_')[1:] else False for plot_type in summary_plots_to_make])
+
                 # iterate through networkspecies
                 for networkspeci in self.networkspecies:
+
+                    # if have 0 plot types that are non-multispecies, and have previously made networkspeci plots,
+                    # then continue 
+                    if (made_networkspeci_summary_plots) & (all_multispecies_plots): 
+                        continue
 
                     # get valid station inds for networkspeci 
                     if self.temporal_colocation and len(self.data_labels) > 1:
@@ -718,7 +726,7 @@ class ProvidentiaOffline:
                             if self.selected_station_data_max[ns] > self.data_range_max_summary[ns]:
                                 self.data_range_max_summary[ns] = copy.deepcopy(self.selected_station_data_max[ns])
                     
-                    # if have no valid data across data labels, then continue 
+                    # if have no valid data across data labels (no observations or experiments), then continue 
                     if not self.selected_station_data[networkspeci]:
                         continue
 
@@ -739,7 +747,7 @@ class ProvidentiaOffline:
                         # make plot
                         print('Making summary {0}'.format(plot_type))
                         self.make_plot('summary', plot_type, plot_options, networkspeci)
-
+                        
                     # update N total pages 
                     self.n_total_pages = len(self.plot_dictionary)
 
@@ -752,8 +760,16 @@ class ProvidentiaOffline:
                # set variable to inform when have made 1 set of networkspecies plots for stations
                made_networkspeci_station_plots = False        
 
+               # determine if all plots are multispecies plots
+               all_multispecies_plots = np.all([True if 'multispecies' in plot_type.split('_')[1:] else False for plot_type in station_plots_to_make])
+
                # iterate through networkspecies
                for networkspeci in self.networkspecies:
+
+                    # if have 0 plot types that are non-multispecies, and have previously made networkspeci plots,
+                    # then continue 
+                    if (made_networkspeci_station_plots) & (all_multispecies_plots): 
+                        continue
 
                     # get valid station inds for networkspeci 
                     if self.temporal_colocation and len(self.data_labels) > 1:
@@ -798,7 +814,7 @@ class ProvidentiaOffline:
                                             data_range_min=self.data_range_min_station, 
                                             data_range_max=self.data_range_max_station)
 
-                        # if have no valid data across data labels, then continue 
+                        # if have no valid data across data labels (no observations or experiments), then continue 
                         if not self.selected_station_data[networkspeci]:
                             continue
                         
@@ -870,8 +886,19 @@ class ProvidentiaOffline:
         else:
             base_plot_type = plot_type.split('_')[0] 
 
+        # get all data_labels for selected_station_data
+        # if multispecies plot then ensure have data_labels from across all 
+        if 'multispecies' in plot_options: 
+            all_data_labels = []
+            for ns in self.selected_station_data:
+                all_data_labels.extend(list(self.selected_station_data[ns].keys()))
+            _, idx = np.unique(all_data_labels, return_index=True)
+            all_data_labels = np.array(all_data_labels)[np.sort(idx)]
+        else:
+            all_data_labels = list(self.selected_station_data[networkspeci].keys())
+
         # if are making bias plot, and have no valid experiment data then cannot make plot type
-        if ('bias' in plot_options) & (len(self.selected_station_data[networkspeci]) < 2):
+        if ('bias' in plot_options) & (len(all_data_labels) < 2):
             return
 
         # get data ranges for plotting paradigm
@@ -884,7 +911,7 @@ class ProvidentiaOffline:
 
         # iterate through all data arrays
         first_data_label = True 
-        for n_data_label, data_label in enumerate(self.selected_station_data[networkspeci].keys()):
+        for data_label in all_data_labels:
 
             # set how experiment should be referred to in heatmap/table
             if data_label == 'observations':
@@ -930,10 +957,10 @@ class ProvidentiaOffline:
                     self.plot.set_map_extent(relevant_axis)
 
                 # do not make map if there is no valid data for relevant data label/s
-                if z1 not in self.selected_station_data[networkspeci]:
+                if z1 not in all_data_labels:
                     continue
 
-                if (z2 != '') & (z2 not in self.selected_station_data[networkspeci]): 
+                if (z2 != '') & (z2 not in all_data_labels): 
                     continue
 
                 # calculate z statistic
@@ -971,7 +998,7 @@ class ProvidentiaOffline:
                 
                 # add stat for current data array (if has been calculated correctly, otherwise append NaNs)                                         
                 if data_label in self.selected_station_data[networkspeci]:
-                    if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
+                    if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna()) > 0:
                         data_to_add = self.selected_station_data[networkspeci][data_label]['all'][zstat][0]
                     else:
                         data_to_add = np.NaN
@@ -1055,7 +1082,7 @@ class ProvidentiaOffline:
                 if (axis_xlabel == '') or (axis_xlabel == 'measurement_units'):
                     if 'xlabel' in self.plot_characteristics[plot_type]:
                         if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
-                            xlabel = self.measurement_units[networkspeci.split('|')[-1]]
+                            xlabel = '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]])
                         else:
                             xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
                     else:
@@ -1076,11 +1103,11 @@ class ProvidentiaOffline:
                         if ylabel_units == 'measurement_units':
                             ylabel_units = self.measurement_units[networkspeci.split('|')[-1]] 
                         if ylabel_units != '':
-                            ylabel = copy.deepcopy(ylabel_units)
+                            ylabel = '[{}]'.format(ylabel_units)
                     else:
                         if 'ylabel' in self.plot_characteristics[plot_type]:
                             if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
-                                ylabel = self.measurement_units[networkspeci.split('|')[-1]]
+                                ylabel = '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]])
                             else:
                                 ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
                         else:
@@ -1095,31 +1122,42 @@ class ProvidentiaOffline:
                     if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                         continue
                         
-                    if data_label in self.selected_station_data[networkspeci]:
-                        if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
-                            if base_plot_type == 'periodic':
-                                self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
-                                                        self.plot_characteristics[plot_type], zstat=zstat, 
-                                                        plot_options=plot_options, 
-                                                        first_data_label=first_data_label)
-                            elif base_plot_type == 'periodic-violin':
-                                self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
-                                                        self.plot_characteristics[plot_type], 
-                                                        plot_options=plot_options, 
-                                                        first_data_label=first_data_label)
-                            self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)
-                            first_data_label = False
+                    # determine if have some data to plot
+                    plot_validity = False
+                    if 'multispecies' in plot_options:
+                        for ns in self.selected_station_data:
+                            if data_label in self.selected_station_data[ns]:
+                                if len(self.selected_station_data[ns][data_label]['pandas_df']['data'].dropna()) > 0:
+                                    plot_validity = True
+                    else:
+                        if data_label in self.selected_station_data[networkspeci]:
+                            if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna()) > 0:
+                                plot_validity = True
 
-                            # turn relevant axes on
-                            for relevant_temporal_resolution in self.relevant_temporal_resolutions:
-                                relevant_axis[relevant_temporal_resolution].axis('on')
-                                relevant_axis[relevant_temporal_resolution].set_visible(True)
+                    if plot_validity:
+                        if base_plot_type == 'periodic':
+                            self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
+                                                    self.plot_characteristics[plot_type], zstat=zstat, 
+                                                    plot_options=plot_options, 
+                                                    first_data_label=first_data_label)
+                        elif base_plot_type == 'periodic-violin':
+                            self.plot.make_periodic(relevant_axis, networkspeci, data_label, 
+                                                    self.plot_characteristics[plot_type], 
+                                                    plot_options=plot_options, 
+                                                    first_data_label=first_data_label)
+                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)
+                        first_data_label = False
 
-                                #get references to periodic label annotations made, and then hide them
-                                annotations = [child for child in relevant_axis[relevant_temporal_resolution].get_children() if isinstance(child, matplotlib.text.Annotation)]
-                                # hide annotations
-                                for annotation in annotations:
-                                    annotation.set_visible(True)
+                        # turn relevant axes on
+                        for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                            relevant_axis[relevant_temporal_resolution].axis('on')
+                            relevant_axis[relevant_temporal_resolution].set_visible(True)
+
+                            #get references to periodic label annotations made, and then hide them
+                            annotations = [child for child in relevant_axis[relevant_temporal_resolution].get_children() if isinstance(child, matplotlib.text.Annotation)]
+                            # hide annotations
+                            for annotation in annotations:
+                                annotation.set_visible(True)
 
                 # other plot types (except heatmap, table and statsummary) 
                 else:
@@ -1128,25 +1166,37 @@ class ProvidentiaOffline:
                         continue
                     else:
                         func = getattr(self.plot, 'make_{}'.format(base_plot_type))
-                    if data_label in self.selected_station_data[networkspeci]:
-                        if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
-                            if base_plot_type == 'metadata':
-                                func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options, first_data_label=first_data_label, station_inds=station_inds) 
-                            elif base_plot_type == 'distribution':
-                                func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options, first_data_label=first_data_label,
-                                    data_range_min=data_range_min, 
-                                    data_range_max=data_range_max) 
-                            else:
-                                func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options, first_data_label=first_data_label) 
-                            first_data_label = False
-                            self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)        
 
-                            # turn axis on
-                            relevant_axis.axis('on')
-                            relevant_axis.set_visible(True)
+                    # determine if have some data to plot
+                    plot_validity = False
+                    if 'multispecies' in plot_options:
+                        for ns in self.selected_station_data:
+                            if data_label in self.selected_station_data[ns]:
+                                if len(self.selected_station_data[ns][data_label]['pandas_df']['data'].dropna()) > 0:
+                                    plot_validity = True
+                    else:
+                        if data_label in self.selected_station_data[networkspeci]:
+                            if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna()) > 0:
+                                plot_validity = True
+
+                    if plot_validity:
+                        if base_plot_type == 'metadata':
+                            func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
+                                plot_options=plot_options, first_data_label=first_data_label, station_inds=station_inds) 
+                        elif base_plot_type == 'distribution':
+                            func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
+                                plot_options=plot_options, first_data_label=first_data_label,
+                                data_range_min=data_range_min, 
+                                data_range_max=data_range_max) 
+                        else:
+                            func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
+                                plot_options=plot_options, first_data_label=first_data_label) 
+                        first_data_label = False
+                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)        
+
+                        # turn axis on
+                        relevant_axis.axis('on')
+                        relevant_axis.set_visible(True)
                                 
             # iterate number of plots made for current type of plot 
             self.current_plot_ind += 1     
@@ -1202,7 +1252,7 @@ class ProvidentiaOffline:
                     # create structure to store data for statsummary plot
                     if 'bias' in plot_options:
                         relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
-                        relevant_data_labels = [data_label for data_label in self.selected_station_data[networkspeci] if data_label != 'observations']
+                        relevant_data_labels = [data_label for data_label in all_data_labels if data_label != 'observations']
                     else:
                         relevant_zstats = self.plot_characteristics[plot_type]['basic']
                         relevant_data_labels = self.selected_station_data[networkspeci]

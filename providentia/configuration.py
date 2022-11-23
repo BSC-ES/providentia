@@ -8,7 +8,7 @@ import sys
 import re
 import subprocess
 
-from .aux import check_for_ghost, multi_species_mapping, get_default_qa
+from .aux import check_for_ghost, multispecies_mapping, get_default_qa
 
 import numpy as np
 import pandas as pd
@@ -49,11 +49,11 @@ class ProvConfiguration:
                                    'MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA',
                                    'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN',
                                    'WMO_WDCGG'], 
-            'network': 'EBAS',
-            'species': 'sconco3',
-            'resolution': 'hourly',
-            'start_date': '20180101',
-            'end_date': '20180201',
+            'network': None,
+            'species': None,
+            'resolution': None,
+            'start_date': None,
+            'end_date': None,
             'experiments': {},
             'qa': None,
             'flags': None,
@@ -181,10 +181,10 @@ class ProvConfiguration:
             # parse network
 
             if isinstance(value, str):
-                # throw error if network is empty str
+                # throw warning if network is empty str
                 if value.strip() == '':
-                    error = 'Error: "network" field is empty in .conf file'
-                    sys.exit(error)
+                    print('Warning: "network" field is empty in .conf file')
+                    return None
                 # parse multiple networks
                 elif ',' in value:
                     return [network.strip() for network in value.split(',')]
@@ -193,17 +193,53 @@ class ProvConfiguration:
 
         elif key == 'species':
             # parse species
+
             if isinstance(value, str):
                 # throw error if species is empty str
                 if value.strip() == '':
-                    error = 'Error: "species" field is empty in .conf file'
-                    sys.exit(error)
+                    print('Warning: "species" field is empty in .conf file')
+                    return None
                 # parse multiple species
                 elif ',' in value:
                     return [speci.strip() for speci in value.split(',')]
                 else:
                     return [value.strip()]
 
+        elif key == 'resolution':
+            # parse resolution
+
+            if isinstance(value, str):
+                # throw error if resolution is empty str
+                if value.strip() == '':
+                    print('Warning: "resolution" field is empty in .conf file')
+                    return None
+                else:
+                    return value.strip()
+
+        elif key == 'start_date':
+            # parse start_date
+
+            if (isinstance(value, str)) or (isinstance(value, int)):
+                # throw error if start_date is empty str
+                value = str(value)
+                if value.strip() == '':
+                    print('Warning: "start_date" field is empty in .conf file')
+                    return None
+                else:
+                    return value.strip()
+
+        elif key == 'end_date':
+            # parse end_date
+
+            if (isinstance(value, str)) or (isinstance(value, int)):
+                # throw error if start_date is empty str
+                value = str(value)
+                if value.strip() == '':
+                    print('Warning: "end_date" field is empty in .conf file')
+                    return None
+                else:
+                    return value.strip()
+        
         elif key == 'qa':
             # parse qa
 
@@ -361,15 +397,21 @@ class ProvConfiguration:
     def check_validity(self):
         """check validity of set variables after parsing"""
 
-        # check have network, otherwise throw error
-        if not hasattr(self.read_instance, 'network'):
-            error = 'Error: "network" field must be defined in .conf file'
-            sys.exit(error)
+        # check have network information, 
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.network:
+            default = ['EBAS']
+            if self.read_instance.offline:
+                print('Warning: "network" field not defined in .conf file. Using default: {}'.format(default))
+            self.read_instance.network = default
 
-        # check have species, otherwise throw error
-        if not hasattr(self.read_instance, 'species'):
-            error = 'Error: "species" field must be defined in .conf file'
-            sys.exit(error)
+        # check have species information, 
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.species:
+            default = ['sconco3']
+            if self.read_instance.offline:
+                print('Warning: "species" field not defined in .conf file. Using default: {}'.format(default))
+            self.read_instance.species = default
 
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,
@@ -402,38 +444,29 @@ class ProvConfiguration:
                     sys.exit(error)
                 previous_is_ghost = is_ghost
 
-        # resolution
-        if hasattr(self.read_instance, 'resolution'):
-            # throw error if species if empty str
-            if self.read_instance.resolution.strip() == '':
-                error = 'Error: "resolution" field is empty in .conf file'
-                sys.exit(error)
-        # throw error if resolution is not defined
-        else:
-            error = 'Error: "resolution" field must be defined in .conf file'
-            sys.exit(error)
+        # check have resolution information, 
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.resolution:
+            default = 'hourly'
+            if self.read_instance.offline:
+                print('Warning: "resolution" field not defined in .conf file. Using default: {}'.format(default))
+            self.read_instance.resolution = default
 
-        # start_date
-        if hasattr(self.read_instance, 'start_date'):
-            # throw error if start_date if empty str
-            if str(self.read_instance.start_date).strip() == '':
-                error = 'Error: "start_date" field is empty in .conf file'
-                sys.exit(error)
-        # throw error if start_date is not defined
-        else:
-            error = 'Error: "start_date" field must be defined in .conf file'
-            sys.exit(error)
+        # check have start_date information, 
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.start_date:
+            default = '20180101'
+            if self.read_instance.offline:
+                print('Warning: "start_date" field not defined in .conf file. Using default: {}'.format(default))
+            self.read_instance.start_date = default
 
-        # end_date
-        if hasattr(self.read_instance, 'end_date'):
-            # throw error if start_date if empty str
-            if str(self.read_instance.end_date).strip() == '':
-                error = 'Error: "end_date" field is empty in .conf file'
-                sys.exit(error)
-        # throw error if end_date is not defined
-        else:
-            error = 'Error: "end_date" field must be defined in .conf file'
-            sys.exit(error)
+        # check have end_date information, 
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.end_date:
+            default = '20190101'
+            if self.read_instance.offline:
+                print('Warning: "end_date" field not defined in .conf file. Using default: {}'.format(default))
+            self.read_instance.end_date = default
 
         # if filter_species is active, and spatial_colocation is not active, then cannot filter by species
         # set filter_species to empty dict and advise user of this
@@ -447,7 +480,7 @@ class ProvConfiguration:
         new_species = copy.deepcopy(self.read_instance.species)
         for speci_ii, speci in enumerate(self.read_instance.species): 
             if '*' in speci:
-                mapped_species = multi_species_mapping(speci)
+                mapped_species = multispecies_mapping(speci)
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
                 network_to_duplicate = self.read_instance.network[speci_ii]
