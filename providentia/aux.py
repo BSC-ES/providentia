@@ -33,13 +33,76 @@ def get_default_qa(instance, speci):
     else:
         return sorted(instance.default_qa_standard)
 
-def multi_species_mapping(species):
+def multispecies_mapping(species):
     """Map species special case str to multiple species names"""
 
-    #multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4','vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
-    multi_species_map = {'vconcaerobin*':['vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
-    
+    multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4','vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
+
     return multi_species_map[species]
+
+def get_multispecies_aliases(networkspecies):
+    """Map networkspecies to networkspecies aliases.
+       Also get label for alias.   
+    """
+
+    multispecies_aliases = {'vconcaerobin1': '0.05',
+                            'vconcaerobin2': '0.066',
+                            'vconcaerobin3': '0.086',
+                            'vconcaerobin4': '0.113',
+                            'vconcaerobin5': '0.148',
+                            'vconcaerobin6': '0.194',
+                            'vconcaerobin7': '0.255',
+                            'vconcaerobin8': '0.335',
+                            'vconcaerobin9': '0.439',
+                            'vconcaerobin10': '0.576',
+                            'vconcaerobin11': '0.756',
+                            'vconcaerobin12': '0.992',
+                            'vconcaerobin13': '1.302',
+                            'vconcaerobin14': '1.708',
+                            'vconcaerobin15': '2.241',
+                            'vconcaerobin16': '2.940',
+                            'vconcaerobin17': '3.857',
+                            'vconcaerobin18': '5.061',
+                            'vconcaerobin19': '6.641',
+                            'vconcaerobin20': '8.713',
+                            'vconcaerobin21': '11.432',
+                            'vconcaerobin22': '15.00'
+                            }
+
+    multispecies_labels =  {'vconcaerobin1': 'Radius [µm]',
+                            'vconcaerobin2': 'Radius [µm]',
+                            'vconcaerobin3': 'Radius [µm]',
+                            'vconcaerobin4': 'Radius [µm]',
+                            'vconcaerobin5': 'Radius [µm]',
+                            'vconcaerobin6': 'Radius [µm]',
+                            'vconcaerobin7': 'Radius [µm]',
+                            'vconcaerobin8': 'Radius [µm]',
+                            'vconcaerobin9': 'Radius [µm]',
+                            'vconcaerobin10': 'Radius [µm]',
+                            'vconcaerobin11': 'Radius [µm]',
+                            'vconcaerobin12': 'Radius [µm]',
+                            'vconcaerobin13': 'Radius [µm]',
+                            'vconcaerobin14': 'Radius [µm]',
+                            'vconcaerobin15': 'Radius [µm]',
+                            'vconcaerobin16': 'Radius [µm]',
+                            'vconcaerobin17': 'Radius [µm]',
+                            'vconcaerobin18': 'Radius [µm]',
+                            'vconcaerobin19': 'Radius [µm]',
+                            'vconcaerobin20': 'Radius [µm]',
+                            'vconcaerobin21': 'Radius [µm]',
+                            'vconcaerobin22': 'Radius [µm]'
+                            }
+    
+    networkspecies_aliases = [multispecies_aliases[networkspeci] if networkspeci in multispecies_aliases else networkspeci 
+                              for networkspeci in networkspecies]
+
+    labels = np.unique([multispecies_labels[networkspeci] for networkspeci in networkspecies if networkspeci in multispecies_labels])
+    if len(labels) == 1:
+        unique_label = labels[0]
+    else:
+        unique_label = ''
+
+    return networkspecies_aliases, unique_label
 
 def exceedance_lim(species):
     """Returns the exceedance limit depending on the species input. If
