@@ -1355,7 +1355,7 @@ class Plot:
                 self.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
     def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics,
-                   plot_options=[]):
+                   plot_options=[], plotting_paradigm=None):
         """Add statistical annotations to plot
 
         :param relevant_axis: axis to plot on 
@@ -1370,6 +1370,8 @@ class Plot:
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
+        :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+        :type plotting_paradigm: str
         """
 
         # get stats wished to be annotated
@@ -1409,13 +1411,13 @@ class Plot:
             if plot_characteristics['annotate_text']['n_stations']:
                 if data_label == data_labels[0]:
                     colours.append('black')
-                    if 'individual' in plot_options:
-                        str_to_annotate.append('Stations: 1')
-                    else:
-                        if self.read_instance.offline:
-                            str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_latitudes[networkspeci])))
+                    if self.read_instance.offline:
+                        if plotting_paradigm == 'station':
+                            str_to_annotate.append('Stations: 1')
                         else:
-                            str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.relative_selected_station_inds)))
+                            str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_inds)))
+                    else:
+                        str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_inds)))
 
             # get colors
             colours.append(self.read_instance.plotting_params[data_label]['colour'])

@@ -224,7 +224,6 @@ class ProvidentiaOffline:
             # create colourbars
             # harmonise xy limits(not for map, heatmap or table, or when xlim and ylim defined)
             # log axes
-            # annotation
             # regression line
             # smooth line
 
@@ -350,16 +349,6 @@ class ProvidentiaOffline:
                                     msg += "in {0} with negative values.".format(plot_type)
                                     print(msg)
 
-                            # annotation
-                            if 'annotate' in plot_options:
-                                if base_plot_type not in ['heatmap']:
-                                    self.plot.annotation(relevant_ax, networkspeci, relevant_data_labels[relevant_ax_ii], 
-                                                        base_plot_type, self.plot_characteristics[plot_type],
-                                                        plot_options=plot_options)
-                                    # annotate on first axis
-                                    if base_plot_type in ['periodic', 'periodic-violin']:
-                                        break
-
                             # regression line
                             if 'regression' in plot_options:
                                 self.plot.linear_regression(relevant_ax, networkspeci, 
@@ -415,7 +404,7 @@ class ProvidentiaOffline:
                 print('\n0 plots remain to write to PDF\n')
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
-        """setup plotting geometry for summary or station specific plots, per network/species"""
+        """Setup plotting geometry for summary or station specific plots, per network/species"""
 
         # depending on plot type set plots to make
         if plotting_paradigm == 'summary':
@@ -583,7 +572,7 @@ class ProvidentiaOffline:
                             # format axis
                             self.plot.format_axis(grid_dict, base_plot_type, plot_characteristics, set_extent=False, relevant_temporal_resolutions=self.relevant_temporal_resolutions)
 
-                            #get references to periodic label annotations made, and then hide them
+                            # get references to periodic label annotations made, and then hide them
                             for relevant_temporal_resolution in self.relevant_temporal_resolutions:
                                 annotations = [child for child in grid_dict[relevant_temporal_resolution].get_children() if isinstance(child, matplotlib.text.Annotation)]
                                 # hide annotations
@@ -1108,18 +1097,32 @@ class ProvidentiaOffline:
                                                         plot_options=plot_options, 
                                                         first_data_label=first_data_label)
                             self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)
-                            first_data_label = False
 
                             # turn relevant axes on
                             for relevant_temporal_resolution in self.relevant_temporal_resolutions:
                                 relevant_axis[relevant_temporal_resolution].axis('on')
                                 relevant_axis[relevant_temporal_resolution].set_visible(True)
 
-                                #get references to periodic label annotations made, and then hide them
+                                # get references to periodic label annotations made, and then show them
                                 annotations = [child for child in relevant_axis[relevant_temporal_resolution].get_children() if isinstance(child, matplotlib.text.Annotation)]
-                                # hide annotations
+                                
+                                # show annotations
                                 for annotation in annotations:
                                     annotation.set_visible(True)
+
+                            # annotation
+                            if first_data_label and 'annotate' in plot_options:
+                                if 'bias' in plot_options:
+                                    relevant_data_labels = list(self.experiments.keys())
+                                else:
+                                    relevant_data_labels = ['observations'] + list(self.experiments.keys())
+                                for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                                    self.plot.annotation(relevant_axis[relevant_temporal_resolution], networkspeci, 
+                                                         relevant_data_labels, base_plot_type, 
+                                                         self.plot_characteristics[plot_type], plot_options=plot_options,
+                                                         plotting_paradigm=plotting_paradigm)
+                                    # annotate only on first axis in periodic plots
+                                    break
 
                 # other plot types (except heatmap, table and statsummary) 
                 else:
@@ -1132,22 +1135,34 @@ class ProvidentiaOffline:
                         if len(self.selected_station_data[networkspeci][data_label]['pandas_df']['data']) > 0:
                             if base_plot_type == 'metadata':
                                 func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options, first_data_label=first_data_label, station_inds=station_inds) 
+                                     plot_options=plot_options, first_data_label=first_data_label, station_inds=station_inds)
                             elif base_plot_type == 'distribution':
                                 func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options, first_data_label=first_data_label,
-                                    data_range_min=data_range_min, 
-                                    data_range_max=data_range_max) 
+                                     plot_options=plot_options, first_data_label=first_data_label,
+                                     data_range_min=data_range_min, 
+                                     data_range_max=data_range_max) 
                             else:
                                 func(relevant_axis, networkspeci, data_label, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options, first_data_label=first_data_label) 
-                            first_data_label = False
+                                     plot_options=plot_options, first_data_label=first_data_label) 
+                            
                             self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(data_label)        
 
                             # turn axis on
                             relevant_axis.axis('on')
                             relevant_axis.set_visible(True)
-                                
+
+                            # annotation
+                            if first_data_label and 'annotate' in plot_options:
+                                if 'bias' in plot_options:
+                                    relevant_data_labels = list(self.experiments.keys())
+                                else:
+                                    relevant_data_labels = ['observations'] + list(self.experiments.keys())
+                                self.plot.annotation(relevant_axis, networkspeci, relevant_data_labels, 
+                                                    base_plot_type, self.plot_characteristics[plot_type],
+                                                    plot_options=plot_options, plotting_paradigm=plotting_paradigm)
+                
+                first_data_label = False
+
             # iterate number of plots made for current type of plot 
             self.current_plot_ind += 1     
 
@@ -1257,7 +1272,7 @@ class ProvidentiaOffline:
                     relevant_axis.set_visible(True)
 
     def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
-        """get relevant page and axis for current plot type/subsection/axis index"""
+        """Get relevant page and axis for current plot type/subsection/axis index"""
 
         # get axes associated with plot type
         if plotting_paradigm == 'summary':
