@@ -8,6 +8,7 @@ import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib 
+from matplotlib.dates import num2date
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 from matplotlib.patches import Polygon
@@ -736,94 +737,7 @@ class Plot:
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
             self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
-
-        # recalculate xticks (if desired) for better spacing
-        if plot_characteristics['xtick_alteration']['define']:
-            
-            if first_data_label:
-                
-                # get steps for first data label
-                steps = ts_nonan.index.values
-                
-                # get start and end dates for first data label
-                timeseries_start_date = pd.to_datetime(ts_nonan.index.values[0])
-                timeseries_end_date = pd.to_datetime(ts_nonan.index.values[-1])
-
-                # transform to pandas timestamps
-                if not isinstance(timeseries_start_date, pd._libs.tslibs.timestamps.Timestamp):
-                    timeseries_start_date = pd.to_datetime(timeseries_start_date)   
-                if not isinstance(timeseries_end_date, pd._libs.tslibs.timestamps.Timestamp):
-                    timeseries_end_date = pd.to_datetime(timeseries_end_date)    
-
-                # get start and end dates for all data labels
-                for data_label in self.canvas_instance.selected_station_data[networkspeci]:
-
-                    # get start and end dates for each label
-                    start_date = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna().index.values[0]
-                    end_date = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna().index.values[-1]
-                    
-                    # transform to pandas timestamps
-                    if not isinstance(start_date, pd._libs.tslibs.timestamps.Timestamp):
-                        start_date = pd.to_datetime(start_date)  
-                    if not isinstance(end_date, pd._libs.tslibs.timestamps.Timestamp):
-                        end_date = pd.to_datetime(end_date)
-
-                    # compare and get wider range
-                    if start_date < timeseries_start_date:
-                        timeseries_start_date = start_date
-                    if end_date > timeseries_end_date:
-                        timeseries_end_date = end_date             
-
-                # get steps for all data labels
-                steps = pd.date_range(timeseries_start_date, timeseries_end_date, 
-                                      freq=self.read_instance.active_frequency_code)
-
-                # get number of months and days
-                n_months = (12*(timeseries_end_date.year - timeseries_start_date.year) + (timeseries_end_date.month - 
-                                                                                          timeseries_start_date.month))
-                n_days = (timeseries_end_date - timeseries_start_date).days
-
-                # get months that are complete
-                months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
-                months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
-                if months_start.size > 1:
-                    if (timeseries_end_date - months_end[-1]).days >= 1:
-                        months = months_start[:-1]
-                    else:
-                        months = months_start
-                else:
-                    months = months_start
-
-                # show hours if number of days is less than 7
-                if n_days < 7:
-                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
-                else:
-                    relevant_axis.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
-
-                # define time slices
-                if n_months >= 3:
-                    steps = months
-                slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
-
-                # use default axes if the number of timesteps is lower than the number of slices
-                if slices >= 1:
-                    xticks = steps[0::slices]
-                else:
-                    xticks = relevant_axis.xaxis.get_ticks()
-
-                # transform to numpy.datetime64
-                if not isinstance(xticks[0], np.datetime64):
-                    xticks = [x.to_datetime64() for x in xticks]
-                if not isinstance(timeseries_end_date, np.datetime64):
-                    timeseries_end_date = timeseries_end_date.to_datetime64()
-
-                # add last step to xticks
-                if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != timeseries_end_date):
-                    xticks = np.append(xticks, timeseries_end_date)
-
-                # set xticks
-                relevant_axis.xaxis.set_ticks(xticks)
-
+        
     def make_periodic(self, relevant_axis, networkspeci, data_label, plot_characteristics, zstat=None, plot_options=[],
                       first_data_label=False):
         """Make period or period-violin plot
@@ -1746,7 +1660,69 @@ class Plot:
 
             # set xlim
             if xlim is not None:
-                ax.set_xlim(xlim)
+                if base_plot_type == 'timeseries':
+                    if plot_characteristics['xtick_alteration']['define']:
+                        
+                        # transform xlim from numbers to dates
+                        timeseries_start_date = num2date(xlim[0])
+                        timeseries_end_date = num2date(xlim[1])
+
+                        # get steps for all data labels
+                        steps = pd.date_range(timeseries_start_date, timeseries_end_date, 
+                                            freq=self.read_instance.active_frequency_code)
+
+                        # get number of months and days
+                        n_months = (12*(timeseries_end_date.year - timeseries_start_date.year) + (timeseries_end_date.month - 
+                                                                                                  timeseries_start_date.month))
+                        n_days = (timeseries_end_date - timeseries_start_date).days
+
+                        # get months that are complete
+                        months_start = pd.date_range(timeseries_start_date, timeseries_end_date, freq='MS')
+                        months_end = pd.date_range(timeseries_start_date, timeseries_end_date, freq='M')
+                        if months_start.size > 1:
+                            if (timeseries_end_date - months_end[-1]).days >= 1:
+                                months = months_start[:-1]
+                            else:
+                                months = months_start
+                        else:
+                            months = months_start
+
+                        # show hours if number of days is less than 7
+                        if n_days < 7:
+                            ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+                        else:
+                            ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
+
+                        # define time slices
+                        if n_months >= 3:
+                            steps = months
+                        slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
+
+                        # use default axes if the number of timesteps is lower than the number of slices
+                        if slices >= 1:
+                            xticks = steps[0::slices]
+                        else:
+                            xticks = ax.xaxis.get_ticks()
+
+                        # transform to numpy.datetime64
+                        if not isinstance(xticks[0], np.datetime64):
+                            xticks = [x.to_datetime64() for x in xticks]
+                        if not isinstance(timeseries_end_date, np.datetime64):
+                            timeseries_end_date = np.datetime64(timeseries_end_date)
+
+                        # add last step to xticks
+                        if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != timeseries_end_date):
+                            xticks = np.append(xticks, timeseries_end_date)
+
+                        # set modified xticks
+                        ax.xaxis.set_ticks(xticks)
+                    
+                    else:
+                        # set default xticks
+                        ax.set_xlim(xlim)
+
+                else:
+                    ax.set_xlim(xlim)
 
             # get ylim
             if ylim is None and ('ylim' not in plot_characteristics):
