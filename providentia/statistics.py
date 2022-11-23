@@ -86,17 +86,17 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                 if read_instance.offline:
                     # get valid station indices
                     if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                        station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
+                        read_instance.station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label]
                     else:
-                        station_inds = read_instance.valid_station_inds[networkspeci][data_label]
+                        read_instance.station_inds = read_instance.valid_station_inds[networkspeci][data_label]
                 
                 # dashboard
                 else:
                     # get valid station indices
                     if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                        station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
+                        read_instance.station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
                     else:
-                        station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
+                        read_instance.station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
                 
                 # get array for specific data label
                 data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:])
@@ -104,7 +104,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                 if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                     data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
                 # cut data array for station indices
-                data_array = data_array[station_inds,:]
+                data_array = data_array[read_instance.station_inds,:]
                     
             # if data array has no valid data for selected stations, do not create a pandas dataframe
             # data array has valid data and is not all nan?
