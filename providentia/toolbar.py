@@ -15,7 +15,7 @@ from providentia import aux
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 class NavigationToolbar(NavigationToolbar2QT):
-    """Define class that updates available buttons on matplotlib toolbar"""
+    """ Class that updates available buttons on matplotlib toolbar. """
     
     def __init__(self, read_instance=None, canvas_instance=None):
 
@@ -46,9 +46,10 @@ class NavigationToolbar(NavigationToolbar2QT):
         self._actions['save_figure'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         
     def save_data(self):
-        """Pops window for choosing directory, filename and type
-        for saving data, metadata and configuration.
-        Available filetypes: Numpy file: .npz, netCDF: .nc"""
+        """ Pop window for choosing directory, filename and type
+            for saving data, metadata and configuration.
+            Available filetypes: Numpy file: .npz, netCDF: .nc. 
+        """
 
         filetypes = {'NetCDF': 'nc', 'Numpy file': 'npz', 'Configuration': 'conf'}
         sorted_filetypes = sorted(filetypes.items())
@@ -60,12 +61,13 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         filter_ext = ['%s (%s)' % (name, '*.%s' % ext) for name, ext in sorted_filetypes]
         filter_ext = ';;'.join(filter_ext)
+        
         # prompt with file name and extension
         fname, fext = qt_compat._getSaveFileName(None, "Choose a filename to save to", start, filter_ext)
         chose_npz = "npz" in fext
         chose_conf = "conf" in fext
         if fname:
-            # Save dir for next time, unless empty str (i.e., use cwd).
+            # save dir for next time, unless empty str (i.e., use cwd).
             if startpath != "":
                 matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
                 try:
@@ -82,9 +84,10 @@ class NavigationToolbar(NavigationToolbar2QT):
                                                    QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
 
     def conf_dialogs(self):
-        """Pops window for selecting configuration file. If file selcted, pops an
-        input dialog for the user to select which section wants to load. Calls
-        reload_conf to reset the fields"""
+        """ Pop window for selecting configuration file. If file selcted, pops an
+            input dialog for the user to select which section wants to load. Calls
+            reload_conf to reset the fields.
+        """
 
         conf_to_load = self.filename_dialog()
         
@@ -109,7 +112,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                                            str(e), QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
 
     def filename_dialog(self):
-        "Open dialog to choose configuration file."
+        """" Open dialog to choose configuration file. """
 
         options =  QtWidgets.QFileDialog.Options()
         options |=  QtWidgets.QFileDialog.DontUseNativeDialog
@@ -119,8 +122,9 @@ class NavigationToolbar(NavigationToolbar2QT):
             return filename
 
     def reload_conf(self, section, fpath):
-        """Resets previous selections, fills values according to new conf file,
-        reads and filters."""
+        """ Reset previous selections, fills values according to new conf file,
+            reads and filters.
+        """
 
         # delete current active config attributes
         for k in self.read_instance.current_config:

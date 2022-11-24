@@ -32,7 +32,7 @@ basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
-    """Define class that generates Providentia dashboard"""
+    """ Class that generates Providentia dashboard. """
 
     # create signals that are fired upon resizing/moving of main Providentia window
     resized = QtCore.pyqtSignal()
@@ -103,7 +103,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # load dictionary with non-GHOST esarchive files to read
         nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, 'conf/nonghost_files.json')))
-        # and merge to existing GHOST observational data dict if we have the path
+        # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
             self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
@@ -111,7 +111,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # initialise DataReader
         self.datareader = DataReader(self)
 
-        #initialise UI
+        # initialise UI
         self.init_ui(**kwargs)
 
         # setup callback events upon resizing/moving of Providentia window
@@ -119,17 +119,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.move.connect(self.get_geometry)
 
     def resizeEvent(self, event):
-        """Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry"""
+        """ Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry. """
+        
         self.resized.emit()
+        
         return super(ProvidentiaMainWindow, self).resizeEvent(event)
 
     def moveEvent(self, event):
-        """Function to overwrite default PyQt5 moveEvent function --> for calling get_geometry"""
+        """ Function to overwrite default PyQt5 moveEvent function --> for calling get_geometry. """
+        
         self.move.emit()
+        
         return super(ProvidentiaMainWindow, self).moveEvent(event)
 
     def get_geometry(self):
-        """Get current geometry of main Providentia window and buttons"""
+        """ Get current geometry of main Providentia window and buttons. """
 
         # get geometry of main window
         self.main_window_geometry = copy.deepcopy(self.geometry())
@@ -138,7 +142,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.update_buttons_geometry()
 
     def update_buttons_geometry(self):
-        """Update current geometry of buttons"""
+        """ Update current geometry of buttons. """
         
         for i, position in enumerate([self.position_1, self.position_2, self.position_3, 
                                       self.position_4, self.position_5]):
@@ -184,7 +188,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     continue
 
     def init_ui(self, **kwargs):
-        """Initialise user interface"""
+        """ Initialise user interface. """
 
         print("Starting Providentia dashboard...")
 
@@ -500,11 +504,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.showMaximized()
 
     def generate_pop_up_window(self, menu_root):
-        """Generate pop up window"""
+        """ Generate pop up window. """
+        
         self.pop_up_window = PopUpWindow(menu_root, [], self.main_window_geometry)
 
     def update_configuration_bar_fields(self):
-        """Define function that initialises/updates configuration bar fields"""
+        """ Function that initialises/updates configuration bar fields. """
 
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
@@ -636,7 +641,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.block_config_bar_handling_updates = False
 
     def update_layout_fields(self):
-        """Define function which updates layout fields"""
+        """ Function which updates layout fields. """
 
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
@@ -701,7 +706,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.block_config_bar_handling_updates = False
 
     def handle_config_bar_params_change(self, changed_param):
-        """Define function which handles interactive updates of combo box fields"""
+        """ Function which handles interactive updates of combo box fields. """
 
         if (changed_param != '') & (not self.block_config_bar_handling_updates):
 
@@ -731,7 +736,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.update_configuration_bar_fields()
 
     def handle_layout_update(self, changed_plot_type):
-        """Define function which handles update of layout"""
+        """ Function which handles update of layout. """
         
         if (changed_plot_type != '') & (not self.block_config_bar_handling_updates):
             
@@ -824,6 +829,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         return None
 
     def update_plot_axis(self, canvas_instance, changed_position, changed_plot_type):
+        """ Update plot axis position from layout options."""
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
@@ -900,8 +906,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.handle_periodic_statistic_update()
 
     def handle_data_selection_update(self):
-        """Define function which handles update of data selection
-        and MPL canvas upon pressing of READ button
+        """ Function which handles update of data selection
+            and MPL canvas upon pressing of READ button.
         """
 
         # if have no data to read, then do not read any data
@@ -914,7 +920,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
         
-        #set previous active variables
+        # set previous active variables
         self.previous_start_date = self.start_date
         self.previous_end_date = self.end_date
         self.previous_network = self.network
@@ -926,7 +932,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_data_labels = self.data_labels
         self.previous_filter_species = {}
         
-        #set new active variables as selected variables from menu
+        # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
         self.end_date = int(self.le_end_date.text())
         self.network = [self.selected_network]
@@ -939,6 +945,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspeci = '{}|{}'.format(self.network[0],self.species[0])
         self.networkspecies = [self.networkspeci]
         self.data_labels = ['observations'] + list(self.experiments.keys())
+        
         # upddate filter_species here with contents of filter_species pop-up menu
         #self.filter_species = 
 
@@ -948,7 +955,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.filter_species = {} 
             print('Warning: "spatial_colocation" must be set to True if wanting to use "filter_species" option.')
 
-        #set read operations to be empty list initially
+        # set read operations to be empty list initially
         read_operations = []
 
         # if first read then need to read all data
@@ -1051,7 +1058,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             aux.update_period_fields(self)
             aux.update_metadata_fields(self)
             
-            #update relevant temporal resolutions 
+            # update relevant temporal resolutions 
             self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
 
         # if species has changed, or first read, update species specific lower/upper limits
@@ -1107,11 +1114,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if self.ch_colocate.checkState() == QtCore.Qt.Checked:
                 self.mpl_canvas.handle_temporal_colocate_update()
 
-        # Restore mouse cursor to normal
+        # restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 
     def reset_options(self):
-        """Resets all filter fields to initial values"""
+        """ Reset all filter fields to initial values. """
 
         if self.block_MPL_canvas_updates:
             return
@@ -1146,7 +1153,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         QtWidgets.QApplication.restoreOverrideCursor()
 
     def disable_ghost_buttons(self):
-        """Disable button related only to ghost data"""
+        """ Disable button related only to ghost data. """
         
         # change background-color to indicate that it's nonusable
         self.bu_flags.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
@@ -1159,7 +1166,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_period.setEnabled(False)
         
     def enable_ghost_buttons(self):
-        """Enable button related only to ghost data"""
+        """ Enable button related only to ghost data. """
 
         # enable buttons        
         self.bu_flags.setEnabled(True)
@@ -1168,7 +1175,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
 # generate Providentia dashboard
 def main(**kwargs):
-    """Main function"""
+    """ Main function. """
+    
     q_app = QtWidgets.QApplication(sys.argv)
     q_app.setStyle("Fusion")
     ProvidentiaMainWindow(**kwargs)

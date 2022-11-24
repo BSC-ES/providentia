@@ -22,26 +22,26 @@ expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_
 
 def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, 
                         station_index=False, data_range_min=False, data_range_max=False):
-    """Function that takes data in memory puts it in a pandas dataframe, per network / species, per data label.
-    For summary plots this involves take the median timeseries across the timeseries.
-    For station plots it is just the station in question.
-    Also temporally aggregate selected data dataframes (by hour, day of week, month),
-    and if have some experiment data associated with selected stations, calculate
-    temporally aggregated basic statistic differences and bias statistics between
-    observations and experiment data arrays.
+    """ Function that takes data in memory puts it in a pandas dataframe, per network / species, per data label.
+        For summary plots this involves take the median timeseries across the timeseries.
+        For station plots it is just the station in question.
+        Also temporally aggregate selected data dataframes (by hour, day of week, month),
+        and if have some experiment data associated with selected stations, calculate
+        temporally aggregated basic statistic differences and bias statistics between
+        observations and experiment data arrays.
 
-    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-    :type read_instance: object
-    :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
-    :type canvas_instance: object
-    :param networkspecies: List of networkspeci strings
-    :type networkspecies: list
-    :param station_index: Indices of stations to keep per network/species
-    :type station_index: list
-    :param data_range_min: current minimum of data range per networkspecies
-    :type data_range_min: dict
-    :param data_range_max: current maximum of data range per networkspecies
-    :type data_range_max: dict
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type read_instance: object
+        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :type canvas_instance: object
+        :param networkspecies: List of networkspeci strings
+        :type networkspecies: list
+        :param station_index: Indices of stations to keep per network/species
+        :type station_index: list
+        :param data_range_min: current minimum of data range per networkspecies
+        :type data_range_min: dict
+        :param data_range_max: current maximum of data range per networkspecies
+        :type data_range_max: dict
     """
 
     # create new dictionary to store selection station data by network / species, per data label
@@ -146,16 +146,16 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
             calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_instance, networkspeci)
             
 def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
-    """Function that aggregates pandas dataframe data, for all data arrays,
-    into desired temporal groupings also calculates all defined basic
-    statistics for each individual temporal grouping
+    """ Function that aggregates pandas dataframe data, for all data arrays,
+        into desired temporal groupings also calculates all defined basic
+        statistics for each individual temporal grouping.
 
-    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-    :type read_instance: object
-    :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-    :type canvas_instance: object
-    :param networkspeci: name of networkspeci str
-    :type networkspeci: str
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type read_instance: object
+        :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type canvas_instance: object
+        :param networkspeci: name of networkspeci str
+        :type networkspeci: str
     """
 
     # define statistics to calculate (all basic statistics)
@@ -233,16 +233,16 @@ def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
                 canvas_instance.selected_station_data[networkspeci][data_label][temporal_aggregation_resolution][stat] = stat_output_by_group
 
 def calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_instance, networkspeci):
-    """Function that calculates temporally aggregated basic statistic
-    differences and bias statistics between observations and experiment
-    data arrays
+    """ Function that calculates temporally aggregated basic statistic
+        differences and bias statistics between observations and experiment
+        data arrays.
 
-    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-    :type read_instance: object
-    :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-    :type canvas_instance: object
-    :param networkspeci: name of networkspeci str
-    :type networkspeci: str
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type read_instance: object
+        :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type canvas_instance: object
+        :param networkspeci: name of networkspeci str
+        :type networkspeci: str
     """
 
     # define all basic statistics that will be subtracted
@@ -325,20 +325,20 @@ def calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_i
                             '{}'.format(bias_stat)] = stat_output_by_group
 
 def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
-    """Function that calculates selected statistic across stations for map plots.
+    """ Function that calculates selected statistic across stations for map plots.
     
-    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-    :type read_instance: object
-    :param z1: name of first data array to plot
-    :type z1: str
-    :param z2: name of second data array to plot in case of bias plots (empty str if plot is absolute)
-    :type z2: str
-    :param zstat: name of statistic
-    :type zstat: str
-    :param networkspeci: name of networkspeci str
-    :type networkspeci: str
-    :return: calculated map statistic and active station indices on map
-    :rtype: np.float32, np.int
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type read_instance: object
+        :param z1: name of first data array to plot
+        :type z1: str
+        :param z2: name of second data array to plot in case of bias plots (empty str if plot is absolute)
+        :type z2: str
+        :param zstat: name of statistic
+        :type zstat: str
+        :param networkspeci: name of networkspeci str
+        :type networkspeci: str
+        :return: calculated map statistic and active station indices on map
+        :rtype: np.float32, np.int
     """
 
     # check if have valid station data first
@@ -473,12 +473,12 @@ def calculate_z_statistic(read_instance, z1, z2, zstat, networkspeci):
     return z_statistic, active_map_valid_station_inds
 
 def get_axes_vminmax(axs):
-    """Function that get minimum and maximum of plotted data across relevant axes
+    """ Function that get minimum and maximum of plotted data across relevant axes.
 
-    :param axs: list of relevant axes
-    :type axs: list
-    :return: minimum plotted value, maximum plotted value
-    :rtype: np.float32, np.float32
+        :param axs: list of relevant axes
+        :type axs: list
+        :return: minimum plotted value, maximum plotted value
+        :rtype: np.float32, np.float32
     """
 
     # get axes plotted vmin/vmax
@@ -497,25 +497,25 @@ def get_axes_vminmax(axs):
     return plotted_min, plotted_max
 
 def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci):
-    """Function that generates neccessary detail to crate colourbar.
+    """ Function that generates neccessary detail to crate colourbar.
 
-    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-    :type read_instance: object
-    :param zstat: name of statistic
-    :type zstat: str
-    :param plotted_min: minimum plotted value
-    :type plotted_min: np.float32
-    :param plotted_max: maximum plotted value
-    :type plotted_max: np.float32
-    :param plot_characteristics: dictionary of plot characteristics
-    :type plot_characteristics: dict
-    :param speci: speci to plot
-    :type speci: str
-    :return: cbar min, cbar max, cbar label, cbar cmap
-    :rtype: np.float32, np.float32, str, str
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type read_instance: object
+        :param zstat: name of statistic
+        :type zstat: str
+        :param plotted_min: minimum plotted value
+        :type plotted_min: np.float32
+        :param plotted_max: maximum plotted value
+        :type plotted_max: np.float32
+        :param plot_characteristics: dictionary of plot characteristics
+        :type plot_characteristics: dict
+        :param speci: speci to plot
+        :type speci: str
+        :return: cbar min, cbar max, cbar label, cbar cmap
+        :rtype: np.float32, np.float32, str, str
     """
 
-    #get zstat information
+    # get zstat information
     zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
 
     # get dictionary containing necessary information for calculation of selected statistic
@@ -530,6 +530,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     # generate z colourbar label
     # first check if have defined label (in this order: 1. configuration file 2. specific for z statistic)
     set_label = False
+
     #1. check configuration file
     if 'cb_label' in plot_characteristics:
         if plot_characteristics['cb_label']['label'] != '':
@@ -624,20 +625,20 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     return z_vmin, z_vmax, z_label, z_colourmap
 
 def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci):
-    """Function that generates colourbar.
+    """ Function that generates colourbar.
 
-    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-    :type read_instance: object
-    :param axs: list of relevant axes
-    :type axs: list
-    :param cb_axs: list of relevant colourbar axes
-    :type cb_axs: list
-    :param zstat: name of statistic
-    :type zstat: str    
-    :param plot_characteristics: dictionary of plot characteristics
-    :type plot_characteristics: dict
-    :param speci: speci to plot
-    :type speci: str
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type read_instance: object
+        :param axs: list of relevant axes
+        :type axs: list
+        :param cb_axs: list of relevant colourbar axes
+        :type cb_axs: list
+        :param zstat: name of statistic
+        :type zstat: str    
+        :param plot_characteristics: dictionary of plot characteristics
+        :type plot_characteristics: dict
+        :param speci: speci to plot
+        :type speci: str
     """
 
     # get plotted vmin and vmax over relevant axes
@@ -700,15 +701,14 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
                 collection.set_cmap(cmap=cmap)
 
 def get_z_statistic_comboboxes(base_zstat, second_data_label=''):
-    """Function that gets appropriate zstat name for selected zstatistic comboboxes 
+    """ Function that gets appropriate zstat name for selected zstatistic comboboxes.
 
-    :param base_zstat: name of statistic
-    :type base_zstat: str   
-    :param second_data_label: name if secondary data label (if exists)
-    :type second_data_label: str
-
-    :return: zstat name
-    :rtype: str
+        :param base_zstat: name of statistic
+        :type base_zstat: str   
+        :param second_data_label: name if secondary data label (if exists)
+        :type second_data_label: str
+        :return: zstat name
+        :rtype: str
     """
     
     # get zstat sign 
@@ -727,12 +727,12 @@ def get_z_statistic_comboboxes(base_zstat, second_data_label=''):
     return zstat
 
 def get_z_statistic_type(zstat):
-    """Function that checks if the z statistic is basic or expbias statistic
+    """ Function that checks if the z statistic is basic or expbias statistic.
     
-    :param zstat: name of statistic
-    :type zstat: str   
-    :return: zstat type
-    :rtype: str
+        :param zstat: name of statistic
+        :type zstat: str   
+        :return: zstat type
+        :rtype: str
     """
 
     # check if the chosen statistic is a basic statistic
@@ -743,14 +743,14 @@ def get_z_statistic_type(zstat):
         return 'expbias'
 
 def get_z_statistic_sign(zstat, zstat_type):
-    """Function that checks if the z statistic is an absolute or bias statistic
+    """ Function that checks if the z statistic is an absolute or bias statistic.
 
-    :param zstat: name of statistic
-    :type zstat: str   
-    :param zstat_type: type of statistic
-    :type zstat_type: str   
-    :return: zstat sign
-    :rtype: str
+        :param zstat: name of statistic
+        :type zstat: str   
+        :param zstat_type: type of statistic
+        :type zstat_type: str   
+        :return: zstat sign
+        :rtype: str
     """
 
     # statistic is bias?
@@ -761,14 +761,15 @@ def get_z_statistic_sign(zstat, zstat_type):
         return 'absolute'
 
 def get_z_statistic_info(plot_type=None, zstat=None):
-    """Get z statistic name, type (basic or expbias), sign (absolute or bias), base name (dropping '_bias' suffix) from plot_type (or known zstat name)
+    """ Get z statistic name, type (basic or expbias), sign (absolute or bias), 
+        base name (dropping '_bias' suffix) from plot_type (or known zstat name).
     
-    :param plot_type: plot type
-    :type plot_type: str
-    :param zstat: name of statistic
-    :type plot_type: str
-    :return zstat name, base zstat name, zstat type, zstst sign
-    :rtype: str, str, str, str
+        :param plot_type: plot type
+        :type plot_type: str
+        :param zstat: name of statistic
+        :type plot_type: str
+        :return zstat name, base zstat name, zstat type, zstst sign
+        :rtype: str, str, str, str
     """
 
     # have plot_type? Therefore need to extract zstat from plot_type name (if available)

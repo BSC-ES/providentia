@@ -9,9 +9,7 @@ from PyQt5 import QtWidgets
 from providentia import aux
 
 class DataFilter:
-    """
-    "Class that filters observational/experiment data into memory as required."
-    """
+    """ Class that filters observational/experiment data into memory as required. """
 
     def __init__(self, read_instance):
         self.read_instance = read_instance
@@ -25,11 +23,12 @@ class DataFilter:
                 self.weekday_weekend_index = self.read_instance.ghost_data_vars_to_read.index('weekday_weekend_code')
             self.season_index = self.read_instance.ghost_data_vars_to_read.index('season_code')
 
-        #apply filtering
+        # apply filtering
         self.filter_all()
 
     def filter_all(self):
-        # call methods to start filtering
+        """ Call methods to start filtering. """
+
         self.reset_data_filter()
         self.filter_by_species()
         self.filter_data_limits()
@@ -40,7 +39,7 @@ class DataFilter:
         self.get_valid_stations_after_filtering()
 
     def reset_data_filter(self):
-        """Resets data arrays to be un-filtered"""
+        """ Resets data arrays to be un-filtered"""
 
         self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
         self.read_instance.temporal_colocation_nans = {}
@@ -48,11 +47,11 @@ class DataFilter:
         self.read_instance.valid_station_inds_temporal_colocation = {}
 
     def filter_by_species(self):
-        """Define function which filters read species by other species.
-           For N other species a lower and upper limit are set. 
-           Where values for each species are outside of these ranges,
-           then impose NaNs upon all read species in memory.
-           Only filter if spatial colocation is True.
+        """ Function which filters read species by other species.
+            For N other species a lower and upper limit are set. 
+            Where values for each species are outside of these ranges,
+            then impose NaNs upon all read species in memory.
+            Only filter if spatial colocation is True.
         """
 
         # filter all read species by set species ranges
@@ -85,7 +84,7 @@ class DataFilter:
                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = np.NaN       
 
     def filter_data_limits(self):
-        """Filter out (set to NaN) data which exceed the lower/upper limits"""
+        """ Filter out (set to NaN) data which exceed the lower/upper limits. """
 
         # iterate through networkspecies  
         for networkspeci in self.read_instance.networkspecies:
@@ -116,7 +115,7 @@ class DataFilter:
             self.read_instance.data_in_memory_filtered[networkspeci][inds_out_of_bounds] = np.NaN
 
     def filter_by_period(self):
-        """Filters data for selected periods (keeping or removing data, as defined)"""
+        """ Filter data for selected periods (keeping or removing data, as defined). """
 
         keeps, removes = [], []
         if self.read_instance.offline:
@@ -208,7 +207,7 @@ class DataFilter:
                     self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
     def filter_by_data_availability(self):
-        """Function which filters data by selected data availability variables"""
+        """ Function which filters data by selected data availability variables. """
 
         # get set variables names representing percentage data availability (native and non-native)
         active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['map_vars']
@@ -296,7 +295,7 @@ class DataFilter:
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
 
     def filter_by_metadata(self):
-        """Filters data by selected metadata"""
+        """ Filter data by selected metadata. """
 
         # validate fields before filtering
         if not self.validate_values():
@@ -380,7 +379,7 @@ class DataFilter:
                             self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_nan] = np.NaN
 
     def validate_values(self):
-        """Validates that field inserted by user is float"""
+        """ Validate that field inserted by user is float. """
 
         # iterate through metadata in memory
         for meta_var in self.read_instance.metadata_vars_to_read:
@@ -409,10 +408,10 @@ class DataFilter:
                     return False
 
     def temporally_colocate_data(self):
-        """Define function which temporally colocates observational and experiment data.
-           This is done across all networks / species if spatial colocation is active,
-           otherwise it is done inderpendently per network / species
-           This in reality means storing the indices for the temporal colocation.
+        """ Function which temporally colocates observational and experiment data.
+            This is done across all networks / species if spatial colocation is active,
+            otherwise it is done inderpendently per network / species
+            This in reality means storing the indices for the temporal colocation.
         """
 
         # if do not have any experiment data loaded, no colocation is possible.
@@ -470,9 +469,9 @@ class DataFilter:
                     self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
 
     def get_valid_stations_after_filtering(self):
-        """Get valid station indices after all filtering has been performed.
-           These are saved in a dictionary per network/species, per data label. 
-           There is an mirror dictionary saved for the temporally colocated version of the data. 
+        """ Get valid station indices after all filtering has been performed.
+            These are saved in a dictionary per network/species, per data label. 
+            There is an mirror dictionary saved for the temporally colocated version of the data. 
         """
 
         # iterate through networkspecies  

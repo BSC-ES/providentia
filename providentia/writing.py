@@ -9,7 +9,7 @@ from .configuration import write_conf
 
 
 def export_data_npz(canvas_instance, fname):
-    """Function that writes out current data / ghost data / metadata in memory to .npy file"""
+    """ Function that writes out current data / ghost data / metadata in memory to .npy file. """
 
     # create dict to save data
     save_data_dict = {}
@@ -38,9 +38,9 @@ def export_data_npz(canvas_instance, fname):
     np.savez(fname, **save_data_dict)
 
 def export_netcdf(canvas_instance, fname):
-    """Write data and metadata to netcdf file"""
+    """ Write data and metadata to netcdf file. """
 
-    #set up some structural variables
+    # set up some structural variables
     read_instance = canvas_instance.read_instance
     sys.path.append('/gpfs/projects/bsc32/AC_cache/obs/ghost/GHOST_standards/{}'
                     .format(read_instance.ghost_version))
@@ -68,6 +68,7 @@ def export_netcdf(canvas_instance, fname):
     fout.createDimension('station', None)
     fout.createDimension('time', len(read_instance.time_array))
     fout.createDimension('month', len(read_instance.yearmonths))
+    
     # create dimensions only for GHOST case
     if read_instance.reading_ghost:
         fout.createDimension('ghost_data_variable', len(read_instance.ghost_data_vars_to_read))
@@ -75,7 +76,7 @@ def export_netcdf(canvas_instance, fname):
     # iterate through networkspecies 
     for speci_ii, networkspeci in enumerate(read_instance.networkspecies):
 
-        #get network / species
+        # get network / species
         network = networkspeci.split('|')[0]
         speci = networkspeci.split('|')[1]
 
@@ -146,7 +147,7 @@ def export_netcdf(canvas_instance, fname):
             var.ghost_version = str(read_instance.ghost_version)
         var[:] = read_instance.data_in_memory[networkspeci]
         
-        # ghost data
+        # GHOST data
         if read_instance.reading_ghost:
             var = fout.createVariable('{}_ghost_data'.format(networkspeci), 'f4', 
                                       ('ghost_data_variable', 'station', 'time',))
@@ -179,18 +180,15 @@ def export_netcdf(canvas_instance, fname):
     fout.close()
 
 def export_configuration(prv, cname, separator="||"):
-    """
-    Create all items to be written in configuration file
-    and send them to write_conf
+    """ Create all items to be written in configuration file
+        and send them to write_conf.
 
-    :prv: Instance of providentia main window
-    :type prv: instance of ProvidentiaMainWindow
-
-    :cname: Name for the configuration file
-    :type cname:
-
-    :separator: delimiter for keep/remove fields
-    :type separator: str
+        :prv: Instance of providentia main window
+        :type prv: instance of ProvidentiaMainWindow
+        :cname: Name for the configuration file
+        :type cname:
+        :separator: delimiter for keep/remove fields
+        :type separator: str
     """
 
     # set section and subsection names in config file
