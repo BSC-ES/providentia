@@ -831,9 +831,9 @@ class ProvidentiaOffline:
                     except:
                         pass
 
-        # update variable to keep track if have setup summary plot geometry yet for a subsection
-        if made_networkspeci_summary_plots:
-            summary_plot_geometry_setup = True
+            # update variable to keep track if have setup summary plot geometry yet for a subsection
+            if made_networkspeci_summary_plots:
+                summary_plot_geometry_setup = True
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """Function that calls making of any type of plot"""
@@ -895,7 +895,7 @@ class ProvidentiaOffline:
                 axis_ind = (self.current_plot_ind * len(self.subsections)) + self.subsection_ind
                 relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, 
                                                                                      plot_type, axis_ind)
-                
+
                 # set axis title
                 if relevant_axis.get_title() == '':
                     if self.n_stations == 1:
