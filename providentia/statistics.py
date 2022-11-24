@@ -540,18 +540,18 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     if not set_label:
         if z_statistic_sign == 'absolute':
             if label_units != '':
-                z_label = '{} ({})'.format(stats_dict['label'], label_units)
+                z_label = '{} [{}]'.format(stats_dict['label'], label_units)
             else:
                 z_label = copy.deepcopy(stats_dict['label'])
         else:
             if z_statistic_type == 'basic':
                 if label_units != '':
-                    z_label = '{} bias ({})'.format(stats_dict['label'], label_units)
+                    z_label = '{} bias [{}]'.format(stats_dict['label'], label_units)
                 else:
                     z_label = '{} bias'.format(stats_dict['label'])
             else:
                 if label_units != '':
-                    z_label = '{} ({})'.format(stats_dict['label'], label_units)
+                    z_label = '{} [{}]'.format(stats_dict['label'], label_units)
                 else:
                     z_label = copy.deepcopy(stats_dict['label'])        
 
