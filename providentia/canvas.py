@@ -38,12 +38,12 @@ basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
 class MPLCanvas(FigureCanvas):
-    """Class that handles the creation and updates of
-    a matplotlib canvas, and associated subplots
+    """ Class that handles the creation and updates of
+        a matplotlib canvas, and associated subplots.
     """
 
     def __init__(self, read_instance):
-        """Initialise the MPL canvas"""
+        """ Initialise the MPL canvas. """
 
         # create figure and canvas objects
         self.figure = Figure(dpi=100)
@@ -154,8 +154,8 @@ class MPLCanvas(FigureCanvas):
             self.remove_axis_elements(ax, plot_type)
 
     def update_MPL_canvas(self):
-        """Function that updates MPL canvas upon clicking
-        the 'READ' button, and when colocating data
+        """ Function that updates MPL canvas upon clicking
+            the 'READ' button, and when colocating data.
         """
 
         # clear and then hide all axes 
@@ -191,8 +191,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def reset_ax_navigation_toolbar_stack(self, ax):
-        """Function which resets the navigation toolbar stack
-        for a given axis with the current view limits"""
+        """ Function which resets the navigation toolbar stack
+            for a given axis with the current view limits.
+        """
 
         # get appropriate axes for nested axes
         axs_to_reset = []
@@ -226,7 +227,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def handle_data_filter_update(self):
-        """Function which handles updates of data filtering"""
+        """ Function which handles updates of data filtering. """
 
         # return if nothing has been loaded yet
         if not hasattr(self.read_instance, 'data_in_memory'):
@@ -243,7 +244,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_active_map(self):
-        """Function that updates plotted map z statistic and updates associated plots"""
+        """ Function that updates plotted map z statistic and updates associated plots. """
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -261,8 +262,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def handle_temporal_colocate_update(self):
-        """Function that handles the update of the MPL canvas
-        with colocated data upon checking of the temporal colocate checkbox"""
+        """ Function that handles the update of the MPL canvas
+            with colocated data upon checking of the temporal colocate checkbox.
+        """
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -301,7 +303,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_map_z_statistic(self):
-        """Function that updates plotted z statistic on map, with colourbar"""
+        """ Function that updates plotted z statistic on map, with colourbar. """
 
         # remove axis elements from map/cb
         self.remove_axis_elements(self.plot_axes['map'], 'map')
@@ -312,12 +314,11 @@ class MPLCanvas(FigureCanvas):
         zstat = get_z_statistic_comboboxes(base_zstat, second_data_label=self.read_instance.cb_z2.currentText())
 
         # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
-        self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(
-                                                              self.read_instance, 
-                                                              self.read_instance.cb_z1.currentText(), 
-                                                              self.read_instance.cb_z2.currentText(), 
-                                                              zstat, 
-                                                              self.read_instance.networkspeci)
+        self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(self.read_instance, 
+                                                                                self.read_instance.cb_z1.currentText(), 
+                                                                                self.read_instance.cb_z2.currentText(), 
+                                                                                zstat, 
+                                                                                self.read_instance.networkspeci)
         self.active_map_valid_station_inds = active_map_valid_station_inds 
         
         # update absolute selected plotted station indices with respect to new active map valid station indices
@@ -330,12 +331,14 @@ class MPLCanvas(FigureCanvas):
         # selected station indices to be empty lists
         # also uncheck select all/intersect/extent checkboxes
         if len(self.active_map_valid_station_inds) == 0:
+
             # unselect all/intersect/extent checkboxes
             self.read_instance.block_MPL_canvas_updates = True
             self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
             self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
             self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
             self.read_instance.block_MPL_canvas_updates = False
+
             # clear previously selected relative/absolute station indices
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
             self.relative_selected_station_inds = np.array([], dtype=np.int)
@@ -354,12 +357,14 @@ class MPLCanvas(FigureCanvas):
             # valid station indices --> unselect selected stations (and associated plots)
             # also uncheck select all/intersect/extent checkboxes
             if not np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)):
+                
                 # unselect all/intersect/extent checkboxes
                 self.read_instance.block_MPL_canvas_updates = True
                 self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.block_MPL_canvas_updates = False
+                
                 # reset relative/absolute selected station indices to be empty lists
                 self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
                 self.relative_selected_station_inds = np.array([], dtype=np.int)
@@ -396,7 +401,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_map_station_selection(self):
-        """Function that updates the visual selection of stations on map"""
+        """ Function that updates the visual selection of stations on map. """
 
         # update map title
         if len(self.relative_selected_station_inds) == 1:
@@ -410,21 +415,29 @@ class MPLCanvas(FigureCanvas):
 
         # reset alphas and marker sizes of stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
+            
             # set markersize of all stations (initally assuming zero stations are selected)
             markersizes = np.full(len(self.active_map_valid_station_inds), self.plot_characteristics['map']['marker_zero_stations_selected']['s'])
+            
             for collection in self.plot_axes['map'].collections:
                 if isinstance(collection, matplotlib.collections.PathCollection):
+                    
                     rgba_tuples = collection.get_facecolor()
+                    
                     # set alpha of all stations (initally assuming zero stations are selected)
                     rgba_tuples[:, -1] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']
+                    
                     # have selected stations?
                     if len(self.relative_selected_station_inds) > 0:
+                        
                         # update markersize and alphas of non-selected stations
                         markersizes[self.absolute_non_selected_station_inds] = self.plot_characteristics['map']['marker_unselected']['s']
                         rgba_tuples[self.absolute_non_selected_station_inds, -1] = self.plot_characteristics['map']['marker_unselected']['alpha']
+                        
                         # update markersize and alphas of selected stations
                         markersizes[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['s']
                         rgba_tuples[self.absolute_selected_station_inds, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
+                    
                     # set new markersizes and alphas
                     collection.set_sizes(markersizes)
                     collection.set_facecolor(rgba_tuples)
@@ -434,7 +447,7 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.flush_events()
 
     def update_associated_active_dashboard_plot(self, plot_type):
-        """Function that updates a plot associated with selected stations on map"""
+        """ Function that updates a plot associated with selected stations on map. """
     
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
@@ -568,7 +581,7 @@ class MPLCanvas(FigureCanvas):
                 self.update_plot_options(plot_types=[plot_type])
 
     def update_associated_active_dashboard_plots(self):
-        """Function that updates all plots associated with selected stations on map"""
+        """ Function that updates all plots associated with selected stations on map. """
 
         # clear all previously plotted artists from selected station plots and hide axes 
         for plot_type in self.read_instance.active_dashboard_plots:
@@ -592,7 +605,7 @@ class MPLCanvas(FigureCanvas):
             self.update_plot_options(plot_types=['map'])
 
     def update_experiment_domain_edges(self):
-        """Function that plots grid domain edges of experiments in memory"""
+        """ Function that plots grid domain edges of experiments in memory. """
 
         # remove grid domain polygon if previously plotted
         inds_to_remove = []
@@ -609,7 +622,7 @@ class MPLCanvas(FigureCanvas):
             self.plot_axes['map'].add_patch(grid_edge_polygon)
 
     def update_legend(self):
-        """Function that updates legend"""
+        """ Function that updates legend. """
 
         # create legend element handles
         legend_plot_characteristics = self.plot.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
@@ -628,7 +641,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def handle_map_z_statistic_update(self):
-        """Define function which handles update of map z statistic upon interaction with map comboboxes"""
+        """ Function which handles update of map z statistic upon interaction with map comboboxes. """
 
         if not self.read_instance.block_config_bar_handling_updates:
 
@@ -695,9 +708,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def handle_periodic_statistic_update(self):
-        """Define function that handles update of plotted periodic statistic
-           upon interaction with periodic statistic combobox
-           """
+        """ Function that handles update of plotted periodic statistic
+            upon interaction with periodic statistic combobox.
+        """
 
         if (not self.read_instance.block_config_bar_handling_updates) & \
                ('periodic' in self.read_instance.active_dashboard_plots):
@@ -801,9 +814,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def remove_axis_elements(self, ax, plot_type):
-        """ Removes all plotted axis elements,
-            and hide axis.
-        """
+        """ Remove all plotted axis elements and hide axis. """
        
         # get appropriate axes for nested axes
         axs_to_remove = []
@@ -816,7 +827,7 @@ class MPLCanvas(FigureCanvas):
         # iterate through axes
         for ax_to_remove in axs_to_remove:
 
-            #remove all plotted axis elements
+            # remove all plotted axis elements
             if plot_type == 'legend':
                 leg = ax_to_remove.get_legend()
                 if leg:
@@ -929,7 +940,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def activate_axis(self, ax, plot_type):
-        """Un-hide axis"""
+        """ Un-hide axis. """
 
         # get appropriate axes for nested axes
         axs_to_activate = []
@@ -965,7 +976,8 @@ class MPLCanvas(FigureCanvas):
             self.periodic_violin_save_button.show()
 
         elif plot_type == 'metadata':
-            self.metadata_menu_button.show()
+            # hide for now because there are no options
+            # self.metadata_menu_button.show()
             self.metadata_save_button.show()
 
         elif plot_type == 'distribution':
@@ -988,9 +1000,8 @@ class MPLCanvas(FigureCanvas):
 
     def update_plot_options(self, plot_types):
         """ Uncheck checked boxes in plot configuration options under menus and
-            reapply check with new data.
-            This can be done for all currently active plot types, or just one
-            specific type.
+            reapply check with new data. This can be done for all currently active plot types, 
+            or just one specific type.
         """
 
         checked_options = {}
@@ -1022,8 +1033,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def select_all_stations(self):
-        """Define function that selects/unselects all plotted stations
-        (and associated plots) upon ticking of checkbox"""
+        """ Function that selects/unselects all plotted stations
+            (and associated plots) upon ticking of checkbox.
+        """
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -1056,7 +1068,7 @@ class MPLCanvas(FigureCanvas):
             # update absolute selected station indices (indices relative to plotted stations on map)
             self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds), dtype=np.int)
 
-            #get absolute non-selected station inds
+            # get absolute non-selected station inds
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                                  self.absolute_selected_station_inds))[0]
 
@@ -1073,9 +1085,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def select_intersect_stations(self):
-        """Define function that selects/unselects intersection of
-        stations and all experiment domains (and associated plots)
-        upon ticking of checkbox
+        """ Function that selects/unselects intersection of
+            stations and all experiment domains (and associated plots)
+            upon ticking of checkbox.
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -1113,13 +1125,16 @@ class MPLCanvas(FigureCanvas):
                             else:
                                 valid_station_inds = self.read_instance.valid_station_inds[self.read_instance.networkspeci][data_label]
                             intersect_lists.append(valid_station_inds)
+                    
                     # get intersect between active map valid station indices and valid station indices
                     # associated with each loaded experiment array --> relative selected station indcies
                     self.relative_selected_station_inds = np.sort(list(set.intersection(*map(set, intersect_lists))))
+                    
                     # get absolute selected station indices (indices relative to plotted stations on map)
                     self.absolute_selected_station_inds = \
                         np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind
                                   in self.relative_selected_station_inds], dtype=np.int)
+                    
                     #get absolute non-selected station inds
                     self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                                          self.absolute_selected_station_inds))[0]
@@ -1149,9 +1164,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def select_extent_stations(self):
-        """Define function that selects/unselects the
-        stations for the current map extent (and associated plots)
-        upon ticking of checkbox
+        """ Function that selects/unselects the
+            stations for the current map extent (and associated plots)
+            upon ticking of checkbox.
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -1228,13 +1243,13 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def onlassoselect_left(self, verts):
-        """Function that handles station selection upon lasso selection with left click.
+        """ Function that handles station selection upon lasso selection with left click.
 
-           Operation:
-           Select all stations within lasso boundaries.
-           If a click is made rather than using lasso, then select nearest station within tolerance.
+            Operation:
+            Select all stations within lasso boundaries.
+            If a click is made rather than using lasso, then select nearest station within tolerance.
 
-           If no station is found with left click, all stations are unselected.
+            If no station is found with left click, all stations are unselected.
         """
 
         # check if have any plotted stations on map, if not, return
@@ -1267,7 +1282,7 @@ class MPLCanvas(FigureCanvas):
 
         # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
         if len(self.absolute_selected_station_inds) == 0:
-            #take first selected point coordinates and get matches of stations within tolerance 
+            # take first selected point coordinates and get matches of stations within tolerance 
             current_xlim = self.plot_axes['map'].get_xlim()
             current_ylim = self.plot_axes['map'].get_ylim()
             mlon = np.mean(current_xlim)
@@ -1284,7 +1299,7 @@ class MPLCanvas(FigureCanvas):
             if len(self.absolute_selected_station_inds) > 1:
                 self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int)
 
-        #get absolute non-selected station inds
+        # get absolute non-selected station inds
         self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                              self.absolute_selected_station_inds))[0]
 
@@ -1308,13 +1323,13 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def onlassoselect_right(self, verts):
-        """Function that handles station selection upon lasso selection with right click.
+        """ Function that handles station selection upon lasso selection with right click.
         
-           Operation:
-           Unselect station/s (if station/s currently selected), 
-           or Select station/s (if station/s currently unselected).
+            Operation:
+            Unselect station/s (if station/s currently selected), 
+            or Select station/s (if station/s currently unselected).
 
-           If no station is found with right click, nothing happens.
+            If no station is found with right click, nothing happens.
         """
 
         # check if have any plotted stations on map, if not, return
@@ -1368,7 +1383,7 @@ class MPLCanvas(FigureCanvas):
         self.absolute_selected_station_inds = np.setxor1d(previous_absolute_selected_station_inds, absolute_selected_station_inds)
         self.previous_absolute_selected_station_inds = previous_absolute_selected_station_inds
 
-        #get absolute non-selected station inds
+        # get absolute non-selected station inds
         self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                              self.absolute_selected_station_inds))[0]
 
@@ -1390,7 +1405,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
-        """ Takes the indices of selected stations on the map
+        """ Take the indices of selected stations on the map
             (potentially a subset of all available stations), and returns the indices
             of the stations inside the full loaded data arrays.
         """
@@ -1400,7 +1415,6 @@ class MPLCanvas(FigureCanvas):
         return self.active_map_valid_station_inds[selected_map_inds]
 
     def generate_interactive_elements(self):
-
         """ Function to create settings menus for each plot and their elements."""
 
         self.interactive_elements = {}
@@ -2440,7 +2454,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def interactive_elements_button_func(self):
-        """Function to show and hide elements in setting menus"""
+        """ Function to show and hide elements in setting menus. """
 
         event_source = self.sender()
         for key, val in self.interactive_elements.items():
@@ -2470,7 +2484,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_markersize_func(self):
-        """Function to handle the update of the markers size."""
+        """ Function to handle the update of the markers size. """
 
         event_source = self.sender()
         source_object = event_source.objectName()
@@ -2491,7 +2505,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_opacity_func(self):
-        """Function to handle the update of the markers opacity."""
+        """ Function to handle the update of the markers opacity. """
 
         event_source = self.sender()
         source_object = event_source.objectName()
@@ -2512,7 +2526,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_linewidth_func(self):
-        """Function to handle the update of the lines widths."""
+        """ Function to handle the update of the lines widths. """
 
         event_source = self.sender()
         for key, val in self.interactive_elements.items():
@@ -2608,11 +2622,7 @@ class MPLCanvas(FigureCanvas):
                     for temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         log_validity = self.plot.log_validity(sub_ax, option)
                         if log_validity:
-                            self.plot.log_axes(sub_ax,
-                                               option, 
-                                               plot_type,
-                                               self.plot_characteristics[plot_type],
-                                               undo=undo)
+                            self.plot.log_axes(sub_ax, option, self.plot_characteristics[plot_type], undo=undo)
                         else:
                             msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
                             msg += "in {0} with negative values.".format(plot_type)
@@ -2624,10 +2634,7 @@ class MPLCanvas(FigureCanvas):
                 else:
                     log_validity = self.plot.log_validity(self.plot_axes[plot_type], option)
                     if log_validity:
-                        self.plot.log_axes(self.plot_axes[plot_type], 
-                                           option, 
-                                           plot_type,
-                                           self.plot_characteristics[plot_type], 
+                        self.plot.log_axes(self.plot_axes[plot_type], option, self.plot_characteristics[plot_type], 
                                            undo=undo)
                     else:
                         msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
@@ -3072,7 +3079,8 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def save_axis_figure_dialog(self, plot_type, relevant_temporal_resolution=None):
-        
+        """ Function to create the dialog box to save each plot figure. """
+
         default_filename = '{0}-{1}-{2}-{3}-{4}-{5}-{6}.png'.format(self.read_instance.network[0],
                                                                     self.read_instance.species[0],
                                                                     self.read_instance.resolution, 
@@ -3092,6 +3100,7 @@ class MPLCanvas(FigureCanvas):
             return figure_path
 
     def save_axis_figure_func(self):
+        """ Function to save each plot figure. """
         
         # get option and plot names
         event_source = self.sender()
@@ -3353,6 +3362,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def hover_timeseries_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the timeseries plot. """
 
         # activate hover over timeseries
         if ('timeseries' in self.read_instance.active_dashboard_plots):

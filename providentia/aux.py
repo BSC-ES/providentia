@@ -20,12 +20,12 @@ from scipy.spatial import cKDTree
 import seaborn as sns
 
 def get_default_qa(instance, speci):
-    """Returns the default values according to GHOST standards. 
+    """ Return the default values according to GHOST standards. 
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :return: QA flags' codes in list
-    :rtype: list
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :return: QA flags' codes in list
+        :rtype: list
     """
 
     if speci in instance.met_parameters:
@@ -34,7 +34,7 @@ def get_default_qa(instance, speci):
         return sorted(instance.default_qa_standard)
 
 def multi_species_mapping(species):
-    """Map species special case str to multiple species names"""
+    """ Map species special case str to multiple species names. """
 
     #multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4','vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
     multi_species_map = {'vconcaerobin*':['vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
@@ -42,14 +42,15 @@ def multi_species_mapping(species):
     return multi_species_map[species]
 
 def exceedance_lim(species):
-    """Returns the exceedance limit depending on the species input. If
-    species doesn't have a reported limit, returns np.NaN.
+    """ Return the exceedance limit depending on the species input. 
+        If species doesn't have a reported limit, returns np.NaN.
 
-    :param species: name of species currently selected (e.g. sconco3)
-    :type species: str
-    :return: value of exceedance limit
-    :rtype: int
+        :param species: name of species currently selected (e.g. sconco3)
+        :type species: str
+        :return: value of exceedance limit
+        :rtype: int
     """
+
     exceedance_limits = {'sconco3': 90.21, 'sconcno2': 106.38}
     if species in exceedance_limits:
         return exceedance_limits[species]
@@ -57,10 +58,10 @@ def exceedance_lim(species):
         return np.NaN
 
 def temporal_resolution_order_dict():
-    """Returns temporal resolution order for menus as a dictionary
+    """ Return temporal resolution order for menus as a dictionary.
 
-    :return: temporal resolution order
-    :rtype: dict
+        :return: temporal resolution order
+        :rtype: dict
     """
 
     resolution_order_dict = {'hourly': 1, '3hourly': 2, '6hourly': 3, 'hourly_instantaneous': 4,
@@ -70,22 +71,24 @@ def temporal_resolution_order_dict():
     return resolution_order_dict
 
 def temp_axis_dict():
-    """Returns temporal mapping as a dictionary used for the plots.
+    """ Return temporal mapping as a dictionary used for the plots.
 
-    :return: numbering of months/days
-    :rtype: dict
+        :return: numbering of months/days
+        :rtype: dict
     """
+
     map_dict = {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
                 'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
                           7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
                 }
+
     return map_dict
 
 def periodic_xticks():
-    """Returns xticks for periodic subplots.
+    """ Return xticks for periodic subplots.
 
-    :return dictionary of xticks per temporal resolution
-    :rtype dict
+        :return dictionary of xticks per temporal resolution
+        :rtype dict
     """
 
     return {'hour':np.arange(24, dtype=np.int), 
@@ -93,21 +96,21 @@ def periodic_xticks():
             'month':np.arange(1, 13, dtype=np.int)}
 
 def periodic_labels():
-    """Return axes labels for periodic subplots.
+    """ Return axes labels for periodic subplots.
 
-    :return: axes labels
-    :rtype: dict
+        :return: axes labels
+        :rtype: dict
     """
 
     return {'hour':'H', 'dayofweek':'DoW', 'month':'M'}
 
 def get_relevant_temporal_resolutions(resolution):        
-    """Get relevant temporal reolsutions for periodic plots, by selected temporal resolution.
+    """ Get relevant temporal reolsutions for periodic plots, by selected temporal resolution.
 
-    :param resolution: name of selected temporal resolution
-    :type resolution: str
-    :return: relevant temporal resolutions
-    :rtype: list
+        :param resolution: name of selected temporal resolution
+        :type resolution: str
+        :return: relevant temporal resolutions
+        :rtype: list
     """
 
     if 'hourly' in resolution:
@@ -116,25 +119,27 @@ def get_relevant_temporal_resolutions(resolution):
         relevant_temporal_resolutions = ['dayofweek', 'month']
     elif resolution == 'monthly':
         relevant_temporal_resolutions = ['month']
+    
     return relevant_temporal_resolutions
 
 def get_land_polygon_resolution(selection):
-    """get resolution of land polygons to plot on map.
+    """ Get resolution of land polygons to plot on map.
 
         :param selection: name of selected temporal resolution
-    :type resolution: str
-    :return: selected land polygon resolution
-    :rtype: list
+        :type resolution: str
+        :return: selected land polygon resolution
+        :rtype: list
     """
     
     land_polygon_resolutions = {'low': '110m','medium': '50m','high': '10m'}
+    
     return land_polygon_resolutions[selection]
 
 def init_flags(instance):
-    """Initialise internal structure to store selected flags.
+    """ Initialise internal structure to store selected flags.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     # do not have object instance already?
@@ -142,6 +147,7 @@ def init_flags(instance):
     if not hasattr(instance, 'flag_menu'):
         instance.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
         instance.flag_menu['select_buttons'] = ['all', 'clear', 'default']
+    
     # reset fields
     instance.flag_menu['checkboxes']['labels'] = np.array(sorted(instance.standard_data_flag_name_to_data_flag_code, key=instance.standard_data_flag_name_to_data_flag_code.get))
     instance.flag_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
@@ -149,10 +155,10 @@ def init_flags(instance):
     instance.flag_menu['checkboxes']['map_vars'] = np.sort(list(instance.standard_data_flag_name_to_data_flag_code.values()))
     
 def init_qa(instance):
-    """Initialise internal structure to store selected qa.
+    """ Initialise internal structure to store selected qa.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     # do not have object instance already?
@@ -160,6 +166,7 @@ def init_qa(instance):
     if not hasattr(instance, 'qa_menu'):
         instance.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
         instance.qa_menu['select_buttons'] = ['all', 'clear', 'default']
+    
     # reset fields
     instance.qa_menu['checkboxes']['labels'] = np.array(sorted(instance.standard_QA_name_to_QA_code, key=instance.standard_QA_name_to_QA_code.get))
     instance.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
@@ -167,10 +174,10 @@ def init_qa(instance):
     instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(instance.standard_QA_name_to_QA_code.values()))
     
 def init_experiments(instance):
-    """Initialise internal structure to store selected experiments.
+    """ Initialise internal structure to store selected experiments.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     # do not have object instance already?
@@ -178,6 +185,7 @@ def init_experiments(instance):
     if not hasattr(instance, 'experiments_menu'):
         instance.experiments_menu = {'window_title': 'EXPERIMENTS', 'page_title': 'Select Experiment/s', 'checkboxes':{}}
         instance.experiments_menu['select_buttons'] = ['all', 'clear']
+    
     # reset fields
     instance.experiments_menu['checkboxes']['labels'] = [] 
     instance.experiments_menu['checkboxes']['keep_default'] = [] 
@@ -185,16 +193,17 @@ def init_experiments(instance):
     instance.experiments_menu['checkboxes']['map_vars'] = [] 
     
 def init_representativity(instance):
-    """Initialise internal structure to store representativity fields.
+    """ Initialise internal structure to store representativity fields.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'representativity_menu'):
         instance.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY', 'page_title': 'Select % Data Representativity Bounds', 'rangeboxes':{}}
+    
     # reset fields
     instance.representativity_menu['rangeboxes']['tooltips'] = []
     instance.representativity_menu['rangeboxes']['labels'] = [] 
@@ -204,26 +213,27 @@ def init_representativity(instance):
     instance.representativity_menu['rangeboxes']['subtitle_inds'] = []
 
 def init_period(instance):
-    """Initialise internal structure to store period fields.
+    """ Initialise internal structure to store period fields.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'period_menu'):
         instance.period_menu = {'window_title': 'DATA PERIOD', 'page_title': 'Select Data Periods', 'checkboxes':{}}
+    
     # reset fields
     instance.period_menu['checkboxes']['labels'] = []
     instance.period_menu['checkboxes']['keep_selected'] = []
     instance.period_menu['checkboxes']['remove_selected'] = []
 
 def init_metadata(instance):
-    """Initialise internal structure to store metadata.
+    """ Initialise internal structure to store metadata.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     # do not have object instance already?
@@ -252,13 +262,13 @@ def init_metadata(instance):
     # reset fields
     for metadata_type_ii, metadata_type in enumerate(instance.metadata_menu['navigation_buttons']['labels']):
 
-        #reset rangebox labels    
+        # reset rangebox labels    
         instance.metadata_menu[metadata_type]['rangeboxes']['labels'] = \
             [metadata_var for metadata_var in instance.metadata_vars_to_read
             if (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type)
             & (instance.standard_metadata[metadata_var]['data_type'] != np.object)]
 
-        #reset rangebox tooltips
+        # reset rangebox tooltips
         instance.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = \
             [instance.standard_metadata[metadata_var]['description']
             for metadata_var in instance.metadata_menu[metadata_type]['rangeboxes']['labels']]
@@ -274,7 +284,7 @@ def init_metadata(instance):
             ['nan'] * len(instance.metadata_menu[metadata_type]['rangeboxes']['labels'])
         instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'] = []
 
-        #reset checkbox labels            
+        # reset checkbox labels            
         instance.metadata_menu[metadata_type]['navigation_buttons']['labels'] = \
             [metadata_var for metadata_var in instance.metadata_vars_to_read if
             (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type) &
@@ -295,7 +305,7 @@ def init_metadata(instance):
                 instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['keep_default'] = []
                 instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['remove_selected'] = []
                 instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['remove_default'] = []
-            #otherwise, create infracstructure to store metadata var information
+            # otherwise, create infracstructure to store metadata var information
             else:
                 instance.metadata_menu[metadata_type][metadata_var] = {'window_title': metadata_var,
                                                                        'page_title': 'Filter stations by unique {} metadata'.format(metadata_var), 
@@ -304,17 +314,17 @@ def init_metadata(instance):
                                                                                      'keep_selected': [], 'keep_default': [],
                                                                                      'remove_selected': [], 'remove_default': []}
         
-        #remove metadata type checkbox var dicts not in metadata_vars_to_read
+        # remove metadata type checkbox var dicts not in metadata_vars_to_read
         metadata_type_checkbox_vars = [metadata_type_var for metadata_type_var in instance.metadata_menu[metadata_type].keys() if metadata_type_var not in ['window_title', 'page_title', 'navigation_buttons', 'rangeboxes']]
         metadata_type_checkbox_vars_to_remove = [metadata_type_checkbox_var for metadata_type_checkbox_var in metadata_type_checkbox_vars if metadata_type_checkbox_var not in instance.metadata_vars_to_read]
         for metadata_type_checkbox_var_to_remove in metadata_type_checkbox_vars_to_remove:
             del instance.metadata_menu[metadata_type][metadata_type_checkbox_var_to_remove]
 
 def update_representativity_fields(instance):
-    """Update the data representativity menu upon read.
+    """ Update the data representativity menu upon read.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
  
     # get previously set rangebox labels / values
@@ -466,10 +476,10 @@ def update_representativity_fields(instance):
                 previous_lower[previous_mapped_labels.index(label_mapped)]
 
 def update_period_fields(instance):
-    """Update the data period menu upon read.
+    """ Update the data period menu upon read.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     # hourly temporal resolution?
@@ -500,16 +510,16 @@ def update_period_fields(instance):
                 instance.period_menu['checkboxes']['remove_selected'].remove(label)
 
 def update_metadata_fields(instance):
-    """Update the metadata menu object with metadata associated with newly read data
-    for non-numeric metadata gets all the unique fields per metadata variable,
-    and sets the available fields as such, and for numeric gets the minimum and maximum
-    boundaries of each metadata variable.
-    If previously metadata settings for a field deviate from the default,
-    then if the same field still exists then the settings (i.e. bounds or
-    checkbox selection) are copied across, rather than setting to the default.
+    """ Update the metadata menu object with metadata associated with newly read data
+        for non-numeric metadata gets all the unique fields per metadata variable,
+        and sets the available fields as such, and for numeric gets the minimum and maximum
+        boundaries of each metadata variable.
+        If previously metadata settings for a field deviate from the default,
+        then if the same field still exists then the settings (i.e. bounds or
+        checkbox selection) are copied across, rather than setting to the default.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     # before doing anything check if have all current metadata variables in menu
@@ -532,7 +542,7 @@ def update_metadata_fields(instance):
     # update metadata menu
     for meta_var in instance.metadata_vars_to_read:
         
-        #get all metadata values for field across all networks and species
+        # get all metadata values for field across all networks and species
         meta_var_field = []
 
         # transform to list if there is only one species / network
@@ -564,6 +574,7 @@ def update_metadata_fields(instance):
 
             # update new labels
             instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'] = np.unique(meta_var_field_nan_removed)
+            
             # if field previously existed, then copy across checkbox settings for field
             # else set initial checkboxes to be all blank
             instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'] = []
@@ -574,6 +585,7 @@ def update_metadata_fields(instance):
                         instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'].append(field)
                     if field in previous_remove:
                         instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_selected'].append(field)
+            
             # set defaults to be empty
             instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_default'] = []
             instance.metadata_menu[metadata_type][meta_var]['checkboxes']['remove_default'] = []
@@ -618,11 +630,11 @@ def update_metadata_fields(instance):
                     instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
 
 def representativity_conf(instance):
-    """Function used when loading from a configuration file. 
-    Sets defined representativity filter variables, rest of variables are set to default. 
+    """ Function used when loading from a configuration file. 
+        Sets defined representativity filter variables, rest of variables are set to default. 
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     for i, label in enumerate(instance.representativity_menu['rangeboxes']['map_vars']):
@@ -635,11 +647,11 @@ def representativity_conf(instance):
                 instance.representativity_menu['rangeboxes']['current_lower'][i] = '0'
 
 def period_conf(instance):
-    """Function used when loading from a configuration file. 
-    Sets defined period filter variables, rest of variables are set to default. 
+    """ Function used when loading from a configuration file. 
+        Sets defined period filter variables, rest of variables are set to default. 
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     from .configuration import split_options
@@ -653,11 +665,11 @@ def period_conf(instance):
         instance.period_menu['checkboxes']['remove_selected'] = []
 
 def metadata_conf(instance):
-    """Function used when loading from a configuration file. 
-    Sets defined metadata filter variables, rest of variables are set to default.
+    """ Function used when loading from a configuration file. 
+        Sets defined metadata filter variables, rest of variables are set to default.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
     """
 
     from .configuration import split_options
@@ -690,7 +702,7 @@ def metadata_conf(instance):
                 instance.metadata_menu[menu_type][label]['checkboxes']['remove_selected'] = []
 
 def valid_date(date_text):
-    """Determines if a date string is in the correct format."""
+    """ Determine if a date string is in the correct format. """
 
     try:
         datetime.datetime.strptime(str(date_text), '%Y%m%d')
@@ -699,9 +711,8 @@ def valid_date(date_text):
         return False
 
 def check_for_ghost(network_name):
-    """
-    Check whether the selected network comes from GHOST or not.
-    All non-GHOST networks start with an asterisk at their name.
+    """ Check whether the selected network comes from GHOST or not.
+        All non-GHOST networks start with an asterisk at their name.
     """
 
     if '/' in network_name:
@@ -709,10 +720,10 @@ def check_for_ghost(network_name):
     else:
         return True
 
-
 def load_conf(self, fpath=None):
-    """Load existing configurations from file
-    for running offline Providentia."""
+    """ Load existing configurations from file
+        for running offline Providentia.
+    """
 
     from .configuration import read_conf
 
@@ -728,13 +739,12 @@ def load_conf(self, fpath=None):
     self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(fpath)
 
 def update_plotting_parameters(instance):
-    """
-    Function that updates plotting parameters (colour and zorder) for data labels
+    """ Function that updates plotting parameters (colour and zorder) for data labels.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :param data_label: label of data array
-    :type data_label: text
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :param data_label: label of data array
+        :type data_label: text
     """
 
     # generate a list of RGB tuples for number of experiments there are
@@ -758,15 +768,14 @@ def update_plotting_parameters(instance):
             experiment_ind += 1
 
 def get_ghost_observational_tree(instance):
-    """
-    Create GHOST observational data tree as a nested dictionary,
-    storing a list of start YYYYMM yearmonths per:
-    network / resolution / matrix / speci
+    """ Create GHOST observational data tree as a nested dictionary,
+        storing a list of start YYYYMM yearmonths per:
+        network / resolution / matrix / speci
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :return: GHOST observational tree dictionary
-    :rtype: dict
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :return: GHOST observational tree dictionary
+        :rtype: dict
     """
 
     ghost_observation_data = {}
@@ -822,22 +831,21 @@ def get_ghost_observational_tree(instance):
     return ghost_observation_data
 
 def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
-    """
-    Fill non-GHOST observational data tree,
-    storing a list of start YYYYMM yearmonths per:
-    network / resolution / matrix / speci
+    """ Fill non-GHOST observational data tree,
+        storing a list of start YYYYMM yearmonths per:
+        network / resolution / matrix / speci
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :param nonghost_observation_data_json: non-GHOST observational tree json
-    :type nonghost_observation_data_json: json
-    :return: non-GHOST observational tree dictionary
-    :rtype: dict
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :param nonghost_observation_data_json: non-GHOST observational tree json
+        :type nonghost_observation_data_json: json
+        :return: non-GHOST observational tree dictionary
+        :rtype: dict
     """
 
     nonghost_observation_data = {}
 
-    #iterate through networks
+    # iterate through networks
     for network in nonghost_observation_data_json:
 
         # check if directory for network exists
@@ -848,7 +856,7 @@ def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
         # write empty dictionary for network
         nonghost_observation_data[network] = {}
 
-        #iterate through resolutions
+        # iterate through resolutions
         for resolution in nonghost_observation_data_json[network]:
 
             # check if directory for resolution exists
@@ -859,7 +867,7 @@ def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
             # write nested empty dictionary for resolution
             nonghost_observation_data[network][resolution] = {}
 
-            #iterate through species
+            # iterate through species
             for speci in nonghost_observation_data_json[network][resolution]:
 
                 # get all available netCDF files 
@@ -884,15 +892,14 @@ def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
     return nonghost_observation_data
 
 def get_experiment_tree(instance):
-    """
-    Fill experiment data tree,
-    storing a list of start YYYYMM yearmonths per:
-    network / resolution / matrix / speci
+    """ Fill experiment data tree,
+        storing a list of start YYYYMM yearmonths per:
+        network / resolution / matrix / speci
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :return: experiment tree dictionary
-    :rtype: dict
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :return: experiment tree dictionary
+        :rtype: dict
     """
 
     experiment_data = {}
@@ -944,18 +951,17 @@ def get_experiment_tree(instance):
     return experiment_data
 
 def get_valid_obs_files_in_date_range(instance, start_date, end_date):
-    """
-    Iterate through observational dictionary tree and return 
-    a dictionary of available data in the selected daterange
+    """ Iterate through observational dictionary tree and return 
+        a dictionary of available data in the selected daterange
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :param start_date: start date (e.g. "20201101")
-    :type start_date: str
-    :param end_date: end date (e.g. "20201101")
-    :type end_date: str
-    :return: available observational tree dictionary
-    :rtype: dict
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201101")
+        :type end_date: str
+        :return: available observational tree dictionary
+        :rtype: dict
     """
 
     # create dictionary to store available observational data
@@ -1004,22 +1010,21 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
                         instance.available_observation_data[network][resolution][matrix][speci] = valid_file_yearmonths
 
 def get_valid_experiments(instance, start_date, end_date, resolution, networks, species):
-    """
-    Get valid experiments for daterange, and selected parameters.
-    Update experiment pop-up with valid experiments.
+    """ Get valid experiments for daterange, and selected parameters.
+        Update experiment pop-up with valid experiments.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :param start_date: start date (e.g. "20201101")
-    :type start_date: str
-    :param end_date: end date (e.g. "20201231")
-    :type end_date: str
-    :param resolution: resolution (e.g. "hourly")
-    :type resolution: str
-    :param networks: list of networks
-    :type networks: list
-    :param species: list of species
-    :type species: list 
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201231")
+        :type end_date: str
+        :param resolution: resolution (e.g. "hourly")
+        :type resolution: str
+        :param networks: list of networks
+        :type networks: list
+        :param species: list of species
+        :type species: list 
     """
 
     # get all different experiment names (from providentia-interpolation output dir)
@@ -1034,10 +1039,10 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
     # get start date on first of month
     start_date_firstdayofmonth = int(str(start_date)[:6] + '01')
 
-    #iterate through networks and species
+    # iterate through networks and species
     for network, speci in zip(networks, species):
 
-        #iterate through available experiments
+        # iterate through available experiments
         for experiment in available_experiments:
 
             # get folder where interpolated experiments are saved
@@ -1088,17 +1093,16 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
         instance.experiments_menu['checkboxes']['map_vars'] = experiments_to_add
 
 def get_basic_metadata(instance):     
-    """
-    Get basic unique metadata across networkspecies wanting to read
-    The basic fields are: station_reference, longitude, latitude, station_classification and area_classification
+    """ Get basic unique metadata across networkspecies wanting to read
+        The basic fields are: station_reference, longitude, latitude, station_classification and area_classification
 
-    If have multiple species, then spatially cocolocate across species 
-    to get matching stations across stations.
+        If have multiple species, then spatially cocolocate across species 
+        to get matching stations across stations.
 
-    :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-    :type instance: object
-    :return: station_references per networkspecies, longitudes per networkspecies, latitudes per networkspecies, station_classifications per networkspecies, area_classifications per networkspecies 
-    :rtype: dict, dict, dict, dict, dict
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :return: station_references per networkspecies, longitudes per networkspecies, latitudes per networkspecies, station_classifications per networkspecies, area_classifications per networkspecies 
+        :rtype: dict, dict, dict, dict, dict
     """
 
     # define dictionaries for storing basic metadata across all species to read
@@ -1234,30 +1238,29 @@ def get_basic_metadata(instance):
     return station_references, station_longitudes, station_latitudes, station_classifications, area_classifications
 
 def spatial_colocation(reading_ghost, station_references, longitudes, latitudes, station_classifications, area_classifications):
-    """ 
-    Given multiple species, return intersecting station_references, longitudes, latitudes, 
-    station_classifications and area_classifications across species.
+    """ Given multiple species, return intersecting station_references, longitudes, latitudes, 
+        station_classifications and area_classifications across species.
 
-    This is done by 
-        1. Cross-checking the station references between species to get matching station_references
-        2. Cross-checking matching longitude/latitude coordinates to a tolerance of 20m difference
+        This is done by 
+            1. Cross-checking the station references between species to get matching station_references
+            2. Cross-checking matching longitude/latitude coordinates to a tolerance of 20m difference
 
-    If longitude/latitude matching is needed, then take impose station reference of the first species 
-    upon the rest of intersecting indices across species. 
+        If longitude/latitude matching is needed, then take impose station reference of the first species 
+        upon the rest of intersecting indices across species. 
 
-    :param reading_ghost: boolean informing if are using GHOST data or not
-    :type reading_ghost: boolean
-    :param station_references: dictionary of station references per network/species
-    :type station_references: dict
-    :param longitudes: dictionary longitudes per network/species
-    :type longitudes: dict
-    :param latitudes: dictionary of latitudes per network/species
-    :type latitudes: dict
-    :param latitudes: dictionary of latitudes per network/species
-    :type latitudes: dict
+        :param reading_ghost: boolean informing if are using GHOST data or not
+        :type reading_ghost: boolean
+        :param station_references: dictionary of station references per network/species
+        :type station_references: dict
+        :param longitudes: dictionary longitudes per network/species
+        :type longitudes: dict
+        :param latitudes: dictionary of latitudes per network/species
+        :type latitudes: dict
+        :param latitudes: dictionary of latitudes per network/species
+        :type latitudes: dict
 
-    :return: intersecting station_references, intersecting longitudes, intersecting latitudes, 
-    :rtype: list, list, list, list, list
+        :return: intersecting station_references, intersecting longitudes, intersecting latitudes, 
+        :rtype: list, list, list, list, list
     """
 
     # if are reading GHOST data remove method abbreviation from station_references
@@ -1317,7 +1320,7 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes,
         lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
         ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
         speci_non_intersecting_x, speci_non_intersecting_y, speci_non_intersecting_z = pyproj.transform(lla, ecef, speci_non_intersecting_longitudes, speci_non_intersecting_latitudes, np.zeros(len(speci_non_intersecting_longitudes)), radians=False)
-        #merge coordinates to 2D array
+        # merge coordinates to 2D array
         speci_non_intersecting_xy = np.column_stack((speci_non_intersecting_x, speci_non_intersecting_y))
 
         # iterate through all other speci, and get intersections (within tolerance) of longitudes and latitudes 

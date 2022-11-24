@@ -26,7 +26,7 @@ basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
 class ProvidentiaOffline:
-    """Run Providentia offline reports"""
+    """ Class to create Providentia offline reports. """
 
     def __init__(self, **kwargs):
         print("Starting Providentia offline...")
@@ -66,7 +66,7 @@ class ProvidentiaOffline:
 
         # load dictionary with non-GHOST esarchive files to read
         nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, 'conf/nonghost_files.json')))
-        # and merge to existing GHOST observational data dict if we have the path
+        # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
             self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
@@ -158,6 +158,7 @@ class ProvidentiaOffline:
                         pass
 
     def start_pdf(self):
+        """ Create PDF document where plots will be stored. """
 
         # get path where reports will be saved
         if '/' in self.report_filename:
@@ -333,8 +334,7 @@ class ProvidentiaOffline:
                             if 'logx' in plot_options:
                                 log_validity = self.plot.log_validity(relevant_ax, 'logx')
                                 if log_validity:
-                                    self.plot.log_axes(relevant_ax, 'logx', base_plot_type, 
-                                                       self.plot_characteristics[plot_type])
+                                    self.plot.log_axes(relevant_ax, 'logx', self.plot_characteristics[plot_type])
                                 else:
                                     msg = "Warning: It is not possible to log the x-axis "
                                     msg += "in {0} with negative values.".format(plot_type)
@@ -342,8 +342,7 @@ class ProvidentiaOffline:
                             if 'logy' in plot_options:
                                 log_validity = self.plot.log_validity(relevant_ax, 'logy')
                                 if log_validity:
-                                    self.plot.log_axes(relevant_ax, 'logy', base_plot_type, 
-                                                       self.plot_characteristics[plot_type])
+                                    self.plot.log_axes(relevant_ax, 'logy', self.plot_characteristics[plot_type])
                                 else:
                                     msg = "Warning: It is not possible to log the y-axis "
                                     msg += "in {0} with negative values.".format(plot_type)
@@ -390,7 +389,7 @@ class ProvidentiaOffline:
                 print('\n0 plots remain to write to PDF\n')
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
-        """Setup plotting geometry for summary or station specific plots, per network/species"""
+        """ Setup plotting geometry for summary or station specific plots, per network/species. """
 
         # depending on plot type set plots to make
         if plotting_paradigm == 'summary':
@@ -610,7 +609,7 @@ class ProvidentiaOffline:
                 self.n_total_pages += 1
 
     def make_plots_per_subsection(self, summary_plots_to_make, station_plots_to_make, do_plot_geometry_setup=False):
-        """Function that calls making of all plots per subsection"""
+        """ Function that calls making of all plots per subsection. """
 
         # create variable to keep track if have setup summary plot geometry yet (done for all subsections at once)
         summary_plot_geometry_setup = False
@@ -836,7 +835,7 @@ class ProvidentiaOffline:
                 summary_plot_geometry_setup = True
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
-        """Function that calls making of any type of plot"""
+        """ Function that calls making of any type of plot. """
 
         self.current_plot_ind = 0
         
@@ -1275,7 +1274,7 @@ class ProvidentiaOffline:
                     relevant_axis.set_visible(True)
 
     def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
-        """Get relevant page and axis for current plot type/subsection/axis index"""
+        """ Get relevant page and axis for current plot type/subsection/axis index. """
 
         # get axes associated with plot type
         if plotting_paradigm == 'summary':
@@ -1294,5 +1293,6 @@ class ProvidentiaOffline:
         return all_relevant_pages[axis_ind], page_inds[axis_ind], relevant_axes[axis_ind]['handle']
 
 def main(**kwargs):
-    """Main function when running offine reports"""
+    """ Main function when running offine reports. """
+   
     ProvidentiaOffline(**kwargs)
