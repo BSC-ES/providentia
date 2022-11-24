@@ -62,7 +62,6 @@ class Providentia(object):
             LOG.error('Unhandled exception on Providentia: %s' % err, exc_info=True)
             return False
 
-
 def main():
     """ Main function. """
     

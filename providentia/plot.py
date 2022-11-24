@@ -20,7 +20,7 @@ import seaborn as sns
 from PyQt5 import QtCore
 
 from .statistics import get_z_statistic_info
-from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels
+from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -429,9 +429,11 @@ class Plot:
         plot_characteristics['page_title']['transform'] = page.transFigure
         page.text(**plot_characteristics['page_title'])
 
-        # if len of network or species uniques is 1, set that instead of lng list of duplicates
-        network_to_write = np.unique(self.read_instance.network)
-        species_to_write = np.unique(self.read_instance.species)
+        # if len of network or species uniques is 1, set that instead of long list of duplicates
+        _, idx = np.unique(self.read_instance.network, return_index=True)
+        network_to_write = np.array(self.read_instance.network)[np.sort(idx)]
+        _, idx = np.unique(self.read_instance.species, return_index=True)
+        species_to_write = np.array(self.read_instance.species)[np.sort(idx)]
 
         # set header main text
         txt = 'Network : {}\n' \
@@ -1030,16 +1032,20 @@ class Plot:
 
             for ns_ii, ns in enumerate(self.read_instance.networkspecies):
                 positions = [(ns_ii - (plot_characteristics['group_widths']['multispecies'] / 2.0)) + (offset)]
-                # make boxplot
-                boxplot = relevant_axis.boxplot(self.canvas_instance.selected_station_data[ns][data_label]['pandas_df']['data'].dropna(), 
-                                                positions=positions, widths=widths, **plot_characteristics['plot'])
+                
+                #check have data_label to plot for networkspecies?
+                if data_label in self.canvas_instance.selected_station_data[ns]: 
+                
+                    # make boxplot
+                    boxplot = relevant_axis.boxplot(self.canvas_instance.selected_station_data[ns][data_label]['pandas_df']['data'].dropna(), 
+                                                    positions=positions, widths=widths, **plot_characteristics['plot'])
 
-                # set box colour
-                for element in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']:
-                    plt.setp(boxplot[element], color=self.read_instance.plotting_params[data_label]['colour'])
-                # set fill colour to be white
-                for patch in boxplot['boxes']:
-                    patch.set(facecolor='white')
+                    # set box colour
+                    for element in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']:
+                        plt.setp(boxplot[element], color=self.read_instance.plotting_params[data_label]['colour'])
+                    # set fill colour to be white
+                    for patch in boxplot['boxes']:
+                        patch.set(facecolor='white')
 
         # make boxplot for datalabel for networkspeci
         else:
@@ -1063,15 +1069,20 @@ class Plot:
         # set xticklabels (if not already plotted)
         if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
             if 'multispecies' in plot_options:
-                relevant_axis.set_xticks(np.arange(len(self.read_instance.networkspecies)))
+                xticks = np.arange(len(self.read_instance.networkspecies))
                 #if all networks or species are same, drop them from xtick label
                 if len(np.unique(self.read_instance.network)) == 1:
-                    networkspecies_labels = copy.deepcopy(self.read_instance.species)
+                    xtick_labels = copy.deepcopy(self.read_instance.species)
                 elif len(np.unique(self.read_instance.species)) == 1:
-                    networkspecies_labels = copy.deepcopy(self.read_instance.network)
+                    xtick_labels = copy.deepcopy(self.read_instance.network)
                 else:
-                    networkspecies_labels = copy.deepcopy(self.read_instance.networkspecies)
-                relevant_axis.set_xticklabels(networkspecies_labels)
+                    xtick_labels = copy.deepcopy(self.read_instance.networkspecies)
+                # get aliases for multispecies (if have any)
+                xtick_labels, xlabel = get_multispecies_aliases(xtick_labels)
+                # set xlabel if xlabels have changed due to alias, and have one to set
+                if xlabel != '':
+                    plot_characteristics['xlabel']['xlabel'] = xlabel
+                    relevant_axis.set_xlabel(**plot_characteristics['xlabel'])
             else:
                 data_labels_to_plot = copy.deepcopy(self.read_instance.data_labels)
                 for dl_ii, dl in enumerate(self.read_instance.data_labels):
@@ -1086,11 +1097,15 @@ class Plot:
                     else:
                         data_labels_to_plot[dl_ii] = self.read_instance.experiments[dl]
                 if ('individual' in plot_options) or ('obs' in plot_options):
-                    relevant_axis.set_xticks([0])
-                    relevant_axis.set_xticklabels([data_labels_to_plot[self.read_instance.data_labels.index(data_label)]])
+                    xticks = [0]
+                    xtick_labels = [data_labels_to_plot[self.read_instance.data_labels.index(data_label)]]
                 else:
-                    relevant_axis.set_xticks(np.arange(len(data_labels_to_plot)))
-                    relevant_axis.set_xticklabels(data_labels_to_plot)
+                    xticks = np.arange(len(data_labels_to_plot))
+                    xtick_labels = data_labels_to_plot
+
+            # set xticks / xticklabels
+            relevant_axis.set_xticks(xticks)
+            relevant_axis.set_xticklabels(xtick_labels, **plot_characteristics['xticklabel_params'])
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
@@ -1489,6 +1504,75 @@ class Plot:
                 validity = False
 
         return validity
+
+    def do_formatting(self, relevant_axs, relevant_data_labels, networkspeci,
+                      base_plot_type, plot_type, plot_options, plotting_paradigm):
+        """ Function that handles formatting of a plot axis,
+            based on given plot options.
+
+        :param relevant_axs: relevant axes
+        :type relevant_axs: list
+        :param relevant_data_labels: names of plotted data arrays 
+        :type relevant_data_labels: list
+        :param networkspeci: str of currently active network and species 
+        :type networkspeci: str
+        :param base_plot_type: plot type, without statistical information
+        :type base_plot_type: str
+        :param plot_type: plot type
+        :type plot_type: str
+        :param plot_options: list of options to configure plots
+        :type plot_options: list
+        :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+        :type plotting_paradigm: str
+        """
+
+        for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
+
+            # log axes?
+            if 'logx' in plot_options:            
+                log_validity = self.plot.log_validity(relevant_ax, 'logx')
+                if log_validity:
+                    self.plot.log_axes(relevant_ax, 'logx', self.plot_characteristics[plot_type])
+                else:
+                    msg = "Warning: It is not possible to log the x-axis "
+                    msg += "in {0} with negative values.".format(plot_type)
+                    print(msg)
+
+            if 'logy' in plot_options:
+                log_validity = self.plot.log_validity(relevant_ax, 'logy')
+                if log_validity:
+                    self.plot.log_axes(relevant_ax, 'logy', self.plot_characteristics[plot_type])
+                else:
+                    msg = "Warning: It is not possible to log the y-axis "
+                    msg += "in {0} with negative values.".format(plot_type)
+                    print(msg)
+
+            # annotation
+            if 'annotate' in plot_options:
+                if base_plot_type not in ['heatmap']:
+                    self.plot.annotation(relevant_ax, networkspeci, 
+                                        relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                                        self.plot_characteristics[plot_type],
+                                        plot_options=plot_options,
+                                        plotting_paradigm=plotting_paradigm)
+                    # annotate on first axis
+                    if base_plot_type in ['periodic', 'periodic-violin']:
+                        break
+            
+            # regression line
+            if 'regression' in plot_options:
+                self.plot.linear_regression(relevant_ax, networkspeci, 
+                                            relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                                            self.plot_characteristics[plot_type], 
+                                            plot_options=plot_options)
+
+            # smooth line
+            if 'smooth' in plot_options:
+                self.plot.smooth(relevant_ax, networkspeci,
+                                 relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                                 self.plot_characteristics[plot_type], 
+                                 plot_options=plot_options)
+
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
