@@ -68,7 +68,7 @@ class ProvConfiguration:
             'report_stations': False,
             'report_title': 'Providentia Offline Report',
             'report_filename': 'PROVIDENTIA_Report',
-            'active_dashboard_plots': ['timeseries', 'statsummary', 'distribution', 'periodic'],
+            'active_dashboard_plots': None,
             'plot_characteristics_filename': '',
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline',
@@ -181,12 +181,8 @@ class ProvConfiguration:
             # parse network
 
             if isinstance(value, str):
-                # throw warning if network is empty str
-                if value.strip() == '':
-                    print('Warning: "network" field is empty in .conf file')
-                    return None
                 # parse multiple networks
-                elif ',' in value:
+                if ',' in value:
                     return [network.strip() for network in value.split(',')]
                 else:
                     return [value.strip()]
@@ -195,12 +191,8 @@ class ProvConfiguration:
             # parse species
 
             if isinstance(value, str):
-                # throw error if species is empty str
-                if value.strip() == '':
-                    print('Warning: "species" field is empty in .conf file')
-                    return None
                 # parse multiple species
-                elif ',' in value:
+                if ',' in value:
                     return [speci.strip() for speci in value.split(',')]
                 else:
                     return [value.strip()]
@@ -209,12 +201,7 @@ class ProvConfiguration:
             # parse resolution
 
             if isinstance(value, str):
-                # throw error if resolution is empty str
-                if value.strip() == '':
-                    print('Warning: "resolution" field is empty in .conf file')
-                    return None
-                else:
-                    return value.strip()
+                return value.strip()
 
         elif key == 'start_date':
             # parse start_date
@@ -222,11 +209,7 @@ class ProvConfiguration:
             if (isinstance(value, str)) or (isinstance(value, int)):
                 # throw error if start_date is empty str
                 value = str(value)
-                if value.strip() == '':
-                    print('Warning: "start_date" field is empty in .conf file')
-                    return None
-                else:
-                    return value.strip()
+                return value.strip()
 
         elif key == 'end_date':
             # parse end_date
@@ -234,11 +217,7 @@ class ProvConfiguration:
             if (isinstance(value, str)) or (isinstance(value, int)):
                 # throw error if start_date is empty str
                 value = str(value)
-                if value.strip() == '':
-                    print('Warning: "end_date" field is empty in .conf file')
-                    return None
-                else:
-                    return value.strip()
+                return value.strip()
         
         elif key == 'qa':
             # parse qa
@@ -391,6 +370,16 @@ class ProvConfiguration:
             else:
                 return {}
 
+        elif key == 'active_dashboard_plots':
+            # parse active_dashboard_plots
+
+            if isinstance(value, str):
+                # parse multiple active_dashboard_plots
+                if ',' in value:
+                    return [plot.strip() for plot in value.split(',')]
+                else:
+                    return [value.strip()]
+
         # if no special parsing treatment for variable, simply return value
         return value
 
@@ -467,6 +456,11 @@ class ProvConfiguration:
             if self.read_instance.offline:
                 print('Warning: "end_date" field not defined in .conf file. Using default: {}'.format(default))
             self.read_instance.end_date = default
+
+        # check have active_dashboard_plots information, 
+        if not self.read_instance.active_dashboard_plots:
+            default = ['timeseries', 'statsummary', 'distribution', 'periodic']
+            self.read_instance.active_dashboard_plots = default
 
         # if filter_species is active, and spatial_colocation is not active, then cannot filter by species
         # set filter_species to empty dict and advise user of this
