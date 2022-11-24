@@ -480,7 +480,7 @@ class MPLCanvas(FigureCanvas):
                     if ylabel_units == 'measurement_units':
                         ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
                     if ylabel_units != '':
-                        ylabel = copy.deepcopy(ylabel_units)
+                        ylabel = '[{}]'.format(ylabel_units)
                     xlabel = ''
 
                 # create structure to store data for statsummary plot
@@ -495,7 +495,7 @@ class MPLCanvas(FigureCanvas):
                     # set new xlabel
                     if 'xlabel' in self.plot_characteristics[plot_type]:
                         if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
-                            xlabel = self.read_instance.measurement_units[self.read_instance.species[0]]
+                            xlabel = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]])
                         else:
                             xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
                     else:
@@ -504,7 +504,7 @@ class MPLCanvas(FigureCanvas):
                     # set new ylabel
                     if 'ylabel' in self.plot_characteristics[plot_type]:
                         if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
-                            ylabel = self.read_instance.measurement_units[self.read_instance.species[0]]
+                            ylabel = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]])
                         else:
                             ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
                     else:
@@ -768,7 +768,7 @@ class MPLCanvas(FigureCanvas):
                         ylabel = expbias_stats[base_zstat]['label']
                         ylabel_units = expbias_stats[base_zstat]['units']
                     if ylabel_units == 'measurement_units':
-                        ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
+                        ylabel_units = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]]) 
                     if ylabel_units != '':
                         ylabel = copy.deepcopy(ylabel_units)
 
