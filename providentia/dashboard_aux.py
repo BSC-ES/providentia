@@ -27,7 +27,7 @@ formatting_dict = {'title_menu':               {'font':QtGui.QFont("SansSerif", 
                    }
 
 def set_formatting(PyQt5_obj, formats):
-    """function that takes a PyQt5 object and applies some defined formatting"""
+    """ Function that takes a PyQt5 object and applies some defined formatting. """
 
     # first get defined font for object
     defined_font = formats['font']
@@ -71,12 +71,12 @@ def set_formatting(PyQt5_obj, formats):
     return PyQt5_obj
 
 def wrap_tooltip_text(tooltip_text, max_width):
-    """function which takes the text for a tooltip and wraps it by the screen pixel width.
-       It does this by estimating the pixel width of the tooltip text (as formatted),
-       and then gets the ratio exceedance over the screen pixel width.
-       If there is an exceedance (i.e. > 1), the text is then broken into n max_char pieces
-       based on the position of the first exceedance in the text
-       (i.e. the part of the text which first exceeds the screen pixel width)
+    """ Function which takes the text for a tooltip and wraps it by the screen pixel width.
+        It does this by estimating the pixel width of the tooltip text (as formatted),
+        and then gets the ratio exceedance over the screen pixel width.
+        If there is an exceedance (i.e. > 1), the text is then broken into n max_char pieces
+        based on the position of the first exceedance in the text
+        (i.e. the part of the text which first exceeds the screen pixel width).
     """
 
     tooltip_label = set_formatting(QtWidgets.QLabel(text=tooltip_text), formatting_dict['tooltip'])
@@ -89,8 +89,8 @@ def wrap_tooltip_text(tooltip_text, max_width):
     return tooltip_text
 
 class ComboBox(QtWidgets.QComboBox):
-    """Modify default class of PyQT5 combobox to always dropdown from fixed
-    position box postion, stopping truncation of data"""
+    """ Modify default class of PyQT5 combobox to always dropdown from fixed
+        position box postion, stopping truncation of data. """
 
     def showPopup(self):
         """Shows popups"""
@@ -99,7 +99,7 @@ class ComboBox(QtWidgets.QComboBox):
         #self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
 class QVLine(QtWidgets.QFrame):
-    """Define class that generates vertical separator line"""
+    """ Define class that generates vertical separator line. """
 
     def __init__(self):
         super(QVLine, self).__init__()
@@ -107,7 +107,7 @@ class QVLine(QtWidgets.QFrame):
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
 class PopUpWindow(QtWidgets.QWidget):
-    """Define class that generates generalised pop-up window"""
+    """ Class that generates generalised pop-up window. """
 
     def __init__(self, menu_root, menu_levels, main_window_geometry):
         super(PopUpWindow, self).__init__()
@@ -127,8 +127,7 @@ class PopUpWindow(QtWidgets.QWidget):
         self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family()))
 
     def generate_window(self):
-
-        """Generate GUI window for current menu level"""
+        """ Generate GUI window for current menu level. """
 
         # get current menu level keys
         menu_current_keys = list(self.menu_current.keys())
@@ -155,12 +154,14 @@ class PopUpWindow(QtWidgets.QWidget):
         # create layout for placing buttons horizontally (aligned left)
         button_row = QtWidgets.QHBoxLayout()
         button_row.setAlignment(QtCore.Qt.AlignLeft)
+        
         # initialise variable to update if have any buttons in button row
         self.have_buttons = False
 
         # check if need to create home/previous button
         if len(self.menu_levels) >= 1:
             self.have_buttons = True
+            
             # create home button
             root_button = set_formatting(QtWidgets.QPushButton("HOME"), formatting_dict['button_popup'])
             root_button.setStyleSheet("color: blue;")
@@ -168,6 +169,7 @@ class PopUpWindow(QtWidgets.QWidget):
             root_button.setFixedWidth(80)
             button_row.addWidget(root_button)
             root_button.clicked.connect(self.root_page)
+            
             # create previous button
             previous_button = set_formatting(QtWidgets.QPushButton("PREVIOUS"), formatting_dict['button_popup'])
             previous_button.setStyleSheet("color: green;")
@@ -179,18 +181,21 @@ class PopUpWindow(QtWidgets.QWidget):
         # check if need to create checkbox selection buttons
         if 'select_buttons' in menu_current_keys:
             self.have_buttons = True
+            
             # need to create "Select All" button?
             if 'all' in self.menu_current['select_buttons']:
                 select_all_button = set_formatting(QtWidgets.QPushButton("Select All"), formatting_dict['button_popup'])
                 select_all_button.setFixedWidth(100)
                 button_row.addWidget(select_all_button)
                 select_all_button.clicked.connect(self.select_all)
+            
             # need to create "Clear All" button?
             if 'clear' in self.menu_current['select_buttons']:
                 clear_all_button = set_formatting(QtWidgets.QPushButton("Clear All"), formatting_dict['button_popup'])
                 clear_all_button.setFixedWidth(100)
                 button_row.addWidget(clear_all_button)
                 clear_all_button.clicked.connect(self.clear_all)
+            
             # need to create "Select Default" button?
             if 'default' in self.menu_current['select_buttons']:
                 select_default_button = set_formatting(QtWidgets.QPushButton("Select Default"), formatting_dict['button_popup'])
@@ -237,8 +242,8 @@ class PopUpWindow(QtWidgets.QWidget):
         quit_event.triggered.connect(self.closeEvent)
         
     def create_grid(self, menu_types):
-        """create grid for each needed checkbox/rangebox/navigation button menu types, that wrap vertically
-           and concatenate them horizontally together
+        """ Create grid for each needed checkbox/rangebox/navigation button menu types, that wrap vertically
+            and concatenate them horizontally together.
         """
 
         # create horizontal layout to place all menu types within
@@ -457,10 +462,10 @@ class PopUpWindow(QtWidgets.QWidget):
 
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
-    # functions that handle callbacks upon clicking on buttons
+    # Functions that handle callbacks upon clicking on buttons
 
     def open_new_page(self):
-        """function to open new page in pop-up window"""
+        """ Function to open new page in pop-up window. """
 
         # get selected navigation button text
         selected_navigation_button = self.sender().text()
@@ -474,7 +479,7 @@ class PopUpWindow(QtWidgets.QWidget):
         self.close()
 
     def root_page(self):
-        """function that returns pop-up window to root menu level page"""
+        """ Function that returns pop-up window to root menu level page. """
 
         # create new pop-up page for root menu level
         self.new_window = PopUpWindow(self.menu_root, [], self.main_window_geometry)
@@ -484,7 +489,7 @@ class PopUpWindow(QtWidgets.QWidget):
         self.close()
 
     def previous_page(self):
-        """function that returns pop-up window to previous menu level page"""
+        """ Function that returns pop-up window to previous menu level page. """
 
         # create new pop-up page for previous menu level
         self.new_window = PopUpWindow(self.menu_root, self.menu_levels[:-1], 
@@ -495,19 +500,22 @@ class PopUpWindow(QtWidgets.QWidget):
         self.close()
 
     def select_all(self):
-        """function to select all checkboxes"""
+        """ Function to select all checkboxes. """
+
         for element in self.page_memory['checkboxes']['ordered_elements']:
             for checkbox_ii, checkbox in enumerate(self.page_memory['checkboxes'][element]):
                 self.page_memory['checkboxes'][element][checkbox_ii].setCheckState(QtCore.Qt.Checked)
 
     def clear_all(self):
-        """function to clear all checkboxes"""
+        """ Function to clear all checkboxes. """
+
         for element in self.page_memory['checkboxes']['ordered_elements']:
             for checkbox_ii, checkbox in enumerate(self.page_memory['checkboxes'][element]):
                 self.page_memory['checkboxes'][element][checkbox_ii].setCheckState(QtCore.Qt.Unchecked)
 
     def select_all_default(self):
-        """function to select all default selected checkboxes"""
+        """ Function to select all default selected checkboxes. """
+
         # unselect all checkboxes first
         for element in self.page_memory['checkboxes']['ordered_elements']:
             for checkbox_ii, checkbox in enumerate(self.page_memory['checkboxes'][element]):
@@ -528,8 +536,7 @@ class PopUpWindow(QtWidgets.QWidget):
     #------------------------------------------------------------------------#
     
     def closeEvent(self, event):
-
-        """function to get status of current page upon closing of pop-up window"""
+        """ Function to get status of current page upon closing of pop-up window. """
 
         # take everything from page memory dictionary and put it back into menu level object
 

@@ -18,5 +18,5 @@
 
 
 class ProvArgumentParserException(Exception):
-    """ Raised on argument parsing exceptions """
+    """ Raise on argument parsing exceptions. """
     pass

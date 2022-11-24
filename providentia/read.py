@@ -15,21 +15,20 @@ import pandas as pd
 from netCDF4 import Dataset
 
 class DataReader:
-    """Class that reads observational/experiment data into memory."""
+    """ Class that reads observational/experiment data into memory. """
 
     def __init__(self, read_instance):
         self.read_instance = read_instance
         
     def read_setup(self, operations, experiments_to_remove=None, experiments_to_read=None):
-        """
-        Setup structures for read of new observational/experiment data and then perform read.
+        """ Setup structures for read of new observational/experiment data and then perform read.
 
-        :param operations: list of instructions on how to adjust data structures
-        :type operation: list
-        :param experiments_to_remove: list of experiments to remove from arrays
-        :type experiments_to_remove: list
-        :param experiments_to_read: list of experiments to add to arrays
-        :type experiments_to_read: list
+            :param operations: list of instructions on how to adjust data structures
+            :type operation: list
+            :param experiments_to_remove: list of experiments to remove from arrays
+            :type experiments_to_remove: list
+            :param experiments_to_read: list of experiments to add to arrays
+            :type experiments_to_read: list
         """
 
         # changing time dimension ?
@@ -175,14 +174,14 @@ class DataReader:
                 self.read_instance.ghost_data_vars_to_read = []
 
             # metadata 
-            #non-GHOST
+            # non-GHOST
             if not self.read_instance.reading_ghost:
                 self.read_instance.metadata_dtype = [('station_name', np.object), ('latitude', np.float32),
                                                      ('longitude', np.float32), ('altitude', np.float32),
                                                      ('station_reference', np.object), ('station_classification', np.object),
                                                      ('area_classification', np.object)]
                 self.read_instance.metadata_vars_to_read = [meta_dtype[0] for meta_dtype in self.read_instance.metadata_dtype]
-            #GHOST
+            # GHOST
             else:
                 self.read_instance.metadata_dtype = self.read_instance.ghost_metadata_dtype
                 self.read_instance.metadata_vars_to_read = self.read_instance.ghost_metadata_vars_to_read
@@ -205,7 +204,7 @@ class DataReader:
 
             # reset plotting params
             self.read_instance.plotting_params = {}
-            #iterate through data labels
+            # iterate through data labels
             for data_label in self.read_instance.data_labels:
                 self.read_instance.plotting_params[data_label] = {}
                 # get experiment specific grid edges for exp, from first relevant file
@@ -235,7 +234,7 @@ class DataReader:
                 new_station_inds = np.where(np.in1d(self.read_instance.station_references[self.read_instance.networkspecies[0]],
                                                     self.read_instance.previous_station_references[self.read_instance.networkspecies[0]]))[0]
 
-                #rearrange metadata station dimension
+                # rearrange metadata station dimension
                 new_metadata_in_memory = np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]),
                                                   len(self.read_instance.previous_yearmonths)),
                                                   np.NaN, dtype=self.read_instance.metadata_dtype)
@@ -327,7 +326,7 @@ class DataReader:
                     self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]] = \
                         self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]][:, data_left_edge_ind:data_right_edge_ind]
 
-                #cut edges of ghost data array
+                # cut edges of ghost data array
                 if self.read_instance.reading_ghost:
                     self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
                         self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]][:, :, data_left_edge_ind:data_right_edge_ind]
@@ -359,10 +358,10 @@ class DataReader:
                         yearmonths_to_read = np.asarray(yearmonths_to_read)
                     yearmonths_to_read = list(yearmonths_to_read[~yearmonths_previously_read])
 
-                    #need to read new yearmonths?
+                    # need to read new yearmonths?
                     if len(yearmonths_to_read) > 0:
 
-                        #add space for new data on left edge of the metadata array
+                        # add space for new data on left edge of the metadata array
                         self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
                             np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
                                 np.NaN, dtype=self.read_instance.metadata_dtype), self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]]), axis=1)
@@ -372,7 +371,7 @@ class DataReader:
                             np.concatenate((np.full((len(self.read_instance.previous_data_labels), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
                                 np.NaN, dtype=np.float32), self.read_instance.data_in_memory[self.read_instance.networkspecies[0]]), axis=2)
 
-                        #add space for new data on left edge of the filter data array
+                        # add space for new data on left edge of the filter data array
                         if self.read_instance.filter_species:  
                             self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]] = \
                                 np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
@@ -409,10 +408,10 @@ class DataReader:
                         yearmonths_to_read = np.asarray(yearmonths_to_read)
                     yearmonths_to_read = list(yearmonths_to_read[~yearmonths_previously_read])
 
-                    #need to read new yearmonths?
+                    # need to read new yearmonths?
                     if len(yearmonths_to_read) > 0:
 
-                        #add space for new data on right edge of the metadata array
+                        # add space for new data on right edge of the metadata array
                         self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
                             np.concatenate((self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]], 
                                 np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
@@ -495,13 +494,12 @@ class DataReader:
             update_plotting_parameters(self.read_instance) 
 
     def read_data(self, yearmonths_to_read, data_labels):
-        """
-        Function that handles reading of observational/experiment data.
+        """ Function that handles reading of observational/experiment data.
 
-        :param yearmonths_to_read: list of yearmonths to read
-        :type yearmonths_to_read: list
-        :param data_labels: data labels to read
-        :type data_labels: list
+            :param yearmonths_to_read: list of yearmonths to read
+            :type yearmonths_to_read: list
+            :param data_labels: data labels to read
+            :type data_labels: list
         """
 
         # create arrays to share across processes (for parallel multiprocessing use)

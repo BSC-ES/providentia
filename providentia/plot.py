@@ -27,9 +27,7 @@ basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
 class Plot:
-    """
-    "Class that makes plots and handles plot configuration options when defined"
-    """
+    """ Class that makes plots and handles plot configuration options when defined. """
 
     def __init__(self, read_instance=None, canvas_instance=None):
         
@@ -55,14 +53,13 @@ class Plot:
         self.canvas_instance.periodic_labels = periodic_labels()
 
     def set_plot_characteristics(self, plot_types, zstat=False):
-        """
-        Iterate through all plots to make, and determine if they can and cannot be made.
-        Update plot characteristics associated with specific plot types due to plot options. 
+        """ Iterate through all plots to make, and determine if they can and cannot be made.
+            Update plot characteristics associated with specific plot types due to plot options. 
 
-        :param plot_types: plot types to create 
-        :type plot_types: list  
-        :param zstat: z statistic str 
-        :type zstat: str
+            :param plot_types: plot types to create 
+            :type plot_types: list  
+            :param zstat: z statistic str 
+            :type zstat: str
         """
 
         # add all valid defined plots to self.plot_characteristics
@@ -173,24 +170,24 @@ class Plot:
     def format_axis(self, ax, base_plot_type, plot_characteristics, 
                     col_ii=0, last_valid_row=True, last_row_on_page=True, set_extent=True,
                     relevant_temporal_resolutions=['hour','dayofweek','month']):
-        """Format a plotting axis.
+        """ Format a plotting axis.
         
-        :param ax: axis object
-        :type ax: object
-        :param base_plot_type: plot to make, without statistical information
-        :type base_plot_type: str  
-        :param plot_characteristics: plot characteristics
-        :type plot_characteristics: dict
-        :param col_ii: column index (for offline report)
-        :type col_ii: int
-        :param last_valid_row: boolean informing if last valid row to plot on (for offline report)
-        :type last_valid_row: boolean
-        :param last_row_on_page: boolean informing if last valid row on page (for offline report)
-        :type last_row_on_page: boolean
-        :param map_extent: boolean informing if wanting to set map_extent or not
-        :type map_extent: boolean
-        :param relevant_temporal_resolutions: list of relevant temporal resolutions
-        :type relevant_temporal_resolutions: list
+            :param ax: axis object
+            :type ax: object
+            :param base_plot_type: plot to make, without statistical information
+            :type base_plot_type: str  
+            :param plot_characteristics: plot characteristics
+            :type plot_characteristics: dict
+            :param col_ii: column index (for offline report)
+            :type col_ii: int
+            :param last_valid_row: boolean informing if last valid row to plot on (for offline report)
+            :type last_valid_row: boolean
+            :param last_row_on_page: boolean informing if last valid row on page (for offline report)
+            :type last_row_on_page: boolean
+            :param map_extent: boolean informing if wanting to set map_extent or not
+            :type map_extent: boolean
+            :param relevant_temporal_resolutions: list of relevant temporal resolutions
+            :type relevant_temporal_resolutions: list
         """
 
         # get plot characteristics vars
@@ -297,8 +294,8 @@ class Plot:
                     self.set_map_extent(ax_to_format)
 
     def set_map_extent(self, ax):
-        """set map extent, done set_xlim and set_ylim rather than set_extent 
-           to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697)
+        """ Set map extent, done set_xlim and set_ylim rather than set_extent 
+            to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697).
         """
 
         mlon = np.mean(self.read_instance.map_extent[:2])
@@ -310,8 +307,7 @@ class Plot:
         ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
 
     def set_equal_axes(self, ax):
-        """ Set equal aspect and limits (useful for scatter plots)
-        """
+        """ Set equal aspect and limits (useful for scatter plots). """
 
         # set aspect
         ax.set_aspect('equal', adjustable='box')
@@ -319,7 +315,7 @@ class Plot:
         if len(ax.lines) == 0:
             return None
 
-        # Get min and max values for ticks
+        # get min and max values for ticks
         for i, line in enumerate(ax.lines):
             line_xdata = line.get_xdata()
             line_ydata = line.get_ydata()
@@ -341,7 +337,7 @@ class Plot:
             if np.nanmax(line.get_ydata()) > ytickmax:
                 ytickmax = np.nanmax(line.get_ydata())
 
-        # Compare min and max across axes
+        # compare min and max across axes
         if xtickmin < ytickmin:
             tickmin = xtickmin
         else:
@@ -358,14 +354,14 @@ class Plot:
         return None
 
     def make_legend_handles(self, plot_characteristics_legend, plot_options=[]):
-        """Make legend element handles
+        """ Make legend element handles.
         
-        :param plot_characteristics_legend: plot characteristics for relevant legend
-        :type plot_characteristics_legend: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list    
-        :return: plot_characteristics_legend with handles updated
-        :rtype: dict
+            :param plot_characteristics_legend: plot characteristics for relevant legend
+            :type plot_characteristics_legend: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list    
+            :return: plot_characteristics_legend with handles updated
+            :rtype: dict
         """
 
         # create legend elements
@@ -393,12 +389,12 @@ class Plot:
         return plot_characteristics_legend
 
     def make_experiment_domain_polygons(self, plot_options=[]):
-        """Make experiment domain polygons
+        """ Make experiment domain polygons.
         
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
-        :return: grid_edge_polygons
-        :rtype: list
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :return: grid_edge_polygons
+            :rtype: list
         """
 
         grid_edge_polygons = []
@@ -419,12 +415,12 @@ class Plot:
         return grid_edge_polygons
 
     def make_header(self, pdf, plot_characteristics, plot_options=[]):
-        """Make header
+        """ Make header.
         
-        :param plot_characteristics: plot characteristics 
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
+            :param plot_characteristics: plot characteristics 
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
         """
 
         # set header title
@@ -437,7 +433,7 @@ class Plot:
         network_to_write = np.unique(self.read_instance.network)
         species_to_write = np.unique(self.read_instance.species)
 
-        #set header main text
+        # set header main text
         txt = 'Network : {}\n' \
               'Species : {}\n' \
               'Temporal Resolution : {}\n' \
@@ -471,22 +467,22 @@ class Plot:
 
     def make_metadata(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
                       first_data_label=False, station_inds=[]):
-        """Make metadata summary plot
+        """ Make metadata summary plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param data_label: name of data array to plot
-        :type data_label: str
-        :param plot_characteristics: plot characteristics 
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
-        :param first_data_label: boolean informing if first plotted data_label on axis
-        :type first_data_label: boolean
-        :param station_inds: list of relevant station indices
-        :type station_inds: list
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_label: name of data array to plot
+            :type data_label: str
+            :param plot_characteristics: plot characteristics 
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param first_data_label: boolean informing if first plotted data_label on axis
+            :type first_data_label: boolean
+            :param station_inds: list of relevant station indices
+            :type station_inds: list
         """
 
         # initialise string to plot on axis
@@ -662,20 +658,20 @@ class Plot:
 
     def make_map(self, relevant_axis, networkspeci, z_statistic, plot_characteristics, plot_options=[],
                  first_data_label=False):
-        """make map plot
+        """ Make map plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param z_statistic: calculated z statistic to plot
-        :type z_statistic: np.array
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
-        :param first_data_label: boolean informing if first plotted data_label on axis
-        :type first_data_label: boolean
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param z_statistic: calculated z statistic to plot
+            :type z_statistic: np.array
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param first_data_label: boolean informing if first plotted data_label on axis
+            :type first_data_label: boolean
         """
       
         # plot new station points on map - coloured by currently active z statisitic
@@ -690,20 +686,20 @@ class Plot:
 
     def make_timeseries(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[], 
                         first_data_label=False):
-        """make timeseries plot
+        """ Make timeseries plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param data_label: name of data array to plot
-        :type data_label: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
-        :param first_data_label: boolean informing if first plotted data_label on axis
-        :type first_data_label: boolean
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_label: name of data array to plot
+            :type data_label: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param first_data_label: boolean informing if first plotted data_label on axis
+            :type first_data_label: boolean
         """
 
         # get marker size
@@ -740,28 +736,28 @@ class Plot:
         
     def make_periodic(self, relevant_axis, networkspeci, data_label, plot_characteristics, zstat=None, plot_options=[],
                       first_data_label=False):
-        """Make period or period-violin plot
+        """ Make period or period-violin plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param data_label: name of data array to plot
-        :type data_label: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param zstat: name of statistic
-        :type zstat: str
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
-        :param first_data_label: boolean informing if first plotted data_label on axis
-        :type first_data_label: boolean
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_label: name of data array to plot
+            :type data_label: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param zstat: name of statistic
+            :type zstat: str
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param first_data_label: boolean informing if first plotted data_label on axis
+            :type first_data_label: boolean
         """
 
         # iterate through all relevant temporal aggregation resolutions
         for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
 
-            #get subplot axis
+            # get subplot axis
             relevant_sub_ax = relevant_axis[relevant_temporal_resolution]
 
             # violin plot type?
@@ -867,24 +863,24 @@ class Plot:
 
     def make_distribution(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
                           first_data_label=False, data_range_min=False, data_range_max=False):
-        """Make distribution plot
+        """ Make distribution plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param data_label: name of data array to plot
-        :type data_label: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
-        :param first_data_label: boolean informing if first plotted data_label on axis
-        :type first_data_label: boolean
-        :param data_range_min: minimum data range of distribution plot grid 
-        :type data_range_min: float
-        :param data_range_max: maximum data range of distribution plot grid 
-        :type data_range_max: float
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_label: name of data array to plot
+            :type data_label: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param first_data_label: boolean informing if first plotted data_label on axis
+            :type first_data_label: boolean
+            :param data_range_min: minimum data range of distribution plot grid 
+            :type data_range_min: float
+            :param data_range_max: maximum data range of distribution plot grid 
+            :type data_range_max: float
         """
 
         # set data ranges for distribution plot grid if not set explicitely
@@ -955,20 +951,20 @@ class Plot:
 
     def make_scatter(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
                      first_data_label=False):
-        """Make scatter plot
+        """ Make scatter plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param data_label: name of data array to plot
-        :type data_label: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
-        :param first_data_label: boolean informing if first plotted data_label on axis
-        :type first_data_label: boolean
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_label: name of data array to plot
+            :type data_label: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param first_data_label: boolean informing if first plotted data_label on axis
+            :type first_data_label: boolean
         """
 
         # get marker size
@@ -1005,23 +1001,22 @@ class Plot:
         if not self.read_instance.offline:
             self.track_plot_elements(data_label, 'scatter', 'plot', scatter_plot, bias=False)
           
-
     def make_boxplot(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
                      first_data_label=False):
-        """Make boxplot
+        """ Make boxplot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param data_label: name of data array to plot
-        :type data_label: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
-        :param first_data_label: boolean informing if first plotted data_label on axis
-        :type first_data_label: boolean
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_label: name of data array to plot
+            :type data_label: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param first_data_label: boolean informing if first plotted data_label on axis
+            :type first_data_label: boolean
         """
 
         # make boxplot for data_label for multispecies
@@ -1102,16 +1097,16 @@ class Plot:
             self.track_plot_elements(data_label, 'boxplot', 'plot', boxplot, bias=False)
 
     def make_heatmap(self, relevant_axis, stats_df, plot_characteristics, plot_options=[]):
-        """Make heatmap plot
+        """ Make heatmap plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param stats_df: dataframe of calculated statistical information
-        :type stats_df: object
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param stats_df: dataframe of calculated statistical information
+            :type stats_df: object
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
         """
 
         # determine if want to add annotations or not from plot_options
@@ -1149,18 +1144,18 @@ class Plot:
             self.track_plot_elements('observations', 'heatmap', 'plot', heatmap, bias=bias)
 
     def make_table(self, relevant_axis, stats_df, plot_characteristics, plot_options=[], statsummary=False):
-        """Make table plot
+        """ Make table plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param stats_df: dataframe of calculated statistical information
-        :type stats_df: object
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plot  
-        :type plot_options: list
-        :param statsummary: boolean indiciating if making alternative statistical summary table plot  
-        :type statsummary: boolean
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param stats_df: dataframe of calculated statistical information
+            :type stats_df: object
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param statsummary: boolean indiciating if making alternative statistical summary table plot  
+            :type statsummary: boolean
         """
 
         # turn off axis to make table
@@ -1240,31 +1235,26 @@ class Plot:
             else:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
 
-    def log_axes(self, relevant_axis, log_ax, base_plot_type, plot_characteristics, 
-                 undo=False):
-        """Log plot axes
+    def log_axes(self, relevant_axis, log_ax, plot_characteristics, undo=False):
+        """ Log plot axes.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param log_ax: which axis to log
-        :type log_ax: str
-        :param base_plot_type: plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param undo: unlog plot axes
-        :type undo: boolean
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param log_ax: which axis to log
+            :type log_ax: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param undo: unlog plot axes
+            :type undo: boolean
         """
 
         if not undo:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('log')
-                relevant_axis.autoscale()
                 
             if log_ax == 'logy':
                 relevant_axis.set_yscale('log')
-                relevant_axis.autoscale()
-                
+
         else:
             if log_ax == 'logx':
                 relevant_axis.set_xscale('linear')
@@ -1272,25 +1262,23 @@ class Plot:
             if log_ax == 'logy':
                 relevant_axis.set_yscale('linear')
             
-            if 'equal_aspect' in list(plot_characteristics.keys()):
-                self.set_equal_axes(relevant_axis)
 
     def linear_regression(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
                           plot_options=[]):
-        """Add linear regression to plot
+        """ Add linear regression to plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param data_labels: names of plotted data arrays  
-        :type data_labels: list
-        :param base_plot_type: plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plots
-        :type plot_options: list
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_labels: names of plotted data arrays  
+            :type data_labels: list
+            :param base_plot_type: plot type, without statistical information
+            :type base_plot_type: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plots
+            :type plot_options: list
         """
     
         # get observations data
@@ -1311,20 +1299,20 @@ class Plot:
                     self.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
     def smooth(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, plot_options=[]):
-        """Add smooth line to plot
+        """ Add smooth line to plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param data_labels: names of plotted data arrays   
-        :type data_labels: list
-        :param base_plot_type: plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plots
-        :type plot_options: list
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_labels: names of plotted data arrays   
+            :type data_labels: list
+            :param base_plot_type: plot type, without statistical information
+            :type base_plot_type: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plots
+            :type plot_options: list
         """
 
         # iterate through plotted data arrays making smooth line
@@ -1356,22 +1344,22 @@ class Plot:
 
     def annotation(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics,
                    plot_options=[], plotting_paradigm=None):
-        """Add statistical annotations to plot
+        """ Add statistical annotations to plot.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param data_labels: names of plotted data arrays 
-        :type data_labels: list
-        :param base_plot_type: plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plots
-        :type plot_options: list
-        :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
-        :type plotting_paradigm: str
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_labels: names of plotted data arrays 
+            :type data_labels: list
+            :param base_plot_type: plot type, without statistical information
+            :type base_plot_type: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plots
+            :type plot_options: list
+            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+            :type plotting_paradigm: str
         """
 
         # get stats wished to be annotated
@@ -1457,8 +1445,7 @@ class Plot:
             self.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
 
     def get_no_margin_lim(self, ax, lim):
-        """ Get true limits of plot area.
-        """
+        """ Get true limits of plot area. """
 
         # xlim
         if lim == 'xlim':
@@ -1477,14 +1464,14 @@ class Plot:
         return lower_lim, upper_lim
 
     def log_validity(self, relevant_axis, log_ax):
-        """Determine if log operation for a given axes is valid (no values <= 0)
+        """ Determine if log operation for a given axes is valid (no values <= 0).
         
-        :param relevant_axis: relevant axes
-        :type relevant_axis: list
-        :param log_ax: which axis to log
-        :type log_ax: str
-        :return: validity to log axis
-        :rtype: boolean
+            :param relevant_axis: relevant axes
+            :type relevant_axis: list
+            :param log_ax: which axis to log
+            :type log_ax: str
+            :return: validity to log axis
+            :rtype: boolean
         """
 
         if log_ax == 'logx':
@@ -1507,16 +1494,16 @@ class Plot:
         """ Function that tracks plotted lines and collections
             that will be removed/added when picking up legend elements on dashboard.
 
-        :param data_label: name of data array to plot
-        :type data_label: str
-        :param base_plot_type: plot type, without statistical information
-        :type base_plot_type: str
-        :param element_type: type of element
-        :type element_type: str
-        :param plot_object: plotted element object
-        :type plot_object: object
-        :param bias: boolean stating if plot is a bias plot
-        :type bias: boolean
+            :param data_label: name of data array to plot
+            :type data_label: str
+            :param base_plot_type: plot type, without statistical information
+            :type base_plot_type: str
+            :param element_type: type of element
+            :type element_type: str
+            :param plot_object: plotted element object
+            :type plot_object: object
+            :param bias: boolean stating if plot is a bias plot
+            :type bias: boolean
         """
 
         # set variable name to access plot elements (absolute or bias versions)
@@ -1578,30 +1565,30 @@ class Plot:
     def harmonise_xy_lims_paradigm(self, relevant_axs, base_plot_type, plot_characteristics, plot_options, 
                                    xlim=None,  ylim=None, relim=False, autoscale=False, autoscale_x=False, 
                                    autoscale_y=False, bias_centre=False):
-        """Harmonises xy limits across paradigm of plot type, unless axis limits have been defined
+        """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
         
-        :param relevant_axs: relevant axes
-        :type relevant_axs: list
-        :param base_plot_type: plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: list of options to configure plots
-        :type plot_options: list
-        :param xlim: xlimits to set
-        :type xlim: list
-        :param ylim: ylimits to set
-        :type ylim: list
-        :param relim: turn on relimiting of axes limits (when updating plotted data on axis)
-        :type relim: boolean
-        :param autoscale: Autoscale the axis view to the data (both x and y axes)
-        :type autoscale: boolean
-        :param autoscale_x: Autoscale the x axis view to the data
-        :type autoscale_x: boolean
-        :param autoscale_y: Autoscale the x axis view to the data
-        :type autoscale_y: boolean
-        :param bias_centre: centre bias plots at 0 on the y axis
-        :type bias_centre: boolean   
+            :param relevant_axs: relevant axes
+            :type relevant_axs: list
+            :param base_plot_type: plot type, without statistical information
+            :type base_plot_type: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plots
+            :type plot_options: list
+            :param xlim: xlimits to set
+            :type xlim: list
+            :param ylim: ylimits to set
+            :type ylim: list
+            :param relim: turn on relimiting of axes limits (when updating plotted data on axis)
+            :type relim: boolean
+            :param autoscale: Autoscale the axis view to the data (both x and y axes)
+            :type autoscale: boolean
+            :param autoscale_x: Autoscale the x axis view to the data
+            :type autoscale_x: boolean
+            :param autoscale_y: Autoscale the x axis view to the data
+            :type autoscale_y: boolean
+            :param bias_centre: centre bias plots at 0 on the y axis
+            :type bias_centre: boolean   
         """
         
         # initialise arrays to save lower and upper limits in all axes
@@ -1773,16 +1760,16 @@ class Plot:
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics, 
                        relevant_temporal_resolutions=['hour']):
-        """Set title of plot axis
+        """ Set title of plot axis.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param title: axis title
-        :type title: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
-        :param relevant_temporal_resolutions: relevant temporal resolutions to plot title on   
-        :type relevant_temporal_resolutions: list
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param title: axis title
+            :type title: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param relevant_temporal_resolutions: relevant temporal resolutions to plot title on   
+            :type relevant_temporal_resolutions: list
         """    
 
         # return if title is empty str
@@ -1807,16 +1794,16 @@ class Plot:
 
     def set_axis_label(self, relevant_axis, label_ax, label, plot_characteristics, 
                        relevant_temporal_resolutions=['hour', 'month']):
-        """Set label of plot axis
+        """ Set label of plot axis.
 
-        :param relevant_axis: axis to plot on 
-        :type relevant_axis: object
-        :param label_ax: which axis to set label of
-        :type label_ax: str
-        :param label: axis label
-        :type label: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param label_ax: which axis to set label of
+            :type label_ax: str
+            :param label: axis label
+            :type label: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
         """
 
         # return if label is empty str
@@ -1848,12 +1835,12 @@ class Plot:
                 relevant_axis.set_ylabel(**axis_label_characteristics)
 
     def get_markersize(self, networkspeci, plot_characteristics):
-        """Set markersize for plot.
+        """ Set markersize for plot.
 
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param plot_characteristics: plot characteristics  
-        :type plot_characteristics: dict
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
         """
 
         # configure size of plots if have very few points

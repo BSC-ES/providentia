@@ -19,12 +19,10 @@ log = logging.getLogger(__name__)
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 class ProvArgumentParser(object):
-    """ Argument Parser """
+    """ Class that handles the argument parser. """
 
     def __init__(self):
-        """
-        Initialization of the arguments the parser can handle
-        """
+        """ Initialise the arguments the parser can handle. """
 
         try:
             self.parser = ArgumentParser(description='Main parser for Providentia.')
@@ -125,10 +123,8 @@ class ProvArgumentParser(object):
     # Parse arguments and preprocess
     #-----------------------------------------------------------------------
     def parse_args(self, args=None):
-        """
-        Parse arguments given to an executable
-        :param args:
-        """
+        """ Parse arguments given to an executable :param args:. """
+
         try:
             return self.parser.parse_args(args)
         except Exception as error:

@@ -24,7 +24,7 @@ def parse_path(dir, f):
         return os.path.join(dir, f)
 
 class ProvConfiguration:
-    """ Configuration parameters definitions """
+    """ Class that handles the configuration parameters definitions. """
 
     def __init__(self, read_instance, **kwargs):
         
@@ -85,7 +85,7 @@ class ProvConfiguration:
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
     def parse_parameter(self, key, value):
-        """ parse a parameter """
+        """ Parse a parameter. """
 
         # get available N CPUs
         if key == 'available_cpus':
@@ -106,7 +106,7 @@ class ProvConfiguration:
             # on all other machines pull from internet
 
         elif key == 'n_cpus':
-            # Define number of CPUs to process on (leave empty to automatically
+            # define number of CPUs to process on (leave empty to automatically
             # utilise all available CPUs) NOTE: if this value is set higher than the
             # actual number of CPUs available, then the max number of CPUs is used.
 
@@ -114,7 +114,7 @@ class ProvConfiguration:
                 return self.read_instance.available_cpus
 
         elif key == 'ghost_root':
-            # Define GHOST observational root data directory (if undefined it is
+            # define GHOST observational root data directory (if undefined it is
             # automatically taken from the BSC machine the tool is ran on)
 
             # set default if left undefined
@@ -127,7 +127,7 @@ class ProvConfiguration:
                     return '/esarchive/obs/ghost'
 
         elif key == 'nonghost_root':
-            # Define non-GHOST observational root data directory (if undefined it is
+            # define non-GHOST observational root data directory (if undefined it is
             # automatically taken from the BSC machine the tool is ran on)
 
             # set default if left undefined
@@ -139,7 +139,7 @@ class ProvConfiguration:
                     return '/esarchive/obs'
 
         elif key == 'exp_root':
-            # Define experiment root data directory
+            # define experiment root data directory
             # set experiment root data directory if left undefined
             if value == '':
                 # not running on workstation?
@@ -163,8 +163,10 @@ class ProvConfiguration:
             self.read_instance.parameter_dictionary = dict()
             for _, param_dict in standard_parameters.items():
                 self.read_instance.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
+            
             # get standard metadata dictionary
             self.read_instance.standard_metadata = get_standard_metadata({'standard_units': ''})
+            
             # create list of GHOST metadata variables to read
             self.read_instance.ghost_metadata_vars_to_read = [key for key in self.read_instance.standard_metadata.keys() if
                                                               pd.isnull(self.read_instance.standard_metadata[key]['metadata_type']) == False]
@@ -359,7 +361,7 @@ class ProvConfiguration:
         return value
 
     def check_validity(self):
-        """check validity of set variables after parsing"""
+        """ Check validity of set variables after parsing. """
 
         # check have network, otherwise throw error
         if not hasattr(self.read_instance, 'network'):
@@ -531,7 +533,7 @@ class ProvConfiguration:
             print('Warning: Multiple networks/species not supported for dashboard. First network / species taken.')
 
 def read_conf(fpath=None):
-    """Read configuration"""
+    """ Read configuration files. """
 
     res = {}
     res_sub = {}
@@ -562,7 +564,7 @@ def read_conf(fpath=None):
                         sys.exit(error)
             elif '[[' in line and ']]' in line:
                 subsection = line.strip()
-                #if first character is comment do not parse subsection
+                # if first character is comment do not parse subsection
                 if subsection[0] != '#':
                     subsection_modified = section_modified + '|' + line.split('[[')[1].split(']]')[0]
                     subsections.append(subsection)
@@ -570,7 +572,7 @@ def read_conf(fpath=None):
                     all_sections_modified.append(subsection_modified)
 
             if '[' in line and ']' in line:
-                #if first character is comment then add section to list to avoid parsing
+                # if first character is comment then add section to list to avoid parsing
                 if line.strip()[0] == '#':
                     all_sections_commented.append(line.strip())
                 else:
@@ -628,7 +630,7 @@ def read_conf(fpath=None):
                             copy = True
                         continue
 
-                    #start of commented section
+                    # start of commented section
                     elif line_strip in all_sections_commented:
                         copy = False
                         continue
@@ -684,7 +686,7 @@ def read_conf(fpath=None):
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
    
 def write_conf(section, subsection, fpath, opts):
-    """Write configurations on file. """
+    """ Write configurations on file. """
 
     config = configparser.RawConfigParser()
 
@@ -701,8 +703,9 @@ def write_conf(section, subsection, fpath, opts):
         config.write(configfile)
 
 def split_options(conf_string, separator="||"):
-    """For the options in the configuration that define the keep and remove
-    options. Returns the values in two lists, the keeps and removes"""
+    """ For the options in the configuration that define the keep and remove
+        options. Returns the values in two lists, the keeps and removes.
+    """
     
     keeps, removes = [], []
 
