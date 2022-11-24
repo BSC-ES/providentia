@@ -1518,6 +1518,75 @@ class Plot:
 
         return validity
 
+    def do_formatting(self, relevant_axs, relevant_data_labels, networkspeci,
+                      base_plot_type, plot_type, plot_options, plotting_paradigm):
+        """ Function that handles formatting of a plot axis,
+            based on given plot options.
+
+        :param relevant_axs: relevant axes
+        :type relevant_axs: list
+        :param relevant_data_labels: names of plotted data arrays 
+        :type relevant_data_labels: list
+        :param networkspeci: str of currently active network and species 
+        :type networkspeci: str
+        :param base_plot_type: plot type, without statistical information
+        :type base_plot_type: str
+        :param plot_type: plot type
+        :type plot_type: str
+        :param plot_options: list of options to configure plots
+        :type plot_options: list
+        :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+        :type plotting_paradigm: str
+        """
+
+        for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
+
+            # log axes?
+            if 'logx' in plot_options:            
+                log_validity = self.plot.log_validity(ax, 'logx')
+                if log_validity:
+                    self.plot.log_axes(relevant_ax, 'logx', base_plot_type, self.plot_characteristics[plot_type])
+                else:
+                    msg = "Warning: It is not possible to log the x-axis "
+                    msg += "in {0} with negative values.".format(plot_type)
+                    print(msg)
+
+            if 'logy' in plot_options:
+                log_validity = self.plot.log_validity(ax, 'logy')
+                if log_validity:
+                    self.plot.log_axes(relevant_ax, 'logy', base_plot_type, self.plot_characteristics[plot_type])
+                else:
+                    msg = "Warning: It is not possible to log the y-axis "
+                    msg += "in {0} with negative values.".format(plot_type)
+                    print(msg)
+
+            # annotation
+            if 'annotate' in plot_options:
+                if base_plot_type not in ['heatmap']:
+                    self.plot.annotation(relevant_ax, networkspeci, 
+                                        relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                                        self.plot_characteristics[plot_type],
+                                        plot_options=plot_options,
+                                        plotting_paradigm=plotting_paradigm)
+                    # annotate on first axis
+                    if base_plot_type in ['periodic', 'periodic-violin']:
+                        break
+            
+            # regression line
+            if 'regression' in plot_options:
+                self.plot.linear_regression(relevant_ax, networkspeci, 
+                                            relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                                            self.plot_characteristics[plot_type], 
+                                            plot_options=plot_options)
+
+            # smooth line
+            if 'smooth' in plot_options:
+                self.plot.smooth(relevant_ax, networkspeci,
+                                 relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                                 self.plot_characteristics[plot_type], 
+                                 plot_options=plot_options)
+
+
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
             that will be removed/added when picking up legend elements on dashboard.
