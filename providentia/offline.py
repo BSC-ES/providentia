@@ -918,7 +918,7 @@ class ProvidentiaOffline:
                 axis_ind = (self.current_plot_ind * len(self.subsections)) + self.subsection_ind
                 relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, 
                                                                                      plot_type, axis_ind)
-                
+
                 # set axis title
                 if relevant_axis.get_title() == '':
                     if self.n_stations == 1:
