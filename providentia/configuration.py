@@ -419,7 +419,7 @@ class ProvConfiguration:
 
             # otherwise throw error
             else:
-                error = 'Error: The number of networks and species is not the same.'
+                error = 'Error: The number of "network" and "species" fields is not the same.'
                 sys.exit(error)
 
         # throw error if one of networks are non all GHOST or non-GHOST
@@ -429,7 +429,7 @@ class ProvConfiguration:
             else:
                 is_ghost = check_for_ghost(network)
                 if is_ghost != previous_is_ghost:
-                    error = 'Error: Networks must be all GHOST or non-GHOST'
+                    error = 'Error: "network" must be all GHOST or non-GHOST'
                     sys.exit(error)
                 previous_is_ghost = is_ghost
 
@@ -457,11 +457,15 @@ class ProvConfiguration:
                 print('Warning: "end_date" field not defined in .conf file. Using default: {}'.format(default))
             self.read_instance.end_date = default
 
-        # check have active_dashboard_plots information, 
+        # check have correct active_dashboard_plots information, 
+        # should have 4 plots if non-empty, throw error if using dashboard if not
         if not self.read_instance.active_dashboard_plots:
             default = ['timeseries', 'statsummary', 'distribution', 'periodic']
             self.read_instance.active_dashboard_plots = default
-
+        if (len(self.read_instance.active_dashboard_plots) != 4) & (not self.read_instance.offline):
+            error = 'Error: there must be 4 "active_dashboard_plots"'
+            sys.exit(error)
+        
         # if filter_species is active, and spatial_colocation is not active, then cannot filter by species
         # set filter_species to empty dict and advise user of this
         if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
