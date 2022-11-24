@@ -16,7 +16,8 @@
                     "heatmap-MB", "heatmap-RMSE", "heatmap-r", "heatmap-r2"],
 
     "dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "distribution", "distribution_bias",
-            "statsummary", "statsummary_bias", "scatter_annotate", "timeseries_annotate",
+            "statsummary", "statsummary_bias", "heatmap_r", "heatmap-MB", "heatmap-RMSE", "heatmap-MFB", 
+            "scatter_annotate", "timeseries_annotate",
             "timeseries_annotate_bias"],
 
     "size": ["boxplot_multispecies"], 
