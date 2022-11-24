@@ -6,11 +6,11 @@ import pandas as pd
 import bisect
 import time
 
-#initialise dictionary for storing pointers to shared memory variables in read step 
+# initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
 
 def drop_nans(data):
-    """Function that returns list of lists of station data with NaNs removed"""
+    """ Function that returns list of lists of station data with NaNs removed. """
 
     # reshape numpy array to have lists of data per station
     data_nonan = []
@@ -21,9 +21,9 @@ def drop_nans(data):
     return data_nonan
 
 def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghost_data_in_memory, ghost_data_in_memory_shape, timestamp_array, qa, flags):
-    """Function which called before netCDF read function,
-       to initialise each worker process.
-       Purpose of this function is to access shared memory variables  
+    """ Function which called before netCDF read function,
+        to initialise each worker process.
+        The purpose of this function is to access shared memory variables.
     """
     shared_memory_vars['data_in_memory'] = data_in_memory
     shared_memory_vars['data_in_memory_shape'] = data_in_memory_shape
@@ -34,10 +34,10 @@ def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghos
     shared_memory_vars['flag'] = flags
 
 def read_netcdf_data(tuple_arguments):
-    """Function that handles reading of observational/experiment
-    netCDF data also handles filtering of observational data based
-    on selected qa/flag/classification flags. If file does not exist,
-    returns None.
+    """ Function that handles reading of observational/experiment
+        netCDF data also handles filtering of observational data based
+        on selected qa/flag/classification flags. If file does not exist,
+        returns None.
     """
 
     # assign arguments from tuple to variables
@@ -45,7 +45,7 @@ def read_netcdf_data(tuple_arguments):
     reading_ghost, ghost_data_vars_to_read, metadata_dtype, metadata_vars_to_read, \
     default_qa, filter_read = tuple_arguments
 
-    #wrap shared arrays as numpy arrays to more easily manipulate the data
+    # wrap shared arrays as numpy arrays to more easily manipulate the data
     data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])
     if (reading_ghost) & (data_label == 'observations'): 
         qa = np.frombuffer(shared_memory_vars['qa'], dtype=np.uint8)
@@ -69,7 +69,8 @@ def read_netcdf_data(tuple_arguments):
         file_time = num2date(ncdf_root['time'][:], time_units)
         # remove microseconds and convert to integer
         file_time = pd.to_datetime([t.replace(microsecond=0) for t in file_time])
-    #get file time as integer timestamp
+    
+    # get file time as integer timestamp
     file_timestamp = file_time.asi8
 
     # get valid file time indices (i.e. those times in active full time array)
@@ -196,7 +197,7 @@ def read_netcdf_data(tuple_arguments):
                 # put metadata in array
                 file_metadata[meta_var][full_array_station_indices, 0] = meta_val
 
-    #experiment data
+    # experiment data
     else:
         relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
 
@@ -214,9 +215,10 @@ def read_netcdf_data(tuple_arguments):
         return file_metadata
 
 def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to_read, resolution):
-    """Function that returns the yearmonths of the files to be read.
-       Filters out yearmonths outside given date range 
+    """ Function that returns the yearmonths of the files to be read.
+        Filters out yearmonths outside given date range.
     """
+    
     available_yearmonthdays = [int(yearmonth+'01') for yearmonth in available_yearmonths]
 
     first_valid_file_ind = bisect.bisect_right(available_yearmonthdays, int(start_date_to_read))
