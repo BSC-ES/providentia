@@ -1033,7 +1033,7 @@ class Plot:
             for ns_ii, ns in enumerate(self.read_instance.networkspecies):
                 positions = [(ns_ii - (plot_characteristics['group_widths']['multispecies'] / 2.0)) + (offset)]
                 
-                #check have data_label to plot for networkspecies?
+                # check have data_label to plot for networkspecies?
                 if data_label in self.canvas_instance.selected_station_data[ns]: 
                 
                     # make boxplot
