@@ -367,7 +367,7 @@ def init_metadata(instance):
                 instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['keep_default'] = []
                 instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['remove_selected'] = []
                 instance.metadata_menu[metadata_type][metadata_var]['checkboxes']['remove_default'] = []
-            # otherwise, create infracstructure to store metadata var information
+            # otherwise, create infrastructure to store metadata var information
             else:
                 instance.metadata_menu[metadata_type][metadata_var] = {'window_title': metadata_var,
                                                                        'page_title': 'Filter stations by unique {} metadata'.format(metadata_var), 
@@ -1232,9 +1232,13 @@ def get_basic_metadata(instance):
             if ncdf_root['station_name'].dtype == np.str:
                 station_references[networkspeci] = ncdf_root['station_name'][:]
             else:
-                station_references[networkspeci] = np.array(
-                    [st_name.tostring().decode('ascii').replace('\x00', '')
-                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+                if ncdf_root['station_name'].dtype == np.dtype(object):
+                    station_references[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_name'][:]])
+                else:
+                    station_references[networkspeci] = np.array(
+                        [st_name.tostring().decode('ascii').replace('\x00', '')
+                        for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+            
             if "latitude" in ncdf_root.variables:
                 station_longitudes[networkspeci] = ncdf_root['longitude'][:]
                 station_latitudes[networkspeci] = ncdf_root['latitude'][:]
@@ -1243,26 +1247,26 @@ def get_basic_metadata(instance):
                 station_latitudes[networkspeci] = ncdf_root['lat'][:]
 
             if "station_classification" in ncdf_root.variables:
-                if ncdf_root['station_classification'][:].dtype == np.str:
+                if ncdf_root['station_classification'].dtype == np.str:
                     station_classifications[networkspeci] = ncdf_root['station_classification'][:]
                 else:
-                    if ncdf_root['station_classification'][:].dtype != np.dtype(object):
+                    if ncdf_root['station_classification'].dtype == np.dtype(object):
+                        station_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_classification'][:]])
+                    else:
                         station_classifications[networkspeci] = np.array(
                             [st_classification.tostring().decode('ascii').replace('\x00', '')
                             for st_classification in ncdf_root['station_classification'][:]], dtype=np.str)
-                    else:
-                        station_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_classification'][:]])
-
+            
             if "area_classification" in ncdf_root.variables:
-                if ncdf_root['area_classification'][:].dtype == np.str:
+                if ncdf_root['area_classification'].dtype == np.str:
                     area_classifications[networkspeci] = ncdf_root['area_classification'][:]
                 else:
-                    if ncdf_root['area_classification'][:].dtype != np.dtype(object):
+                    if ncdf_root['area_classification'].dtype == np.dtype(object):
+                        area_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['area_classification'][:]]) 
+                    else:
                         area_classifications[networkspeci] = np.array(
                             [area_classification.tostring().decode('ascii').replace('\x00', '')
                             for area_classification in ncdf_root['area_classification'][:]], dtype=np.str)
-                    else:
-                        area_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['area_classification'][:]]) 
             
             ncdf_root.close()
 
