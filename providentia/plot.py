@@ -62,7 +62,7 @@ class Plot:
             :type zstat: str
         """
 
-        # add all valid defined plots to self.plot_characteristics
+        # add all valid defined plots to plot_characteristics
         for plot_type in plot_types:
         
             # do not create empty plots
@@ -1530,18 +1530,18 @@ class Plot:
 
             # log axes?
             if 'logx' in plot_options:            
-                log_validity = self.plot.log_validity(relevant_ax, 'logx')
+                log_validity = self.log_validity(relevant_ax, 'logx')
                 if log_validity:
-                    self.plot.log_axes(relevant_ax, 'logx', self.plot_characteristics[plot_type])
+                    self.log_axes(relevant_ax, 'logx', self.canvas_instance.plot_characteristics[plot_type])
                 else:
                     msg = "Warning: It is not possible to log the x-axis "
                     msg += "in {0} with negative values.".format(plot_type)
                     print(msg)
 
             if 'logy' in plot_options:
-                log_validity = self.plot.log_validity(relevant_ax, 'logy')
+                log_validity = self.log_validity(relevant_ax, 'logy')
                 if log_validity:
-                    self.plot.log_axes(relevant_ax, 'logy', self.plot_characteristics[plot_type])
+                    self.log_axes(relevant_ax, 'logy', self.canvas_instance.plot_characteristics[plot_type])
                 else:
                     msg = "Warning: It is not possible to log the y-axis "
                     msg += "in {0} with negative values.".format(plot_type)
@@ -1550,28 +1550,28 @@ class Plot:
             # annotation
             if 'annotate' in plot_options:
                 if base_plot_type not in ['heatmap']:
-                    self.plot.annotation(relevant_ax, networkspeci, 
-                                        relevant_data_labels[relevant_ax_ii], base_plot_type, 
-                                        self.plot_characteristics[plot_type],
-                                        plot_options=plot_options,
-                                        plotting_paradigm=plotting_paradigm)
+                    self.annotation(relevant_ax, networkspeci, 
+                                    relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                                    self.canvas_instance.plot_characteristics[plot_type],
+                                    plot_options=plot_options,
+                                    plotting_paradigm=plotting_paradigm)
                     # annotate on first axis
                     if base_plot_type in ['periodic', 'periodic-violin']:
                         break
             
             # regression line
             if 'regression' in plot_options:
-                self.plot.linear_regression(relevant_ax, networkspeci, 
-                                            relevant_data_labels[relevant_ax_ii], base_plot_type, 
-                                            self.plot_characteristics[plot_type], 
-                                            plot_options=plot_options)
+                self.linear_regression(relevant_ax, networkspeci, 
+                                       relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                                       self.canvas_instance.plot_characteristics[plot_type], 
+                                       plot_options=plot_options)
 
             # smooth line
             if 'smooth' in plot_options:
-                self.plot.smooth(relevant_ax, networkspeci,
-                                 relevant_data_labels[relevant_ax_ii], base_plot_type, 
-                                 self.plot_characteristics[plot_type], 
-                                 plot_options=plot_options)
+                self.smooth(relevant_ax, networkspeci,
+                            relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                            self.canvas_instance.plot_characteristics[plot_type], 
+                            plot_options=plot_options)
 
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
