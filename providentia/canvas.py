@@ -3500,14 +3500,20 @@ class MPLCanvas(FigureCanvas):
             
                 # get event information
                 legend_label = event.artist
-                data_label = legend_label.get_text().lower()
-                for experiment, experiment_alias in self.read_instance.experiments.items():
-                    if data_label == experiment_alias:
-                        data_label = experiment
+                data_label = legend_label.get_text()
+                for exp_label, exp_alias in self.read_instance.experiments.items():
+                    if data_label == exp_alias:
+                        data_label = exp_label
                         continue
                 if data_label not in self.plot_elements['data_labels_active']:
                     visible = True
-                    self.plot_elements['data_labels_active'].append(data_label)
+                    # put observations label always first in pop-ups on hover
+                    if data_label == 'observations':
+                        self.plot_elements['data_labels_active'].insert(0, data_label)
+                    # put experiment labels in the same order as in the legend
+                    else:
+                        self.plot_elements['data_labels_active'].insert(list(self.read_instance.experiments.keys()).index(data_label)+1, 
+                                                                        data_label)
                 else:
                     visible = False
                     self.plot_elements['data_labels_active'].remove(data_label)
