@@ -702,11 +702,6 @@ def representativity_conf(instance):
     for i, label in enumerate(instance.representativity_menu['rangeboxes']['map_vars']):
         if hasattr(instance, label):
             instance.representativity_menu['rangeboxes']['current_lower'][i] = str(getattr(instance, label))
-        else:
-            if 'max_gap' in label:
-                instance.representativity_menu['rangeboxes']['current_lower'][i] = '100'
-            else:
-                instance.representativity_menu['rangeboxes']['current_lower'][i] = '0'
 
 def period_conf(instance):
     """ Function used when loading from a configuration file. 
@@ -722,9 +717,6 @@ def period_conf(instance):
         keeps, removes = split_options(instance.period)
         instance.period_menu['checkboxes']['keep_selected'] = keeps
         instance.period_menu['checkboxes']['remove_selected'] = removes
-    else:
-        instance.period_menu['checkboxes']['keep_selected'] =  []
-        instance.period_menu['checkboxes']['remove_selected'] = []
 
 def metadata_conf(instance):
     """ Function used when loading from a configuration file. 
@@ -747,8 +739,8 @@ def metadata_conf(instance):
                 current_upper.append(str(getattr(instance, label)[1]))
                 apply_selected.append(label)
             else:
-                current_lower.append('nan')
-                current_upper.append('nan')
+                current_lower.append(instance.metadata_menu[menu_type]['rangeboxes']['current_lower'][i])
+                current_upper.append(instance.metadata_menu[menu_type]['rangeboxes']['current_upper'][i])
         instance.metadata_menu[menu_type]['rangeboxes']['current_lower'] = current_lower
         instance.metadata_menu[menu_type]['rangeboxes']['current_upper'] = current_upper
         instance.metadata_menu[menu_type]['rangeboxes']['apply_selected'] = apply_selected
@@ -759,9 +751,6 @@ def metadata_conf(instance):
                 keeps, removes = split_options(getattr(instance, label))
                 instance.metadata_menu[menu_type][label]['checkboxes']['keep_selected'] = keeps
                 instance.metadata_menu[menu_type][label]['checkboxes']['remove_selected'] = removes
-            else:
-                instance.metadata_menu[menu_type][label]['checkboxes']['keep_selected'] = []
-                instance.metadata_menu[menu_type][label]['checkboxes']['remove_selected'] = []
 
 def valid_date(date_text):
     """ Determine if a date string is in the correct format. """
