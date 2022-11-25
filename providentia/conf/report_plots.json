@@ -1,6 +1,6 @@
 {       
     
-    "debug": ["metadata", "map-p50", "map-p95_bias", "timeseries", "timeseries_bias", "map-RMSE", "periodic-Mean", "periodic-r", "periodic-violin", "distribution", "distribution_bias", "boxplot", "heatmap-p50_annotate","heatmap-r_annotate", "table-p99","table-Mean_bias", "statsummary", "statsummary_bias"],
+    "debug": ["metadata", "map-p50", "map-p95_bias", "map-RMSE", "timeseries", "timeseries_bias", "periodic-Mean", "periodic-p50_bias", "periodic-r", "periodic-violin", "distribution", "distribution_bias", "boxplot", "heatmap-p50_annotate","heatmap-p95_bias_annotate","heatmap-r_annotate", "table-p99","table-Mean_bias", "statsummary", "statsummary_bias", "scatter_annotate"],
 
     "training": ["timeseries", "timeseries_individual", "scatter_annotate", "map-p95", 
                  "periodic-violin", "distribution_bias"],
@@ -16,7 +16,8 @@
                     "heatmap-MB", "heatmap-RMSE", "heatmap-r", "heatmap-r2"],
 
     "dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "distribution", "distribution_bias",
-            "statsummary", "statsummary_bias", "heatmap_r", "heatmap-MB", "heatmap-RMSE", "heatmap-MFB", 
+            "statsummary", "statsummary_bias", 
+            "heatmap-r_annotate", "heatmap-MB_annotate", "heatmap-RMSE_annotate", "heatmap-MFB_annotate", 
             "scatter_annotate", "timeseries_annotate",
             "timeseries_annotate_bias"],
 

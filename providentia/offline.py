@@ -791,6 +791,14 @@ class ProvidentiaOffline:
                         # iterate through plots to make
                         for plot_type in station_plots_to_make:
 
+                            # get zstat information from plot_type
+                            zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+                            # get base plot type (without stat and options)
+                            if zstat:
+                                base_plot_type = plot_type.split('-')[0] 
+                            else:
+                                base_plot_type = plot_type.split('_')[0] 
+
                             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                             plot_options = plot_type.split('_')[1:]
 
