@@ -238,7 +238,7 @@ def export_configuration(prv, cname, separator="||"):
                               })
 
     #add other miscellaneous fields
-    options['section'].update({'map_extent': prv.map_extent,
+    options['section'].update({'map_extent': ",".join(str(i) for i in prv.map_extent),
                                'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots),
                                'plot_characteristics_filename': prv.plot_characteristics_filename
                               })
@@ -284,7 +284,11 @@ def export_configuration(prv, cname, separator="||"):
                 lower_def = prv.metadata_menu[menu_type]['rangeboxes']['lower_default'][i]
                 upper_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_upper'][i]
                 upper_def = prv.metadata_menu[menu_type]['rangeboxes']['upper_default'][i]
-                if (lower_cur != lower_def) or (upper_cur != upper_def):
+                # do not write nans
+                if (pd.isnull(lower_cur)) or (pd.isnull(upper_cur)) or (lower_cur == 'nan') or (upper_cur == 'nan'):
+                    continue
+                # write field if different from default values
+                elif (lower_cur != lower_def) or (upper_cur != upper_def):
                     options['subsection'][label] = lower_cur + ", " + upper_cur
 
             # and then treat the keep/remove
