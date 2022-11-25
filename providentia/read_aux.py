@@ -85,8 +85,11 @@ def read_netcdf_data(tuple_arguments):
         if ncdf_root['station_name'].dtype == np.str:
             file_station_references = ncdf_root['station_name'][:]
         else:
-            file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
-                                                for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+            if ncdf_root['station_name'].dtype == np.dtype(object):
+                file_station_references = np.array([''.join(val) for val in ncdf_root['station_name'][:]])
+            else:
+                file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
+                                                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
     else:
         file_station_references = ncdf_root['station_reference'][:]
 
