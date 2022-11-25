@@ -8,9 +8,9 @@ import copy
 # and CAMS Validated Reanalysis (VRA)
 
 # please indicate the type of station files to use (IRA or VRA)  
-process_type = 'IRA'
+process_type = 'VRA'
 # please indicate the year of station files to process (YYYY)
-station_year = '2022'
+station_year = '2019'
 # please indicate the GHOST version
 ghost_version = '1.4'
 # please indicate the species to process (as a list)
@@ -20,9 +20,9 @@ network = 'EEA_AQ_eReporting'
 # please indicate the temporal resolution of data to use (hourly, daily or monthly)
 resolution = 'hourly'
 # please indicate the start_date of data to read (YYYYMMDD)
-start_date = '20200101'
+start_date = '20190101'
 # please indicate the end_date of data to read (YYYYMMDD)
-end_date = '20210101'
+end_date = '20200101'
 
 def cross_check(stations_unfound, ghost_stations, associated_networks, mapped_stations):
    
