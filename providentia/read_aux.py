@@ -6,11 +6,11 @@ import pandas as pd
 import bisect
 import time
 
-#initialise dictionary for storing pointers to shared memory variables in read step 
+# initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
 
 def drop_nans(data):
-    """Function that returns list of lists of station data with NaNs removed"""
+    """ Function that returns list of lists of station data with NaNs removed. """
 
     # reshape numpy array to have lists of data per station
     data_nonan = []
@@ -21,9 +21,9 @@ def drop_nans(data):
     return data_nonan
 
 def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghost_data_in_memory, ghost_data_in_memory_shape, timestamp_array, qa, flags):
-    """Function which called before netCDF read function,
-       to initialise each worker process.
-       Purpose of this function is to access shared memory variables  
+    """ Function which called before netCDF read function,
+        to initialise each worker process.
+        The purpose of this function is to access shared memory variables.
     """
     shared_memory_vars['data_in_memory'] = data_in_memory
     shared_memory_vars['data_in_memory_shape'] = data_in_memory_shape
@@ -34,20 +34,25 @@ def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghos
     shared_memory_vars['flag'] = flags
 
 def read_netcdf_data(tuple_arguments):
-    """Function that handles reading of observational/experiment
-    netCDF data also handles filtering of observational data based
-    on selected qa/flag/classification flags. If file does not exist,
-    returns None.
+    """ Function that handles reading of observational/experiment
+        netCDF data also handles filtering of observational data based
+        on selected qa/flag/classification flags. If file does not exist,
+        returns None.
     """
 
     # assign arguments from tuple to variables
     relevant_file, station_references, speci, data_label, data_labels, \
-    reading_ghost, ghost_data_vars_to_read, metadata_dtype, metadata_vars_to_read = tuple_arguments
+    reading_ghost, ghost_data_vars_to_read, metadata_dtype, metadata_vars_to_read, \
+    default_qa, filter_read = tuple_arguments
 
-    #wrap shared arrays as numpy arrays to more easily manipulate the data
-    data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'])
+    # wrap shared arrays as numpy arrays to more easily manipulate the data
+    data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])
     if (reading_ghost) & (data_label == 'observations'): 
-        ghost_data_in_memory = np.frombuffer(shared_memory_vars['ghost_data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'])
+        qa = np.frombuffer(shared_memory_vars['qa'], dtype=np.uint8)
+        flags = np.frombuffer(shared_memory_vars['flag'], dtype=np.uint8)
+        if not filter_read:
+            ghost_data_in_memory = np.frombuffer(shared_memory_vars['ghost_data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'][:])
+    timestamp_array = np.frombuffer(shared_memory_vars['timestamp_array'], dtype=np.int64)
 
     # read netCDF frame, if files doesn't exist, return with None
     ncdf_root = Dataset(relevant_file)
@@ -64,23 +69,27 @@ def read_netcdf_data(tuple_arguments):
         file_time = num2date(ncdf_root['time'][:], time_units)
         # remove microseconds and convert to integer
         file_time = pd.to_datetime([t.replace(microsecond=0) for t in file_time])
-    #get file time as integer timestamp
+    
+    # get file time as integer timestamp
     file_timestamp = file_time.asi8
 
     # get valid file time indices (i.e. those times in active full time array)
-    valid_file_time_indices = np.where(np.logical_and(file_timestamp>=shared_memory_vars['timestamp_array'][0], 
-                                                      file_timestamp<=shared_memory_vars['timestamp_array'][-1]))[0]
+    valid_file_time_indices = np.where(np.logical_and(file_timestamp>=timestamp_array[0], 
+                                                      file_timestamp<=timestamp_array[-1]))[0]
 
     # get indices relative to active full timestamp array
-    full_array_time_indices = np.searchsorted(shared_memory_vars['timestamp_array'], file_timestamp[valid_file_time_indices])
+    full_array_time_indices = np.searchsorted(timestamp_array, file_timestamp[valid_file_time_indices])
 
     # get all station references in file (do little extra work to get non-GHOST observational station references)
     if (not reading_ghost) & (data_label == 'observations'):
         if ncdf_root['station_name'].dtype == np.str:
             file_station_references = ncdf_root['station_name'][:]
         else:
-            file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
-                                                for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+            if ncdf_root['station_name'].dtype == np.dtype(object):
+                file_station_references = np.array([''.join(val) for val in ncdf_root['station_name'][:]])
+            else:
+                file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
+                                                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
     else:
         file_station_references = ncdf_root['station_reference'][:]
 
@@ -93,16 +102,27 @@ def read_netcdf_data(tuple_arguments):
     # contained in all unique station references array
     current_file_station_indices = \
         np.where(np.in1d(file_station_references, station_references))[0]
+
+    # if have zero current_file_station_indices in all unique station references (can happen due to station colocation)
+    # then return from function without reading
+    if len(current_file_station_indices) == 0:
+        # return empty metadata list if reading observations
+        if (data_label == 'observations') & (not filter_read):
+            return []
+        else:
+            return 
+
     # read observations
-    s = time.time()
     if data_label == 'observations':
 
         # read species variable
         # GHOST
         if reading_ghost:
             # if need to filter by qa load non-filtered array, otherwise load prefiltered array (if available)
-            if (len(shared_memory_vars['qa']) == 0) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
+            if (default_qa) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
                 species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][current_file_station_indices, valid_file_time_indices]
+                # set qa to None as not filtering by them
+                qa = None
             else:
                 species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
         # non-GHOST (transpose array to swap station and time dimensions)
@@ -113,72 +133,74 @@ def read_netcdf_data(tuple_arguments):
         if reading_ghost:
 
             # read GHOST data variables
-            for ghost_data_var_ii, ghost_data_var in enumerate(ghost_data_vars_to_read):
-                ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] =\
-                    ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
+            if not filter_read:
+                for ghost_data_var_ii, ghost_data_var in enumerate(ghost_data_vars_to_read):
+                    ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] =\
+                        ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
 
             # if some qa flags selected then screen observations
-            if len(shared_memory_vars['qa']) > 0:
-                # screen out observations which are associated with any of the selected qa flags
-                species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['qa']).any(axis=2)] = np.NaN
-            
+            if qa is not None:
+                if len(qa) > 0:
+                    # screen out observations which are associated with any of the selected qa flags
+                    species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], qa).any(axis=2)] = np.NaN
+                
             # if some data provider flags selected then screen observations
-            if len(shared_memory_vars['flag']) > 0:
+            if len(flags) > 0:
                 # screen out observations which are associated with any of the selected data provider flags
-                species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], shared_memory_vars['flag']).any(axis=2)] = np.NaN
+                species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], flags).any(axis=2)] = np.NaN
 
         # write filtered species data to shared file data
         data_in_memory[data_labels.index('observations'), full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] = species_data
 
         # get file metadata
-        file_metadata = np.full((len(station_references), 1), np.NaN, dtype=metadata_dtype)
-        for meta_var in metadata_vars_to_read:
-            # do extra work for non-GHOST data 
-            if not reading_ghost:
-                # get correct variable name for .nc
-                if meta_var == 'longitude':
-                    if "longitude" not in ncdf_root.variables:
-                        meta_var_nc = 'lon'
+        if not filter_read:
+            file_metadata = np.full((len(station_references), 1), np.NaN, dtype=metadata_dtype)
+            for meta_var in metadata_vars_to_read:
+                # do extra work for non-GHOST data 
+                if not reading_ghost:
+                    # get correct variable name for .nc
+                    if meta_var == 'longitude':
+                        if "longitude" not in ncdf_root.variables:
+                            meta_var_nc = 'lon'
+                        else:
+                            meta_var_nc = 'longitude'
+                    elif meta_var == 'latitude':
+                        if "latitude" not in ncdf_root.variables:
+                            meta_var_nc = 'lat'
+                        else:
+                            meta_var_nc = 'latitude'
+                    elif meta_var == 'station_reference':
+                        meta_var_nc = 'station_code'
                     else:
-                        meta_var_nc = 'longitude'
-                elif meta_var == 'latitude':
-                    if "latitude" not in ncdf_root.variables:
-                        meta_var_nc = 'lat'
+                        meta_var_nc = meta_var
+
+                    # read variable
+                    if meta_var == 'station_name':
+                        meta_val = file_station_references[current_file_station_indices]
                     else:
-                        meta_var_nc = 'latitude'
-                elif meta_var == 'station_reference':
-                    meta_var_nc = 'station_code'
-                elif meta_var == 'station_classification':
-                    meta_var_nc = 'station_type'
-                elif meta_var == 'area_classification':
-                    meta_var_nc = 'station_area'
+                        # check meta variable is in netCDF
+                        if meta_var_nc not in ncdf_root.variables:
+                            continue
+                        meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
+                    
+                    # some extra str formatting
+                    if meta_var in ['station_reference', 'station_classification', 'area_classification', '']:
+                        if meta_val.dtype != np.str:
+                            if meta_val.dtype != np.dtype(object):
+                                meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
+                                                    for val in meta_val], dtype=np.str)
+                            else:
+                                meta_val = np.array([''.join(val) for val in meta_val])
+
+                # GHOST metadata
                 else:
                     meta_var_nc = meta_var
-
-                # read variable
-                if meta_var == 'station_name':
-                    meta_val = file_station_references[current_file_station_indices]
-                else:
-                    # check meta variable is in netCDF
-                    if meta_var_nc not in ncdf_root.variables:
-                        continue
                     meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
-                
-                # some extra str formatting
-                if meta_var in ['station_reference', 'station_classification', 'area_classification' '']:
-                    if meta_val.dtype != np.str:
-                        meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
-                                             for val in meta_val], dtype=np.str)
 
-            # GHOST metadata
-            else:
-                meta_var_nc = meta_var
-                meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
+                # put metadata in array
+                file_metadata[meta_var][full_array_station_indices, 0] = meta_val
 
-            # put metadata in array
-            file_metadata[meta_var][full_array_station_indices, 0] = meta_val
-
-    #experiment data
+    # experiment data
     else:
         relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
 
@@ -192,13 +214,14 @@ def read_netcdf_data(tuple_arguments):
     ncdf_root.close()
 
     # return metadata if reading observations
-    if data_label == 'observations':
+    if (data_label == 'observations') & (not filter_read):
         return file_metadata
 
 def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to_read, resolution):
-    """Function that returns the yearmonths of the files to be read.
-       Filters out yearmonths outside given date range 
+    """ Function that returns the yearmonths of the files to be read.
+        Filters out yearmonths outside given date range.
     """
+    
     available_yearmonthdays = [int(yearmonth+'01') for yearmonth in available_yearmonths]
 
     first_valid_file_ind = bisect.bisect_right(available_yearmonthdays, int(start_date_to_read))
