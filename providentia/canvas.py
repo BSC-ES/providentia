@@ -38,12 +38,12 @@ basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 
 class MPLCanvas(FigureCanvas):
-    """Class that handles the creation and updates of
-    a matplotlib canvas, and associated subplots
+    """ Class that handles the creation and updates of
+        a matplotlib canvas, and associated subplots.
     """
 
     def __init__(self, read_instance):
-        """Initialise the MPL canvas"""
+        """ Initialise the MPL canvas. """
 
         # create figure and canvas objects
         self.figure = Figure(dpi=100)
@@ -86,8 +86,7 @@ class MPLCanvas(FigureCanvas):
             if plot_type not in self.all_plots:
                 msg = "Error: Plot type {0} is not an option. ".format(plot_type)
                 msg += "The available plots are: {0}.".format(self.all_plots[2:])
-                print(msg)
-                sys.exit()
+                sys.exit(msg)
 
         # initialize layout positions
         self.read_instance.position_1 = 'map'
@@ -148,35 +147,20 @@ class MPLCanvas(FigureCanvas):
 
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
-            ax = self.plot_axes[plot_type]
-            if type(ax) == dict:
-                for relevant_temporal_resolution, sub_ax in ax.items():
-                    self.plot.format_axis(sub_ax, plot_type, self.plot_characteristics[plot_type], 
-                                          relevant_temporal_resolution=relevant_temporal_resolution, 
-                                          col_ii=-1)
-            else:
-                self.plot.format_axis(ax, plot_type, self.plot_characteristics[plot_type])
+            self.plot.format_axis(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type])
 
         # hide all plot axes
         for plot_type, ax in self.plot_axes.items():
-            if type(ax) == dict:
-                for relevant_temporal_resolution, sub_ax in ax.items():
-                    self.remove_axis_elements(sub_ax, plot_type)
-            else:
-                self.remove_axis_elements(ax, plot_type)
+            self.remove_axis_elements(ax, plot_type)
 
     def update_MPL_canvas(self):
-        """Function that updates MPL canvas upon clicking
-        the 'READ' button, and when colocating data
+        """ Function that updates MPL canvas upon clicking
+            the 'READ' button, and when colocating data.
         """
 
         # clear and then hide all axes 
         for plot_type, ax in self.plot_axes.items():
-            if type(ax) == dict:
-                for sub_ax in ax.values():
-                    self.remove_axis_elements(sub_ax, plot_type)
-            else:
-                self.remove_axis_elements(ax, plot_type)
+            self.remove_axis_elements(ax, plot_type)
 
         # reset relative index lists of selected station on map as empty lists
         self.previous_relative_selected_station_inds = np.array([], dtype=np.int)
@@ -207,31 +191,43 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def reset_ax_navigation_toolbar_stack(self, ax):
-        """Function which resets the navigation toolbar stack
-        for a given axis with the current view limits"""
+        """ Function which resets the navigation toolbar stack
+            for a given axis with the current view limits.
+        """
+
+        # get appropriate axes for nested axes
+        axs_to_reset = []
+        if isinstance(ax, dict):
+            for relevant_temporal_resolution, sub_ax in ax.items():
+                if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                    axs_to_reset.append(sub_ax)
+        else:
+            axs_to_reset.append(ax)
 
         # check if have axes dictionaries in stack list
-        if len(self.read_instance.navi_toolbar._nav_stack) == 0:
-            # if don't have an axes dictionary in stack list, create one with current
-            # axis in dictionary with current view limits
-            self.read_instance.navi_toolbar._nav_stack.push(
-                WeakKeyDictionary({ax: (ax._get_view(), (ax.get_position(True).frozen(), ax.get_position().frozen()))}))
+        for ax_to_reset in axs_to_reset:
 
-        # if have existing axes dictionaries in stack list, iterate through stack list
-        # removing given axis from all stack list dictionaries
-        else:
-            for axes_dict in self.read_instance.navi_toolbar._nav_stack:
-                if ax in axes_dict.keyrefs():
-                    axes_dict.pop(ax)
+            if len(self.read_instance.navi_toolbar._nav_stack) == 0:
+                # if don't have an axes dictionary in stack list, create one with current
+                # axis in dictionary with current view limits
+                self.read_instance.navi_toolbar._nav_stack.push(
+                    WeakKeyDictionary({ax_to_reset: (ax_to_reset._get_view(), (ax_to_reset.get_position(True).frozen(), ax_to_reset.get_position().frozen()))}))
 
-            # now add axis to first dictionary in stack, with the current view limits
-            self.read_instance.navi_toolbar._nav_stack[0][ax] = \
-                (ax._get_view(), (ax.get_position(True).frozen(), ax.get_position().frozen()))
+            # if have existing axes dictionaries in stack list, iterate through stack list
+            # removing given axis from all stack list dictionaries
+            else:
+                for axes_dict in self.read_instance.navi_toolbar._nav_stack:
+                    if ax_to_reset in axes_dict.keyrefs():
+                        axes_dict.pop(ax_to_reset)
+
+                # now add axis to first dictionary in stack, with the current view limits
+                self.read_instance.navi_toolbar._nav_stack[0][ax_to_reset] = \
+                    (ax_to_reset._get_view(), (ax_to_reset.get_position(True).frozen(), ax_to_reset.get_position().frozen()))
 
         return None
 
     def handle_data_filter_update(self):
-        """Function which handles updates of data filtering"""
+        """ Function which handles updates of data filtering. """
 
         # return if nothing has been loaded yet
         if not hasattr(self.read_instance, 'data_in_memory'):
@@ -248,7 +244,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_active_map(self):
-        """Function that updates plotted map z statistic and updates associated plots"""
+        """ Function that updates plotted map z statistic and updates associated plots. """
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -266,8 +262,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def handle_temporal_colocate_update(self):
-        """Function that handles the update of the MPL canvas
-        with colocated data upon checking of the temporal colocate checkbox"""
+        """ Function that handles the update of the MPL canvas
+            with colocated data upon checking of the temporal colocate checkbox.
+        """
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -306,7 +303,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_map_z_statistic(self):
-        """Function that updates plotted z statistic on map, with colourbar"""
+        """ Function that updates plotted z statistic on map, with colourbar. """
 
         # remove axis elements from map/cb
         self.remove_axis_elements(self.plot_axes['map'], 'map')
@@ -317,12 +314,11 @@ class MPLCanvas(FigureCanvas):
         zstat = get_z_statistic_comboboxes(base_zstat, second_data_label=self.read_instance.cb_z2.currentText())
 
         # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
-        self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(
-                                                              self.read_instance, 
-                                                              self.read_instance.cb_z1.currentText(), 
-                                                              self.read_instance.cb_z2.currentText(), 
-                                                              zstat, 
-                                                              self.read_instance.networkspeci)
+        self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(self.read_instance, 
+                                                                                self.read_instance.cb_z1.currentText(), 
+                                                                                self.read_instance.cb_z2.currentText(), 
+                                                                                zstat, 
+                                                                                self.read_instance.networkspeci)
         self.active_map_valid_station_inds = active_map_valid_station_inds 
         
         # update absolute selected plotted station indices with respect to new active map valid station indices
@@ -335,17 +331,25 @@ class MPLCanvas(FigureCanvas):
         # selected station indices to be empty lists
         # also uncheck select all/intersect/extent checkboxes
         if len(self.active_map_valid_station_inds) == 0:
+
             # unselect all/intersect/extent checkboxes
             self.read_instance.block_MPL_canvas_updates = True
             self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
             self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
             self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
             self.read_instance.block_MPL_canvas_updates = False
+
             # clear previously selected relative/absolute station indices
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
             self.relative_selected_station_inds = np.array([], dtype=np.int)
             self.absolute_selected_station_inds = np.array([], dtype=np.int)
             self.absolute_non_selected_station_inds = np.array([], dtype=np.int)
+
+            # plot map with 0 stations
+            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, self.plot_characteristics['map'])
+
+            # activate map
+            self.activate_axis(self.plot_axes['map'], 'map')
 
         # otherwise plot valid active map stations on map
         else:
@@ -353,12 +357,14 @@ class MPLCanvas(FigureCanvas):
             # valid station indices --> unselect selected stations (and associated plots)
             # also uncheck select all/intersect/extent checkboxes
             if not np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)):
+                
                 # unselect all/intersect/extent checkboxes
                 self.read_instance.block_MPL_canvas_updates = True
                 self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.block_MPL_canvas_updates = False
+                
                 # reset relative/absolute selected station indices to be empty lists
                 self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
                 self.relative_selected_station_inds = np.array([], dtype=np.int)
@@ -395,34 +401,43 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_map_station_selection(self):
-        """Function that updates the visual selection of stations on map"""
+        """ Function that updates the visual selection of stations on map. """
 
         # update map title
         if len(self.relative_selected_station_inds) == 1:
             axis_title_label = '{} Selected'.format(
-                self.read_instance.station_references[self.read_instance.networkspeci][self.relative_selected_station_inds][0])
+                self.read_instance.station_references[self.read_instance.networkspeci][self.relative_selected_station_inds[0]])
         else:
             axis_title_label = '{} Selected Stations of {} Available'.format(
                 len(self.relative_selected_station_inds), len(self.active_map_valid_station_inds))
         self.plot.set_axis_title(self.plot_axes['map'], axis_title_label, self.plot_characteristics['map'])
+        self.plot_characteristics['map']['axis_title']['label'] = axis_title_label
 
         # reset alphas and marker sizes of stations (if have some stations on map)
         if len(self.active_map_valid_station_inds) > 0:
+            
             # set markersize of all stations (initally assuming zero stations are selected)
             markersizes = np.full(len(self.active_map_valid_station_inds), self.plot_characteristics['map']['marker_zero_stations_selected']['s'])
+            
             for collection in self.plot_axes['map'].collections:
                 if isinstance(collection, matplotlib.collections.PathCollection):
+                    
                     rgba_tuples = collection.get_facecolor()
+                    
                     # set alpha of all stations (initally assuming zero stations are selected)
                     rgba_tuples[:, -1] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']
+                    
                     # have selected stations?
                     if len(self.relative_selected_station_inds) > 0:
+                        
                         # update markersize and alphas of non-selected stations
                         markersizes[self.absolute_non_selected_station_inds] = self.plot_characteristics['map']['marker_unselected']['s']
                         rgba_tuples[self.absolute_non_selected_station_inds, -1] = self.plot_characteristics['map']['marker_unselected']['alpha']
+                        
                         # update markersize and alphas of selected stations
                         markersizes[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['s']
                         rgba_tuples[self.absolute_selected_station_inds, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
+                    
                     # set new markersizes and alphas
                     collection.set_sizes(markersizes)
                     collection.set_facecolor(rgba_tuples)
@@ -432,7 +447,7 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.flush_events()
 
     def update_associated_active_dashboard_plot(self, plot_type):
-        """Function that updates a plot associated with selected stations on map"""
+        """ Function that updates a plot associated with selected stations on map. """
     
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
@@ -465,7 +480,8 @@ class MPLCanvas(FigureCanvas):
                     if ylabel_units == 'measurement_units':
                         ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
                     if ylabel_units != '':
-                        ylabel = copy.deepcopy(ylabel_units)
+                        ylabel = '[{}]'.format(ylabel_units)
+                    xlabel = ''
 
                 # create structure to store data for statsummary plot
                 elif plot_type in ['statsummary']:
@@ -479,7 +495,7 @@ class MPLCanvas(FigureCanvas):
                     # set new xlabel
                     if 'xlabel' in self.plot_characteristics[plot_type]:
                         if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
-                            xlabel = self.read_instance.measurement_units[self.read_instance.species[0]]
+                            xlabel = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]])
                         else:
                             xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
                     else:
@@ -488,7 +504,7 @@ class MPLCanvas(FigureCanvas):
                     # set new ylabel
                     if 'ylabel' in self.plot_characteristics[plot_type]:
                         if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
-                            ylabel = self.read_instance.measurement_units[self.read_instance.species[0]]
+                            ylabel = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]])
                         else:
                             ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
                     else:
@@ -528,61 +544,48 @@ class MPLCanvas(FigureCanvas):
                     stats_df = pd.DataFrame(data=stats_df, index=self.selected_station_data[self.read_instance.networkspeci])
                     func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, statsummary=True)
 
-                # format axes reset axes limits (harmonise across subplots for periodic plots), reset navigation toolbar stack, and set axis title / ylabel
-                if type(ax) == dict:
-                    if plot_type == 'periodic-violin':
-                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                             plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                                 self.selected_station_data_max[self.read_instance.networkspeci]],
-                                                             relim=True, autoscale_x=True)
-                    else:
-                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                             plot_options, relim=True, autoscale=True)
-
-                    set_title = False
-                    for relevant_temporal_resolution, sub_ax in ax.items():
-                        #do not show axis if temporal resolution is not relevant
-                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                            # set ylabel (if sub_ax in first column) and title (if sub_ax in first column and not previously set)   
-                            if relevant_temporal_resolution in ['hour', 'month']:
-                                self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics[plot_type])
-                                if not set_title:
-                                    title = self.plot.set_axis_title(sub_ax, plot_type, self.plot_characteristics[plot_type])
-                                    self.plot_characteristics[plot_type]['axis_title']['label'] = title
-                                    set_title = True
-                            elif relevant_temporal_resolution == 'dayofweek':
-                                sub_ax.set_ylabel('')
-                                sub_ax.yaxis.set_tick_params(which='both', labelleft=False)
-                            self.activate_axis(sub_ax, plot_type)
-                            self.reset_ax_navigation_toolbar_stack(sub_ax)
-                else:
-                    if plot_type == 'scatter':
+                # reset axes limits (harmonising across subplots for periodic plots) 
+                if plot_type == 'periodic-violin':
+                    self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
+                                                         plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                             self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                         relim=True, autoscale_x=True)
+                elif plot_type == 'scatter':
                         self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, relim=True)
-                    else: 
-                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                             plot_options, relim=True, autoscale=True)
-                    title = self.plot.set_axis_title(ax, plot_type, self.plot_characteristics[plot_type])
-                    self.plot_characteristics[plot_type]['axis_title']['label'] = title
-                    self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
-                    self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
-                    self.activate_axis(ax, plot_type)
-                    self.reset_ax_navigation_toolbar_stack(ax)
+                else:
+                    self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
+                                                         plot_options, relim=True, autoscale=True)
+
+                # set title
+                if 'hour' in self.read_instance.relevant_temporal_resolutions:
+                    relevant_temporal_resolutions_title = ['hour']
+                else:
+                    relevant_temporal_resolutions_title = ['month']
+                self.plot.set_axis_title(ax, plot_type, self.plot_characteristics[plot_type], relevant_temporal_resolutions=relevant_temporal_resolutions_title)
+                self.plot_characteristics[plot_type]['axis_title']['label'] = plot_type
+
+                # set xlabel
+                self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
+
+                # set ylabel
+                self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
+
+                # activate axis
+                self.activate_axis(ax, plot_type)
+
+                # reset navigation toolbar stack for plot
+                self.reset_ax_navigation_toolbar_stack(ax)
 
                 # update plot options
                 self.update_plot_options(plot_types=[plot_type])
 
     def update_associated_active_dashboard_plots(self):
-        """Function that updates all plots associated with selected stations on map"""
+        """ Function that updates all plots associated with selected stations on map. """
 
         # clear all previously plotted artists from selected station plots and hide axes 
         for plot_type in self.read_instance.active_dashboard_plots:
-            ax = self.plot_axes[plot_type]
-            if type(ax) == dict:
-                for sub_ax in ax.values():
-                    self.remove_axis_elements(sub_ax, plot_type)
-            else:
-                self.remove_axis_elements(ax, plot_type)
+            self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
 
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
@@ -602,7 +605,7 @@ class MPLCanvas(FigureCanvas):
             self.update_plot_options(plot_types=['map'])
 
     def update_experiment_domain_edges(self):
-        """Function that plots grid domain edges of experiments in memory"""
+        """ Function that plots grid domain edges of experiments in memory. """
 
         # remove grid domain polygon if previously plotted
         inds_to_remove = []
@@ -619,7 +622,7 @@ class MPLCanvas(FigureCanvas):
             self.plot_axes['map'].add_patch(grid_edge_polygon)
 
     def update_legend(self):
-        """Function that updates legend"""
+        """ Function that updates legend. """
 
         # create legend element handles
         legend_plot_characteristics = self.plot.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
@@ -638,7 +641,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def handle_map_z_statistic_update(self):
-        """Define function which handles update of map z statistic upon interaction with map comboboxes"""
+        """ Function which handles update of map z statistic upon interaction with map comboboxes. """
 
         if not self.read_instance.block_config_bar_handling_updates:
 
@@ -705,9 +708,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def handle_periodic_statistic_update(self):
-        """Define function that handles update of plotted periodic statistic
-           upon interaction with periodic statistic combobox
-           """
+        """ Function that handles update of plotted periodic statistic
+            upon interaction with periodic statistic combobox.
+        """
 
         if (not self.read_instance.block_config_bar_handling_updates) & \
                ('periodic' in self.read_instance.active_dashboard_plots):
@@ -750,8 +753,7 @@ class MPLCanvas(FigureCanvas):
                 if len(self.relative_selected_station_inds) > 0:
 
                     # clear and turn off all relevant axes before updating
-                    for sub_ax in self.plot_axes['periodic'].values():
-                        self.remove_axis_elements(sub_ax, 'periodic')
+                    self.remove_axis_elements(self.plot_axes['periodic'], 'periodic')
 
                     # get zstat information 
                     zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
@@ -766,7 +768,7 @@ class MPLCanvas(FigureCanvas):
                         ylabel = expbias_stats[base_zstat]['label']
                         ylabel_units = expbias_stats[base_zstat]['units']
                     if ylabel_units == 'measurement_units':
-                        ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
+                        ylabel_units = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]]) 
                     if ylabel_units != '':
                         ylabel = copy.deepcopy(ylabel_units)
 
@@ -781,28 +783,27 @@ class MPLCanvas(FigureCanvas):
                                                 first_data_label=first_data_label)
                         first_data_label = False
 
-                    # harmonise axes limits across subplots 
+                    # reset axes limits (harmonising across subplots for periodic plots) 
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
                                                          self.plot_characteristics['periodic'], 
                                                          plot_options, relim=True, autoscale=True)
-                    set_title = False
-                    # un-hide axes, and reset navigation toolbar stack, and set axis title and ylabel
-                    for relevant_temporal_resolution, sub_ax in self.plot_axes['periodic'].items():
-                        # do not show axis if temporal resolution is not relevant
-                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                            # set ylabel (if sub_ax in first column) and title (if sub_ax in first column and not previously set)   
-                            if relevant_temporal_resolution in ['hour','month']:
-                                self.plot.set_axis_label(sub_ax, 'y', ylabel, self.plot_characteristics['periodic'])
-                                if not set_title:
-                                    title = self.plot.set_axis_title(sub_ax, 'periodic', 
-                                                                     self.plot_characteristics['periodic'])
-                                    self.plot_characteristics['periodic']['axis_title']['label'] = title
-                                    set_title = True
-                            elif relevant_temporal_resolution == 'dayofweek':
-                                sub_ax.set_ylabel('')
-                                sub_ax.yaxis.set_tick_params(which='both', labelleft=False)
-                            self.activate_axis(sub_ax, 'periodic')
-                            self.reset_ax_navigation_toolbar_stack(sub_ax)
+
+                    # set title
+                    if 'hour' in self.read_instance.relevant_temporal_resolutions:
+                        relevant_temporal_resolutions_title = ['hour']
+                    else:
+                        relevant_temporal_resolutions_title = ['month']
+                    self.plot.set_axis_title(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'], relevant_temporal_resolutions=relevant_temporal_resolutions_title)
+                    self.plot_characteristics['periodic']['axis_title']['label'] = 'periodic'
+
+                    # set ylabel
+                    self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
+
+                    # activate axis
+                    self.activate_axis(self.plot_axes['periodic'], 'periodic')
+
+                    # reset navigation toolbar stack for plot
+                    self.reset_ax_navigation_toolbar_stack(self.plot_axes['periodic'])
 
                     # update plot options
                     self.update_plot_options(plot_types=['periodic'])
@@ -813,81 +814,111 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def remove_axis_elements(self, ax, plot_type):
-        """ Removes all plotted axis elements,
-            and hide axis.
-        """
+        """ Remove all plotted axis elements and hide axis. """
        
-        #remove all plotted axis elements
-        if plot_type == 'legend':
-            leg = ax.get_legend()
-            if leg:
-                leg.remove()
+        # get appropriate axes for nested axes
+        axs_to_remove = []
+        if isinstance(ax, dict):
+            for relevant_temporal_resolution, sub_ax in ax.items():
+                axs_to_remove.append(sub_ax)
+        else:
+            axs_to_remove.append(ax)
 
-        elif plot_type == 'map':
-            inds_to_remove = []
-            for artist_ii, artist in enumerate(ax.artists):         
-                if type(artist) == AnchoredOffsetbox:
-                    inds_to_remove.append(artist_ii)
-            ax.artists = list(np.delete(np.array(ax.artists), inds_to_remove))
+        # iterate through axes
+        for ax_to_remove in axs_to_remove:
 
-            inds_to_remove = []
-            for col_ii, col in enumerate(ax.collections):            
-                if isinstance(col, matplotlib.collections.PathCollection):
-                    inds_to_remove.append(col_ii)
-            ax.collections = list(np.delete(np.array(ax.collections), inds_to_remove))
+            # remove all plotted axis elements
+            if plot_type == 'legend':
+                leg = ax_to_remove.get_legend()
+                if leg:
+                    leg.remove()
+
+            elif plot_type == 'map':
+                inds_to_remove = []
+                for artist_ii, artist in enumerate(ax_to_remove.artists):         
+                    if type(artist) == AnchoredOffsetbox:
+                        inds_to_remove.append(artist_ii)
+                ax_to_remove.artists = list(np.delete(np.array(ax_to_remove.artists), inds_to_remove))
+
+                inds_to_remove = []
+                for col_ii, col in enumerate(ax_to_remove.collections):            
+                    if isinstance(col, matplotlib.collections.PathCollection):
+                        inds_to_remove.append(col_ii)
+                ax_to_remove.collections = list(np.delete(np.array(ax_to_remove.collections), inds_to_remove))
+
+            elif plot_type == 'cb':
+                ax_to_remove.artists = []
+                ax_to_remove.collections = [] 
+
+            elif plot_type == 'timeseries':
+                ax_to_remove.lines = [self.timeseries_vline]
+                ax_to_remove.artists = []
+            
+            elif plot_type == 'periodic':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+
+            elif plot_type == 'periodic-violin':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+                ax_to_remove.collections = []
+
+            elif plot_type == 'metadata':
+                ax_to_remove.texts = []
+
+            elif plot_type == 'distribution':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+
+            elif plot_type == 'scatter':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+
+            elif plot_type == 'statsummary':
+                ax_to_remove.tables = []
+
+            elif plot_type == 'boxplot':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+
+            # hide axis
+            ax_to_remove.axis('off')
+            ax_to_remove.set_visible(False)
+
+        # hide plot buttons
+        if plot_type == 'map':
             self.map_menu_button.hide()
             self.map_save_button.hide()
 
-        elif plot_type == 'cb':
-            ax.artists = []
-            ax.collections = [] 
-
         elif plot_type == 'timeseries':
-            for line in ax.lines:
-                if line != self.timeseries_vline:
-                    line.remove()
-            ax.artists = []
             self.timeseries_menu_button.hide()
             self.timeseries_save_button.hide()
         
         elif plot_type == 'periodic':
-            ax.lines = []
-            ax.artists = []
             self.periodic_menu_button.hide()
             self.periodic_save_button.hide()
 
         elif plot_type == 'periodic-violin':
-            ax.lines = []
-            ax.artists = []
-            ax.collections = []
             self.periodic_violin_menu_button.hide()
             self.periodic_violin_save_button.hide()
 
         elif plot_type == 'metadata':
-            ax.texts = []
             self.metadata_menu_button.hide()
             self.metadata_save_button.hide()
 
         elif plot_type == 'distribution':
-            ax.lines = []
-            ax.artists = []
             self.distribution_menu_button.hide()
             self.distribution_save_button.hide()
 
         elif plot_type == 'scatter':
-            ax.lines = []
-            ax.artists = []
             self.scatter_menu_button.hide()
             self.scatter_save_button.hide()
 
         elif plot_type == 'statsummary':
-            ax.tables = []
             self.statsummary_menu_button.hide()
             self.statsummary_save_button.hide()
 
         elif plot_type == 'boxplot':
-            ax.lines = []
-            ax.artists = []
             self.boxplot_menu_button.hide()
             self.boxplot_save_button.hide()
 
@@ -906,23 +937,28 @@ class MPLCanvas(FigureCanvas):
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias'] 
 
-        # hide axis
-        ax.axis('off')
-        ax.set_visible(False)
-        ax.grid(False)
-
         return None
 
     def activate_axis(self, ax, plot_type):
-        """Un-hide axis"""
+        """ Un-hide axis. """
 
-        # un-hide axis
-        ax.axis('on')
-        ax.set_visible(True)
+        # get appropriate axes for nested axes
+        axs_to_activate = []
+        if isinstance(ax, dict):
+            for relevant_temporal_resolution, sub_ax in ax.items():
+                if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                    axs_to_activate.append(sub_ax)
+        else:
+            axs_to_activate.append(ax)
 
-        if plot_type not in ['legend', 'cb', 'metadata', 'statsummary']:
-            ax.grid(True)
+        # iterate through axes
+        for ax_to_activate in axs_to_activate:
 
+            # un-hide axis
+            ax_to_activate.axis('on')
+            ax_to_activate.set_visible(True)
+
+        # show plot buttons
         if plot_type == 'map':
             self.map_menu_button.show()
             self.map_save_button.show()
@@ -940,13 +976,14 @@ class MPLCanvas(FigureCanvas):
             self.periodic_violin_save_button.show()
 
         elif plot_type == 'metadata':
-            self.metadata_menu_button.show()
+            # hide for now because there are no options
+            # self.metadata_menu_button.show()
             self.metadata_save_button.show()
 
         elif plot_type == 'distribution':
             self.distribution_menu_button.show()
             self.distribution_save_button.show()
-       
+    
         elif plot_type == 'scatter':
             self.scatter_menu_button.show()
             self.scatter_save_button.show()
@@ -963,9 +1000,8 @@ class MPLCanvas(FigureCanvas):
 
     def update_plot_options(self, plot_types):
         """ Uncheck checked boxes in plot configuration options under menus and
-            reapply check with new data.
-            This can be done for all currently active plot types, or just one
-            specific type.
+            reapply check with new data. This can be done for all currently active plot types, 
+            or just one specific type.
         """
 
         checked_options = {}
@@ -997,8 +1033,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def select_all_stations(self):
-        """Define function that selects/unselects all plotted stations
-        (and associated plots) upon ticking of checkbox"""
+        """ Function that selects/unselects all plotted stations
+            (and associated plots) upon ticking of checkbox.
+        """
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -1031,7 +1068,7 @@ class MPLCanvas(FigureCanvas):
             # update absolute selected station indices (indices relative to plotted stations on map)
             self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds), dtype=np.int)
 
-            #get absolute non-selected station inds
+            # get absolute non-selected station inds
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                                  self.absolute_selected_station_inds))[0]
 
@@ -1048,9 +1085,9 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def select_intersect_stations(self):
-        """Define function that selects/unselects intersection of
-        stations and all experiment domains (and associated plots)
-        upon ticking of checkbox
+        """ Function that selects/unselects intersection of
+            stations and all experiment domains (and associated plots)
+            upon ticking of checkbox.
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -1088,13 +1125,16 @@ class MPLCanvas(FigureCanvas):
                             else:
                                 valid_station_inds = self.read_instance.valid_station_inds[self.read_instance.networkspeci][data_label]
                             intersect_lists.append(valid_station_inds)
+                    
                     # get intersect between active map valid station indices and valid station indices
                     # associated with each loaded experiment array --> relative selected station indcies
                     self.relative_selected_station_inds = np.sort(list(set.intersection(*map(set, intersect_lists))))
+                    
                     # get absolute selected station indices (indices relative to plotted stations on map)
                     self.absolute_selected_station_inds = \
                         np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind
                                   in self.relative_selected_station_inds], dtype=np.int)
+                    
                     #get absolute non-selected station inds
                     self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                                          self.absolute_selected_station_inds))[0]
@@ -1124,15 +1164,22 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def select_extent_stations(self):
-        """Define function that selects/unselects the
-        stations for the current map extent (and associated plots)
-        upon ticking of checkbox
+        """ Function that selects/unselects the
+            stations for the current map extent (and associated plots)
+            upon ticking of checkbox.
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
 
-            # get map extent (should be transforming xlim and ylim from ax --> to do)            
-            self.read_instance.map_extent = self.plot_axes['map'].get_extent(crs=self.datacrs)
+            # get map extent (in data coords)
+            current_xlim = self.plot_axes['map'].get_xlim()
+            current_ylim = self.plot_axes['map'].get_ylim()
+            mlon = np.mean(current_xlim)
+            mlat = np.mean(current_ylim)
+            xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
+            ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
+            transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
+            self.read_instance.map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(), transformed_coords[:,1].min(), transformed_coords[:,1].max()]
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1196,13 +1243,13 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def onlassoselect_left(self, verts):
-        """Function that handles station selection upon lasso selection with left click.
+        """ Function that handles station selection upon lasso selection with left click.
 
-           Operation:
-           Select all stations within lasso boundaries.
-           If a click is made rather than using lasso, then select nearest station within tolerance.
+            Operation:
+            Select all stations within lasso boundaries.
+            If a click is made rather than using lasso, then select nearest station within tolerance.
 
-           If no station is found with left click, all stations are unselected.
+            If no station is found with left click, all stations are unselected.
         """
 
         # check if have any plotted stations on map, if not, return
@@ -1235,9 +1282,16 @@ class MPLCanvas(FigureCanvas):
 
         # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
         if len(self.absolute_selected_station_inds) == 0:
-            #take first selected point coordinates and get matches of stations within tolerance 
-            current_map_extent = self.plot_axes['map'].get_extent(crs=self.datacrs)
-            tolerance = np.average([current_map_extent[1]-current_map_extent[0],current_map_extent[3]-current_map_extent[2]]) / 100.0
+            # take first selected point coordinates and get matches of stations within tolerance 
+            current_xlim = self.plot_axes['map'].get_xlim()
+            current_ylim = self.plot_axes['map'].get_ylim()
+            mlon = np.mean(current_xlim)
+            mlat = np.mean(current_ylim)
+            xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
+            ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
+            transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
+            self.read_instance.map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(), transformed_coords[:,1].min(), transformed_coords[:,1].max()]
+            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
             self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
@@ -1245,7 +1299,7 @@ class MPLCanvas(FigureCanvas):
             if len(self.absolute_selected_station_inds) > 1:
                 self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int)
 
-        #get absolute non-selected station inds
+        # get absolute non-selected station inds
         self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                              self.absolute_selected_station_inds))[0]
 
@@ -1269,13 +1323,13 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def onlassoselect_right(self, verts):
-        """Function that handles station selection upon lasso selection with right click.
+        """ Function that handles station selection upon lasso selection with right click.
         
-           Operation:
-           Unselect station/s (if station/s currently selected), 
-           or Select station/s (if station/s currently unselected).
+            Operation:
+            Unselect station/s (if station/s currently selected), 
+            or Select station/s (if station/s currently unselected).
 
-           If no station is found with right click, nothing happens.
+            If no station is found with right click, nothing happens.
         """
 
         # check if have any plotted stations on map, if not, return
@@ -1304,8 +1358,15 @@ class MPLCanvas(FigureCanvas):
         # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
         if len(absolute_selected_station_inds) == 0:
             #take first selected point coordinates and get matches of stations within tolerance 
-            current_map_extent = self.plot_axes['map'].get_extent(crs=self.datacrs)
-            tolerance = np.average([current_map_extent[1]-current_map_extent[0],current_map_extent[3]-current_map_extent[2]]) / 100.0
+            current_xlim = self.plot_axes['map'].get_xlim()
+            current_ylim = self.plot_axes['map'].get_ylim()
+            mlon = np.mean(current_xlim)
+            mlat = np.mean(current_ylim)
+            xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
+            ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
+            transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
+            self.read_instance.map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(), transformed_coords[:,1].min(), transformed_coords[:,1].max()]
+            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
             absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
@@ -1322,7 +1383,7 @@ class MPLCanvas(FigureCanvas):
         self.absolute_selected_station_inds = np.setxor1d(previous_absolute_selected_station_inds, absolute_selected_station_inds)
         self.previous_absolute_selected_station_inds = previous_absolute_selected_station_inds
 
-        #get absolute non-selected station inds
+        # get absolute non-selected station inds
         self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                              self.absolute_selected_station_inds))[0]
 
@@ -1344,7 +1405,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
-        """ Takes the indices of selected stations on the map
+        """ Take the indices of selected stations on the map
             (potentially a subset of all available stations), and returns the indices
             of the stations inside the full loaded data arrays.
         """
@@ -1354,7 +1415,6 @@ class MPLCanvas(FigureCanvas):
         return self.active_map_valid_station_inds[selected_map_inds]
 
     def generate_interactive_elements(self):
-
         """ Function to create settings menus for each plot and their elements."""
 
         self.interactive_elements = {}
@@ -2394,7 +2454,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def interactive_elements_button_func(self):
-        """Function to show and hide elements in setting menus"""
+        """ Function to show and hide elements in setting menus. """
 
         event_source = self.sender()
         for key, val in self.interactive_elements.items():
@@ -2424,7 +2484,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_markersize_func(self):
-        """Function to handle the update of the markers size."""
+        """ Function to handle the update of the markers size. """
 
         event_source = self.sender()
         source_object = event_source.objectName()
@@ -2445,7 +2505,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_opacity_func(self):
-        """Function to handle the update of the markers opacity."""
+        """ Function to handle the update of the markers opacity. """
 
         event_source = self.sender()
         source_object = event_source.objectName()
@@ -2466,7 +2526,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_linewidth_func(self):
-        """Function to handle the update of the lines widths."""
+        """ Function to handle the update of the lines widths. """
 
         event_source = self.sender()
         for key, val in self.interactive_elements.items():
@@ -2562,11 +2622,7 @@ class MPLCanvas(FigureCanvas):
                     for temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         log_validity = self.plot.log_validity(sub_ax, option)
                         if log_validity:
-                            self.plot.log_axes(sub_ax,
-                                               option, 
-                                               plot_type,
-                                               self.plot_characteristics[plot_type],
-                                               undo=undo)
+                            self.plot.log_axes(sub_ax, option, self.plot_characteristics[plot_type], undo=undo)
                         else:
                             msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
                             msg += "in {0} with negative values.".format(plot_type)
@@ -2578,10 +2634,7 @@ class MPLCanvas(FigureCanvas):
                 else:
                     log_validity = self.plot.log_validity(self.plot_axes[plot_type], option)
                     if log_validity:
-                        self.plot.log_axes(self.plot_axes[plot_type], 
-                                           option, 
-                                           plot_type,
-                                           self.plot_characteristics[plot_type], 
+                        self.plot.log_axes(self.plot_axes[plot_type], option, self.plot_characteristics[plot_type], 
                                            undo=undo)
                     else:
                         msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
@@ -2776,27 +2829,22 @@ class MPLCanvas(FigureCanvas):
                     self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                                plot_type, 'absolute', plot_options)
 
-            # update axis scaling
-            if type(self.plot_axes[plot_type]) == dict:
+            # reset axes limits (harmonising across subplots for periodic plots) 
+            if plot_type != 'map':
                 if plot_type == 'periodic-violin':
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                          self.plot_characteristics[plot_type], plot_options, 
                                                          ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
                                                                self.selected_station_data_max[self.read_instance.networkspeci]],
                                                          relim=True, autoscale_x=True)
-                else:
-                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                         self.plot_characteristics[plot_type], plot_options, 
-                                                         relim=True, autoscale=True)
-            else:
-                if plot_type == 'scatter':
+                elif plot_type == 'scatter':
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                          self.plot_characteristics[plot_type], plot_options, 
                                                          relim=True)
-                elif plot_type != 'map':
+                else:
                     self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                          self.plot_characteristics[plot_type], plot_options, 
-                                                         relim=True, autoscale=True)                             
+                                                         relim=True, autoscale=True)                       
 
             # draw changes
             self.figure.canvas.draw()
@@ -2857,7 +2905,7 @@ class MPLCanvas(FigureCanvas):
         # set markersize
         if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin']:
 
-            if type(ax) == dict:
+            if isinstance(ax, dict):
                 for sub_ax in ax.values():
                     for line in sub_ax.lines:
                         line.set_markersize(markersize)
@@ -2984,7 +3032,7 @@ class MPLCanvas(FigureCanvas):
         """ Update line widths for each plot type. """
         
         # set linewidth
-        if type(ax) == dict:
+        if isinstance(ax, dict):
             for sub_ax in ax.values():
                 for line in sub_ax.lines:
                     line.set_linewidth(linewidth)
@@ -3009,7 +3057,7 @@ class MPLCanvas(FigureCanvas):
         
         # set violin widths
         if plot_type == 'periodic-violin':
-            if type(ax) == dict:
+            if isinstance(ax, dict):
                 for sub_ax in ax.values():
                     widths = np.full(len(self.active_map_valid_station_inds), width)
                     for collection in sub_ax.collections:
@@ -3031,7 +3079,8 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def save_axis_figure_dialog(self, plot_type, relevant_temporal_resolution=None):
-        
+        """ Function to create the dialog box to save each plot figure. """
+
         default_filename = '{0}-{1}-{2}-{3}-{4}-{5}-{6}.png'.format(self.read_instance.network[0],
                                                                     self.read_instance.species[0],
                                                                     self.read_instance.resolution, 
@@ -3051,6 +3100,7 @@ class MPLCanvas(FigureCanvas):
             return figure_path
 
     def save_axis_figure_func(self):
+        """ Function to save each plot figure. """
         
         # get option and plot names
         event_source = self.sender()
@@ -3163,8 +3213,8 @@ class MPLCanvas(FigureCanvas):
         """ Update annotation for each station that is hovered. """
 
         # retrieve stations references and coordinates
-        station_names = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds][annotation_index['ind'][0]]
-        station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds][annotation_index['ind'][0]]
+        station_names = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
+        station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
         station_value = self.z_statistic[annotation_index['ind'][0]]
 
@@ -3172,8 +3222,15 @@ class MPLCanvas(FigureCanvas):
         self.station_annotation.xy = station_location
 
         # update bbox position
-        lat_min = self.plot_axes['map'].get_extent(crs=self.datacrs)[2]
-        lat_max = self.plot_axes['map'].get_extent(crs=self.datacrs)[3]
+        current_xlim = self.plot_axes['map'].get_xlim()
+        current_ylim = self.plot_axes['map'].get_ylim()
+        mlon = np.mean(current_xlim)
+        mlat = np.mean(current_ylim)
+        xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
+        ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
+        transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
+        lat_min = transformed_coords[:,1].min()
+        lat_max = transformed_coords[:,1].max()
         if station_location[1] > ((lat_max + lat_min) / 2):
             self.station_annotation.set_y(-10)
             self.station_annotation.set_va('top')
@@ -3305,6 +3362,7 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def hover_timeseries_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the timeseries plot. """
 
         # activate hover over timeseries
         if ('timeseries' in self.read_instance.active_dashboard_plots):
@@ -3314,6 +3372,7 @@ class MPLCanvas(FigureCanvas):
 
                     # lock annotation
                     self.lock_timeseries_annotation = True
+                    is_contained = False
 
                     for data_label in self.plot_elements['data_labels_active']:
 
@@ -3388,8 +3447,13 @@ class MPLCanvas(FigureCanvas):
                     self.plot_axes['map'].set_ylim([ydata - (ydata - current_ylim[0]) / scale_factor, 
                                                     ydata + (current_ylim[1] - ydata) / scale_factor])
                     
-                    # save map extent
-                    self.read_instance.map_extent = self.plot_axes['map'].get_extent(crs=self.datacrs)
+                    # save map extent (in data coords)
+                    mlon = np.mean(current_xlim)
+                    mlat = np.mean(current_ylim)
+                    xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
+                    ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
+                    transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
+                    self.read_instance.map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(), transformed_coords[:,1].min(), transformed_coords[:,1].max()]
 
                     # redraw points
                     self.figure.canvas.draw()
@@ -3436,14 +3500,20 @@ class MPLCanvas(FigureCanvas):
             
                 # get event information
                 legend_label = event.artist
-                data_label = legend_label.get_text().lower()
-                for experiment, experiment_alias in self.read_instance.experiments.items():
-                    if data_label == experiment_alias:
-                        data_label = experiment
+                data_label = legend_label.get_text()
+                for exp_label, exp_alias in self.read_instance.experiments.items():
+                    if data_label == exp_alias:
+                        data_label = exp_label
                         continue
                 if data_label not in self.plot_elements['data_labels_active']:
                     visible = True
-                    self.plot_elements['data_labels_active'].append(data_label)
+                    # put observations label always first in pop-ups on hover
+                    if data_label == 'observations':
+                        self.plot_elements['data_labels_active'].insert(0, data_label)
+                    # put experiment labels in the same order as in the legend
+                    else:
+                        self.plot_elements['data_labels_active'].insert(list(self.read_instance.experiments.keys()).index(data_label)+1, 
+                                                                        data_label)
                 else:
                     visible = False
                     self.plot_elements['data_labels_active'].remove(data_label)
@@ -3478,28 +3548,22 @@ class MPLCanvas(FigureCanvas):
                                         else:
                                             plot_element.set_visible(False)
 
-                            # update axis scaling 
-                            if type(self.plot_axes[plot_type]) == dict:
-                                if plot_type == 'periodic-violin':
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                         self.plot_characteristics[plot_type], 
-                                                                         plot_options, 
-                                                                         ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                               self.selected_station_data_max[self.read_instance.networkspeci]],
-                                                                         relim=True, autoscale_x=True)
-                                else:
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                         self.plot_characteristics[plot_type], 
-                                                                         plot_options, relim=True, autoscale=True)
-                            else:
-                                if plot_type == 'scatter':
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                         self.plot_characteristics[plot_type], 
-                                                                         plot_options, relim=True)
-                                else: 
-                                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                         self.plot_characteristics[plot_type], 
-                                                                         plot_options, relim=True, autoscale=True)
+                            # reset axes limits (harmonising across subplots for periodic plots) 
+                            if plot_type == 'periodic-violin':
+                                self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                     self.plot_characteristics[plot_type], 
+                                                                     plot_options, 
+                                                                     ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                           self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                                     relim=True, autoscale_x=True)
+                            elif plot_type == 'scatter':
+                                self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                     self.plot_characteristics[plot_type], 
+                                                                     plot_options, relim=True)
+                            else: 
+                                self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                     self.plot_characteristics[plot_type], 
+                                                                     plot_options, relim=True, autoscale=True)
 
                 # change font weight of label
                 legend_label._fontproperties = self.legend.get_texts()[0]._fontproperties.copy()

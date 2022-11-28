@@ -24,14 +24,14 @@ LOG = logging.getLogger(__name__)
 
 
 class Providentia(object):
-    """
-    Interface class for Providentia
-    """
+    """ Interface class for Providentia. """
+
     def __init__(self, parser):
         self.parser = parser
 
     def getargs(self, args):
-        """ Returns arguments to be passed to the dashboard """
+        """ Return arguments to be passed to the dashboard. """
+
         req = vars(args)
         # print help if no args
         if req.values() == [None for _ in range(len(req.values()))]:
@@ -42,9 +42,8 @@ class Providentia(object):
         return res
 
     def main(self):
-        """
-        Main functionality of the tool
-        """
+        """ Main functionality of the tool. """
+        
         try:
             args = self.parser.parse_args()
             LOG.info(args)
@@ -63,9 +62,9 @@ class Providentia(object):
             LOG.error('Unhandled exception on Providentia: %s' % err, exc_info=True)
             return False
 
-
 def main():
-    """ Main function """
+    """ Main function. """
+    
     if Providentia(ProvArgumentParser()).main() is False:
         sys.exit(1)
     sys.exit(0)

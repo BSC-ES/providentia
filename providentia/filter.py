@@ -9,9 +9,7 @@ from PyQt5 import QtWidgets
 from providentia import aux
 
 class DataFilter:
-    """
-    "Class that filters observational/experiment data into memory as required."
-    """
+    """ Class that filters observational/experiment data into memory as required. """
 
     def __init__(self, read_instance):
         self.read_instance = read_instance
@@ -25,41 +23,79 @@ class DataFilter:
                 self.weekday_weekend_index = self.read_instance.ghost_data_vars_to_read.index('weekday_weekend_code')
             self.season_index = self.read_instance.ghost_data_vars_to_read.index('season_code')
 
-        #apply filtering
+        # apply filtering
         self.filter_all()
 
     def filter_all(self):
-        # call functions to start filtering
+        """ Call methods to start filtering. """
+
         self.reset_data_filter()
+        self.filter_by_species()
         self.filter_data_limits()
         self.filter_by_period()
         self.filter_by_data_availability()
         self.filter_by_metadata()
         self.temporally_colocate_data()
-        self.filter_by_species()
         self.get_valid_stations_after_filtering()
 
     def reset_data_filter(self):
-        """Resets data arrays to be un-filtered"""
+        """ Resets data arrays to be un-filtered"""
 
         self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
         self.read_instance.temporal_colocation_nans = {}
         self.read_instance.valid_station_inds = {}
         self.read_instance.valid_station_inds_temporal_colocation = {}
 
+    def filter_by_species(self):
+        """ Function which filters read species by other species.
+            For N other species a lower and upper limit are set. 
+            Where values for each species are outside of these ranges,
+            then impose NaNs upon all read species in memory.
+            Only filter if spatial colocation is True.
+        """
+
+        # filter all read species by set species ranges
+        if (self.read_instance.filter_species) and (self.read_instance.spatial_colocation):
+
+            # initialise array to set where temporally to filter species
+            # initialse being all False, set as True where data is outside given bounds for species
+            inds_to_filter = np.full(self.read_instance.data_in_memory_filtered[self.read_instance.networkspecies[0]][self.obs_index,:,:].shape, False)    
+
+            # iterate through all species to filter by
+            for filter_networkspeci, speci_limits in self.read_instance.filter_species.items():
+                
+                # get lower and upper limits for species
+                lower_limit = speci_limits[0]
+                upper_limit = speci_limits[1]
+
+                # get where data is outside bounds
+                if filter_networkspeci in self.read_instance.networkspecies:
+                    invalid_inds_per_species = np.logical_or(self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] < lower_limit,
+                                                             self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] > upper_limit)
+                else:
+                    invalid_inds_per_species = np.logical_or(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < lower_limit,
+                                                             self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > upper_limit)
+
+                # update inds_to_filter array, making True all instances where have data outside bounds
+                inds_to_filter = np.any([inds_to_filter, invalid_inds_per_species], axis=0)
+
+            # set all inds to filter as NaN for all networkspecies in memory
+            for networkspeci in self.read_instance.networkspecies:
+                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = np.NaN       
+
     def filter_data_limits(self):
-        """Filter out (set to NaN) data which exceed the lower/upper limits"""
+        """ Filter out (set to NaN) data which exceed the lower/upper limits. """
 
-        # iterate through network / species  
-        for network, speci in zip(self.read_instance.network, self.read_instance.species):
+        # iterate through networkspecies  
+        for networkspeci in self.read_instance.networkspecies:
 
-            # get network / species str
-            networkspeci = '{}|{}'.format(network,speci)
+            # get speci str
+            speci = networkspeci.split('|')[1]
 
             # get set lower/upper data bounds
             if self.read_instance.offline:
-                lower_bound, upper_bound = aux.which_bounds(self.read_instance, 
-                                                            self.read_instance.species[0])
+                lower_bound = self.read_instance.lower_bound[speci]
+                upper_bound = self.read_instance.upper_bound[speci]
             else:
                 lower_bound = self.read_instance.le_minimum_value.text()
                 upper_bound = self.read_instance.le_maximum_value.text()
@@ -79,7 +115,7 @@ class DataFilter:
             self.read_instance.data_in_memory_filtered[networkspeci][inds_out_of_bounds] = np.NaN
 
     def filter_by_period(self):
-        """Filters data for selected periods (keeping or removing data, as defined)"""
+        """ Filter data for selected periods (keeping or removing data, as defined). """
 
         keeps, removes = [], []
         if self.read_instance.offline:
@@ -99,8 +135,7 @@ class DataFilter:
             if len(day_night_codes_to_keep) == 1:
                 if (self.read_instance.resolution != 'daily') & (self.read_instance.resolution != 'monthly'):
                     # iterate through network / species  
-                    for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                        networkspeci = '{}|{}'.format(network,speci)
+                    for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.day_night_index,:,:], day_night_codes_to_keep, invert=True)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -112,8 +147,7 @@ class DataFilter:
             if len(weekday_weekend_codes_to_keep) == 1:
                 if self.read_instance.resolution != 'monthly':
                     # iterate through network / species  
-                    for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                        networkspeci = '{}|{}'.format(network,speci)
+                    for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.weekday_weekend_index,:,:], weekday_weekend_codes_to_keep, invert=True)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -128,8 +162,7 @@ class DataFilter:
                 season_codes_to_keep.append(3)
             if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
                 # iterate through network / species  
-                for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                    networkspeci = '{}|{}'.format(network,speci)
+                for networkspeci in self.read_instance.networkspecies:
                     inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.season_index,:,:], season_codes_to_keep, invert=True)
                     self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -142,8 +175,7 @@ class DataFilter:
             if len(day_night_codes_to_remove) > 0:
                 if (self.read_instance.resolution != 'daily') & (self.read_instance.resolution != 'monthly'):
                     # iterate through network / species  
-                    for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                        networkspeci = '{}|{}'.format(network,speci)
+                    for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.day_night_index,:,:], day_night_codes_to_remove)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -155,8 +187,7 @@ class DataFilter:
             if len(weekday_weekend_codes_to_remove) > 0:
                 if self.read_instance.resolution != 'monthly':
                     # iterate through network / species  
-                    for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                        networkspeci = '{}|{}'.format(network,speci)
+                    for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.weekday_weekend_index,:,:], weekday_weekend_codes_to_remove)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
@@ -171,13 +202,12 @@ class DataFilter:
                 season_codes_to_remove.append(3)
             if len(season_codes_to_remove) > 0:
                 # iterate through network / species  
-                for network, speci in zip(self.read_instance.network, self.read_instance.species):
-                    networkspeci = '{}|{}'.format(network,speci)
+                for networkspeci in self.read_instance.networkspecies:
                     inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.season_index,:,:], season_codes_to_remove)
                     self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
     def filter_by_data_availability(self):
-        """Function which filters data by selected data availability variables"""
+        """ Function which filters data by selected data availability variables. """
 
         # get set variables names representing percentage data availability (native and non-native)
         active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['map_vars']
@@ -199,10 +229,7 @@ class DataFilter:
                     var_index = self.read_instance.ghost_data_vars_to_read.index(var)
                     
                     # iterate through network / species  
-                    for network, speci in zip(self.read_instance.network, self.read_instance.species):
-
-                        # get network / species str
-                        networkspeci = '{}|{}'.format(network,speci)
+                    for networkspeci in self.read_instance.networkspecies:
 
                         # max gap variable?
                         if 'max_gap' in var:
@@ -250,27 +277,25 @@ class DataFilter:
                 for period_inds in period_inds_split:
                     if len(period_inds) > 0:
 
-                        # iterate through network / species  
-                        for network, speci in zip(self.read_instance.network, self.read_instance.species):
-
-                            # get network / species str
-                            networkspeci = '{}|{}'.format(network,speci)
+                        # iterate through networkspecies  
+                        for networkspeci in self.read_instance.networkspecies:
 
                             # max gap variable?
                             if 'max_gap' in var:
                                 max_gap_percent = Stats.max_repeated_nans_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][:,:,period_inds])
-                                inds_to_screen = max_gap_percent > data_availability_lower_bounds[var_ii]
-                                self.read_instance.data_in_memory_filtered[networkspeci][inds_to_screen] = np.NaN
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds])
+                                inds_to_screen = np.where(max_gap_percent > data_availability_lower_bounds[var_ii])[0]
+                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
+
                             # data representativity variable?
                             else:
                                 data_availability_percent = Stats.calculate_data_avail_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][:,:,period_inds])
-                                inds_to_screen = data_availability_percent < data_availability_lower_bounds[var_ii]
-                                self.read_instance.data_in_memory_filtered[networkspeci][inds_to_screen] = np.NaN
-    
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds])
+                                inds_to_screen = np.where(data_availability_percent < data_availability_lower_bounds[var_ii])[0]
+                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
+
     def filter_by_metadata(self):
-        """Filters data by selected metadata"""
+        """ Filter data by selected metadata. """
 
         # validate fields before filtering
         if not self.validate_values():
@@ -290,11 +315,8 @@ class DataFilter:
             # handle non-numeric metadata
             if metadata_data_type == np.object:
 
-                # iterate through network / species  
-                for network, speci in zip(self.read_instance.network, self.read_instance.species):
-
-                    # get network / species str
-                    networkspeci = '{}|{}'.format(network,speci)
+                # iterate through networkspecies  
+                for networkspeci in self.read_instance.networkspecies:
 
                     # if any of the keep checkboxes are selected, filter out data by fields that have not been selected
                     current_keep = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected']
@@ -328,11 +350,8 @@ class DataFilter:
                     # apply bounds and remove nans if variable has been selected
                     if meta_var in current_apply:
 
-                        # iterate through network / species  
-                        for network, speci in zip(self.read_instance.network, self.read_instance.species):
-
-                            # get network / species str
-                            networkspeci = '{}|{}'.format(network,speci)
+                        # iterate through networkspecies  
+                        for networkspeci in self.read_instance.networkspecies:
 
                             # if current lower value is non-NaN, then filter out data with metadata < current lower value
                             if not pd.isnull(current_lower):
@@ -360,7 +379,7 @@ class DataFilter:
                             self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_nan] = np.NaN
 
     def validate_values(self):
-        """Validates that field inserted by user is float"""
+        """ Validate that field inserted by user is float. """
 
         # iterate through metadata in memory
         for meta_var in self.read_instance.metadata_vars_to_read:
@@ -389,10 +408,10 @@ class DataFilter:
                     return False
 
     def temporally_colocate_data(self):
-        """Define function which temporally colocates observational and experiment data.
-           This is done across all networks / species if spatial colocation is active,
-           otherwise it is done inderpendently per network / species
-           This in reality means storing the indices for the temporal colocation.
+        """ Define function which temporally colocates observational and experiment data.
+            This is done across all networks / species if spatial colocation is active,
+            otherwise it is done independently per network / species
+            This in reality means storing the indices for the temporal colocation.
         """
 
         # if do not have any experiment data loaded, no colocation is possible.
@@ -401,29 +420,31 @@ class DataFilter:
         else:
             # colocate observational data array to every different experiment array in memory, 
             # and all experiment arrays to observations.
-            # wherever there is a NaN at one time in one of the observations/experiment arrays across all networks / species
-            # the other array value is also made NaN
-
+            # wherever there is a NaN at one time in one of the observations/experiment arrays 
+            # the other array value is also made NaN.
+            # this is done across all networks / species if spatial colocation is active,
+            # otherwise it is done inderpendently per network / species
+            
             # iterate through network / species  
-            for ii, (network, speci) in enumerate(zip(self.read_instance.network, self.read_instance.species)):
+            for ii, networkspeci in enumerate(self.read_instance.networkspecies):
 
-                # get network / species str
-                networkspeci = '{}|{}'.format(network,speci)
-
-                if (self.read_instance.spatial_colocation) or (ii == 0):
-                    # create array for finding instances where have 0 valid values across all observations in all networks / species
+                # initialise arrays to determine where have NaNs
+                if (ii == 0) or (not self.read_instance.spatial_colocation):
+                    # create array for finding instances where have 0 valid values across all observations
                     # initialise as being all False (i.e. non-NaN), set as True on the occasion there is a NaN in the observations
                     obs_all_nan = np.full(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:].shape, False)
 
-                    # create array for finding instances where have 0 valid values across all experiments, in all networks / species
+                    # create array for finding instances where have 0 valid values across all experiments
                     # initialise as being all False (i.e. non-NaN), set as True on the occasion there is a NaN in an experiment
                     exps_all_nan = np.full(obs_all_nan.shape, False)
 
                 # get all instances observations is NaN
-                nan_obs = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:])
-                
+                nan_obs = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:])             
+
                 # update obs_all_nan array, making True all instances where have NaNs
-                obs_all_nan = np.any([obs_all_nan, nan_obs], axis=0)
+                # if all observations are nan then do not update
+                if not np.all(nan_obs):
+                    obs_all_nan = np.any([obs_all_nan, nan_obs], axis=0)
 
                 # iterate through experiment data arrays in data in memory dictionary
                 # save indices for colocation with observations
@@ -434,36 +455,31 @@ class DataFilter:
                     
                     # get all instances experiment is NaN
                     nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][exp_data_index,:,:])
-                
+
                     # update exps_all_nan array, making True all instances where have NaNs
-                    exps_all_nan = np.any([exps_all_nan, nan_exp], axis=0)
+                    # if all experiment values are nan then do not update for that experiment
+                    if not np.all(nan_exp):
+                        exps_all_nan = np.any([exps_all_nan, nan_exp], axis=0)
 
                 # if spatial colocation is not active,
                 # get indices where one of observations and experiments per network /species is NaN
                 if not self.read_instance.spatial_colocation:
                     self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
 
+            # if spatial colocation is active, 
             # get indices where one of observations and experiments across networks / species is NaN
             if self.read_instance.spatial_colocation:
-                for network, speci in zip(self.read_instance.network, self.read_instance.species):
+                for networkspeci in self.read_instance.networkspecies:
                     self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
 
-    def filter_by_species(self):
-        """Define function which filters read species by other species."""
-
-        pass
-
     def get_valid_stations_after_filtering(self):
-        """Get valid station indices after all filtering has been performed.
-           These are saved in a dictionary per network/species, per data label. 
-           There is an mirror dictionary saved for the temporally colocated version of the data. 
+        """ Get valid station indices after all filtering has been performed.
+            These are saved in a dictionary per network/species, per data label. 
+            There is an mirror dictionary saved for the temporally colocated version of the data. 
         """
 
-        # iterate through networks / species  
-        for network, speci in zip(self.read_instance.network, self.read_instance.species):
-
-            # get network / species str
-            networkspeci = '{}|{}'.format(network,speci)
+        # iterate through networkspecies  
+        for networkspeci in self.read_instance.networkspecies:
 
             self.read_instance.valid_station_inds[networkspeci] = {}
             self.read_instance.valid_station_inds_temporal_colocation[networkspeci] = {}
@@ -511,12 +527,12 @@ class DataFilter:
 
                     # get absolute data availability number per station in experiment data array
                     station_data_availability_number = Stats.calculate_data_avail_number(exp_data)
-                    
+
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
                         valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
 
-                    # get colocated experimental data array (if have experiments, first subset by valid observational stations)
+                    # get colocated experimental data array (first subset by valid observational stations)
                     exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
                     exp_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
                     exp_data = exp_data[valid_station_inds,:]

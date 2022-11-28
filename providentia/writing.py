@@ -9,18 +9,17 @@ from .configuration import write_conf
 
 
 def export_data_npz(canvas_instance, fname):
-    """Function that writes out current data / ghost data / metadata in memory to .npy file"""
+    """ Function that writes out current data / ghost data / metadata in memory to .npy file. """
 
     # create dict to save data
     save_data_dict = {}
 
     # save data / ghost data / metadata
-    for network, speci in zip(canvas_instance.read_instance.network, canvas_instance.read_instance.species):
-        networkspeci = '{}|{}'.format(network,speci)
+    for networkspeci in self.canvas_instance.read_instance.networkspecies:
         if canvas_instance.read_instance.reading_ghost:
-            save_data_dict['{}_{}_ghost_data'.format(network,speci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci]
-        save_data_dict['{}_{}_data'.format(network,speci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci]
-        save_data_dict['{}_{}_metadata'.format(network,speci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci]
+            save_data_dict['{}_ghost_data'.format(networkspeci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci]
+        save_data_dict['{}_data'.format(networkspeci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci]
+        save_data_dict['{}_metadata'.format(networkspeci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci]
 
     # save out miscellaneous variables 
     save_data_dict['time'] = canvas_instance.read_instance.time_array
@@ -39,9 +38,9 @@ def export_data_npz(canvas_instance, fname):
     np.savez(fname, **save_data_dict)
 
 def export_netcdf(canvas_instance, fname):
-    """Write data and metadata to netcdf file"""
+    """ Write data and metadata to netcdf file. """
 
-    #set up some structural variables
+    # set up some structural variables
     read_instance = canvas_instance.read_instance
     sys.path.append('/gpfs/projects/bsc32/AC_cache/obs/ghost/GHOST_standards/{}'
                     .format(read_instance.ghost_version))
@@ -69,13 +68,17 @@ def export_netcdf(canvas_instance, fname):
     fout.createDimension('station', None)
     fout.createDimension('time', len(read_instance.time_array))
     fout.createDimension('month', len(read_instance.yearmonths))
+    
     # create dimensions only for GHOST case
     if read_instance.reading_ghost:
         fout.createDimension('ghost_data_variable', len(read_instance.ghost_data_vars_to_read))
 
-    # iterate through networks and species 
-    for speci_ii, (network, speci) in enumerate(zip(read_instance.network, read_instance.species)):
-        networkspeci = '{}|{}'.format(network,speci)
+    # iterate through networkspecies 
+    for speci_ii, networkspeci in enumerate(read_instance.networkspecies):
+
+        # get network / species
+        network = networkspeci.split('|')[0]
+        speci = networkspeci.split('|')[1]
 
         # get some key variables for speci
         parameter_details = parameter_dictionary[speci]
@@ -109,8 +112,6 @@ def export_netcdf(canvas_instance, fname):
             var.axis = 'T'
             var.calendar = 'standard'
             var.tz = 'UTC'
-
-            # save
             var[:] = np.arange(len(read_instance.time_array))
             
             # miscellaneous variables 
@@ -128,7 +129,7 @@ def export_netcdf(canvas_instance, fname):
          
         # data
         current_data_type = type_map[data_format_dict[speci]['data_type']]
-        var = fout.createVariable('{}_{}_data'.format(network,speci), current_data_type, 
+        var = fout.createVariable('{}_data'.format(networkspeci), current_data_type, 
                                   ('data_label', 'station', 'time',))
         
         # set attributes
@@ -144,26 +145,23 @@ def export_netcdf(canvas_instance, fname):
         var.filter_species = str(read_instance.filter_species)
         if read_instance.reading_ghost:
             var.ghost_version = str(read_instance.ghost_version)
-        
-        # save
         var[:] = read_instance.data_in_memory[networkspeci]
         
-        # ghost data
+        # GHOST data
         if read_instance.reading_ghost:
-            var = fout.createVariable('{}_{}_ghost_data'.format(network,speci), 'f4', 
+            var = fout.createVariable('{}_ghost_data'.format(networkspeci), 'f4', 
                                       ('ghost_data_variable', 'station', 'time',))
             # set attributes 
-            var.standard_name = '{}_{}_ghost_data'.format(network,speci) 
-            var.long_name = '{}_{}_ghost_data'.format(network,speci)
+            var.standard_name = '{}_ghost_data'.format(networkspeci) 
+            var.long_name = '{}_ghost_data'.format(networkspeci)
             var.description = 'GHOST data variables used for additional filtering.'
-            # save
             var[:] = read_instance.ghost_data_in_memory[networkspeci]
 
         # save metadata (as individual variables)
         metadata_arr = read_instance.metadata_in_memory[networkspeci]
         for metadata_var in metadata_arr.dtype.names:
             current_data_type = type_map[metadata_format_dict[metadata_var]['data_type']]
-            var = fout.createVariable('{}_{}_{}'.format(network,speci,metadata_var), current_data_type, ('station', 'month',))
+            var = fout.createVariable('{}_{}'.format(networkspeci,metadata_var), current_data_type, ('station', 'month',))
             # set attributes
             var.standard_name = metadata_format_dict[metadata_var]['standard_name']
             var.long_name = metadata_format_dict[metadata_var]['long_name']
@@ -173,7 +171,6 @@ def export_netcdf(canvas_instance, fname):
                 var.axis = 'X'
             elif metadata_var == 'latitude':
                 var.axis = 'Y'
-            # save 
             if current_data_type == str:
                 var[:] = metadata_arr[metadata_var].astype(str)
             else:
@@ -183,18 +180,15 @@ def export_netcdf(canvas_instance, fname):
     fout.close()
 
 def export_configuration(prv, cname, separator="||"):
-    """
-    Create all items to be written in configuration file
-    and send them to write_conf
+    """ Create all items to be written in configuration file
+        and send them to write_conf.
 
-    :prv: Instance of providentia main window
-    :type prv: instance of ProvidentiaMainWindow
-
-    :cname: Name for the configuration file
-    :type cname:
-
-    :separator: delimiter for keep/remove fields
-    :type separator: str
+        :prv: Instance of providentia main window
+        :type prv: instance of ProvidentiaMainWindow
+        :cname: Name for the configuration file
+        :type cname:
+        :separator: delimiter for keep/remove fields
+        :type separator: str
     """
 
     # set section and subsection names in config file
@@ -244,7 +238,7 @@ def export_configuration(prv, cname, separator="||"):
                               })
 
     #add other miscellaneous fields
-    options['section'].update({'map_extent': prv.map_extent,
+    options['section'].update({'map_extent': ",".join(str(i) for i in prv.map_extent),
                                'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots),
                                'plot_characteristics_filename': prv.plot_characteristics_filename
                               })
@@ -290,12 +284,15 @@ def export_configuration(prv, cname, separator="||"):
                 lower_def = prv.metadata_menu[menu_type]['rangeboxes']['lower_default'][i]
                 upper_cur = prv.metadata_menu[menu_type]['rangeboxes']['current_upper'][i]
                 upper_def = prv.metadata_menu[menu_type]['rangeboxes']['upper_default'][i]
-                if (lower_cur != lower_def) or (upper_cur != upper_def):
+                # do not write nans
+                if (pd.isnull(lower_cur)) or (pd.isnull(upper_cur)) or (lower_cur == 'nan') or (upper_cur == 'nan'):
+                    continue
+                # write field if different from default values
+                elif (lower_cur != lower_def) or (upper_cur != upper_def):
                     options['subsection'][label] = lower_cur + ", " + upper_cur
 
             # and then treat the keep/remove
             for label in prv.metadata_menu[menu_type]['navigation_buttons']['labels']:
-                #         keeps, removes = split_options(getattr(self, label))
                 keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
                 removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
                 if keeps or removes:
