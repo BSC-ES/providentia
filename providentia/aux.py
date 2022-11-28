@@ -682,7 +682,7 @@ def update_metadata_fields(instance):
                 # set defaults to min/max extents
                 instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
                 instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = max_val
-            # do not have some numeric values for metadata variable so set as 'nan'
+            # do not haveupdate_representativity_fields some numeric values for metadata variable so set as 'nan'
             else:
                 instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = 'nan'
                 instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
