@@ -115,16 +115,15 @@ class ProvidentiaOffline:
 
             # read data
             self.datareader.read_setup(['reset'])
+            #initialise previous QA, flags and filter species as section values
+            self.previous_qa = copy.deepcopy(self.qa)
+            self.previous_flags = copy.deepcopy(self.flags)
+            self.previous_filter_species = copy.deepcopy(self.filter_species)
 
             # if no valid data has been found be to be read, then skip to next section
             if self.invalid_read:
                 print('No valid data for {} section'.format(section))
                 continue
-
-            # initialise/reinitialise structures to store % data representativity, data periods and metadata
-            aux.init_representativity(self)
-            aux.init_period(self)
-            aux.init_metadata(self)
 
             # set plot characteristics
             try:
@@ -614,13 +613,27 @@ class ProvidentiaOffline:
             if len(self.experiments) == 0:
                 self.temporal_colocation = False    
 
+            # determine if need to re-read data (qa, flags or filter_species have changed)
+            if (self.qa != self.previous_qa) or (self.flags != self.previous_flags) or\
+            (self.filter_species != self.previous_filter_species):
+                # re-read data
+                self.datareader.read_setup(['reset'])
+
             # update fields available for filtering
+            aux.init_representativity(self)
             aux.update_representativity_fields(self)
             aux.representativity_conf(self)
+            aux.init_period(self)
             aux.update_period_fields(self)
             aux.period_conf(self)
+            aux.init_metadata(self)
             aux.update_metadata_fields(self)
             aux.metadata_conf(self)
+
+            #set previous QA, flags and filter species as subsection
+            self.previous_qa = copy.deepcopy(self.qa)
+            self.previous_flags = copy.deepcopy(self.flags)
+            self.previous_filter_species = copy.deepcopy(self.filter_species)
             
             # filter dataset for current subsection
             print('\nFiltering data for {} subsection'.format(self.subsection))
