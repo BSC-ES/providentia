@@ -3498,13 +3498,18 @@ class MPLCanvas(FigureCanvas):
                 # lock legend pick
                 self.lock_legend_pick = True
             
-                # get event information
+                # get legend label information
                 legend_label = event.artist
                 data_label = legend_label.get_text()
+
+                # transform legend label into data labels
                 for exp_label, exp_alias in self.read_instance.experiments.items():
                     if data_label == exp_alias:
                         data_label = exp_label
                         continue
+                if data_label == self.plot_characteristics['legend']['handles']['obs_label']:
+                    data_label = 'observations'
+
                 if data_label not in self.plot_elements['data_labels_active']:
                     visible = True
                     # put observations label always first in pop-ups on hover
