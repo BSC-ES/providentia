@@ -345,6 +345,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 occupied_vertical_space_before_grid += (formatting_dict['button_popup']['height'] + self.layout_spacing)
             if have_column_headers:
                 occupied_vertical_space_before_grid += (formatting_dict['column_header_label_popup']['height'] + grid_vertical_spacing)
+            # add horizontal scrollbar spacing
+            occupied_vertical_space_before_grid += row_format_dict['height']*1.5
 
             # initialise variable for tracking available vertical space when appending rows of grid
             currently_occupied_vertical_space = copy.deepcopy(occupied_vertical_space_before_grid)
