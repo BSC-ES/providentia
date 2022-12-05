@@ -574,8 +574,9 @@ class DataReader:
 
                     elif '/' in network:
                         file_root = \
-                            '%s/%s/%s/%s/%s/*%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                        data_label, self.read_instance.resolution, speci, network.split('/')[0].upper(), speci)
+                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                                                        data_label, self.read_instance.resolution, speci, 
+                                                        network.replace('/', '-'), speci)
                     else:
                         file_root = \
                             '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
