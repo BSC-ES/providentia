@@ -971,10 +971,10 @@ def get_experiment_tree(instance):
                             files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
                                                                      experiment, resolution, species, network)
                         else:
-                            files_directory = '%s/%s/%s/%s/%s/*%s' % (instance.exp_root, instance.ghost_version, 
+                            files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
                                                                       experiment, resolution, species,
-                                                                      network.split('/')[0].upper())
-                            
+                                                                      network.replace('/', '-'))
+                        
                         # test if interpolated directory exists for experiment
                         # if it does not exit, continue
                         if not os.path.exists(files_directory):
@@ -1101,9 +1101,9 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
                 files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
                                                          experiment, resolution, speci, network)
             else:
-                files_directory = '%s/%s/%s/%s/%s/*%s' % (instance.exp_root, instance.ghost_version, 
+                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
                                                           experiment, resolution, speci,
-                                                          network.split('/')[0].upper())
+                                                          network.replace('/', '-'))
                 
             # test if interpolated directory exists for experiment
             # if it does not exit, continue
