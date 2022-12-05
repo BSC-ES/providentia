@@ -237,7 +237,7 @@ def export_configuration(prv, cname, separator="||"):
                                'report_filename': prv.report_filename 
                               })
 
-    #add other miscellaneous fields
+    # add other miscellaneous fields
     options['section'].update({'map_extent': ",".join(str(i) for i in prv.map_extent),
                                'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots),
                                'plot_characteristics_filename': prv.plot_characteristics_filename
