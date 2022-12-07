@@ -10,7 +10,7 @@
             }
         },
 
-    "nasa-aeronet/directsun_v2-lev20": {
+    "nasa-aeronet/directsun_v3-lev20": {
         "3hourly": {
             "od550aero": [],
             "ae440-870aero": []
