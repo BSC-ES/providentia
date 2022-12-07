@@ -14,6 +14,10 @@
         "3hourly": {
             "od550aero": [],
             "ae440-870aero": []
+            },
+        "hourly": {
+            "od550aero": [],
+            "ae440-870aero": []
             }
         },
 
@@ -28,6 +32,19 @@
             "od500aerocoarse": [],
             "od500aerofine": []
             }
+        },
+
+    "nasa-aeronet/oneill_v3-lev20": {
+            "3hourly": {
+                "od500aero": [],
+                "od500aerocoarse": [],
+                "od500aerofine": []
+                },
+            "hourly": {
+                "od500aero": [],
+                "od500aerocoarse": [],
+                "od500aerofine": []
+                }
         },
 
     "eea/eionet": {
@@ -87,5 +104,16 @@
             "sconcisop": [],
             "sconcxyl": []
         }
+    },
+
+    "meteofrance/eionet-cams2_40": {
+        "hourly": {
+            "pm10": [],
+            "pm2p5": [],
+            "sconcco": [],
+            "sconcno2": [],
+            "sconco3": [],
+            "sconcso2": []
+            }
     }
 }
