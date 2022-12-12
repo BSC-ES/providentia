@@ -907,9 +907,10 @@ class ProvidentiaOffline:
             data_range_max = self.data_range_max_station[networkspeci]
 
         # iterate through all data arrays
-        first_data_label = True 
+        first_data_label = True
+        self.plot.markersize_from_density = False
         for data_label in all_data_labels:
-
+            
             # set how experiment should be referred to in heatmap/table
             if data_label == 'observations':
                 data_label_legend = copy.deepcopy(data_label)
@@ -966,7 +967,7 @@ class ProvidentiaOffline:
 
                 # make map plot
                 self.plot.make_map(relevant_axis, networkspeci, self.z_statistic, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options)
+                                   plot_options=plot_options, first_data_label=first_data_label)
                 
                 # save plot information for later formatting 
                 if z2 == '':
@@ -980,6 +981,8 @@ class ProvidentiaOffline:
                 # turn axis on
                 relevant_axis.axis('on')
                 relevant_axis.set_visible(True)
+
+                first_data_label = False
 
             # heatmap and table
             elif base_plot_type in ['heatmap', 'table']:
@@ -1050,6 +1053,7 @@ class ProvidentiaOffline:
                             break
                 else:
                     axis_title = relevant_axis.get_title()
+
                 # axis title is empty?
                 if axis_title == '':
                     if plotting_paradigm == 'summary':
