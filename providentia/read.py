@@ -461,9 +461,6 @@ class DataReader:
             for experiment in experiments_to_remove:
                 del self.read_instance.plotting_params[experiment]
 
-            # update plotting parameters colours and zorder
-            update_plotting_parameters(self.read_instance) 
-
         # need to read experiment/s ? 
         if 'read_exp' in operations: 
 
@@ -494,6 +491,9 @@ class DataReader:
                 self.read_instance.plotting_params[experiment_to_read]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
                 exp_nc_root.close()
 
+        # need to read or/and remove experiment/s ? 
+        if ('read_exp' in operations) or ('remove_exp' in operations): 
+            
             # update plotting parameters colours and zorder
             update_plotting_parameters(self.read_instance) 
 
