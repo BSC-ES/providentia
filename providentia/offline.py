@@ -583,6 +583,9 @@ class ProvidentiaOffline:
         # create variable to keep track if have setup summary plot geometry yet (done for all subsections at once)
         summary_plot_geometry_setup = False
 
+        # set default markersize from density
+        self.plot.map_markersize_from_density = False
+
         # iterate through subsections
         for subsection_ind, subsection in enumerate(self.subsections):
 
@@ -908,7 +911,6 @@ class ProvidentiaOffline:
 
         # iterate through all data arrays
         first_data_label = True
-        self.plot.markersize_from_density = False
         for data_label in all_data_labels:
             
             # set how experiment should be referred to in heatmap/table
