@@ -1172,14 +1172,7 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_MPL_canvas_updates:
 
             # get map extent (in data coords)
-            current_xlim = self.plot_axes['map'].get_xlim()
-            current_ylim = self.plot_axes['map'].get_ylim()
-            mlon = np.mean(current_xlim)
-            mlat = np.mean(current_ylim)
-            xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
-            ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
-            transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
-            self.read_instance.map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(), transformed_coords[:,1].min(), transformed_coords[:,1].max()]
+            self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1283,14 +1276,7 @@ class MPLCanvas(FigureCanvas):
         # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
         if len(self.absolute_selected_station_inds) == 0:
             # take first selected point coordinates and get matches of stations within tolerance 
-            current_xlim = self.plot_axes['map'].get_xlim()
-            current_ylim = self.plot_axes['map'].get_ylim()
-            mlon = np.mean(current_xlim)
-            mlat = np.mean(current_ylim)
-            xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
-            ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
-            transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
-            self.read_instance.map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(), transformed_coords[:,1].min(), transformed_coords[:,1].max()]
+            self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
             tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
@@ -1357,15 +1343,8 @@ class MPLCanvas(FigureCanvas):
 
         # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
         if len(absolute_selected_station_inds) == 0:
-            #take first selected point coordinates and get matches of stations within tolerance 
-            current_xlim = self.plot_axes['map'].get_xlim()
-            current_ylim = self.plot_axes['map'].get_ylim()
-            mlon = np.mean(current_xlim)
-            mlat = np.mean(current_ylim)
-            xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
-            ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
-            transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
-            self.read_instance.map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(), transformed_coords[:,1].min(), transformed_coords[:,1].max()]
+            # take first selected point coordinates and get matches of stations within tolerance
+            self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
             tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
@@ -3222,15 +3201,9 @@ class MPLCanvas(FigureCanvas):
         self.station_annotation.xy = station_location
 
         # update bbox position
-        current_xlim = self.plot_axes['map'].get_xlim()
-        current_ylim = self.plot_axes['map'].get_ylim()
-        mlon = np.mean(current_xlim)
-        mlat = np.mean(current_ylim)
-        xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
-        ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
-        transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
-        lat_min = transformed_coords[:,1].min()
-        lat_max = transformed_coords[:,1].max()
+        self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
+        lat_min = self.read_instance.map_extent[2]
+        lat_max = self.read_instance.map_extent[3]
         if station_location[1] > ((lat_max + lat_min) / 2):
             self.station_annotation.set_y(-10)
             self.station_annotation.set_va('top')
@@ -3448,13 +3421,8 @@ class MPLCanvas(FigureCanvas):
                                                     ydata + (current_ylim[1] - ydata) / scale_factor])
                     
                     # save map extent (in data coords)
-                    mlon = np.mean(current_xlim)
-                    mlat = np.mean(current_ylim)
-                    xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
-                    ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
-                    transformed_coords = self.datacrs.transform_points(self.plotcrs, xcoords, ycoords)[:, :2]
-                    self.read_instance.map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(), transformed_coords[:,1].min(), transformed_coords[:,1].max()]
-
+                    self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
+                    
                     # redraw points
                     self.figure.canvas.draw()
                     self.figure.canvas.flush_events()
