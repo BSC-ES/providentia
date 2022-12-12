@@ -300,11 +300,28 @@ class Plot:
 
         mlon = np.mean(self.read_instance.map_extent[:2])
         mlat = np.mean(self.read_instance.map_extent[2:])
-        xtrm_data = np.array([[self.read_instance.map_extent[0], mlat], [mlon, self.read_instance.map_extent[2]], [self.read_instance.map_extent[1], mlat], [mlon, self.read_instance.map_extent[3]]])
+        xtrm_data = np.array([[self.read_instance.map_extent[0], mlat], [mlon, self.read_instance.map_extent[2]], 
+                              [self.read_instance.map_extent[1], mlat], [mlon, self.read_instance.map_extent[3]]])
         proj_to_data = self.canvas_instance.datacrs._as_mpl_transform(ax) - ax.transData
         xtrm = proj_to_data.transform(xtrm_data)
         ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
         ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
+
+    def get_map_extent(self, ax):
+        """ Get map extent from xlim and ylim. """
+
+        current_xlim = ax.get_xlim()
+        current_ylim = ax.get_ylim()
+        mlon = np.mean(current_xlim)
+        mlat = np.mean(current_ylim)
+        xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
+        ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
+        transformed_coords = self.canvas_instance.datacrs.transform_points(self.canvas_instance.plotcrs, 
+                                                                           xcoords, ycoords)[:, :2]
+        map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(),
+                      transformed_coords[:,1].min(), transformed_coords[:,1].max()]
+
+        return map_extent
 
     def set_equal_axes(self, ax):
         """ Set equal aspect and limits (useful for scatter plots). """
@@ -675,7 +692,11 @@ class Plot:
             :param first_data_label: boolean informing if first plotted data_label on axis
             :type first_data_label: boolean
         """
-      
+
+        # get marker size
+        if (first_data_label) and (self.read_instance.offline):
+            self.get_markersize('map', networkspeci, plot_characteristics, first_data_label)
+
         # plot new station points on map - coloured by currently active z statisitic
         self.stations_scatter = relevant_axis.scatter(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds], 
                                                       self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds], 
@@ -705,8 +726,8 @@ class Plot:
         """
 
         # get marker size
-        if self.read_instance.offline:
-            self.get_markersize(networkspeci, plot_characteristics)
+        if (first_data_label) and (self.read_instance.offline):
+            self.get_markersize('timeseries', networkspeci, plot_characteristics, first_data_label)
 
         # bias plot?
         if 'bias' in plot_options:
@@ -970,8 +991,8 @@ class Plot:
         """
 
         # get marker size
-        if self.read_instance.offline:
-            self.get_markersize(networkspeci, plot_characteristics)
+        if (first_data_label) and (self.read_instance.offline):
+            self.get_markersize('scatter', networkspeci, plot_characteristics, first_data_label)
 
         # get observations data
         observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']['data']
@@ -1918,21 +1939,56 @@ class Plot:
                 axis_label_characteristics['ylabel'] = label
                 relevant_axis.set_ylabel(**axis_label_characteristics)
 
-    def get_markersize(self, networkspeci, plot_characteristics):
+    def get_markersize(self, base_plot_type, networkspeci, plot_characteristics, first_data_label=False):
         """ Set markersize for plot.
-
+        
+            :param base_plot_type: plot type, without statistical information
+            :type base_plot_type: str
             :param networkspeci: str of currently active network and species 
             :type networkspeci: str
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
         """
 
-        # configure size of plots if have very few points
-        if (min(self.canvas_instance.selected_station_data_number_non_nan[networkspeci]) < plot_characteristics['markersize_npoints_threshold']):
-            markersize = plot_characteristics['markersize']['few_points'] 
-        else:
-            markersize = plot_characteristics['markersize']['standard'] 
+        if base_plot_type in ['timeseries', 'scatter']:
+            
+            if plot_characteristics['plot']['markersize'] == '':
 
-        # add to plot_characteristics json
-        if plot_characteristics['plot']['markersize'] == '':
-            plot_characteristics['plot']['markersize'] = markersize
+                # configure size of plots if have very few points
+                if (min(self.canvas_instance.selected_station_data_number_non_nan[networkspeci]) < plot_characteristics['markersize_npoints_threshold']):
+                    markersize = plot_characteristics['markersize']['few_points'] 
+                else:
+                    markersize = plot_characteristics['markersize']['standard'] 
+
+                # add to plot_characteristics json
+                plot_characteristics['plot']['markersize'] = markersize
+        
+        elif base_plot_type == 'map':
+
+            if (plot_characteristics['plot']['s'] == '') or (self.markersize_from_density):
+
+                # calculate marker size considering points density
+                n_points = len(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
+                
+                # get map extent
+                if self.read_instance.map_extent is None:
+                    lon_min = min(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
+                    lon_max = max(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
+                    lat_min = min(self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
+                    lat_max = max(self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
+                    map_extent = [lon_min, lon_max, lat_min, lat_max]
+                else:
+                    map_extent = self.read_instance.map_extent
+                
+                # calculate area and density
+                area = (map_extent[1] - map_extent[0])*(map_extent[3] - map_extent[2])
+                density = n_points / area
+                
+                # marker size is calculated using the inverse rule of 3 where 4 is the size that the points should have
+                # in a plot with a density of 3.78 (EEA_AQ_eReporting in Spain in 2018 for sconco3)
+                plot_characteristics['plot']['s'] = (4*3.78)/density
+                self.markersize_from_density = True
+                
+            else:
+
+                self.markersize_from_density = False
