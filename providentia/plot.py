@@ -1971,14 +1971,11 @@ class Plot:
                 n_points = len(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
                 
                 # get map extent
-                if self.read_instance.map_extent is None:
-                    lon_min = min(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
-                    lon_max = max(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
-                    lat_min = min(self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
-                    lat_max = max(self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
-                    map_extent = [lon_min, lon_max, lat_min, lat_max]
-                else:
-                    map_extent = self.read_instance.map_extent
+                lon_min = min(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
+                lon_max = max(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
+                lat_min = min(self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
+                lat_max = max(self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
+                map_extent = [lon_min, lon_max, lat_min, lat_max]
                 
                 # calculate area and density
                 area = (map_extent[1] - map_extent[0])*(map_extent[3] - map_extent[2])
