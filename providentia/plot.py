@@ -1981,9 +1981,9 @@ class Plot:
                 area = (map_extent[1] - map_extent[0])*(map_extent[3] - map_extent[2])
                 density = n_points / area
 
-                # marker size is calculated using the inverse rule of 3 where 2.8 is the size that the points should have
-                # in a plot with a density of 3.7814 (EEA_AQ_eReporting in Spain in 2018 for sconco3)
-                plot_characteristics['plot']['s'] = (2.8*3.7814)/density
+                # marker size is calculated using a linear regression with negative correlation where
+                # the maximum size is 10 at very low densities (e.g. AERONET)
+                plot_characteristics['plot']['s'] = -1.85*density + 10
                 self.map_markersize_from_density = True
                 
             else:
