@@ -584,7 +584,8 @@ class ProvidentiaOffline:
         summary_plot_geometry_setup = False
 
         # set default markersize from density
-        self.plot.map_markersize_from_density = False
+        if do_plot_geometry_setup:
+            self.plot.map_markersize_from_density = False
 
         # iterate through subsections
         for subsection_ind, subsection in enumerate(self.subsections):
