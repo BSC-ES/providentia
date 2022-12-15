@@ -695,8 +695,8 @@ class Plot:
 
         # get marker size
         if (first_data_label) and (self.read_instance.offline):
-            self.get_markersize('map', networkspeci, plot_characteristics, first_data_label)
-
+            self.get_markersize(relevant_axis, 'map', networkspeci, plot_characteristics)
+        
         # plot new station points on map - coloured by currently active z statisitic
         self.stations_scatter = relevant_axis.scatter(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds], 
                                                       self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds], 
@@ -727,7 +727,7 @@ class Plot:
 
         # get marker size
         if (first_data_label) and (self.read_instance.offline):
-            self.get_markersize('timeseries', networkspeci, plot_characteristics, first_data_label)
+            self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics)
 
         # bias plot?
         if 'bias' in plot_options:
@@ -992,7 +992,7 @@ class Plot:
 
         # get marker size
         if (first_data_label) and (self.read_instance.offline):
-            self.get_markersize('scatter', networkspeci, plot_characteristics, first_data_label)
+            self.get_markersize(relevant_axis, 'scatter', networkspeci, plot_characteristics)
 
         # get observations data
         observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']['data']
@@ -1939,7 +1939,7 @@ class Plot:
                 axis_label_characteristics['ylabel'] = label
                 relevant_axis.set_ylabel(**axis_label_characteristics)
 
-    def get_markersize(self, base_plot_type, networkspeci, plot_characteristics, first_data_label=False):
+    def get_markersize(self, relevant_axis, base_plot_type, networkspeci, plot_characteristics):
         """ Set markersize for plot.
         
             :param base_plot_type: plot type, without statistical information
@@ -1970,20 +1970,15 @@ class Plot:
                 # calculate marker size considering points density
                 n_points = len(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
                 
-                # get map extent
-                lon_min = min(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
-                lon_max = max(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
-                lat_min = min(self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
-                lat_max = max(self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
-                map_extent = [lon_min, lon_max, lat_min, lat_max]
-                
-                # calculate area and density
-                area = (map_extent[1] - map_extent[0])*(map_extent[3] - map_extent[2])
+                # calculate figure area and density
+                # divide area by 10000 so the function below makes sense
+                area = (relevant_axis.bbox.width * relevant_axis.bbox.height) / 10000
                 density = n_points / area
 
-                # marker size is calculated using a linear regression with negative correlation where
-                # the maximum size is 10 at very low densities (e.g. AERONET)
-                plot_characteristics['plot']['s'] = -1.85*density + 10
+                # marker size is calculated using an exponential equation
+                # the maximum size is 40 (very low densities)
+                # see https://earth.bsc.es/gitlab/ac/Providentia/-/issues/210
+                plot_characteristics['plot']['s'] = 1.2**(-density)*40
                 self.map_markersize_from_density = True
                 
             else:
