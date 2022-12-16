@@ -231,6 +231,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), formatting_dict['checkbox_menu'])
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
+        self.ch_colocate.setMaximumWidth(80)
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_network.setFixedWidth(100)
         self.cb_network.AdjustToContents
@@ -264,6 +265,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), formatting_dict['button_menu'])
         self.bu_experiments.setFixedWidth(80)
         self.bu_experiments.setToolTip('Select experiment/s data to read')
+        self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), formatting_dict['button_menu'])
+        self.bu_multispecies.setFixedWidth(80)
+        self.bu_multispecies.setToolTip('Select data to filter by')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
         self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), formatting_dict['title_menu'])
@@ -361,47 +365,48 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # position objects on gridded configuration bar
         config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_network, 1, 0)
-        config_bar.addWidget(self.cb_resolution, 2, 0)
-        config_bar.addWidget(self.cb_matrix, 1, 1)
-        config_bar.addWidget(self.cb_species, 1, 2)
-        config_bar.addWidget(self.le_start_date, 2, 1)
-        config_bar.addWidget(self.le_end_date, 2, 2)
-        config_bar.addWidget(self.bu_QA, 1, 3)
-        config_bar.addWidget(self.bu_flags, 2, 3)
-        config_bar.addWidget(self.bu_experiments, 1, 4)
-        config_bar.addWidget(self.ch_colocate, 2, 4)
-        config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignRight)
-        config_bar.addWidget(self.vertical_splitter_1, 0, 5, 4, 1)
-        config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_data_bounds, 1, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_minimum_value, 1, 7)
-        config_bar.addWidget(self.le_maximum_value, 1, 8)
-        config_bar.addWidget(self.bu_rep, 2, 6)
-        config_bar.addWidget(self.bu_period, 2, 7)
-        config_bar.addWidget(self.bu_meta, 2, 8)
-        config_bar.addWidget(self.bu_reset, 3, 7)
-        config_bar.addWidget(self.bu_screen, 3, 8)
-        config_bar.addWidget(self.vertical_splitter_2, 0, 9, 4, 1)
-        config_bar.addWidget(self.lb_z, 0, 10, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_z_stat, 1, 10)
-        config_bar.addWidget(self.cb_z1, 2, 10)
-        config_bar.addWidget(self.cb_z2, 3, 10)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 11, 4, 1)
-        config_bar.addWidget(self.lb_periodic_stat, 0, 12, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_periodic_stat, 1, 12)
-        config_bar.addWidget(self.vertical_splitter_4, 0, 13, 4, 1)
-        config_bar.addWidget(self.lb_station_selection, 0, 14, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 14)
-        config_bar.addWidget(self.ch_intersect, 2, 14)
-        config_bar.addWidget(self.ch_extent, 3, 14)
-        config_bar.addWidget(self.vertical_splitter_5, 0, 15, 4, 1)
-        config_bar.addWidget(self.lb_layout_selection, 0, 16, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_1, 1, 16)
-        config_bar.addWidget(self.cb_position_2, 1, 17)
-        config_bar.addWidget(self.cb_position_3, 2, 16)
-        config_bar.addWidget(self.cb_position_4, 2, 17)
-        config_bar.addWidget(self.cb_position_5, 2, 18)
+        config_bar.addWidget(self.cb_network, 1, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resolution, 2, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_matrix, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_species, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_start_date, 2, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_end_date, 2, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_QA, 1, 3, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_flags, 2, 3, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_multispecies, 1, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_experiments, 2, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_colocate, 1, 5, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_1, 0, 6, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_filter, 0, 7, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_bounds, 1, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_minimum_value, 1, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_maximum_value, 1, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_rep, 2, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_period, 2, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_meta, 2, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_reset, 3, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_screen, 3, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_2, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_z, 0, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_z_stat, 1, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_z1, 2, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_z2, 3, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_periodic_stat, 0, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_periodic_stat, 1, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_4, 0, 14, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_station_selection, 0, 15, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 15, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 15, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 15, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_5, 0, 16, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_layout_selection, 0, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_1, 1, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_2, 1, 18, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_3, 2, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_4, 2, 18, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_5, 2, 19, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
@@ -416,6 +421,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_flags(self)
         aux.init_qa(self)
         aux.init_experiments(self)
+        aux.init_multispecies(self)
         aux.init_representativity(self)
         aux.init_period(self)
         self.metadata_vars_to_read = []
@@ -425,9 +431,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
         self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
         self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window, self.experiments_menu))
+        self.bu_multispecies.clicked.connect(partial(self.generate_pop_up_window, self.multispecies_menu))
         self.bu_meta.clicked.connect(partial(self.generate_pop_up_window, self.metadata_menu))
         self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
         self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
+
+        # data bounds of the main network and speci will be set by default in the data filter
+        # but can also bet set in the multispecies filtering tab
+        # if they are set in the tab, this variable will be True
+        self.bounds_set_on_multispecies = False
 
         # Setup MPL canvas of plots
         # set variable that blocks updating of MPL canvas until some data has been read
@@ -438,6 +450,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.config_bar_initialisation = True
         self.update_configuration_bar_fields()
         self.config_bar_initialisation = False
+
+        # initialise multispecies tab
+        self.multispecies_initialisation = True
 
         # Enable interactivity of functions which update MPL canvas
         # enable READ button
@@ -506,7 +521,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
         
-        self.pop_up_window = PopUpWindow(menu_root, [], self.main_window_geometry)
+        self.pop_up_window = PopUpWindow(self, menu_root, [], self.main_window_geometry)
 
     def update_configuration_bar_fields(self):
         """ Function that initialises/updates configuration bar fields. """
@@ -532,6 +547,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.time_array = None
             self.yearmonths = None
             self.data_labels = None
+            
             # set initial station references to be empty dict
             self.station_references = {}
 
@@ -541,6 +557,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_matrix = self.parameter_dictionary[self.species[0]]['matrix']
             self.selected_species = copy.deepcopy(self.species[0])
 
+            # set initial filter species in widgets as empty dictionaries
+            self.selected_widget_network = dict()
+            self.selected_widget_matrix = dict()
+            self.selected_widget_species = dict()
+              
             # set variable stating first read
             self.first_read = True
 
@@ -618,7 +639,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update experiments -- keeping previously selected experiments if available
         if self.config_bar_initialisation:   
             self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in self.experiments
-                                                                    if experiment in self.experiments_menu['checkboxes']['map_vars']]
+                                                                    if experiment in 
+                                                                    self.experiments_menu['checkboxes']['map_vars']]
             self.experiments = {experiment:experiment_alias for experiment, experiment_alias in self.experiments.items()
                                 if experiment in self.experiments_menu['checkboxes']['map_vars']}
 
@@ -628,7 +650,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                 if previous_selected_experiment in
                                                                 self.experiments_menu['checkboxes']['map_vars']]
         previous_experiments = self.experiments
-        self.experiments = {exp:previous_experiments[exp] if exp in previous_experiments else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
+        self.experiments = {exp:previous_experiments[exp] if exp in previous_experiments else exp 
+                            for exp in self.experiments_menu['checkboxes']['keep_selected']}
 
         # update default qa
         default_qa = aux.get_default_qa(self, self.selected_species)
@@ -938,17 +961,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.network = [self.selected_network]
         self.resolution = self.selected_resolution
         self.species = [self.selected_species]  
-        self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
+        self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp 
+                            for exp in self.experiments_menu['checkboxes']['keep_selected']}
         self.qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
         self.qa_per_species[self.selected_species] = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
-        self.networkspeci = '{}|{}'.format(self.network[0],self.species[0])
-        self.networkspecies = [self.networkspeci]
+        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
+        self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
         
-        # upddate filter_species here with contents of filter_species pop-up menu
-        #self.filter_species = 
-
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not akready
         # inform user of this
         if (self.filter_species) and (not self.spatial_colocation):
@@ -1063,11 +1084,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # if species has changed, or first read, update species specific lower/upper limits
         if (self.first_read) or (self.species[0] != self.previous_species[0]):
-            # get default GHOST limits
-            self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
-            self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
-            self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
-            self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
+            # have bounds not been set in multispecies filtering tab?
+            if not self.bounds_set_on_multispecies:
+                # get default GHOST limits
+                self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
+                self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
+                self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
+                self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
 
         # run function to update filter
         self.mpl_canvas.handle_data_filter_update()
@@ -1138,13 +1161,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_metadata(self)
         aux.update_metadata_fields(self)
 
-        # reset bounds
-        species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
-        species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
-        
-        # set default limits
-        self.le_minimum_value.setText(str(species_lower_limit))
-        self.le_maximum_value.setText(str(species_upper_limit))
+        # have bounds not been set in multispecies filtering tab?
+        if not self.bounds_set_on_multispecies:
+            
+            # reset bounds
+            species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
+            species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
+            
+            # set default limits
+            self.le_minimum_value.setText(str(species_lower_limit))
+            self.le_maximum_value.setText(str(species_upper_limit))
         
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
