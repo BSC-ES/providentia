@@ -207,11 +207,14 @@ def init_flags(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'flag_menu'):
-        instance.flag_menu = {'window_title':'FLAGS', 'page_title':'Select standardised data reporter provided flags to filter by', 'checkboxes':{}}
+        instance.flag_menu = {'window_title':'FLAGS', 
+                              'page_title':'Select standardised data reporter provided flags to filter by', 
+                              'checkboxes':{}}
         instance.flag_menu['select_buttons'] = ['all', 'clear', 'default']
     
     # reset fields
-    instance.flag_menu['checkboxes']['labels'] = np.array(sorted(instance.standard_data_flag_name_to_data_flag_code, key=instance.standard_data_flag_name_to_data_flag_code.get))
+    instance.flag_menu['checkboxes']['labels'] = np.array(sorted(instance.standard_data_flag_name_to_data_flag_code, 
+                                                                 key=instance.standard_data_flag_name_to_data_flag_code.get))
     instance.flag_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
     instance.flag_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
     instance.flag_menu['checkboxes']['map_vars'] = np.sort(list(instance.standard_data_flag_name_to_data_flag_code.values()))
@@ -226,11 +229,14 @@ def init_qa(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'qa_menu'):
-        instance.qa_menu = {'window_title':'QA', 'page_title':'Select standardised quality assurance flags to filter by', 'checkboxes':{}}
+        instance.qa_menu = {'window_title':'QA', 
+                            'page_title':'Select standardised quality assurance flags to filter by', 
+                            'checkboxes':{}}
         instance.qa_menu['select_buttons'] = ['all', 'clear', 'default']
     
     # reset fields
-    instance.qa_menu['checkboxes']['labels'] = np.array(sorted(instance.standard_QA_name_to_QA_code, key=instance.standard_QA_name_to_QA_code.get))
+    instance.qa_menu['checkboxes']['labels'] = np.array(sorted(instance.standard_QA_name_to_QA_code, 
+                                                               key=instance.standard_QA_name_to_QA_code.get))
     instance.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
     instance.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
     instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(instance.standard_QA_name_to_QA_code.values()))
@@ -245,7 +251,9 @@ def init_experiments(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'experiments_menu'):
-        instance.experiments_menu = {'window_title': 'EXPERIMENTS', 'page_title': 'Select Experiment/s', 'checkboxes':{}}
+        instance.experiments_menu = {'window_title': 'EXPERIMENTS', 
+                                     'page_title': 'Select Experiment/s', 
+                                     'checkboxes':{}}
         instance.experiments_menu['select_buttons'] = ['all', 'clear']
     
     # reset fields
@@ -253,7 +261,31 @@ def init_experiments(instance):
     instance.experiments_menu['checkboxes']['keep_default'] = [] 
     instance.experiments_menu['checkboxes']['keep_selected'] = [] 
     instance.experiments_menu['checkboxes']['map_vars'] = [] 
-    
+
+def init_multispecies(instance):
+    """ Initialise internal structure to store multispecies fields.
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+    """
+
+    # do not have object instance already?
+    # if not, create it
+    if not hasattr(instance, 'multispecies_menu'):
+        instance.multispecies_menu = {'window_title': 'MULTISPECIES', 
+                                      'page_title': 'Select Network/s and Specie/s',
+                                      'multispecies': {},
+                                     }
+
+    # reset rangeboxes
+    instance.multispecies_menu['multispecies']['labels'] = ['networkspeci_0']
+    instance.multispecies_menu['multispecies']['current_lower'] = {}
+    instance.multispecies_menu['multispecies']['current_upper'] = {}
+    instance.multispecies_menu['multispecies']['apply_selected'] = {}
+    instance.multispecies_menu['multispecies']['previous_lower'] = {}
+    instance.multispecies_menu['multispecies']['previous_upper'] = {}
+    instance.multispecies_menu['multispecies']['previous_apply'] = {}
+
 def init_representativity(instance):
     """ Initialise internal structure to store representativity fields.
 
@@ -264,7 +296,9 @@ def init_representativity(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'representativity_menu'):
-        instance.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY', 'page_title': 'Select % Data Representativity Bounds', 'rangeboxes':{}}
+        instance.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY', 
+                                          'page_title': 'Select % Data Representativity Bounds', 
+                                          'rangeboxes':{}}
     
     # reset fields
     instance.representativity_menu['rangeboxes']['tooltips'] = []
@@ -284,7 +318,9 @@ def init_period(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'period_menu'):
-        instance.period_menu = {'window_title': 'DATA PERIOD', 'page_title': 'Select Data Periods', 'checkboxes':{}}
+        instance.period_menu = {'window_title': 'DATA PERIOD', 
+                                'page_title': 'Select Data Periods', 
+                                'checkboxes':{}}
     
     # reset fields
     instance.period_menu['checkboxes']['labels'] = []
@@ -307,7 +343,8 @@ def init_metadata(instance):
                                    'GLOBALLY GRIDDED CLASSIFICATIONS': 'Filter stations by globally gridded classifications',
                                    'MEASUREMENT PROCESS INFORMATION': 'Filter stations by measurement process information'}
             
-        instance.metadata_menu = {'window_title': 'METADATA', 'page_title': 'Select metadata type to filter stations by',
+        instance.metadata_menu = {'window_title': 'METADATA', 
+                                  'page_title': 'Select metadata type to filter stations by',
                                   'navigation_buttons': {}}
 
         instance.metadata_menu['navigation_buttons']['labels'] = list(instance.metadata_types.keys())
