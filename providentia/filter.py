@@ -92,7 +92,7 @@ class DataFilter:
             # get speci str
             speci = networkspeci.split('|')[1]
 
-            # get set lower/upper data bounds
+            # get lower/upper data bounds
             if self.read_instance.offline:
                 lower_bound = self.read_instance.lower_bound[speci]
                 upper_bound = self.read_instance.upper_bound[speci]
