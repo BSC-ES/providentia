@@ -176,9 +176,9 @@ class DataReader:
             # metadata 
             # non-GHOST
             if not self.read_instance.reading_ghost:
-                self.read_instance.metadata_dtype = [('station_name', np.object), ('latitude', np.float32),
+                self.read_instance.metadata_dtype = [('station_reference', np.object), ('latitude', np.float32),
                                                      ('longitude', np.float32), ('altitude', np.float32),
-                                                     ('station_reference', np.object), ('station_classification', np.object),
+                                                     ('station_name', np.object), ('station_classification', np.object),
                                                      ('area_classification', np.object)]
                 self.read_instance.metadata_vars_to_read = [meta_dtype[0] for meta_dtype in self.read_instance.metadata_dtype]
             # GHOST

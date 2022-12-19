@@ -82,16 +82,27 @@ def read_netcdf_data(tuple_arguments):
 
     # get all station references in file (do little extra work to get non-GHOST observational station references)
     if (not reading_ghost) & (data_label == 'observations'):
-        if ncdf_root['station_name'].dtype == np.str:
-            file_station_references = ncdf_root['station_name'][:]
+        if 'station_reference' in ncdf_root.variables:
+            station_reference_var = 'station_reference'
+        elif 'station_code' in ncdf_root.variables:
+            station_reference_var = 'station_code'
+        elif 'station_name' in ncdf_root.variables:
+            station_reference_var = 'station_name'
+
+        if ncdf_root[station_reference_var].dtype == np.str:
+            file_station_references = ncdf_root[station_reference_var][:]
         else:
-            if ncdf_root['station_name'].dtype == np.dtype(object):
-                file_station_references = np.array([''.join(val) for val in ncdf_root['station_name'][:]])
+            if ncdf_root[station_reference_var].dtype == np.dtype(object):
+                file_station_references = np.array([''.join(val) for val in ncdf_root[station_reference_var][:]])
             else:
                 file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
-                                                    for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+                                                    for st_name in ncdf_root[station_reference_var][:]], dtype=np.str)
     else:
         file_station_references = ncdf_root['station_reference'][:]
+
+    # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
+    non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(file_station_references) if ref.lower() != 'nan'])
+    file_station_references = file_station_references[non_nan_station_indices]
 
     # get indices of all unique station references that are contained
     # within file station references array
@@ -170,21 +181,20 @@ def read_netcdf_data(tuple_arguments):
                         else:
                             meta_var_nc = 'latitude'
                     elif meta_var == 'station_reference':
-                        meta_var_nc = 'station_code'
+                        if "station_reference" not in ncdf_root.variables:
+                            meta_var_nc = 'station_code'
+                        else:
+                            meta_var_nc = 'station_reference'
                     else:
                         meta_var_nc = meta_var
-
-                    # read variable
-                    if meta_var == 'station_name':
-                        meta_val = file_station_references[current_file_station_indices]
-                    else:
-                        # check meta variable is in netCDF
-                        if meta_var_nc not in ncdf_root.variables:
-                            continue
-                        meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
+        
+                    # check meta variable is in netCDF
+                    if meta_var_nc not in ncdf_root.variables:
+                        continue
+                    meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
                     
                     # some extra str formatting
-                    if meta_var in ['station_reference', 'station_classification', 'area_classification', '']:
+                    if meta_var in ['station_reference', 'station_name', 'station_classification', 'area_classification']:
                         if meta_val.dtype != np.str:
                             if meta_val.dtype != np.dtype(object):
                                 meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
