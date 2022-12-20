@@ -1304,46 +1304,57 @@ def get_basic_metadata(instance):
         
         # non-GHOST
         else:
-            
+        
             ncdf_root = Dataset(relevant_files[0])
-            if ncdf_root['station_name'].dtype == np.str:
-                station_references[networkspeci] = ncdf_root['station_name'][:]
+            if 'station_reference' in ncdf_root.variables:
+                station_reference_var = 'station_reference'
+            elif 'station_code' in ncdf_root.variables:
+                station_reference_var = 'station_code'
+            elif 'station_name' in ncdf_root.variables:
+                station_reference_var = 'station_name'
+
+            if ncdf_root[station_reference_var].dtype == np.str:
+                station_references[networkspeci] = ncdf_root[station_reference_var][:]
             else:
-                if ncdf_root['station_name'].dtype == np.dtype(object):
-                    station_references[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_name'][:]])
+                if ncdf_root[station_reference_var].dtype == np.dtype(object):
+                    station_references[networkspeci] = np.array([''.join(val) for val in ncdf_root[station_reference_var][:]])
                 else:
                     station_references[networkspeci] = np.array(
                         [st_name.tostring().decode('ascii').replace('\x00', '')
-                        for st_name in ncdf_root['station_name'][:]], dtype=np.str)
+                        for st_name in ncdf_root[station_reference_var][:]], dtype=np.str)
             
+            # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
+            non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(station_references[networkspeci]) if ref.lower() != 'nan'])
+            station_references[networkspeci] = station_references[networkspeci][non_nan_station_indices]
+
             if "latitude" in ncdf_root.variables:
-                station_longitudes[networkspeci] = ncdf_root['longitude'][:]
-                station_latitudes[networkspeci] = ncdf_root['latitude'][:]
+                station_longitudes[networkspeci] = ncdf_root['longitude'][non_nan_station_indices]
+                station_latitudes[networkspeci] = ncdf_root['latitude'][non_nan_station_indices]
             else:
-                station_longitudes[networkspeci] = ncdf_root['lon'][:]
-                station_latitudes[networkspeci] = ncdf_root['lat'][:]
+                station_longitudes[networkspeci] = ncdf_root['lon'][non_nan_station_indices]
+                station_latitudes[networkspeci] = ncdf_root['lat'][non_nan_station_indices]
 
             if "station_classification" in ncdf_root.variables:
                 if ncdf_root['station_classification'].dtype == np.str:
-                    station_classifications[networkspeci] = ncdf_root['station_classification'][:]
+                    station_classifications[networkspeci] = ncdf_root['station_classification'][non_nan_station_indices]
                 else:
                     if ncdf_root['station_classification'].dtype == np.dtype(object):
-                        station_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_classification'][:]])
+                        station_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_classification'][non_nan_station_indices]])
                     else:
                         station_classifications[networkspeci] = np.array(
                             [st_classification.tostring().decode('ascii').replace('\x00', '')
-                            for st_classification in ncdf_root['station_classification'][:]], dtype=np.str)
+                            for st_classification in ncdf_root['station_classification'][non_nan_station_indices]], dtype=np.str)
             
             if "area_classification" in ncdf_root.variables:
                 if ncdf_root['area_classification'].dtype == np.str:
-                    area_classifications[networkspeci] = ncdf_root['area_classification'][:]
+                    area_classifications[networkspeci] = ncdf_root['area_classification'][non_nan_station_indices]
                 else:
                     if ncdf_root['area_classification'].dtype == np.dtype(object):
-                        area_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['area_classification'][:]]) 
+                        area_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['area_classification'][non_nan_station_indices]]) 
                     else:
                         area_classifications[networkspeci] = np.array(
                             [area_classification.tostring().decode('ascii').replace('\x00', '')
-                            for area_classification in ncdf_root['area_classification'][:]], dtype=np.str)
+                            for area_classification in ncdf_root['area_classification'][non_nan_station_indices]], dtype=np.str)
             
             ncdf_root.close()
 
