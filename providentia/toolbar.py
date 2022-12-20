@@ -161,6 +161,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.reset_options()
 
         # set fields available for filtering
+        aux.multispecies_conf(self.read_instance)
         aux.representativity_conf(self.read_instance)
         aux.period_conf(self.read_instance)
         aux.metadata_conf(self.read_instance)

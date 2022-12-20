@@ -427,15 +427,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.metadata_vars_to_read = []
         aux.init_metadata(self)
 
-        # enable pop up configuration windows
-        self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
-        self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
-        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window, self.experiments_menu))
-        self.bu_multispecies.clicked.connect(partial(self.generate_pop_up_window, self.multispecies_menu))
-        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window, self.metadata_menu))
-        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
-        self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
-
         # data bounds of the main network and speci will be set by default in the data filter
         # but can also bet set in the multispecies filtering tab
         # if they are set in the tab, this variable will be True
@@ -454,13 +445,39 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # initialise multispecies tab
         self.multispecies_initialisation = True
 
+        # launch with configuriton file?
+        if self.from_conf: 
+            # read
+            self.handle_data_selection_update()
+
+            # set filtered multispecies if any
+            aux.multispecies_conf(self)
+
+            # set fields available for filtering
+            aux.representativity_conf(self)
+            aux.period_conf(self)
+            aux.metadata_conf(self)
+            self.mpl_canvas.handle_data_filter_update()
+
+        # enable pop up configuration windows
+        self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
+        self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
+        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window, self.experiments_menu))
+        self.bu_multispecies.clicked.connect(partial(self.generate_pop_up_window, self.multispecies_menu))
+        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window, self.metadata_menu))
+        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
+        self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
+
         # Enable interactivity of functions which update MPL canvas
         # enable READ button
         self.bu_read.clicked.connect(self.handle_data_selection_update)
+
         # enable RESET button
         self.bu_reset.clicked.connect(self.reset_options)
+
         # enable interactivity of temporal colocation checkbox
         self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_temporal_colocate_update)
+
         # enable FILTER button
         self.bu_screen.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
@@ -501,20 +518,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
 
-        # starting from a configuration file?
-        if self.from_conf: 
-            # read
-            self.handle_data_selection_update()
-            # set fields available for filtering
-            aux.representativity_conf(self)
-            aux.period_conf(self)
-            aux.metadata_conf(self)
-            self.mpl_canvas.handle_data_filter_update()
-
         # set finalised layout
         self.setLayout(parent_layout)
+
         # plot whole dashboard
         self.show()
+
         # maximise window to fit screen
         self.showMaximized()
 
@@ -561,7 +570,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_widget_network = dict()
             self.selected_widget_matrix = dict()
             self.selected_widget_species = dict()
-              
+            self.selected_widget_lower = dict()
+            self.selected_widget_upper = dict()
+            self.selected_widget_apply = dict()
+            
             # set variable stating first read
             self.first_read = True
 

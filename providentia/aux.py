@@ -9,7 +9,6 @@ import copy
 import json
 import datetime
 import sys
-
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
@@ -17,6 +16,7 @@ import math
 import pyproj
 from scipy.spatial import cKDTree
 import seaborn as sns
+
 
 def get_default_qa(instance, speci):
     """ Return the default values according to GHOST standards. 
@@ -35,7 +35,11 @@ def get_default_qa(instance, speci):
 def multispecies_mapping(species):
     """ Map species special case str to multiple species names. """
 
-    multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4','vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9','vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14','vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19','vconcaerobin20','vconcaerobin21','vconcaerobin22']}
+    multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4',
+                         'vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9',
+                         'vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14',
+                         'vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19',
+                         'vconcaerobin20','vconcaerobin21','vconcaerobin22']}
 
     return multi_species_map[species]
 
@@ -92,10 +96,12 @@ def get_multispecies_aliases(networkspecies):
                             'vconcaerobin22': 'Radius [µm]'
                             }
     
-    networkspecies_aliases = [multispecies_aliases[networkspeci] if networkspeci in multispecies_aliases else networkspeci 
+    networkspecies_aliases = [multispecies_aliases[networkspeci] 
+                              if networkspeci in multispecies_aliases else networkspeci 
                               for networkspeci in networkspecies]
 
-    labels = np.unique([multispecies_labels[networkspeci] for networkspeci in networkspecies if networkspeci in multispecies_labels])
+    labels = np.unique([multispecies_labels[networkspeci] 
+                        for networkspeci in networkspecies if networkspeci in multispecies_labels])
     if len(labels) == 1:
         unique_label = labels[0]
     else:
@@ -273,7 +279,7 @@ def init_multispecies(instance):
     # if not, create it
     if not hasattr(instance, 'multispecies_menu'):
         instance.multispecies_menu = {'window_title': 'MULTISPECIES', 
-                                      'page_title': 'Select Network/s and Specie/s',
+                                      'page_title': 'Select Network/s and Specie/s to Filter by',
                                       'multispecies': {},
                                      }
 
@@ -727,6 +733,40 @@ def update_metadata_fields(instance):
                 instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
                 if meta_var in instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected']:
                     instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
+
+def multispecies_conf(instance):
+    """ Function used when loading from a configuration file. 
+        Sets defined multispecies filtering variables, rest of variables are set to default. 
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+    """
+
+    if hasattr(instance, 'filter_species'):
+        for (networkspeci_ii, networkspeci), bounds in zip(enumerate(instance.filter_species.keys()),
+                                                                     instance.filter_species.values()):
+            
+            # update menu_current
+            if networkspeci_ii > 0:
+                instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
+
+            # add values
+            instance.multispecies_menu['multispecies']['current_lower'][networkspeci_ii] = bounds[0]
+            instance.multispecies_menu['multispecies']['current_upper'][networkspeci_ii] = bounds[1]
+            instance.multispecies_menu['multispecies']['apply_selected'][networkspeci_ii] = True
+
+            # set initial selected config variables as set .conf files or defaults
+            instance.selected_widget_network.update({networkspeci_ii: networkspeci.split('|')[0]})
+            instance.selected_widget_matrix.update({networkspeci_ii: instance.parameter_dictionary[networkspeci.split('|')[1]]['matrix']})
+            instance.selected_widget_species.update({networkspeci_ii: networkspeci.split('|')[1]})
+            instance.selected_widget_lower.update({networkspeci_ii: bounds[0]})
+            instance.selected_widget_upper.update({networkspeci_ii: bounds[1]})
+            instance.selected_widget_apply.update({networkspeci_ii: True})
+
+            update_filter_species(instance, networkspeci_ii)
+
+            # filtering tab is initialized from conf
+            instance.multispecies_initialisation = False
 
 def representativity_conf(instance):
     """ Function used when loading from a configuration file. 
@@ -1458,3 +1498,60 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes,
     intersecting_area_classifications = intersecting_area_classifications[sorted_inds]
 
     return intersecting_station_references, intersecting_longitudes, intersecting_latitudes, intersecting_station_classifications, intersecting_area_classifications
+
+def update_filter_species(instance, label_ii, add_filter_species=True):
+    """ Function to update filter species. """
+
+    # get selected network, species and bounds
+    network = instance.selected_widget_network[label_ii]
+    speci = instance.selected_widget_species[label_ii]
+    networkspeci = network + '|' + speci
+    current_lower = instance.selected_widget_lower[label_ii]
+    current_upper = instance.selected_widget_upper[label_ii]
+
+    # if apply button is checked or filter_species in configuraiton file, add networkspecies in filter_species
+    if add_filter_species:
+
+        # do not add networkspeci to filter_species if filtered network is main
+        if networkspeci != instance.networkspecies[0]:
+
+            # add if networkspeci is not already in lists
+            if networkspeci not in instance.filter_species.keys():
+
+                # if bounds are not empty?
+                if current_lower != str(np.nan) and current_upper != str(np.nan):
+
+                    # check selected lower/upper bounds are numbers
+                    try:
+                        instance.filter_species[networkspeci] = [float(current_lower), 
+                                                                 float(current_upper)]
+                    # if any of the fields are not numbers, return from function
+                    except ValueError:
+                        print("Warning: Data limit fields must be numeric")
+                        return
+
+                # add if networkspeci is not already in qa_per_species
+                if speci not in instance.qa_per_species:
+                    qa_species = copy.deepcopy(instance.species)
+                    qa_species.append(speci)
+                    instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
+
+        # update le_minimum_value and le_maximum_value (data bounds) for main networkspeci
+        else:
+            instance.le_minimum_value.setText(current_lower)
+            instance.le_maximum_value.setText(current_upper)
+            instance.bounds_set_on_multispecies = True
+
+    # if apply button is unchecked, remove networkspecies from filter_species
+    else:
+        # remove from filter_species
+        if networkspeci in instance.filter_species.keys():
+            del instance.filter_species[networkspeci]
+
+        # remove from qa_per_species
+        if speci in instance.qa_per_species:
+            del instance.qa_per_species[speci]
+
+    print('- Network species', instance.networkspecies)
+    print('- Filter species', instance.filter_species)
+    
