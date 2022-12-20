@@ -7,7 +7,7 @@ import numpy as np
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
-from .aux import get_default_qa
+from .aux import update_filter_species
 
 # setup dictionary characterising formats for all GUI window objects (i.e. buttons, titles etc.)
 formatting_dict = {'title_menu':               {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20, 'bold':True},
@@ -482,14 +482,15 @@ class PopUpWindow(QtWidgets.QWidget):
                         
                         # add tooltip
                         if len(menu_current_type['tooltips']) > 0:
-                            self.page_memory[menu_type][element][label_ii].setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], self.main_window_geometry.width()))
+                            self.page_memory[menu_type][element][label_ii].setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], 
+                                                                                                        self.main_window_geometry.width()))
                         
                         # add connectivity to buttons
                         self.page_memory[menu_type][element][label_ii].clicked.connect(self.open_new_page)
 
                     # if menu type == multispecies
                     elif menu_type == 'multispecies':
-                    
+                        
                         # add connectivity to create a new line
                         if element == 'add_row':
                             self.page_memory[menu_type][element][label_ii].clicked.connect(lambda: self.add_multispecies_widgets(grid))
@@ -506,7 +507,8 @@ class PopUpWindow(QtWidgets.QWidget):
                             self.page_memory[menu_type][element][label_ii].currentTextChanged.connect(self.handle_multispecies_params_change)
 
                         elif element == 'apply_selected':
-                            self.page_memory[menu_type][element][label_ii].clicked.connect(lambda: self.update_networkspecies(label_ii))
+                            self.page_memory[menu_type][element][label_ii].setObjectName('apply_' + str(label_ii))
+                            self.page_memory[menu_type][element][label_ii].clicked.connect(self.handle_filter_species_change)
 
                     # add element to grid (aligned left)
                     # button add_row is done separately since it is alone on the top of the multispecies filtering tab
@@ -528,6 +530,7 @@ class PopUpWindow(QtWidgets.QWidget):
                 # add row vertical space to total occupied space
                 currently_occupied_vertical_space += (row_format_dict['height'] + grid_vertical_spacing)
 
+            # get values before closing the tab
             if menu_type == 'multispecies':
                 self.set_previous_fields()
 
@@ -668,11 +671,13 @@ class PopUpWindow(QtWidgets.QWidget):
     def add_multispecies_widgets(self, grid):
         """ Function to add new line to pop-up window. """
         
-        # get current number of columns
-        label_ii = len(self.page_memory['multispecies']['network'])
+        # get widget line
+        label_ii = len(self.menu_current['multispecies']['labels'])
 
-        # update menu_current
-        self.menu_current['multispecies']['labels'].append('networkspeci_' + str(label_ii))
+        # update menu_current labels
+        # check if they exist since they might have been added with the function multispecies_conf
+        if 'networkspeci_' + str(label_ii) not in self.menu_current['multispecies']['labels']:
+            self.menu_current['multispecies']['labels'].append('networkspeci_' + str(label_ii))
 
         # add new line only when add_row button is pressed
         for (element_ii, element), widget in zip(enumerate(self.page_memory['multispecies']['ordered_elements'][1:]),
@@ -696,7 +701,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 self.page_memory['multispecies'][element][label_ii].currentTextChanged.connect(self.handle_multispecies_params_change)
 
             elif element == 'apply_selected':
-                self.page_memory['multispecies'][element][label_ii].clicked.connect(lambda: self.update_networkspecies(label_ii))
+                self.page_memory['multispecies'][element][label_ii].setObjectName('apply_' + str(label_ii))
+                self.page_memory['multispecies'][element][label_ii].clicked.connect(self.handle_filter_species_change)
 
             # add element to grid
             grid.addWidget(self.page_memory['multispecies'][element][label_ii], label_ii + 2, element_ii, 
@@ -706,72 +712,21 @@ class PopUpWindow(QtWidgets.QWidget):
         self.read_instance.multispecies_initialisation = True
         self.update_multispecies_fields(label_ii)
         self.read_instance.multispecies_initialisation = False
-            
-    def update_networkspecies(self, label_ii):
-        """ Function to update networkspecies and read data for multiple ones. """
 
+    def handle_filter_species_change(self):
+        """ Function to add or remote filter species after clicking on apply button. """
+        
+        # get widget line
         event_source = self.sender()
-
-        # get current network, species and filter bounds
-        network = self.page_memory['multispecies']['network'][label_ii].currentText()
-        speci = self.page_memory['multispecies']['species'][label_ii].currentText()
-        networkspeci = network + '|' + speci
-        current_lower = self.page_memory['multispecies']['current_lower'][label_ii].text()
-        current_upper = self.page_memory['multispecies']['current_upper'][label_ii].text()
-
-        # if apply button is checked, add networkspecies and update bounds in filter_species
+        label_ii = int(event_source.objectName().split('_')[1])
+        
         if event_source.isChecked():
-            
-            # update le_minimum_value and le_maximum_value for main networkspeci
-            if networkspeci == self.read_instance.networkspecies[0]:
-                self.read_instance.le_minimum_value.setText(current_lower)
-                self.read_instance.le_maximum_value.setText(current_upper)
-                self.read_instance.bounds_set_on_multispecies = True
-
-            # add pair in lists of networks and species
-            else:
-                # if networkspeci is not already in lists
-                if networkspeci not in self.read_instance.networkspecies:
-                    self.read_instance.network.append(network)
-                    self.read_instance.species.append(speci)
-                    self.read_instance.networkspecies = ['{}|{}'.format(network,speci) 
-                                                        for network, speci in zip(self.read_instance.network, 
-                                                                                self.read_instance.species)]
-                                                                        
-                    self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
-                                                        for speci in self.read_instance.species}
-
-                    # if bounds are not empty?
-                    if current_lower != str(np.nan) and current_upper != str(np.nan):
-                        # check selected lower/upper bounds are numbers
-                        try:
-                            self.read_instance.filter_species[networkspeci] = [float(current_lower), float(current_upper)]
-                        # if any of the fields are not numbers, return from function
-                        except ValueError:
-                            print("Warning: Data limit fields must be numeric")
-                            return
-
-        # if apply button is unchecked, remove networkspecies and bounds from filter_species
+            update_filter_species(self.read_instance, label_ii)
         else:
-            # do not delete main networkspeci
-            if networkspeci != self.read_instance.networkspecies[0]:
-                # remove only if pair exists in lists of networks and species
-                # TODO: Do not remove if networkspeci is duplicated and checked in another line
-                if networkspeci in self.read_instance.networkspecies:
-                    self.read_instance.network.remove(network)
-                    self.read_instance.species.remove(speci)
-                    self.read_instance.networkspecies.remove(networkspeci)
-                    del self.read_instance.qa_per_species[speci]
-
-                # remove only if pair has defined bounds
-                if networkspeci in self.read_instance.filter_species.keys():
-                    del self.read_instance.filter_species[networkspeci]
-                
-        print('- Network species', self.read_instance.networkspecies)
-        print('- Filter species', self.read_instance.filter_species)
+            update_filter_species(self.read_instance, label_ii, add_filter_species=False)
 
     def update_multispecies_fields(self, label_ii):
-
+        
         # set variable to block interactive handling while updating config bar parameters
         self.read_instance.block_config_bar_handling_updates = True
 
@@ -782,7 +737,10 @@ class PopUpWindow(QtWidgets.QWidget):
             self.read_instance.selected_widget_network.update({label_ii: copy.deepcopy(self.read_instance.network[0])})
             self.read_instance.selected_widget_matrix.update({label_ii: self.read_instance.parameter_dictionary[self.read_instance.species[0]]['matrix']})
             self.read_instance.selected_widget_species.update({label_ii: copy.deepcopy(self.read_instance.species[0])})
-        
+            self.read_instance.selected_widget_lower.update({label_ii: str(np.nan)})
+            self.read_instance.selected_widget_upper.update({label_ii: str(np.nan)})
+            self.read_instance.selected_widget_apply.update({label_ii: False})
+
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
         self.page_memory['multispecies']['network'][label_ii].clear()
@@ -791,7 +749,7 @@ class PopUpWindow(QtWidgets.QWidget):
         self.page_memory['multispecies']['current_lower'][label_ii].setText(str(np.nan))
         self.page_memory['multispecies']['current_upper'][label_ii].setText(str(np.nan))
         self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
- 
+
         # if have no available observational data, return from function, updating variable informing that have no data
         if len(self.read_instance.available_observation_data) == 0:
             self.read_instance.no_data_to_read = True
@@ -834,22 +792,36 @@ class PopUpWindow(QtWidgets.QWidget):
         else:
             self.read_instance.selected_widget_species.update({label_ii: self.page_memory['multispecies']['species'][label_ii].currentText()})
         
+        # update current lower
+        if self.read_instance.selected_widget_lower[label_ii] != str(np.nan):
+            self.page_memory['multispecies']['current_lower'][label_ii].setText(str(self.read_instance.selected_widget_lower[label_ii]))
+
+        # update current upper
+        if self.read_instance.selected_widget_upper[label_ii] != str(np.nan):
+            self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.read_instance.selected_widget_upper[label_ii]))
+
+        # update apply
+        if self.read_instance.selected_widget_apply[label_ii] == True:
+            self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Checked)
+
         self.read_instance.block_config_bar_handling_updates = False
 
     def set_previous_fields(self):
 
         # set variable to block interactive handling while updating config bar parameters
         self.read_instance.block_config_bar_handling_updates = True
-
+        
         # set previous bounds and check apply_selected
         # do this only when previous bounds exist (after tab has been closed)
-        for label_ii, label in enumerate(self.menu_current['multispecies']['labels']):
-            if (((label_ii+1) <= len(self.menu_current['multispecies']['previous_lower'].keys())) 
-                and (len(self.menu_current['multispecies']['previous_lower'].keys()) > 0)):
-                self.page_memory['multispecies']['current_lower'][label_ii].setText(str(self.menu_current['multispecies']['previous_lower'][label_ii]))
-                self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.menu_current['multispecies']['previous_upper'][label_ii]))
-                if self.menu_current['multispecies']['previous_apply'][label_ii]:
-                    self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Checked)
+        if len(self.menu_current['multispecies']['previous_lower'].keys()) > 0:
+            for label_ii, label in enumerate(self.menu_current['multispecies']['labels']):
+                if (label_ii+1) <= len(self.menu_current['multispecies']['previous_lower'].keys()):
+                    self.page_memory['multispecies']['current_lower'][label_ii].setText(str(self.menu_current['multispecies']['previous_lower'][label_ii]))
+                    self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.menu_current['multispecies']['previous_upper'][label_ii]))
+                    if self.menu_current['multispecies']['previous_apply'][label_ii]:
+                        self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Checked)
+                    else:
+                        self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
 
         self.read_instance.block_config_bar_handling_updates = False
 
@@ -862,7 +834,7 @@ class PopUpWindow(QtWidgets.QWidget):
             event_source = self.sender()
 
             # get line
-            label_ii = int(self.sender().objectName().split('_')[1])
+            label_ii = int(event_source.objectName().split('_')[1])
             
             # if network, matrix or species have changed then respective
             # current selection for the changed param
@@ -877,30 +849,16 @@ class PopUpWindow(QtWidgets.QWidget):
             elif event_source == self.page_memory['multispecies']['species'][label_ii]:
                 self.read_instance.selected_widget_species.update({label_ii: changed_param})
 
-            # uncheck apply_selected and remove species from filter
-            self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+            # reset bounds and apply values on widgets
+            self.read_instance.selected_widget_lower.update({label_ii: str(np.nan)})
+            self.read_instance.selected_widget_upper.update({label_ii: str(np.nan)})
+            self.read_instance.selected_widget_apply.update({label_ii: False})
 
-            # get selected network and species
-            network = self.read_instance.selected_widget_network[label_ii]
-            speci = self.read_instance.selected_widget_species[label_ii]
-            networkspeci = network + '|' + speci
-
-            # do not delete main networkspeci
-            if (network != self.read_instance.network[0]) and (speci != self.read_instance.species[0]):
-                # remove only if pair exists in lists of networks and species
-                if (network in self.read_instance.network) and (speci in self.read_instance.species):
-                    self.read_instance.network.remove(network)
-                    self.read_instance.species.remove(speci)
-                    self.read_instance.networkspecies.remove(networkspeci)
-                    del self.read_instance.qa_per_species[speci]
-
-                # remove only if pair has defined bounds
-                if networkspeci in self.read_instance.filter_species.keys():
-                    del self.read_instance.filter_species[networkspeci]
-                self.menu_current['multispecies']['apply_selected'][label_ii] = False
+            # remove networkspeci from lists
+            update_filter_species(self.read_instance, label_ii, add_filter_species=False)
 
             # update multispecies filtering fields
-            self.update_multispecies_fields(int(label_ii))
+            self.update_multispecies_fields(label_ii)
 
     #------------------------------------------------------------------------#
     #------------------------------------------------------------------------#
