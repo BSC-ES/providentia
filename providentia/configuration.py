@@ -739,8 +739,6 @@ def read_conf(fpath=None):
         # reset res variable
         res_sub = {}
 
-        print(config[section_modified])
-
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
    
 def write_conf(section, subsection, fpath, opts):
