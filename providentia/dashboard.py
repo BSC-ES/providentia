@@ -572,6 +572,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_widget_species = dict()
             self.selected_widget_lower = dict()
             self.selected_widget_upper = dict()
+            self.selected_widget_filter_species_fill_value = dict()
             self.selected_widget_apply = dict()
             
             # set variable stating first read
