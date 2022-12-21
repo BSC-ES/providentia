@@ -683,9 +683,20 @@ def read_conf(fpath=None):
                 # set section attributes
                 if copy:
                     if line_strip != '':
-                        key = line_strip.split('=')[0].strip()
-                        value = line_strip.split('=')[1].strip()
-                        config[section_modified][key] = value
+                        # initial definition of parameter - value
+                        if '=' in line_strip:
+                            key = line_strip.split('=')[0].strip()
+                            value = line_strip.split('=')[1].strip()
+                            config[section_modified][key] = value
+                        # lines after adding line breaks
+                        else:
+                            # get last key and add current value to values from last key
+                            last_key = list(config[section_modified].keys())[-1]
+                            value = config[section_modified][last_key] + line_strip.strip()
+
+                            # update values for last key in dict
+                            del config[section_modified][last_key]
+                            config[section_modified][last_key] = value
 
     # add section attributes to subsection if do not exist there (e.g. add SECTIONA values to SECTIONA-Spain)
     for section_modified in all_sections_modified:
@@ -727,6 +738,8 @@ def read_conf(fpath=None):
 
         # reset res variable
         res_sub = {}
+
+        print(config[section_modified])
 
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
    
