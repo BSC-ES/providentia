@@ -318,22 +318,36 @@ class ProvConfiguration:
                 else:
                     # split per networkspecies
                     networkspecies_split = value_strip.split('),')
+
                     # iterate through networkspecies, saving list of limits per networkspecies
                     filter_networkspecies_dict = {}
                     for networkspeci_split in networkspecies_split:
+
                         networkspeci_split_2 = networkspeci_split.split('(')
+
                         # get networkspeci
                         networkspeci = networkspeci_split_2[0].replace(':','|')
+
                         # get lower and upper limits
                         networkspeci_split_3 = networkspeci_split_2[1].split(',')
                         lower_limit = float(networkspeci_split_3[0])
-                        upper_limit = float(networkspeci_split_3[1].replace(')',''))
+                        
+                        # if it has fill value
+                        if len(networkspeci_split_3) > 2:
+                            upper_limit = float(networkspeci_split_3[1])
+                            filter_species_fill_value = float(networkspeci_split_3[2].replace(')',''))
+                        # only bounds, fill value will be nan
+                        else:
+                            upper_limit = float(networkspeci_split_3[1].replace(')',''))
+                            filter_species_fill_value = np.nan
+
                         # save limits per networkspecies
-                        filter_networkspecies_dict[networkspeci] = [lower_limit, upper_limit]
+                        filter_networkspecies_dict[networkspeci] = [lower_limit, upper_limit, filter_species_fill_value]
+
                     return filter_networkspecies_dict
 
         elif key == 'lower_bound':
-            #parse lower_bound
+            # parse lower_bound
             
             # if not None then set lower_bound by that given
             # make sure it is a list of values

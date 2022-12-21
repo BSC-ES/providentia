@@ -340,19 +340,23 @@ class PopUpWindow(QtWidgets.QWidget):
                 row_format_dict = formatting_dict['multispecies_popup']
                 grid_vertical_spacing = 3
                 self.page_memory['multispecies'] = {'add_row': [], 'network': [], 'species': [], 'matrix': [],
-                                                    'current_lower': [], 'current_upper': [], 'apply_selected': [],
+                                                    'current_lower': [], 'current_upper': [], 
+                                                    'current_filter_species_fill_value': [],
+                                                    'apply_selected': [],
                                                     'n_column_consumed': 6, 
                                                     'ordered_elements':['add_row',
                                                                         'network', 
                                                                         'matrix',
                                                                         'species',
                                                                         'current_lower', 
-                                                                        'current_upper', 
+                                                                        'current_upper',
+                                                                        'current_filter_species_fill_value', 
                                                                         'apply_selected'], 
                                                     'widget':[QtWidgets.QPushButton,
                                                               QtWidgets.QComboBox,
                                                               QtWidgets.QComboBox,
                                                               QtWidgets.QComboBox,
+                                                              QtWidgets.QLineEdit, 
                                                               QtWidgets.QLineEdit, 
                                                               QtWidgets.QLineEdit, 
                                                               QtWidgets.QCheckBox
@@ -495,20 +499,24 @@ class PopUpWindow(QtWidgets.QWidget):
                         if element == 'add_row':
                             self.page_memory[menu_type][element][label_ii].clicked.connect(lambda: self.add_multispecies_widgets(grid))
                             
-                        # format and connect for changes
-                        elif element in ['network', 'species', 'matrix']:
-
-                            # format
-                            self.page_memory[menu_type][element][label_ii].setFixedWidth(100)
-                            self.page_memory[menu_type][element][label_ii].AdjustToContents
-
-                            # add connectivity to options
-                            self.page_memory[menu_type][element][label_ii].setObjectName('multispecies_' + str(label_ii))
-                            self.page_memory[menu_type][element][label_ii].currentTextChanged.connect(self.handle_multispecies_params_change)
-
                         elif element == 'apply_selected':
                             self.page_memory[menu_type][element][label_ii].setObjectName('apply_' + str(label_ii))
                             self.page_memory[menu_type][element][label_ii].clicked.connect(self.handle_filter_species_change)
+
+                        # format and connect for changes
+                        else:
+                            if element in ['network', 'species', 'matrix']:
+                                # format
+                                self.page_memory[menu_type][element][label_ii].setFixedWidth(100)
+                                self.page_memory[menu_type][element][label_ii].AdjustToContents
+
+                                # add connectivity to options
+                                self.page_memory[menu_type][element][label_ii].setObjectName('comboboxes_' + str(label_ii))
+                                self.page_memory[menu_type][element][label_ii].currentTextChanged.connect(self.handle_multispecies_params_change)
+                            else:
+                                # add connectivity to options
+                                self.page_memory[menu_type][element][label_ii].setObjectName('texts_' + str(label_ii))
+                                self.page_memory[menu_type][element][label_ii].textChanged.connect(self.handle_multispecies_params_change)
 
                     # add element to grid (aligned left)
                     # button add_row is done separately since it is alone on the top of the multispecies filtering tab
@@ -532,7 +540,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # get values before closing the tab
             if menu_type == 'multispecies':
-                self.set_previous_fields()
+                self.set_multispecies_previous_fields()
 
             # add column headers to menu type grid if needed
             if have_column_headers:
@@ -570,9 +578,12 @@ class PopUpWindow(QtWidgets.QWidget):
                         grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Max'), 
                                                       formatting_dict['column_header_label_popup']), 
                                        1, column_number+4, QtCore.Qt.AlignCenter)
+                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Fill value'), 
+                                                      formatting_dict['column_header_label_popup']), 
+                                       1, column_number+5, QtCore.Qt.AlignCenter)
                         grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='A'), 
                                                       formatting_dict['column_header_label_popup']), 
-                                       1, column_number+5, QtCore.Qt.AlignCenter)                        
+                                       1, column_number+6, QtCore.Qt.AlignCenter)                        
             
             # set horizontal scroll properties
             scroll_area = QtWidgets.QScrollArea() 
@@ -587,10 +598,6 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # return horizontally concatenated menu type grids
         return horizontal_parent
-
-    #------------------------------------------------------------------------#
-    #------------------------------------------------------------------------#
-    # Functions that handle callbacks upon clicking on buttons
 
     def open_new_page(self):
         """ Function to open new page in pop-up window. """
@@ -689,20 +696,23 @@ class PopUpWindow(QtWidgets.QWidget):
             grid.addWidget(self.page_memory['multispecies'][element][label_ii], label_ii + 2, element_ii, 
                            QtCore.Qt.AlignLeft)
 
-            # format and connect for changes
-            if element in ['network', 'species', 'matrix']:
-
-                # format
-                self.page_memory['multispecies'][element][label_ii].setFixedWidth(100)
-                self.page_memory['multispecies'][element][label_ii].AdjustToContents
-
-                # add connectivity to options
-                self.page_memory['multispecies'][element][label_ii].setObjectName('multispecies_' + str(label_ii))
-                self.page_memory['multispecies'][element][label_ii].currentTextChanged.connect(self.handle_multispecies_params_change)
-
-            elif element == 'apply_selected':
+            if element == 'apply_selected':
                 self.page_memory['multispecies'][element][label_ii].setObjectName('apply_' + str(label_ii))
                 self.page_memory['multispecies'][element][label_ii].clicked.connect(self.handle_filter_species_change)
+
+            else:
+                if element in ['network', 'species', 'matrix']:
+                    # format
+                    self.page_memory['multispecies'][element][label_ii].setFixedWidth(100)
+                    self.page_memory['multispecies'][element][label_ii].AdjustToContents
+
+                    # add connectivity to options
+                    self.page_memory['multispecies'][element][label_ii].setObjectName('comboboxes_' + str(label_ii))
+                    self.page_memory['multispecies'][element][label_ii].currentTextChanged.connect(self.handle_multispecies_params_change)
+                else:
+                    # add connectivity to options
+                    self.page_memory['multispecies'][element][label_ii].setObjectName('texts_' + str(label_ii))
+                    self.page_memory['multispecies'][element][label_ii].textChanged.connect(self.handle_multispecies_params_change)
 
             # add element to grid
             grid.addWidget(self.page_memory['multispecies'][element][label_ii], label_ii + 2, element_ii, 
@@ -726,7 +736,12 @@ class PopUpWindow(QtWidgets.QWidget):
             update_filter_species(self.read_instance, label_ii, add_filter_species=False)
 
     def update_multispecies_fields(self, label_ii):
-        
+        """ Update multispecies fields in tab.
+
+            :param label_ii: Corresponding widget line in dashboard
+            :type label_ii: int
+        """
+
         # set variable to block interactive handling while updating config bar parameters
         self.read_instance.block_config_bar_handling_updates = True
 
@@ -739,6 +754,7 @@ class PopUpWindow(QtWidgets.QWidget):
             self.read_instance.selected_widget_species.update({label_ii: copy.deepcopy(self.read_instance.species[0])})
             self.read_instance.selected_widget_lower.update({label_ii: str(np.nan)})
             self.read_instance.selected_widget_upper.update({label_ii: str(np.nan)})
+            self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: str(np.nan)})
             self.read_instance.selected_widget_apply.update({label_ii: False})
 
         # initialise/update fields - maintain previously selected values wherever possible
@@ -748,6 +764,7 @@ class PopUpWindow(QtWidgets.QWidget):
         self.page_memory['multispecies']['species'][label_ii].clear()
         self.page_memory['multispecies']['current_lower'][label_ii].setText(str(np.nan))
         self.page_memory['multispecies']['current_upper'][label_ii].setText(str(np.nan))
+        self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(np.nan))
         self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
 
         # if have no available observational data, return from function, updating variable informing that have no data
@@ -800,13 +817,19 @@ class PopUpWindow(QtWidgets.QWidget):
         if self.read_instance.selected_widget_upper[label_ii] != str(np.nan):
             self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.read_instance.selected_widget_upper[label_ii]))
 
+        # update current fill value
+        if self.read_instance.selected_widget_filter_species_fill_value[label_ii] != str(np.nan):
+            self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(self.read_instance.selected_widget_filter_species_fill_value[label_ii]))
+
         # update apply
         if self.read_instance.selected_widget_apply[label_ii] == True:
             self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Checked)
 
         self.read_instance.block_config_bar_handling_updates = False
 
-    def set_previous_fields(self):
+    def set_multispecies_previous_fields(self):
+        """ Function to set the same multispecies filtering fields that we previously had upon reopening the tab.
+        """
 
         # set variable to block interactive handling while updating config bar parameters
         self.read_instance.block_config_bar_handling_updates = True
@@ -818,6 +841,7 @@ class PopUpWindow(QtWidgets.QWidget):
                 if (label_ii+1) <= len(self.menu_current['multispecies']['previous_lower'].keys()):
                     self.page_memory['multispecies']['current_lower'][label_ii].setText(str(self.menu_current['multispecies']['previous_lower'][label_ii]))
                     self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.menu_current['multispecies']['previous_upper'][label_ii]))
+                    self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(self.menu_current['multispecies']['previous_filter_species_fill_value'][label_ii]))
                     if self.menu_current['multispecies']['previous_apply'][label_ii]:
                         self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Checked)
                     else:
@@ -827,7 +851,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
     def handle_multispecies_params_change(self, changed_param):
         """ Function which handles interactive updates of multispecies filtering fields. """
-
+        
         if (changed_param != '') and (not self.read_instance.block_config_bar_handling_updates):
             
             # get event origin source
@@ -848,10 +872,14 @@ class PopUpWindow(QtWidgets.QWidget):
                     self.read_instance.available_observation_data[self.read_instance.selected_widget_network[label_ii]][self.read_instance.selected_resolution][self.read_instance.selected_widget_matrix[label_ii]].keys()))[0]})
             elif event_source == self.page_memory['multispecies']['species'][label_ii]:
                 self.read_instance.selected_widget_species.update({label_ii: changed_param})
+            elif event_source == self.page_memory['multispecies']['current_lower'][label_ii]:
+                self.read_instance.selected_widget_lower.update({label_ii: changed_param})
+            elif event_source == self.page_memory['multispecies']['current_upper'][label_ii]:
+                self.read_instance.selected_widget_upper.update({label_ii: changed_param})
+            elif event_source == self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii]:
+                self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: changed_param})
 
             # reset bounds and apply values on widgets
-            self.read_instance.selected_widget_lower.update({label_ii: str(np.nan)})
-            self.read_instance.selected_widget_upper.update({label_ii: str(np.nan)})
             self.read_instance.selected_widget_apply.update({label_ii: False})
 
             # remove networkspeci from lists
@@ -860,9 +888,6 @@ class PopUpWindow(QtWidgets.QWidget):
             # update multispecies filtering fields
             self.update_multispecies_fields(label_ii)
 
-    #------------------------------------------------------------------------#
-    #------------------------------------------------------------------------#
-    
     def closeEvent(self, event):
         """ Function to get status of current page upon closing of pop-up window. """
 
@@ -923,6 +948,8 @@ class PopUpWindow(QtWidgets.QWidget):
                             self.menu_current[menu_type]['previous_lower'].update({label_ii: self.page_memory['multispecies']['current_lower'][label_ii].text()})
                         elif element == 'current_upper':
                             self.menu_current[menu_type]['previous_upper'].update({label_ii: self.page_memory['multispecies']['current_upper'][label_ii].text()})
+                        elif element == 'current_filter_species_fill_value':
+                            self.menu_current[menu_type]['previous_filter_species_fill_value'].update({label_ii: self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].text()})
                         elif element == 'apply_selected':
                             if self.page_memory['multispecies']['apply_selected'][label_ii].isChecked():
                                 self.menu_current[menu_type]['previous_apply'].update({label_ii: True})
