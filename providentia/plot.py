@@ -1298,7 +1298,6 @@ class Plot:
             if log_ax == 'logy':
                 relevant_axis.set_yscale('linear')
             
-
     def linear_regression(self, relevant_axis, networkspeci, data_labels, base_plot_type, plot_characteristics, 
                           plot_options=[]):
         """ Add linear regression to plot.
@@ -1531,20 +1530,20 @@ class Plot:
         """ Function that handles formatting of a plot axis,
             based on given plot options.
 
-        :param relevant_axs: relevant axes
-        :type relevant_axs: list
-        :param relevant_data_labels: names of plotted data arrays 
-        :type relevant_data_labels: list
-        :param networkspeci: str of currently active network and species 
-        :type networkspeci: str
-        :param base_plot_type: plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_type: plot type
-        :type plot_type: str
-        :param plot_options: list of options to configure plots
-        :type plot_options: list
-        :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
-        :type plotting_paradigm: str
+            :param relevant_axs: relevant axes
+            :type relevant_axs: list
+            :param relevant_data_labels: names of plotted data arrays 
+            :type relevant_data_labels: list
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param base_plot_type: plot type, without statistical information
+            :type base_plot_type: str
+            :param plot_type: plot type
+            :type plot_type: str
+            :param plot_options: list of options to configure plots
+            :type plot_options: list
+            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+            :type plotting_paradigm: str
         """
 
         for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
@@ -1707,16 +1706,7 @@ class Plot:
         xlim_max = None
         ylim_min = None
         ylim_max = None
-
-        if not isinstance(relevant_axs, list):
-            # if changes only apply to one axis, put it in list
-            if not isinstance(relevant_axs, dict):
-                relevant_axs = [relevant_axs]
-            # transform dictionaries into lists
-            else:
-                relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
-                                relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
-
+        
         # get lower and upper limits across all relevant axes
         for ax in relevant_axs:
             if 'equal_aspect' in plot_characteristics:

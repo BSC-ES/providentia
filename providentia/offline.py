@@ -294,8 +294,7 @@ class ProvidentiaOffline:
                             continue
 
                         # get relevant axs and plot types per networkspeci / plot type
-                        relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type(networkspeci, 
-                                                                                                              base_plot_type, 
+                        relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type(base_plot_type, 
                                                                                                               relevant_pages)
 
                         # if have no relevant axs, continue to next paradigm
@@ -704,6 +703,7 @@ class ProvidentiaOffline:
 
                         # get zstat information from plot_type
                         zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+                        
                         # get base plot type (without stat and options)
                         if zstat:
                             base_plot_type = plot_type.split('-')[0] 
@@ -720,12 +720,12 @@ class ProvidentiaOffline:
                         # make plot
                         print('Making summary {0}'.format(plot_type))
                         plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
+                        
+                        # get relevant axs and plot types per networkspeci / plot type
+                        relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type(base_plot_type, 
+                                                                                                              [plot_indices[0][0]])
 
                         # do formatting
-                        relevant_axs = [self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'] 
-                                        for relevant_page, page_ind in plot_indices]
-                        relevant_data_labels = [self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'] 
-                                                for relevant_page, page_ind in plot_indices]
                         self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
                                                 base_plot_type, plot_type, plot_options, 'summary')
 
@@ -846,11 +846,11 @@ class ProvidentiaOffline:
                                                                                 self.current_station_name))                                
                             plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
 
+                            # get relevant axs and plot types per networkspeci / plot type
+                            relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type(base_plot_type, 
+                                                                                                                  [plot_indices[0][0]])
+
                             # do formatting 
-                            relevant_axs = [self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'] 
-                                            for relevant_page, page_ind in plot_indices]
-                            relevant_data_labels = [self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'] 
-                                                    for relevant_page, page_ind in plot_indices]
                             self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
                                                     base_plot_type, plot_type, plot_options, 'station')
 
@@ -1354,8 +1354,8 @@ class ProvidentiaOffline:
 
         return all_relevant_pages[axis_ind], page_inds[axis_ind], relevant_axes[axis_ind]['handle']
 
-    def get_relevant_axs_per_networkspeci_plot_type(self, networkspeci, base_plot_type, relevant_pages):
-        """Get relevant axs per networkspeci, per plot type"""
+    def get_relevant_axs_per_networkspeci_plot_type(self, base_plot_type, relevant_pages):
+        """Get relevant axs per plot type"""
 
         relevant_axs = []
         relevant_data_labels = []
