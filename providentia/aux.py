@@ -287,10 +287,12 @@ def init_multispecies(instance):
     instance.multispecies_menu['multispecies']['labels'] = ['networkspeci_0']
     instance.multispecies_menu['multispecies']['current_lower'] = {}
     instance.multispecies_menu['multispecies']['current_upper'] = {}
+    instance.multispecies_menu['multispecies']['current_filter_species_fill_value'] = {}
     instance.multispecies_menu['multispecies']['apply_selected'] = {}
     instance.multispecies_menu['multispecies']['previous_lower'] = {}
     instance.multispecies_menu['multispecies']['previous_upper'] = {}
     instance.multispecies_menu['multispecies']['previous_apply'] = {}
+    instance.multispecies_menu['multispecies']['previous_filter_species_fill_value'] = {}
 
 def init_representativity(instance):
     """ Initialise internal structure to store representativity fields.
@@ -753,6 +755,7 @@ def multispecies_conf(instance):
             # add values
             instance.multispecies_menu['multispecies']['current_lower'][networkspeci_ii] = bounds[0]
             instance.multispecies_menu['multispecies']['current_upper'][networkspeci_ii] = bounds[1]
+            instance.multispecies_menu['multispecies']['current_filter_species_fill_value'][networkspeci_ii] = bounds[2]
             instance.multispecies_menu['multispecies']['apply_selected'][networkspeci_ii] = True
 
             # set initial selected config variables as set .conf files or defaults
@@ -761,6 +764,7 @@ def multispecies_conf(instance):
             instance.selected_widget_species.update({networkspeci_ii: networkspeci.split('|')[1]})
             instance.selected_widget_lower.update({networkspeci_ii: bounds[0]})
             instance.selected_widget_upper.update({networkspeci_ii: bounds[1]})
+            instance.selected_widget_filter_species_fill_value.update({networkspeci_ii: bounds[2]})
             instance.selected_widget_apply.update({networkspeci_ii: True})
 
             update_filter_species(instance, networkspeci_ii)
@@ -1468,6 +1472,7 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes,
 
             # convert speci longitude and latitudes in geogroahic coordinates to cartesian ECEF 
             next_speci_non_intersecting_x, next_speci_non_intersecting_y, next_speci_non_intersecting_z = pyproj.transform(lla, ecef, next_speci_non_intersecting_longitudes, next_speci_non_intersecting_latitudes, np.zeros(len(next_speci_non_intersecting_longitudes)), radians=False)
+            
             # merge coordinates to 2D array
             next_speci_non_intersecting_xy = np.column_stack((next_speci_non_intersecting_x, next_speci_non_intersecting_y))            
 
@@ -1500,7 +1505,16 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes,
     return intersecting_station_references, intersecting_longitudes, intersecting_latitudes, intersecting_station_classifications, intersecting_area_classifications
 
 def update_filter_species(instance, label_ii, add_filter_species=True):
-    """ Function to update filter species. """
+    """ Function to update filter species after launching the dashboard with a configuration file or 
+        by editing the fields in the multispecies filtering tab in the dashboard. 
+
+        :param instance: Instance of class ProvidentiaMainWindow
+        :type instance: object
+        :param label_ii: Corresponding widget line in dashboard
+        :type label_ii: int
+        :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
+        :type add_filter_species: boolean
+    """
 
     # get selected network, species and bounds
     network = instance.selected_widget_network[label_ii]
@@ -1508,33 +1522,35 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
     networkspeci = network + '|' + speci
     current_lower = instance.selected_widget_lower[label_ii]
     current_upper = instance.selected_widget_upper[label_ii]
+    current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
 
-    # if apply button is checked or filter_species in configuraiton file, add networkspecies in filter_species
+    # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
     if add_filter_species:
 
         # do not add networkspeci to filter_species if filtered network is main
         if networkspeci != instance.networkspecies[0]:
+            
+            # add or update networkspeci
+            # check selected lower and upper bounds and fill value are numbers or nan
+            try:
+                instance.filter_species[networkspeci] = [float(current_lower), float(current_upper),
+                                                         float(current_filter_species_fill_value)]
+                
+            # if any of the fields are not numbers, return from function
+            except ValueError:
+                print("Warning: Data limit fields must be numeric")
+                return
 
-            # add if networkspeci is not already in lists
-            if networkspeci not in instance.filter_species.keys():
-
-                # if bounds are not empty?
-                if current_lower != str(np.nan) and current_upper != str(np.nan):
-
-                    # check selected lower/upper bounds are numbers
-                    try:
-                        instance.filter_species[networkspeci] = [float(current_lower), 
-                                                                 float(current_upper)]
-                    # if any of the fields are not numbers, return from function
-                    except ValueError:
-                        print("Warning: Data limit fields must be numeric")
-                        return
-
-                # add if networkspeci is not already in qa_per_species
-                if speci not in instance.qa_per_species:
-                    qa_species = copy.deepcopy(instance.species)
-                    qa_species.append(speci)
-                    instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
+            # add if networkspeci is not already in qa_per_species
+            if speci not in instance.qa_per_species:
+                # get species in memory 
+                species = copy.deepcopy(instance.species)
+                filter_species = [val.split('|')[1] for val in list(copy.deepcopy(instance.filter_species).keys())]
+                qa_species = species + filter_species
+                
+                # add
+                qa_species.append(speci)
+                instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
 
         # update le_minimum_value and le_maximum_value (data bounds) for main networkspeci
         else:
@@ -1552,6 +1568,7 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
         if speci in instance.qa_per_species:
             del instance.qa_per_species[speci]
 
+    print('SELECTED SPECIES')
     print('- Network species', instance.networkspecies)
     print('- Filter species', instance.filter_species)
     
