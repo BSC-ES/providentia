@@ -720,12 +720,10 @@ class ProvidentiaOffline:
                         # make plot
                         print('Making summary {0}'.format(plot_type))
                         plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
-                        
-                        # get relevant axs and plot types per networkspeci / plot type
-                        relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type(base_plot_type, 
-                                                                                                              [plot_indices[0][0]])
 
                         # do formatting
+                        relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(base_plot_type, 
+                                                                                                                       plot_indices)
                         self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
                                                 base_plot_type, plot_type, plot_options, 'summary')
 
@@ -846,11 +844,9 @@ class ProvidentiaOffline:
                                                                                 self.current_station_name))                                
                             plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
 
-                            # get relevant axs and plot types per networkspeci / plot type
-                            relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type(base_plot_type, 
-                                                                                                                  [plot_indices[0][0]])
-
                             # do formatting 
+                            relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(base_plot_type, 
+                                                                                                                           plot_indices)
                             self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
                                                     base_plot_type, plot_type, plot_options, 'station')
 
@@ -1356,7 +1352,7 @@ class ProvidentiaOffline:
 
     def get_relevant_axs_per_networkspeci_plot_type(self, base_plot_type, relevant_pages):
         """Get relevant axs per plot type"""
-
+        
         relevant_axs = []
         relevant_data_labels = []
         for relevant_page in relevant_pages:
@@ -1371,7 +1367,23 @@ class ProvidentiaOffline:
                     relevant_data_labels.append(ax['data_labels'])
 
         return relevant_axs, relevant_data_labels
-        
+    
+    def get_relevant_axs_per_networkspeci_plot_type_page_ind(self, base_plot_type, plot_indices):
+        """Get relevant axs per plot type and page ind"""
+
+        relevant_axs = []
+        relevant_data_labels = []
+        for relevant_page, page_ind in plot_indices:
+            if base_plot_type in ['periodic', 'periodic-violin']:
+                for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                    relevant_axs.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'][relevant_temporal_resolution])
+                    relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'])
+            else:
+                relevant_axs.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'])
+                relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'])
+
+        return relevant_axs, relevant_data_labels
+
 def main(**kwargs):
     """ Main function when running offine reports. """
    
