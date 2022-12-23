@@ -1384,7 +1384,8 @@ def get_basic_metadata(instance):
 
     return station_references, station_longitudes, station_latitudes, station_classifications, area_classifications
 
-def spatial_colocation(reading_ghost, station_references, longitudes, latitudes, station_classifications, area_classifications):
+def spatial_colocation(reading_ghost, station_references, longitudes, latitudes, station_classifications, 
+                       area_classifications):
     """ Given multiple species, return intersecting station_references, longitudes, latitudes, 
         station_classifications and area_classifications across species.
 
@@ -1414,7 +1415,8 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes,
     if reading_ghost:
         station_references_no_method = {}
         for networkspecies in station_references:
-            station_references_no_method[networkspecies] = ['_'.join(ref.split('_')[:-1]) for ref in station_references[networkspecies]]
+            station_references_no_method[networkspecies] = ['_'.join(ref.split('_')[:-1]) 
+                                                            for ref in station_references[networkspecies]]
     else:
         station_references_no_method = station_references
 
@@ -1422,7 +1424,8 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes,
     intersecting_station_references_no_method = list(set.intersection(*map(set,list(station_references_no_method.values()))))
     intersecting_indices = {}
     for networkspecies in station_references_no_method:
-        intersecting_indices[networkspecies] = np.sort([station_references_no_method[networkspecies].index(ref) for ref in intersecting_station_references_no_method])
+        intersecting_indices[networkspecies] = np.sort([station_references_no_method[networkspecies].index(ref) 
+                                                        for ref in intersecting_station_references_no_method])
 
     # set intersecting station_references, longitudes and latitudes,
     # after matching station references across species
@@ -1466,7 +1469,9 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes,
         # ECEF coordiantes represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
         lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
         ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
-        speci_non_intersecting_x, speci_non_intersecting_y, speci_non_intersecting_z = pyproj.transform(lla, ecef, speci_non_intersecting_longitudes, speci_non_intersecting_latitudes, np.zeros(len(speci_non_intersecting_longitudes)), radians=False)
+        speci_non_intersecting_x, speci_non_intersecting_y, speci_non_intersecting_z = pyproj.transform(lla, ecef, 
+            speci_non_intersecting_longitudes, speci_non_intersecting_latitudes, 
+            np.zeros(len(speci_non_intersecting_longitudes)), radians=False)
         # merge coordinates to 2D array
         speci_non_intersecting_xy = np.column_stack((speci_non_intersecting_x, speci_non_intersecting_y))
 
@@ -1482,7 +1487,9 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes,
             next_speci_non_intersecting_latitudes = non_intersecting_latitudes[networkspecies]
 
             # convert speci longitude and latitudes in geogroahic coordinates to cartesian ECEF 
-            next_speci_non_intersecting_x, next_speci_non_intersecting_y, next_speci_non_intersecting_z = pyproj.transform(lla, ecef, next_speci_non_intersecting_longitudes, next_speci_non_intersecting_latitudes, np.zeros(len(next_speci_non_intersecting_longitudes)), radians=False)
+            next_speci_non_intersecting_x, next_speci_non_intersecting_y, next_speci_non_intersecting_z = pyproj.transform(lla, 
+                ecef, next_speci_non_intersecting_longitudes, next_speci_non_intersecting_latitudes, 
+                np.zeros(len(next_speci_non_intersecting_longitudes)), radians=False)
             
             # merge coordinates to 2D array
             next_speci_non_intersecting_xy = np.column_stack((next_speci_non_intersecting_x, next_speci_non_intersecting_y))            
