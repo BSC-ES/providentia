@@ -2,11 +2,8 @@
 from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .dashboard_aux import ComboBox
-from .dashboard_aux import QVLine
-from .dashboard_aux import PopUpWindow
-from .dashboard_aux import formatting_dict
-from .dashboard_aux import set_formatting
+from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow
+from .dashboard_aux import formatting_dict, set_formatting
 from .read import DataReader
 from providentia import aux
 
@@ -205,8 +202,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         parent_layout.setContentsMargins(0, 0, 0, 0)
 
         # define stylesheet for tooltips
-        self.setStyleSheet("QToolTip { font: %spt %s}" % (formatting_dict['tooltip']['font'].pointSizeF(),
-                                                          formatting_dict['tooltip']['font'].family()))
+        self.setStyleSheet("QToolTip { font: %spt %s}" % (formatting_dict['tooltip']['font']['size'],
+                                                          formatting_dict['tooltip']['font']['style']))
 
         # setup configuration bar with combo boxes, input boxes and buttons
         # use a gridded layout to place objects
@@ -222,6 +219,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         hbox = QtWidgets.QHBoxLayout()
 
         # define all configuration box objects (labels, comboboxes etc.)
+        # data selection section
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"),
                                                 formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
@@ -270,6 +268,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_multispecies.setToolTip('Select data to filter by')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
+
+        # filters section
         self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), formatting_dict['title_menu'])
         self.lb_data_filter.setFixedWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
@@ -302,6 +302,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
+
+        # resampling section
+        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
+        self.lb_resampling.setToolTip('Set resampling options')
+        self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_resampling_resolution.setFixedWidth(136)
+        self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
+        self.cb_resampling_switch = set_formatting(Switch(self), formatting_dict['switch_menu'])
+        self.cb_resampling_switch.setToolTip('Activate resampling')
+        self.vertical_splitter_3 = QVLine()
+        self.vertical_splitter_3.setMaximumWidth(20)
+
+        # map stat section
         self.lb_z = set_formatting(QtWidgets.QLabel(self, text="Map Stat"), formatting_dict['title_menu'])
         self.lb_z.setToolTip('Set plotted map statistic')
         self.cb_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
@@ -316,16 +329,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_z2.setFixedWidth(125)
         self.cb_z2.AdjustToContents
         self.cb_z2.setToolTip('Select map dataset 2')
-        self.vertical_splitter_3 = QVLine()
-        self.vertical_splitter_3.setMaximumWidth(20)
+        self.vertical_splitter_4 = QVLine()
+        self.vertical_splitter_4.setMaximumWidth(20)
+
+        # periodic stat section
         self.lb_periodic_stat = set_formatting(QtWidgets.QLabel(self, text="Periodic Stat"),
                                                  formatting_dict['title_menu'])
         self.lb_periodic_stat.setToolTip('Set plotted periodic statistic')
         self.cb_periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_periodic_stat.setFixedWidth(136)
         self.cb_periodic_stat.setToolTip('Select periodic statistic')
-        self.vertical_splitter_4 = QVLine()
-        self.vertical_splitter_4.setMaximumWidth(20)
+        self.vertical_splitter_5 = QVLine()
+        self.vertical_splitter_5.setMaximumWidth(20)
+
+        # station selection section
         self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
                                                    formatting_dict['title_menu'])
         self.lb_station_selection.setToolTip('Select stations')
@@ -338,13 +355,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), formatting_dict['checkbox_menu'])
         self.ch_extent.setToolTip('Select stations that are within the map extent')
         self.ch_extent.setFixedWidth(80)
-        self.vertical_splitter_5 = QVLine()
-        self.vertical_splitter_5.setMaximumWidth(20)
+        self.vertical_splitter_6 = QVLine()
+        self.vertical_splitter_6.setMaximumWidth(20)
+
+        # layout section
         self.lb_layout_selection = set_formatting(QtWidgets.QLabel(self, text="Layout"),
                                                   formatting_dict['title_menu'])
         self.cb_position_1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_position_1.setFixedWidth(100)
         self.cb_position_1.AdjustToContents
+        self.cb_position_1.setEnabled(False)
         self.cb_position_1.setToolTip('Select plot type in top left position')
         self.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_position_2.setFixedWidth(100)
@@ -364,6 +384,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_position_5.setToolTip('Select plot type in bottom right position')
 
         # position objects on gridded configuration bar
+        # data selection section
         config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_network, 1, 0, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_resolution, 2, 0, QtCore.Qt.AlignLeft)
@@ -378,6 +399,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_colocate, 1, 5, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_1, 0, 6, 4, 1, QtCore.Qt.AlignLeft)
+
+        # filters section
         config_bar.addWidget(self.lb_data_filter, 0, 7, 1, 2, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.lb_data_bounds, 1, 7, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.le_minimum_value, 1, 8, QtCore.Qt.AlignLeft)
@@ -388,25 +411,39 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.bu_reset, 3, 8, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_screen, 3, 9, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_2, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_z, 0, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_z_stat, 1, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_z1, 2, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_z2, 3, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_periodic_stat, 0, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_periodic_stat, 1, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_4, 0, 14, 4, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_station_selection, 0, 15, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 15, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_intersect, 2, 15, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_extent, 3, 15, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_5, 0, 16, 4, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_layout_selection, 0, 17, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_1, 1, 17, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_2, 1, 18, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_3, 2, 17, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_4, 2, 18, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_5, 2, 19, QtCore.Qt.AlignLeft)
+
+        # resampling section
+        config_bar.addWidget(self.lb_resampling, 0, 11, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_resolution, 1, 11, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_switch, 0, 12, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 13, 4, 1, QtCore.Qt.AlignLeft)
+
+        # map stat section
+        config_bar.addWidget(self.lb_z, 0, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_z_stat, 1, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_z1, 2, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_z2, 3, 14, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_4, 0, 15, 4, 1, QtCore.Qt.AlignLeft)
+
+        # periodic stat section
+        config_bar.addWidget(self.lb_periodic_stat, 0, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_periodic_stat, 1, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_5, 0, 17, 4, 1, QtCore.Qt.AlignLeft)
+
+        # station selection section
+        config_bar.addWidget(self.lb_station_selection, 0, 18, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 18, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 18, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 18, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_6, 0, 19, 4, 1, QtCore.Qt.AlignLeft)
+
+        # layout section
+        config_bar.addWidget(self.lb_layout_selection, 0, 20, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_1, 1, 20, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_2, 1, 21, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_3, 2, 20, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_4, 2, 21, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_position_5, 2, 22, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
@@ -480,6 +517,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # enable FILTER button
         self.bu_screen.clicked.connect(self.mpl_canvas.handle_data_filter_update)
+
+        # enable activating the resampling
+        self.cb_resampling_switch.clicked.connect(self.mpl_canvas.handle_resampling_update)
 
         # enable updating of map z statistic
         self.cb_z_stat.currentTextChanged.connect(self.mpl_canvas.handle_map_z_statistic_update)
