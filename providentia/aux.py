@@ -1266,8 +1266,14 @@ def get_basic_metadata(instance):
                                              instance.resolution, speci, speci)
 
         # get relevant files
-        relevant_files = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in instance.yearmonths])
-    
+        relevant_files_before_filter = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in instance.yearmonths])
+        relevant_files = copy.deepcopy(relevant_files_before_filter)
+
+        # drop files if they don't exist
+        for file in relevant_files_before_filter:
+            if not os.path.exists(file):
+                relevant_files.remove(file)
+
         # if have 0 files to read for networkspeci, then drop networkspeci
         if len(relevant_files) == 0:
             if networkspeci in instance.networkspecies:
