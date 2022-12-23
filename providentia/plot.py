@@ -696,7 +696,7 @@ class Plot:
         # get marker size
         if (first_data_label) and (self.read_instance.offline):
             self.get_markersize(relevant_axis, 'map', networkspeci, plot_characteristics)
-        
+
         # plot new station points on map - coloured by currently active z statisitic
         self.stations_scatter = relevant_axis.scatter(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds], 
                                                       self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds], 
@@ -1970,8 +1970,8 @@ class Plot:
                 n_points = len(self.read_instance.station_longitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds])
                 
                 # calculate figure area and density
-                # divide area by 10000 so the function below makes sense
-                area = (relevant_axis.bbox.width * relevant_axis.bbox.height) / 10000
+                # divide area by 1000 so the function below makes sense
+                area = (relevant_axis.bbox.width * relevant_axis.bbox.height) / 1000
                 density = n_points / area
 
                 # marker size is calculated using an exponential equation
