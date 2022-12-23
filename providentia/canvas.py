@@ -28,6 +28,7 @@ import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
+from .dashboard_aux import formatting_dict, set_formatting
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
@@ -240,6 +241,11 @@ class MPLCanvas(FigureCanvas):
             self.filter_data.filter_all()
             self.update_active_map()
         QtWidgets.QApplication.restoreOverrideCursor()
+
+        return None
+
+    def handle_resampling_update(self):
+        """ Function which handles updates of resampling. """
 
         return None
 
@@ -1401,26 +1407,24 @@ class MPLCanvas(FigureCanvas):
 
         # MAP SETTINGS MENU #
         # add button to map to show and hide settings menu
-        self.map_menu_button = QtWidgets.QPushButton(self)
+        self.map_menu_button = set_formatting(QtWidgets.QPushButton(self), 
+                                              formatting_dict['settings_icon'])
         self.map_menu_button.setObjectName('map_menu_button')
         self.map_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.map_menu_button.setIconSize(QtCore.QSize(31, 35))
-        self.map_menu_button.setStyleSheet("QPushButton { border: None;} "
-                                           "QPushButton:hover { border: None; }")
         self.map_menu_button.hide()
 
         # add white container
-        self.map_container = QtWidgets.QWidget(self)
-        self.map_container.setStyleSheet("QWidget { padding: 5px; background-color: white; "
-                                         "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
+        self.map_container = set_formatting(QtWidgets.QWidget(self), 
+                                            formatting_dict['settings_container'])
         self.map_container.setGeometry(self.map_menu_button.geometry().x()-210,
                                        self.map_menu_button.geometry().y()+35, 
                                        235, 460)
         self.map_container.hide()
 
         # add settings label
-        self.map_settings_label = QtWidgets.QLabel("Settings", self)
-        self.map_settings_label.setStyleSheet("QLabel { font-weight: bold; }")
+        self.map_settings_label = set_formatting(QtWidgets.QLabel("Settings", self), 
+                                                 formatting_dict['settings_label'])
         self.map_settings_label.setGeometry(self.map_menu_button.geometry().x()-200, 
                                             self.map_menu_button.geometry().y()+35, 
                                             200, 20)
@@ -1588,12 +1592,11 @@ class MPLCanvas(FigureCanvas):
             self.options.append(self.map_options[option])
 
         # add map figure save button
-        self.map_save_button = QtWidgets.QPushButton(self)
+        self.map_save_button = set_formatting(QtWidgets.QPushButton(self), 
+                                              formatting_dict['settings_icon'])
         self.map_save_button.setObjectName('map_save_button')
         self.map_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         self.map_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.map_save_button.setStyleSheet("QPushButton { border: None; }"
-                                           "QPushButton:hover { border: None; }")
         self.map_save_button.hide()
 
         # set show/hide actions
@@ -1631,26 +1634,24 @@ class MPLCanvas(FigureCanvas):
 
         # TIMESERIES PLOT SETTINGS MENU #
         # add button to timeseries to show and hide settings menu
-        self.timeseries_menu_button = QtWidgets.QPushButton(self)
+        self.timeseries_menu_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                     formatting_dict['settings_icon'])
         self.timeseries_menu_button.setObjectName('timeseries_menu_button')
         self.timeseries_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.timeseries_menu_button.setIconSize(QtCore.QSize(31, 35))
-        self.timeseries_menu_button.setStyleSheet("QPushButton { border: None; }"
-                                                  "QPushButton:hover { border: None; }")
         self.timeseries_menu_button.hide()
 
         # add white container
-        self.timeseries_container = QtWidgets.QWidget(self)
-        self.timeseries_container.setStyleSheet("QWidget { padding: 5px; background-color: white; "
-                                                "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
+        self.timeseries_container = set_formatting(QtWidgets.QWidget(self), 
+                                                   formatting_dict['settings_container'])
         self.timeseries_container.setGeometry(self.timeseries_menu_button.geometry().x()-210,
                                               self.timeseries_menu_button.geometry().y()+25, 
                                               235, 150)
         self.timeseries_container.hide()
 
         # add settings label
-        self.timeseries_settings_label = QtWidgets.QLabel("Settings", self)
-        self.timeseries_settings_label.setStyleSheet("QLabel { font-weight: bold; }")
+        self.timeseries_settings_label = set_formatting(QtWidgets.QLabel("Settings", self), 
+                                                        formatting_dict['settings_label'])
         self.timeseries_settings_label.setGeometry(self.timeseries_menu_button.geometry().x()-200, 
                                                    self.timeseries_menu_button.geometry().y()+25, 
                                                    200, 20)
@@ -1705,12 +1706,11 @@ class MPLCanvas(FigureCanvas):
             self.options.append(self.timeseries_options[option])
 
         # add timeseries figure save button
-        self.timeseries_save_button = QtWidgets.QPushButton(self)
+        self.timeseries_save_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                     formatting_dict['settings_icon'])
         self.timeseries_save_button.setObjectName('timeseries_save_button')
         self.timeseries_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         self.timeseries_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.timeseries_save_button.setStyleSheet("QPushButton { border: None; }"
-                                                  "QPushButton:hover { border: None; }")
         self.timeseries_save_button.hide()
 
         # set show/hide actions
@@ -1730,26 +1730,24 @@ class MPLCanvas(FigureCanvas):
 
         # PERIODIC PLOT SETTINGS MENU #
         # add button to periodic plot to show and hide settings menu
-        self.periodic_menu_button = QtWidgets.QPushButton(self)
+        self.periodic_menu_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                   formatting_dict['settings_icon'])
         self.periodic_menu_button.setObjectName('periodic_menu_button')
         self.periodic_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.periodic_menu_button.setIconSize(QtCore.QSize(31, 35))
-        self.periodic_menu_button.setStyleSheet("QPushButton { border: None; } "
-                                                "QPushButton:hover { border: None; }")
         self.periodic_menu_button.hide()
 
         # add white container
-        self.periodic_container = QtWidgets.QWidget(self)
-        self.periodic_container.setStyleSheet("QWidget { padding: 5px; background-color: white; "
-                                              "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
+        self.periodic_container = set_formatting(QtWidgets.QWidget(self), 
+                                                 formatting_dict['settings_container'])
         self.periodic_container.setGeometry(self.periodic_menu_button.geometry().x()-220, 
                                             self.periodic_menu_button.geometry().y()+25, 
                                             235, 200)
         self.periodic_container.hide()
 
         # add settings label
-        self.periodic_settings_label = QtWidgets.QLabel("Settings", self)
-        self.periodic_settings_label.setStyleSheet("QLabel { font-weight: bold; }")
+        self.periodic_settings_label = set_formatting(QtWidgets.QLabel("Settings", self), 
+                                                      formatting_dict['settings_label'])
         self.periodic_settings_label.setGeometry(self.periodic_menu_button.geometry().x()-210, 
                                                  self.periodic_menu_button.geometry().y()+25, 
                                                  200, 20)
@@ -1823,12 +1821,11 @@ class MPLCanvas(FigureCanvas):
             self.options.append(self.periodic_options[option])
 
         # add periodic figure save button
-        self.periodic_save_button = QtWidgets.QPushButton(self)
+        self.periodic_save_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                   formatting_dict['settings_icon'])
         self.periodic_save_button.setObjectName('periodic_save_button')
         self.periodic_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         self.periodic_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.periodic_save_button.setStyleSheet("QPushButton { border: None; }"
-                                                "QPushButton:hover { border: None; }")
         self.periodic_save_button.hide()
 
         # set show/hide actions
@@ -1851,26 +1848,24 @@ class MPLCanvas(FigureCanvas):
 
         # PERIODIC VIOLIN PLOT SETTINGS MENU #
         # add button to periodic violin plot to show and hide settings menu
-        self.periodic_violin_menu_button = QtWidgets.QPushButton(self)
+        self.periodic_violin_menu_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                          formatting_dict['settings_icon'])
         self.periodic_violin_menu_button.setObjectName('periodic_violin_menu_button')
         self.periodic_violin_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.periodic_violin_menu_button.setIconSize(QtCore.QSize(31, 35))
-        self.periodic_violin_menu_button.setStyleSheet("QPushButton { border: None; } "
-                                                       "QPushButton:hover { border: None; }")
         self.periodic_violin_menu_button.hide()
 
         # add white container
-        self.periodic_violin_container = QtWidgets.QWidget(self)
-        self.periodic_violin_container.setStyleSheet("QWidget { padding: 5px; background-color: white; "
-                                                     "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
+        self.periodic_violin_container = set_formatting(QtWidgets.QWidget(self), 
+                                                        formatting_dict['settings_container'])
         self.periodic_violin_container.setGeometry(self.periodic_violin_menu_button.geometry().x()-210, 
                                                    self.periodic_violin_menu_button.geometry().y()+25, 
                                                    235, 200)
         self.periodic_violin_container.hide()
 
         # add settings label
-        self.periodic_violin_settings_label = QtWidgets.QLabel("Settings", self)
-        self.periodic_violin_settings_label.setStyleSheet("QLabel { font-weight: bold; }")
+        self.periodic_violin_settings_label = set_formatting(QtWidgets.QLabel("Settings", self), 
+                                                             formatting_dict['settings_label'])
         self.periodic_violin_settings_label.setGeometry(self.periodic_violin_menu_button.geometry().x()-200,
                                                         self.periodic_violin_menu_button.geometry().y()+25, 
                                                         200, 20)
@@ -1944,12 +1939,11 @@ class MPLCanvas(FigureCanvas):
             self.options.append(self.periodic_violin_options[option])
 
         # add periodic violin figure save button
-        self.periodic_violin_save_button = QtWidgets.QPushButton(self)
+        self.periodic_violin_save_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                          formatting_dict['settings_icon'])
         self.periodic_violin_save_button.setObjectName('periodic_violin_save_button')
         self.periodic_violin_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         self.periodic_violin_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.periodic_violin_save_button.setStyleSheet("QPushButton { border: None; }"
-                                                       "QPushButton:hover { border: None; }")
         self.periodic_violin_save_button.hide()
 
         # set show/hide actions
@@ -1972,26 +1966,24 @@ class MPLCanvas(FigureCanvas):
 
         # METADATA PLOT SETTINGS MENU #
         # add button to metadata plot to show and hide settings menu
-        self.metadata_menu_button = QtWidgets.QPushButton(self)
+        self.metadata_menu_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                   formatting_dict['settings_icon'])
         self.metadata_menu_button.setObjectName('metadata_menu_button')
         self.metadata_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.metadata_menu_button.setIconSize(QtCore.QSize(31, 35))
-        self.metadata_menu_button.setStyleSheet("QPushButton { border: None; }"
-                                                "QPushButton:hover { border: None; }")
         self.metadata_menu_button.hide()
 
         # add white container
-        self.metadata_container = QtWidgets.QWidget(self)
-        self.metadata_container.setStyleSheet("QWidget { padding: 5px; background-color: white; "
-                                              "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
+        self.metadata_container = set_formatting(QtWidgets.QWidget(self), 
+                                                 formatting_dict['settings_container'])
         self.metadata_container.setGeometry(self.metadata_menu_button.geometry().x()-210,
                                             self.metadata_menu_button.geometry().y()+25, 
                                             235, 75)
         self.metadata_container.hide()
 
         # add settings label
-        self.metadata_settings_label = QtWidgets.QLabel("Settings", self)
-        self.metadata_settings_label.setStyleSheet("QLabel { font-weight: bold; }")
+        self.metadata_settings_label = set_formatting(QtWidgets.QLabel("Settings", self), 
+                                                      formatting_dict['settings_label'])
         self.metadata_settings_label.setGeometry(self.metadata_menu_button.geometry().x()-200, 
                                                  self.metadata_menu_button.geometry().y()+25, 
                                                  200, 20)
@@ -2027,12 +2019,11 @@ class MPLCanvas(FigureCanvas):
             self.options.append(self.metadata_options[option])
 
         # add metadata figure save button
-        self.metadata_save_button = QtWidgets.QPushButton(self)
+        self.metadata_save_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                   formatting_dict['settings_icon'])
         self.metadata_save_button.setObjectName('metadata_save_button')
         self.metadata_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         self.metadata_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.metadata_save_button.setStyleSheet("QPushButton { border: None; }"
-                                                "QPushButton:hover { border: None; }")
         self.metadata_save_button.hide()
 
         # set show/hide actions
@@ -2050,26 +2041,24 @@ class MPLCanvas(FigureCanvas):
 
         # DISTRIBUTION PLOT SETTINGS MENU #
         # add button to distribution plot to show and hide settings menu
-        self.distribution_menu_button = QtWidgets.QPushButton(self)
+        self.distribution_menu_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                       formatting_dict['settings_icon'])
         self.distribution_menu_button.setObjectName('distribution_menu_button')
         self.distribution_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.distribution_menu_button.setIconSize(QtCore.QSize(31, 35))
-        self.distribution_menu_button.setStyleSheet("QPushButton { border: None; }"
-                                                    "QPushButton:hover { border: None; }")
         self.distribution_menu_button.hide()
 
         # add white container
-        self.distribution_container = QtWidgets.QWidget(self)
-        self.distribution_container.setStyleSheet("QWidget { padding: 5px; background-color: white; "
-                                                  "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
+        self.distribution_container = set_formatting(QtWidgets.QWidget(self), 
+                                                     formatting_dict['settings_container'])
         self.distribution_container.setGeometry(self.distribution_menu_button.geometry().x()-210,
                                                 self.distribution_menu_button.geometry().y()+25, 
                                                 235, 150)
         self.distribution_container.hide()
 
         # add settings label
-        self.distribution_settings_label = QtWidgets.QLabel("Settings", self)
-        self.distribution_settings_label.setStyleSheet("QLabel { font-weight: bold; }")
+        self.distribution_settings_label = set_formatting(QtWidgets.QLabel("Settings", self), 
+                                                          formatting_dict['settings_label'])
         self.distribution_settings_label.setGeometry(self.distribution_menu_button.geometry().x()-200, 
                                                      self.distribution_menu_button.geometry().y()+25, 
                                                      200, 20)
@@ -2124,12 +2113,11 @@ class MPLCanvas(FigureCanvas):
             self.options.append(self.distribution_options[option])
 
         # add distribution figure save button
-        self.distribution_save_button = QtWidgets.QPushButton(self)
+        self.distribution_save_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                       formatting_dict['settings_icon'])
         self.distribution_save_button.setObjectName('distribution_save_button')
         self.distribution_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         self.distribution_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.distribution_save_button.setStyleSheet("QPushButton { border: None; }"
-                                                    "QPushButton:hover { border: None; }")
         self.distribution_save_button.hide()
 
         # set show/hide actions
@@ -2149,26 +2137,24 @@ class MPLCanvas(FigureCanvas):
 
         # SCATTER PLOT SETTINGS MENU #
         # add button to scatter plot to show and hide settings menu
-        self.scatter_menu_button = QtWidgets.QPushButton(self)
+        self.scatter_menu_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                  formatting_dict['settings_icon'])
         self.scatter_menu_button.setObjectName('scatter_menu_button')
         self.scatter_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.scatter_menu_button.setIconSize(QtCore.QSize(31, 35))
-        self.scatter_menu_button.setStyleSheet("QPushButton { border: None; }"
-                                               "QPushButton:hover { border: None; }")
         self.scatter_menu_button.hide()
 
         # add white container
-        self.scatter_container = QtWidgets.QWidget(self)
-        self.scatter_container.setStyleSheet("QWidget { padding: 5px; background-color: white; "
-                                             "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
+        self.scatter_container = set_formatting(QtWidgets.QWidget(self),
+                                                formatting_dict['settings_container'])
         self.scatter_container.setGeometry(self.scatter_menu_button.geometry().x()-210,
                                            self.scatter_menu_button.geometry().y()+25, 
                                            235, 150)
         self.scatter_container.hide()
 
         # add settings label
-        self.scatter_settings_label = QtWidgets.QLabel("Settings", self)
-        self.scatter_settings_label.setStyleSheet("QLabel { font-weight: bold; }")
+        self.scatter_settings_label = set_formatting(QtWidgets.QLabel("Settings", self), 
+                                                     formatting_dict['settings_label'])
         self.scatter_settings_label.setGeometry(self.scatter_menu_button.geometry().x()-200, 
                                                 self.scatter_menu_button.geometry().y()+25, 
                                                 200, 20)
@@ -2223,12 +2209,10 @@ class MPLCanvas(FigureCanvas):
             self.options.append(self.scatter_options[option])
 
         # add scatter figure save button
-        self.scatter_save_button = QtWidgets.QPushButton(self)
+        self.scatter_save_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
         self.scatter_save_button.setObjectName('scatter_save_button')
         self.scatter_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         self.scatter_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.scatter_save_button.setStyleSheet("QPushButton { border: None; }"
-                                               "QPushButton:hover { border: None; }")
         self.scatter_save_button.hide()
 
         # set show/hide actions
@@ -2248,26 +2232,22 @@ class MPLCanvas(FigureCanvas):
 
         # STATSUMMARY PLOT SETTINGS MENU #
         # add button to statsummary plot to show and hide settings menu
-        self.statsummary_menu_button = QtWidgets.QPushButton(self)
+        self.statsummary_menu_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
         self.statsummary_menu_button.setObjectName('statsummary_menu_button')
         self.statsummary_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.statsummary_menu_button.setIconSize(QtCore.QSize(31, 35))
-        self.statsummary_menu_button.setStyleSheet("QPushButton { border: None; }"
-                                                   "QPushButton:hover { border: None; }")
         self.statsummary_menu_button.hide()
 
         # add white container
-        self.statsummary_container = QtWidgets.QWidget(self)
-        self.statsummary_container.setStyleSheet("QWidget { padding: 5px; background-color: white; "
-                                                 "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
+        self.statsummary_container = set_formatting(QtWidgets.QWidget(self), formatting_dict['settings_container'])
         self.statsummary_container.setGeometry(self.statsummary_menu_button.geometry().x()-210,
                                                self.statsummary_menu_button.geometry().y()+25, 
                                                235, 75)
         self.statsummary_container.hide()
 
         # add settings label
-        self.statsummary_settings_label = QtWidgets.QLabel("Settings", self)
-        self.statsummary_settings_label.setStyleSheet("QLabel { font-weight: bold; }")
+        self.statsummary_settings_label = set_formatting(QtWidgets.QLabel("Settings", self), 
+                                                                          formatting_dict['settings_label'])
         self.statsummary_settings_label.setGeometry(self.statsummary_menu_button.geometry().x()-200, 
                                                     self.statsummary_menu_button.geometry().y()+25, 
                                                     200, 20)
@@ -2303,12 +2283,10 @@ class MPLCanvas(FigureCanvas):
             self.options.append(self.statsummary_options[option])
 
         # add statsummary figure save button
-        self.statsummary_save_button = QtWidgets.QPushButton(self)
+        self.statsummary_save_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
         self.statsummary_save_button.setObjectName('statsummary_save_button')
         self.statsummary_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         self.statsummary_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.statsummary_save_button.setStyleSheet("QPushButton { border: None; }"
-                                               "QPushButton:hover { border: None; }")
         self.statsummary_save_button.hide()
 
         # set show/hide actions
@@ -2326,26 +2304,22 @@ class MPLCanvas(FigureCanvas):
 
         # BOXPLOT PLOT SETTINGS MENU #
         # add button to boxplot to show and hide settings menu
-        self.boxplot_menu_button = QtWidgets.QPushButton(self)
+        self.boxplot_menu_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
         self.boxplot_menu_button.setObjectName('boxplot_menu_button')
         self.boxplot_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.boxplot_menu_button.setIconSize(QtCore.QSize(31, 35))
-        self.boxplot_menu_button.setStyleSheet("QPushButton { border: None; }"
-                                               "QPushButton:hover { border: None; }")
         self.boxplot_menu_button.hide()
 
         # add white container
-        self.boxplot_container = QtWidgets.QWidget(self)
-        self.boxplot_container.setStyleSheet("QWidget { padding: 5px; background-color: white; "
-                                             "border: 1px solid; border-color: lightgrey; border-radius: 5px; }")
+        self.boxplot_container = set_formatting(QtWidgets.QWidget(self), formatting_dict['settings_container'])
         self.boxplot_container.setGeometry(self.boxplot_menu_button.geometry().x()-210,
                                            self.boxplot_menu_button.geometry().y()+25, 
                                            235, 100)
         self.boxplot_container.hide()
 
         # add settings label
-        self.boxplot_settings_label = QtWidgets.QLabel("Settings", self)
-        self.boxplot_settings_label.setStyleSheet("QLabel { font-weight: bold; }")
+        self.boxplot_settings_label = set_formatting(QtWidgets.QLabel("Settings", self), 
+                                                     formatting_dict['settings_label'])
         self.boxplot_settings_label.setGeometry(self.boxplot_menu_button.geometry().x()-200, 
                                                 self.boxplot_menu_button.geometry().y()+25, 
                                                 200, 20)
@@ -2381,12 +2355,10 @@ class MPLCanvas(FigureCanvas):
             self.options.append(self.boxplot_options[option])
 
         # add boxplot figure save button
-        self.boxplot_save_button = QtWidgets.QPushButton(self)
+        self.boxplot_save_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
         self.boxplot_save_button.setObjectName('boxplot_save_button')
         self.boxplot_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         self.boxplot_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.boxplot_save_button.setStyleSheet("QPushButton { border: None; }"
-                                               "QPushButton:hover { border: None; }")
         self.boxplot_save_button.hide()
 
         # set show/hide actions
