@@ -10,40 +10,70 @@ from PyQt5 import QtGui
 from .aux import update_filter_species
 
 # setup dictionary characterising formats for all GUI window objects (i.e. buttons, titles etc.)
-formatting_dict = {'title_menu':               {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20, 'bold':True},
-                   'label_menu':               {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
-                   'button_menu':              {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
-                   'checkbox_menu':            {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
-                   'combobox_menu':            {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
-                   'lineedit_menu':            {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
-                   'title_popup':              {'font':QtGui.QFont("SansSerif", 13),  'colour':'black', 'height':23, 'bold':True},
-                   'subtitle_popup':           {'font':QtGui.QFont("SansSerif", 11),  'colour':'black', 'height':23, 'bold':True},
-                   'button_popup':             {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
-                   'navigation_button_popup':  {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':20},
-                   'checkbox_popup':           {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18},
-                   'rangebox_label_popup':     {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18},
-                   'rangebox_popup':           {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18, 'max_width':90},
-                   'multispecies_popup':       {'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18},
-                   'column_header_label_popup':{'font':QtGui.QFont("SansSerif", 9.5), 'colour':'black', 'height':18, 'italic':True},
-                   'tooltip':                  {'font':QtGui.QFont("SansSerif", 8)}
+formatting_dict = {'title_menu':               {'font': {'style': 'SansSerif', 'size': 9.5, "bold": True}, 
+                                                'height': 20, 'color': 'black'},
+                   'label_menu':               {'font': {'style': 'SansSerif', 'size': 9.5},
+                                                 'height': 20, 'color': 'black'},
+                   'button_menu':              {'font': {'style': 'SansSerif', 'size': 9.5}, 
+                                                'height': 20, 'color': 'black', 'background-color': 'white'},
+                   'checkbox_menu':            {'font': {'style': 'SansSerif', 'size': 9.5},
+                                                'height': 20, 'color': 'black'},
+                   'combobox_menu':            {'font': {'style': 'SansSerif', 'size': 9.5},
+                                                'height': 20, 'color': 'black', 'background-color': 'white', 
+                                                'selection-color': 'white', 'selection-background-color': 'black'},
+                   'lineedit_menu':            {'font': {'style': 'SansSerif', 'size': 9.5},
+                                                 'height': 20, 'color': 'black'},
+                   'switch_menu':              {'font': {'style': 'SansSerif', 'size': 9},
+                                                'height': 15, 'width': 65, 'color': 'black', 
+                                                'border': {'colour': 'white', 'size': 1}},
+                   'title_popup':              {'font': {'style': 'SansSerif', 'size': 13, "bold": True}, 
+                                                'height': 23, 'color': 'black'},
+                   'subtitle_popup':           {'font': {'style': 'SansSerif', 'size': 11, "bold": True},  
+                                                'height': 23, 'color': 'black'},
+                   'button_popup':             {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 20, 
+                                                'color': 'black'},
+                   'navigation_button_popup':  {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 20, 
+                                                'color': 'black'},
+                   'checkbox_popup':           {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 18, 
+                                                'color': 'black'},
+                   'rangebox_label_popup':     {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 18, 
+                                                'color': 'black'},
+                   'rangebox_popup':           {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 18, 
+                                                'max_width': 90, 'color': 'black'},
+                   'multispecies_popup':       {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 18, 
+                                                'color': 'black'},
+                   'column_header_label_popup':{'font': {'style': 'SansSerif', 'size': 9.5, 'italic': True}, 
+                                                'height': 18, 'color': 'black'},
+                   'tooltip':                  {'font': {'style': 'SansSerif', 'size': 8}},
+                   'settings_container':       {'background-color': 'white', 
+                                                'border': {'colour': 'lightgrey', 'size': 1}, 
+                                                'border-radius': 5, 'padding': 5},
+                   'settings_icon':            {'border': None},
+                   'settings_label':           {'font': {'style': 'SansSerif', 'size': 9.5, 'bold': True}}
                    }
 
 def set_formatting(PyQt5_obj, formats):
     """ Function that takes a PyQt5 object and applies some defined formatting. """
 
-    # first get defined font for object
-    defined_font = formats['font']
+    # initialise style
+    defined_style = ""
 
     # iterate through formats dictionary and apply defined font modifiers/object formatting values
     for format_name, format_val in formats.items():
-        if format_name == 'bold':
-            defined_font.setBold(format_val)
+        if format_name == 'font':
+            
+            defined_font = QtGui.QFont(formats['font']['style'], formats['font']['size'])
 
-        if format_name == 'italic':
-            defined_font.setItalic(format_val)
+            if 'bold' in formats[format_name].keys():
+                defined_font.setBold(formats['font']['bold'])
+            
+            if 'italic' in formats[format_name].keys():
+                defined_font.setItalic(formats['font']['italic'])
 
-        elif format_name == 'underline':
-            defined_font.setUnderline(format_val)
+            if 'underline' in formats[format_name].keys():
+                defined_font.setUnderline(formats['font']['underline'])
+
+            PyQt5_obj.setFont(defined_font)
 
         elif format_name == 'height':
             PyQt5_obj.setFixedHeight(format_val)
@@ -63,13 +93,34 @@ def set_formatting(PyQt5_obj, formats):
         elif format_name == 'max_width':
             PyQt5_obj.setMaximumWidth(format_val)
 
-        elif format_name == 'colour':
-            PyQt5_obj.setStyleSheet("color: {};".format(format_val))
+        elif format_name == 'color':
+            defined_style += "color: {};".format(format_val)
 
-    # now apply font to object
-    PyQt5_obj.setFont(defined_font)
+        elif format_name == 'background-color':
+            defined_style += "background-color: {};".format(format_val)
 
-    # return modified PyQt5 object
+        elif format_name == 'selection-color':
+            defined_style += "selection-color: {};".format(format_val)
+
+        elif format_name == 'selection-background-color':
+            defined_style += "selection-background-color: {};".format(format_val)
+
+        elif format_name == 'border':
+            if format_val is not None:
+                defined_style += "border: {}px solid {};".format(formats['border']['size'], 
+                                                                 formats['border']['colour'])
+            else:
+                defined_style += "border: None;"
+
+        elif format_name == 'border-radius':
+            defined_style += "border-radius: {}px;".format(format_val)
+
+        elif format_name == 'padding':
+            defined_style += "padding: {}px;".format(format_val)
+
+    # apply style sheet
+    PyQt5_obj.setStyleSheet(defined_style)
+
     return PyQt5_obj
 
 def wrap_tooltip_text(tooltip_text, max_width):
@@ -108,6 +159,50 @@ class QVLine(QtWidgets.QFrame):
         self.setFrameShape(QtWidgets.QFrame.VLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
+class Switch(QtWidgets.QPushButton):
+    """ Define class that generates switch buttons. """
+
+    def __init__(self, parent=None):
+        super(Switch, self).__init__(parent)
+        self.setCheckable(True)
+
+    def paintEvent(self, event):
+
+        # set switch properties
+        radius = 10
+        width = 25
+        painter = QtGui.QPainter(self)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        painter.translate(self.rect().center())
+
+        # add grey border to switch main box
+        painter.setPen(QtGui.QPen(QtCore.Qt.gray))
+
+        # set white background
+        painter.setBrush(QtCore.Qt.white)
+        painter.drawRoundedRect(QtCore.QRect(-width, -radius, 2*width, 2*radius), radius, radius)
+
+        # set colours and labels on switch
+        label = "ON" if self.isChecked() else "OFF"
+        bg_colour = QtCore.Qt.black if self.isChecked() else QtCore.Qt.gray
+        text_colour = QtCore.Qt.white if self.isChecked() else QtCore.Qt.black
+
+        # set switch background color
+        painter.setBrush(QtGui.QBrush(bg_colour))
+
+        # remove switch border color
+        painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+
+        # change position depending on check
+        sw_rect = QtCore.QRect(-radius, -radius, width + radius, 2*radius)
+        if not self.isChecked():
+            sw_rect.moveLeft(-width)
+        painter.drawRoundedRect(sw_rect, radius, radius)
+
+        # add label (ON / OFF)
+        painter.setPen(QtGui.QPen(text_colour))
+        painter.drawText(sw_rect, QtCore.Qt.AlignCenter, label)
+
 class PopUpWindow(QtWidgets.QWidget):
     """ Class that generates generalised pop-up window. """
 
@@ -127,7 +222,8 @@ class PopUpWindow(QtWidgets.QWidget):
         self.generate_window()
 
         # define stylesheet for tooltips
-        self.setStyleSheet("QToolTip { font: %spt %s}"%(formatting_dict['tooltip']['font'].pointSizeF(), formatting_dict['tooltip']['font'].family()))
+        self.setStyleSheet("QToolTip { font: %spt %s}" % (formatting_dict['tooltip']['font']['size'],
+                                                          formatting_dict['tooltip']['font']['style']))
 
     def generate_window(self):
         """ Generate GUI window for current menu level. """
@@ -418,7 +514,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
                 # add label to left of checkboxes / rangeboxes, and also add a tooltip (if exists)
                 if menu_type in ['checkboxes', 'rangeboxes']:
-                    rangebox_label = set_formatting(QtWidgets.QLabel(self, text = label), 
+                    rangebox_label = set_formatting(QtWidgets.QLabel(self, text = str(label)), 
                                                     formatting_dict['rangebox_label_popup'])
                     if menu_type == 'rangeboxes':
                         if len(menu_current_type['tooltips']) > 0:
