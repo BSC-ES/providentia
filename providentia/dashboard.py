@@ -303,45 +303,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
 
-        # resampling section
-        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
-        self.lb_resampling.setToolTip('Set resampling options')
-        self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_resampling_resolution.setFixedWidth(136)
-        self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
-        self.cb_resampling_switch = set_formatting(Switch(self), formatting_dict['switch_menu'])
-        self.cb_resampling_switch.setToolTip('Activate resampling')
-        self.vertical_splitter_3 = QVLine()
-        self.vertical_splitter_3.setMaximumWidth(20)
-
-        # map stat section
-        self.lb_z = set_formatting(QtWidgets.QLabel(self, text="Map Stat"), formatting_dict['title_menu'])
-        self.lb_z.setToolTip('Set plotted map statistic')
-        self.cb_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z_stat.setFixedWidth(125)
-        self.cb_z_stat.AdjustToContents
-        self.cb_z_stat.setToolTip('Select map statistic')
-        self.cb_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z1.setFixedWidth(125)
-        self.cb_z1.AdjustToContents
-        self.cb_z1.setToolTip('Select map dataset 1')
-        self.cb_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z2.setFixedWidth(125)
-        self.cb_z2.AdjustToContents
-        self.cb_z2.setToolTip('Select map dataset 2')
-        self.vertical_splitter_4 = QVLine()
-        self.vertical_splitter_4.setMaximumWidth(20)
-
-        # periodic stat section
-        self.lb_periodic_stat = set_formatting(QtWidgets.QLabel(self, text="Periodic Stat"),
-                                                 formatting_dict['title_menu'])
-        self.lb_periodic_stat.setToolTip('Set plotted periodic statistic')
-        self.cb_periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_periodic_stat.setFixedWidth(136)
-        self.cb_periodic_stat.setToolTip('Select periodic statistic')
-        self.vertical_splitter_5 = QVLine()
-        self.vertical_splitter_5.setMaximumWidth(20)
-
         # station selection section
         self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
                                                    formatting_dict['title_menu'])
@@ -355,8 +316,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), formatting_dict['checkbox_menu'])
         self.ch_extent.setToolTip('Select stations that are within the map extent')
         self.ch_extent.setFixedWidth(80)
-        self.vertical_splitter_6 = QVLine()
-        self.vertical_splitter_6.setMaximumWidth(20)
+        self.vertical_splitter_3 = QVLine()
+        self.vertical_splitter_3.setMaximumWidth(20)
+
+        # resampling section
+        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
+        self.lb_resampling.setToolTip('Set resampling options')
+        self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_resampling_resolution.setFixedWidth(100)
+        self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
+        self.cb_resampling_switch = set_formatting(Switch(self), formatting_dict['switch_menu'])
+        self.cb_resampling_switch.setToolTip('Activate/Deactivate resampling')
+        self.vertical_splitter_4 = QVLine()
+        self.vertical_splitter_4.setMaximumWidth(20)
 
         # layout section
         self.lb_layout_selection = set_formatting(QtWidgets.QLabel(self, text="Layout"),
@@ -412,30 +384,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.bu_screen, 3, 9, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_2, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
 
-        # resampling section
-        config_bar.addWidget(self.lb_resampling, 0, 11, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resampling_resolution, 1, 11, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resampling_switch, 0, 12, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 13, 4, 1, QtCore.Qt.AlignLeft)
-
-        # map stat section
-        config_bar.addWidget(self.lb_z, 0, 14, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_z_stat, 1, 14, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_z1, 2, 14, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_z2, 3, 14, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_4, 0, 15, 4, 1, QtCore.Qt.AlignLeft)
-
-        # periodic stat section
-        config_bar.addWidget(self.lb_periodic_stat, 0, 16, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_periodic_stat, 1, 16, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_5, 0, 17, 4, 1, QtCore.Qt.AlignLeft)
-
         # station selection section
-        config_bar.addWidget(self.lb_station_selection, 0, 18, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 18, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_intersect, 2, 18, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_extent, 3, 18, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_6, 0, 19, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_station_selection, 0, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_4, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
+
+        # resampling section
+        config_bar.addWidget(self.lb_resampling, 0, 13, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_resolution, 1, 13, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_switch, 1, 14, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 15, 4, 1, QtCore.Qt.AlignLeft)
 
         # layout section
         config_bar.addWidget(self.lb_layout_selection, 0, 20, QtCore.Qt.AlignLeft)
@@ -448,6 +408,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
+        self.cb_resampling_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
@@ -520,14 +481,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # enable activating the resampling
         self.cb_resampling_switch.clicked.connect(self.mpl_canvas.handle_resampling_update)
-
-        # enable updating of map z statistic
-        self.cb_z_stat.currentTextChanged.connect(self.mpl_canvas.handle_map_z_statistic_update)
-        self.cb_z1.currentTextChanged.connect(self.mpl_canvas.handle_map_z_statistic_update)
-        self.cb_z2.currentTextChanged.connect(self.mpl_canvas.handle_map_z_statistic_update)
-
-        # enable updating of periodic statistic
-        self.cb_periodic_stat.currentTextChanged.connect(self.mpl_canvas.handle_periodic_statistic_update)
 
         # enable interactivity of station selection checkboxes
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
@@ -603,6 +556,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # set initial selected config variables as set .conf files or defaults
             self.selected_network = copy.deepcopy(self.network[0])
             self.selected_resolution = copy.deepcopy(self.resolution)
+            self.selected_resampling_resolution = ''
             self.selected_matrix = self.parameter_dictionary[self.species[0]]['matrix']
             self.selected_species = copy.deepcopy(self.species[0])
 
@@ -635,6 +589,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_resolution.clear()
         self.cb_matrix.clear()
         self.cb_species.clear()
+        self.cb_resampling_resolution.clear()
 
         # if have no available observational data, return from function, updating variable informing that have no data
         if len(self.available_observation_data) == 0:
@@ -668,6 +623,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.cb_resolution.setCurrentText(self.selected_resolution)
         else:
             self.selected_resolution = self.cb_resolution.currentText()
+        
+        # update resampling resolution field
+        resampling_available_resolutions = copy.deepcopy(available_resolutions)[1:]
+        resampling_available_resolutions.append('yearly')
+        self.cb_resampling_resolution.addItems(resampling_available_resolutions)
+        if self.selected_resampling_resolution in resampling_available_resolutions:
+            self.cb_resampling_resolution.setCurrentText(self.selected_resampling_resolution)
+        else:
+            self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
 
         # update matrix field
         available_matrices = sorted(self.available_observation_data[self.selected_network][self.selected_resolution])
@@ -794,6 +758,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.selected_network = changed_param
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
+            elif event_source == self.cb_resampling_resolution:
+                self.selected_resampling_resolution = changed_param
+                self.cb_resampling_switch.setChecked(False)
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
                 self.selected_species = sorted(list(
@@ -1007,6 +974,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
         self.previous_filter_species = {}
+        self.previous_plot_options = {}
+        for plot_type in self.mpl_canvas.all_plots:
+            self.previous_plot_options[plot_type] = []
         
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
@@ -1022,7 +992,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
-        
+
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not akready
         # inform user of this
         if (self.filter_species) and (not self.spatial_colocation):
@@ -1176,6 +1146,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
         self.ch_extent.setCheckState(QtCore.Qt.Unchecked)
+
+        # turn off resampling switch
+        self.cb_resampling_switch.setChecked(False)
 
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
