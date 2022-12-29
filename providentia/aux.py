@@ -187,7 +187,9 @@ def get_relevant_temporal_resolutions(resolution):
         relevant_temporal_resolutions = ['dayofweek', 'month']
     elif resolution == 'monthly':
         relevant_temporal_resolutions = ['month']
-    
+    else:
+        relevant_temporal_resolutions = []
+        
     return relevant_temporal_resolutions
 
 def get_land_polygon_resolution(selection):

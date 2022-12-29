@@ -7,10 +7,10 @@
             "obs_zorder": 5, "obs_markerfacecolor": "black", 
             "experiment_domain_polygon": {"linewidth": 1, "linestyle": "--", "fill": false, "zorder": 2},
             "settings_menu": {"position_1": {"x": 795, "y": 40},
-                              "position_2": {"x": 1795, "y": 100},
+                              "position_2": {"x": 1790, "y": 100},
                               "position_3": {"x": 585, "y": 475},
                               "position_4": {"x": 1185, "y": 475},
-                              "position_5": {"x": 1795, "y": 475}}},
+                              "position_5": {"x": 1790, "y": 475}}},
 
 "legend": {"remove_spines": ["top", "right", "left", "bottom"],
            "xtick_params": {"which": "both", "bottom": false, "top": false, "right": false, "left": false, 
