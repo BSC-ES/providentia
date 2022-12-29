@@ -123,7 +123,6 @@ class DataReader:
 
             # filter data (if active)
             if self.read_instance.filter_species:
-                
                 self.read_instance.filter_data_in_memory = {networkspeci: 
                                                             np.full((len(self.read_instance.station_references[networkspeci]),
                                                                      len(self.read_instance.time_array)),
