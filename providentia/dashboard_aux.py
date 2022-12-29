@@ -24,7 +24,7 @@ formatting_dict = {'title_menu':               {'font': {'style': 'SansSerif', '
                    'lineedit_menu':            {'font': {'style': 'SansSerif', 'size': 9.5},
                                                  'height': 20, 'color': 'black'},
                    'switch_menu':              {'font': {'style': 'SansSerif', 'size': 9},
-                                                'height': 15, 'width': 65, 'color': 'black', 
+                                                'height': 20, 'width': 50, 'color': 'black', 
                                                 'border': {'colour': 'white', 'size': 1}},
                    'title_popup':              {'font': {'style': 'SansSerif', 'size': 13, "bold": True}, 
                                                 'height': 23, 'color': 'black'},
@@ -146,10 +146,135 @@ class ComboBox(QtWidgets.QComboBox):
         position box postion, stopping truncation of data. """
 
     def showPopup(self):
-        """Shows popups"""
+        """ Shows popups. """
+
         QtWidgets.QComboBox.showPopup(self)
         self.view().parent().move(self.mapToGlobal(QtCore.QPoint()))
         #self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+
+class CheckableComboBox(QtWidgets.QComboBox):
+    """ Create combobox with multiple selection options.
+        Reference: https://gis.stackexchange.com/questions/350148/qcombobox-multiple-selection-pyqt5. 
+    """
+    
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        # make the combo editable to set a custom text, but readonly
+        self.setEditable(True)
+        self.lineEdit().setPlaceholderText('Select option/s:')
+        self.lineEdit().setReadOnly(True)
+
+        # make the lineedit the same color as QPushButton
+        palette = QtWidgets.QApplication.palette()
+        palette.setBrush(QtGui.QPalette.Base, palette.button())
+        self.lineEdit().setPalette(palette)
+
+        # update the text when an item is toggled
+        self.model().dataChanged.connect(self.updateText)
+
+        # hide and show popup when clicking the line edit
+        self.lineEdit().installEventFilter(self)
+        self.closeOnLineEditClick = False
+
+        # prevent popup from closing when clicking on an item
+        self.view().viewport().installEventFilter(self)
+
+    def resizeEvent(self, event):
+
+        # recompute text to elide as needed
+        self.updateText()
+        super().resizeEvent(event)
+
+    def eventFilter(self, object, event):
+
+        if object == self.lineEdit():
+            if event.type() == QtCore.QEvent.MouseButtonRelease:
+                if self.closeOnLineEditClick:
+                    self.hidePopup()
+                else:
+                    self.showPopup()
+                return True
+            return False
+
+        if object == self.view().viewport():
+            if event.type() == QtCore.QEvent.MouseButtonRelease:
+                index = self.view().indexAt(event.pos())
+                item = self.model().item(index.row())
+
+                if item.checkState() == QtCore.Qt.Checked:
+                    item.setCheckState(QtCore.Qt.Unchecked)
+                else:
+                    item.setCheckState(QtCore.Qt.Checked)
+                return True
+        return False
+
+    def showPopup(self):
+
+        super().showPopup()
+
+        # when the popup is displayed, a click on the lineedit should close it
+        self.closeOnLineEditClick = True
+
+    def hidePopup(self):
+        
+        super().hidePopup()
+        
+        # used to prevent immediate reopening when clicking on the lineEdit
+        self.startTimer(100)
+        
+        # refresh the display text when closing
+        self.updateText()
+
+    def timerEvent(self, event):
+        
+        # after timeout, kill timer, and reenable click on line edit
+        self.killTimer(event.timerId())
+        self.closeOnLineEditClick = False
+
+    def updateText(self):
+        
+        texts = []
+        for i in range(self.model().rowCount()):
+            if self.model().item(i).checkState() == QtCore.Qt.Checked:
+                texts.append(self.model().item(i).text())
+        text = ", ".join(texts)
+
+        # compute elided text (with "...")
+        metrics = QtGui.QFontMetrics(self.lineEdit().font())
+        elidedText = metrics.elidedText(text, QtCore.Qt.ElideRight, self.lineEdit().width())
+        self.lineEdit().setText(elidedText)
+
+    def addItem(self, text, data=None):
+
+        item = QtGui.QStandardItem()
+        item.setText(text)
+        if data is None:
+            item.setData(text)
+        else:
+            item.setData(data)
+        item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+        item.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
+        self.model().appendRow(item)
+
+    def addItems(self, texts, datalist=None):
+
+        for i, text in enumerate(texts):
+            try:
+                data = datalist[i]
+            except (TypeError, IndexError):
+                data = None
+            self.addItem(text, data)
+
+    def currentData(self):
+        
+        # return the list of selected items data
+        res = []
+        for i in range(self.model().rowCount()):
+            if self.model().item(i).checkState() == QtCore.Qt.Checked:
+                res.append(self.model().item(i).data())
+        return res
 
 class QVLine(QtWidgets.QFrame):
     """ Define class that generates vertical separator line. """
@@ -169,8 +294,8 @@ class Switch(QtWidgets.QPushButton):
     def paintEvent(self, event):
 
         # set switch properties
-        radius = 10
-        width = 25
+        radius = 9
+        width = 20
         painter = QtGui.QPainter(self)
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
         painter.translate(self.rect().center())
