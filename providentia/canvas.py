@@ -325,7 +325,7 @@ class MPLCanvas(FigureCanvas):
 
                                 # update relevant temporal resolutions 
                                 self.read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(resampling_resolution)
-
+                                
                                 # temporally aggregate selected data dataframes (if have periodic plot to make) 
                                 # (by hour, day of week, month)
                                 pandas_temporal_aggregation(read_instance=self.read_instance, canvas_instance=self, 
@@ -350,8 +350,7 @@ class MPLCanvas(FigureCanvas):
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
                     
-                    if plot_type == 'periodic' and not self.read_instance.relevant_temporal_resolutions:
-                        print('not doing periodic')
+                    if (plot_type in ['periodic', 'periodic-violin']) and (not self.read_instance.relevant_temporal_resolutions):
                         print('Warning: Currently it is not possible to get annual periodic plots.')
                         continue
 
