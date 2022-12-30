@@ -639,8 +639,6 @@ class MPLCanvas(FigureCanvas):
                     to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
                                         networkspecies=[self.read_instance.networkspeci])
 
-                print(self.read_instance.relevant_temporal_resolutions)
-                
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
 
