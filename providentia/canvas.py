@@ -58,6 +58,9 @@ class MPLCanvas(FigureCanvas):
         # initialise plot elements
         self.plot_elements = {}
 
+        # initialise resampling
+        self.resampling = False
+
         # add general plot characteristics to self
         for k, val in self.plot_characteristics_templates['general'].items():
             setattr(self, k, val)
@@ -261,107 +264,17 @@ class MPLCanvas(FigureCanvas):
 
                 event_source = self.sender()
 
+                # activate or deactivate resampling option
                 if event_source.isChecked():
-
-                    # read resampling output resolution
-                    resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
-
-                    # transform resolution to code for .resample function
-                    if resampling_resolution in ['hourly', 'hourly_instantaneous']:
-                        temporal_resolution_to_output_code = 'H'
-                    elif resampling_resolution in ['3hourly', '3hourly_instantaneous']:
-                        temporal_resolution_to_output_code = '3H'
-                    elif resampling_resolution in ['6hourly', '6hourly_instantaneous']:
-                        temporal_resolution_to_output_code = '6H'
-                    elif resampling_resolution == 'daily':
-                        temporal_resolution_to_output_code = 'D'
-                    elif resampling_resolution == 'monthly':
-                        temporal_resolution_to_output_code = 'MS'
-                    elif resampling_resolution == 'yearly':
-                        temporal_resolution_to_output_code = 'AS'
-
-                    self.resampled_data_to_output = {}
-
-                    # iterate through networks / species  
-                    for networkspeci_ii, networkspeci in enumerate(self.read_instance.networkspecies):
-                        
-                        self.resampled_data_to_output[networkspeci] = {}
-
-                        # iterate through data labels
-                        for data_label in self.read_instance.data_labels:
-
-                            # get valid station indices
-                            if self.read_instance.temporal_colocation and len(self.read_instance.data_labels) > 1:
-                                self.read_instance.station_inds = np.intersect1d(self.relative_selected_station_inds, 
-                                                                                self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
-                            else:
-                                self.read_instance.station_inds = np.intersect1d(self.relative_selected_station_inds, 
-                                                                                self.read_instance.valid_station_inds[networkspeci][data_label])
-                                    
-                            # get array for specific data label
-                            data_array = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
-                            
-                            # temporally colocate data array
-                            if self.read_instance.temporal_colocation and len(self.read_instance.data_labels) > 1:
-                                data_array[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
-                            
-                            # cut data array for station indices
-                            data_array = data_array[self.read_instance.station_inds,:]
-                            
-                            # if data array has no valid data for selected stations, do not create a pandas dataframe
-                            # data array has valid data and is not all nan?
-                            if data_array.size > 0 and not np.isnan(data_array).all():
-
-                                # add nested dictionary for data label in selected station data dictionary
-                                self.resampled_data_to_output[networkspeci][data_label] = {}
-                                
-                                # take cross station median of selected data for data array, and place it in a pandas dataframe 
-                                self.resampled_data_to_output[networkspeci][data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), 
-                                                                                                                    index=self.read_instance.time_array, 
-                                                                                                                    columns=['data'])
-
-                                # resample data to output resolution
-                                self.selected_station_data[networkspeci][data_label]['pandas_df'] = self.resampled_data_to_output[networkspeci][data_label]['pandas_df'].resample(temporal_resolution_to_output_code, axis=0).mean()
-
-                                # update relevant temporal resolutions 
-                                self.read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(resampling_resolution)
-                                
-                                # temporally aggregate selected data dataframes (if have periodic plot to make) 
-                                # (by hour, day of week, month)
-                                pandas_temporal_aggregation(read_instance=self.read_instance, canvas_instance=self, 
-                                                            networkspeci=networkspeci)
-
-                                # if have some experiment data associated with selected stations, calculate
-                                # temporally aggregated basic statistic differences and bias statistics between
-                                # observations and experiment data arrays
-                                if len(self.selected_station_data[networkspeci]) > 1:
-                                    calculate_temporally_aggregated_experiment_statistic(read_instance=self.read_instance, 
-                                                                                         canvas_instance=self, 
-                                                                                         networkspeci=networkspeci)
-            
+                    self.resampling = True
                 else:
-                    # update relevant temporal resolutions 
-                    self.read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.read_instance.resolution)
+                    self.resampling = False
 
-                    # put selected data for each data array into pandas dataframes
-                    to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
-                                        networkspecies=[self.read_instance.networkspeci])
-
-                # iterate through active_dashboard_plots
-                for plot_type in self.read_instance.active_dashboard_plots:
-                    
-                    if (plot_type in ['periodic', 'periodic-violin']) and (not self.read_instance.relevant_temporal_resolutions):
-                        print('Warning: Currently it is not possible to get annual periodic plots.')
-                        continue
-
-                    # update plot
-                    self.update_associated_active_dashboard_plot(plot_type)
-            
-                # update map plot options
-                self.update_plot_options(plot_types=['map'])
+                # update associated plots with selected stations
+                self.update_associated_active_dashboard_plots()
 
                 # re-draw
-                self.figure.canvas.draw()
+                #self.figure.canvas.draw()
             
             else:
                 print('Warning: Select the data you want to plot before resampling.')
@@ -717,13 +630,23 @@ class MPLCanvas(FigureCanvas):
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
+                
+                if self.resampling:
+                    # put selected data for each data array into resampled pandas dataframe
+                    to_resampled_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self)
+                else:
+                    # put selected data for each data array into pandas dataframes
+                    to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
+                                        networkspecies=[self.read_instance.networkspeci])
 
-                # put selected data for each data array into pandas dataframes
-                to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
-                                    networkspecies=[self.read_instance.networkspeci])
-
+                print(self.read_instance.relevant_temporal_resolutions)
+                
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
+
+                    # if there are no temporal resolutions (only yearly), skip periodic plots
+                    if (plot_type in ['periodic', 'periodic-violin']) and (not self.read_instance.relevant_temporal_resolutions):
+                        print('Warning: Currently it is not possible to get annual periodic plots.')
 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
@@ -1189,12 +1112,6 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
 
-                # turn off resampling switch
-                if self.read_instance.cb_resampling_switch.isChecked():
-                    self.read_instance.block_MPL_canvas_updates = True
-                    self.read_instance.cb_resampling_switch.setChecked(False)
-                    self.read_instance.block_MPL_canvas_updates = False
-
             # if checkbox is unchecked then unselect all plotted stations
             elif check_state == QtCore.Qt.Unchecked:
                 self.relative_selected_station_inds = np.array([], dtype=np.int)
@@ -1285,12 +1202,6 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
 
-                # turn off resampling switch
-                if self.read_instance.cb_resampling_switch.isChecked():
-                    self.read_instance.block_MPL_canvas_updates = True
-                    self.read_instance.cb_resampling_switch.setChecked(False)
-                    self.read_instance.block_MPL_canvas_updates = False
-
             # update map station selection
             self.update_map_station_selection()
 
@@ -1350,12 +1261,6 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
 
-                # turn off resampling switch
-                if self.read_instance.cb_resampling_switch.isChecked():
-                    self.read_instance.block_MPL_canvas_updates = True
-                    self.read_instance.cb_resampling_switch.setChecked(False)
-                    self.read_instance.block_MPL_canvas_updates = False
-
             # if checkbox is unchecked then unselect all plotted stations
             elif check_state == QtCore.Qt.Unchecked:
                 self.relative_selected_station_inds = np.array([], dtype=np.int)
@@ -1400,13 +1305,11 @@ class MPLCanvas(FigureCanvas):
             # lock stations pick
             self.lock_station_pick = True
 
-        # unselect all/intersect checkboxes and turn off resampling switch
+        # unselect all/intersect checkboxes
         self.read_instance.block_MPL_canvas_updates = True
         self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
         self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-        if self.read_instance.cb_resampling_switch.isChecked():
-            self.read_instance.cb_resampling_switch.setChecked(False)
         self.read_instance.block_MPL_canvas_updates = False
 
         # make copy of current full array absolute abd relative selected stations indices, before selecting new ones
@@ -1470,13 +1373,11 @@ class MPLCanvas(FigureCanvas):
         if len(self.active_map_valid_station_inds) == 0:
             return
 
-        # unselect all/intersect checkboxes and turn off resampling switch
+        # unselect all/intersect checkboxes
         self.read_instance.block_MPL_canvas_updates = True
         self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
         self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-        if self.read_instance.cb_resampling_switch.isChecked():
-            self.read_instance.cb_resampling_switch.setChecked(False)
         self.read_instance.block_MPL_canvas_updates = False
 
         # make copy of current full array relative selected stations indices, before selecting new ones
