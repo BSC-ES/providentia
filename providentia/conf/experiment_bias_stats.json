@@ -1,18 +1,49 @@
 {
-"MB":   {"function":"calculate_mb",        "order":0,  "label":"MB",      "arguments":{},                            "minimum_bias":[0.0],                                            "units":"measurement_units", "cmap_bias":"bwr"},
-"NMB":  {"function":"calculate_mb",        "order":1,  "label":"NMB",     "arguments":{"normalisation_type":"mean"}, "minimum_bias":[0.0],                                            "units":"%",                 "cmap_bias":"bwr"},
-"ME":   {"function":"calculate_me",        "order":2,  "label":"ME",      "arguments":{},                            "minimum_bias":[0.0],   "vmin_bias":0.0,                         "units":"measurement_units", "cmap_bias":"Reds"},
-"NME":  {"function":"calculate_me",        "order":3,  "label":"NME",     "arguments":{"normalisation_type":"mean"}, "minimum_bias":[0.0],   "vmin_bias":0.0,                         "units":"%",                 "cmap_bias":"Reds"},
-"MNB":  {"function":"calculate_mnb",       "order":4,  "label":"MNB",     "arguments":{},                            "minimum_bias":[0.0],                                            "units":"%",                 "cmap_bias":"bwr"},
-"MNE":  {"function":"calculate_mne",       "order":5,  "label":"MNE",     "arguments":{},                            "minimum_bias":[0.0],   "vmin_bias":0.0,                         "units":"%",                 "cmap_bias":"Reds"},
-"MFB":  {"function":"calculate_mfb",       "order":6,  "label":"MFB",     "arguments":{},                            "minimum_bias":[0.0],                                            "units":"%",                 "cmap_bias":"bwr"},
-"MFE":  {"function":"calculate_mfe",       "order":7,  "label":"MFE",     "arguments":{},                            "minimum_bias":[0.0],   "vmin_bias":0.0,                         "units":"%",                 "cmap_bias":"Reds"},
-"RMSE": {"function":"calculate_rmse",      "order":8,  "label":"RMSE",    "arguments":{},                            "minimum_bias":[0.0],   "vmin_bias":0.0,                         "units":"measurement_units", "cmap_bias":"Reds"},
-"NRMSE":{"function":"calculate_rmse",      "order":9,  "label":"NRMSE",   "arguments":{"normalisation_type":"mean"}, "minimum_bias":[0.0],   "vmin_bias":0.0,                         "units":"%",                 "cmap_bias":"Reds"},
-"COE":  {"function":"calculate_coe",       "order":10, "label":"COE",     "arguments":{},                            "minimum_bias":[1.0],                       "vmax_bias":1.0,     "units":"",                  "cmap_bias":"Reds"},
-"FAC2": {"function":"calculate_fac2",      "order":11, "label":"FAC2",    "arguments":{},                            "minimum_bias":[100.0],                     "vmax_bias":100.0,   "units":"%",                 "cmap_bias":"Reds"},
-"IOA":  {"function":"calculate_ioa",       "order":12, "label":"IOA",     "arguments":{},                            "minimum_bias":[1.0],   "vmin_bias":-1.0,   "vmax_bias":1.0,     "units":"",                  "cmap_bias":"bwr"},
-"r":    {"function":"calculate_r",         "order":13, "label":"r",       "arguments":{},                            "minimum_bias":[1.0],   "vmin_bias":-1.0,   "vmax_bias":1.0,     "units":"",                  "cmap_bias":"bwr"},
-"r2":   {"function":"calculate_r_squared", "order":14, "label":"r$^{2}$", "arguments":{},                            "minimum_bias":[1.0],   "vmin_bias":0.0,    "vmax_bias":1.0,     "units":"",                  "cmap_bias":"Reds"},
-"UPA":  {"function":"calculate_upa",       "order":15, "label":"UPA",     "arguments":{},                            "minimum_bias":[0.0],                                            "units":"%",                 "cmap_bias":"bwr"}
+    "MB":   {"function": "calculate_mb", "order": 0,  "label": "MB", "arguments": {}, "minimum_bias": [0.0],       
+             "units": "measurement_units", "cmap_bias": "bwr"},
+    
+    "NMB":  {"function": "calculate_mb", "order": 1, "label": "NMB", "arguments": {"normalisation_type": "mean"}, 
+             "minimum_bias": [0.0], "units": "%", "cmap_bias": "bwr"},
+    
+    "ME":   {"function": "calculate_me", "order": 2, "label": "ME", "arguments": {}, "minimum_bias": [0.0], 
+             "vmin_bias": 0.0, "units": "measurement_units", "cmap_bias": "Reds"},
+    
+    "NME":  {"function": "calculate_me", "order": 3, "label": "NME", "arguments": {"normalisation_type": "mean"}, 
+             "minimum_bias": [0.0], "vmin_bias": 0.0, "units": "%", "cmap_bias": "Reds"},
+    
+    "MNB":  {"function": "calculate_mnb", "order": 4, "label": "MNB", "arguments": {}, "minimum_bias": [0.0], 
+             "units": "%", "cmap_bias": "bwr"},
+    
+    "MNE":  {"function": "calculate_mne", "order": 5, "label": "MNE", "arguments": {}, "minimum_bias": [0.0],   
+             "vmin_bias": 0.0, "units": "%", "cmap_bias": "Reds"},
+    
+    "MFB":  {"function": "calculate_mfb", "order": 6, "label": "MFB", "arguments": {}, "minimum_bias": [0.0], 
+             "units": "%", "cmap_bias": "bwr"},
+    
+    "MFE":  {"function": "calculate_mfe", "order": 7, "label": "MFE", "arguments": {}, "minimum_bias": [0.0],   
+             "vmin_bias": 0.0, "units": "%", "cmap_bias": "Reds"},
+    
+    "RMSE": {"function": "calculate_rmse", "order": 8, "label": "RMSE", "arguments": {}, "minimum_bias": [0.0],
+             "vmin_bias": 0.0, "units": "measurement_units", "cmap_bias": "Reds"},
+    
+    "NRMSE": {"function": "calculate_rmse", "order": 9, "label": "NRMSE", "arguments": {"normalisation_type": "mean"}, 
+              "minimum_bias": [0.0],  "vmin_bias": 0.0, "units": "%", "cmap_bias": "Reds"},
+
+    "COE":  {"function": "calculate_coe", "order": 10, "label": "COE", "arguments": {}, "minimum_bias": [1.0],
+             "vmax_bias": 1.0, "units": "",  "cmap_bias": "Reds"},
+    
+    "FAC2": {"function": "calculate_fac2", "order": 11, "label": "FAC2", "arguments": {}, "minimum_bias": [100.0], 
+             "vmax_bias":100.0,   "units": "%", "cmap_bias": "Reds"},
+    
+    "IOA":  {"function": "calculate_ioa", "order": 12, "label": "IOA", "arguments": {}, "minimum_bias": [1.0],
+             "vmin_bias": -1.0, "vmax_bias": 1.0, "units": "", "cmap_bias": "bwr"},
+    
+    "r":    {"function": "calculate_r", "order": 13, "label": "r", "arguments": {}, "minimum_bias": [1.0], 
+             "vmin_bias": -1.0, "vmax_bias": 1.0, "units": "", "cmap_bias": "bwr"},
+    
+    "r2":   {"function": "calculate_r_squared", "order":14, "label": "r$^{2}$", "arguments": {}, "minimum_bias": [1.0], 
+             "vmin_bias": 0.0, "vmax_bias": 1.0, "units": "", "cmap_bias": "Reds"},
+    
+    "UPA":  {"function": "calculate_upa", "order":15, "label": "UPA", "arguments": {}, "minimum_bias": [0.0],  
+             "units": "%", "cmap_bias": "bwr"}
 }

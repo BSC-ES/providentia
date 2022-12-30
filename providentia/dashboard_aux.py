@@ -1,7 +1,9 @@
 """ Auxiliary classes for Dashboard """
 
+import os
 import copy
 import time
+import json
 from textwrap import wrap
 import numpy as np
 from PyQt5 import QtCore
@@ -9,69 +11,30 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 from .aux import update_filter_species
 
-# setup dictionary characterising formats for all GUI window objects (i.e. buttons, titles etc.)
-formatting_dict = {'title_menu':               {'font': {'style': 'SansSerif', 'size': 9.5, "bold": True}, 
-                                                'height': 20, 'color': 'black'},
-                   'label_menu':               {'font': {'style': 'SansSerif', 'size': 9.5},
-                                                 'height': 20, 'color': 'black'},
-                   'button_menu':              {'font': {'style': 'SansSerif', 'size': 9.5}, 
-                                                'height': 20, 'color': 'black', 'background-color': 'white'},
-                   'checkbox_menu':            {'font': {'style': 'SansSerif', 'size': 9.5},
-                                                'height': 20, 'color': 'black'},
-                   'combobox_menu':            {'font': {'style': 'SansSerif', 'size': 9.5},
-                                                'height': 20, 'color': 'black', 'background-color': 'white', 
-                                                'selection-color': 'white', 'selection-background-color': 'black'},
-                   'lineedit_menu':            {'font': {'style': 'SansSerif', 'size': 9.5},
-                                                 'height': 20, 'color': 'black'},
-                   'switch_menu':              {'font': {'style': 'SansSerif', 'size': 9},
-                                                'height': 20, 'width': 50, 'color': 'black', 
-                                                'border': {'colour': 'white', 'size': 1}},
-                   'title_popup':              {'font': {'style': 'SansSerif', 'size': 13, "bold": True}, 
-                                                'height': 23, 'color': 'black'},
-                   'subtitle_popup':           {'font': {'style': 'SansSerif', 'size': 11, "bold": True},  
-                                                'height': 23, 'color': 'black'},
-                   'button_popup':             {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 20, 
-                                                'color': 'black'},
-                   'navigation_button_popup':  {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 20, 
-                                                'color': 'black'},
-                   'checkbox_popup':           {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 18, 
-                                                'color': 'black'},
-                   'rangebox_label_popup':     {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 18, 
-                                                'color': 'black'},
-                   'rangebox_popup':           {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 18, 
-                                                'max_width': 90, 'color': 'black'},
-                   'multispecies_popup':       {'font': {'style': 'SansSerif', 'size': 9.5}, 'height': 18, 
-                                                'color': 'black'},
-                   'column_header_label_popup':{'font': {'style': 'SansSerif', 'size': 9.5, 'italic': True}, 
-                                                'height': 18, 'color': 'black'},
-                   'tooltip':                  {'font': {'style': 'SansSerif', 'size': 8}},
-                   'settings_container':       {'background-color': 'white', 
-                                                'border': {'colour': 'lightgrey', 'size': 1}, 
-                                                'border-radius': 5, 'padding': 5},
-                   'settings_icon':            {'border': None},
-                   'settings_label':           {'font': {'style': 'SansSerif', 'size': 9.5, 'bold': True}}
-                   }
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
 
-def set_formatting(PyQt5_obj, formats):
+
+def set_formatting(PyQt5_obj, format):
     """ Function that takes a PyQt5 object and applies some defined formatting. """
 
     # initialise style
     defined_style = ""
 
-    # iterate through formats dictionary and apply defined font modifiers/object formatting values
-    for format_name, format_val in formats.items():
+    # iterate through formatting dictionary and apply defined font modifiers/object formatting values
+    for format_name, format_val in format.items():
         if format_name == 'font':
             
-            defined_font = QtGui.QFont(formats['font']['style'], formats['font']['size'])
+            defined_font = QtGui.QFont(format['font']['style'], format['font']['size'])
 
-            if 'bold' in formats[format_name].keys():
-                defined_font.setBold(formats['font']['bold'])
+            if 'bold' in format[format_name].keys():
+                defined_font.setBold(format['font']['bold'])
             
-            if 'italic' in formats[format_name].keys():
-                defined_font.setItalic(formats['font']['italic'])
+            if 'italic' in format[format_name].keys():
+                defined_font.setItalic(format['font']['italic'])
 
-            if 'underline' in formats[format_name].keys():
-                defined_font.setUnderline(formats['font']['underline'])
+            if 'underline' in format[format_name].keys():
+                defined_font.setUnderline(format['font']['underline'])
 
             PyQt5_obj.setFont(defined_font)
 
@@ -107,8 +70,8 @@ def set_formatting(PyQt5_obj, formats):
 
         elif format_name == 'border':
             if format_val is not None:
-                defined_style += "border: {}px solid {};".format(formats['border']['size'], 
-                                                                 formats['border']['colour'])
+                defined_style += "border: {}px solid {};".format(format['border']['size'], 
+                                                                 format['border']['colour'])
             else:
                 defined_style += "border: None;"
 
