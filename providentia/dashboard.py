@@ -3,14 +3,13 @@ from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
 from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow
-from .dashboard_aux import formatting_dict, set_formatting
+from .dashboard_aux import set_formatting
 from .read import DataReader
 from providentia import aux
 
+import os
 import copy
 import datetime
-import os
-import os.path
 import json
 import sys
 from functools import partial
@@ -27,6 +26,8 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
+formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
+
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
     """ Class that generates Providentia dashboard. """
