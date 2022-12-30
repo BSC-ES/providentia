@@ -625,7 +625,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_resolution = self.cb_resolution.currentText()
         
         # update resampling resolution field
-        resampling_available_resolutions = copy.deepcopy(available_resolutions)[1:]
+        resampling_available_resolutions = copy.deepcopy(available_resolutions)[available_resolutions.index(self.selected_resolution)+1:]
         resampling_available_resolutions.append('yearly')
         self.cb_resampling_resolution.addItems(resampling_available_resolutions)
         if self.selected_resampling_resolution in resampling_available_resolutions:
@@ -752,19 +752,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # get event origin source
             event_source = self.sender()
+
             # if network, resolution, matrix or species have changed then respective
             # current selection for the changed param
             if event_source == self.cb_network:
                 self.selected_network = changed_param
+
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
+
             elif event_source == self.cb_resampling_resolution:
                 self.selected_resampling_resolution = changed_param
-                self.cb_resampling_switch.setChecked(False)
+
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
                 self.selected_species = sorted(list(
                     self.available_observation_data[self.selected_network][self.selected_resolution][self.selected_matrix].keys()))[0]
+            
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
 
