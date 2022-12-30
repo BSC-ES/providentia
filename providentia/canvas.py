@@ -2,9 +2,9 @@ from .filter import DataFilter
 from .statistics import *
 from .plot import Plot
 
+import os
 import copy
 import json
-import os
 import sys
 import time
 import datetime
@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_aux import formatting_dict, set_formatting
+from .dashboard_aux import set_formatting
 from .dashboard_aux import ComboBox, CheckableComboBox
 from .aux import get_relevant_temporal_resolutions
 
@@ -35,6 +35,8 @@ register_matplotlib_converters()
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
+formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
+
 
 class MPLCanvas(FigureCanvas):
     """ Class that handles the creation and updates of
@@ -486,6 +488,73 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
+    def update_periodic_statistic(self, zstat):
+
+        # update periodic plot/s if have some stations selected on map
+        if len(self.relative_selected_station_inds) > 0:
+
+            # clear and turn off all relevant axes before updating
+            self.remove_axis_elements(self.plot_axes['periodic'], 'periodic')
+
+            # get zstat information 
+            zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
+            
+            # set plot options as empty
+            plot_options = []
+
+            # set new ylabel
+            if z_statistic_type == 'basic':
+                ylabel = basic_stats[base_zstat]['label']
+                ylabel_units = basic_stats[base_zstat]['units']
+            else:
+                ylabel = expbias_stats[base_zstat]['label']
+                ylabel_units = expbias_stats[base_zstat]['units']
+            if ylabel_units == 'measurement_units':
+                ylabel_units = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]]) 
+            if ylabel_units != '':
+                ylabel = copy.deepcopy(ylabel_units)
+
+            # update periodic plot
+            first_data_label = True
+            for data_label in self.selected_station_data[self.read_instance.networkspeci]:
+                # skip observational array if bias stat
+                if (z_statistic_sign == 'bias') & (data_label == 'observations'):
+                    continue
+                self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, data_label, 
+                                        self.plot_characteristics['periodic'], zstat=zstat, 
+                                        first_data_label=first_data_label)
+                first_data_label = False
+
+            # reset axes limits (harmonising across subplots for periodic plots) 
+            self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
+                                                    self.plot_characteristics['periodic'], 
+                                                    plot_options, relim=True, autoscale=True)
+
+            # set title
+            if 'hour' in self.read_instance.relevant_temporal_resolutions:
+                relevant_temporal_resolutions_title = ['hour']
+            else:
+                relevant_temporal_resolutions_title = ['month']
+            self.plot.set_axis_title(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'], 
+                                     relevant_temporal_resolutions=relevant_temporal_resolutions_title)
+            self.plot_characteristics['periodic']['axis_title']['label'] = 'periodic'
+
+            # set ylabel
+            self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
+
+            # activate axis
+            self.activate_axis(self.plot_axes['periodic'], 'periodic')
+
+            # reset navigation toolbar stack for plot
+            self.reset_ax_navigation_toolbar_stack(self.plot_axes['periodic'])
+
+            # update plot options
+            self.update_plot_options(plot_types=['periodic'])
+
+            # draw changes
+            self.figure.canvas.draw()
+            self.figure.canvas.flush_events()
+
     def update_associated_active_dashboard_plot(self, plot_type):
         """ Function that updates a plot associated with selected stations on map. """
     
@@ -750,9 +819,8 @@ class MPLCanvas(FigureCanvas):
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
+            # update plotted map z statistic
             if not self.read_instance.block_MPL_canvas_updates:
-
-                # update plotted map z statistic
                 self.update_map_z_statistic()
 
         return None
@@ -796,69 +864,9 @@ class MPLCanvas(FigureCanvas):
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
+            # update plotted periodic statistic
             if not self.read_instance.block_MPL_canvas_updates:
-
-                # update periodic plot/s if have some stations selected on map
-                if len(self.relative_selected_station_inds) > 0:
-
-                    # clear and turn off all relevant axes before updating
-                    self.remove_axis_elements(self.plot_axes['periodic'], 'periodic')
-
-                    # get zstat information 
-                    zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
-                    # set plot options as empty
-                    plot_options = []
-
-                    # set new ylabel
-                    if z_statistic_type == 'basic':
-                        ylabel = basic_stats[base_zstat]['label']
-                        ylabel_units = basic_stats[base_zstat]['units']
-                    else:
-                        ylabel = expbias_stats[base_zstat]['label']
-                        ylabel_units = expbias_stats[base_zstat]['units']
-                    if ylabel_units == 'measurement_units':
-                        ylabel_units = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]]) 
-                    if ylabel_units != '':
-                        ylabel = copy.deepcopy(ylabel_units)
-
-                    # update periodic plot
-                    first_data_label = True
-                    for data_label in self.selected_station_data[self.read_instance.networkspeci]:
-                        # skip observational array if bias stat
-                        if (z_statistic_sign == 'bias') & (data_label == 'observations'):
-                            continue
-                        self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, data_label, 
-                                                self.plot_characteristics['periodic'], zstat=zstat, 
-                                                first_data_label=first_data_label)
-                        first_data_label = False
-
-                    # reset axes limits (harmonising across subplots for periodic plots) 
-                    self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
-                                                         self.plot_characteristics['periodic'], 
-                                                         plot_options, relim=True, autoscale=True)
-
-                    # set title
-                    if 'hour' in self.read_instance.relevant_temporal_resolutions:
-                        relevant_temporal_resolutions_title = ['hour']
-                    else:
-                        relevant_temporal_resolutions_title = ['month']
-                    self.plot.set_axis_title(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'], relevant_temporal_resolutions=relevant_temporal_resolutions_title)
-                    self.plot_characteristics['periodic']['axis_title']['label'] = 'periodic'
-
-                    # set ylabel
-                    self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
-
-                    # activate axis
-                    self.activate_axis(self.plot_axes['periodic'], 'periodic')
-
-                    # reset navigation toolbar stack for plot
-                    self.reset_ax_navigation_toolbar_stack(self.plot_axes['periodic'])
-
-                    # update plot options
-                    self.update_plot_options(plot_types=['periodic'])
-
-                    # draw changes
-                    self.figure.canvas.draw()
+                self.update_periodic_statistic(zstat)
 
         return None
 
