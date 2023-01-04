@@ -964,13 +964,13 @@ class Plot:
         
         if PDF_sampled_calculated:
             # make plot
-            distribution_plot = relevant_axis.plot(x_grid, PDF_sampled, 
-                                                color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                **plot_characteristics['plot'])
+            self.distribution_plot = relevant_axis.plot(x_grid, PDF_sampled, 
+                                                        color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                        **plot_characteristics['plot'])
 
             # track plot elements if using dashboard 
             if not self.read_instance.offline:
-                self.track_plot_elements(data_label, 'distribution', 'plot', distribution_plot, bias=bias)
+                self.track_plot_elements(data_label, 'distribution', 'plot', self.distribution_plot, bias=bias)
 
     def make_scatter(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
                      first_data_label=False):
