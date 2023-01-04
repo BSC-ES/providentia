@@ -957,6 +957,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                                                       canvas_instance.hover_distribution_annotation)
 
         elif changed_plot_type == 'periodic':
+            
+            # setup periodic annotation
+            canvas_instance.create_periodic_annotation()
+            canvas_instance.create_periodic_annotation_vline()
+            canvas_instance.lock_periodic_annotation = dict()
+            for resolution in canvas_instance.plot_axes['periodic'].keys():
+                canvas_instance.lock_periodic_annotation[resolution] = False
+            canvas_instance.periodic_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                  canvas_instance.hover_periodic_annotation)
 
             # update periodic statistic combobox
             self.block_config_bar_handling_updates = False
