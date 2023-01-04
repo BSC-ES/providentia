@@ -277,7 +277,7 @@ class Plot:
                 else:
                     plot_characteristics['xticks'] = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
                     ax_to_format.set_xticks(plot_characteristics['xticks'])
-                    ax_to_format.set_xticklabels([self.canvas_instance.temporal_axis_mapping_dict[relevant_temporal_resolution][xtick] for xtick
+                    ax_to_format.set_xticklabels([self.canvas_instance.temporal_axis_mapping_dict['short'][relevant_temporal_resolution][xtick] for xtick
                                                   in self.canvas_instance.periodic_xticks[relevant_temporal_resolution]])
             # map specific formatting
             elif base_plot_type == 'map':
@@ -792,9 +792,9 @@ class Plot:
                 grouped_data = [group for group in grouped_data if len(group) > 0]
 
                 # make violin plot 
-                violin_plot = relevant_sub_ax.violinplot(grouped_data, 
-                                                         positions=self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['valid_xticks'], 
-                                                         **plot_characteristics['plot']['violin'])
+                self.violin_plot = relevant_sub_ax.violinplot(grouped_data, 
+                                                              positions=self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['valid_xticks'], 
+                                                              **plot_characteristics['plot']['violin'])
 
                 # plot p50
                 xticks = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
@@ -825,7 +825,7 @@ class Plot:
                                                       **plot_characteristics['plot']['p50'])
 
                 # update plotted objects with necessary colour and alpha
-                for patch in violin_plot['bodies']:
+                for patch in self.violin_plot['bodies']:
                     patch.set_facecolor(self.read_instance.plotting_params[data_label]['colour'])
                     if data_label == 'observations':
                         patch.set_alpha(plot_characteristics['patch']['alpha_obs'])
@@ -844,7 +844,7 @@ class Plot:
 
                 # track plot elements if using dashboard 
                 if not self.read_instance.offline:
-                    self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), violin_plot, bias=False)
+                    self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), self.violin_plot, bias=False)
                     self.track_plot_elements(data_label, 'periodic-violin', 'p50_plot_{}'.format(relevant_temporal_resolution), p50_plots, bias=False)
 
             # standard periodic plot type
@@ -874,15 +874,15 @@ class Plot:
                             self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), bias_lines, bias=bias)
 
                 # make plot
-                periodic_plot = relevant_sub_ax.plot(self.canvas_instance.periodic_xticks[relevant_temporal_resolution],
-                                                     self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution][zstat],
-                                                     color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                     zorder=self.read_instance.plotting_params[data_label]['zorder'],
-                                                     **plot_characteristics['plot'])
+                self.periodic_plot = relevant_sub_ax.plot(self.canvas_instance.periodic_xticks[relevant_temporal_resolution],
+                                                          self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution][zstat],
+                                                          color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                          zorder=self.read_instance.plotting_params[data_label]['zorder'],
+                                                          **plot_characteristics['plot'])
                                         
                 # track plot elements if using dashboard 
                 if not self.read_instance.offline:
-                    self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), periodic_plot, bias=bias)
+                    self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), self.periodic_plot, bias=bias)
 
     def make_distribution(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
                           first_data_label=False, data_range_min=False, data_range_max=False):

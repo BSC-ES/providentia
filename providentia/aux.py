@@ -145,9 +145,14 @@ def temp_axis_dict():
         :rtype: dict
     """
 
-    map_dict = {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
-                'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
-                          7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}
+    map_dict = {'short': {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
+                          'month': {1: 'J', 2: 'F', 3: 'M', 4: 'A', 5: 'M', 6: 'J',
+                                    7: 'J', 8: 'A', 9: 'S', 10: 'O', 11: 'N', 12: 'D'}},
+                'long': {'dayofweek': {0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 
+                                       4: 'Friday', 5: 'Saturday', 6: 'Sunday'},
+                         'month': {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June',
+                                   7: 'July', 8: 'August', 9: 'September', 10: 'October', 11: 'November', 
+                                   12: 'December'}}
                 }
 
     return map_dict
