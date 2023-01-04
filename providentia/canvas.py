@@ -3325,6 +3325,101 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def create_scatter_annotation(self):
+        """ Create annotation at (0, 0) that will be updated later. """
+
+        # in the newest version of matplotlib, s corresponds to text
+        self.scatter_annotation = self.plot_axes['scatter'].annotate(s='', xy=(0, 0), xycoords='data',
+                                                                     **self.plot_characteristics['scatter']['marker_annotate'],
+                                                                     bbox={**self.plot_characteristics['scatter']['marker_annotate_bbox']},
+                                                                     arrowprops={**self.plot_characteristics['scatter']['marker_annotate_arrowprops']})
+        self.scatter_annotation.set_visible(False)
+
+        return None
+
+    def update_scatter_annotation(self, annotation_index):
+
+        for data_label in self.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.scatter_annotate_data_label:
+                
+                # do not annotate if plot is cleared
+                if data_label not in self.plot_elements['scatter'][self.plot_elements['scatter']['active']].keys():
+                    continue
+
+                # retrieve time and concentration
+                line = self.plot_elements['scatter'][self.plot_elements['scatter']['active']][data_label]['plot'][0]
+                concentration_x = line.get_xdata()[annotation_index['ind'][0]]
+                concentration_y = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.scatter_annotation.xy = (concentration_x, concentration_y)
+
+                # update bbox position
+                concentration_x_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if concentration_x > concentration_x_middle:
+                    self.scatter_annotation.set_x(-10)
+                    self.scatter_annotation.set_ha('right')
+                else:
+                    self.scatter_annotation.set_x(10)
+                    self.scatter_annotation.set_ha('left')
+
+                # create annotation text
+                # observations label
+                text_label = ('{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
+                                                       concentration_x)
+                # experiment label
+                exp_alias = self.read_instance.experiments[data_label]
+                text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration_y)
+    
+        self.scatter_annotation.set_text(text_label)
+
+        return None
+
+    def hover_scatter_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the scatter plot. """
+        
+        # activate hover over scatter
+        if ('scatter' in self.read_instance.active_dashboard_plots):
+            if event.inaxes == self.plot_axes['scatter']:
+                if ((hasattr(self.plot, 'scatter_plot')) and ('scatter' in self.plot_elements)
+                    and (self.lock_scatter_annotation == False)):
+
+                    # lock annotation
+                    self.lock_scatter_annotation = True
+                    is_contained = False
+
+                    for data_label in self.plot_elements['data_labels_active']:
+
+                        # do not annotate if plot is cleared
+                        if data_label not in self.plot_elements['scatter'][self.plot_elements['scatter']['active']].keys():
+                            continue
+
+                        line = self.plot_elements['scatter'][self.plot_elements['scatter']['active']][data_label]['plot'][0]
+                        is_contained, annotation_index = line.contains(event)
+                        if is_contained:
+                            self.scatter_annotate_data_label = data_label
+                            break
+                    
+                    if is_contained:
+                        # update annotation if hovered
+                        self.update_scatter_annotation(annotation_index)
+                        self.scatter_annotation.set_visible(True)
+                    else:
+                        # hide annotation if not hovered
+                        if self.scatter_annotation.get_visible():
+                            self.scatter_annotation.set_visible(False)
+                            
+                    # redraw points
+                    self.figure.canvas.draw()
+                    self.figure.canvas.flush_events()
+                        
+                    # unlock annotation 
+                    self.lock_scatter_annotation = False
+
+        return None
+
     def zoom_map_func(self, event):
         """ Function to handle zoom on map using scroll wheel. """
 

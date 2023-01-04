@@ -203,7 +203,14 @@
                    "2:1_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
                    "equal_aspect": true,
                    "plot": {"marker": "o", "linestyle": "None", "markersize": 2, "alpha": 0.5},
-                   "plot_options": ["annotate", "logx", "logy", "regression"]},
+                   "plot_options": ["annotate", "logx", "logy", "regression"],
+                   "marker_annotate": {"xytext": [0, 0], "textcoords": "offset points", "size": 8, "ha": "left", 
+                                       "va": "center", "zorder": 100},
+                   "marker_annotate_bbox": {"boxstyle": "round", "linewidth": 0.5, "facecolor": "white", 
+                                            "edgecolor": "#757575"},
+                   "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, "color": "#757575", 
+                                                  "edgecolor": "#5e5e5e"}
+              },
 
        "boxplot": {"ygrid": {"color": "lightgrey", "alpha": 0.8, "zorder": 1},
                    "remove_spines": ["top", "right"],
