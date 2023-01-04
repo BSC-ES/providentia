@@ -924,7 +924,7 @@ class MPLCanvas(FigureCanvas):
                 ax_to_remove.texts = []
 
             elif plot_type == 'distribution':
-                ax_to_remove.lines = []
+                ax_to_remove.lines = [self.distribution_vline]
                 ax_to_remove.artists = []
 
             elif plot_type == 'scatter':
@@ -3210,8 +3210,7 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation vertical line at (0, 0) that will be updated later. """
 
         # add vertical line
-        self.timeseries_vline = self.plot_axes['timeseries'].axvline(0, 
-                                                                     **self.plot_characteristics['timeseries']['marker_annotate_vline'])
+        self.timeseries_vline = self.plot_axes['timeseries'].axvline(0, **self.plot_characteristics['timeseries']['marker_annotate_vline'])
         self.timeseries_vline.set_visible(False)
 
         return None
@@ -3259,7 +3258,7 @@ class MPLCanvas(FigureCanvas):
             if self.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
                 continue
 
-            # retrieve time and concentration
+            # retrieve concentration
             line = self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']][data_label]['plot'][0]
             concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
 
@@ -3417,6 +3416,136 @@ class MPLCanvas(FigureCanvas):
                         
                     # unlock annotation 
                     self.lock_scatter_annotation = False
+
+        return None
+
+    def create_distribution_annotation(self):
+        """ Create annotation at (0, 0) that will be updated later. """
+
+        # in the newest version of matplotlib, s corresponds to text
+        self.distribution_annotation = self.plot_axes['distribution'].annotate(s='', xy=(0, 0), xycoords='data',
+                                                                               **self.plot_characteristics['distribution']['marker_annotate'],
+                                                                               bbox={**self.plot_characteristics['distribution']['marker_annotate_bbox']},
+                                                                               arrowprops={**self.plot_characteristics['distribution']['marker_annotate_arrowprops']})
+        self.distribution_annotation.set_visible(False)
+
+        return None
+
+    def create_distribution_annotation_vline(self):
+        """ Create annotation vertical line at (0, 0) that will be updated later. """
+
+        # add vertical line
+        self.distribution_vline = self.plot_axes['distribution'].axvline(0, **self.plot_characteristics['distribution']['marker_annotate_vline'])
+        self.distribution_vline.set_visible(False)
+
+        return None
+
+    def update_distribution_annotation(self, annotation_index):
+        """ Update annotation for each distribution point that is hovered. """
+        
+        for data_label in self.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.distribution_annotate_data_label:
+                
+                # skip observations for bias plot
+                if self.plot_elements['distribution']['active'] == 'bias' and data_label == 'observations':
+                    continue
+                
+                # do not annotate if plot is cleared
+                if data_label not in self.plot_elements['distribution'][self.plot_elements['distribution']['active']].keys():
+                    continue
+
+                # retrieve time and concentration
+                line = self.plot_elements['distribution'][self.plot_elements['distribution']['active']][data_label]['plot'][0]
+                concentration = line.get_xdata()[annotation_index['ind'][0]]
+                density = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.distribution_annotation.xy = (concentration, density)
+                self.distribution_vline.set_xdata(concentration)
+
+                # update bbox position
+                concentration_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if concentration > concentration_middle:
+                    self.distribution_annotation.set_x(-10)
+                    self.distribution_annotation.set_ha('right')
+                else:
+                    self.distribution_annotation.set_x(10)
+                    self.distribution_annotation.set_ha('left')
+
+                # create annotation text
+                text_label = ('{0}: {1:.2f}').format(self.read_instance.species[0], concentration)
+        
+        for data_label in self.plot_elements['data_labels_active']:
+            
+            # skip observations for bias plot
+            if self.plot_elements['distribution']['active'] == 'bias' and data_label == 'observations':
+                continue
+
+            # retrieve density
+            line = self.plot_elements['distribution'][self.plot_elements['distribution']['active']][data_label]['plot'][0]
+            density = line.get_ydata()[np.where(line.get_xdata() == concentration)[0]]
+
+            # for all labels if there is data
+            if len(density) >= 1:
+                if data_label != 'observations':
+                    exp_alias = self.read_instance.experiments[data_label]
+                    text_label += ('\n{0}: {1:.2f}').format(exp_alias, density[0])
+                else:
+                    text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
+                                                            density[0])
+
+        self.distribution_annotation.set_text(text_label)
+
+        return None
+
+    def hover_distribution_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the distribution plot. """
+
+        # activate hover over distribution
+        if ('distribution' in self.read_instance.active_dashboard_plots):
+            if event.inaxes == self.plot_axes['distribution']:
+                if ((hasattr(self.plot, 'distribution_plot')) and ('distribution' in self.plot_elements)
+                    and (self.lock_distribution_annotation == False)):
+
+                    # lock annotation
+                    self.lock_distribution_annotation = True
+                    is_contained = False
+
+                    for data_label in self.plot_elements['data_labels_active']:
+
+                        # skip observations for bias plot
+                        if self.plot_elements['distribution']['active'] == 'bias' and data_label == 'observations':
+                            continue
+
+                        # do not annotate if plot is cleared
+                        if data_label not in self.plot_elements['distribution'][self.plot_elements['distribution']['active']].keys():
+                            continue
+
+                        line = self.plot_elements['distribution'][self.plot_elements['distribution']['active']][data_label]['plot'][0]
+                        is_contained, annotation_index = line.contains(event)
+                        if is_contained:
+                            self.distribution_annotate_data_label = data_label
+                            break
+                    
+                    if is_contained:
+                        # update annotation if hovered
+                        self.update_distribution_annotation(annotation_index)
+                        self.distribution_annotation.set_visible(True)
+                        self.distribution_vline.set_visible(True)
+                    else:
+                        # hide annotation if not hovered
+                        if self.distribution_annotation.get_visible():
+                            self.distribution_annotation.set_visible(False)
+                            self.distribution_vline.set_visible(False)
+                            
+                    # redraw points
+                    self.figure.canvas.draw()
+                    self.figure.canvas.flush_events()
+                        
+                    # unlock annotation 
+                    self.lock_distribution_annotation = False
 
         return None
 

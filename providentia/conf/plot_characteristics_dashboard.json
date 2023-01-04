@@ -180,7 +180,14 @@
                         "pdf_min_samples": 2000,
                         "bias_line": {"y": 0.0, "linestyle": "--", "linewidth": 1.0, "color": "black", "zorder": 0},
                         "plot": {"linewidth": 1},
-                        "plot_options": ["annotate", "bias", "logx", "logy"]},
+                        "plot_options": ["annotate", "bias", "logx", "logy"],
+                        "marker_annotate": {"xytext": [0, 0], "textcoords": "offset points", "size": 8, "ha": "left", 
+                                            "va": "center", "zorder": 100},
+                        "marker_annotate_bbox": {"boxstyle": "round", "linewidth": 0.5, "facecolor": "white", 
+                                                "edgecolor": "#757575"},
+                        "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, "color": "#757575", 
+                                                       "edgecolor": "#5e5e5e"},
+                        "marker_annotate_vline": {"color": "#757575", "linewidth": 0.5, "linestyle": "--"}},
 
        "scatter": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                    "remove_spines": ["top", "right"],
@@ -209,8 +216,7 @@
                    "marker_annotate_bbox": {"boxstyle": "round", "linewidth": 0.5, "facecolor": "white", 
                                             "edgecolor": "#757575"},
                    "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, "color": "#757575", 
-                                                  "edgecolor": "#5e5e5e"}
-              },
+                                                  "edgecolor": "#5e5e5e"}},
 
        "boxplot": {"ygrid": {"color": "lightgrey", "alpha": 0.8, "zorder": 1},
                    "remove_spines": ["top", "right"],
