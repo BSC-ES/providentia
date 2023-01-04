@@ -1016,13 +1016,13 @@ class Plot:
                                    **plot_characteristics['2:1_line'])
 
         # create scatter plot
-        scatter_plot = relevant_axis.plot(observations_data, experiment_data, 
-                                          color=self.read_instance.plotting_params[data_label]['colour'],
-                                          **plot_characteristics['plot'])
+        self.scatter_plot = relevant_axis.plot(observations_data, experiment_data, 
+                                               color=self.read_instance.plotting_params[data_label]['colour'],
+                                               **plot_characteristics['plot'])
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'scatter', 'plot', scatter_plot, bias=False)
+            self.track_plot_elements(data_label, 'scatter', 'plot', self.scatter_plot, bias=False)
           
     def make_boxplot(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
                      first_data_label=False):
