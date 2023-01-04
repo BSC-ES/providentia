@@ -945,7 +945,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_scatter_annotation = False
             canvas_instance.scatter_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                  canvas_instance.hover_scatter_annotation)
-        
+
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
+        elif changed_plot_type == 'distribution':
+
+            # setup distribution annotation
+            canvas_instance.create_distribution_annotation()
+            canvas_instance.create_distribution_annotation_vline()
+            canvas_instance.lock_distribution_annotation = False
+            canvas_instance.distribution_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                      canvas_instance.hover_distribution_annotation)
+
         elif changed_plot_type == 'periodic':
 
             # update periodic statistic combobox
