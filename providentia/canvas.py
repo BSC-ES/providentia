@@ -924,7 +924,7 @@ class MPLCanvas(FigureCanvas):
                 ax_to_remove.texts = []
 
             elif plot_type == 'distribution':
-                ax_to_remove.lines = []
+                ax_to_remove.lines = [self.distribution_vline]
                 ax_to_remove.artists = []
 
             elif plot_type == 'scatter':
@@ -942,6 +942,15 @@ class MPLCanvas(FigureCanvas):
             ax_to_remove.axis('off')
             ax_to_remove.set_visible(False)
 
+        # append vertical lines to periodic and periodic violin plots
+        if plot_type == 'periodic':
+            for resolution in self.plot_axes['periodic'].keys():
+                ax_to_remove.lines.append(self.periodic_vline[resolution])
+        
+        elif plot_type == 'periodic-violin':
+            for resolution in self.plot_axes['periodic-violin'].keys():
+                ax_to_remove.lines.append(self.periodic_violin_vline[resolution])
+                
         # hide plot buttons
         if plot_type == 'map':
             self.map_menu_button.hide()
@@ -3210,8 +3219,7 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation vertical line at (0, 0) that will be updated later. """
 
         # add vertical line
-        self.timeseries_vline = self.plot_axes['timeseries'].axvline(0, 
-                                                                     **self.plot_characteristics['timeseries']['marker_annotate_vline'])
+        self.timeseries_vline = self.plot_axes['timeseries'].axvline(0, **self.plot_characteristics['timeseries']['marker_annotate_vline'])
         self.timeseries_vline.set_visible(False)
 
         return None
@@ -3259,7 +3267,7 @@ class MPLCanvas(FigureCanvas):
             if self.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
                 continue
 
-            # retrieve time and concentration
+            # retrieve concentration
             line = self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']][data_label]['plot'][0]
             concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
 
@@ -3322,6 +3330,523 @@ class MPLCanvas(FigureCanvas):
                         
                     # unlock annotation 
                     self.lock_timeseries_annotation = False
+
+        return None
+
+    def create_scatter_annotation(self):
+        """ Create annotation at (0, 0) that will be updated later. """
+
+        # in the newest version of matplotlib, s corresponds to text
+        self.scatter_annotation = self.plot_axes['scatter'].annotate(s='', xy=(0, 0), xycoords='data',
+                                                                     **self.plot_characteristics['scatter']['marker_annotate'],
+                                                                     bbox={**self.plot_characteristics['scatter']['marker_annotate_bbox']},
+                                                                     arrowprops={**self.plot_characteristics['scatter']['marker_annotate_arrowprops']})
+        self.scatter_annotation.set_visible(False)
+
+        return None
+
+    def update_scatter_annotation(self, annotation_index):
+
+        for data_label in self.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.scatter_annotate_data_label:
+                
+                # do not annotate if plot is cleared
+                if data_label not in self.plot_elements['scatter'][self.plot_elements['scatter']['active']].keys():
+                    continue
+
+                # retrieve time and concentration
+                line = self.plot_elements['scatter'][self.plot_elements['scatter']['active']][data_label]['plot'][0]
+                concentration_x = line.get_xdata()[annotation_index['ind'][0]]
+                concentration_y = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.scatter_annotation.xy = (concentration_x, concentration_y)
+
+                # update bbox position
+                concentration_x_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if concentration_x > concentration_x_middle:
+                    self.scatter_annotation.set_x(-10)
+                    self.scatter_annotation.set_ha('right')
+                else:
+                    self.scatter_annotation.set_x(10)
+                    self.scatter_annotation.set_ha('left')
+
+                # create annotation text
+                # observations label
+                text_label = ('{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
+                                                       concentration_x)
+                # experiment label
+                exp_alias = self.read_instance.experiments[data_label]
+                text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration_y)
+    
+        self.scatter_annotation.set_text(text_label)
+
+        return None
+
+    def hover_scatter_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the scatter plot. """
+        
+        # activate hover over scatter
+        if ('scatter' in self.read_instance.active_dashboard_plots):
+            if event.inaxes == self.plot_axes['scatter']:
+                if ((hasattr(self.plot, 'scatter_plot')) and ('scatter' in self.plot_elements)
+                    and (self.lock_scatter_annotation == False)):
+
+                    # lock annotation
+                    self.lock_scatter_annotation = True
+                    is_contained = False
+
+                    for data_label in self.plot_elements['data_labels_active']:
+
+                        # do not annotate if plot is cleared
+                        if data_label not in self.plot_elements['scatter'][self.plot_elements['scatter']['active']].keys():
+                            continue
+
+                        line = self.plot_elements['scatter'][self.plot_elements['scatter']['active']][data_label]['plot'][0]
+                        is_contained, annotation_index = line.contains(event)
+                        if is_contained:
+                            self.scatter_annotate_data_label = data_label
+                            break
+                    
+                    if is_contained:
+                        # update annotation if hovered
+                        self.update_scatter_annotation(annotation_index)
+                        self.scatter_annotation.set_visible(True)
+                    else:
+                        # hide annotation if not hovered
+                        if self.scatter_annotation.get_visible():
+                            self.scatter_annotation.set_visible(False)
+                            
+                    # redraw points
+                    self.figure.canvas.draw()
+                    self.figure.canvas.flush_events()
+                        
+                    # unlock annotation 
+                    self.lock_scatter_annotation = False
+
+        return None
+
+    def create_distribution_annotation(self):
+        """ Create annotation at (0, 0) that will be updated later. """
+
+        # in the newest version of matplotlib, s corresponds to text
+        self.distribution_annotation = self.plot_axes['distribution'].annotate(s='', xy=(0, 0), xycoords='data',
+                                                                               **self.plot_characteristics['distribution']['marker_annotate'],
+                                                                               bbox={**self.plot_characteristics['distribution']['marker_annotate_bbox']},
+                                                                               arrowprops={**self.plot_characteristics['distribution']['marker_annotate_arrowprops']})
+        self.distribution_annotation.set_visible(False)
+
+        return None
+
+    def create_distribution_annotation_vline(self):
+        """ Create annotation vertical line at (0, 0) that will be updated later. """
+
+        # add vertical line
+        self.distribution_vline = self.plot_axes['distribution'].axvline(0, **self.plot_characteristics['distribution']['marker_annotate_vline'])
+        self.distribution_vline.set_visible(False)
+
+        return None
+
+    def update_distribution_annotation(self, annotation_index):
+        """ Update annotation for each distribution point that is hovered. """
+        
+        for data_label in self.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.distribution_annotate_data_label:
+                
+                # skip observations for bias plot
+                if self.plot_elements['distribution']['active'] == 'bias' and data_label == 'observations':
+                    continue
+                
+                # do not annotate if plot is cleared
+                if data_label not in self.plot_elements['distribution'][self.plot_elements['distribution']['active']].keys():
+                    continue
+
+                # retrieve time and concentration
+                line = self.plot_elements['distribution'][self.plot_elements['distribution']['active']][data_label]['plot'][0]
+                concentration = line.get_xdata()[annotation_index['ind'][0]]
+                density = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.distribution_annotation.xy = (concentration, density)
+                self.distribution_vline.set_xdata(concentration)
+
+                # update bbox position
+                concentration_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if concentration > concentration_middle:
+                    self.distribution_annotation.set_x(-10)
+                    self.distribution_annotation.set_ha('right')
+                else:
+                    self.distribution_annotation.set_x(10)
+                    self.distribution_annotation.set_ha('left')
+
+                # create annotation text
+                text_label = ('{0}: {1:.2f}').format(self.read_instance.species[0], concentration)
+        
+        for data_label in self.plot_elements['data_labels_active']:
+            
+            # skip observations for bias plot
+            if self.plot_elements['distribution']['active'] == 'bias' and data_label == 'observations':
+                continue
+
+            # retrieve density
+            line = self.plot_elements['distribution'][self.plot_elements['distribution']['active']][data_label]['plot'][0]
+            density = line.get_ydata()[np.where(line.get_xdata() == concentration)[0]]
+
+            # for all labels if there is data
+            if len(density) >= 1:
+                if data_label != 'observations':
+                    exp_alias = self.read_instance.experiments[data_label]
+                    text_label += ('\n{0}: {1:.2f}').format(exp_alias, density[0])
+                else:
+                    text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
+                                                            density[0])
+
+        self.distribution_annotation.set_text(text_label)
+
+        return None
+
+    def hover_distribution_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the distribution plot. """
+
+        # activate hover over distribution
+        if ('distribution' in self.read_instance.active_dashboard_plots):
+            if event.inaxes == self.plot_axes['distribution']:
+                if ((hasattr(self.plot, 'distribution_plot')) and ('distribution' in self.plot_elements)
+                    and (self.lock_distribution_annotation == False)):
+
+                    # lock annotation
+                    self.lock_distribution_annotation = True
+                    is_contained = False
+
+                    for data_label in self.plot_elements['data_labels_active']:
+
+                        # skip observations for bias plot
+                        if self.plot_elements['distribution']['active'] == 'bias' and data_label == 'observations':
+                            continue
+
+                        # do not annotate if plot is cleared
+                        if data_label not in self.plot_elements['distribution'][self.plot_elements['distribution']['active']].keys():
+                            continue
+
+                        line = self.plot_elements['distribution'][self.plot_elements['distribution']['active']][data_label]['plot'][0]
+                        is_contained, annotation_index = line.contains(event)
+                        if is_contained:
+                            self.distribution_annotate_data_label = data_label
+                            break
+                    
+                    if is_contained:
+                        # update annotation if hovered
+                        self.update_distribution_annotation(annotation_index)
+                        self.distribution_annotation.set_visible(True)
+                        self.distribution_vline.set_visible(True)
+                    else:
+                        # hide annotation if not hovered
+                        if self.distribution_annotation.get_visible():
+                            self.distribution_annotation.set_visible(False)
+                            self.distribution_vline.set_visible(False)
+                            
+                    # redraw points
+                    self.figure.canvas.draw()
+                    self.figure.canvas.flush_events()
+                        
+                    # unlock annotation 
+                    self.lock_distribution_annotation = False
+
+        return None
+
+    def create_periodic_annotation(self):
+        """ Create annotation at (0, 0) that will be updated later. """
+
+        # in the newest version of matplotlib, s corresponds to text
+        self.periodic_annotation = dict()
+        for resolution in self.plot_axes['periodic'].keys():
+            self.periodic_annotation[resolution] = self.plot_axes['periodic'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
+                                                                                                   **self.plot_characteristics['periodic']['marker_annotate'],
+                                                                                                   bbox={**self.plot_characteristics['periodic']['marker_annotate_bbox']},
+                                                                                                   arrowprops={**self.plot_characteristics['periodic']['marker_annotate_arrowprops']})
+            self.periodic_annotation[resolution].set_visible(False)
+
+        return None
+
+    def create_periodic_annotation_vline(self):
+        """ Create annotation vertical line at (0, 0) that will be updated later. """
+
+        # add vertical line
+        self.periodic_vline = dict()
+        for resolution in self.plot_axes['periodic'].keys():
+            self.periodic_vline[resolution] = self.plot_axes['periodic'][resolution].axvline(0, **self.plot_characteristics['periodic']['marker_annotate_vline'])
+            self.periodic_vline[resolution].set_visible(False)
+
+        return None
+
+    def update_periodic_annotation(self, annotation_index, resolution):
+        """ Update annotation for each periodic point that is hovered. """
+        
+        for data_label in self.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.periodic_annotate_data_label:
+                
+                # skip observations for bias plot
+                if self.plot_elements['periodic']['active'] == 'bias' and data_label == 'observations':
+                    continue
+                
+                # do not annotate if plot is cleared
+                if data_label not in self.plot_elements['periodic'][self.plot_elements['periodic']['active']].keys():
+                    continue
+
+                # retrieve time and concentration
+                line = self.plot_elements['periodic'][self.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
+                time = line.get_xdata()[annotation_index['ind'][0]]
+                concentration = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.periodic_annotation[resolution].xy = (time, concentration)
+                self.periodic_vline[resolution].set_xdata(time)
+
+                # update bbox position
+                time_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if time > time_middle:
+                    self.periodic_annotation[resolution].set_x(-10)
+                    self.periodic_annotation[resolution].set_ha('right')
+                else:
+                    self.periodic_annotation[resolution].set_x(10)
+                    self.periodic_annotation[resolution].set_ha('left')
+
+                # create annotation text
+                if resolution == 'hour':
+                    resolution_text = 'Hour'
+                    time_text = time
+                else:
+                    time_options = [self.temporal_axis_mapping_dict['long'][resolution][xtick] 
+                                    for xtick in self.periodic_xticks[resolution]]
+                    time_text = time_options[time-1]
+                    if resolution == 'dayofweek':
+                        resolution_text = 'Day'
+                    elif resolution == 'month':
+                        resolution_text = 'Month'
+                text_label = ('{0}: {1}').format(resolution_text, time_text)
+        
+        for data_label in self.plot_elements['data_labels_active']:
+            
+            # skip observations for bias plot
+            if self.plot_elements['periodic']['active'] == 'bias' and data_label == 'observations':
+                continue
+            
+            # retrieve concentration
+            line = self.plot_elements['periodic'][self.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
+            concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
+            
+            # for all labels if there is data
+            if len(concentration) >= 1:
+                if data_label != 'observations':
+                    exp_alias = self.read_instance.experiments[data_label]
+                    text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration[0])
+                else:
+                    text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
+                                                            concentration[0])
+        
+        self.periodic_annotation[resolution].set_text(text_label)
+
+        return None
+
+    def hover_periodic_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the periodic plot. """
+        
+        # activate hover over periodic
+        if ('periodic' in self.read_instance.active_dashboard_plots):
+            for resolution in self.read_instance.relevant_temporal_resolutions:
+                if event.inaxes == self.plot_axes['periodic'][resolution]:
+                    if ((hasattr(self.plot, 'periodic_plot')) and ('periodic' in self.plot_elements)
+                        and (self.lock_periodic_annotation[resolution] == False)):
+
+                        # lock annotation
+                        self.lock_periodic_annotation[resolution] = True
+                        is_contained = False
+
+                        for data_label in self.plot_elements['data_labels_active']:
+
+                            # skip observations for bias plot
+                            if self.plot_elements['periodic']['active'] == 'bias' and data_label == 'observations':
+                                continue
+
+                            # do not annotate if plot is cleared
+                            if data_label not in self.plot_elements['periodic'][self.plot_elements['periodic']['active']].keys():
+                                continue
+                            
+                            line = self.plot_elements['periodic'][self.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
+                            is_contained, annotation_index = line.contains(event)
+                            if is_contained:
+                                self.periodic_annotate_data_label = data_label
+                                break
+                        
+                        if is_contained:
+                            # update annotation if hovered
+                            self.update_periodic_annotation(annotation_index, resolution)
+                            self.periodic_annotation[resolution].set_visible(True)
+                            self.periodic_vline[resolution].set_visible(True)
+                        else:
+                            # hide annotation if not hovered
+                            if self.periodic_annotation[resolution].get_visible():
+                                self.periodic_annotation[resolution].set_visible(False)
+                                self.periodic_vline[resolution].set_visible(False)
+                                
+                        # redraw points
+                        self.figure.canvas.draw()
+                        self.figure.canvas.flush_events()
+                            
+                        # unlock annotation 
+                        self.lock_periodic_annotation[resolution] = False
+
+        return None
+
+    def create_periodic_violin_annotation(self):
+        """ Create annotation at (0, 0) that will be updated later. """
+
+        # in the newest version of matplotlib, s corresponds to text
+        self.periodic_violin_annotation = dict()
+        for resolution in self.plot_axes['periodic-violin'].keys():
+            self.periodic_violin_annotation[resolution] = self.plot_axes['periodic-violin'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
+                                                                                                                 **self.plot_characteristics['periodic-violin']['marker_annotate'],
+                                                                                                                 bbox={**self.plot_characteristics['periodic-violin']['marker_annotate_bbox']},
+                                                                                                                 arrowprops={**self.plot_characteristics['periodic-violin']['marker_annotate_arrowprops']})
+            self.periodic_violin_annotation[resolution].set_visible(False)
+
+        return None
+
+    def create_periodic_violin_annotation_vline(self):
+        """ Create annotation vertical line at (0, 0) that will be updated later. """
+
+        # add vertical line
+        self.periodic_violin_vline = dict()
+        for resolution in self.plot_axes['periodic-violin'].keys():
+            self.periodic_violin_vline[resolution] = self.plot_axes['periodic-violin'][resolution].axvline(0, **self.plot_characteristics['periodic-violin']['marker_annotate_vline'])
+            self.periodic_violin_vline[resolution].set_visible(False)
+
+        return None
+
+    def update_periodic_violin_annotation(self, annotation_index, resolution):
+        """ Update annotation for each periodic violin point that is hovered. """
+        
+        for data_label in self.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.periodic_violin_annotate_data_label:
+                
+                # skip observations for bias plot
+                if self.plot_elements['periodic-violin']['active'] == 'bias' and data_label == 'observations':
+                    continue
+                
+                # do not annotate if plot is cleared
+                if data_label not in self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']].keys():
+                    continue
+
+                # retrieve time and concentration
+                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+                time = line.get_xdata()[annotation_index['ind'][0]]
+                concentration = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.periodic_violin_annotation[resolution].xy = (time, concentration)
+                self.periodic_violin_vline[resolution].set_xdata(time)
+
+                # update bbox position
+                time_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if time > time_middle:
+                    self.periodic_violin_annotation[resolution].set_x(-10)
+                    self.periodic_violin_annotation[resolution].set_ha('right')
+                else:
+                    self.periodic_violin_annotation[resolution].set_x(10)
+                    self.periodic_violin_annotation[resolution].set_ha('left')
+
+                # create annotation text
+                if resolution == 'hour':
+                    resolution_text = 'Hour'
+                    time_text = time
+                else:
+                    time_options = [self.temporal_axis_mapping_dict['long'][resolution][xtick] 
+                                    for xtick in self.periodic_xticks[resolution]]
+                    time_text = time_options[time-1]
+                    if resolution == 'dayofweek':
+                        resolution_text = 'Day'
+                    elif resolution == 'month':
+                        resolution_text = 'Month'
+                text_label = ('{0}: {1}').format(resolution_text, time_text)
+        
+        for data_label in self.plot_elements['data_labels_active']:
+            
+            # skip observations for bias plot
+            if self.plot_elements['periodic-violin']['active'] == 'bias' and data_label == 'observations':
+                continue
+            
+            # retrieve concentration
+            line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+            concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
+            
+            # for all labels if there is data
+            if len(concentration) >= 1:
+                if data_label != 'observations':
+                    exp_alias = self.read_instance.experiments[data_label]
+                    text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration[0])
+                else:
+                    text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
+                                                            concentration[0])
+        
+        self.periodic_violin_annotation[resolution].set_text(text_label)
+
+        return None
+
+    def hover_periodic_violin_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the periodic violin plot. """
+        
+        # activate hover over periodic violin
+        if ('periodic-violin' in self.read_instance.active_dashboard_plots):
+            for resolution in self.read_instance.relevant_temporal_resolutions:
+                if event.inaxes == self.plot_axes['periodic-violin'][resolution]:
+                    if ((hasattr(self.plot, 'violin_plot')) and ('periodic-violin' in self.plot_elements)
+                        and (self.lock_periodic_violin_annotation[resolution] == False)):
+                        
+                        # lock annotation
+                        self.lock_periodic_violin_annotation[resolution] = True
+                        is_contained = False
+
+                        for data_label in self.plot_elements['data_labels_active']:
+
+                            # skip observations for bias plot
+                            if self.plot_elements['periodic-violin']['active'] == 'bias' and data_label == 'observations':
+                                continue
+
+                            # do not annotate if plot is cleared
+                            if data_label not in self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']].keys():
+                                continue
+                            
+                            line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+                            is_contained, annotation_index = line.contains(event)
+                            if is_contained:
+                                self.periodic_violin_annotate_data_label = data_label
+                                break
+                        
+                        if is_contained:
+                            # update annotation if hovered
+                            self.update_periodic_violin_annotation(annotation_index, resolution)
+                            self.periodic_violin_annotation[resolution].set_visible(True)
+                            self.periodic_violin_vline[resolution].set_visible(True)
+                        else:
+                            # hide annotation if not hovered
+                            if self.periodic_violin_annotation[resolution].get_visible():
+                                self.periodic_violin_annotation[resolution].set_visible(False)
+                                self.periodic_violin_vline[resolution].set_visible(False)
+                                
+                        # redraw points
+                        self.figure.canvas.draw()
+                        self.figure.canvas.flush_events()
+                            
+                        # unlock annotation 
+                        self.lock_periodic_violin_annotation[resolution] = False
 
         return None
 
