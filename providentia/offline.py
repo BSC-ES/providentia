@@ -189,7 +189,7 @@ class ProvidentiaOffline:
 
             # get subsection names
             self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
-                                           if self.section == subsection_name.split('|')[0]]
+                                           if self.section == subsection_name.split('·')[0]]
             if len(self.child_subsection_names) > 0:
                 self.subsections = self.child_subsection_names
             else:
