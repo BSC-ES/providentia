@@ -936,7 +936,36 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_timeseries_annotation = False
             canvas_instance.timeseries_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                     canvas_instance.hover_timeseries_annotation)
+
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
+        elif changed_plot_type == 'scatter':
+
+            # setup scatter annotation
+            canvas_instance.create_scatter_annotation()
+            canvas_instance.lock_scatter_annotation = False
+            canvas_instance.scatter_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                 canvas_instance.hover_scatter_annotation)
+
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
+        elif changed_plot_type == 'distribution':
+
+            # setup distribution annotation
+            canvas_instance.create_distribution_annotation()
+            canvas_instance.create_distribution_annotation_vline()
+            canvas_instance.lock_distribution_annotation = False
+            canvas_instance.distribution_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                      canvas_instance.hover_distribution_annotation)
+
         elif changed_plot_type == 'periodic':
+            
+            # setup periodic annotation
+            canvas_instance.create_periodic_annotation()
+            canvas_instance.create_periodic_annotation_vline()
+            canvas_instance.lock_periodic_annotation = dict()
+            for resolution in canvas_instance.plot_axes['periodic'].keys():
+                canvas_instance.lock_periodic_annotation[resolution] = False
+            canvas_instance.periodic_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                  canvas_instance.hover_periodic_annotation)
 
             # update periodic statistic combobox
             self.block_config_bar_handling_updates = False
@@ -952,6 +981,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # update periodic statistic in dashboard
             canvas_instance.handle_periodic_statistic_update()
+
+        elif changed_plot_type == 'periodic-violin':
+            
+            # setup periodic violin annotation
+            canvas_instance.create_periodic_violin_annotation()
+            canvas_instance.create_periodic_violin_annotation_vline()
+            canvas_instance.lock_periodic_violin_annotation = dict()
+            for resolution in canvas_instance.plot_axes['periodic-violin'].keys():
+                canvas_instance.lock_periodic_violin_annotation[resolution] = False
+            canvas_instance.periodic_violin_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                         canvas_instance.hover_periodic_violin_annotation)
 
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
