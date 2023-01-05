@@ -611,7 +611,7 @@ def read_conf(fpath=None):
                 subsection = line.strip()
                 # if first character is comment do not parse subsection
                 if subsection[0] != '#':
-                    subsection_modified = section_modified + '|' + line.split('[[')[1].split(']]')[0]
+                    subsection_modified = section_modified + '·' + line.split('[[')[1].split(']]')[0]
                     subsections.append(subsection)
                     subsections_modified.append(subsection_modified)
                     all_sections_modified.append(subsection_modified)
@@ -702,9 +702,9 @@ def read_conf(fpath=None):
     for section_modified in all_sections_modified:
         
         # determine if subsection or not
-        if '|' in section_modified:
+        if '·' in section_modified:
             is_subsection = True
-            par_section = section_modified.split('|')[0]
+            par_section = section_modified.split('·')[0]
             # add attributes from parent section
             for par_k, par_val in config[par_section].items():
                 # if first character of key is comment character (#), do not parse this attribute
