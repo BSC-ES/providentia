@@ -58,7 +58,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     self.current_config = self.sub_opts[kwargs['section']]
                 else:
                     error = 'Error: The section specified in the command line does not exist.'
-                    tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) before the subsection name (e.g. SECTIONA·Spain).'
+                    tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                    tip += 'before the subsection name (e.g. SECTIONA·Spain).'
                     sys.exit(error + '\n' + tip)
 
             elif 'section' not in kwargs:
