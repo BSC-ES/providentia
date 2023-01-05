@@ -982,6 +982,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update periodic statistic in dashboard
             canvas_instance.handle_periodic_statistic_update()
 
+        elif changed_plot_type == 'periodic-violin':
+            
+            # setup periodic violin annotation
+            canvas_instance.create_periodic_violin_annotation()
+            canvas_instance.create_periodic_violin_annotation_vline()
+            canvas_instance.lock_periodic_violin_annotation = dict()
+            for resolution in canvas_instance.plot_axes['periodic-violin'].keys():
+                canvas_instance.lock_periodic_violin_annotation[resolution] = False
+            canvas_instance.periodic_violin_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                         canvas_instance.hover_periodic_violin_annotation)
+
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
             and MPL canvas upon pressing of READ button.
