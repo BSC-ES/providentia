@@ -287,7 +287,8 @@ class Plot:
 
                 # add gridlines ?
                 if 'gridlines' in plot_characteristics_vars:
-                    ax_to_format.gridlines(crs=self.canvas_instance.datacrs, **plot_characteristics['gridlines'])
+                    ax_to_format.gridlines(crs=self.canvas_instance.datacrs, 
+                                           **plot_characteristics['gridlines'])
 
                 # set map extent (if wanted)
                 if set_extent:
@@ -702,7 +703,14 @@ class Plot:
                                                       self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds], 
                                                       c=z_statistic, transform=self.canvas_instance.datacrs,
                                                       **plot_characteristics['plot'])
-
+        
+        # add gridlines
+        """
+        if 'gridlines' in plot_characteristics:
+            self.canvas_instance.map_gl = relevant_axis.gridlines(crs=self.canvas_instance.datacrs, 
+                                                                  **plot_characteristics['gridlines'])
+            print('add map gl')
+        """
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
             self.track_plot_elements('observations', 'map', 'plot', [self.stations_scatter], bias=False)

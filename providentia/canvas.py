@@ -388,7 +388,8 @@ class MPLCanvas(FigureCanvas):
             self.absolute_non_selected_station_inds = np.array([], dtype=np.int)
 
             # plot map with 0 stations
-            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, self.plot_characteristics['map'])
+            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, 
+                               self.plot_characteristics['map'])
 
             # activate map
             self.activate_axis(self.plot_axes['map'], 'map')
@@ -436,6 +437,7 @@ class MPLCanvas(FigureCanvas):
 
         # re-draw (needed to update plotted colours before update_map_station_selection)
         self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
 
         # update map selection appropriately for z statistic
         self.update_map_station_selection()
@@ -483,7 +485,7 @@ class MPLCanvas(FigureCanvas):
                     # set new markersizes and alphas
                     collection.set_sizes(markersizes)
                     collection.set_facecolor(rgba_tuples)
-                    
+        
         # redraw points
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
@@ -898,8 +900,9 @@ class MPLCanvas(FigureCanvas):
                 ax_to_remove.artists = list(np.delete(np.array(ax_to_remove.artists), inds_to_remove))
 
                 inds_to_remove = []
-                for col_ii, col in enumerate(ax_to_remove.collections):            
-                    if isinstance(col, matplotlib.collections.PathCollection):
+                for col_ii, col in enumerate(ax_to_remove.collections): 
+                    if ((isinstance(col, matplotlib.collections.PathCollection))
+                        or (isinstance(col, matplotlib.collections.LineCollection))):
                         inds_to_remove.append(col_ii)
                 ax_to_remove.collections = list(np.delete(np.array(ax_to_remove.collections), inds_to_remove))
 
