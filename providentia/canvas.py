@@ -251,7 +251,7 @@ class MPLCanvas(FigureCanvas):
     def handle_resampling_update(self):
         """ Function which handles updates of resampling. """
 
-        if self.read_instance.temporal_colocation == False:
+        if (self.read_instance.temporal_colocation == False) and (len(self.read_instance.data_labels) > 1):
             print('Warning: It is not possible to resample the data without first activating the temporal colocation.')
             self.read_instance.cb_resampling_switch.setChecked(False)
             return
@@ -3659,48 +3659,49 @@ class MPLCanvas(FigureCanvas):
         
         # activate hover over periodic
         if ('periodic' in self.read_instance.active_dashboard_plots):
-            for resolution in self.read_instance.relevant_temporal_resolutions:
-                if event.inaxes == self.plot_axes['periodic'][resolution]:
-                    if ((hasattr(self.plot, 'periodic_plot')) and ('periodic' in self.plot_elements)
-                        and (self.lock_periodic_annotation[resolution] == False)):
+            if hasattr(self.read_instance, 'relevant_temporal_resolutions'):
+                for resolution in self.read_instance.relevant_temporal_resolutions:
+                    if event.inaxes == self.plot_axes['periodic'][resolution]:
+                        if ((hasattr(self.plot, 'periodic_plot')) and ('periodic' in self.plot_elements)
+                            and (self.lock_periodic_annotation[resolution] == False)):
 
-                        # lock annotation
-                        self.lock_periodic_annotation[resolution] = True
-                        is_contained = False
+                            # lock annotation
+                            self.lock_periodic_annotation[resolution] = True
+                            is_contained = False
 
-                        for data_label in self.plot_elements['data_labels_active']:
+                            for data_label in self.plot_elements['data_labels_active']:
 
-                            # skip observations for bias plot
-                            if self.plot_elements['periodic']['active'] == 'bias' and data_label == 'observations':
-                                continue
+                                # skip observations for bias plot
+                                if self.plot_elements['periodic']['active'] == 'bias' and data_label == 'observations':
+                                    continue
 
-                            # do not annotate if plot is cleared
-                            if data_label not in self.plot_elements['periodic'][self.plot_elements['periodic']['active']].keys():
-                                continue
-                            
-                            line = self.plot_elements['periodic'][self.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
-                            is_contained, annotation_index = line.contains(event)
-                            if is_contained:
-                                self.periodic_annotate_data_label = data_label
-                                break
-                        
-                        if is_contained:
-                            # update annotation if hovered
-                            self.update_periodic_annotation(annotation_index, resolution)
-                            self.periodic_annotation[resolution].set_visible(True)
-                            self.periodic_vline[resolution].set_visible(True)
-                        else:
-                            # hide annotation if not hovered
-                            if self.periodic_annotation[resolution].get_visible():
-                                self.periodic_annotation[resolution].set_visible(False)
-                                self.periodic_vline[resolution].set_visible(False)
+                                # do not annotate if plot is cleared
+                                if data_label not in self.plot_elements['periodic'][self.plot_elements['periodic']['active']].keys():
+                                    continue
                                 
-                        # redraw points
-                        self.figure.canvas.draw()
-                        self.figure.canvas.flush_events()
+                                line = self.plot_elements['periodic'][self.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
+                                is_contained, annotation_index = line.contains(event)
+                                if is_contained:
+                                    self.periodic_annotate_data_label = data_label
+                                    break
                             
-                        # unlock annotation 
-                        self.lock_periodic_annotation[resolution] = False
+                            if is_contained:
+                                # update annotation if hovered
+                                self.update_periodic_annotation(annotation_index, resolution)
+                                self.periodic_annotation[resolution].set_visible(True)
+                                self.periodic_vline[resolution].set_visible(True)
+                            else:
+                                # hide annotation if not hovered
+                                if self.periodic_annotation[resolution].get_visible():
+                                    self.periodic_annotation[resolution].set_visible(False)
+                                    self.periodic_vline[resolution].set_visible(False)
+                                    
+                            # redraw points
+                            self.figure.canvas.draw()
+                            self.figure.canvas.flush_events()
+                                
+                            # unlock annotation 
+                            self.lock_periodic_annotation[resolution] = False
 
         return None
 
@@ -3805,48 +3806,49 @@ class MPLCanvas(FigureCanvas):
         
         # activate hover over periodic violin
         if ('periodic-violin' in self.read_instance.active_dashboard_plots):
-            for resolution in self.read_instance.relevant_temporal_resolutions:
-                if event.inaxes == self.plot_axes['periodic-violin'][resolution]:
-                    if ((hasattr(self.plot, 'violin_plot')) and ('periodic-violin' in self.plot_elements)
-                        and (self.lock_periodic_violin_annotation[resolution] == False)):
-                        
-                        # lock annotation
-                        self.lock_periodic_violin_annotation[resolution] = True
-                        is_contained = False
-
-                        for data_label in self.plot_elements['data_labels_active']:
-
-                            # skip observations for bias plot
-                            if self.plot_elements['periodic-violin']['active'] == 'bias' and data_label == 'observations':
-                                continue
-
-                            # do not annotate if plot is cleared
-                            if data_label not in self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']].keys():
-                                continue
+            if hasattr(self.read_instance, 'relevant_temporal_resolutions'):
+                for resolution in self.read_instance.relevant_temporal_resolutions:
+                    if event.inaxes == self.plot_axes['periodic-violin'][resolution]:
+                        if ((hasattr(self.plot, 'violin_plot')) and ('periodic-violin' in self.plot_elements)
+                            and (self.lock_periodic_violin_annotation[resolution] == False)):
                             
-                            line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
-                            is_contained, annotation_index = line.contains(event)
-                            if is_contained:
-                                self.periodic_violin_annotate_data_label = data_label
-                                break
-                        
-                        if is_contained:
-                            # update annotation if hovered
-                            self.update_periodic_violin_annotation(annotation_index, resolution)
-                            self.periodic_violin_annotation[resolution].set_visible(True)
-                            self.periodic_violin_vline[resolution].set_visible(True)
-                        else:
-                            # hide annotation if not hovered
-                            if self.periodic_violin_annotation[resolution].get_visible():
-                                self.periodic_violin_annotation[resolution].set_visible(False)
-                                self.periodic_violin_vline[resolution].set_visible(False)
+                            # lock annotation
+                            self.lock_periodic_violin_annotation[resolution] = True
+                            is_contained = False
+
+                            for data_label in self.plot_elements['data_labels_active']:
+
+                                # skip observations for bias plot
+                                if self.plot_elements['periodic-violin']['active'] == 'bias' and data_label == 'observations':
+                                    continue
+
+                                # do not annotate if plot is cleared
+                                if data_label not in self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']].keys():
+                                    continue
                                 
-                        # redraw points
-                        self.figure.canvas.draw()
-                        self.figure.canvas.flush_events()
+                                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+                                is_contained, annotation_index = line.contains(event)
+                                if is_contained:
+                                    self.periodic_violin_annotate_data_label = data_label
+                                    break
                             
-                        # unlock annotation 
-                        self.lock_periodic_violin_annotation[resolution] = False
+                            if is_contained:
+                                # update annotation if hovered
+                                self.update_periodic_violin_annotation(annotation_index, resolution)
+                                self.periodic_violin_annotation[resolution].set_visible(True)
+                                self.periodic_violin_vline[resolution].set_visible(True)
+                            else:
+                                # hide annotation if not hovered
+                                if self.periodic_violin_annotation[resolution].get_visible():
+                                    self.periodic_violin_annotation[resolution].set_visible(False)
+                                    self.periodic_violin_vline[resolution].set_visible(False)
+                                    
+                            # redraw points
+                            self.figure.canvas.draw()
+                            self.figure.canvas.flush_events()
+                                
+                            # unlock annotation 
+                            self.lock_periodic_violin_annotation[resolution] = False
 
         return None
 
