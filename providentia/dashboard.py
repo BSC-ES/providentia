@@ -766,6 +766,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             elif event_source == self.cb_resampling_resolution:
                 self.selected_resampling_resolution = changed_param
+                self.cb_resampling_switch.setChecked(False)
 
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
