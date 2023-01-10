@@ -21,6 +21,7 @@ from PyQt5 import QtCore
 
 from .statistics import get_z_statistic_info
 from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases
+from .dashboard_aux import MessageBox
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -1399,10 +1400,16 @@ class Plot:
 
         # get stats wished to be annotated
         stats = plot_characteristics['annotate_stats']
-
+        
         # if no stats defined, then return
         if len(stats) == 0:
-            print(f'Warning: No annotation statistics have not been defined for {base_plot_type} in plot_characteristics_offline.py')
+            msg = 'No annotation statistics are defined for {} '.format(base_plot_type)
+            if self.read_instance.offline:
+                msg += 'in plot_characteristics_offline.json.'
+                print('Warning:' + msg)
+            else:
+                msg += 'in plot_characteristics_dashboard.json.'
+                MessageBox(msg)
             return
 
         # initialise list of strs to annotate, and colours of annotations
