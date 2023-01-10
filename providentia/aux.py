@@ -802,7 +802,7 @@ def period_conf(instance):
     from .configuration import split_options
 
     if hasattr(instance, 'period'):
-        keeps, removes = split_options(instance.period)
+        keeps, removes = split_options(instance, instance.period)
         instance.period_menu['checkboxes']['keep_selected'] = keeps
         instance.period_menu['checkboxes']['remove_selected'] = removes
 
@@ -836,7 +836,7 @@ def metadata_conf(instance):
         # and then treat the keep/remove
         for label in instance.metadata_menu[menu_type]['navigation_buttons']['labels']:
             if hasattr(instance, label):
-                keeps, removes = split_options(getattr(instance, label))
+                keeps, removes = split_options(instance, getattr(instance, label))
                 instance.metadata_menu[menu_type][label]['checkboxes']['keep_selected'] = keeps
                 instance.metadata_menu[menu_type][label]['checkboxes']['remove_selected'] = removes
 

@@ -107,7 +107,11 @@ class DataFilter:
                 upper_bound = np.float32(upper_bound)
             # if any of the fields are not numbers, return from function
             except ValueError:
-                print("Warning: Data limit fields must be numeric")
+                msg = 'Data limit fields must be numeric.'
+                if self.read_instance.offline:
+                    print('Warning:' + msg)
+                else:
+                    MessageBox(msg)
                 return
 
             # filter all observational/experiment data out of bounds of lower/upper limits
@@ -121,7 +125,7 @@ class DataFilter:
         keeps, removes = [], []
         if self.read_instance.offline:
             if hasattr(self.read_instance, 'period'):
-                keeps, removes = split_options(self.read_instance.period)
+                keeps, removes = split_options(self.read_instance, self.read_instance.period)
         else:
             keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
             removes = self.read_instance.period_menu['checkboxes']['remove_selected']
@@ -220,7 +224,11 @@ class DataFilter:
                     np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
         # if any of the fields are not numbers, return from function
         except ValueError:
-            print("Warning: Data availability fields must be numeric")
+            msg = 'Data availability fields must be numeric.'
+            if self.read_instance.offline:
+                print('Warning:' + msg)
+            else:
+                MessageBox(msg)
             return
 
         # filter observations by native percentage data availability variables (only GHOST data)
@@ -396,11 +404,10 @@ class DataFilter:
                                 'rangeboxes']['current_upper'][meta_var_index])
                 return True
             except ValueError as e:
+                msg = "Error in metadata fields. The field of '{}' should be numeric.".format(meta_var)
                 if self.read_instance.offline:
-                    print("Warning: Error in metadata fields. The field of '{}' "
-                          "should be numeric".format(meta_var))
+                    print('Warning:' + msg)
                 else:
-                    msg = "Error in metadata fields. The field of '{}' should be numeric.".format(meta_var)
                     MessageBox(msg)
                     self.read_instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
                 return False
