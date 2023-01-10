@@ -105,15 +105,19 @@ def wrap_tooltip_text(tooltip_text, max_width):
 
 class ComboBox(QtWidgets.QComboBox):
     """ Modify default class of PyQT5 combobox to always dropdown from fixed
-        position box postion, stopping truncation of data. """
+        position box position, stopping truncation of data. """
 
+    def __init__(self, parent=None):
+        
+        super(ComboBox, self).__init__(parent)
+        
     def showPopup(self):
         """ Shows popups. """
 
-        QtWidgets.QComboBox.showPopup(self)
-        self.view().parent().move(self.mapToGlobal(QtCore.QPoint()))
+        super().showPopup()
+        #self.view().parent().move(self.mapToGlobal(QtCore.QPoint(0, 0)))
         #self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-
+        
 class CheckableComboBox(QtWidgets.QComboBox):
     """ Create combobox with multiple selection options.
         Reference: https://gis.stackexchange.com/questions/350148/qcombobox-multiple-selection-pyqt5. 
@@ -170,6 +174,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
                 else:
                     item.setCheckState(QtCore.Qt.Checked)
                 return True
+
         return False
 
     def showPopup(self):
@@ -241,8 +246,8 @@ class CheckableComboBox(QtWidgets.QComboBox):
 class QVLine(QtWidgets.QFrame):
     """ Define class that generates vertical separator line. """
 
-    def __init__(self):
-        super(QVLine, self).__init__()
+    def __init__(self, parent=None):
+        super(QVLine, self).__init__(parent)
         self.setFrameShape(QtWidgets.QFrame.VLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
