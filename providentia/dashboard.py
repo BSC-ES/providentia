@@ -2,7 +2,7 @@
 from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow
+from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow, MessageBox, InputDialog
 from .dashboard_aux import set_formatting
 from .read import DataReader
 from providentia import aux
@@ -66,16 +66,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 # config defined, section undefined
                 aux.load_conf(self, fpath=kwargs['config'])    
                 all_sections = self.sub_opts.keys()
+                
                 if len(all_sections) == 1:
                     okpressed = False
                     selected_section = list(all_sections)[0]
                 else:
-                    selected_section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
-                                                                                 'Select section to load',  
-                                                                                 all_sections, 0, False)
+                    title = 'Sections'
+                    msg = 'Select section to load'
+                    dialog = InputDialog(self, title, msg, all_sections)
+                    selected_section, okpressed = dialog.selected_option, dialog.okpressed
+
                 if okpressed or (len(all_sections) == 1):
                     self.from_conf = True
                     self.current_config = self.sub_opts[selected_section]
+
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
@@ -369,8 +373,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.le_end_date, 2, 2, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_QA, 1, 3, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_flags, 2, 3, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_multispecies, 1, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_experiments, 2, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_experiments, 1, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_multispecies, 2, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_colocate, 1, 5, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_1, 0, 6, 4, 1, QtCore.Qt.AlignLeft)
@@ -1045,7 +1049,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # inform user of this
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {} 
-            print('Warning: "spatial_colocation" must be set to True if wanting to use "filter_species" option.')
+            msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
+            MessageBox(msg)
 
         # set read operations to be empty list initially
         read_operations = []
