@@ -6,9 +6,7 @@ import time
 import json
 from textwrap import wrap
 import numpy as np
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
-from PyQt5 import QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 from functools import partial
 from .aux import update_filter_species
 
