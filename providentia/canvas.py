@@ -1483,21 +1483,21 @@ class MPLCanvas(FigureCanvas):
                                             formatting_dict['settings_container'])
         self.map_container.setGeometry(self.map_menu_button.geometry().x()-230,
                                        self.map_menu_button.geometry().y()+25, 
-                                       250, 440)
+                                       250, 430)
         self.map_container.hide()
 
         # add settings label
         self.map_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
                                                  formatting_dict['settings_label'])
         self.map_settings_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                            self.map_menu_button.geometry().y()+40, 
+                                            self.map_menu_button.geometry().y()+30, 
                                             230, 20)
         self.map_settings_label.hide()
 
         # add map stat label ('Statistic') to layout
         self.map_z_stat_label = QtWidgets.QLabel('Statistic', self)
         self.map_z_stat_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                          self.map_menu_button.geometry().y()+60, 
+                                          self.map_menu_button.geometry().y()+50, 
                                           230, 20)
         self.map_z_stat_label.hide()
 
@@ -1505,14 +1505,14 @@ class MPLCanvas(FigureCanvas):
         self.map_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z_stat.AdjustToContents
         self.map_z_stat.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                    self.map_menu_button.geometry().y()+85, 
+                                    self.map_menu_button.geometry().y()+75, 
                                     110, 20)
         self.map_z_stat.hide()
 
         # add map dataset 1 label ('Dataset 1') to layout
         self.map_z1_label = QtWidgets.QLabel('Dataset 1', self)
         self.map_z1_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                      self.map_menu_button.geometry().y()+110, 
+                                      self.map_menu_button.geometry().y()+100, 
                                       230, 20)
         self.map_z1_label.hide()
 
@@ -1520,14 +1520,14 @@ class MPLCanvas(FigureCanvas):
         self.map_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z1.AdjustToContents
         self.map_z1.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                self.map_menu_button.geometry().y()+135, 
+                                self.map_menu_button.geometry().y()+125, 
                                 110, 20)
         self.map_z1.hide()
 
         # add map dataset 2 label ('Dataset 2') to layout
         self.map_z2_label = QtWidgets.QLabel('Dataset 2', self)
         self.map_z2_label.setGeometry(self.map_menu_button.geometry().x()-100, 
-                                      self.map_menu_button.geometry().y()+110, 
+                                      self.map_menu_button.geometry().y()+100, 
                                       230, 20)
         self.map_z2_label.hide()
 
@@ -1535,14 +1535,14 @@ class MPLCanvas(FigureCanvas):
         self.map_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z2.AdjustToContents
         self.map_z2.setGeometry(self.map_menu_button.geometry().x()-100, 
-                                self.map_menu_button.geometry().y()+135, 
+                                self.map_menu_button.geometry().y()+125, 
                                 110, 20)
         self.map_z2.hide()
 
         # add map general text for unselected stations ('Unselected stations')
         self.map_unsel_label = QtWidgets.QLabel("Unselected stations", self)
         self.map_unsel_label.setGeometry(self.map_menu_button.geometry().x()-220,
-                                         self.map_menu_button.geometry().y()+160, 
+                                         self.map_menu_button.geometry().y()+150, 
                                          230, 20)
         self.map_unsel_label.hide()
 
@@ -1550,7 +1550,7 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_unsel_sl_label = QtWidgets.QLabel('Size', self)
         self.map_markersize_unsel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_markersize_unsel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220,
-                                                       self.map_menu_button.geometry().y()+185, 
+                                                       self.map_menu_button.geometry().y()+175, 
                                                        230, 20)
         self.map_markersize_unsel_sl_label.hide()
 
@@ -1562,7 +1562,7 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['s'])
         self.map_markersize_unsel_sl.setTickInterval(2)
         self.map_markersize_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                 self.map_menu_button.geometry().y()+210, 
+                                                 self.map_menu_button.geometry().y()+200, 
                                                  230, 20)
         self.map_markersize_unsel_sl.hide()
 
@@ -1570,7 +1570,7 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_unsel_sl_label = QtWidgets.QLabel('Opacity', self)
         self.map_opacity_unsel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_opacity_unsel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                    self.map_menu_button.geometry().y()+235, 
+                                                    self.map_menu_button.geometry().y()+225, 
                                                     230, 20)
         self.map_opacity_unsel_sl_label.hide()
 
@@ -1582,14 +1582,14 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['alpha']*10)
         self.map_opacity_unsel_sl.setTickInterval(1)
         self.map_opacity_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                              self.map_menu_button.geometry().y()+260, 
+                                              self.map_menu_button.geometry().y()+250, 
                                               230, 20)
         self.map_opacity_unsel_sl.hide()
 
         # add map general text for selected stations ('Selected stations')
         self.map_sel_label = QtWidgets.QLabel("Selected stations", self)
         self.map_sel_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                       self.map_menu_button.geometry().y()+285, 
+                                       self.map_menu_button.geometry().y()+275, 
                                        230, 20)
         self.map_sel_label.hide()
 
@@ -1597,7 +1597,7 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_sel_sl_label = QtWidgets.QLabel('Size', self)
         self.map_markersize_sel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_markersize_sel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                     self.map_menu_button.geometry().y()+310, 
+                                                     self.map_menu_button.geometry().y()+300, 
                                                      230, 20)
         self.map_markersize_sel_sl_label.hide()
 
@@ -1609,7 +1609,7 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['s'])
         self.map_markersize_sel_sl.setTickInterval(2)
         self.map_markersize_sel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                               self.map_menu_button.geometry().y()+335, 
+                                               self.map_menu_button.geometry().y()+325, 
                                                230, 20)
         self.map_markersize_sel_sl.hide()
 
@@ -1617,7 +1617,7 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_sel_sl_label = QtWidgets.QLabel('Opacity', self)
         self.map_opacity_sel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_opacity_sel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                  self.map_menu_button.geometry().y()+360, 
+                                                  self.map_menu_button.geometry().y()+350, 
                                                   230, 20)
         self.map_opacity_sel_sl_label.hide()
 
@@ -1629,14 +1629,14 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['alpha']*10)
         self.map_opacity_sel_sl.setTickInterval(1)
         self.map_opacity_sel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                            self.map_menu_button.geometry().y()+385, 
+                                            self.map_menu_button.geometry().y()+375, 
                                             230, 20)
         self.map_opacity_sel_sl.hide()
 
         # add map options name ('Options') to layout
         self.map_options_label = QtWidgets.QLabel("Options", self)
         self.map_options_label.setGeometry(self.map_menu_button.geometry().x()-220,
-                                           self.map_menu_button.geometry().y()+410, 
+                                           self.map_menu_button.geometry().y()+400, 
                                            230, 20)
         self.map_options_label.hide()
 
@@ -1645,7 +1645,7 @@ class MPLCanvas(FigureCanvas):
         self.map_options.setObjectName('map_options')
         self.map_options.addItems(self.plot_characteristics['map']['plot_options'])        
         self.map_options.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                     self.map_menu_button.geometry().y()+435, 
+                                     self.map_menu_button.geometry().y()+425, 
                                      230, 20)
         self.map_options.currentTextChanged.connect(self.update_plot_option)
         self.map_options.hide()
@@ -1808,6 +1808,7 @@ class MPLCanvas(FigureCanvas):
         
         # add periodic stat combobox
         self.periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.periodic_stat.AdjustToContents
         self.periodic_stat.setGeometry(self.periodic_menu_button.geometry().x()-220, 
                                        self.periodic_menu_button.geometry().y()+75, 
                                        110, 20)
