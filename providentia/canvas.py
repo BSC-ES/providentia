@@ -25,7 +25,7 @@ import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
 from .dashboard_aux import set_formatting
-from .dashboard_aux import ComboBox, CheckableComboBox
+from .dashboard_aux import ComboBox, CheckableComboBox, MessageBox
 from .aux import get_relevant_temporal_resolutions
 
 # make sure that we are using Qt5 backend with matplotlib
@@ -252,7 +252,9 @@ class MPLCanvas(FigureCanvas):
         """ Function which handles updates of resampling. """
 
         if (self.read_instance.temporal_colocation == False) and (len(self.read_instance.data_labels) > 1):
-            print('Warning: It is not possible to resample the data without first activating the temporal colocation.')
+
+            msg = 'It is not possible to resample the data without first activating the temporal colocation.'
+            MessageBox(msg)
             self.read_instance.cb_resampling_switch.setChecked(False)
             return
 
@@ -279,7 +281,8 @@ class MPLCanvas(FigureCanvas):
                 #self.figure.canvas.draw()
             
             else:
-                print('Warning: Select the data you want to plot before resampling.')
+                msg = 'Select the data you want to plot before resampling.'
+                MessageBox(msg)
                 self.read_instance.cb_resampling_switch.setChecked(False)
                 return
 
@@ -713,7 +716,8 @@ class MPLCanvas(FigureCanvas):
 
                     # if there are no temporal resolutions (only yearly), skip periodic plots
                     if (plot_type in ['periodic', 'periodic-violin']) and (not self.read_instance.relevant_temporal_resolutions):
-                        print('Warning: Currently it is not possible to get annual periodic plots.')
+                        msg = 'Currently it is not possible to get annual periodic plots.'
+                        MessageBox(msg)
 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
@@ -2557,9 +2561,9 @@ class MPLCanvas(FigureCanvas):
                             if log_validity:
                                 self.plot.log_axes(sub_ax, option, self.plot_characteristics[plot_type], undo=undo)
                             else:
-                                msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
+                                msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                 msg += "in {0} with negative values.".format(plot_type)
-                                print(msg)
+                                MessageBox(msg)
                                 self.read_instance.block_MPL_canvas_updates = True
                                 event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                 self.read_instance.block_MPL_canvas_updates = False
@@ -2570,9 +2574,9 @@ class MPLCanvas(FigureCanvas):
                             self.plot.log_axes(self.plot_axes[plot_type], option, self.plot_characteristics[plot_type], 
                                             undo=undo)
                         else:
-                            msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
+                            msg = "It is not possible to log the {0}-axis ".format(option[-1])
                             msg += "in {0} with negative values.".format(plot_type)
-                            print(msg)
+                            MessageBox(msg)
                             self.read_instance.block_MPL_canvas_updates = True
                             event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                             self.read_instance.block_MPL_canvas_updates = False
@@ -2625,7 +2629,8 @@ class MPLCanvas(FigureCanvas):
 
                     # firstly if just 1 data label then cannot make bias plot 
                     if len(list(self.selected_station_data[self.read_instance.networkspeci].keys())) == 1:
-                        print("Warning: It is not possible to make a bias plot with just observations loaded.")
+                        msg = 'It is not possible to make a bias plot with just observations loaded.'
+                        MessageBox(msg)
                         self.read_instance.block_MPL_canvas_updates = True
                         event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                         self.read_instance.block_MPL_canvas_updates = False
