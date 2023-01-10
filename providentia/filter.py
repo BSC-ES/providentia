@@ -7,6 +7,7 @@ import pandas as pd
 
 from PyQt5 import QtWidgets
 from providentia import aux
+from .dashboard_aux import MessageBox
 
 class DataFilter:
     """ Class that filters observational/experiment data into memory as required. """
@@ -381,13 +382,13 @@ class DataFilter:
 
     def validate_values(self):
         """ Validate that field inserted by user is float. """
-
+        
         # iterate through metadata in memory
         for meta_var in self.read_instance.metadata_vars_to_read:
-
+            
             metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
             metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
-
+            
             if metadata_data_type != np.object:
                 meta_var_index = self.read_instance.metadata_menu[metadata_type][
                     'rangeboxes']['labels'].index(meta_var)
@@ -402,10 +403,10 @@ class DataFilter:
                         print("Warning: Error in metadata fields. The field of '{}' "
                               "should be numeric, \n{}".format(meta_var, str(e)))
                     else:
-                        QtWidgets.QMessageBox.critical(self.read_instance, "Error in metadata fields",
-                                                       "The field of '{}' should be numeric, \n{}"
-                                                       .format(meta_var, str(e)),
-                                                       QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+                        msg = "Error in metadata fields. The field of '{}' ".format(meta_var)
+                        msg += "should be numeric."
+                        MessageBox(msg)
+
                     return False
 
     def temporally_colocate_data(self):
