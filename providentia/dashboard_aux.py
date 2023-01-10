@@ -9,6 +9,7 @@ import numpy as np
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
+from functools import partial
 from .aux import update_filter_species
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -290,6 +291,65 @@ class Switch(QtWidgets.QPushButton):
         # add label (ON / OFF)
         painter.setPen(QtGui.QPen(text_colour))
         painter.drawText(sw_rect, QtCore.Qt.AlignCenter, label)
+
+def center(window):
+    # Reference: https://wiki.qt.io/How_to_Center_a_Window_on_the_Screen
+
+    window.setGeometry(
+        QtWidgets.QStyle.alignedRect(
+            QtCore.Qt.LeftToRight,
+            QtCore.Qt.AlignCenter,
+            window.size(),
+            QtWidgets.qApp.desktop().availableGeometry(),
+        )
+    )
+
+class MessageBox(QtWidgets.QWidget):
+
+    def __init__(self, msg, parent=None):
+
+        super().__init__(parent)
+        
+        msg_box = self.create_msg_box(msg)
+        if msg_box is not None:
+            layout = QtWidgets.QVBoxLayout(self)
+            layout.addWidget(msg_box)
+            center(self)
+
+    def create_msg_box(self, msg):
+
+        # add warning box
+        msg_box = QtWidgets.QMessageBox()
+        msg_box.setWindowTitle("Warning")
+        msg_box.setText(msg)
+
+        # add ok button
+        ok_button = set_formatting(QtWidgets.QPushButton("OK"), formatting_dict['button_popup'])
+        msg_box.addButton(ok_button, QtWidgets.QMessageBox.AcceptRole)
+
+        # create wrapper to center
+        wrapper = partial(center, msg_box)
+        QtCore.QTimer.singleShot(0, wrapper)
+        msg_box.exec_()
+
+class InputDialog(QtWidgets.QWidget):
+
+    def __init__(self, read_instance, title, msg, options, parent=None):
+
+        super().__init__(parent)
+        
+        dialog = self.create_dialog_box(read_instance, title, msg, options)
+        if dialog is not None:
+            layout = QtWidgets.QVBoxLayout(self)
+            layout.addWidget(dialog)
+            center(self) 
+
+    def create_dialog_box(self, read_instance, title, msg, options):
+
+        dialog = QtWidgets.QInputDialog(self)
+        self.selected_option, self.okpressed = dialog.getItem(read_instance, title, msg, options, 0, False)
+        if not self.okpressed:
+            return
 
 class PopUpWindow(QtWidgets.QWidget):
     """ Class that generates generalised pop-up window. """
