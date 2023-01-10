@@ -11,7 +11,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from .configuration import ProvConfiguration
 from .writing import export_data_npz, export_netcdf, export_configuration
 from providentia import aux
-from .dashboard_aux import InputDialog
+from .dashboard_aux import MessageBox, InputDialog
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -81,8 +81,8 @@ class NavigationToolbar(NavigationToolbar2QT):
                         export_netcdf(self.canvas_instance, fname)
                     QtWidgets.QApplication.restoreOverrideCursor()
                 except Exception as e:
-                    QtWidgets.QMessageBox.critical(self.canvas_instance, "Error saving file", str(e),
-                                                   QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+                    msg = 'There was an error saving the file.'
+                    MessageBox(msg)
 
     def conf_dialogs(self):
         """ Pop window for selecting configuration file. If file selcted, pops an
@@ -113,8 +113,8 @@ class NavigationToolbar(NavigationToolbar2QT):
                 self.reload_conf(selected_section, conf_to_load)
         
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self.read_instance, "Error loading configuration file",
-                                           str(e), QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
+            msg = 'There was an error loading the configuration file.'
+            MessageBox(msg)
 
     def filename_dialog(self):
         """" Open dialog to choose configuration file. """
