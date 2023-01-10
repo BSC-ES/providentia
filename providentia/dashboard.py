@@ -137,12 +137,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         return super(ProvidentiaMainWindow, self).moveEvent(event)
 
     def get_geometry(self):
-        """ Get current geometry of main Providentia window and buttons. """
+        """ Update current geometry of main Providentia window and buttons. """
 
         # get geometry of main window
         self.main_window_geometry = copy.deepcopy(self.geometry())
 
-        # get and update geometry of settings menus
+        # update geometry of setting menus
         self.update_buttons_geometry()
 
     def update_buttons_geometry(self):
@@ -173,7 +173,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     
                     # apply new geometry to menu and save button
                     menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(menu_button.x(), menu_button.y()-25, 20, 20)
+                    save_button.setGeometry(menu_button.x()-25, menu_button.y(), 20, 20)
 
                     # apply new geometry to container elements
                     for sub_element in element:
