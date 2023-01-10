@@ -5,7 +5,6 @@ import copy
 import numpy as np
 import pandas as pd
 
-from PyQt5 import QtWidgets
 from providentia import aux
 from .dashboard_aux import MessageBox
 
@@ -299,13 +298,14 @@ class DataFilter:
     def filter_by_metadata(self):
         """ Filter data by selected metadata. """
 
-        # validate fields before filtering
-        if not self.validate_values():
-            return
-
         # iterate through metadata in memory
         for meta_var in self.read_instance.metadata_vars_to_read:
             
+            # validate field before filtering
+            if not self.validate_values(meta_var):
+                # go to next variable if filter cannot be applied
+                continue
+
             if meta_var == 'lat':
                 meta_var = 'latitude'
             elif meta_var == 'lon':
@@ -380,34 +380,30 @@ class DataFilter:
                                                     self.read_instance.N_inds_per_yearmonth, axis=1)
                             self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_nan] = np.NaN
 
-    def validate_values(self):
+    def validate_values(self, meta_var):
         """ Validate that field inserted by user is float. """
         
-        # iterate through metadata in memory
-        for meta_var in self.read_instance.metadata_vars_to_read:
-            
-            metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
-            metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
-            
-            if metadata_data_type != np.object:
-                meta_var_index = self.read_instance.metadata_menu[metadata_type][
-                    'rangeboxes']['labels'].index(meta_var)
-                try:
-                    np.float32(self.read_instance.metadata_menu[metadata_type][
-                                   'rangeboxes']['current_lower'][meta_var_index])
-                    np.float32(self.read_instance.metadata_menu[metadata_type][
-                                   'rangeboxes']['current_upper'][meta_var_index])
-                    return True
-                except ValueError as e:
-                    if self.read_instance.offline:
-                        print("Warning: Error in metadata fields. The field of '{}' "
-                              "should be numeric, \n{}".format(meta_var, str(e)))
-                    else:
-                        msg = "Error in metadata fields. The field of '{}' ".format(meta_var)
-                        msg += "should be numeric."
-                        MessageBox(msg)
-
-                    return False
+        metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
+        metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
+        
+        if metadata_data_type != np.object:
+            meta_var_index = self.read_instance.metadata_menu[metadata_type][
+                'rangeboxes']['labels'].index(meta_var)
+            try:
+                np.float32(self.read_instance.metadata_menu[metadata_type][
+                                'rangeboxes']['current_lower'][meta_var_index])
+                np.float32(self.read_instance.metadata_menu[metadata_type][
+                                'rangeboxes']['current_upper'][meta_var_index])
+                return True
+            except ValueError as e:
+                if self.read_instance.offline:
+                    print("Warning: Error in metadata fields. The field of '{}' "
+                          "should be numeric".format(meta_var))
+                else:
+                    msg = "Error in metadata fields. The field of '{}' should be numeric.".format(meta_var)
+                    MessageBox(msg)
+                    self.read_instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
+                return False
 
     def temporally_colocate_data(self):
         """ Define function which temporally colocates observational and experiment data.
