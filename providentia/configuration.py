@@ -7,14 +7,14 @@ import os
 import sys
 import re
 import subprocess
-
-from .aux import check_for_ghost, multispecies_mapping, get_default_qa
-
 import numpy as np
 import pandas as pd
 
-MACHINE = os.environ.get('BSC_MACHINE', '')
+from .aux import check_for_ghost, multispecies_mapping, get_default_qa
+from .dashboard_aux import MessageBox
 
+
+MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 def parse_path(dir, f):
@@ -406,16 +406,22 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:
             default = ['EBAS']
+            msg = 'Network (network) was not defined in the configuration file. Using {} as default'.format(default)
             if self.read_instance.offline:
-                print('Warning: "network" field not defined in .conf file. Using default: {}'.format(default))
+                print('Warning:' + msg)
+            elif (not self.read_instance.offline) and (self.read_instance.from_conf):
+                MessageBox(msg)
             self.read_instance.network = default
 
         # check have species information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.species:
             default = ['sconco3']
+            msg = 'Species (species) was not defined in the configuration file. Using {} as default'.format(default)
             if self.read_instance.offline:
-                print('Warning: "species" field not defined in .conf file. Using default: {}'.format(default))
+                print('Warning:' + msg)
+            elif (not self.read_instance.offline) and (self.read_instance.from_conf):
+                MessageBox(msg)
             self.read_instance.species = default
 
         # if number of networks and species is not the same,
@@ -453,24 +459,33 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.resolution:
             default = 'hourly'
+            msg = 'Resolution (resolution) was not defined in the configuration file. Using {} as default.'.format(default)
             if self.read_instance.offline:
-                print('Warning: "resolution" field not defined in .conf file. Using default: {}'.format(default))
+                print('Warning:' + msg)
+            elif (not self.read_instance.offline) and (self.read_instance.from_conf):
+                MessageBox(msg)
             self.read_instance.resolution = default
 
         # check have start_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.start_date:
             default = '20180101'
+            msg = 'Start date (start_date) was not defined in the configuration file. Using {} as default.'.format(default)
             if self.read_instance.offline:
-                print('Warning: "start_date" field not defined in .conf file. Using default: {}'.format(default))
+                print('Warning:' + msg)
+            elif (not self.read_instance.offline) and (self.read_instance.from_conf):
+                MessageBox(msg)
             self.read_instance.start_date = default
 
         # check have end_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.end_date:
             default = '20190101'
+            msg = 'End date (end_date) was not defined in the configuration file. Using {} as default.'.format(default)
             if self.read_instance.offline:
-                print('Warning: "end_date" field not defined in .conf file. Using default: {}'.format(default))
+                print('Warning:' + msg)
+            elif (not self.read_instance.offline) and (self.read_instance.from_conf):
+                MessageBox(msg)
             self.read_instance.end_date = default
 
         # check have correct active_dashboard_plots information, 
@@ -486,7 +501,11 @@ class ProvConfiguration:
         # set filter_species to empty dict and advise user of this
         if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
             self.read_instance.filter_species = {}
-            print('Warning: "spatial_colocation" must be set to True if wanting to use "filter_species" option.')
+            msg = 'Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species.'
+            if self.read_instance.offline:
+                print('Warning:' + msg)
+            elif (not self.read_instance.offline) and (self.read_instance.from_conf):
+                MessageBox(msg)
 
         # map to multiple species if have * wildcard
         # also duplicate out associated network
@@ -572,10 +591,15 @@ class ProvConfiguration:
             self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
-        if (len(self.read_instance.network) > 1) & (len(self.read_instance.species) > 1) & (not self.read_instance.offline):
+        if ((len(self.read_instance.network) > 1) & (len(self.read_instance.species) > 1) & 
+            (not self.read_instance.offline)):
+            
+            if self.read_instance.from_conf:
+                msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
+                MessageBox(msg)
+
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
-            print('Warning: Multiple networks/species not supported for dashboard. First network / species taken.')
 
 def read_conf(fpath=None):
     """ Read configuration files. """
@@ -758,7 +782,7 @@ def write_conf(section, subsection, fpath, opts):
     with open(fpath, 'w') as configfile:
         config.write(configfile)
 
-def split_options(conf_string, separator="||"):
+def split_options(read_instance, conf_string, separator="||"):
     """ For the options in the configuration that define the keep and remove
         options. Returns the values in two lists, the keeps and removes.
     """
@@ -777,7 +801,11 @@ def split_options(conf_string, separator="||"):
             removes = removes.split(",")
             removes = [r.strip() for r in removes]
         elif ("keep:" in conf_string) and ("remove:" in conf_string):
-            print('Warning: In order to define the keep and remove options, these must be separated by ||.')
+            msg = 'In order to define the keep and remove options, these must be separated by ||.'
+            if read_instance.offline:
+                print('Warning:' + msg)
+            elif (not read_instance.offline) and (read_instance.from_conf):
+                MessageBox(msg)
     else:
         if "keep:" in conf_string:
             keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)
