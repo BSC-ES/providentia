@@ -65,7 +65,10 @@ class Plot:
 
         # add all valid defined plots to plot_characteristics
         for plot_type in plot_types:
-        
+            
+            # initialize condition
+            valid_plot_type = True
+
             # do not create empty plots
             if plot_type == 'None':
                 continue
@@ -79,21 +82,21 @@ class Plot:
             # remove plots where setting 'obs' and 'bias' options together
             if ('obs' in plot_options) & ('bias' in plot_options): 
                 if self.read_instance.offline:
-                    print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together")
-                    continue
+                    print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together.")
+                    valid_plot_type = False
 
             # if no experiments are defined, remove all bias plots 
             if ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                 if len(self.read_instance.data_labels) == 1:
                     if self.read_instance.offline:
-                        print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created')
-                        continue
+                        print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created.')
+                        valid_plot_type = False
 
             # if are making an experiment bias plot, and temporal_colocation is off, then remove plot
             if (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
                 if self.read_instance.offline:
-                    print(f'Warning: To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created')
-                    continue
+                    print(f'Warning: To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.')
+                    valid_plot_type = False
 
             # add new keys to make plots with stats (map, periodic, heatmap, table)
             if zstat:
@@ -106,18 +109,25 @@ class Plot:
                 # check all defined plot options are allowed for current plot type
                 if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
                     if self.read_instance.offline:
-                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid')
-                        continue
+                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid.')
+                        valid_plot_type = False
                 # check desired statistic is defined in stats dict
                 if base_zstat not in stats_dict:
                     if self.read_instance.offline:
                         print(f"Warning: {plot_type} cannot be created as {base_zstat} not defined in Providentia's statistical library.")
-                        continue
+                        valid_plot_type = False
                 # remove plots where setting 'obs', but z_statistic_sign is 'bias'
                 elif ('obs' in plot_options) & (z_statistic_sign == 'bias'):
                     if self.read_instance.offline:
-                        print(f"Warning: {plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set")
-                        continue
+                        print(f"Warning: {plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set.")
+                        valid_plot_type = False
+
+                if not valid_plot_type:
+                    if plot_type in self.read_instance.summary_plots_to_make:
+                        self.read_instance.summary_plots_to_make.remove(plot_type)
+                    if plot_type in self.read_instance.station_plots_to_make:
+                        self.read_instance.station.plots_to_make.remove(plot_type)
+                    continue
 
                 # add information for plot type from base plot type template 
                 self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
@@ -140,18 +150,26 @@ class Plot:
                 # check all defined plot options are allowed for current plot type
                 if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
                     if self.read_instance.offline:
-                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid')
-                        continue
+                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid.')
+                        valid_plot_type = False
                 # warning for scatter plot if the temporal colocation is not active
                 elif ('scatter' == base_plot_type) & (not self.read_instance.temporal_colocation):
                     if self.read_instance.offline:
-                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
-                        continue
+                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
+                        valid_plot_type = False
                 # warning for timeseries bias plot if the temporal colocation is not active
                 elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
                     if self.read_instance.offline:
-                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
-                        continue
+                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
+                        valid_plot_type = False
+
+                # break loop if the plot type is not valid and remove plot type from lists
+                if not valid_plot_type:
+                    if plot_type in self.read_instance.summary_plots_to_make:
+                        self.read_instance.summary_plots_to_make.remove(plot_type)
+                    if plot_type in self.read_instance.station_plots_to_make:
+                        self.read_instance.station.plots_to_make.remove(plot_type)
+                    continue
 
                 # add information for plot type for base plot type 
                 self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
