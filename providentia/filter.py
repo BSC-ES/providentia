@@ -411,6 +411,8 @@ class DataFilter:
                     MessageBox(msg)
                     self.read_instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
                 return False
+        else:
+            return True
 
     def temporally_colocate_data(self):
         """ Define function which temporally colocates observational and experiment data.
