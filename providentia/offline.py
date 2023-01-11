@@ -124,26 +124,60 @@ class ProvidentiaOffline:
             if self.invalid_read:
                 print('No valid data for {} section'.format(section))
                 continue
-
-            # set plot characteristics
-            try:
-                plot_types = self.report_plots[self.report_type]
-            except KeyError:
+            
+            # check if report type is valid
+            if self.report_type not in self.report_plots.keys():
                 msg = 'Error: The report type {0} cannot be found in conf/report_plots.json. '.format(self.report_type)
                 msg += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
                 sys.exit(msg)
-            self.plot.set_plot_characteristics(plot_types)
+
+            # set plots that need to be made (summary and station specific)
+            self.station_plots_to_make = []
+            if (('summary' in self.report_plots[self.report_type].keys()) 
+                and ('station' in self.report_plots[self.report_type].keys())):
+                self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
+                for plot_type in self.report_plots[self.report_type]['station']:
+                    # there can be no station specific plots for map plot type
+                    if plot_type[:4] != 'map-':
+                        self.station_plots_to_make.append(plot_type)
+            elif (('summary' in self.report_plots[self.report_type].keys()) 
+                  and ('station' not in self.report_plots[self.report_type].keys())):
+                self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
+            elif (('summary' not in self.report_plots[self.report_type].keys()) 
+                  and ('station' in self.report_plots[self.report_type].keys())):
+                self.summary_plots_to_make = []
+                for plot_type in self.report_plots[self.report_type]['station']:
+                    # there can be no station specific plots for map plot type
+                    if plot_type[:4] != 'map-':
+                        self.station_plots_to_make.append(plot_type) 
+            else:
+                self.summary_plots_to_make = self.report_plots[self.report_type]
+                self.station_plots_to_make = []
+                for plot_type in self.report_plots[self.report_type]:
+                    # there can be no station specific plots for map plot type
+                    if plot_type[:4] != 'map-':
+                        self.station_plots_to_make.append(plot_type)
+
+            # set plot characteristics for all plot types (summary, station)
+            self.plots_to_make = list(self.summary_plots_to_make)
+            self.plots_to_make.extend(x for x in self.station_plots_to_make
+                                      if x not in self.summary_plots_to_make)
+            self.plot.set_plot_characteristics(self.plots_to_make)
+            
+            # show user warning if report_summary is False but there are summary plots in report_plots.json
+            if (('summary' in self.report_plots[self.report_type].keys())
+                and (self.report_plots[self.report_type]['summary'])
+                and not self.report_summary):
+                print('Warning: report_summary is False, summary plots will not be created.')
+            
+            # show user warnings if report_stations is False but there are station plots in report_plots.json
+            if (('station' in self.report_plots[self.report_type].keys())
+                and (self.report_plots[self.report_type]['station'])
+                and not self.report_stations):
+                print('Warning: report_stations is False, station plots will not be created.')
 
             # define dictionary to store plot figures per page
             self.plot_dictionary = {}
-
-            # set plots that need to be made (summary and station specific)
-            self.summary_plots_to_make = list(self.plot_characteristics.keys())
-            self.station_plots_to_make = []
-            for plot_type in self.summary_plots_to_make:
-                # there can be no station specific plots for map plot type
-                if plot_type[:4] != 'map-':
-                    self.station_plots_to_make.append(plot_type)
 
             # start making PDF
             self.start_pdf()
