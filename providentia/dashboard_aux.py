@@ -345,7 +345,6 @@ class InputDialog(QtWidgets.QWidget):
         if dialog is not None:
             layout = QtWidgets.QVBoxLayout(self)
             layout.addWidget(dialog)
-            center(self) 
 
     def create_dialog_box(self, read_instance, title, msg, options):
 
