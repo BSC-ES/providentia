@@ -533,15 +533,6 @@ class MPLCanvas(FigureCanvas):
                                                     self.plot_characteristics['periodic'], 
                                                     plot_options, relim=True, autoscale=True)
 
-            # set title
-            if 'hour' in self.read_instance.relevant_temporal_resolutions:
-                relevant_temporal_resolutions_title = ['hour']
-            else:
-                relevant_temporal_resolutions_title = ['month']
-            self.plot.set_axis_title(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'], 
-                                     relevant_temporal_resolutions=relevant_temporal_resolutions_title)
-            self.plot_characteristics['periodic']['axis_title']['label'] = 'periodic'
-
             # set ylabel
             self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
 
@@ -668,14 +659,6 @@ class MPLCanvas(FigureCanvas):
                 else:
                     self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                          plot_options, relim=True, autoscale=True)
-
-                # set title
-                if 'hour' in self.read_instance.relevant_temporal_resolutions:
-                    relevant_temporal_resolutions_title = ['hour']
-                else:
-                    relevant_temporal_resolutions_title = ['month']
-                self.plot.set_axis_title(ax, plot_type, self.plot_characteristics[plot_type], relevant_temporal_resolutions=relevant_temporal_resolutions_title)
-                self.plot_characteristics[plot_type]['axis_title']['label'] = plot_type
 
                 # set xlabel
                 self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
@@ -1065,6 +1048,11 @@ class MPLCanvas(FigureCanvas):
         elif plot_type == 'boxplot':
             self.boxplot_menu_button.show()
             self.boxplot_save_button.show()
+        
+        if plot_type in self.read_instance.active_dashboard_plots:
+            position = self.read_instance.active_dashboard_plots.index(plot_type) + 2
+            cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
+            cb_position.show()
 
         return None
 
@@ -1468,6 +1456,39 @@ class MPLCanvas(FigureCanvas):
 
         self.interactive_elements = {}
         self.options = []
+
+        # LAYOUT OPTIONS #
+        # add position 2 plot selector
+        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_2.setFixedWidth(100)
+        self.read_instance.cb_position_2.AdjustToContents
+        self.read_instance.cb_position_2.setToolTip('Select plot type in top right position')
+        self.read_instance.cb_position_2.currentTextChanged.connect(self.read_instance.handle_layout_update)
+        self.read_instance.cb_position_2.hide()
+
+        # add position 3 plot selector
+        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_3.setFixedWidth(100)
+        self.read_instance.cb_position_3.AdjustToContents
+        self.read_instance.cb_position_3.setToolTip('Select plot type in bottom left position')
+        self.read_instance.cb_position_3.currentTextChanged.connect(self.read_instance.handle_layout_update)
+        self.read_instance.cb_position_3.hide()
+
+        # add position 4 plot selector
+        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_4.setFixedWidth(100)
+        self.read_instance.cb_position_4.AdjustToContents
+        self.read_instance.cb_position_4.setToolTip('Select plot type in bottom centre position')
+        self.read_instance.cb_position_4.currentTextChanged.connect(self.read_instance.handle_layout_update)
+        self.read_instance.cb_position_4.hide()
+
+        # add position 5 plot selector
+        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_5.setFixedWidth(100)
+        self.read_instance.cb_position_5.AdjustToContents
+        self.read_instance.cb_position_5.setToolTip('Select plot type in bottom right position')
+        self.read_instance.cb_position_5.currentTextChanged.connect(self.read_instance.handle_layout_update)
+        self.read_instance.cb_position_5.hide()
 
         # MAP SETTINGS MENU #
         # add button to map to show and hide settings menu
