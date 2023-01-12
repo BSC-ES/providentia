@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import bisect
 import time
+import sys
 
 # initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
@@ -82,13 +83,19 @@ def read_netcdf_data(tuple_arguments):
 
     # get all station references in file (do little extra work to get non-GHOST observational station references)
     if (not reading_ghost) & (data_label == 'observations'):
+        """
         if 'station_reference' in ncdf_root.variables:
             station_reference_var = 'station_reference'
         elif 'station_code' in ncdf_root.variables:
             station_reference_var = 'station_code'
         elif 'station_name' in ncdf_root.variables:
             station_reference_var = 'station_name'
-
+        """
+        if 'station_name' in ncdf_root.variables:
+            station_reference_var = 'station_name'
+        else: 
+            print('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
+            sys.exit()
         if ncdf_root[station_reference_var].dtype == np.str:
             file_station_references = ncdf_root[station_reference_var][:]
         else:
@@ -217,7 +224,7 @@ def read_netcdf_data(tuple_arguments):
         # mask out fill values for parameter field
         relevant_data[relevant_data.mask] = np.NaN
         
-        #put data in array
+        # put data in array
         data_in_memory[data_labels.index(data_label), full_array_station_indices[:, np.newaxis], full_array_time_indices[np.newaxis, :]] = relevant_data
 
     # close netCDF

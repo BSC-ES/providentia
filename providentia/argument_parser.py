@@ -11,7 +11,6 @@ import sys
 
 from configargparse import ArgumentParser
 import providentia
-from . import exceptions
 
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
@@ -129,4 +128,3 @@ class ProvArgumentParser(object):
             return self.parser.parse_args(args)
         except Exception as error:
             print(error)
-            raise exceptions.ProvArgumentParserException
