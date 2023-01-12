@@ -80,6 +80,8 @@ class NavigationToolbar(NavigationToolbar2QT):
                     else:
                         export_netcdf(self.canvas_instance, fname)
                     QtWidgets.QApplication.restoreOverrideCursor()
+                    msg = 'The data was successfully saved in {}.'.format(fname)
+                    MessageBox(msg)
                 except Exception as e:
                     msg = 'There was an error saving the file.'
                     MessageBox(msg)

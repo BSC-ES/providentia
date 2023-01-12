@@ -1323,13 +1323,19 @@ def get_basic_metadata(instance):
         else:
         
             ncdf_root = Dataset(relevant_files[0])
+            """
             if 'station_reference' in ncdf_root.variables:
                 station_reference_var = 'station_reference'
             elif 'station_code' in ncdf_root.variables:
                 station_reference_var = 'station_code'
             elif 'station_name' in ncdf_root.variables:
                 station_reference_var = 'station_name'
-
+            """
+            if 'station_name' in ncdf_root.variables:
+                station_reference_var = 'station_name'
+            else: 
+                print('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
+                sys.exit()
             if ncdf_root[station_reference_var].dtype == np.str:
                 station_references[networkspeci] = ncdf_root[station_reference_var][:]
             else:
