@@ -309,15 +309,22 @@ def center(window):
 
 class MessageBox(QtWidgets.QWidget):
 
-    def __init__(self, msg, parent=None):
+    def __init__(self, msg, offline=False, msg_offline=None, from_conf=None, parent=None):
 
         super().__init__(parent)
         
-        msg_box = self.create_msg_box(msg)
-        if msg_box is not None:
-            layout = QtWidgets.QVBoxLayout(self)
-            layout.addWidget(msg_box)
-            center(self)
+        if offline:
+            if msg_offline is not None:
+                print('Warning: ' + msg_offline)
+            else:
+                print('Warning: ' + msg)
+        else:
+            if from_conf is None or from_conf:
+                msg_box = self.create_msg_box(msg)
+                if msg_box is not None:
+                    layout = QtWidgets.QVBoxLayout(self)
+                    layout.addWidget(msg_box)
+                    center(self)
 
     def create_msg_box(self, msg):
 
