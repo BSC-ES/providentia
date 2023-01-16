@@ -132,31 +132,30 @@ class ProvidentiaOffline:
                 sys.exit(msg)
 
             # set plots that need to be made (summary and station specific)
+            self.summary_plots_to_make = []
             self.station_plots_to_make = []
-            if (('summary' in self.report_plots[self.report_type].keys()) 
-                and ('station' in self.report_plots[self.report_type].keys())):
-                self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
-                for plot_type in self.report_plots[self.report_type]['station']:
-                    # there can be no station specific plots for map plot type
-                    if plot_type[:4] != 'map-':
-                        self.station_plots_to_make.append(plot_type)
-            elif (('summary' in self.report_plots[self.report_type].keys()) 
-                  and ('station' not in self.report_plots[self.report_type].keys())):
-                self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
-            elif (('summary' not in self.report_plots[self.report_type].keys()) 
-                  and ('station' in self.report_plots[self.report_type].keys())):
-                self.summary_plots_to_make = []
-                for plot_type in self.report_plots[self.report_type]['station']:
-                    # there can be no station specific plots for map plot type
-                    if plot_type[:4] != 'map-':
-                        self.station_plots_to_make.append(plot_type) 
-            else:
+            if isinstance(self.report_plots[self.report_type], list):
                 self.summary_plots_to_make = self.report_plots[self.report_type]
-                self.station_plots_to_make = []
                 for plot_type in self.report_plots[self.report_type]:
                     # there can be no station specific plots for map plot type
                     if plot_type[:4] != 'map-':
                         self.station_plots_to_make.append(plot_type)
+            elif isinstance(self.report_plots[self.report_type], dict):
+                # get summary plots
+                if 'summary' in self.report_plots[self.report_type].keys():
+                    if not self.report_summary:
+                        print('Warning: report_summary is False, summary plots will not be created.')
+                    else:
+                        self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
+                # get station plots
+                if 'station' in self.report_plots[self.report_type].keys():
+                    if not self.report_stations:
+                        print('Warning: report_stations is False, station plots will not be created.')
+                    else:
+                        for plot_type in self.report_plots[self.report_type]['station']:
+                            # there can be no station specific plots for map plot type
+                            if plot_type[:4] != 'map-':
+                                self.station_plots_to_make.append(plot_type)
 
             # set plot characteristics for all plot types (summary, station)
             self.plots_to_make = list(self.summary_plots_to_make)
@@ -164,18 +163,6 @@ class ProvidentiaOffline:
                                       if x not in self.summary_plots_to_make)
             self.plot.set_plot_characteristics(self.plots_to_make)
             
-            # show user warning if report_summary is False but there are summary plots in report_plots.json
-            if (('summary' in self.report_plots[self.report_type].keys())
-                and (self.report_plots[self.report_type]['summary'])
-                and not self.report_summary):
-                print('Warning: report_summary is False, summary plots will not be created.')
-            
-            # show user warnings if report_stations is False but there are station plots in report_plots.json
-            if (('station' in self.report_plots[self.report_type].keys())
-                and (self.report_plots[self.report_type]['station'])
-                and not self.report_stations):
-                print('Warning: report_stations is False, station plots will not be created.')
-
             # define dictionary to store plot figures per page
             self.plot_dictionary = {}
 
@@ -713,7 +700,8 @@ class ProvidentiaOffline:
                         print('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
 
                     if not made_networkspeci_summary_plots:
-                        # get median timeseries across data from filtered data, and place it pandas dataframe
+                        
+                        # put selected data for each data array into pandas dataframe
                         to_pandas_dataframe(read_instance=self, canvas_instance=self, 
                                             networkspecies=self.networkspecies)
 
@@ -820,7 +808,7 @@ class ProvidentiaOffline:
                         current_lats = self.metadata_in_memory[networkspeci]['latitude'][relevant_station_ind, :]
                         self.current_lat = round(current_lats[pd.notnull(current_lats)][0], 2)
                         
-                        # put station data in pandas dataframe
+                        # put selected data for each data array into pandas dataframe
                         to_pandas_dataframe(read_instance=self, canvas_instance=self, 
                                             networkspecies=[networkspeci], 
                                             station_index=relevant_station_ind, 
