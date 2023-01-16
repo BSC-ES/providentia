@@ -148,8 +148,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def update_buttons_geometry(self):
         """ Update current geometry of buttons. """
         
-        for i, position in enumerate([self.position_1, self.position_2, self.position_3, 
-                                      self.position_4, self.position_5]):
+        for position_ii, position in enumerate([self.position_1, self.position_2, self.position_3, 
+                                                self.position_4, self.position_5]):
             for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
                                                          self.mpl_canvas.save_buttons, 
                                                          self.mpl_canvas.elements):
@@ -162,18 +162,31 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 if position == plot_type:
                     
                     # calculate proportional geometry of buttons respect main window
-                    x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'+str(i+1)]['x'] * 
-                        self.main_window_geometry.width()) / 1848
-                    y = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'+str(i+1)]['y'] * 
-                        self.main_window_geometry.height()) / 1016
+                    x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
+                         + str(position_ii+1)]['x'] * self.main_window_geometry.width()) / 1848
+                    y = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_' 
+                         + str(position_ii+1)]['y'] * self.main_window_geometry.height()) / 1016
                     
                     # get geometries
                     old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
                     new_button_geometry = QtCore.QRect(x, y, 18, 18)
                     
-                    # apply new geometry to menu and save button
+                    # apply new geometry to menu and save buttons
                     menu_button.setGeometry(new_button_geometry)
                     save_button.setGeometry(menu_button.x()-25, menu_button.y(), 20, 20)
+
+                    # apply new geometry to layout buttons
+                    if position_ii > 0:
+                        cb_position = getattr(self, 'cb_position_{}'.format(position_ii+1))
+                        # layout selector at position 2 needs to be further from menu
+                        if (position_ii + 1) == 2:
+                            width_diff = 915
+                        else:
+                            width_diff = 570
+                        height_diff = 1
+                        width = (width_diff * self.main_window_geometry.width()) / 1848
+                        height = (height_diff * self.main_window_geometry.height()) / 1848
+                        cb_position.move(menu_button.x()-width, menu_button.y()+height)
 
                     # apply new geometry to container elements
                     for sub_element in element:
@@ -334,33 +347,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
         self.cb_resampling_switch = set_formatting(Switch(self), formatting_dict['switch_menu'])
         self.cb_resampling_switch.setToolTip('Activate/Deactivate resampling')
-        self.vertical_splitter_4 = QVLine()
-        self.vertical_splitter_4.setMaximumWidth(20)
-
-        # layout section
-        self.lb_layout_selection = set_formatting(QtWidgets.QLabel(self, text="Layout"),
-                                                  formatting_dict['title_menu'])
-        self.cb_position_1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_1.setFixedWidth(100)
-        self.cb_position_1.AdjustToContents
-        self.cb_position_1.setEnabled(False)
-        self.cb_position_1.setToolTip('Select plot type in top left position')
-        self.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_2.setFixedWidth(100)
-        self.cb_position_2.AdjustToContents
-        self.cb_position_2.setToolTip('Select plot type in top right position')
-        self.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_3.setFixedWidth(100)
-        self.cb_position_3.AdjustToContents
-        self.cb_position_3.setToolTip('Select plot type in bottom left position')
-        self.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_4.setFixedWidth(100)
-        self.cb_position_4.AdjustToContents
-        self.cb_position_4.setToolTip('Select plot type in bottom centre position')
-        self.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_5.setFixedWidth(100)
-        self.cb_position_5.AdjustToContents
-        self.cb_position_5.setToolTip('Select plot type in bottom right position')
 
         # position objects on gridded configuration bar
         # data selection section
@@ -396,21 +382,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.ch_select_all, 1, 11, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_intersect, 2, 11, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_extent, 3, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_4, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
 
         # resampling section
         config_bar.addWidget(self.lb_resampling, 0, 13, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_resampling_resolution, 1, 13, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_resampling_switch, 1, 14, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 15, 4, 1, QtCore.Qt.AlignLeft)
-
-        # layout section
-        config_bar.addWidget(self.lb_layout_selection, 0, 20, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_1, 1, 20, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_2, 1, 21, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_3, 2, 20, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_4, 2, 21, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_5, 2, 22, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
@@ -493,13 +470,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
         self.ch_intersect.stateChanged.connect(self.mpl_canvas.select_intersect_stations)
         self.ch_extent.stateChanged.connect(self.mpl_canvas.select_extent_stations)
-
-        # enable updating of plots layout
-        self.cb_position_1.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_2.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_3.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_4.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_5.currentTextChanged.connect(self.handle_layout_update)
 
         # Generate MPL navigation toolbar
         self.navi_toolbar = NavigationToolbar(read_instance=self, canvas_instance=self.mpl_canvas)
@@ -695,7 +665,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # update layout field buttons
         # clear fields
-        self.cb_position_1.clear()
         self.cb_position_2.clear()
         self.cb_position_3.clear()
         self.cb_position_4.clear()
@@ -709,9 +678,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if not self.temporal_colocation:
             if 'scatter' in layout_options:
                 layout_options.remove('scatter')
-
-        # update position 1 in layout (always map)
-        self.cb_position_1.addItems(['map'])
         
         # update position 2 in layout
         self.cb_position_2.addItems(layout_options)
