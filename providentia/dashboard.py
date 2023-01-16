@@ -533,9 +533,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # set initial selected config variables as set .conf files or defaults
             self.selected_network = copy.deepcopy(self.network[0])
             self.selected_resolution = copy.deepcopy(self.resolution)
-            self.selected_resampling_resolution = ''
             self.selected_matrix = self.parameter_dictionary[self.species[0]]['matrix']
             self.selected_species = copy.deepcopy(self.species[0])
+            self.selected_resampling_resolution = copy.deepcopy(self.resampling_resolution)
+            self.selected_resampling = copy.deepcopy(self.resampling)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -609,6 +610,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.cb_resampling_resolution.setCurrentText(self.selected_resampling_resolution)
         else:
             self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
+
+        # update resampling switch
+        if self.selected_resampling:
+            self.cb_resampling_switch.setChecked(True)
+        else:
+            self.cb_resampling_switch.setChecked(False)
 
         # update matrix field
         available_matrices = sorted(self.available_observation_data[self.selected_network][self.selected_resolution])
@@ -1165,9 +1172,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
         self.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-
-        # turn off resampling switch
-        self.cb_resampling_switch.setChecked(False)
 
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
