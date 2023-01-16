@@ -275,9 +275,6 @@ class MPLCanvas(FigureCanvas):
 
                 # update associated plots with selected stations
                 self.update_associated_active_dashboard_plots()
-
-                # re-draw
-                #self.figure.canvas.draw()
             
             else:
                 msg = 'Select the data you want to plot before resampling.'
