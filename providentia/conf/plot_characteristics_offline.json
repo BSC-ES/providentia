@@ -115,7 +115,7 @@
                       "markersize_npoints_threshold": 200,
                       "markersize": {"standard": 1.1, "few_points": 4.0},
                       "round_decimal_places": 2,
-                      "plot": {"marker": "o", "markeredgecolor": null, "mew": 0, "linestyle": null, "markersize": ""},
+                      "plot": {"marker": "o", "markeredgecolor": "None", "mew": 0, "linestyle": "None", "markersize": ""},
                       "plot_options": ["bias", "obs", "individual", "annotate", "smooth", "logy"]},
 
        "periodic": {"orientation": "landscape",
@@ -223,7 +223,7 @@
                    "markersize_npoints_threshold": 200,
                    "markersize": {"standard": 1.1, "few_points": 4.0},
                    "round_decimal_places": 2,
-                   "plot": {"marker": "o", "markersize": "", "linestyle": null},
+                   "plot": {"marker": "o", "markersize": "", "linestyle": "None"},
                    "plot_options": ["individual", "annotate", "regression", "logx", "logy"]},
 
        "boxplot": {"orientation": "landscape",

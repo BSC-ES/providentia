@@ -60,9 +60,6 @@ class MPLCanvas(FigureCanvas):
         # initialise plot elements
         self.plot_elements = {}
 
-        # initialise resampling
-        self.resampling = False
-
         # add general plot characteristics to self
         for k, val in self.plot_characteristics_templates['general'].items():
             setattr(self, k, val)
@@ -270,9 +267,11 @@ class MPLCanvas(FigureCanvas):
 
                 # activate or deactivate resampling option
                 if event_source.isChecked():
-                    self.resampling = True
+                    self.read_instance.resampling = True
+                    self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
                 else:
-                    self.resampling = False
+                    self.read_instance.resampling = False
+                    self.read_instance.resampling_resolution = None
 
                 # update associated plots with selected stations
                 self.update_associated_active_dashboard_plots()
@@ -686,13 +685,9 @@ class MPLCanvas(FigureCanvas):
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
                 
-                if self.resampling:
-                    # put selected data for each data array into resampled pandas dataframe
-                    to_resampled_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self)
-                else:
-                    # put selected data for each data array into pandas dataframes
-                    to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
-                                        networkspecies=[self.read_instance.networkspeci])
+                # put selected data for each data array into pandas dataframe
+                to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
+                                    networkspecies=[self.read_instance.networkspeci])
 
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
