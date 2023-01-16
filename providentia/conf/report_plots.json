@@ -22,6 +22,6 @@
     "cams2_40": ["metadata", "timeseries_annotate", "timeseries_bias", "periodic-violin", "periodic-r", "periodic-r2", 
                  "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
 
-    "debug": {"summary": ["map-p50", "map-p95_bias", "map-RMSE"],
+    "debug": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
               "station": ["timeseries", "scatter"]}
 }
