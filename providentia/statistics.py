@@ -43,15 +43,36 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
         :param data_range_max: current maximum of data range per networkspecies
         :type data_range_max: dict
     """
+    
+    if read_instance.resampling:
+
+        # update relevant temporal resolutions 
+        read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resampling_resolution)
+                        
+        # transform resolution to code for .resample function
+        if read_instance.resampling_resolution in ['hourly', 'hourly_instantaneous']:
+            temporal_resolution_to_output_code = 'H'
+        elif read_instance.resampling_resolution in ['3hourly', '3hourly_instantaneous']:
+            temporal_resolution_to_output_code = '3H'
+        elif read_instance.resampling_resolution in ['6hourly', '6hourly_instantaneous']:
+            temporal_resolution_to_output_code = '6H'
+        elif read_instance.resampling_resolution == 'daily':
+            temporal_resolution_to_output_code = 'D'
+        elif read_instance.resampling_resolution == 'monthly':
+            temporal_resolution_to_output_code = 'MS'
+        elif read_instance.resampling_resolution == 'yearly':
+            temporal_resolution_to_output_code = 'AS'
+    
+    else:
+
+        # update relevant temporal resolutions 
+        read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resolution)    
 
     # create new dictionary to store selection station data by network / species, per data label
     canvas_instance.selected_station_data = {}
     canvas_instance.selected_station_data_number_non_nan = {}
     canvas_instance.selected_station_data_min = {}
     canvas_instance.selected_station_data_max = {}
-
-    # update relevant temporal resolutions 
-    read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resolution)    
 
     # iterate through networks / species  
     for networkspeci_ii, networkspeci in enumerate(networkspecies):
@@ -125,6 +146,10 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                     canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), 
                                                                                                                 index=read_instance.time_array, 
                                                                                                                 columns=['data'])
+                
+                # resample data to output resolution
+                if read_instance.resampling:
+                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].resample(temporal_resolution_to_output_code, axis=0).mean()
 
                 # get min / max across all selected station data per network / species
                 current_min = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].min()
@@ -147,84 +172,6 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
         # observations and experiment data arrays
         if len(canvas_instance.selected_station_data[networkspeci]) > 1:
             calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_instance, networkspeci)
-
-def to_resampled_pandas_dataframe(read_instance, canvas_instance):
-
-    # read resampling output resolution
-    resampling_resolution = read_instance.cb_resampling_resolution.currentText()
-
-    # update relevant temporal resolutions 
-    read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(resampling_resolution)
-                   
-    # transform resolution to code for .resample function
-    if resampling_resolution in ['hourly', 'hourly_instantaneous']:
-        temporal_resolution_to_output_code = 'H'
-    elif resampling_resolution in ['3hourly', '3hourly_instantaneous']:
-        temporal_resolution_to_output_code = '3H'
-    elif resampling_resolution in ['6hourly', '6hourly_instantaneous']:
-        temporal_resolution_to_output_code = '6H'
-    elif resampling_resolution == 'daily':
-        temporal_resolution_to_output_code = 'D'
-    elif resampling_resolution == 'monthly':
-        temporal_resolution_to_output_code = 'MS'
-    elif resampling_resolution == 'yearly':
-        temporal_resolution_to_output_code = 'AS'
-
-    canvas_instance.resampled_data_to_output = {}
-
-    # iterate through networks / species  
-    for networkspeci_ii, networkspeci in enumerate(read_instance.networkspecies):
-        
-        canvas_instance.resampled_data_to_output[networkspeci] = {}
-
-        # iterate through data labels
-        for data_label in read_instance.data_labels:
-
-            # get valid station indices
-            if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                read_instance.station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, 
-                                                            read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
-            else:
-                read_instance.station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, 
-                                                            read_instance.valid_station_inds[networkspeci][data_label])
-                    
-            # get array for specific data label
-            data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:])
-            
-            # temporally colocate data array
-            if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
-            
-            # cut data array for station indices
-            data_array = data_array[read_instance.station_inds,:]
-            
-            # if data array has no valid data for selected stations, do not create a pandas dataframe
-            # data array has valid data and is not all nan?
-            if data_array.size > 0 and not np.isnan(data_array).all():
-
-                # add nested dictionary for data label in selected station data dictionary
-                canvas_instance.resampled_data_to_output[networkspeci][data_label] = {}
-                
-                # take cross station median of selected data for data array, and place it in a pandas dataframe 
-                canvas_instance.resampled_data_to_output[networkspeci][data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), 
-                                                                                                               index=read_instance.time_array, 
-                                                                                                               columns=['data'])
-
-                # resample data to output resolution
-                canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = canvas_instance.resampled_data_to_output[networkspeci][data_label]['pandas_df'].resample(temporal_resolution_to_output_code, axis=0).mean()
-
-                # temporally aggregate selected data dataframes (if have periodic plot to make) 
-                # (by hour, day of week, month)
-                pandas_temporal_aggregation(read_instance=read_instance, canvas_instance=canvas_instance, 
-                                            networkspeci=networkspeci)
-
-                # if have some experiment data associated with selected stations, calculate
-                # temporally aggregated basic statistic differences and bias statistics between
-                # observations and experiment data arrays
-                if len(canvas_instance.selected_station_data[networkspeci]) > 1:
-                    calculate_temporally_aggregated_experiment_statistic(read_instance=read_instance, 
-                                                                         canvas_instance=canvas_instance, 
-                                                                         networkspeci=networkspeci)
 
 def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
     """ Function that aggregates pandas dataframe data, for all data arrays,
