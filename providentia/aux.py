@@ -1250,6 +1250,7 @@ def get_basic_metadata(instance):
     station_latitudes = {}
     station_classifications = {}
     area_classifications = {}
+    nonghost_units = {}
 
     # iterate through network, speci pairs
     for networkspeci in (instance.networkspecies + instance.filter_networkspecies):
@@ -1379,6 +1380,9 @@ def get_basic_metadata(instance):
                             [area_classification.tostring().decode('ascii').replace('\x00', '')
                             for area_classification in ncdf_root['area_classification'][non_nan_station_indices]], dtype=np.str)
             
+            # get non-GHOST measurement units
+            nonghost_units[speci] = ncdf_root[speci].units
+
             ncdf_root.close()
 
     # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
@@ -1395,7 +1399,7 @@ def get_basic_metadata(instance):
             station_classifications[ns] = station_classifications[ns][ns_intersects]
             area_classifications[ns] =  area_classifications[ns][ns_intersects] 
 
-    return station_references, station_longitudes, station_latitudes, station_classifications, area_classifications
+    return station_references, station_longitudes, station_latitudes, station_classifications, area_classifications, nonghost_units
 
 def spatial_colocation(reading_ghost, station_references, longitudes, latitudes):
     """ Given multiple species, return intersecting indices for matching stations across species (per network/species).
