@@ -49,7 +49,7 @@ class DataFilter:
     def filter_by_species(self):
         """ Function which filters read species by other species.
             For N other species a lower and upper limit are set. 
-            Where values for each species are outside of these ranges,
+            Where values for each species are outside of these ranges, or NaN,
             then impose NaNs upon all read species in memory.
             Only filter if spatial colocation is True.
         """
@@ -63,27 +63,29 @@ class DataFilter:
 
             # iterate through all species to filter by
             for filter_networkspeci, speci_limits in self.read_instance.filter_species.items():
-                
+
                 # get lower and upper limits for species
                 lower_limit = speci_limits[0]
                 upper_limit = speci_limits[1]
                 filter_species_fill_value = speci_limits[2]
 
-                # get where data is outside bounds
+                # get where data is outside bounds, or NaN
                 if filter_networkspeci in self.read_instance.networkspecies:
-                    invalid_inds_per_species = np.logical_or(self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] < lower_limit,
-                                                             self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] > upper_limit)
+                    invalid_inds_per_species = np.logical_or.reduce((self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] < lower_limit,
+                                                                     self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] > upper_limit,
+                                                                     np.isnan(self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:])))
                 else:
-                    invalid_inds_per_species = np.logical_or(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < lower_limit,
-                                                             self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > upper_limit)
+                    invalid_inds_per_species = np.logical_or.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < lower_limit,
+                                                                     self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > upper_limit,
+                                                                     np.isnan(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:])))
 
                 # update inds_to_filter array, making True all instances where have data outside bounds
                 inds_to_filter = np.any([inds_to_filter, invalid_inds_per_species], axis=0)
 
-                # set all inds to filter as NaN for all networkspecies in memory
-                for networkspeci in self.read_instance.networkspecies:
-                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
-
+            # set all inds to filter as NaN for all networkspecies in memory
+            for networkspeci in self.read_instance.networkspecies:
+                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
+                
     def filter_data_limits(self):
         """ Filter out (set to NaN) data which exceed the lower/upper limits. """
 

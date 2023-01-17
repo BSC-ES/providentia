@@ -1387,11 +1387,8 @@ def get_basic_metadata(instance):
         # get intersecting station indices across species
         intersecting_indices = spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes)
         
-        from collections import Counter
-
         # iterate through networkspecies specific intersecting indices, setting 
         for ns, ns_intersects in intersecting_indices.items():
-            
             station_references[ns] = station_references[ns][ns_intersects]
             station_longitudes[ns] = station_longitudes[ns][ns_intersects]
             station_latitudes[ns] = station_latitudes[ns][ns_intersects]
@@ -1432,8 +1429,8 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
     intersecting_station_references_no_method = list(set.intersection(*map(set,list(station_references_no_method.values()))))
     intersecting_indices = {}
     for networkspecies in station_references_no_method:
-        intersecting_indices[networkspecies] = np.sort([station_references_no_method[networkspecies].index(ref) 
-                                                        for ref in intersecting_station_references_no_method])
+        intersecting_indices[networkspecies] = np.array(np.sort([station_references_no_method[networkspecies].index(ref) 
+                                                        for ref in intersecting_station_references_no_method]), dtype=np.int)
 
     # set variable for first networkspecies
     firstnetworkspecies = list(intersecting_indices.keys())[0]
@@ -1516,7 +1513,7 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
         # append newly found intersecting indices to previously found intersect inds
         # while doing so also manke sure indices are sorted
         for networkspecies in non_intersecting_longitudes:
-            intersecting_indices[networkspecies] = np.sort(np.append(intersecting_indices[networkspecies], pairwise_intersect_inds[networkspecies]))
+            intersecting_indices[networkspecies] = np.array(np.sort(np.append(intersecting_indices[networkspecies], pairwise_intersect_inds[networkspecies])), dtype=np.int)
 
     return intersecting_indices
 
