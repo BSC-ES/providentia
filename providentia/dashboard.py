@@ -866,13 +866,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if changed_position == self.cb_position_2 or changed_position == 2:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=15, colspan=49))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 81), rowspan=15, colspan=18))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=30))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=15, colspan=48))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 81), rowspan=15, colspan=17))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=29))
             elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=34))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=33))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=49))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=48))
             
         # position 3 (bottom left)
         if changed_position == self.cb_position_3 or changed_position == 3:
@@ -1020,6 +1020,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
+        self.current_plot_options = {}
+        for plot_type in self.mpl_canvas.all_plots:
+            self.current_plot_options[plot_type] = []
 
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not akready
         # inform user of this
