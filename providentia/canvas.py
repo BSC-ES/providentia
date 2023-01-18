@@ -3032,25 +3032,8 @@ class MPLCanvas(FigureCanvas):
         all_plot_options = self.plot_characteristics[plot_type]['plot_options']
         index = all_plot_options.index('smooth')
 
-        # remove old smooth lines and uncheck plot option
-        if plot_type in self.plot_elements:
-            
-            active = self.plot_elements[plot_type]['active']
-            data_labels = self.plot_elements[plot_type][active].keys()
-            
-            for data_label in data_labels:
-                if 'smooth' in self.plot_elements[plot_type][active][data_label].keys():
-                    
-                    # remove lines 
-                    del self.plot_elements[plot_type][active][data_label]['smooth']
-                    ax.lines[len(data_labels)+1:] = []
-                    
-                    # remove smooth plot option
-                    self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-
-                    if 'smooth' in self.read_instance.previous_plot_options[plot_type]:
-                        print('removing smooth')
-                        self.read_instance.previous_plot_options[plot_type].remove('smooth')
+        # remove smooth plot option
+        self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
 
         # create smooth lines
         if smooth_window > 0:
