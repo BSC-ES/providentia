@@ -2513,15 +2513,11 @@ class MPLCanvas(FigureCanvas):
             if event_source.currentData() or self.read_instance.previous_plot_options[plot_type]:
 
                 # get plot options (previous and currently selected)
-                plot_options = event_source.currentData()
-                self.read_instance.current_plot_options[plot_type] = copy.deepcopy(plot_options)
-                for previous_plot_option in self.read_instance.previous_plot_options[plot_type]:
-                    if previous_plot_option not in plot_options:
-                        self.read_instance.current_plot_options[plot_type].append(previous_plot_option)
+                self.read_instance.current_plot_options[plot_type] = copy.deepcopy(event_source.currentData())
                 all_plot_options = self.plot_characteristics[plot_type]['plot_options']
-
-                for option in self.read_instance.current_plot_options[plot_type]:
-
+                
+                for option in all_plot_options:
+                    
                     # get index to raise errors and uncheck options
                     index = all_plot_options.index(option)
 
@@ -2541,17 +2537,21 @@ class MPLCanvas(FigureCanvas):
 
                     # undo plot options that were selected before but not now
                     if ((option in self.read_instance.previous_plot_options[plot_type]) 
-                        and (option not in plot_options)):
+                        and (option not in self.read_instance.current_plot_options[plot_type])):
                         undo = True
                     # do plot options that were not selected before
                     elif ((option not in self.read_instance.previous_plot_options[plot_type]) 
-                        and (option in plot_options)):
+                        and (option in self.read_instance.current_plot_options[plot_type])):
                         undo = False
                     # do nothing if options were selected before and now
                     elif ((option in self.read_instance.previous_plot_options[plot_type]) 
-                        and (option in plot_options)):
+                        and (option in self.read_instance.current_plot_options[plot_type])):
                         continue
-                        
+                    # do nothing if options were never selected
+                    elif ((option not in self.read_instance.previous_plot_options[plot_type]) 
+                        and (option not in self.read_instance.current_plot_options[plot_type])):
+                        continue
+
                     # if plot type not in plot_elements, then return
                     if plot_type not in self.plot_elements:
                         return
@@ -2562,7 +2562,7 @@ class MPLCanvas(FigureCanvas):
                         for active_type in self.plot_elements[plot_type]:
                             if active_type != 'active':
                                 for data_label in self.plot_elements[plot_type][active_type]:
-                                    for plot_option in plot_options:
+                                    for plot_option in self.read_instance.current_plot_options[plot_type]:
                                         if plot_option in self.plot_elements[plot_type][active_type][data_label]:
                                             for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
                                                 plot_element.remove()
@@ -2583,7 +2583,7 @@ class MPLCanvas(FigureCanvas):
                         for active_type in self.plot_elements[plot_type]:
                             if active_type != 'active':
                                 for data_label in self.plot_elements[plot_type][active_type]:
-                                    for plot_option in plot_options:
+                                    for plot_option in self.read_instance.current_plot_options[plot_type]:
                                         if plot_option in self.plot_elements[plot_type][active_type][data_label]:
                                             for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
                                                 plot_element.remove()
@@ -2631,7 +2631,7 @@ class MPLCanvas(FigureCanvas):
                                                             list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                                             plot_type,
                                                             self.plot_characteristics[plot_type], 
-                                                            plot_options=plot_options)
+                                                            plot_options=self.read_instance.current_plot_options[plot_type])
                                         break
                             else:
                                 self.plot.annotation(self.plot_axes[plot_type], 
@@ -2639,7 +2639,7 @@ class MPLCanvas(FigureCanvas):
                                                     list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                                     plot_type,
                                                     self.plot_characteristics[plot_type], 
-                                                    plot_options=plot_options)
+                                                    plot_options=self.read_instance.current_plot_options[plot_type])
 
                     # option 'smooth'
                     elif option == 'smooth':
@@ -2649,7 +2649,7 @@ class MPLCanvas(FigureCanvas):
                                              list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                              plot_type,
                                              self.plot_characteristics[plot_type], 
-                                             plot_options=plot_options)
+                                             plot_options=self.read_instance.current_plot_options[plot_type])
                           
                     # option 'regression'
                     elif option == 'regression':
@@ -2659,7 +2659,7 @@ class MPLCanvas(FigureCanvas):
                                                         list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
                                                         plot_type,
                                                         self.plot_characteristics[plot_type],  
-                                                        plot_options=plot_options)
+                                                        plot_options=self.read_instance.current_plot_options[plot_type])
 
                     # option 'bias'
                     elif option == 'bias':
@@ -2672,11 +2672,11 @@ class MPLCanvas(FigureCanvas):
                             event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                             self.read_instance.block_MPL_canvas_updates = False
                             self.plot_elements[plot_type]['active'] = 'absolute'
-                            plot_options.remove('bias')
+                            self.read_instance.current_plot_options[plot_type].remove('bias')
 
                             # create other active plot option elements for now absolute plot (if do not already exist)
                             self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                       plot_type, 'absolute', plot_options)
+                                                       plot_type, 'absolute', self.read_instance.current_plot_options[plot_type])
 
                         # if bias option is enabled then first check if bias elements stored
                         elif not undo:
@@ -2756,11 +2756,11 @@ class MPLCanvas(FigureCanvas):
                                         # call plotting function
                                         if plot_type in ['periodic']:
                                             func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
-                                                self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options, 
+                                                self.plot_characteristics[plot_type], zstat=zstat, plot_options=self.read_instance.current_plot_options[plot_type], 
                                                 first_data_label=first_data_label)
                                         else: 
                                             func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
-                                                self.plot_characteristics[plot_type], plot_options=plot_options, 
+                                                self.plot_characteristics[plot_type], plot_options=self.read_instance.current_plot_options[plot_type], 
                                                 first_data_label=first_data_label)
                                         first_data_label = False
 
@@ -2770,11 +2770,11 @@ class MPLCanvas(FigureCanvas):
                                     index = [data_label for data_label in self.selected_station_data[self.read_instance.networkspeci] if data_label != 'observations']
                                     stats_df = pd.DataFrame(data=stats_df,index=index)
                                     func(self.plot_axes[plot_type], stats_df, self.plot_characteristics[plot_type], 
-                                        plot_options=plot_options, statsummary=True)
+                                         plot_options=self.read_instance.current_plot_options[plot_type], statsummary=True)
 
                             # create other active plot option elements for bias plot (if do not already exist)
                             self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                    plot_type, 'bias', plot_options)
+                                                       plot_type, 'bias', self.read_instance.current_plot_options[plot_type])
 
                         # if bias option is not enabled then hide bias plot elements and show absolute plots again
                         else:
@@ -2801,27 +2801,27 @@ class MPLCanvas(FigureCanvas):
 
                             # create other active plot option elements for absolute plot (if do not already exist)
                             self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                    plot_type, 'absolute', plot_options)
+                                                       plot_type, 'absolute', self.read_instance.current_plot_options[plot_type])
 
                     # reset axes limits (harmonising across subplots for periodic plots) 
                     if plot_type != 'map':
                         if plot_type == 'periodic-violin':
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                self.plot_characteristics[plot_type], plot_options, 
+                                                                self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
                                                                 ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
                                                                     self.selected_station_data_max[self.read_instance.networkspeci]],
                                                                 relim=True, autoscale_x=True)
                         elif plot_type == 'scatter':
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                self.plot_characteristics[plot_type], plot_options, 
-                                                                relim=True)
+                                                                 self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
+                                                                 relim=True)
                         else:
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                self.plot_characteristics[plot_type], plot_options, 
-                                                                relim=True, autoscale=True)                       
+                                                                 self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
+                                                                 relim=True, autoscale=True)                       
 
                 # save current plot options as previous
-                self.read_instance.previous_plot_options[plot_type] = plot_options
+                self.read_instance.previous_plot_options[plot_type] = self.read_instance.current_plot_options[plot_type]
 
                 # draw changes
                 self.figure.canvas.draw()
@@ -3047,6 +3047,10 @@ class MPLCanvas(FigureCanvas):
                     
                     # remove smooth plot option
                     self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+
+                    if 'smooth' in self.read_instance.previous_plot_options[plot_type]:
+                        print('removing smooth')
+                        self.read_instance.previous_plot_options[plot_type].remove('smooth')
 
         # create smooth lines
         if smooth_window > 0:
