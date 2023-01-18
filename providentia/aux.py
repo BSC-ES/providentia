@@ -1405,11 +1405,14 @@ def get_basic_metadata(instance):
         # iterate through networkspecies specific intersecting indices, setting 
         for ns, ns_intersects in intersecting_indices.items():
             station_references[ns] = station_references[ns][ns_intersects]
-            station_names[ns] = station_names[ns][ns_intersects]
             station_longitudes[ns] = station_longitudes[ns][ns_intersects]
             station_latitudes[ns] = station_latitudes[ns][ns_intersects]
-            station_classifications[ns] = station_classifications[ns][ns_intersects]
-            area_classifications[ns] =  area_classifications[ns][ns_intersects] 
+            if ns in station_names:
+                station_names[ns] = station_names[ns][ns_intersects]
+            if ns in station_classifications:
+                station_classifications[ns] = station_classifications[ns][ns_intersects]
+            if ns in area_classifications:
+                area_classifications[ns] =  area_classifications[ns][ns_intersects] 
 
     return station_references, station_names, station_longitudes, station_latitudes, station_classifications, area_classifications, nonghost_units
 
@@ -1433,13 +1436,13 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
     """
 
     # if are reading GHOST data remove method abbreviation from station_references
-    if reading_ghost:
-        station_references_no_method = {}
-        for networkspecies in station_references:
+    station_references_no_method = {}
+    for networkspecies in station_references:
+        if reading_ghost:
             station_references_no_method[networkspecies] = ['_'.join(ref.split('_')[:-1]) 
-                                                            for ref in station_references[networkspecies]]
-    else:
-        station_references_no_method = station_references
+                                                        for ref in station_references[networkspecies]]
+        else:
+            station_references_no_method[networkspecies] = station_references[networkspecies].tolist()
 
     # get indices of intersection of station references across species
     intersecting_station_references_no_method = list(set.intersection(*map(set,list(station_references_no_method.values()))))
