@@ -17,6 +17,8 @@
             "scatter_annotate", "timeseries_annotate",
             "timeseries_annotate_bias"],
 
+    "boxplot": ["boxplot","boxplot_multispecies"],
+
     "sizedist": ["boxplot_multispecies"],
 
     "cams2_40": ["metadata", "timeseries_annotate", "timeseries_bias", "periodic-violin", "periodic-r", "periodic-r2", 
