@@ -107,8 +107,8 @@ class MPLCanvas(FigureCanvas):
         # create map, colorbar and legend plot axes
         self.plot_axes = {}
         self.plot_axes['map'] = self.figure.add_subplot(self.gridspec.new_subplotspec((2, 0), 
-                                                        rowspan=44, colspan=42), projection=self.plotcrs)
-        self.plot_axes['cb'] = self.figure.add_axes([0.0455, 0.536, 0.3794, 0.02])
+                                                        rowspan=44, colspan=41), projection=self.plotcrs)
+        self.plot_axes['cb'] = self.figure.add_axes([0.0455, 0.54, 0.3794, 0.02])
         self.plot_axes['legend'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 47), 
                                                            rowspan=8, colspan=53))
 
@@ -1054,31 +1054,14 @@ class MPLCanvas(FigureCanvas):
             or just one specific type.
         """
 
-        checked_options = {}
         for plot_type in plot_types:
-            for option_box in self.options:
-                option_plot_type = option_box.objectName().split('_option')[0]
-                if plot_type != option_plot_type:
-                    continue
-                option = option_box.objectName().split('option_')[1]
-                if option_box.isChecked():
-                    if plot_type not in checked_options:
-                        checked_options[plot_type] = {} 
-                    checked_options[plot_type][option] = option_box      
-
-        for plot_type in checked_options:
-
-            if 'bias' in checked_options[plot_type]:
-                self.read_instance.block_MPL_canvas_updates = True
-                checked_options[plot_type]['bias'].setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.block_MPL_canvas_updates = False
-                checked_options[plot_type]['bias'].setCheckState(QtCore.Qt.Checked)
-            else:
-                for option, option_box in checked_options[plot_type].items():
-                    self.read_instance.block_MPL_canvas_updates = True
-                    option_box.setCheckState(QtCore.Qt.Unchecked)
-                    self.read_instance.block_MPL_canvas_updates = False
-                    option_box.setCheckState(QtCore.Qt.Checked)
+            all_plot_options = self.plot_characteristics[plot_type]['plot_options']
+            checked_options = self.read_instance.current_plot_options[plot_type]
+            cb_options = getattr(self, plot_type + '_options')
+            for checked_option in checked_options:
+                index = all_plot_options.index(checked_option)
+                cb_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+                cb_options.model().item(index).setCheckState(QtCore.Qt.Checked)
 
         return None
 
@@ -1447,7 +1430,6 @@ class MPLCanvas(FigureCanvas):
         """ Function to create settings menus for each plot and their elements."""
 
         self.interactive_elements = {}
-        self.options = []
 
         # LAYOUT OPTIONS #
         # add position 2 plot selector
@@ -1717,7 +1699,7 @@ class MPLCanvas(FigureCanvas):
                                                    formatting_dict['settings_container'])
         self.timeseries_container.setGeometry(self.timeseries_menu_button.geometry().x()-230,
                                               self.timeseries_menu_button.geometry().y()+25, 
-                                              250, 130)
+                                              250, 180)
         self.timeseries_container.hide()
 
         # add settings label
@@ -1747,10 +1729,29 @@ class MPLCanvas(FigureCanvas):
                                                   230, 20)
         self.timeseries_markersize_sl.hide()
 
+        # add timeseries smooth slider name ('Smooth') to layout
+        self.timeseries_smooth_sl_label = QtWidgets.QLabel('Smooth', self)
+        self.timeseries_smooth_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
+                                                    self.timeseries_menu_button.geometry().y()+100, 
+                                                    230, 20)
+        self.timeseries_smooth_sl_label.hide()
+
+        # add timeseries smooth slider
+        self.timeseries_smooth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.timeseries_smooth_sl.setObjectName('timeseries_smooth_sl')
+        self.timeseries_smooth_sl.setMinimum(0)
+        self.timeseries_smooth_sl.setMaximum(self.plot_characteristics['timeseries']['smooth']['window']*10)
+        self.timeseries_smooth_sl.setValue(0)
+        self.timeseries_smooth_sl.setTickInterval(2)
+        self.timeseries_smooth_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
+                                              self.timeseries_menu_button.geometry().y()+125, 
+                                              230, 20)
+        self.timeseries_smooth_sl.hide()
+
         # add timeseries plot options name ('Options') to layout
         self.timeseries_options_label = QtWidgets.QLabel("Options", self)
         self.timeseries_options_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                  self.timeseries_menu_button.geometry().y()+100, 
+                                                  self.timeseries_menu_button.geometry().y()+150, 
                                                   230, 20)
         self.timeseries_options_label.hide()
 
@@ -1759,7 +1760,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_options.setObjectName('timeseries_options')
         self.timeseries_options.addItems(self.plot_characteristics['timeseries']['plot_options'])        
         self.timeseries_options.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                            self.timeseries_menu_button.geometry().y()+125, 
+                                            self.timeseries_menu_button.geometry().y()+175, 
                                             230, 20)
         self.timeseries_options.currentTextChanged.connect(self.update_plot_option)
         self.timeseries_options.hide()
@@ -1775,16 +1776,19 @@ class MPLCanvas(FigureCanvas):
         # set show/hide actions
         self.timeseries_elements = [self.timeseries_container, self.timeseries_settings_label, 
                                     self.timeseries_markersize_sl_label, self.timeseries_markersize_sl,
+                                    self.timeseries_smooth_sl_label, self.timeseries_smooth_sl,
                                     self.timeseries_options_label, self.timeseries_options]
         self.interactive_elements['timeseries'] = {'button': self.timeseries_menu_button, 
                                                    'hidden': True,
                                                    'elements': self.timeseries_elements,
                                                    'markersize_sl': [self.timeseries_markersize_sl],
                                                    'opacity_sl': [],
-                                                   'linewidth_sl': []
+                                                   'linewidth_sl': [],
+                                                   'smooth_sl': [self.timeseries_smooth_sl]
                                                    }
         self.timeseries_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.timeseries_markersize_sl.valueChanged.connect(self.update_markersize_func)
+        self.timeseries_smooth_sl.valueChanged.connect(self.update_smooth_func)
         self.timeseries_save_button.clicked.connect(self.save_axis_figure_func)
 
         # PERIODIC PLOT SETTINGS MENU #
@@ -2476,9 +2480,23 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def update_smooth_func(self):
+        
+        # get source
+        event_source = self.sender()
+        plot_type = event_source.objectName().split('_smooth')[0]
+        for element in self.interactive_elements[plot_type]['smooth_sl']:
+            smooth_window = element.value()
+            break
+
+        self.update_smooth_window(self.plot_axes[plot_type], plot_type, smooth_window, 
+                                  self.read_instance.current_plot_options[plot_type])
+
+        return None
+
     def update_plot_option(self):
         """ Function to handle the update of the plot options. """
-
+        
         if not self.read_instance.block_MPL_canvas_updates:
 
             # get source
@@ -2496,13 +2514,13 @@ class MPLCanvas(FigureCanvas):
 
                 # get plot options (previous and currently selected)
                 plot_options = event_source.currentData()
-                current_plot_options = copy.deepcopy(plot_options)
+                self.read_instance.current_plot_options[plot_type] = copy.deepcopy(plot_options)
                 for previous_plot_option in self.read_instance.previous_plot_options[plot_type]:
                     if previous_plot_option not in plot_options:
-                        current_plot_options.append(previous_plot_option)
+                        self.read_instance.current_plot_options[plot_type].append(previous_plot_option)
                 all_plot_options = self.plot_characteristics[plot_type]['plot_options']
 
-                for option in current_plot_options:
+                for option in self.read_instance.current_plot_options[plot_type]:
 
                     # get index to raise errors and uncheck options
                     index = all_plot_options.index(option)
@@ -2571,9 +2589,6 @@ class MPLCanvas(FigureCanvas):
                                                 plot_element.remove()
                                             del self.plot_elements[plot_type][active_type][data_label][plot_option] 
 
-                    # get active (absolute / bias)
-                    active = self.plot_elements[plot_type]['active']
-
                     # options 'logy' and 'logx' 
                     # only plot if axis has all positive values
                     if (option == 'logy') or (option == 'logx'):
@@ -2630,12 +2645,12 @@ class MPLCanvas(FigureCanvas):
                     elif option == 'smooth':
                         if not undo:
                             self.plot.smooth(self.plot_axes[plot_type], 
-                                            self.read_instance.networkspeci,
-                                            list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                            plot_type,
-                                            self.plot_characteristics[plot_type], 
-                                            plot_options=plot_options)
-                    
+                                             self.read_instance.networkspeci,
+                                             list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                             plot_type,
+                                             self.plot_characteristics[plot_type], 
+                                             plot_options=plot_options)
+                          
                     # option 'regression'
                     elif option == 'regression':
                         if not undo:
@@ -2661,7 +2676,7 @@ class MPLCanvas(FigureCanvas):
 
                             # create other active plot option elements for now absolute plot (if do not already exist)
                             self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                    plot_type, 'absolute', plot_options)
+                                                       plot_type, 'absolute', plot_options)
 
                         # if bias option is enabled then first check if bias elements stored
                         elif not undo:
@@ -3001,6 +3016,43 @@ class MPLCanvas(FigureCanvas):
             self.plot_characteristics[plot_type]['plot']['p50']['linewidth'] = linewidth
         else:
             self.plot_characteristics[plot_type]['plot']['linewidth'] = linewidth
+
+        # redraw points
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
+
+        return None
+
+    def update_smooth_window(self, ax, plot_type, smooth_window, plot_options):
+
+        # update characteristics per plot type
+        self.plot_characteristics[plot_type]['smooth']['window'] = smooth_window
+        
+        # get index of smooth in plot options
+        all_plot_options = self.plot_characteristics[plot_type]['plot_options']
+        index = all_plot_options.index('smooth')
+
+        # remove old smooth lines and uncheck plot option
+        if plot_type in self.plot_elements:
+            
+            active = self.plot_elements[plot_type]['active']
+            data_labels = self.plot_elements[plot_type][active].keys()
+            
+            for data_label in data_labels:
+                if 'smooth' in self.plot_elements[plot_type][active][data_label].keys():
+                    
+                    # remove lines 
+                    del self.plot_elements[plot_type][active][data_label]['smooth']
+                    ax.lines[len(data_labels)+1:] = []
+                    
+                    # remove smooth plot option
+                    self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+
+        # create smooth lines
+        if smooth_window > 0:
+            
+            # add smooth plot option
+            self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Checked)
 
         # redraw points
         self.figure.canvas.draw()
@@ -3988,21 +4040,19 @@ class MPLCanvas(FigureCanvas):
 
                 # iterate through plot types stored in plot_elements (if have selected stations)
                 if len(self.relative_selected_station_inds) > 0:
-                    for plot_type in self.plot_elements:
+                    for plot_type_alt in self.plot_elements:  
+
+                        # correct perodic-violin name for plot_options
+                        if plot_type_alt == 'periodic-violin':
+                            plot_type = 'periodic_violin'
+                        else:
+                            plot_type = copy.deepcopy(plot_type_alt)
+
                         if plot_type not in ['data_labels_active', 'metadata', 'map', 'heatmap', 
                                              'table', 'statsummary']:
 
-                            # correct perodic-violin name for plot_options
-                            if plot_type == 'periodic-violin':
-                                plot_type_alt = 'periodic_violin'
-                            else:
-                                plot_type_alt = copy.deepcopy(plot_type)
-
                             # get currently selected options for plot
-                            plot_options = []
-                            for other_option, other_option_obj in getattr(self, '{}_options'.format(plot_type_alt)).items():
-                                if other_option_obj.isChecked():
-                                    plot_options.append(other_option)
+                            plot_options = self.read_instance.current_plot_options[plot_type]
                         
                             # get active (absolute / bias)
                             active = self.plot_elements[plot_type]['active']
