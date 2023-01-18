@@ -14,6 +14,8 @@ import numpy as np
 import pandas as pd
 from netCDF4 import Dataset
 
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+
 class DataReader:
     """ Class that reads observational/experiment data into memory. """
 
@@ -91,8 +93,9 @@ class DataReader:
                 # for this step include filter networkspecies
                 self.read_instance.station_references, self.read_instance.station_names,\
                 self.read_instance.station_longitudes, self.read_instance.station_latitudes,\
-                self.read_instance.station_classifications, self.read_instance.area_classifications = \
-                get_basic_metadata(self.read_instance) 
+                self.read_instance.station_classifications, self.read_instance.area_classifications,\
+                self.read_instance.nonghost_units = \
+                    get_basic_metadata(self.read_instance) 
 
                 # iterate through station_references per networkspecies
                 # if have 0 valid stations then drop  
@@ -201,13 +204,33 @@ class DataReader:
             self.read_data(yearmonths_to_read, self.read_instance.data_labels)
 
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
-            self.read_instance.measurement_units = {speci:self.read_instance.parameter_dictionary[speci]['standard_units'] for speci in self.read_instance.species}
+            # non-GHOST
+            if not self.read_instance.reading_ghost:
+                # import unit converter
+                sys.path.insert(1, os.path.join(CURRENT_PATH, 'dependencies/unit-converter'))
+                import unit_converter
+
+                # convert non-GHOST units to standard format
+                nonghost_standard_units = {}
+                for speci in self.read_instance.nonghost_units.keys():
+                    input_units = self.read_instance.nonghost_units[speci]
+                    output_units = self.read_instance.nonghost_units[speci]
+                    conv_obj = unit_converter.convert_units(input_units, output_units, 1)
+                    nonghost_standard_units[speci] = conv_obj.output_standard_units
+                self.read_instance.measurement_units = {speci:nonghost_standard_units[speci] 
+                                                        for speci in self.read_instance.species}
+            # GHOST
+            else:
+                self.read_instance.measurement_units = {speci:self.read_instance.parameter_dictionary[speci]['standard_units'] 
+                                                        for speci in self.read_instance.species}
 
             # reset plotting params
             self.read_instance.plotting_params = {}
+
             # iterate through data labels
             for data_label in self.read_instance.data_labels:
                 self.read_instance.plotting_params[data_label] = {}
+
                 # get experiment specific grid edges for exp, from first relevant file
                 if data_label != 'observations':
                     # iterate through networkspecies until find one which has valid files to read
@@ -664,6 +687,10 @@ class DataReader:
             # wait for worker processes to terminate before continuing
             pool.join()
             
+            # do not read data if there are not enough datasets (less than 2 timesteps)
+            if not returned_data:
+                continue
+
             # finalise assignment of non-filter species
             if not filter_read:
                 # iterate through read file data and place metadata into full array as appropriate
