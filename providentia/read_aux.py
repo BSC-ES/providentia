@@ -42,9 +42,9 @@ def read_netcdf_data(tuple_arguments):
     """
 
     # assign arguments from tuple to variables
-    relevant_file, station_references, speci, data_label, data_labels, \
-    reading_ghost, ghost_data_vars_to_read, metadata_dtype, metadata_vars_to_read, \
-    default_qa, filter_read = tuple_arguments
+    relevant_file, station_references, station_names, speci,\
+    data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
+    metadata_dtype, metadata_vars_to_read, default_qa, filter_read = tuple_arguments
 
     # wrap shared arrays as numpy arrays to more easily manipulate the data
     data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])
@@ -83,15 +83,11 @@ def read_netcdf_data(tuple_arguments):
 
     # get all station references in file (do little extra work to get non-GHOST observational station references)
     if (not reading_ghost) & (data_label == 'observations'):
-        """
         if 'station_reference' in ncdf_root.variables:
             station_reference_var = 'station_reference'
         elif 'station_code' in ncdf_root.variables:
             station_reference_var = 'station_code'
         elif 'station_name' in ncdf_root.variables:
-            station_reference_var = 'station_name'
-        """
-        if 'station_name' in ncdf_root.variables:
             station_reference_var = 'station_name'
         else: 
             print('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
@@ -121,7 +117,22 @@ def read_netcdf_data(tuple_arguments):
     current_file_station_indices = \
         np.where(np.in1d(file_station_references, station_references))[0]
 
-    # if have zero current_file_station_indices in all unique station references (can happen due to station colocation)
+    # if have zero current_file_station_indices in all unique station references, 
+    # then check if it is because of old-style of Providentia-interpolation output, 
+    # where all station_references were for 'station_name'  
+    if (data_label != 'observations') & (len(current_file_station_indices) == 0):
+
+        # get indices of all unique station references that are contained
+        # within file station references array
+        full_array_station_indices = \
+            np.where(np.in1d(station_names, file_station_references))[0]
+
+        # get indices of file station station references that are
+        # contained in all unique station references array
+        current_file_station_indices = \
+            np.where(np.in1d(file_station_references, station_names))[0]
+
+    # if still have zero current_file_station_indices in all unique station references (can happen due to station colocation)
     # then return from function without reading
     if len(current_file_station_indices) == 0:
         # return empty metadata list if reading observations
