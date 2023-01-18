@@ -89,8 +89,10 @@ class DataReader:
 
                 # get unique basic metadata across networkspecies
                 # for this step include filter networkspecies
-                self.read_instance.station_references, self.read_instance.station_longitudes, self.read_instance.station_latitudes, self.read_instance.station_classifications, self.read_instance.area_classifications =\
-                    get_basic_metadata(self.read_instance) 
+                self.read_instance.station_references, self.read_instance.station_names,\
+                self.read_instance.station_longitudes, self.read_instance.station_latitudes,\
+                self.read_instance.station_classifications, self.read_instance.area_classifications = \
+                get_basic_metadata(self.read_instance) 
 
                 # iterate through station_references per networkspecies
                 # if have 0 valid stations then drop  
@@ -641,14 +643,15 @@ class DataReader:
                                                   ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, 
                                                   timestamp_array_shared, qa_shared, flags_shared))
             # read netCDF files in parallel
-            tuple_argument_fields = ['filename', 'station_references', 'speci', 'data_label', 'data_labels', 
-                                     'reading_ghost', 'ghost_data_vars_to_read', 'metadata_dtype', 
-                                     'metadata_vars_to_read', 'default_qa_active', 'filter_read']
+            tuple_argument_fields = ['filename', 'station_references', 'station_names', 'speci', 
+                                     'data_label', 'data_labels', 'reading_ghost', 'ghost_data_vars_to_read', 
+                                     'metadata_dtype', 'metadata_vars_to_read', 'default_qa_active', 'filter_read']
             tuple_arguments = []
 
             for data_label in self.files_to_read[networkspeci]:
                 for fname in self.files_to_read[networkspeci][data_label]:
                     tuple_arguments.append((fname, self.read_instance.station_references[networkspeci], 
+                                            self.read_instance.station_names[networkspeci],
                                             speci, data_label, data_labels, self.read_instance.reading_ghost, 
                                             self.read_instance.ghost_data_vars_to_read, 
                                             self.read_instance.metadata_dtype, 
