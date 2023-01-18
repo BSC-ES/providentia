@@ -158,151 +158,108 @@ def read_netcdf_data(tuple_arguments):
         if reading_ghost:
             # if need to filter by qa load non-filtered array, otherwise load prefiltered array (if available)
             if (default_qa) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
-                species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][current_file_station_indices, valid_file_time_indices]
+                species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][current_file_station_indices, 
+                                                                                valid_file_time_indices]
                 # set qa to None as not filtering by them
                 qa = None
             else:
-                if ncdf_root[station_reference_var].dtype == np.dtype(object):
-                    file_station_references = np.array([''.join(val) for val in ncdf_root[station_reference_var][:]])
-                else:
-                    file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
-                                                        for st_name in ncdf_root[station_reference_var][:]], dtype=np.str)
+                species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
+        # non-GHOST (transpose array to swap station and time dimensions)
         else:
-            file_station_references = ncdf_root['station_reference'][:]
+            species_data = ncdf_root[speci][valid_file_time_indices, current_file_station_indices].T
 
-        # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
-        non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(file_station_references) if ref.lower() != 'nan'])
-        file_station_references = file_station_references[non_nan_station_indices]
+        # reading GHOST data?
+        if reading_ghost:
 
-        # get indices of all unique station references that are contained
-        # within file station references array
-        full_array_station_indices = \
-            np.where(np.in1d(station_references, file_station_references))[0]
-
-        # get indices of file station station references that are
-        # contained in all unique station references array
-        current_file_station_indices = \
-            np.where(np.in1d(file_station_references, station_references))[0]
-
-        # if have zero current_file_station_indices in all unique station references (can happen due to station colocation)
-        # then return from function without reading
-        if len(current_file_station_indices) == 0:
-            # return empty metadata list if reading observations
-            if (data_label == 'observations') & (not filter_read):
-                return []
-            else:
-                return 
-
-        # read observations
-        if data_label == 'observations':
-
-            # read species variable
-            # GHOST
-            if reading_ghost:
-                # if need to filter by qa load non-filtered array, otherwise load prefiltered array (if available)
-                if (default_qa) & ('{}_prefiltered_defaultqa'.format(speci) in list(ncdf_root.variables.keys())):
-                    species_data = ncdf_root['{}_prefiltered_defaultqa'.format(speci)][current_file_station_indices, 
-                                                                                    valid_file_time_indices]
-                    # set qa to None as not filtering by them
-                    qa = None
-                else:
-                    species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
-            # non-GHOST (transpose array to swap station and time dimensions)
-            else:
-                species_data = ncdf_root[speci][valid_file_time_indices, current_file_station_indices].T
-
-            # reading GHOST data?
-            if reading_ghost:
-
-                # read GHOST data variables
-                if not filter_read:
-                    for ghost_data_var_ii, ghost_data_var in enumerate(ghost_data_vars_to_read):
-                        ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], 
-                                            full_array_time_indices[np.newaxis, :]] = \
-                            ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
-
-                # if some qa flags selected then screen observations
-                if qa is not None:
-                    if len(qa) > 0:
-                        # screen out observations which are associated with any of the selected qa flags
-                        species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], 
-                                            qa).any(axis=2)] = np.NaN
-                    
-                # if some data provider flags selected then screen observations
-                if len(flags) > 0:
-                    # screen out observations which are associated with any of the selected data provider flags
-                    species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], 
-                                        flags).any(axis=2)] = np.NaN
-
-            # write filtered species data to shared file data
-            data_in_memory[data_labels.index('observations'), full_array_station_indices[:, np.newaxis], 
-                        full_array_time_indices[np.newaxis, :]] = species_data
-
-            # get file metadata
+            # read GHOST data variables
             if not filter_read:
-                file_metadata = np.full((len(station_references), 1), np.NaN, dtype=metadata_dtype)
-                for meta_var in metadata_vars_to_read:
-                    # do extra work for non-GHOST data 
-                    if not reading_ghost:
-                        # get correct variable name for .nc
-                        if meta_var == 'longitude':
-                            if "longitude" not in ncdf_root.variables:
-                                meta_var_nc = 'lon'
-                            else:
-                                meta_var_nc = 'longitude'
-                        elif meta_var == 'latitude':
-                            if "latitude" not in ncdf_root.variables:
-                                meta_var_nc = 'lat'
-                            else:
-                                meta_var_nc = 'latitude'
-                        elif meta_var == 'station_reference':
-                            if "station_reference" not in ncdf_root.variables:
-                                meta_var_nc = 'station_code'
-                            else:
-                                meta_var_nc = 'station_reference'
-                        else:
-                            meta_var_nc = meta_var
-            
-                        # check meta variable is in netCDF
-                        if meta_var_nc not in ncdf_root.variables:
-                            continue
-                        meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
-                        
-                        # some extra str formatting
-                        if meta_var in ['station_reference', 'station_name', 'station_classification', 
-                                        'area_classification']:
-                            if meta_val.dtype != np.str:
-                                if meta_val.dtype != np.dtype(object):
-                                    meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
-                                                        for val in meta_val], dtype=np.str)
-                                else:
-                                    meta_val = np.array([''.join(val) for val in meta_val])
+                for ghost_data_var_ii, ghost_data_var in enumerate(ghost_data_vars_to_read):
+                    ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], 
+                                        full_array_time_indices[np.newaxis, :]] = \
+                        ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
 
-                    # GHOST metadata
+            # if some qa flags selected then screen observations
+            if qa is not None:
+                if len(qa) > 0:
+                    # screen out observations which are associated with any of the selected qa flags
+                    species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], 
+                                        qa).any(axis=2)] = np.NaN
+                
+            # if some data provider flags selected then screen observations
+            if len(flags) > 0:
+                # screen out observations which are associated with any of the selected data provider flags
+                species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], 
+                                    flags).any(axis=2)] = np.NaN
+
+        # write filtered species data to shared file data
+        data_in_memory[data_labels.index('observations'), full_array_station_indices[:, np.newaxis], 
+                    full_array_time_indices[np.newaxis, :]] = species_data
+
+        # get file metadata
+        if not filter_read:
+            file_metadata = np.full((len(station_references), 1), np.NaN, dtype=metadata_dtype)
+            for meta_var in metadata_vars_to_read:
+                # do extra work for non-GHOST data 
+                if not reading_ghost:
+                    # get correct variable name for .nc
+                    if meta_var == 'longitude':
+                        if "longitude" not in ncdf_root.variables:
+                            meta_var_nc = 'lon'
+                        else:
+                            meta_var_nc = 'longitude'
+                    elif meta_var == 'latitude':
+                        if "latitude" not in ncdf_root.variables:
+                            meta_var_nc = 'lat'
+                        else:
+                            meta_var_nc = 'latitude'
+                    elif meta_var == 'station_reference':
+                        if "station_reference" not in ncdf_root.variables:
+                            meta_var_nc = 'station_code'
+                        else:
+                            meta_var_nc = 'station_reference'
                     else:
                         meta_var_nc = meta_var
-                        meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
+        
+                    # check meta variable is in netCDF
+                    if meta_var_nc not in ncdf_root.variables:
+                        continue
+                    meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
+                    
+                    # some extra str formatting
+                    if meta_var in ['station_reference', 'station_name', 'station_classification', 
+                                    'area_classification']:
+                        if meta_val.dtype != np.str:
+                            if meta_val.dtype != np.dtype(object):
+                                meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
+                                                    for val in meta_val], dtype=np.str)
+                            else:
+                                meta_val = np.array([''.join(val) for val in meta_val])
 
-                    # put metadata in array
-                    file_metadata[meta_var][full_array_station_indices, 0] = meta_val
+                # GHOST metadata
+                else:
+                    meta_var_nc = meta_var
+                    meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
 
-        # experiment data
-        else:
-            relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
+                # put metadata in array
+                file_metadata[meta_var][full_array_station_indices, 0] = meta_val
 
-            # mask out fill values for parameter field
-            relevant_data[relevant_data.mask] = np.NaN
-            
-            # put data in array
-            data_in_memory[data_labels.index(data_label), full_array_station_indices[:, np.newaxis], 
-                        full_array_time_indices[np.newaxis, :]] = relevant_data
+    # experiment data
+    else:
+        relevant_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
 
-        # close netCDF
-        ncdf_root.close()
+        # mask out fill values for parameter field
+        relevant_data[relevant_data.mask] = np.NaN
+        
+        # put data in array
+        data_in_memory[data_labels.index(data_label), full_array_station_indices[:, np.newaxis], 
+                    full_array_time_indices[np.newaxis, :]] = relevant_data
 
-        # return metadata if reading observations
-        if (data_label == 'observations') & (not filter_read):
-            return file_metadata
+    # close netCDF
+    ncdf_root.close()
+
+    # return metadata if reading observations
+    if (data_label == 'observations') & (not filter_read):
+        return file_metadata
 
 def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to_read, resolution):
     """ Function that returns the yearmonths of the files to be read.
