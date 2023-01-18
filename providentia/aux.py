@@ -1108,18 +1108,18 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
 
     # check if start/end date are valid values, if not, return with no valid obs. files
     if (not valid_date(start_date)) or (not valid_date(end_date)):
-        print('Warning: One of start date or end date are not valid.')
+        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
         return
 
     # check end date is > start date, if not, return with no valid obs. files
     if int(start_date) >= int(end_date):
-        print('Warning: Start date exceeds end date.')
+        print(f'Warning: Start date ({start_date}) exceeds end date ({end_date}).')
         return
 
     # check start date and end date are both within if valid date range (19000101 - 20500101),
     # if not, return with no valid obs. files
     if (int(start_date) < 19000101) or (int(end_date) < 19000101) or (int(start_date) >= 20500101) or (int(end_date) >= 20500101):
-        print('Warning: One of start date or end date are not valid.')
+        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
         return 
 
     # get start date on first of month
@@ -1251,6 +1251,7 @@ def get_basic_metadata(instance):
     station_latitudes = {}
     station_classifications = {}
     area_classifications = {}
+    nonghost_units = {}
 
     # iterate through network, speci pairs
     for networkspeci in (instance.networkspecies + instance.filter_networkspecies):
@@ -1390,6 +1391,9 @@ def get_basic_metadata(instance):
                             [area_classification.tostring().decode('ascii').replace('\x00', '')
                             for area_classification in ncdf_root['area_classification'][non_nan_station_indices]], dtype=np.str)
             
+            # get non-GHOST measurement units
+            nonghost_units[speci] = ncdf_root[speci].units
+
             ncdf_root.close()
 
     # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
@@ -1407,7 +1411,7 @@ def get_basic_metadata(instance):
             station_classifications[ns] = station_classifications[ns][ns_intersects]
             area_classifications[ns] =  area_classifications[ns][ns_intersects] 
 
-    return station_references, station_names, station_longitudes, station_latitudes, station_classifications, area_classifications
+    return station_references, station_names, station_longitudes, station_latitudes, station_classifications, area_classifications, nonghost_units
 
 def spatial_colocation(reading_ghost, station_references, longitudes, latitudes):
     """ Given multiple species, return intersecting indices for matching stations across species (per network/species).
