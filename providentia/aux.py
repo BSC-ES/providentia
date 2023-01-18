@@ -1246,6 +1246,7 @@ def get_basic_metadata(instance):
 
     # define dictionaries for storing basic metadata across all species to read
     station_references = {}
+    station_names = {}
     station_longitudes = {}
     station_latitudes = {}
     station_classifications = {}
@@ -1298,6 +1299,7 @@ def get_basic_metadata(instance):
             
             # define arrays for storing speci metadata
             speci_station_references = []
+            speci_station_names = []
             speci_station_longitudes = []
             speci_station_latitudes = []
             speci_station_classifications = []
@@ -1306,6 +1308,7 @@ def get_basic_metadata(instance):
             for relevant_file in relevant_files:
                 ncdf_root = Dataset(relevant_file)
                 speci_station_references = np.append(speci_station_references, ncdf_root['station_reference'][:])
+                speci_station_names = np.append(speci_station_names, ncdf_root['station_name'][:])
                 speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
                 speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
                 speci_station_classifications = np.append(speci_station_classifications, ncdf_root['station_classification'][:])
@@ -1314,6 +1317,7 @@ def get_basic_metadata(instance):
 
             speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
             station_references[networkspeci] = speci_station_references
+            station_names[networkspeci] = speci_station_names
             station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
             station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
             station_classifications[networkspeci] = speci_station_classifications[station_unique_indices]
@@ -1323,15 +1327,11 @@ def get_basic_metadata(instance):
         else:
         
             ncdf_root = Dataset(relevant_files[0])
-            """
             if 'station_reference' in ncdf_root.variables:
                 station_reference_var = 'station_reference'
             elif 'station_code' in ncdf_root.variables:
                 station_reference_var = 'station_code'
             elif 'station_name' in ncdf_root.variables:
-                station_reference_var = 'station_name'
-            """
-            if 'station_name' in ncdf_root.variables:
                 station_reference_var = 'station_name'
             else: 
                 print('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
@@ -1349,6 +1349,17 @@ def get_basic_metadata(instance):
             # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
             non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(station_references[networkspeci]) if ref.lower() != 'nan'])
             station_references[networkspeci] = station_references[networkspeci][non_nan_station_indices]
+
+            if "station_name" in ncdf_root.variables:
+                if ncdf_root['station_name'].dtype == np.str:
+                    station_names[networkspeci] = ncdf_root['station_name'][non_nan_station_indices]
+                else:
+                    if ncdf_root['station_name'].dtype == np.dtype(object):
+                        station_names[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_name'][non_nan_station_indices]])
+                    else:
+                        station_names[networkspeci] = np.array(
+                            [st_name.tostring().decode('ascii').replace('\x00', '')
+                            for st_name in ncdf_root['station_name'][non_nan_station_indices]], dtype=np.str)
 
             if "latitude" in ncdf_root.variables:
                 station_longitudes[networkspeci] = ncdf_root['longitude'][non_nan_station_indices]
@@ -1390,12 +1401,13 @@ def get_basic_metadata(instance):
         # iterate through networkspecies specific intersecting indices, setting 
         for ns, ns_intersects in intersecting_indices.items():
             station_references[ns] = station_references[ns][ns_intersects]
+            station_names[ns] = station_names[ns][ns_intersects]
             station_longitudes[ns] = station_longitudes[ns][ns_intersects]
             station_latitudes[ns] = station_latitudes[ns][ns_intersects]
             station_classifications[ns] = station_classifications[ns][ns_intersects]
             area_classifications[ns] =  area_classifications[ns][ns_intersects] 
 
-    return station_references, station_longitudes, station_latitudes, station_classifications, area_classifications
+    return station_references, station_names, station_longitudes, station_latitudes, station_classifications, area_classifications
 
 def spatial_colocation(reading_ghost, station_references, longitudes, latitudes):
     """ Given multiple species, return intersecting indices for matching stations across species (per network/species).
