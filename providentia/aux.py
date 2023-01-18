@@ -1108,18 +1108,18 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
 
     # check if start/end date are valid values, if not, return with no valid obs. files
     if (not valid_date(start_date)) or (not valid_date(end_date)):
-        print('Warning: One of start date or end date are not valid.')
+        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
         return
 
     # check end date is > start date, if not, return with no valid obs. files
     if int(start_date) >= int(end_date):
-        print('Warning: Start date exceeds end date.')
+        print(f'Warning: Start date ({start_date}) exceeds end date ({end_date}).')
         return
 
     # check start date and end date are both within if valid date range (19000101 - 20500101),
     # if not, return with no valid obs. files
     if (int(start_date) < 19000101) or (int(end_date) < 19000101) or (int(start_date) >= 20500101) or (int(end_date) >= 20500101):
-        print('Warning: One of start date or end date are not valid.')
+        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
         return 
 
     # get start date on first of month
