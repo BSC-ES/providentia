@@ -1387,7 +1387,9 @@ class Plot:
                 bias = False
 
             # make smooth line
-            smooth_line = relevant_axis.plot(ts.rolling(plot_characteristics['smooth']['window'], min_periods=plot_characteristics['smooth']['min_points'], center=True).mean().dropna(),
+            smooth_line = relevant_axis.plot(ts.rolling(plot_characteristics['smooth']['window'], 
+                                                        min_periods=plot_characteristics['smooth']['min_points'], 
+                                                        center=True).mean().dropna(),
                                              color=self.read_instance.plotting_params[data_label]['colour'],
                                              zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
                                              **plot_characteristics['smooth']['format'])
