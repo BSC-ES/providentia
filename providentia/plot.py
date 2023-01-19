@@ -1063,16 +1063,24 @@ class Plot:
 
         # make boxplot for data_label for multispecies
         if 'multispecies' in plot_options:
-            widths = plot_characteristics['group_widths']['multispecies'] / (len(self.read_instance.data_labels) + 1)
-            gap_after_plot = widths / len(self.read_instance.data_labels)
-            if ('individual' in plot_options) or ('obs' in plot_options):
-                offset = plot_characteristics['group_widths']['multispecies'] / 2.0
+
+            if ('individual' in plot_options) or ('obs' in plot_options) or (len(self.read_instance.networkspecies) == 1):
+                widths = plot_characteristics['group_widths']['singlespecies']
             else:
-                offset = ((widths * (self.read_instance.data_labels.index(data_label) + 1)) - (widths/2.0)) + (gap_after_plot * (self.read_instance.data_labels.index(data_label)))
+                available_width = plot_characteristics['group_widths']['multispecies']
+                remainder_width = 1.0 - available_width
+                start_point = -0.5 + (remainder_width / 2.0)
+                widths = available_width / (len(self.read_instance.data_labels) + 0.15)
+                spacing = (available_width - (widths * len(self.read_instance.data_labels))) / (len(self.read_instance.data_labels) - 1)
 
             for ns_ii, ns in enumerate(self.read_instance.networkspecies):
-                positions = [(ns_ii - (plot_characteristics['group_widths']['multispecies'] / 2.0)) + (offset)]
-                
+                if ('individual' in plot_options) or ('obs' in plot_options):
+                    positions = [ns_ii]
+                elif (len(self.read_instance.networkspecies) == 1):
+                    positions = [self.read_instance.data_labels.index(data_label)]
+                else:
+                    positions = [((start_point + (widths/2.0)) + (spacing * self.read_instance.data_labels.index(data_label)) + (widths * self.read_instance.data_labels.index(data_label))) + ns_ii]  
+
                 # check have data_label to plot for networkspecies?
                 if data_label in self.canvas_instance.selected_station_data[ns]: 
                 
@@ -1108,7 +1116,7 @@ class Plot:
 
         # set xticklabels (if not already plotted)
         if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
-            if 'multispecies' in plot_options:
+            if ('multispecies' in plot_options) & (len(self.read_instance.networkspecies) > 1):
                 xticks = np.arange(len(self.read_instance.networkspecies))
                 #if all networks or species are same, drop them from xtick label
                 if len(np.unique(self.read_instance.network)) == 1:
