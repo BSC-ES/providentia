@@ -235,6 +235,7 @@ class MPLCanvas(FigureCanvas):
             return
 
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
         if self.filter_data is None:
             self.filter_data = DataFilter(self.read_instance)
         else:
@@ -258,7 +259,10 @@ class MPLCanvas(FigureCanvas):
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
-            
+                
+                # update mouse cursor to a waiting cursor
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
                 # clear all previously plotted artists from selected station plots and hide axes 
                 for plot_type in self.read_instance.active_dashboard_plots:
                     self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
@@ -275,7 +279,13 @@ class MPLCanvas(FigureCanvas):
 
                 # update associated plots with selected stations
                 self.update_associated_active_dashboard_plots()
-            
+
+                # draw changes
+                self.figure.canvas.draw()
+
+                # restore mouse cursor to normal
+                QtWidgets.QApplication.restoreOverrideCursor()
+
             else:
                 msg = 'Select the data you want to plot before resampling.'
                 MessageBox(msg)
@@ -691,8 +701,9 @@ class MPLCanvas(FigureCanvas):
 
                     # if there are no temporal resolutions (only yearly), skip periodic plots
                     if (plot_type in ['periodic', 'periodic-violin']) and (not self.read_instance.relevant_temporal_resolutions):
-                        msg = 'Currently it is not possible to get annual periodic plots.'
+                        msg = 'It is not possible to make periodic plots using annual resolution data.'
                         MessageBox(msg)
+                        continue
 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
