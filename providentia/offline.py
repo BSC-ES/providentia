@@ -755,6 +755,10 @@ class ProvidentiaOffline:
                     # update variable now summary plots have been made for a networkspecies
                     made_networkspeci_summary_plots = True
 
+                # update variable to keep track if have setup summary plot geometry yet for a subsection
+                if made_networkspeci_summary_plots:
+                    summary_plot_geometry_setup = True
+
             # make station specific plots?
             if self.report_stations:      
 
@@ -801,6 +805,8 @@ class ProvidentiaOffline:
                         self.station_ind += 1
                         valid_station_references = self.metadata_in_memory[networkspeci]['station_reference'][relevant_station_ind, :]
                         self.current_station_reference = valid_station_references[pd.notnull(valid_station_references)][0]
+                        if isinstance(self.current_station_reference, np.ndarray):
+                            self.current_station_reference = self.current_station_reference.ravel()[0]
                         valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][relevant_station_ind, :]
                         self.current_station_name = valid_station_names[pd.notnull(valid_station_names)][0]
                         current_lons = self.metadata_in_memory[networkspeci]['longitude'][relevant_station_ind, :]
@@ -882,10 +888,6 @@ class ProvidentiaOffline:
                         vars(self).pop(k)
                     except:
                         pass
-
-            # update variable to keep track if have setup summary plot geometry yet for a subsection
-            if made_networkspeci_summary_plots:
-                summary_plot_geometry_setup = True
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """ Function that calls making of any type of plot. """
