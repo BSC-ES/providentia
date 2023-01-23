@@ -985,7 +985,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if self.no_data_to_read:
             return
 
-        # Update mouse cursor to a waiting cursor
+        # update mouse cursor to a waiting cursor
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # set variable that blocks updating of MPL canvas until all data has been updated
@@ -1114,7 +1114,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, 
                                        experiments_to_read=experiments_to_read)
             
-            #clear canvas entirely if have no valid data after read
+            # clear canvas entirely if have no valid data after read
             if self.invalid_read:
                 # clear axes
                 for plot_type, ax in self.mpl_canvas.plot_axes.items():

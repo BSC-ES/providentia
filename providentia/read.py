@@ -521,6 +521,8 @@ class DataReader:
             # update plotting parameters colours and zorder
             update_plotting_parameters(self.read_instance) 
 
+        # TODO: Add multispecies print and remove main from filter_species
+
     def read_data(self, yearmonths_to_read, data_labels):
         """ Function that handles reading of observational/experiment data.
 
