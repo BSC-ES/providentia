@@ -1249,6 +1249,7 @@ def get_basic_metadata(instance):
     station_names = {}
     station_longitudes = {}
     station_latitudes = {}
+    station_measurement_altitudes = {}
     station_classifications = {}
     area_classifications = {}
     nonghost_units = {}
@@ -1303,6 +1304,7 @@ def get_basic_metadata(instance):
             speci_station_names = []
             speci_station_longitudes = []
             speci_station_latitudes = []
+            speci_station_measurement_altitudes = []
             speci_station_classifications = []
             speci_area_classifications = []
 
@@ -1312,6 +1314,7 @@ def get_basic_metadata(instance):
                 speci_station_names = np.append(speci_station_names, ncdf_root['station_name'][:])
                 speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
                 speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
+                speci_station_measurement_altitudes = np.append(speci_station_measurement_altitudes, ncdf_root['measurement_altitude'][:])
                 speci_station_classifications = np.append(speci_station_classifications, ncdf_root['station_classification'][:])
                 speci_area_classifications = np.append(speci_area_classifications, ncdf_root['area_classification'][:])
                 ncdf_root.close()
@@ -1321,6 +1324,7 @@ def get_basic_metadata(instance):
             station_names[networkspeci] = speci_station_names
             station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
             station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
+            station_measurement_altitudes[networkspeci] = speci_station_measurement_altitudes[station_unique_indices]
             station_classifications[networkspeci] = speci_station_classifications[station_unique_indices]
             area_classifications[networkspeci] = speci_area_classifications[station_unique_indices]
         
@@ -1399,14 +1403,19 @@ def get_basic_metadata(instance):
     # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
     # then spatially colocate stations across species
     if (len((instance.networkspecies + instance.filter_networkspecies)) > 1) & (instance.spatial_colocation):
-        # get intersecting station indices across species
-        intersecting_indices = spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes)
+        # get intersecting station indices across species (handle both GHOST and non-GHOST cases)
+        if instance.reading_ghost:
+            intersecting_indices = spatial_colocation_ghost(station_longitudes, station_latitudes, station_measurement_altitudes)
+        else:
+            intersecting_indices = spatial_colocation_nonghost(station_references, station_longitudes, station_latitudes)
         
         # iterate through networkspecies specific intersecting indices, setting 
         for ns, ns_intersects in intersecting_indices.items():
             station_references[ns] = station_references[ns][ns_intersects]
             station_longitudes[ns] = station_longitudes[ns][ns_intersects]
             station_latitudes[ns] = station_latitudes[ns][ns_intersects]
+            if ns in station_measurement_altitudes:
+                station_measurement_altitudes[ns] = station_measurement_altitudes[ns][ns_intersects]
             if ns in station_names:
                 station_names[ns] = station_names[ns][ns_intersects]
             if ns in station_classifications:
@@ -1414,17 +1423,20 @@ def get_basic_metadata(instance):
             if ns in area_classifications:
                 area_classifications[ns] =  area_classifications[ns][ns_intersects] 
 
-    return station_references, station_names, station_longitudes, station_latitudes, station_classifications, area_classifications, nonghost_units
+    return station_references, station_names, station_longitudes, station_latitudes, station_measurement_altitudes, station_classifications, area_classifications, nonghost_units
 
-def spatial_colocation(reading_ghost, station_references, longitudes, latitudes):
-    """ Given multiple species, return intersecting indices for matching stations across species (per network/species).
+def spatial_colocation_nonghost(station_references, longitudes, latitudes):
+    """ Given multiple species, return intersecting indices for matching stations across species (per network/species)
+        for non-GHOST data.
 
         This is done by 
             1. Cross-checking the station references between species to get matching station_references
-            2. Cross-checking matching longitude/latitude coordinates to a tolerance of 20m difference
+            2. Cross-checking matching longitude / latitude coordinates to a tolerance of 11m difference
 
-        :param reading_ghost: boolean informing if are using GHOST data or not
-        :type reading_ghost: boolean
+        The tolerance is calculated by allowing for a tolerance of 11m in the 2 independent x,y dimensions, 
+        as is done in GHOST to distinguish unique stations.
+        Using Pythagoras in 2D √(11**2 +11**2) = 15.556.
+
         :param station_references: dictionary of station references per network/species
         :type station_references: dict
         :param longitudes: dictionary of longitudes per network/species
@@ -1435,21 +1447,14 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
         :rtype: dict
     """
 
-    # if are reading GHOST data remove method abbreviation from station_references
-    station_references_no_method = {}
-    for networkspecies in station_references:
-        if reading_ghost:
-            station_references_no_method[networkspecies] = ['_'.join(ref.split('_')[:-1]) 
-                                                        for ref in station_references[networkspecies]]
-        else:
-            station_references_no_method[networkspecies] = station_references[networkspecies].tolist()
-
     # get indices of intersection of station references across species
-    intersecting_station_references_no_method = list(set.intersection(*map(set,list(station_references_no_method.values()))))
+    #for networkspecies in station_references:
+    #    station_references[networkspecies] = station_references[networkspecies].tolist()    
+    intersecting_station_references = list(set.intersection(*map(set,list(station_references.values()))))
     intersecting_indices = {}
-    for networkspecies in station_references_no_method:
-        intersecting_indices[networkspecies] = np.array(np.sort([station_references_no_method[networkspecies].index(ref) 
-                                                        for ref in intersecting_station_references_no_method]), dtype=np.int)
+    for networkspecies in station_references:
+        intersecting_indices[networkspecies] = np.array(np.sort([list(station_references[networkspecies]).index(ref) 
+                                                        for ref in intersecting_station_references]), dtype=np.int)
 
     # set variable for first networkspecies
     firstnetworkspecies = list(intersecting_indices.keys())[0]
@@ -1461,10 +1466,10 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
 
     # if non-intersecting indices unaccounted for across species, 
     # then attempt to resolve them by matching longitudes / latitudes
-    if len(intersecting_indices[firstnetworkspecies]) != len(station_references_no_method[firstnetworkspecies]):
+    if len(intersecting_indices[firstnetworkspecies]) != len(station_references[firstnetworkspecies]):
 
         # set tolerance for matching longitudes and latitudes in metres
-        tolerance = 20
+        tolerance = 15.556
 
         # get non-intersecting indices, longitudes and latitudes across speci
         non_intersecting_indices = {networkspecies: np.setdiff1d(np.arange(len(station_references[networkspecies])), intersecting_indices[networkspecies]) for networkspecies in station_references}
@@ -1472,19 +1477,20 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
         non_intersecting_latitudes = {networkspecies: latitudes[networkspecies][non_intersecting_indices[networkspecies]] for networkspecies in latitudes}
 
         # get non-intersecting station longitudes and latitudes for first speci
-        speci_non_intersecting_longitudes = non_intersecting_longitudes[firstnetworkspecies]
-        speci_non_intersecting_latitudes = non_intersecting_latitudes[firstnetworkspecies]
+        firstnetworkspecies_longitudes = non_intersecting_longitudes[firstnetworkspecies]
+        firstnetworkspecies_latitudes = non_intersecting_latitudes[firstnetworkspecies]
 
         # convert speci longitude and latitudes in geographic coordinates to cartesian ECEF 
         # (Earth Centred, Earth Fixed) coordinates assuming WGS84 datum and ellipsoid, and that all heights equal zero
         # ECEF coordiantes represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
         lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
         ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
-        speci_non_intersecting_x, speci_non_intersecting_y, speci_non_intersecting_z = pyproj.transform(lla, ecef, 
-            speci_non_intersecting_longitudes, speci_non_intersecting_latitudes, 
-            np.zeros(len(speci_non_intersecting_longitudes)), radians=False)
-        # merge coordinates to 2D array
-        speci_non_intersecting_xy = np.column_stack((speci_non_intersecting_x, speci_non_intersecting_y))
+        firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = pyproj.transform(lla, ecef, 
+            firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, 
+            np.zeros(len(firstnetworkspecies_longitudes)), radians=False)
+        
+        # merge coordinates to 3D array
+        firstnetworkspecies_xyz = np.column_stack((firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z))
 
         # iterate through all other speci, and get intersections (within tolerance) of longitudes and latitudes 
         # with first speci longitudes and latitudes
@@ -1494,29 +1500,29 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
             if networkspecies == firstnetworkspecies:
                 continue
 
-            next_speci_non_intersecting_longitudes = non_intersecting_longitudes[networkspecies]
-            next_speci_non_intersecting_latitudes = non_intersecting_latitudes[networkspecies]
+            nextnetworkspecies_longitudes = non_intersecting_longitudes[networkspecies]
+            nextnetworkspecies_latitudes = non_intersecting_latitudes[networkspecies]
 
-            # convert speci longitude and latitudes in geogroahic coordinates to cartesian ECEF 
-            next_speci_non_intersecting_x, next_speci_non_intersecting_y, next_speci_non_intersecting_z = pyproj.transform(lla, 
-                ecef, next_speci_non_intersecting_longitudes, next_speci_non_intersecting_latitudes, 
-                np.zeros(len(next_speci_non_intersecting_longitudes)), radians=False)
+            # convert speci longitude and latitudes in geographic coordinates to cartesian ECEF 
+            nextnetworkspecies_x, nextnetworkspecies_y, nextnetworkspecies_z = pyproj.transform(lla, ecef, 
+                nextnetworkspecies_longitudes, nextnetworkspecies_latitudes, 
+                np.zeros(len(nextnetworkspecies_longitudes)), radians=False)
             
-            # merge coordinates to 2D array
-            next_speci_non_intersecting_xy = np.column_stack((next_speci_non_intersecting_x, next_speci_non_intersecting_y))            
+            # merge coordinates to 3D array
+            nextnetworkspecies_xyz = np.column_stack((nextnetworkspecies_x, nextnetworkspecies_y, nextnetworkspecies_z))            
 
-            # get closest differences between next speci lon,lat coords, with first speci lon lats coords (in dimensions of first species)
-            dists_fs = cKDTree(next_speci_non_intersecting_xy).query(speci_non_intersecting_xy, k=1)[0]
+            # get closest differences between next speci xyz coords, with first speci xyz coords (in dimensions of first species)
+            dists_fs = cKDTree(nextnetworkspecies_xyz).query(firstnetworkspecies_xyz, k=1)[0]
             
-            # get closest differences between first speci lon lats coords, with next speci lon,lat coords (in dimensions of next species)
-            dists_ns = cKDTree(speci_non_intersecting_xy).query(next_speci_non_intersecting_xy, k=1)[0]
+            # get closest differences between first speci xyz coords, with next speci xyz coords (in dimensions of next species)
+            dists_ns = cKDTree(firstnetworkspecies_xyz).query(nextnetworkspecies_xyz, k=1)[0]
 
             # get indices where first species differences are within tolerance, i.e. intersecting 
-            pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = non_intersecting_indices[firstnetworkspecies][np.where(dists_fs <= tolerance)[0]]
+            pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = non_intersecting_indices[firstnetworkspecies][np.where(dists_fs < tolerance)[0]]
             pairwise_intersect_inds[firstnetworkspecies].extend(copy.deepcopy(pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)]))
            
             # get indices where next species differences are within tolerance, i.e. intersecting 
-            pairwise_intersect_inds[networkspecies] = non_intersecting_indices[networkspecies][np.where(dists_ns <= tolerance)[0]]
+            pairwise_intersect_inds[networkspecies] = non_intersecting_indices[networkspecies][np.where(dists_ns < tolerance)[0]]
 
         # get indices (for first networkspecies) where longitude and latitudes intersect across all species
         pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds[firstnetworkspecies], return_counts=True)
@@ -1533,6 +1539,97 @@ def spatial_colocation(reading_ghost, station_references, longitudes, latitudes)
         # while doing so also manke sure indices are sorted
         for networkspecies in non_intersecting_longitudes:
             intersecting_indices[networkspecies] = np.array(np.sort(np.append(intersecting_indices[networkspecies], pairwise_intersect_inds[networkspecies])), dtype=np.int)
+
+    return intersecting_indices
+
+def spatial_colocation_ghost(longitudes, latitudes, measurement_altitudes):
+    """ Given multiple species, return intersecting indices for matching stations across species (per network/species)
+        for GHOST data.
+
+        This is done by cross-checking matching longitude / latitude / measurement altitudes coordinates 
+        to a tolerance of 19.053m difference.
+        This tolerance is calculated by allowing for a tolerance of 11m in the 3 independent x,y,z dimensions, 
+        as is done in GHOST to distinguish unique stations.
+        Using Pythagoras in 3D √(11**2 +11**2 + 11**2) = 19.053.
+
+        :param longitudes: dictionary of longitudes per network/species
+        :type longitudes: dict
+        :param latitudes: dictionary of latitudes per network/species
+        :type latitudes: dict
+        :param measurement_altitudes: dictionary of measurement altitudes per network/species
+        :type measurement_altitudes: dict
+        :return: intersecting indices per network/species
+        :rtype: dict
+    """
+
+    # set tolerance for matching longitudes / latitudes / measurement_altitudes in metres
+    tolerance = 19.053
+
+    # set variable for first networkspecies
+    firstnetworkspecies = list(longitudes.keys())[0]
+    
+    # get station coordinates for firstnetworkspecies
+    firstnetworkspecies_longitudes = longitudes[firstnetworkspecies]
+    firstnetworkspecies_latitudes = latitudes[firstnetworkspecies] 
+    firstnetworkspecies_measurement_altitudes = measurement_altitudes[firstnetworkspecies]
+
+    # convert longitudes / latitudes / measurement_altitudes in geographic coordinates to cartesian ECEF 
+    # (Earth Centred, Earth Fixed) coordinates assuming WGS84 datum and ellipsoid, and that all heights equal zero
+    # ECEF coordiantes represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
+    lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
+    ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
+    firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = pyproj.transform(lla, ecef, 
+        firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, firstnetworkspecies_measurement_altitudes,
+        radians=False)
+
+    # merge coordinates to 3D array
+    firstnetworkspecies_xyz = np.column_stack((firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z))
+
+    # iterate through all other speci, and get intersections (within tolerance) of 
+    # longitudes / latitudes / measurement_altitudes, with first speci longitudes and latitudes
+    pairwise_intersect_inds = {firstnetworkspecies:[]}
+    for networkspecies in longitudes:
+
+        if networkspecies == firstnetworkspecies:
+            continue
+
+        nextnetworkspecies_longitudes = longitudes[networkspecies]
+        nextnetworkspecies_latitudes = latitudes[networkspecies]
+        nextnetworkspecies_measurement_altitudes = measurement_altitudes[networkspecies]
+
+        # convert speci longitude and latitudes in geographic coordinates to cartesian ECEF 
+        nextnetworkspecies_x, nextnetworkspecies_y, nextnetworkspecies_z = pyproj.transform(lla, 
+            ecef, nextnetworkspecies_longitudes, nextnetworkspecies_latitudes, nextnetworkspecies_measurement_altitudes,
+            radians=False)
+        
+        # merge coordinates to 3D array
+        nextnetworkspecies_xyz = np.column_stack((nextnetworkspecies_x, nextnetworkspecies_y, nextnetworkspecies_z))            
+
+        # get closest differences between next speci xyz coords, with first speci xyz coords (in dimensions of first species)
+        dists_fs = cKDTree(nextnetworkspecies_xyz).query(firstnetworkspecies_xyz, k=1)[0]
+        
+        # get closest differences between first speci xyz coords, with next speci xyz coords (in dimensions of next species)
+        dists_ns = cKDTree(firstnetworkspecies_xyz).query(nextnetworkspecies_xyz, k=1)[0]
+
+        # get indices where first species differences are within tolerance, i.e. intersecting 
+        pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.where(dists_fs < tolerance)[0]
+        pairwise_intersect_inds[firstnetworkspecies].extend(copy.deepcopy(pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)]))
+        
+        # get indices where next species differences are within tolerance, i.e. intersecting 
+        pairwise_intersect_inds[networkspecies] = np.where(dists_ns < tolerance)[0]
+
+    # get indices (for first networkspecies) where longitude, latitudes and measurement_altitudes intersect across all species
+    pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds[firstnetworkspecies], return_counts=True)
+    pairwise_intersect_inds[firstnetworkspecies] = pairwise_intersect_inds_unique[counts == (len(longitudes)-1)]
+
+    # get specific intersect indices across all species, for rest of species
+    intersecting_indices = {}
+    for networkspecies in longitudes:
+        if networkspecies == firstnetworkspecies:
+            intersecting_indices[networkspecies] = np.array(np.sort(pairwise_intersect_inds[networkspecies]), dtype=np.int)
+        else:
+            _, species_intersect_inds, _ = np.intersect1d(pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)], pairwise_intersect_inds[firstnetworkspecies], return_indices=True)
+            intersecting_indices[networkspecies] = np.array(np.sort(pairwise_intersect_inds[networkspecies][species_intersect_inds]), dtype=np.int)
 
     return intersecting_indices
 
