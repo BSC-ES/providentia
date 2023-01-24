@@ -84,6 +84,7 @@ def read_netcdf_data(tuple_arguments):
     # show warning when the data consists only of less than 2 timesteps
     if len(file_timestamp) < 2:
         msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots.'
+        msg += 'Plots will only be created when period is longer than 2 timesteps.'
         MessageBox(msg)
         return []
 
