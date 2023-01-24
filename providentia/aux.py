@@ -1656,36 +1656,27 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
     # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
     if add_filter_species:
 
-        # do not add networkspeci to filter_species if filtered network is main
-        if networkspeci != instance.networkspecies[0]:
+        # add or update networkspeci
+        # check selected lower and upper bounds and fill value are numbers or nan
+        try:
+            instance.filter_species[networkspeci] = [float(current_lower), float(current_upper),
+                                                     float(current_filter_species_fill_value)]
             
-            # add or update networkspeci
-            # check selected lower and upper bounds and fill value are numbers or nan
-            try:
-                instance.filter_species[networkspeci] = [float(current_lower), float(current_upper),
-                                                         float(current_filter_species_fill_value)]
-                
-            # if any of the fields are not numbers, return from function
-            except ValueError:
-                print("Warning: Data limit fields must be numeric")
-                return
+        # if any of the fields are not numbers, return from function
+        except ValueError:
+            print("Warning: Data limit fields must be numeric")
+            return
 
-            # add if networkspeci is not already in qa_per_species
-            if speci not in instance.qa_per_species:
-                # get species in memory 
-                species = copy.deepcopy(instance.species)
-                filter_species = [val.split('|')[1] for val in list(copy.deepcopy(instance.filter_species).keys())]
-                qa_species = species + filter_species
-                
-                # add
-                qa_species.append(speci)
-                instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
-
-        # update le_minimum_value and le_maximum_value (data bounds) for main networkspeci
-        else:
-            instance.le_minimum_value.setText(current_lower)
-            instance.le_maximum_value.setText(current_upper)
-            instance.bounds_set_on_multispecies = True
+        # add if networkspeci is not already in qa_per_species
+        if speci not in instance.qa_per_species:
+            # get species in memory 
+            species = copy.deepcopy(instance.species)
+            filter_species = [val.split('|')[1] for val in list(copy.deepcopy(instance.filter_species).keys())]
+            qa_species = species + filter_species
+            
+            # add
+            qa_species.append(speci)
+            instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
 
     # if apply button is unchecked, remove networkspecies from filter_species
     else:
@@ -1696,8 +1687,4 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
         # remove from qa_per_species
         if speci in instance.qa_per_species:
             del instance.qa_per_species[speci]
-
-    print('SELECTED SPECIES')
-    print('- Network species', instance.networkspecies)
-    print('- Filter species', instance.filter_species)
     
