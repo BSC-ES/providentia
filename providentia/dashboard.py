@@ -1102,11 +1102,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # has date range changed?
         if len(read_operations) > 0:
-           
+            
+            # inactivate resampling
+            self.resampling = False
+
             # set current time array, as previous time array
             self.previous_time_array = self.time_array
+
             # set current station references, as previous station references
             self.previous_station_references = self.station_references
+            
             # set current relevant yearmonths, as previous relevant yearmonths
             self.previous_yearmonths = self.yearmonths
 

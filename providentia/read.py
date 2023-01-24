@@ -1,6 +1,3 @@
-from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data
-from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, get_default_qa
-
 import sys
 import os
 import copy
@@ -8,11 +5,13 @@ import ctypes
 import datetime
 import multiprocessing
 import time
-
 from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset
+from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data
+from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, get_default_qa
+from .dashboard_aux import MessageBox
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -63,7 +62,9 @@ class DataReader:
             # show warning when the data consists only of less than 2 timesteps
             if len(self.read_instance.time_array) < 2:
                 self.read_instance.invalid_read = True
-                print('Error: Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots.')
+                msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
+                msg += 'Plots will only be created when period is longer than 2 timesteps.'
+                MessageBox(msg)
                 return
             else:
                 # get list of extra networkspecies to read, used for filtering data
@@ -73,7 +74,22 @@ class DataReader:
                     for networkspeci in self.read_instance.filter_species:
                         if networkspeci not in self.read_instance.networkspecies:
                             self.read_instance.filter_networkspecies.append(networkspeci)
-                
+                    
+                    # update le_minimum_value and le_maximum_value (data bounds) for current networkspecies
+                    if networkspeci in self.read_instance.networkspecies:
+                        
+                        current_lower = str(self.read_instance.filter_species[networkspeci][0])
+                        current_upper = str(self.read_instance.filter_species[networkspeci][1])
+                        self.read_instance.le_minimum_value.setText(current_lower)
+                        self.read_instance.le_maximum_value.setText(current_upper)
+                        self.read_instance.bounds_set_on_multispecies = True
+                        
+                        del self.read_instance.filter_species[networkspeci]
+                        
+                        msg = 'The current network-species has been selected in the MULTI tab, '
+                        msg += 'this will change the data bounds.'
+                        MessageBox(msg)
+
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)
                 self.read_instance.yearmonths = list(np.unique(['{}0{}'.format(dti.year,dti.month) if len(str(dti.month)) == 1 else '{}{}'.format(dti.year,dti.month) \
                                                                 for dti in self.read_instance.time_array]))
@@ -521,7 +537,11 @@ class DataReader:
             # update plotting parameters colours and zorder
             update_plotting_parameters(self.read_instance) 
 
-        # TODO: Add multispecies print and remove main from filter_species
+        # print basic information species
+        print('SELECTED SPECIES')
+        print('- Main network-species', self.read_instance.networkspecies)
+        if self.read_instance.filter_species:
+            print('- Filter network-species', self.read_instance.filter_species)
 
     def read_data(self, yearmonths_to_read, data_labels):
         """ Function that handles reading of observational/experiment data.
