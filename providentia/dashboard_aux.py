@@ -312,14 +312,13 @@ class MessageBox(QtWidgets.QWidget):
     def __init__(self, msg, offline=False, msg_offline=None, from_conf=None, parent=None):
 
         super().__init__(parent)
-        
         if offline:
             if msg_offline is not None:
                 print('Warning: ' + msg_offline)
             else:
                 print('Warning: ' + msg)
         else:
-            if from_conf is None or from_conf:
+            if (from_conf is None) or (from_conf):
                 msg_box = self.create_msg_box(msg)
                 if msg_box is not None:
                     layout = QtWidgets.QVBoxLayout(self)

@@ -696,6 +696,14 @@ class MPLCanvas(FigureCanvas):
                 to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
                                     networkspecies=[self.read_instance.networkspeci])
 
+                for data_label in self.selected_station_data[self.read_instance.networkspeci].keys():
+                    dates = self.selected_station_data[self.read_instance.networkspeci][data_label]['pandas_df'].index
+                    if len(dates) < 2:
+                        msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
+                        msg += 'Plots will only be created when period is longer than 2 timesteps.'
+                        MessageBox(msg)
+                        return
+
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
 
