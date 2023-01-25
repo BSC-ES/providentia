@@ -804,11 +804,9 @@ class ProvidentiaOffline:
                         # gather some information about current station
                         self.station_ind += 1
                         valid_station_references = self.metadata_in_memory[networkspeci]['station_reference'][relevant_station_ind, :]
-                        self.current_station_reference = valid_station_references[pd.notnull(valid_station_references)][0]
-                        if isinstance(self.current_station_reference, np.ndarray):
-                            self.current_station_reference = self.current_station_reference.ravel()[0]
+                        self.current_station_reference = str(valid_station_references[pd.notnull(valid_station_references)][0])
                         valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][relevant_station_ind, :]
-                        self.current_station_name = valid_station_names[pd.notnull(valid_station_names)][0]
+                        self.current_station_name = str(valid_station_names[pd.notnull(valid_station_names)][0])
                         current_lons = self.metadata_in_memory[networkspeci]['longitude'][relevant_station_ind, :]
                         self.current_lon = round(current_lons[pd.notnull(current_lons)][0], 2)
                         current_lats = self.metadata_in_memory[networkspeci]['latitude'][relevant_station_ind, :]
@@ -869,7 +867,8 @@ class ProvidentiaOffline:
                             print('Making station {2} for {3} ({0}/{1})'.format(i+1, 
                                                                                 len(self.relevant_station_inds),
                                                                                 plot_type, 
-                                                                                self.current_station_name))                                
+                                                                                self.current_station_name))   
+
                             plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
 
                             # do formatting 
