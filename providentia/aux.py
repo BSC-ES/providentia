@@ -1598,6 +1598,11 @@ def spatial_colocation_ghost(longitudes, latitudes, measurement_altitudes):
         as is done in GHOST to distinguish unique stations.
         Using Pythagoras in 3D √(11**2 +11**2 + 11**2) = 19.053.
 
+        A current limitation is that at one station there can be several measurement methods, which
+        are represented as unique stations in GHOST. Currently, if these stations have the same measurement 
+        position, simply the first of these stations will be preferentially chosen as a match.
+        This could be better done by prioritising first by method, when have multiple matches.
+
         :param longitudes: dictionary of longitudes per network/species
         :type longitudes: dict
         :param latitudes: dictionary of latitudes per network/species
