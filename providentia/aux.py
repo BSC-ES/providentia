@@ -1322,7 +1322,7 @@ def get_basic_metadata(instance):
 
             speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
             station_references[networkspeci] = speci_station_references
-            station_names[networkspeci] = speci_station_names
+            station_names[networkspeci] = speci_station_names[station_unique_indices]
             station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
             station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
             station_measurement_altitudes[networkspeci] = speci_station_measurement_altitudes[station_unique_indices]
