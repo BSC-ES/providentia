@@ -772,6 +772,12 @@ class Plot:
                                                   color=self.read_instance.plotting_params[data_label]['colour'], 
                                                   **plot_characteristics['plot'])
 
+        # update maximum smooth value
+        if not self.read_instance.offline:
+            print(len(ts_nonan), (len(ts_nonan)+1)/2, (len(ts_nonan))/2)
+            if self.canvas_instance.timeseries_smooth_sl.value() != (len(ts_nonan)+1)/2:
+                self.canvas_instance.timeseries_smooth_sl.setMaximum((len(ts_nonan)+1)/2)
+
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
             self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
