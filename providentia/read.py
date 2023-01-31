@@ -82,7 +82,6 @@ class DataReader:
                         current_upper = str(self.read_instance.filter_species[networkspeci][1])
                         self.read_instance.le_minimum_value.setText(current_lower)
                         self.read_instance.le_maximum_value.setText(current_upper)
-                        self.read_instance.bounds_set_on_multispecies = True
                         
                         del self.read_instance.filter_species[networkspeci]
                         
@@ -93,7 +92,7 @@ class DataReader:
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)
                 self.read_instance.yearmonths = list(np.unique(['{}0{}'.format(dti.year,dti.month) if len(str(dti.month)) == 1 else '{}{}'.format(dti.year,dti.month) \
                                                                 for dti in self.read_instance.time_array]))
-
+                
                 # get time array as integer timestamps
                 self.read_instance.timestamp_array = self.read_instance.time_array.asi8
 
@@ -635,7 +634,7 @@ class DataReader:
                 # get intersection of yearmonths_to_read and available_yearmonths
                 yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
                 self.files_to_read[networkspeci][data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])
-
+                
             # if active qa == default qa, no need to screen by QA, so inform reading function of this
             default_qa = get_default_qa(self.read_instance, speci)
             if self.read_instance.qa_per_species[speci] == default_qa:
