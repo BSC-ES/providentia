@@ -44,9 +44,12 @@ class ProvConfiguration:
             'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                       '3hourly_instantaneous', '6hourly_instantaneous',
                                       'daily', 'monthly'],
-            'available_networks': ['AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN','CHILE_SINCA',
-                                   'EANET','EBAS','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX',
-                                   'MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA',
+            'available_networks': ['GHOST','AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN',
+                                   'CHILE_SINCA','EANET','EBAS', 'EBAS-ACTRIS', 'EBAS-AMAP', 'EBAS-CAMP', 'EBAS-EMEP',
+                                   'EBAS-EUCAARI', 'EBAS-EUSAAR', 'EBAS-HELCOM', 'EBAS-HTAP', 'EBAS-Independent', 
+                                   'EBAS-MOE','EBAS-NILU', 'EBAS-NOAA_ESRL', 'EBAS-OECD', 'EBAS-UK_DECC', 
+                                   'EBAS-WMO_WDCA', 'EBAS-WMO_WDCRG','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES',
+                                   'MEXICO_CDMX','MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA',
                                    'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN',
                                    'WMO_WDCGG'], 
             'network': None,
@@ -413,7 +416,7 @@ class ProvConfiguration:
         # check have network information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:
-            default = ['EBAS']
+            default = ['GHOST']
             msg = 'Network (network) was not defined in the configuration file. Using {} as default.'.format(default)
             MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
             self.read_instance.network = default
