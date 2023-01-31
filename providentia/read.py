@@ -187,7 +187,6 @@ class DataReader:
                                                  len(self.read_instance.station_references[networkspeci]),
                                                  len(self.read_instance.time_array)),
                                                  np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies} 
-
             else:
                 self.read_instance.ghost_data_in_memory = {}
                 self.read_instance.ghost_data_vars_to_read = []
