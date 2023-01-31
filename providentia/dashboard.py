@@ -409,11 +409,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.metadata_vars_to_read = []
         aux.init_metadata(self)
 
-        # data bounds of the main network and speci will be set by default in the data filter
-        # but can also bet set in the multispecies filtering tab
-        # if they are set in the tab, this variable will be True
-        self.bounds_set_on_multispecies = False
-
         # Setup MPL canvas of plots
         # set variable that blocks updating of MPL canvas until some data has been read
         self.block_MPL_canvas_updates = True
@@ -741,13 +736,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
 
-            elif event_source == self.cb_resampling_resolution:
-                self.selected_resampling_resolution = changed_param
-                self.selected_resampling = False
-
-            elif event_source == self.cb_resampling_switch:
-                self.selected_resampling = changed_param
-
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
                 self.selected_species = sorted(list(
@@ -756,12 +744,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
 
+            elif event_source == self.cb_resampling_resolution:
+                self.selected_resampling_resolution = changed_param
+                self.selected_resampling = False
+
+            elif event_source == self.cb_resampling_switch:
+                self.selected_resampling = changed_param
+
             # set variable to check if date range changes
             self.date_range_has_changed = False
 
             # check if start date/end date have changed
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
                 self.date_range_has_changed = True
+
+            # initalise multispecies tab if network, resolution, matrix or species change
+            if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
+                aux.init_multispecies(self)
 
             # update configuration bar fields
             self.update_configuration_bar_fields()
@@ -1144,13 +1143,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # if species has changed, or first read, update species specific lower/upper limits
         if (self.first_read) or (self.species[0] != self.previous_species[0]):
-            # have bounds not been set in multispecies filtering tab?
-            if not self.bounds_set_on_multispecies:
-                # get default GHOST limits
-                self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
-                self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
-                self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
-                self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
+            # get default GHOST limits
+            self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
+            self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
+            self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
+            self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
 
         # run function to update filter
         self.mpl_canvas.handle_data_filter_update()
@@ -1221,16 +1218,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_metadata(self)
         aux.update_metadata_fields(self)
 
-        # have bounds not been set in multispecies filtering tab?
-        if not self.bounds_set_on_multispecies:
-            
-            # reset bounds
-            species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
-            species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
-            
-            # set default limits
-            self.le_minimum_value.setText(str(species_lower_limit))
-            self.le_maximum_value.setText(str(species_upper_limit))
+        # reset bounds
+        species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
+        species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
+        
+        # set default limits
+        self.le_minimum_value.setText(str(species_lower_limit))
+        self.le_maximum_value.setText(str(species_upper_limit))
         
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
