@@ -1765,7 +1765,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_smooth_sl.setObjectName('timeseries_smooth_sl')
         self.timeseries_smooth_sl.setMinimum(0)
         self.timeseries_smooth_sl.setValue(0)
-        self.timeseries_smooth_sl.setTickInterval(4)
+        self.timeseries_smooth_sl.setTickInterval(2)
         self.timeseries_smooth_sl.setTracking(False)
         self.timeseries_smooth_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
                                               self.timeseries_menu_button.geometry().y()+125, 
