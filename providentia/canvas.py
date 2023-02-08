@@ -1575,6 +1575,7 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_unsel_sl.setMaximum(80)
         self.map_markersize_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['s'])
         self.map_markersize_unsel_sl.setTickInterval(2)
+        self.map_markersize_unsel_sl.setTracking(False)
         self.map_markersize_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
                                                  self.map_menu_button.geometry().y()+200, 
                                                  230, 20)
@@ -1595,6 +1596,7 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_unsel_sl.setMaximum(10)
         self.map_opacity_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['alpha']*10)
         self.map_opacity_unsel_sl.setTickInterval(1)
+        self.map_opacity_unsel_sl.setTracking(False)
         self.map_opacity_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
                                               self.map_menu_button.geometry().y()+250, 
                                               230, 20)
@@ -1622,6 +1624,7 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_sel_sl.setMaximum(80)
         self.map_markersize_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['s'])
         self.map_markersize_sel_sl.setTickInterval(2)
+        self.map_markersize_sel_sl.setTracking(False)
         self.map_markersize_sel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
                                                self.map_menu_button.geometry().y()+325, 
                                                230, 20)
@@ -1642,6 +1645,7 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_sel_sl.setMaximum(10)
         self.map_opacity_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['alpha']*10)
         self.map_opacity_sel_sl.setTickInterval(1)
+        self.map_opacity_sel_sl.setTracking(False)
         self.map_opacity_sel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
                                             self.map_menu_button.geometry().y()+375, 
                                             230, 20)
@@ -1743,6 +1747,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_markersize_sl.setMaximum(self.plot_characteristics['timeseries']['plot']['markersize']*10)
         self.timeseries_markersize_sl.setValue(self.plot_characteristics['timeseries']['plot']['markersize'])
         self.timeseries_markersize_sl.setTickInterval(2)
+        self.timeseries_markersize_sl.setTracking(False)
         self.timeseries_markersize_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
                                                   self.timeseries_menu_button.geometry().y()+75, 
                                                   230, 20)
@@ -1759,9 +1764,9 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_smooth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.timeseries_smooth_sl.setObjectName('timeseries_smooth_sl')
         self.timeseries_smooth_sl.setMinimum(0)
-        self.timeseries_smooth_sl.setMaximum(self.plot_characteristics['timeseries']['smooth']['window']*10)
         self.timeseries_smooth_sl.setValue(0)
         self.timeseries_smooth_sl.setTickInterval(2)
+        self.timeseries_smooth_sl.setTracking(False)
         self.timeseries_smooth_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
                                               self.timeseries_menu_button.geometry().y()+125, 
                                               230, 20)
@@ -1864,6 +1869,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_markersize_sl.setMaximum(self.plot_characteristics['periodic']['plot']['markersize']*10)
         self.periodic_markersize_sl.setValue(self.plot_characteristics['periodic']['plot']['markersize'])
         self.periodic_markersize_sl.setTickInterval(2)
+        self.periodic_markersize_sl.setTracking(False)
         self.periodic_markersize_sl.setGeometry(self.periodic_menu_button.geometry().x()-220, 
                                                 self.periodic_menu_button.geometry().y()+125, 
                                                 230, 20)
@@ -1883,6 +1889,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_linewidth_sl.setMaximum(self.plot_characteristics['periodic']['plot']['linewidth']*100)
         self.periodic_linewidth_sl.setValue(self.plot_characteristics['periodic']['plot']['linewidth']*10)
         self.periodic_linewidth_sl.setTickInterval(2)
+        self.periodic_linewidth_sl.setTracking(False)
         self.periodic_linewidth_sl.setGeometry(self.periodic_menu_button.geometry().x()-220, 
                                                self.periodic_menu_button.geometry().y()+175, 
                                                230, 20)
@@ -1972,6 +1979,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_markersize_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['p50']['markersize']*10)
         self.periodic_violin_markersize_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['p50']['markersize'])
         self.periodic_violin_markersize_sl.setTickInterval(2)
+        self.periodic_violin_markersize_sl.setTracking(False)
         self.periodic_violin_markersize_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220,
                                                        self.periodic_menu_button.geometry().y()+75, 
                                                        230, 20)
@@ -1991,6 +1999,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_linewidth_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['p50']['linewidth']*100)
         self.periodic_violin_linewidth_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['p50']['linewidth']*10)
         self.periodic_violin_linewidth_sl.setTickInterval(2)
+        self.periodic_violin_linewidth_sl.setTracking(False)
         self.periodic_violin_linewidth_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220, 
                                                       self.periodic_violin_menu_button.geometry().y()+125, 
                                                       230, 20)
@@ -2141,6 +2150,7 @@ class MPLCanvas(FigureCanvas):
         self.distribution_linewidth_sl.setMaximum(self.plot_characteristics['distribution']['plot']['linewidth']*100)
         self.distribution_linewidth_sl.setValue(self.plot_characteristics['distribution']['plot']['linewidth']*10)
         self.distribution_linewidth_sl.setTickInterval(2)
+        self.distribution_linewidth_sl.setTracking(False)
         self.distribution_linewidth_sl.setGeometry(self.distribution_menu_button.geometry().x()-220, 
                                                    self.distribution_menu_button.geometry().y()+75, 
                                                    230, 20)
@@ -2225,6 +2235,7 @@ class MPLCanvas(FigureCanvas):
         self.scatter_markersize_sl.setMaximum(self.plot_characteristics['scatter']['plot']['markersize']*100)
         self.scatter_markersize_sl.setValue(self.plot_characteristics['scatter']['plot']['markersize']*10)
         self.scatter_markersize_sl.setTickInterval(2)
+        self.scatter_markersize_sl.setTracking(False)
         self.scatter_markersize_sl.setGeometry(self.scatter_menu_button.geometry().x()-220, 
                                               self.scatter_menu_button.geometry().y()+75, 
                                               230, 20)
@@ -3227,8 +3238,6 @@ class MPLCanvas(FigureCanvas):
         """ Update annotation for each station that is hovered. """
 
         # retrieve stations references and coordinates
-
-
         station_names = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
         station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
