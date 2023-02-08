@@ -229,9 +229,12 @@ class DataReader:
                 nonghost_standard_units = {}
                 for speci in self.read_instance.nonghost_units.keys():
                     input_units = self.read_instance.nonghost_units[speci]
-                    output_units = self.read_instance.nonghost_units[speci]
-                    conv_obj = unit_converter.convert_units(input_units, output_units, 1)
-                    nonghost_standard_units[speci] = conv_obj.output_standard_units
+                    if input_units != '-':
+                        output_units = copy.deepcopy(input_units)
+                        conv_obj = unit_converter.convert_units(input_units, output_units, 1)
+                        nonghost_standard_units[speci] = conv_obj.output_standard_units
+                    else:
+                        nonghost_standard_units[speci] = 'unitless'
                 self.read_instance.measurement_units = {speci:nonghost_standard_units[speci] 
                                                         for speci in self.read_instance.species}
             # GHOST
