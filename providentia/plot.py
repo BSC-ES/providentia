@@ -772,6 +772,11 @@ class Plot:
                                                   color=self.read_instance.plotting_params[data_label]['colour'], 
                                                   **plot_characteristics['plot'])
 
+        # update maximum smooth value
+        if not self.read_instance.offline:
+            if self.canvas_instance.timeseries_smooth_sl.value() != (len(ts)*2 - 1):
+                self.canvas_instance.timeseries_smooth_sl.setMaximum(len(ts)*2 - 1)
+
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
             self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
@@ -1395,9 +1400,10 @@ class Plot:
                 bias = False
 
             # make smooth line
-            smooth_line = relevant_axis.plot(ts.rolling(plot_characteristics['smooth']['window'], 
-                                                        min_periods=plot_characteristics['smooth']['min_points'], 
-                                                        center=True).mean().dropna(),
+            smooth_line_data = ts.rolling(plot_characteristics['smooth']['window'], 
+                                     min_periods=plot_characteristics['smooth']['min_points'], 
+                                     center=True).mean()
+            smooth_line = relevant_axis.plot(smooth_line_data,
                                              color=self.read_instance.plotting_params[data_label]['colour'],
                                              zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
                                              **plot_characteristics['smooth']['format'])
