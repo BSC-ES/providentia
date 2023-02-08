@@ -1764,9 +1764,8 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_smooth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.timeseries_smooth_sl.setObjectName('timeseries_smooth_sl')
         self.timeseries_smooth_sl.setMinimum(0)
-        #self.timeseries_smooth_sl.setMaximum(self.plot_characteristics['timeseries']['smooth']['window']*10)
         self.timeseries_smooth_sl.setValue(0)
-        self.timeseries_smooth_sl.setTickInterval(2)
+        self.timeseries_smooth_sl.setTickInterval(4)
         self.timeseries_smooth_sl.setTracking(False)
         self.timeseries_smooth_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
                                               self.timeseries_menu_button.geometry().y()+125, 
@@ -3057,7 +3056,6 @@ class MPLCanvas(FigureCanvas):
     def update_smooth_window(self, ax, plot_type, smooth_window, plot_options):
 
         # update characteristics per plot type
-        print(smooth_window)
         self.plot_characteristics[plot_type]['smooth']['window'] = smooth_window
         
         # get index of smooth in plot options
@@ -3240,8 +3238,6 @@ class MPLCanvas(FigureCanvas):
         """ Update annotation for each station that is hovered. """
 
         # retrieve stations references and coordinates
-
-
         station_names = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
         station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
