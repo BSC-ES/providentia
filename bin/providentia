@@ -82,12 +82,13 @@ queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
 load_command="source load_modules.sh"
-salloc_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
 python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $OTHEROPTS"
 
-# set QT scale to avoid magnifying issues
-if [ "${BSC_MACHINE}" != "nord3" ]; then
-    export QT_AUTO_SCREEN_SCALE_FACTOR=0
+# avoid x11 forwarding when creating offline reports
+if [[ $PARSED =~ "offline" ]]; then
+    salloc_command="salloc -t 02:00:00 -c $cores -J $jobname"
+else
+    salloc_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
 fi
 
 # load modules

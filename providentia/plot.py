@@ -17,7 +17,6 @@ import numpy as np
 import pandas as pd
 import scipy.stats as st
 import seaborn as sns
-from PyQt5 import QtCore
 
 from .statistics import get_z_statistic_info
 from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases
