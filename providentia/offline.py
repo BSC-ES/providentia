@@ -28,6 +28,9 @@ expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
 
+    # make sure that we are not using Qt5 backend with matplotlib
+    matplotlib.use('Agg')
+
     def __init__(self, **kwargs):
         print("Starting Providentia offline...")
 

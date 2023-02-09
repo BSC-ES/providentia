@@ -28,10 +28,6 @@ from .dashboard_aux import set_formatting
 from .dashboard_aux import ComboBox, CheckableComboBox, MessageBox
 from .aux import get_relevant_temporal_resolutions
 
-# make sure that we are using Qt5 backend with matplotlib
-matplotlib.use('Qt5Agg')
-register_matplotlib_converters()
-
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
