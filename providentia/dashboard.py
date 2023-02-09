@@ -12,6 +12,7 @@ import copy
 import datetime
 import json
 import sys
+import matplotlib
 from functools import partial
 from collections import OrderedDict
 from weakref import WeakKeyDictionary
@@ -19,6 +20,7 @@ from weakref import WeakKeyDictionary
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
 import pandas as pd
+from pandas.plotting import register_matplotlib_converters
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -35,6 +37,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     # create signals that are fired upon resizing/moving of main Providentia window
     resized = QtCore.pyqtSignal()
     move = QtCore.pyqtSignal()
+
+    # make sure that we are using Qt5 backend with matplotlib
+    matplotlib.use('Qt5Agg')
+    register_matplotlib_converters()
 
     def __init__(self, **kwargs):
 
