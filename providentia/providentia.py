@@ -14,8 +14,6 @@
 
 from __future__ import print_function
 from .argument_parser import ProvArgumentParser
-from . import dashboard as dashboard
-from . import offline as offline
 
 import sys
 import logging
@@ -54,8 +52,10 @@ class Providentia(object):
             LOG.info(res)
 
             if args.offline:
+                from . import offline as offline
                 offline.main(**res)
             else:
+                from . import dashboard as dashboard
                 dashboard.main(**res)
 
         except Exception as err:
