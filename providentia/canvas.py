@@ -103,8 +103,8 @@ class MPLCanvas(FigureCanvas):
         # create map, colorbar and legend plot axes
         self.plot_axes = {}
         self.plot_axes['map'] = self.figure.add_subplot(self.gridspec.new_subplotspec((2, 0), 
-                                                        rowspan=44, colspan=41), projection=self.plotcrs)
-        self.plot_axes['cb'] = self.figure.add_axes([0.0455, 0.54, 0.3794, 0.02])
+                                                        rowspan=44, colspan=42), projection=self.plotcrs)
+        self.plot_axes['cb'] = self.figure.add_axes([0.0455, 0.536, 0.3794, 0.02])
         self.plot_axes['legend'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 47), 
                                                            rowspan=8, colspan=53))
 

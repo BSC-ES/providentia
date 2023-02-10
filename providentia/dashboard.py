@@ -871,13 +871,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if changed_position == self.cb_position_2 or changed_position == 2:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=15, colspan=48))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 81), rowspan=15, colspan=17))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=15, colspan=49))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 81), rowspan=15, colspan=18))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=30))
             elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=33))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=34))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=48))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=49))
             
         # position 3 (bottom left)
         if changed_position == self.cb_position_3 or changed_position == 3:
@@ -1128,11 +1128,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if self.invalid_read:
                 # clear axes
                 for plot_type, ax in self.mpl_canvas.plot_axes.items():
-                    if isinstance(ax, dict):
-                        for sub_ax in ax.values():
-                            sub_ax.remove()
-                    else:
-                        ax.remove() 
+                    self.mpl_canvas.remove_axis_elements(ax, plot_type)
                 # update MPL canvas
                 self.mpl_canvas.figure.canvas.draw()  
                 # restore mouse cursor to normal

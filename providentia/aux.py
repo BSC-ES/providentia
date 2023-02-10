@@ -292,7 +292,7 @@ def init_multispecies(instance):
                                      }
 
     # reset rangeboxes
-    instance.multispecies_menu['multispecies']['labels'] = ['networkspeci_0']
+    instance.multispecies_menu['multispecies']['labels'] = []
     instance.multispecies_menu['multispecies']['current_lower'] = {}
     instance.multispecies_menu['multispecies']['current_upper'] = {}
     instance.multispecies_menu['multispecies']['current_filter_species_fill_value'] = {}
