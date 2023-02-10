@@ -81,17 +81,10 @@ def read_netcdf_data(tuple_arguments):
     valid_file_time_indices = np.where(np.logical_and(file_timestamp>=timestamp_array[0], 
                                                       file_timestamp<=timestamp_array[-1]))[0]
 
-    # show warning when the data consists only of less than 2 timesteps
-    if len(file_timestamp) < 2:
-        msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots.'
-        msg += 'Plots will only be created when period is longer than 2 timesteps.'
-        MessageBox(msg)
-        return []
-
     # get indices relative to active full timestamp array
     full_array_time_indices = np.searchsorted(timestamp_array, file_timestamp[valid_file_time_indices])
 
-        # get all station references in file (do little extra work to get non-GHOST observational station references)
+    # get all station references in file (do little extra work to get non-GHOST observational station references)
     if (not reading_ghost) & (data_label == 'observations'):
         if 'station_reference' in ncdf_root.variables:
             station_reference_var = 'station_reference'
