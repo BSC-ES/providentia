@@ -9,9 +9,8 @@ from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset
-from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data
-from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, get_default_qa
-from .dashboard_aux import MessageBox
+from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data, get_default_qa
+from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -68,7 +67,7 @@ class DataReader:
                 self.read_instance.invalid_read = True
                 msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
-                MessageBox(msg)
+                show_message(msg)
                 if (self.read_instance.from_conf) and (not self.read_instance.offline):
                     sys.exit('Error: Providentia will not be launched.')
                 else:
@@ -87,7 +86,7 @@ class DataReader:
                         
                         msg = 'The current network-species has been selected in the MULTI tab, '
                         msg += 'this will change the data bounds.'
-                        MessageBox(msg)
+                        show_message(msg)
 
                         current_lower = str(self.read_instance.filter_species[networkspeci][0])
                         current_upper = str(self.read_instance.filter_species[networkspeci][1])
