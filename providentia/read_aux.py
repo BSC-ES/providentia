@@ -6,7 +6,6 @@ import pandas as pd
 import bisect
 import time
 import sys
-from .dashboard_aux import MessageBox
 
 # initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
@@ -280,3 +279,17 @@ def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to
         return [available_yearmonths[first_valid_file_ind]]
     else:
         return available_yearmonths[first_valid_file_ind:last_valid_file_ind]
+
+def get_default_qa(instance, speci):
+    """ Return the default values according to GHOST standards. 
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :return: QA flags' codes in list
+        :rtype: list
+    """
+
+    if speci in instance.met_parameters:
+        return sorted(instance.default_qa_met)
+    else:
+        return sorted(instance.default_qa_standard)
