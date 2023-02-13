@@ -19,8 +19,7 @@ import scipy.stats as st
 import seaborn as sns
 
 from .statistics import get_z_statistic_info
-from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases
-from .dashboard_aux import MessageBox
+from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases, show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -1438,8 +1437,7 @@ class Plot:
         if len(stats) == 0:
             msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.json.'.format(base_plot_type)
             msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.json.'.format(base_plot_type)
-            MessageBox(msg=msg_dashboard, offline=self.read_instance.offline, msg_offline=msg_offline,
-                       from_conf=self.read_instance.from_conf)
+            show_message(msg=msg_dashboard, offline=self.read_instance.offline, msg_offline=msg_offline)
             return
 
         # initialise list of strs to annotate, and colours of annotations

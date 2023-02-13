@@ -2,9 +2,12 @@
 from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow, MessageBox, InputDialog
+from .toolbar import multispecies_conf
+from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow, InputDialog
 from .dashboard_aux import set_formatting
+from .aux import show_message
 from .read import DataReader
+from .read_aux import get_default_qa
 from providentia import aux
 
 import os
@@ -193,6 +196,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                         width = (width_diff * self.main_window_geometry.width()) / 1848
                         height = (height_diff * self.main_window_geometry.height()) / 1848
                         cb_position.move(menu_button.x()-width, menu_button.y()+height)
+                        cb_position.resize(cb_position.x(), 20)
 
                     # apply new geometry to container elements
                     for sub_element in element:
@@ -434,7 +438,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.handle_data_selection_update()
 
             # set filtered multispecies if any
-            aux.multispecies_conf(self)
+            multispecies_conf(self)
 
             # set fields available for filtering
             aux.representativity_conf(self)
@@ -656,7 +660,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                             for exp in self.experiments_menu['checkboxes']['keep_selected']}
 
         # update default qa
-        default_qa = aux.get_default_qa(self, self.selected_species)
+        default_qa = get_default_qa(self, self.selected_species)
         self.qa_menu['checkboxes']['remove_default'] = default_qa
 
         # update layout fields
@@ -1034,7 +1038,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {} 
             msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
-            MessageBox(msg)
+            show_message(msg)
 
         # set read operations to be empty list initially
         read_operations = []

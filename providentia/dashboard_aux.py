@@ -8,7 +8,7 @@ from textwrap import wrap
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
 from functools import partial
-from .aux import update_filter_species
+from .read_aux import get_default_qa
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
@@ -309,21 +309,14 @@ def center(window):
 
 class MessageBox(QtWidgets.QWidget):
 
-    def __init__(self, msg, offline=False, msg_offline=None, from_conf=None, parent=None):
+    def __init__(self, msg, parent=None):
 
         super().__init__(parent)
-        if offline:
-            if msg_offline is not None:
-                print('Warning: ' + msg_offline)
-            else:
-                print('Warning: ' + msg)
-        else:
-            if (from_conf is None) or (from_conf):
-                msg_box = self.create_msg_box(msg)
-                if msg_box is not None:
-                    layout = QtWidgets.QVBoxLayout(self)
-                    layout.addWidget(msg_box)
-                    center(self)
+        msg_box = self.create_msg_box(msg)
+        if msg_box is not None:
+            layout = QtWidgets.QVBoxLayout(self)
+            layout.addWidget(msg_box)
+            center(self)
 
     def create_msg_box(self, msg):
 
@@ -1203,4 +1196,95 @@ class PopUpWindow(QtWidgets.QWidget):
                                 self.menu_current[menu_type]['previous_apply'].update({label_ii: True})
                             else:
                                 self.menu_current[menu_type]['previous_apply'].update({label_ii: False})
-                                
+
+def multispecies_conf(instance):
+    """ Function used when loading from a configuration file. 
+        Sets defined multispecies filtering variables, rest of variables are set to default. 
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+    """
+
+    if hasattr(instance, 'filter_species'):
+        for (networkspeci_ii, networkspeci), bounds in zip(enumerate(instance.filter_species.keys()),
+                                                                    instance.filter_species.values()):
+            
+            # update menu_current
+            if networkspeci_ii > 0:
+                instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
+
+            # add values
+            instance.multispecies_menu['multispecies']['current_lower'][networkspeci_ii] = bounds[0]
+            instance.multispecies_menu['multispecies']['current_upper'][networkspeci_ii] = bounds[1]
+            instance.multispecies_menu['multispecies']['current_filter_species_fill_value'][networkspeci_ii] = bounds[2]
+            instance.multispecies_menu['multispecies']['apply_selected'][networkspeci_ii] = True
+
+            # set initial selected config variables as set .conf files or defaults
+            instance.selected_widget_network.update({networkspeci_ii: networkspeci.split('|')[0]})
+            instance.selected_widget_matrix.update({networkspeci_ii: instance.parameter_dictionary[networkspeci.split('|')[1]]['matrix']})
+            instance.selected_widget_species.update({networkspeci_ii: networkspeci.split('|')[1]})
+            instance.selected_widget_lower.update({networkspeci_ii: bounds[0]})
+            instance.selected_widget_upper.update({networkspeci_ii: bounds[1]})
+            instance.selected_widget_filter_species_fill_value.update({networkspeci_ii: bounds[2]})
+            instance.selected_widget_apply.update({networkspeci_ii: True})
+
+            update_filter_species(instance, networkspeci_ii)
+
+            # filtering tab is initialized from conf
+            instance.multispecies_initialisation = False
+
+def update_filter_species(instance, label_ii, add_filter_species=True):
+    """ Function to update filter species after launching the dashboard with a configuration file or 
+        by editing the fields in the multispecies filtering tab in the dashboard. 
+
+        :param instance: Instance of class ProvidentiaMainWindow
+        :type instance: object
+        :param label_ii: Corresponding widget line in dashboard
+        :type label_ii: int
+        :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
+        :type add_filter_species: boolean
+    """
+
+    # get selected network, species and bounds
+    network = instance.selected_widget_network[label_ii]
+    speci = instance.selected_widget_species[label_ii]
+    networkspeci = network + '|' + speci
+    current_lower = instance.selected_widget_lower[label_ii]
+    current_upper = instance.selected_widget_upper[label_ii]
+    current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
+
+    # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
+    if add_filter_species:
+
+        # add or update networkspeci
+        # check selected lower and upper bounds and fill value are numbers or nan
+        try:
+            instance.filter_species[networkspeci] = [float(current_lower), float(current_upper),
+                                                     float(current_filter_species_fill_value)]
+            
+        # if any of the fields are not numbers, return from function
+        except ValueError:
+            print("Warning: Data limit fields must be numeric")
+            return
+
+        # add if networkspeci is not already in qa_per_species
+        if speci not in instance.qa_per_species:
+            # get species in memory 
+            species = copy.deepcopy(instance.species)
+            filter_species = [val.split('|')[1] for val in list(copy.deepcopy(instance.filter_species).keys())]
+            qa_species = species + filter_species
+            
+            # add
+            qa_species.append(speci)
+            instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
+
+    # if apply button is unchecked, remove networkspecies from filter_species
+    else:
+        # remove from filter_species
+        if networkspeci in instance.filter_species.keys():
+            del instance.filter_species[networkspeci]
+
+        # remove from qa_per_species
+        if speci in instance.qa_per_species:
+            del instance.qa_per_species[speci]
+    

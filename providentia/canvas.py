@@ -25,8 +25,8 @@ import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
 from .dashboard_aux import set_formatting
-from .dashboard_aux import ComboBox, CheckableComboBox, MessageBox
-from .aux import get_relevant_temporal_resolutions
+from .dashboard_aux import ComboBox, CheckableComboBox
+from .aux import get_relevant_temporal_resolutions, show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -248,7 +248,7 @@ class MPLCanvas(FigureCanvas):
         if (self.read_instance.temporal_colocation == False) and (len(self.read_instance.data_labels) > 1):
 
             msg = 'It is not possible to resample the data without first activating the temporal colocation.'
-            MessageBox(msg)
+            show_message(msg)
             self.read_instance.cb_resampling_switch.setChecked(False)
             return
 
@@ -284,7 +284,7 @@ class MPLCanvas(FigureCanvas):
 
             else:
                 msg = 'Select the data you want to plot before resampling.'
-                MessageBox(msg)
+                show_message(msg)
                 self.read_instance.cb_resampling_switch.setChecked(False)
                 return
 
@@ -697,7 +697,7 @@ class MPLCanvas(FigureCanvas):
                     if len(dates) < 2:
                         msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                         msg += 'Plots will only be created when period is longer than 2 timesteps.'
-                        MessageBox(msg)
+                        show_message(msg)
                         return
 
                 # iterate through active_dashboard_plots
@@ -706,7 +706,7 @@ class MPLCanvas(FigureCanvas):
                     # if there are no temporal resolutions (only yearly), skip periodic plots
                     if (plot_type in ['periodic', 'periodic-violin']) and (not self.read_instance.relevant_temporal_resolutions):
                         msg = 'It is not possible to make periodic plots using annual resolution data.'
-                        MessageBox(msg)
+                        show_message(msg)
                         continue
 
                     # update plot
@@ -2551,7 +2551,7 @@ class MPLCanvas(FigureCanvas):
                     # so return
                     if not hasattr(self, 'selected_station_data'):
                         msg = 'Select at least one station in the plot to apply options.'
-                        MessageBox(msg)
+                        show_message(msg)
                         self.read_instance.block_MPL_canvas_updates = True
                         event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                         self.read_instance.block_MPL_canvas_updates = False
@@ -2626,7 +2626,7 @@ class MPLCanvas(FigureCanvas):
                                 else:
                                     msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                     msg += "in {0} with negative values.".format(plot_type)
-                                    MessageBox(msg)
+                                    show_message(msg)
                                     self.read_instance.block_MPL_canvas_updates = True
                                     event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                     self.read_instance.block_MPL_canvas_updates = False
@@ -2639,7 +2639,7 @@ class MPLCanvas(FigureCanvas):
                             else:
                                 msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                 msg += "in {0} with negative values.".format(plot_type)
-                                MessageBox(msg)
+                                show_message(msg)
                                 self.read_instance.block_MPL_canvas_updates = True
                                 event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                 self.read_instance.block_MPL_canvas_updates = False
@@ -2693,7 +2693,7 @@ class MPLCanvas(FigureCanvas):
                         # firstly if just 1 data label then cannot make bias plot 
                         if len(list(self.selected_station_data[self.read_instance.networkspeci].keys())) == 1:
                             msg = 'It is not possible to make a bias plot with just observations loaded.'
-                            MessageBox(msg)
+                            show_message(msg)
                             self.read_instance.block_MPL_canvas_updates = True
                             event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                             self.read_instance.block_MPL_canvas_updates = False
