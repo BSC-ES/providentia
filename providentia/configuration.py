@@ -10,9 +10,8 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from .aux import check_for_ghost, multispecies_mapping, get_default_qa
-from .dashboard_aux import MessageBox
-
+from .aux import check_for_ghost, multispecies_mapping, show_message
+from .read_aux import get_default_qa
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -418,7 +417,7 @@ class ProvConfiguration:
         if not self.read_instance.network:
             default = ['GHOST']
             msg = 'Network (network) was not defined in the configuration file. Using {} as default.'.format(default)
-            MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(msg, offline=self.read_instance.offline)
             self.read_instance.network = default
 
         # check have species information, 
@@ -426,7 +425,7 @@ class ProvConfiguration:
         if not self.read_instance.species:
             default = ['sconco3']
             msg = 'Species (species) was not defined in the configuration file. Using {} as default.'.format(default)
-            MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(msg, offline=self.read_instance.offline)
             self.read_instance.species = default
 
         # if number of networks and species is not the same,
@@ -465,7 +464,7 @@ class ProvConfiguration:
         if not self.read_instance.resolution:
             default = 'hourly'
             msg = 'Resolution (resolution) was not defined in the configuration file. Using {} as default.'.format(default)
-            MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(msg, offline=self.read_instance.offline)
             self.read_instance.resolution = default
 
         # check have start_date information, 
@@ -473,7 +472,7 @@ class ProvConfiguration:
         if not self.read_instance.start_date:
             default = '20180101'
             msg = 'Start date (start_date) was not defined in the configuration file. Using {} as default.'.format(default)
-            MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(msg, offline=self.read_instance.offline)
             self.read_instance.start_date = default
 
         # check have end_date information, 
@@ -481,7 +480,7 @@ class ProvConfiguration:
         if not self.read_instance.end_date:
             default = '20190101'
             msg = 'End date (end_date) was not defined in the configuration file. Using {} as default.'.format(default)
-            MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(msg, offline=self.read_instance.offline)
             self.read_instance.end_date = default
 
         # check have correct active_dashboard_plots information, 
@@ -498,7 +497,7 @@ class ProvConfiguration:
         if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
             self.read_instance.filter_species = {}
             msg = 'Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species.'
-            MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(msg, offline=self.read_instance.offline)
 
         # map to multiple species if have * wildcard
         # also duplicate out associated network
@@ -588,7 +587,7 @@ class ProvConfiguration:
             (not self.read_instance.offline)):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
-            MessageBox(msg, from_conf=self.read_instance.from_conf)
+            show_message(msg)
 
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
@@ -597,7 +596,7 @@ class ProvConfiguration:
         # if offline, throw message, stating error
         if (self.read_instance.resampling) and (self.read_instance.resampling_resolution is None):
             msg = 'Resampling will not be applied because resampling resolution was not defined.'
-            MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(msg, offline=self.read_instance.offline)
             self.read_instance.resampling = False
             
 def read_conf(fpath=None):
@@ -801,7 +800,7 @@ def split_options(read_instance, conf_string, separator="||"):
             removes = [r.strip() for r in removes]
         elif ("keep:" in conf_string) and ("remove:" in conf_string):
             msg = 'In order to define the keep and remove options, these must be separated by ||.'
-            MessageBox(msg, offline=read_instance.offline, from_conf=read_instance.from_conf)
+            show_message(msg, offline=read_instance.offline)
     else:
         if "keep:" in conf_string:
             keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)

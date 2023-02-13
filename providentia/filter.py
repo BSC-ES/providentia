@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from providentia import aux
-from .dashboard_aux import MessageBox
+from .aux import show_message
 
 class DataFilter:
     """ Class that filters observational/experiment data into memory as required. """
@@ -110,7 +110,7 @@ class DataFilter:
             # if any of the fields are not numbers, return from function
             except ValueError:
                 msg = 'Data limit fields must be numeric.'
-                MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+                show_message(msg, offline=self.read_instance.offline)
                 return
 
             # filter all observational/experiment data out of bounds of lower/upper limits
@@ -224,7 +224,7 @@ class DataFilter:
         # if any of the fields are not numbers, return from function
         except ValueError:
             msg = 'Data availability fields must be numeric.'
-            MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(msg, offline=self.read_instance.offline)
             return
 
         # filter observations by native percentage data availability variables (only GHOST data)
@@ -401,7 +401,7 @@ class DataFilter:
                 return True
             except ValueError as e:
                 msg = "Error in metadata fields. The field of '{}' should be numeric.".format(meta_var)
-                MessageBox(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+                show_message(msg, offline=self.read_instance.offline)
                 if not self.read_instance.offline:
                     self.read_instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
                 return False
