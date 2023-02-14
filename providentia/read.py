@@ -577,6 +577,8 @@ class DataReader:
         # iterate through networkspecies + filter_networkspecies
         for networkspeci in (self.read_instance.networkspecies + self.read_instance.filter_networkspecies):
 
+            print(networkspeci)
+
             # determine if filter networkspecies or not
             if networkspeci in self.read_instance.filter_networkspecies:
                 filter_read = True

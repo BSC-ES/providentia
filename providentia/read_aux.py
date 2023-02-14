@@ -109,30 +109,30 @@ def read_netcdf_data(tuple_arguments):
     non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(file_station_references) if ref.lower() != 'nan'])
     file_station_references = file_station_references[non_nan_station_indices]
 
+    # get indices of file station station references that are contained in all unique station references array
+    current_file_station_indices = np.where(np.in1d(file_station_references, station_references))[0]
+
     # for all unique station references that are contained within file station references array
     # get the index of the station reference in the unique station references array 
     index = np.argsort(station_references)
     sorted_station_references = station_references[index]
-    sorted_index = np.searchsorted(sorted_station_references, file_station_references)
+    sorted_index = np.searchsorted(sorted_station_references, file_station_references[current_file_station_indices])
     full_array_station_indices = np.take(index, sorted_index, mode="clip")
-
-    # get indices of file station station references that are contained in all unique station references array
-    current_file_station_indices = np.where(np.in1d(file_station_references, station_references))[0]
 
     # if have zero current_file_station_indices in all unique station references, 
     # then check if it is because of old-style of Providentia-interpolation output, 
     # where all station_references were for 'station_name'  
     if (data_label != 'observations') & (len(current_file_station_indices) == 0):
 
+        # get indices of file station station references that are contained in all unique station references array
+        current_file_station_indices = np.where(np.in1d(file_station_references, station_names))[0]
+
         # for all unique station references that are contained within file station references array
         # get the index of the station reference in the unique station references array 
         index = np.argsort(station_names)
         sorted_station_names = station_names[index]
-        sorted_index = np.searchsorted(sorted_station_names, file_station_references)
+        sorted_index = np.searchsorted(sorted_station_names, file_station_references[current_file_station_indices])
         full_array_station_indices = np.take(index, sorted_index, mode="clip")
-
-        # get indices of file station station references that are contained in all unique station references array
-        current_file_station_indices = np.where(np.in1d(file_station_references, station_names))[0]
 
     # if still have zero current_file_station_indices in all unique station references (can happen due to station colocation)
     # then return from function without reading
