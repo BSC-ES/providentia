@@ -562,6 +562,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.flag_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.flags)
             self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa_per_species[self.selected_species])
 
+            # set initial filter species
+            self.previous_filter_species = {}
+            self.filter_species = {}
+             
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
             aux.get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
@@ -1010,7 +1014,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
-        self.previous_filter_species = {}
+        self.previous_filter_species = self.previous_filter_species
         self.previous_plot_options = {}
         for plot_type in self.mpl_canvas.all_plots:
             self.previous_plot_options[plot_type] = []
@@ -1029,6 +1033,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
+        self.filter_species = self.filter_species
         self.current_plot_options = {}
         for plot_type in self.mpl_canvas.all_plots:
             self.current_plot_options[plot_type] = []
