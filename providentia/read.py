@@ -1,6 +1,3 @@
-from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data
-from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, get_default_qa
-
 import sys
 import os
 import copy
@@ -8,11 +5,14 @@ import ctypes
 import datetime
 import multiprocessing
 import time
-
 from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset
+from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data, get_default_qa
+from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, show_message
+
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 class DataReader:
     """ Class that reads observational/experiment data into memory. """
@@ -33,6 +33,10 @@ class DataReader:
 
         # changing time dimension ?
         if ('reset' in operations) or ('read_left' in operations) or ('read_right' in operations) or ('cut_left' in operations) or ('cut_right' in operations):
+            
+            # turn off read from configuration
+            if 'reset' not in operations:
+                self.read_instance.from_conf = False
 
             # determine if reading GHOST or non-GHOST
             self.read_instance.reading_ghost = check_for_ghost(self.read_instance.network[0])
@@ -61,8 +65,13 @@ class DataReader:
             # show warning when the data consists only of less than 2 timesteps
             if len(self.read_instance.time_array) < 2:
                 self.read_instance.invalid_read = True
-                print('Error: Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots.')
-                return
+                msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
+                msg += 'Plots will only be created when period is longer than 2 timesteps.'
+                show_message(msg)
+                if (self.read_instance.from_conf) and (not self.read_instance.offline):
+                    sys.exit('Error: Providentia will not be launched.')
+                else:
+                    self.read_instance.first_read = True
             else:
                 # get list of extra networkspecies to read, used for filtering data
                 # read only networkspecies not present in current networkspecies to read
@@ -71,11 +80,25 @@ class DataReader:
                     for networkspeci in self.read_instance.filter_species:
                         if networkspeci not in self.read_instance.networkspecies:
                             self.read_instance.filter_networkspecies.append(networkspeci)
-                
+                    
+                    # update le_minimum_value and le_maximum_value (data bounds) for current networkspecies
+                    if networkspeci in self.read_instance.networkspecies:
+                        
+                        msg = 'The current network-species has been selected in the MULTI tab, '
+                        msg += 'this will change the data bounds.'
+                        show_message(msg)
+
+                        current_lower = str(self.read_instance.filter_species[networkspeci][0])
+                        current_upper = str(self.read_instance.filter_species[networkspeci][1])
+                        self.read_instance.le_minimum_value.setText(current_lower)
+                        self.read_instance.le_maximum_value.setText(current_upper)
+                        
+                        del self.read_instance.filter_species[networkspeci]
+
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)
                 self.read_instance.yearmonths = list(np.unique(['{}0{}'.format(dti.year,dti.month) if len(str(dti.month)) == 1 else '{}{}'.format(dti.year,dti.month) \
                                                                 for dti in self.read_instance.time_array]))
-
+                
                 # get time array as integer timestamps
                 self.read_instance.timestamp_array = self.read_instance.time_array.asi8
 
@@ -89,7 +112,10 @@ class DataReader:
 
                 # get unique basic metadata across networkspecies
                 # for this step include filter networkspecies
-                self.read_instance.station_references, self.read_instance.station_longitudes, self.read_instance.station_latitudes, self.read_instance.station_classifications, self.read_instance.area_classifications =\
+                self.read_instance.station_references, self.read_instance.station_names,\
+                self.read_instance.station_longitudes, self.read_instance.station_latitudes,\
+                self.read_instance.measurement_altitudes, self.read_instance.station_classifications,\
+                self.read_instance.area_classifications, self.read_instance.nonghost_units = \
                     get_basic_metadata(self.read_instance) 
 
                 # iterate through station_references per networkspecies
@@ -167,7 +193,6 @@ class DataReader:
                                                  len(self.read_instance.station_references[networkspeci]),
                                                  len(self.read_instance.time_array)),
                                                  np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies} 
-
             else:
                 self.read_instance.ghost_data_in_memory = {}
                 self.read_instance.ghost_data_vars_to_read = []
@@ -199,13 +224,36 @@ class DataReader:
             self.read_data(yearmonths_to_read, self.read_instance.data_labels)
 
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
-            self.read_instance.measurement_units = {speci:self.read_instance.parameter_dictionary[speci]['standard_units'] for speci in self.read_instance.species}
+            # non-GHOST
+            if not self.read_instance.reading_ghost:
+                # import unit converter
+                sys.path.insert(1, os.path.join(CURRENT_PATH, 'dependencies/unit-converter'))
+                import unit_converter
+
+                # convert non-GHOST units to standard format
+                nonghost_standard_units = {}
+                for speci in self.read_instance.nonghost_units.keys():
+                    input_units = self.read_instance.nonghost_units[speci]
+                    if input_units != '-':
+                        output_units = copy.deepcopy(input_units)
+                        conv_obj = unit_converter.convert_units(input_units, output_units, 1)
+                        nonghost_standard_units[speci] = conv_obj.output_standard_units
+                    else:
+                        nonghost_standard_units[speci] = 'unitless'
+                self.read_instance.measurement_units = {speci:nonghost_standard_units[speci] 
+                                                        for speci in self.read_instance.species}
+            # GHOST
+            else:
+                self.read_instance.measurement_units = {speci:self.read_instance.parameter_dictionary[speci]['standard_units'] 
+                                                        for speci in self.read_instance.species}
 
             # reset plotting params
             self.read_instance.plotting_params = {}
+
             # iterate through data labels
             for data_label in self.read_instance.data_labels:
                 self.read_instance.plotting_params[data_label] = {}
+
                 # get experiment specific grid edges for exp, from first relevant file
                 if data_label != 'observations':
                     # iterate through networkspecies until find one which has valid files to read
@@ -496,6 +544,12 @@ class DataReader:
             # update plotting parameters colours and zorder
             update_plotting_parameters(self.read_instance) 
 
+        # print basic information species
+        print('SELECTED SPECIES')
+        print('- Main network-species', self.read_instance.networkspecies)
+        if self.read_instance.filter_species:
+            print('- Filter network-species', self.read_instance.filter_species)
+
     def read_data(self, yearmonths_to_read, data_labels):
         """ Function that handles reading of observational/experiment data.
 
@@ -588,7 +642,7 @@ class DataReader:
                 # get intersection of yearmonths_to_read and available_yearmonths
                 yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
                 self.files_to_read[networkspeci][data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])
-
+                
             # if active qa == default qa, no need to screen by QA, so inform reading function of this
             default_qa = get_default_qa(self.read_instance, speci)
             if self.read_instance.qa_per_species[speci] == default_qa:
@@ -641,14 +695,15 @@ class DataReader:
                                                   ghost_data_in_memory_shared, ghost_data_in_memory_shared_shape, 
                                                   timestamp_array_shared, qa_shared, flags_shared))
             # read netCDF files in parallel
-            tuple_argument_fields = ['filename', 'station_references', 'speci', 'data_label', 'data_labels', 
-                                     'reading_ghost', 'ghost_data_vars_to_read', 'metadata_dtype', 
-                                     'metadata_vars_to_read', 'default_qa_active', 'filter_read']
+            tuple_argument_fields = ['filename', 'station_references', 'station_names', 'speci', 
+                                     'data_label', 'data_labels', 'reading_ghost', 'ghost_data_vars_to_read', 
+                                     'metadata_dtype', 'metadata_vars_to_read', 'default_qa_active', 'filter_read']
             tuple_arguments = []
 
             for data_label in self.files_to_read[networkspeci]:
                 for fname in self.files_to_read[networkspeci][data_label]:
                     tuple_arguments.append((fname, self.read_instance.station_references[networkspeci], 
+                                            self.read_instance.station_names[networkspeci],
                                             speci, data_label, data_labels, self.read_instance.reading_ghost, 
                                             self.read_instance.ghost_data_vars_to_read, 
                                             self.read_instance.metadata_dtype, 
@@ -661,6 +716,10 @@ class DataReader:
             # wait for worker processes to terminate before continuing
             pool.join()
             
+            # do not read data if there are not enough datasets (less than 2 timesteps)
+            if not returned_data:
+                continue
+
             # finalise assignment of non-filter species
             if not filter_read:
                 # iterate through read file data and place metadata into full array as appropriate

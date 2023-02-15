@@ -115,7 +115,7 @@
                       "markersize_npoints_threshold": 200,
                       "markersize": {"standard": 1.1, "few_points": 4.0},
                       "round_decimal_places": 2,
-                      "plot": {"marker": "o", "markeredgecolor": null, "mew": 0, "linestyle": null, "markersize": ""},
+                      "plot": {"marker": "o", "markeredgecolor": "None", "mew": 0, "linestyle": "None", "markersize": ""},
                       "plot_options": ["bias", "obs", "individual", "annotate", "smooth", "logy"]},
 
        "periodic": {"orientation": "landscape",
@@ -223,7 +223,7 @@
                    "markersize_npoints_threshold": 200,
                    "markersize": {"standard": 1.1, "few_points": 4.0},
                    "round_decimal_places": 2,
-                   "plot": {"marker": "o", "markersize": "", "linestyle": null},
+                   "plot": {"marker": "o", "markersize": "", "linestyle": "None"},
                    "plot_options": ["individual", "annotate", "regression", "logx", "logy"]},
 
        "boxplot": {"orientation": "landscape",
@@ -246,7 +246,7 @@
                    "annotate_text": {"s": "", "loc": "upper left", "fontsize": 6, "n_stations": false, 
                                      "exp_labels": true, "color": "", "round_decimal_places": 2},
                    "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
-                   "group_widths": {"singlespecies":0.6, "multispecies":0.9}, 
+                   "group_widths": {"singlespecies":0.7, "multispecies":0.9}, 
                    "round_decimal_places": 2,
                    "plot": {"patch_artist": true, "manage_xticks": false, "showfliers": false},
                    "plot_options": ["obs", "individual", "annotate", "logy", "multispecies"]},
