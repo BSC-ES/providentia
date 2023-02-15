@@ -11,7 +11,6 @@ import sys
 
 from configargparse import ArgumentParser
 import providentia
-from . import exceptions
 
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
@@ -29,7 +28,7 @@ class ProvArgumentParser(object):
             self.parser.add_argument('-V', '--version', action='version',
                                      version=providentia.__version__,
                                      help="returns Providentia version number and exit")
-            self.parser.add_argument('--config', 
+            self.parser.add_argument('--conf', '--config', 
                                      dest="config",
                                      help='specifies the config file to read') 
             self.parser.add_argument('--config_dir', 
@@ -129,4 +128,3 @@ class ProvArgumentParser(object):
             return self.parser.parse_args(args)
         except Exception as error:
             print(error)
-            raise exceptions.ProvArgumentParserException
