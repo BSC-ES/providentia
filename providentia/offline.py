@@ -119,7 +119,8 @@ class ProvidentiaOffline:
 
             # read data
             self.datareader.read_setup(['reset'])
-            #initialise previous QA, flags and filter species as section values
+            
+            # initialise previous QA, flags and filter species as section values
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
