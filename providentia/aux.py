@@ -7,6 +7,7 @@ from glob import glob
 import os
 import copy
 import json
+import itertools
 import datetime
 import sys
 from netCDF4 import Dataset
@@ -17,20 +18,6 @@ import pyproj
 from scipy.spatial import cKDTree
 import seaborn as sns
 
-
-def get_default_qa(instance, speci):
-    """ Return the default values according to GHOST standards. 
-
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-        :type instance: object
-        :return: QA flags' codes in list
-        :rtype: list
-    """
-
-    if speci in instance.met_parameters:
-        return sorted(instance.default_qa_met)
-    else:
-        return sorted(instance.default_qa_standard)
 
 def multispecies_mapping(species):
     """ Map species special case str to multiple species names. """
@@ -291,7 +278,7 @@ def init_multispecies(instance):
                                      }
 
     # reset rangeboxes
-    instance.multispecies_menu['multispecies']['labels'] = ['networkspeci_0']
+    instance.multispecies_menu['multispecies']['labels'] = []
     instance.multispecies_menu['multispecies']['current_lower'] = {}
     instance.multispecies_menu['multispecies']['current_upper'] = {}
     instance.multispecies_menu['multispecies']['current_filter_species_fill_value'] = {}
@@ -734,7 +721,7 @@ def update_metadata_fields(instance):
                 # set defaults to min/max extents
                 instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = min_val
                 instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = max_val
-            # do not haveupdate_representativity_fields some numeric values for metadata variable so set as 'nan'
+            # do not have update_representativity_fields some numeric values for metadata variable so set as 'nan'
             else:
                 instance.metadata_menu[metadata_type]['rangeboxes']['current_lower'][meta_var_index] = 'nan'
                 instance.metadata_menu[metadata_type]['rangeboxes']['lower_default'][meta_var_index] = 'nan'
@@ -742,42 +729,6 @@ def update_metadata_fields(instance):
                 instance.metadata_menu[metadata_type]['rangeboxes']['upper_default'][meta_var_index] = 'nan'
                 if meta_var in instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected']:
                     instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
-
-def multispecies_conf(instance):
-    """ Function used when loading from a configuration file. 
-        Sets defined multispecies filtering variables, rest of variables are set to default. 
-
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-        :type instance: object
-    """
-
-    if hasattr(instance, 'filter_species'):
-        for (networkspeci_ii, networkspeci), bounds in zip(enumerate(instance.filter_species.keys()),
-                                                                     instance.filter_species.values()):
-            
-            # update menu_current
-            if networkspeci_ii > 0:
-                instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
-
-            # add values
-            instance.multispecies_menu['multispecies']['current_lower'][networkspeci_ii] = bounds[0]
-            instance.multispecies_menu['multispecies']['current_upper'][networkspeci_ii] = bounds[1]
-            instance.multispecies_menu['multispecies']['current_filter_species_fill_value'][networkspeci_ii] = bounds[2]
-            instance.multispecies_menu['multispecies']['apply_selected'][networkspeci_ii] = True
-
-            # set initial selected config variables as set .conf files or defaults
-            instance.selected_widget_network.update({networkspeci_ii: networkspeci.split('|')[0]})
-            instance.selected_widget_matrix.update({networkspeci_ii: instance.parameter_dictionary[networkspeci.split('|')[1]]['matrix']})
-            instance.selected_widget_species.update({networkspeci_ii: networkspeci.split('|')[1]})
-            instance.selected_widget_lower.update({networkspeci_ii: bounds[0]})
-            instance.selected_widget_upper.update({networkspeci_ii: bounds[1]})
-            instance.selected_widget_filter_species_fill_value.update({networkspeci_ii: bounds[2]})
-            instance.selected_widget_apply.update({networkspeci_ii: True})
-
-            update_filter_species(instance, networkspeci_ii)
-
-            # filtering tab is initialized from conf
-            instance.multispecies_initialisation = False
 
 def representativity_conf(instance):
     """ Function used when loading from a configuration file. 
@@ -802,7 +753,7 @@ def period_conf(instance):
     from .configuration import split_options
 
     if hasattr(instance, 'period'):
-        keeps, removes = split_options(instance.period)
+        keeps, removes = split_options(instance, instance.period)
         instance.period_menu['checkboxes']['keep_selected'] = keeps
         instance.period_menu['checkboxes']['remove_selected'] = removes
 
@@ -836,7 +787,7 @@ def metadata_conf(instance):
         # and then treat the keep/remove
         for label in instance.metadata_menu[menu_type]['navigation_buttons']['labels']:
             if hasattr(instance, label):
-                keeps, removes = split_options(getattr(instance, label))
+                keeps, removes = split_options(instance, getattr(instance, label))
                 instance.metadata_menu[menu_type][label]['checkboxes']['keep_selected'] = keeps
                 instance.metadata_menu[menu_type][label]['checkboxes']['remove_selected'] = removes
 
@@ -1108,18 +1059,18 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
 
     # check if start/end date are valid values, if not, return with no valid obs. files
     if (not valid_date(start_date)) or (not valid_date(end_date)):
-        print('Warning: One of start date or end date are not valid.')
+        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
         return
 
     # check end date is > start date, if not, return with no valid obs. files
     if int(start_date) >= int(end_date):
-        print('Warning: Start date exceeds end date.')
+        print(f'Warning: Start date ({start_date}) exceeds end date ({end_date}).')
         return
 
     # check start date and end date are both within if valid date range (19000101 - 20500101),
     # if not, return with no valid obs. files
     if (int(start_date) < 19000101) or (int(end_date) < 19000101) or (int(start_date) >= 20500101) or (int(end_date) >= 20500101):
-        print('Warning: One of start date or end date are not valid.')
+        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
         return 
 
     # get start date on first of month
@@ -1246,10 +1197,13 @@ def get_basic_metadata(instance):
 
     # define dictionaries for storing basic metadata across all species to read
     station_references = {}
+    station_names = {}
     station_longitudes = {}
     station_latitudes = {}
+    station_measurement_altitudes = {}
     station_classifications = {}
     area_classifications = {}
+    nonghost_units = {}
 
     # iterate through network, speci pairs
     for networkspeci in (instance.networkspecies + instance.filter_networkspecies):
@@ -1298,24 +1252,30 @@ def get_basic_metadata(instance):
             
             # define arrays for storing speci metadata
             speci_station_references = []
+            speci_station_names = []
             speci_station_longitudes = []
             speci_station_latitudes = []
+            speci_station_measurement_altitudes = []
             speci_station_classifications = []
             speci_area_classifications = []
 
             for relevant_file in relevant_files:
                 ncdf_root = Dataset(relevant_file)
                 speci_station_references = np.append(speci_station_references, ncdf_root['station_reference'][:])
+                speci_station_names = np.append(speci_station_names, ncdf_root['station_name'][:])
                 speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
                 speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
+                speci_station_measurement_altitudes = np.append(speci_station_measurement_altitudes, ncdf_root['measurement_altitude'][:])
                 speci_station_classifications = np.append(speci_station_classifications, ncdf_root['station_classification'][:])
                 speci_area_classifications = np.append(speci_area_classifications, ncdf_root['area_classification'][:])
                 ncdf_root.close()
 
             speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
             station_references[networkspeci] = speci_station_references
+            station_names[networkspeci] = speci_station_names[station_unique_indices]
             station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
             station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
+            station_measurement_altitudes[networkspeci] = speci_station_measurement_altitudes[station_unique_indices]
             station_classifications[networkspeci] = speci_station_classifications[station_unique_indices]
             area_classifications[networkspeci] = speci_area_classifications[station_unique_indices]
         
@@ -1329,7 +1289,9 @@ def get_basic_metadata(instance):
                 station_reference_var = 'station_code'
             elif 'station_name' in ncdf_root.variables:
                 station_reference_var = 'station_name'
-
+            else: 
+                print('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
+                sys.exit()
             if ncdf_root[station_reference_var].dtype == np.str:
                 station_references[networkspeci] = ncdf_root[station_reference_var][:]
             else:
@@ -1343,6 +1305,17 @@ def get_basic_metadata(instance):
             # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
             non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(station_references[networkspeci]) if ref.lower() != 'nan'])
             station_references[networkspeci] = station_references[networkspeci][non_nan_station_indices]
+
+            if "station_name" in ncdf_root.variables:
+                if ncdf_root['station_name'].dtype == np.str:
+                    station_names[networkspeci] = ncdf_root['station_name'][non_nan_station_indices]
+                else:
+                    if ncdf_root['station_name'].dtype == np.dtype(object):
+                        station_names[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_name'][non_nan_station_indices]])
+                    else:
+                        station_names[networkspeci] = np.array(
+                            [st_name.tostring().decode('ascii').replace('\x00', '')
+                            for st_name in ncdf_root['station_name'][non_nan_station_indices]], dtype=np.str)
 
             if "latitude" in ncdf_root.variables:
                 station_longitudes[networkspeci] = ncdf_root['longitude'][non_nan_station_indices]
@@ -1373,233 +1346,440 @@ def get_basic_metadata(instance):
                             [area_classification.tostring().decode('ascii').replace('\x00', '')
                             for area_classification in ncdf_root['area_classification'][non_nan_station_indices]], dtype=np.str)
             
+            # get non-GHOST measurement units
+            nonghost_units[speci] = ncdf_root[speci].units
+
             ncdf_root.close()
 
     # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
     # then spatially colocate stations across species
     if (len((instance.networkspecies + instance.filter_networkspecies)) > 1) & (instance.spatial_colocation):
-        # get intersecting station information across species
-        intersecting_station_references, intersecting_station_longitudes, intersecting_station_latitudes, intersecting_station_classifications, intersecting_area_classifications = \
-            spatial_colocation(instance.reading_ghost, station_references, station_longitudes, station_latitudes, station_classifications, area_classifications)
-        for ns in station_references:
-            # if using GHOST data then add method abberivations per species to intersecting station references
-            if instance.reading_ghost:
-                station_references_no_method = ['_'.join(ref.split('_')[:-1]) for ref in station_references[ns]]
-                methods = [ref.split('_')[-1] for ref in station_references[ns]]
-                intersecting_station_references_methods = ['{}_{}'.format(ref, methods[station_references_no_method.index(ref)]) for ref in intersecting_station_references]
-            else:
-                intersecting_station_references_methods = intersecting_station_references
-            station_references[ns] = np.array(intersecting_station_references_methods)
-            station_longitudes[ns] = np.array(intersecting_station_longitudes)
-            station_latitudes[ns] = np.array(intersecting_station_latitudes)    
-            station_classifications[ns] = np.array(intersecting_station_classifications)  
-            area_classifications[ns] =  np.array(intersecting_area_classifications)  
+        # get intersecting station indices across species (handle both GHOST and non-GHOST cases)
+        if instance.reading_ghost:
+            intersecting_indices = spatial_colocation_ghost(station_longitudes, station_latitudes, station_measurement_altitudes)
+        else:
+            intersecting_indices = spatial_colocation_nonghost(station_references, station_longitudes, station_latitudes)
+        
+        # iterate through networkspecies specific intersecting indices, setting 
+        for ns, ns_intersects in intersecting_indices.items():
+            station_references[ns] = station_references[ns][ns_intersects]
+            station_longitudes[ns] = station_longitudes[ns][ns_intersects]
+            station_latitudes[ns] = station_latitudes[ns][ns_intersects]
+            if ns in station_measurement_altitudes:
+                station_measurement_altitudes[ns] = station_measurement_altitudes[ns][ns_intersects]
+            if ns in station_names:
+                station_names[ns] = station_names[ns][ns_intersects]
+            if ns in station_classifications:
+                station_classifications[ns] = station_classifications[ns][ns_intersects]
+            if ns in area_classifications:
+                area_classifications[ns] =  area_classifications[ns][ns_intersects] 
 
-    return station_references, station_longitudes, station_latitudes, station_classifications, area_classifications
+    return station_references, station_names, station_longitudes, station_latitudes, station_measurement_altitudes, station_classifications, area_classifications, nonghost_units
 
-def spatial_colocation(reading_ghost, station_references, longitudes, latitudes, station_classifications, 
-                       area_classifications):
-    """ Given multiple species, return intersecting station_references, longitudes, latitudes, 
-        station_classifications and area_classifications across species.
+def spatial_colocation_nonghost(station_references, longitudes, latitudes):
+    """ Given multiple species, return intersecting indices for matching stations across species (per network/species)
+        for non-GHOST data.
 
         This is done by 
             1. Cross-checking the station references between species to get matching station_references
-            2. Cross-checking matching longitude/latitude coordinates to a tolerance of 20m difference
+            2. Cross-checking matching longitude / latitude coordinates to a tolerance of 19m difference
 
-        If longitude/latitude matching is needed, then take impose station reference of the first species 
-        upon the rest of intersecting indices across species. 
+        The tolerance is calculated by allowing for a tolerance of 19.053m in the 3 independent x,y,z dimensions, 
+        as is done in GHOST to distinguish unique stations.
+        Using Pythagoras in 3D √(11**2 +11**2 + 11**2) = 19.053.
 
-        :param reading_ghost: boolean informing if are using GHOST data or not
-        :type reading_ghost: boolean
         :param station_references: dictionary of station references per network/species
         :type station_references: dict
-        :param longitudes: dictionary longitudes per network/species
+        :param longitudes: dictionary of longitudes per network/species
         :type longitudes: dict
         :param latitudes: dictionary of latitudes per network/species
         :type latitudes: dict
-        :param latitudes: dictionary of latitudes per network/species
-        :type latitudes: dict
-
-        :return: intersecting station_references, intersecting longitudes, intersecting latitudes, 
-        :rtype: list, list, list, list, list
+        :return: intersecting indices per network/species
+        :rtype: dict
     """
 
-    # if are reading GHOST data remove method abbreviation from station_references
-    if reading_ghost:
-        station_references_no_method = {}
-        for networkspecies in station_references:
-            station_references_no_method[networkspecies] = ['_'.join(ref.split('_')[:-1]) 
-                                                            for ref in station_references[networkspecies]]
-    else:
-        station_references_no_method = station_references
-
     # get indices of intersection of station references across species
-    intersecting_station_references_no_method = list(set.intersection(*map(set,list(station_references_no_method.values()))))
+    #for networkspecies in station_references:
+    #    station_references[networkspecies] = station_references[networkspecies].tolist()    
+    intersecting_station_references = list(set.intersection(*map(set,list(station_references.values()))))
     intersecting_indices = {}
-    for networkspecies in station_references_no_method:
-        intersecting_indices[networkspecies] = np.sort([station_references_no_method[networkspecies].index(ref) 
-                                                        for ref in intersecting_station_references_no_method])
+    for networkspecies in station_references:
+        intersecting_indices[networkspecies] = np.array([list(station_references[networkspecies]).index(ref) 
+                                                        for ref in intersecting_station_references], dtype=np.int)
 
-    # set intersecting station_references, longitudes and latitudes,
-    # after matching station references across species
+    # set variable for first networkspecies
     firstnetworkspecies = list(intersecting_indices.keys())[0]
-    if len(intersecting_indices[firstnetworkspecies]) > 0:
-        intersecting_station_references = np.array(station_references_no_method[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
-        intersecting_longitudes = np.array(longitudes[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
-        intersecting_latitudes = np.array(latitudes[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
-        intersecting_station_classifications = np.array(station_classifications[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
-        intersecting_area_classifications = np.array(area_classifications[firstnetworkspecies])[intersecting_indices[firstnetworkspecies]]
-    else:
-        intersecting_station_references = np.array([])
-        intersecting_longitudes = np.array([])
-        intersecting_latitudes = np.array([])
-        intersecting_station_classifications = np.array([])
-        intersecting_area_classifications = np.array([])
+
+    # if have zero intersecting indices across species, then return with warning message
+    if len(intersecting_indices[firstnetworkspecies]) == 0:
+        print('Warning: No intersecting stations across networks/species')
+        return intersecting_indices
 
     # if non-intersecting indices unaccounted for across species, 
     # then attempt to resolve them by matching longitudes / latitudes
-    if len(intersecting_station_references) != len(station_references_no_method[firstnetworkspecies]):
+    if len(intersecting_indices[firstnetworkspecies]) != len(station_references[firstnetworkspecies]):
 
         # set tolerance for matching longitudes and latitudes in metres
-        tolerance = 20
+        tolerance = 19.053
 
-        # get non-intersecting station references, longitudes and latitudes across speci
-        non_intersecting_station_references = {networkspecies: (np.delete(station_references_no_method[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(station_references_no_method[networkspecies])) for networkspecies in station_references_no_method}
-        non_intersecting_longitudes = {networkspecies: (np.delete(longitudes[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(longitudes[networkspecies])) for networkspecies in longitudes}
-        non_intersecting_latitudes = {networkspecies: (np.delete(latitudes[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(latitudes[networkspecies])) for networkspecies in latitudes}
-        non_intersecting_station_classifications = {networkspecies: (np.delete(station_classifications[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(station_classifications[networkspecies])) for networkspecies in station_classifications}
-        non_intersecting_area_classifications = {networkspecies: (np.delete(area_classifications[networkspecies], intersecting_indices[networkspecies]) if len(intersecting_indices[networkspecies]) > 0 else np.array(area_classifications[networkspecies])) for networkspecies in area_classifications}
+        # get non-intersecting indices, longitudes and latitudes across speci
+        non_intersecting_indices = {networkspecies: np.setdiff1d(np.arange(len(station_references[networkspecies])), intersecting_indices[networkspecies]) for networkspecies in station_references}
+        non_intersecting_longitudes = {networkspecies: longitudes[networkspecies][non_intersecting_indices[networkspecies]] for networkspecies in longitudes}
+        non_intersecting_latitudes = {networkspecies: latitudes[networkspecies][non_intersecting_indices[networkspecies]] for networkspecies in latitudes}
 
-        # get non-intersecting station references, longitudes and latitudes for first speci
-        speci_non_intersecting_station_references = non_intersecting_station_references[firstnetworkspecies]
-        speci_non_intersecting_longitudes = non_intersecting_longitudes[firstnetworkspecies]
-        speci_non_intersecting_latitudes = non_intersecting_latitudes[firstnetworkspecies]
-        speci_non_intersecting_station_classifications = non_intersecting_station_classifications[firstnetworkspecies]    
-        speci_non_intersecting_area_classifications = non_intersecting_area_classifications[firstnetworkspecies]
+        # get non-intersecting station longitudes and latitudes for first speci
+        firstnetworkspecies_longitudes = non_intersecting_longitudes[firstnetworkspecies]
+        firstnetworkspecies_latitudes = non_intersecting_latitudes[firstnetworkspecies]
 
-        # convert speci longitude and latitudes in geogroahic coordinates to cartesian ECEF 
+        # convert speci longitude and latitudes in geographic coordinates to cartesian ECEF 
         # (Earth Centred, Earth Fixed) coordinates assuming WGS84 datum and ellipsoid, and that all heights equal zero
-        # ECEF coordiantes represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
+        # ECEF coordinates represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
         lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
         ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
-        speci_non_intersecting_x, speci_non_intersecting_y, speci_non_intersecting_z = pyproj.transform(lla, ecef, 
-            speci_non_intersecting_longitudes, speci_non_intersecting_latitudes, 
-            np.zeros(len(speci_non_intersecting_longitudes)), radians=False)
-        # merge coordinates to 2D array
-        speci_non_intersecting_xy = np.column_stack((speci_non_intersecting_x, speci_non_intersecting_y))
+        firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = pyproj.transform(lla, ecef, 
+            firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, 
+            np.zeros(len(firstnetworkspecies_longitudes)), radians=False)
+        
+        # merge coordinates to 3D array
+        firstnetworkspecies_xyz = np.column_stack((firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z))
 
         # iterate through all other speci, and get intersections (within tolerance) of longitudes and latitudes 
         # with first speci longitudes and latitudes
-        pairwise_intersect_inds = []
+        pairwise_intersect_inds = {firstnetworkspecies:[]}
         for networkspecies in non_intersecting_longitudes:
 
             if networkspecies == firstnetworkspecies:
                 continue
 
-            next_speci_non_intersecting_longitudes = non_intersecting_longitudes[networkspecies]
-            next_speci_non_intersecting_latitudes = non_intersecting_latitudes[networkspecies]
+            nextnetworkspecies_longitudes = non_intersecting_longitudes[networkspecies]
+            nextnetworkspecies_latitudes = non_intersecting_latitudes[networkspecies]
 
-            # convert speci longitude and latitudes in geogroahic coordinates to cartesian ECEF 
-            next_speci_non_intersecting_x, next_speci_non_intersecting_y, next_speci_non_intersecting_z = pyproj.transform(lla, 
-                ecef, next_speci_non_intersecting_longitudes, next_speci_non_intersecting_latitudes, 
-                np.zeros(len(next_speci_non_intersecting_longitudes)), radians=False)
+            # convert speci longitude and latitudes in geographic coordinates to cartesian ECEF 
+            nextnetworkspecies_x, nextnetworkspecies_y, nextnetworkspecies_z = pyproj.transform(lla, ecef, 
+                nextnetworkspecies_longitudes, nextnetworkspecies_latitudes, 
+                np.zeros(len(nextnetworkspecies_longitudes)), radians=False)
             
-            # merge coordinates to 2D array
-            next_speci_non_intersecting_xy = np.column_stack((next_speci_non_intersecting_x, next_speci_non_intersecting_y))            
+            # merge coordinates to 3D array
+            nextnetworkspecies_xyz = np.column_stack((nextnetworkspecies_x, nextnetworkspecies_y, nextnetworkspecies_z))            
 
-            # get closest differences between next speci lon,lat coords, with first speci lon lats coords
-            dists = cKDTree(next_speci_non_intersecting_xy).query(speci_non_intersecting_xy, k=1)[0]
+            # get all indices of next speci xyz coords, within tolerance of each first speci xyz coords
+            idx = cKDTree(nextnetworkspecies_xyz).query_ball_point(firstnetworkspecies_xyz, tolerance)
+
+            # get all indices where have non-duplicated and duplicated matched indices
+            unique_idx, unique_idx_counts = np.unique(list(itertools.chain(*idx)), return_counts=True)
+            nondup_idx = unique_idx[np.where(unique_idx_counts == 1)[0]]
+            dup_idx = unique_idx[np.where(unique_idx_counts > 1)[0]]
+
+            # gather list of indices for first speci and next speci of already resolved within tolerance indices
+            fs_wtol_inds = []
+            ns_wtol_inds = []
+
+            # resolve all duplicated matched indices
+            idx, unresolved_dup_idx, fs_wtol_inds, ns_wtol_inds = resolve_duplicate_spatial_colocation_matches(idx, 
+                                                                    nondup_idx, dup_idx, 
+                                                                    firstnetworkspecies_xyz, nextnetworkspecies_xyz,
+                                                                    fs_wtol_inds, ns_wtol_inds)
+
+            # pass through again to resolve all unresovered duplicated indices after first pass
+            if len(unresolved_dup_idx) > 0:
+                idx, _, fs_wtol_inds, ns_wtol_inds = resolve_duplicate_spatial_colocation_matches(idx, 
+                                                    nondup_idx, unresolved_dup_idx, 
+                                                    firstnetworkspecies_xyz, nextnetworkspecies_xyz,
+                                                    fs_wtol_inds, ns_wtol_inds)
+
+            # iterate though next speci within tolerance indices, per each first speci coord 
+            for idx_ii, idx_l in enumerate(idx):
+                # if position has already been resolved (through resolving duplicates) then continue
+                if idx_ii in fs_wtol_inds:
+                    continue
+                
+                # no matches, then append nothing
+                elif len(idx_l) == 0:
+                    continue
+
+                # just 1 match, then append
+                elif len(idx_l) == 1:
+                    fs_wtol_inds.append(idx_ii) 
+                    ns_wtol_inds.append(idx_l[0])
+
+                # more than 1 match, then find which match has closest distance, then append
+                else:
+                    # find the dists between all relevant first speci xyz coords and next speci duplicate xyz coord
+                    idx_l = np.array(idx_l)
+                    dists = cKDTree([firstnetworkspecies_xyz[idx_ii]]).query(nextnetworkspecies_xyz[idx_l], k=1)[0]
+                    ordered_idx_l = idx_l[np.argsort(dists)]
+                    fs_wtol_inds.append(idx_ii) 
+                    ns_wtol_inds.append(ordered_idx_l[0])
+
+            # order matched indices for first species in ascending order, and order next speci indices in smae way
+            if len(fs_wtol_inds) > 0:
+                fs_wtol_inds, ns_wtol_inds = list(zip(*sorted(zip(fs_wtol_inds, ns_wtol_inds))))
+
+                # set indices where first species differences are within tolerance, i.e. intersecting 
+                pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = non_intersecting_indices[firstnetworkspecies][np.array(fs_wtol_inds)]
+                pairwise_intersect_inds[firstnetworkspecies].extend(non_intersecting_indices[firstnetworkspecies][np.array(fs_wtol_inds)])
             
-            # get indices where differences are within tolerance, i.e. intersecting 
-            pairwise_intersect_inds.extend(np.where(dists <= tolerance)[0])
+                # get indices where next species differences are within tolerance, i.e. intersecting 
+                pairwise_intersect_inds[networkspecies] = non_intersecting_indices[networkspecies][np.array(ns_wtol_inds)]
+            else:
+                pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int)
+                pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int)
 
-        # get indices where longitude and latitudes intersect across all species
-        pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds, return_counts=True)
-        intersecting_indices_lonlat = pairwise_intersect_inds_unique[counts == (len(longitudes)-1)]
+        # get indices (for first networkspecies) where longitude and latitudes intersect across all species
+        pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds[firstnetworkspecies], return_counts=True)
+        pairwise_intersect_inds[firstnetworkspecies] = pairwise_intersect_inds_unique[counts == (len(longitudes)-1)]
 
-        # append newly found intersecting station references, longitudes and latitudes
-        if len(intersecting_indices_lonlat) > 0:
-            intersecting_station_references = np.append(intersecting_station_references, speci_non_intersecting_station_references[intersecting_indices_lonlat])
-            intersecting_longitudes = np.append(intersecting_longitudes, speci_non_intersecting_longitudes[intersecting_indices_lonlat])
-            intersecting_latitudes = np.append(intersecting_latitudes, speci_non_intersecting_latitudes[intersecting_indices_lonlat])
-            intersecting_station_classifications = np.append(intersecting_station_classifications, speci_non_intersecting_station_classifications[intersecting_indices_lonlat])
-            intersecting_area_classifications = np.append(intersecting_area_classifications, speci_non_intersecting_area_classifications[intersecting_indices_lonlat])
-            
-    # sort arrays by station references (alphabetically)
-    sorted_inds = intersecting_station_references.argsort()
-    intersecting_station_references = intersecting_station_references[sorted_inds]
-    intersecting_longitudes = intersecting_longitudes[sorted_inds]
-    intersecting_latitudes = intersecting_latitudes[sorted_inds]
-    intersecting_station_classifications = intersecting_station_classifications[sorted_inds]
-    intersecting_area_classifications = intersecting_area_classifications[sorted_inds]
+        if len(pairwise_intersect_inds[firstnetworkspecies]) > 0:
+            # get specific intersect indices across all species, for rest of species
+            for networkspecies in non_intersecting_longitudes:
+                if networkspecies == firstnetworkspecies:
+                    continue
+                _, species_intersect_inds, _ = np.intersect1d(pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)], pairwise_intersect_inds[firstnetworkspecies], return_indices=True)
+                pairwise_intersect_inds[networkspecies] = pairwise_intersect_inds[networkspecies][species_intersect_inds]
 
-    return intersecting_station_references, intersecting_longitudes, intersecting_latitudes, intersecting_station_classifications, intersecting_area_classifications
+            # append newly found intersecting indices to previously found intersect inds
+            for networkspecies in non_intersecting_longitudes:
+                intersecting_indices[networkspecies] = np.array(np.append(intersecting_indices[networkspecies], pairwise_intersect_inds[networkspecies]), dtype=np.int)
 
-def update_filter_species(instance, label_ii, add_filter_species=True):
-    """ Function to update filter species after launching the dashboard with a configuration file or 
-        by editing the fields in the multispecies filtering tab in the dashboard. 
+    return intersecting_indices
 
-        :param instance: Instance of class ProvidentiaMainWindow
-        :type instance: object
-        :param label_ii: Corresponding widget line in dashboard
-        :type label_ii: int
-        :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
-        :type add_filter_species: boolean
+def spatial_colocation_ghost(longitudes, latitudes, measurement_altitudes):
+    """ Given multiple species, return intersecting indices for matching stations across species (per network/species)
+        for GHOST data.
+
+        This is done by cross-checking matching longitude / latitude / measurement altitudes coordinates 
+        to a tolerance of 19.053m difference.
+        This tolerance is calculated by allowing for a tolerance of 11m in the 3 independent x,y,z dimensions, 
+        as is done in GHOST to distinguish unique stations.
+        Using Pythagoras in 3D √(11**2 +11**2 + 11**2) = 19.053.
+
+        A current limitation is that at one station there can be several measurement methods, which
+        are represented as unique stations in GHOST. Currently, if these stations have the same measurement 
+        position, simply the first of these stations will be preferentially chosen as a match.
+        This could be better done by prioritising first by method, when have multiple matches.
+
+        :param longitudes: dictionary of longitudes per network/species
+        :type longitudes: dict
+        :param latitudes: dictionary of latitudes per network/species
+        :type latitudes: dict
+        :param measurement_altitudes: dictionary of measurement altitudes per network/species
+        :type measurement_altitudes: dict
+        :return: intersecting indices per network/species
+        :rtype: dict
     """
 
-    # get selected network, species and bounds
-    network = instance.selected_widget_network[label_ii]
-    speci = instance.selected_widget_species[label_ii]
-    networkspeci = network + '|' + speci
-    current_lower = instance.selected_widget_lower[label_ii]
-    current_upper = instance.selected_widget_upper[label_ii]
-    current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
+    # set tolerance for matching longitudes / latitudes / measurement_altitudes in metres
+    tolerance = 19.053
 
-    # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
-    if add_filter_species:
-
-        # do not add networkspeci to filter_species if filtered network is main
-        if networkspeci != instance.networkspecies[0]:
-            
-            # add or update networkspeci
-            # check selected lower and upper bounds and fill value are numbers or nan
-            try:
-                instance.filter_species[networkspeci] = [float(current_lower), float(current_upper),
-                                                         float(current_filter_species_fill_value)]
-                
-            # if any of the fields are not numbers, return from function
-            except ValueError:
-                print("Warning: Data limit fields must be numeric")
-                return
-
-            # add if networkspeci is not already in qa_per_species
-            if speci not in instance.qa_per_species:
-                # get species in memory 
-                species = copy.deepcopy(instance.species)
-                filter_species = [val.split('|')[1] for val in list(copy.deepcopy(instance.filter_species).keys())]
-                qa_species = species + filter_species
-                
-                # add
-                qa_species.append(speci)
-                instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
-
-        # update le_minimum_value and le_maximum_value (data bounds) for main networkspeci
-        else:
-            instance.le_minimum_value.setText(current_lower)
-            instance.le_maximum_value.setText(current_upper)
-            instance.bounds_set_on_multispecies = True
-
-    # if apply button is unchecked, remove networkspecies from filter_species
-    else:
-        # remove from filter_species
-        if networkspeci in instance.filter_species.keys():
-            del instance.filter_species[networkspeci]
-
-        # remove from qa_per_species
-        if speci in instance.qa_per_species:
-            del instance.qa_per_species[speci]
-
-    print('SELECTED SPECIES')
-    print('- Network species', instance.networkspecies)
-    print('- Filter species', instance.filter_species)
+    # set variable for first networkspecies
+    firstnetworkspecies = list(longitudes.keys())[0]
     
+    # get station coordinates for firstnetworkspecies
+    firstnetworkspecies_longitudes = longitudes[firstnetworkspecies]
+    firstnetworkspecies_latitudes = latitudes[firstnetworkspecies] 
+    firstnetworkspecies_measurement_altitudes = measurement_altitudes[firstnetworkspecies]
+
+    # convert longitudes / latitudes / measurement_altitudes in geographic coordinates to cartesian ECEF 
+    # (Earth Centred, Earth Fixed) coordinates assuming WGS84 datum and ellipsoid, and that all heights equal zero
+    # ECEF coordinates represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
+    lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
+    ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
+    firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = pyproj.transform(lla, ecef, 
+        firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, firstnetworkspecies_measurement_altitudes,
+        radians=False)
+
+    # merge coordinates to 3D array
+    firstnetworkspecies_xyz = np.column_stack((firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z))
+
+    # iterate through all other speci, and get intersections (within tolerance) of 
+    # longitudes / latitudes / measurement_altitudes, with first speci longitudes and latitudes
+    pairwise_intersect_inds = {firstnetworkspecies:[]}
+    for networkspecies in longitudes:
+
+        if networkspecies == firstnetworkspecies:
+            continue
+
+        nextnetworkspecies_longitudes = longitudes[networkspecies]
+        nextnetworkspecies_latitudes = latitudes[networkspecies]
+        nextnetworkspecies_measurement_altitudes = measurement_altitudes[networkspecies]
+
+        # convert speci longitude and latitudes in geographic coordinates to cartesian ECEF 
+        nextnetworkspecies_x, nextnetworkspecies_y, nextnetworkspecies_z = pyproj.transform(lla, 
+            ecef, nextnetworkspecies_longitudes, nextnetworkspecies_latitudes, nextnetworkspecies_measurement_altitudes,
+            radians=False)
+        
+        # merge coordinates to 3D array
+        nextnetworkspecies_xyz = np.column_stack((nextnetworkspecies_x, nextnetworkspecies_y, nextnetworkspecies_z))            
+
+        # get all indices of next speci xyz coords, within tolerance of each first speci xyz coords
+        idx = cKDTree(nextnetworkspecies_xyz).query_ball_point(firstnetworkspecies_xyz, tolerance)
+
+        # get all indices where have non-duplicated and duplicated matched indices
+        unique_idx, unique_idx_counts = np.unique(list(itertools.chain(*idx)), return_counts=True)
+        nondup_idx = unique_idx[np.where(unique_idx_counts == 1)[0]]
+        dup_idx = unique_idx[np.where(unique_idx_counts > 1)[0]]
+
+        # gather list of indices for first speci and next speci of already resolved within tolerance indices
+        fs_wtol_inds = []
+        ns_wtol_inds = []
+
+        # resolve all duplicated matched indices
+        idx, unresolved_dup_idx, fs_wtol_inds, ns_wtol_inds = resolve_duplicate_spatial_colocation_matches(idx, 
+                                                                nondup_idx, dup_idx, 
+                                                                firstnetworkspecies_xyz, nextnetworkspecies_xyz,
+                                                                fs_wtol_inds, ns_wtol_inds)
+
+        # pass through again to resolve all unresovered duplicated indices after first pass
+        if len(unresolved_dup_idx) > 0:
+            idx, _, fs_wtol_inds, ns_wtol_inds = resolve_duplicate_spatial_colocation_matches(idx, 
+                                                   nondup_idx, unresolved_dup_idx, 
+                                                   firstnetworkspecies_xyz, nextnetworkspecies_xyz,
+                                                   fs_wtol_inds, ns_wtol_inds)
+
+        # iterate though next speci within tolerance indices, per each first speci coord 
+        for idx_ii, idx_l in enumerate(idx):
+            # if position has already been resolved (through resolving duplicates) then continue
+            if idx_ii in fs_wtol_inds:
+                continue
+            
+            # no matches, then append nothing
+            elif len(idx_l) == 0:
+                continue
+
+            # just 1 match, then append
+            elif len(idx_l) == 1:
+                fs_wtol_inds.append(idx_ii) 
+                ns_wtol_inds.append(idx_l[0])
+
+            # more than 1 match, then find which match has closest distance, then append
+            else:
+                # find the dists between all relevant first speci xyz coords and next speci duplicate xyz coord
+                idx_l = np.array(idx_l)
+                dists = cKDTree([firstnetworkspecies_xyz[idx_ii]]).query(nextnetworkspecies_xyz[idx_l], k=1)[0]
+                ordered_idx_l = idx_l[np.argsort(dists)]
+                fs_wtol_inds.append(idx_ii) 
+                ns_wtol_inds.append(ordered_idx_l[0])
+
+        # order matched indices for first species in ascending order, and order next speci indices in smae way
+        if len(fs_wtol_inds) > 0:
+            fs_wtol_inds, ns_wtol_inds = list(zip(*sorted(zip(fs_wtol_inds, ns_wtol_inds))))
+
+            # set indices where first species differences are within tolerance, i.e. intersecting 
+            pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array(fs_wtol_inds)
+            pairwise_intersect_inds[firstnetworkspecies].extend(np.array(fs_wtol_inds))
+        
+            # get indices where next species differences are within tolerance, i.e. intersecting 
+            pairwise_intersect_inds[networkspecies] = np.array(ns_wtol_inds)
+        else:
+            pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int)
+            pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int)
+
+    # get indices (for first networkspecies) where longitude, latitudes and measurement_altitudes intersect across all species
+    pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds[firstnetworkspecies], return_counts=True)
+    pairwise_intersect_inds[firstnetworkspecies] = pairwise_intersect_inds_unique[counts == (len(longitudes)-1)]
+
+    # get specific intersect indices across all species, for rest of species
+    intersecting_indices = {}
+    for networkspecies in longitudes:
+        if networkspecies == firstnetworkspecies:
+            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies], dtype=np.int)
+        else:
+            _, species_intersect_inds, _ = np.intersect1d(pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)], pairwise_intersect_inds[firstnetworkspecies], return_indices=True)
+            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies][species_intersect_inds], dtype=np.int)
+
+    return intersecting_indices
+
+def resolve_duplicate_spatial_colocation_matches(idx, nondup_idx, dup_idx, 
+                                                 firstnetworkspecies_xyz, nextnetworkspecies_xyz,
+                                                 fs_wtol_inds, ns_wtol_inds):
+
+    """ Function that resolves duplicate indices found during spatial colocation of 2 species.
+
+        In spatial colocation it is neccessary to match each stations geographically within a specific
+        tolerance, for 2 different species. 
+
+        In some cases the stations within the tolerance can match for multiple stations. 
+        In order to resolve this, for each duplicated station, it is set to match with the closest station to it
+        in terms of 3D distance. This is done iteratively until there are no more duplicates.
+
+        :param idx: per first networkspeci xyz coords, a list of indices of next networkspeci xyz coords within tolerance
+        :type idx: array 
+        :param nondup_idx: next networkspeci idx coords that are not duplicated across idx array 
+        :type nondup_idx: array
+        :param dup_idx: next networkspeci idx coords that are duplicated across idx array 
+        :type dup_idx: array
+        :param firstnetworkspecies_xyz: ECEF coordinates for first networkspeci stations
+        :type firstnetworkspecies_xyz: array
+        :param nextnetworkspecies_xyz: ECEF coordinates for next networkspeci stations
+        :type nextnetworkspecies_xyz: array
+        :param fs_wtol_inds: first networkspeci station indices within tolerance (i.e. have paired match)
+        :type fs_wtol_inds: list
+        :param ns_wtol_inds: next networkspeci station indices within tolerance (i.e. have paired match)
+        :type ns_wtol_inds: list
+        :return: idx, unresolved_dup_idx, fs_wtol_inds, ns_wtol_inds 
+        :rtype: array, list, list, list
+    """
+
+    # resolve all duplicated matched indices by finding for which index the distance is closest
+    unresolved_dup_idx = []
+    for dup_index in dup_idx:
+
+        # get all relevant first speci indices for which contain the duplicate next speci index
+        relevant_idx = np.array([idx_ii for idx_ii, idx_l in enumerate(idx) if dup_index in idx_l])
+        # find the dists between all relevant first speci xyz coords and next speci duplicate xyz coord
+        dists = cKDTree([nextnetworkspecies_xyz[dup_index]]).query(firstnetworkspecies_xyz[relevant_idx], k=1)[0]
+        # order the relevant first speci indices by dists (closest first)
+        ordered_relevant_idx = relevant_idx[np.argsort(dists)]
+        # iterate through ordered relevant first speci indices until find an ind for which can claim duplicate ind
+        # keep going in order iteratively until have exhausted all options for duplicate ind
+        for ordered_relevant_index_ii, ordered_relevant_index in enumerate(ordered_relevant_idx):
+        
+            # if current relevant first speci index has no competing indices, then append matched index,
+            # remove duplicate index from other match lists, and then break out of iteration
+            if len(idx[ordered_relevant_index]) == 1:
+                fs_wtol_inds.append(ordered_relevant_index)
+                ns_wtol_inds.append(dup_index)
+                for next_ordered_relevant_index in ordered_relevant_idx[ordered_relevant_index_ii+1:]:
+                    idx[next_ordered_relevant_index].remove(dup_index)
+                break
+
+            # otherwise, 
+            # find the dists between the relevant first speci xyz coord and next speci duplicate xyz coords
+            else:
+                idx_l = np.array(idx[ordered_relevant_index])
+                dists = cKDTree([firstnetworkspecies_xyz[ordered_relevant_index]]).query(nextnetworkspecies_xyz[idx_l], k=1)[0]
+                ordered_idx_l = idx_l[np.argsort(dists)]
+
+                # if the closest index is the dup index, or is another non-duplicate, then append it
+                # if the closest index is the dup index, then remove duplicate index from other match lists 
+                # and then break out of iteration
+                if (ordered_idx_l[0] == dup_index) or (ordered_idx_l[0] in nondup_idx):
+                    fs_wtol_inds.append(ordered_relevant_index)
+                    ns_wtol_inds.append(ordered_idx_l[0])
+                    if ordered_idx_l[0] == dup_index:
+                        for next_ordered_relevant_index in ordered_relevant_idx[ordered_relevant_index_ii+1:]:
+                            idx[next_ordered_relevant_index].remove(dup_index)
+                        break
+
+                # else, if the closest index is another duplicated index,
+                # then cannot currently resolve position, so come back to this later
+                else:
+                    unresolved_dup_idx.append(dup_index)
+                    break
+
+    return idx, unresolved_dup_idx, fs_wtol_inds, ns_wtol_inds 
+
+def show_message(msg, offline=False, msg_offline=None, from_conf=None):
+
+    if offline:
+        if msg_offline is not None:
+            print('Warning: ' + msg_offline)
+        else:
+            print('Warning: ' + msg)
+    
+    else:
+        # there are some warnings that will only be shown if we launch the dashboard
+        # using a configuration file (those in filter.py and configuration.py)
+        if (from_conf is None) or (from_conf):
+            from .dashboard_aux import MessageBox
+            MessageBox(msg)

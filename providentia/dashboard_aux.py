@@ -6,10 +6,9 @@ import time
 import json
 from textwrap import wrap
 import numpy as np
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
-from PyQt5 import QtGui
-from .aux import update_filter_species
+from PyQt5 import QtCore, QtWidgets, QtGui
+from functools import partial
+from .read_aux import get_default_qa
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
@@ -106,15 +105,19 @@ def wrap_tooltip_text(tooltip_text, max_width):
 
 class ComboBox(QtWidgets.QComboBox):
     """ Modify default class of PyQT5 combobox to always dropdown from fixed
-        position box postion, stopping truncation of data. """
+        position box position, stopping truncation of data. """
 
+    def __init__(self, parent=None):
+        
+        super(ComboBox, self).__init__(parent)
+        
     def showPopup(self):
         """ Shows popups. """
 
-        QtWidgets.QComboBox.showPopup(self)
-        self.view().parent().move(self.mapToGlobal(QtCore.QPoint()))
+        super().showPopup()
+        #self.view().parent().move(self.mapToGlobal(QtCore.QPoint(0, 0)))
         #self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-
+        
 class CheckableComboBox(QtWidgets.QComboBox):
     """ Create combobox with multiple selection options.
         Reference: https://gis.stackexchange.com/questions/350148/qcombobox-multiple-selection-pyqt5. 
@@ -171,6 +174,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
                 else:
                     item.setCheckState(QtCore.Qt.Checked)
                 return True
+
         return False
 
     def showPopup(self):
@@ -242,8 +246,8 @@ class CheckableComboBox(QtWidgets.QComboBox):
 class QVLine(QtWidgets.QFrame):
     """ Define class that generates vertical separator line. """
 
-    def __init__(self):
-        super(QVLine, self).__init__()
+    def __init__(self, parent=None):
+        super(QVLine, self).__init__(parent)
         self.setFrameShape(QtWidgets.QFrame.VLine)
         self.setFrameShadow(QtWidgets.QFrame.Sunken)
 
@@ -290,6 +294,63 @@ class Switch(QtWidgets.QPushButton):
         # add label (ON / OFF)
         painter.setPen(QtGui.QPen(text_colour))
         painter.drawText(sw_rect, QtCore.Qt.AlignCenter, label)
+
+def center(window):
+    # Reference: https://wiki.qt.io/How_to_Center_a_Window_on_the_Screen
+
+    window.setGeometry(
+        QtWidgets.QStyle.alignedRect(
+            QtCore.Qt.LeftToRight,
+            QtCore.Qt.AlignCenter,
+            window.size(),
+            QtWidgets.qApp.desktop().availableGeometry(),
+        )
+    )
+
+class MessageBox(QtWidgets.QWidget):
+
+    def __init__(self, msg, parent=None):
+
+        super().__init__(parent)
+        msg_box = self.create_msg_box(msg)
+        if msg_box is not None:
+            layout = QtWidgets.QVBoxLayout(self)
+            layout.addWidget(msg_box)
+            center(self)
+
+    def create_msg_box(self, msg):
+
+        # add warning box
+        msg_box = QtWidgets.QMessageBox()
+        msg_box.setWindowTitle("Warning")
+        msg_box.setText(msg)
+
+        # add ok button
+        ok_button = set_formatting(QtWidgets.QPushButton("OK"), formatting_dict['button_popup'])
+        msg_box.addButton(ok_button, QtWidgets.QMessageBox.AcceptRole)
+
+        # create wrapper to center
+        wrapper = partial(center, msg_box)
+        QtCore.QTimer.singleShot(0, wrapper)
+        msg_box.exec_()
+
+class InputDialog(QtWidgets.QWidget):
+
+    def __init__(self, read_instance, title, msg, options, parent=None):
+
+        super().__init__(parent)
+        
+        dialog = self.create_dialog_box(read_instance, title, msg, options)
+        if dialog is not None:
+            layout = QtWidgets.QVBoxLayout(self)
+            layout.addWidget(dialog)
+
+    def create_dialog_box(self, read_instance, title, msg, options):
+
+        dialog = QtWidgets.QInputDialog(self)
+        self.selected_option, self.okpressed = dialog.getItem(read_instance, title, msg, options, 0, False)
+        if not self.okpressed:
+            return
 
 class PopUpWindow(QtWidgets.QWidget):
     """ Class that generates generalised pop-up window. """
@@ -467,8 +528,16 @@ class PopUpWindow(QtWidgets.QWidget):
             # get dictionary nested inside current menu for menu type
             menu_current_type = self.menu_current[menu_type]
             
+            # add button to add row in multispecies
+            if menu_type == 'multispecies':
+                element_label = 'ADD ROW'
+                add_row_button = set_formatting(QtWidgets.QPushButton(element_label), 
+                                                formatting_dict['multispecies_popup'])
+                add_row_button.clicked.connect(lambda: self.add_multispecies_widgets(grid))
+                grid.addWidget(add_row_button, 0, 3, QtCore.Qt.AlignCenter)
+                
             # if have no labels for current menu type, continue to next menu type
-            if len(menu_current_type['labels']) == 0:
+            if len(menu_current_type['labels']) == 0 and menu_type != 'multispecies':
                 continue
 
             # get keys associated with current menu type in current menu level
@@ -523,21 +592,19 @@ class PopUpWindow(QtWidgets.QWidget):
             elif menu_type == 'multispecies':
                 row_format_dict = formatting_dict['multispecies_popup']
                 grid_vertical_spacing = 3
-                self.page_memory['multispecies'] = {'add_row': [], 'network': [], 'species': [], 'matrix': [],
+                self.page_memory['multispecies'] = {'network': [], 'species': [], 'matrix': [],
                                                     'current_lower': [], 'current_upper': [], 
                                                     'current_filter_species_fill_value': [],
                                                     'apply_selected': [],
-                                                    'n_column_consumed': 6, 
-                                                    'ordered_elements':['add_row',
-                                                                        'network', 
+                                                    'n_column_consumed': 7, 
+                                                    'ordered_elements':['network', 
                                                                         'matrix',
                                                                         'species',
                                                                         'current_lower', 
                                                                         'current_upper',
                                                                         'current_filter_species_fill_value', 
                                                                         'apply_selected'], 
-                                                    'widget':[QtWidgets.QPushButton,
-                                                              QtWidgets.QComboBox,
+                                                    'widget':[QtWidgets.QComboBox,
                                                               QtWidgets.QComboBox,
                                                               QtWidgets.QComboBox,
                                                               QtWidgets.QLineEdit, 
@@ -617,24 +684,15 @@ class PopUpWindow(QtWidgets.QWidget):
                     # if menu type ==  'rangeboxes' then add 1 to element ii, because placed a label in first column
                     if menu_type in ['checkboxes', 'rangeboxes']:
                         element_label = ''
-                        element_ii+=1
-                    elif menu_type == 'multispecies':
-                        if element == 'add_row':
-                            element_label = 'ADD ROW'
-                        else:
-                            # substract 1 because add_row is in the same column as the network column
-                            element_label = ''
-                            element_ii-=1
+                        element_ii += 1
+                    elif menu_type in ['multispecies']:
+                        element_ii -= 1
                     else:
                         element_label = label
 
                     # append widget to page memory dictionary
                     if menu_type == 'multispecies':
-                        if element == 'add_row':
-                            self.page_memory[menu_type][element].append(set_formatting(widget(element_label), 
-                                                                                       row_format_dict))
-                        else:
-                            self.page_memory[menu_type][element].append(set_formatting(widget(), row_format_dict))
+                        self.page_memory[menu_type][element].append(set_formatting(widget(), row_format_dict))
                     else:
                         self.page_memory[menu_type][element].append(set_formatting(widget(element_label), 
                                                                                    row_format_dict))
@@ -679,11 +737,8 @@ class PopUpWindow(QtWidgets.QWidget):
                     # if menu type == multispecies
                     elif menu_type == 'multispecies':
                         
-                        # add connectivity to create a new line
-                        if element == 'add_row':
-                            self.page_memory[menu_type][element][label_ii].clicked.connect(lambda: self.add_multispecies_widgets(grid))
-                            
-                        elif element == 'apply_selected':
+                        # add connectivity to apply button
+                        if element == 'apply_selected':
                             self.page_memory[menu_type][element][label_ii].setObjectName('apply_' + str(label_ii))
                             self.page_memory[menu_type][element][label_ii].clicked.connect(self.handle_filter_species_change)
 
@@ -703,13 +758,8 @@ class PopUpWindow(QtWidgets.QWidget):
                                 self.page_memory[menu_type][element][label_ii].textChanged.connect(self.handle_multispecies_params_change)
 
                     # add element to grid (aligned left)
-                    # button add_row is done separately since it is alone on the top of the multispecies filtering tab
-                    if element == 'add_row':
-                        grid.addWidget(self.page_memory[menu_type][element][label_ii],
-                                       0, 0, QtCore.Qt.AlignRight)
-                    else:
-                        grid.addWidget(self.page_memory[menu_type][element][label_ii], 
-                                       start_row_n+row_n, column_n+element_ii, QtCore.Qt.AlignLeft)
+                    grid.addWidget(self.page_memory[menu_type][element][label_ii], 
+                                   start_row_n+row_n, element_ii+1, QtCore.Qt.AlignLeft)
 
                 # update multispecies filtering fields for each row
                 if menu_type == 'multispecies':
@@ -730,45 +780,25 @@ class PopUpWindow(QtWidgets.QWidget):
             if have_column_headers:
                 for column_number in np.arange(0, column_n+1, self.page_memory[menu_type]['n_column_consumed']):
                     if menu_type == 'checkboxes':
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='K'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       0, column_number+1, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='R'), 
-                                                      formatting_dict['column_header_label_popup']),
-                                       0, column_number+2, QtCore.Qt.AlignCenter)
+                        texts = ['K', 'R']
+                        for i, text in enumerate(texts):
+                            grid.addWidget(set_formatting(QtWidgets.QLabel(self, text=text), 
+                                                          formatting_dict['column_header_label_popup']), 
+                                        0, column_number+i+1, QtCore.Qt.AlignCenter)
                     elif menu_type == 'rangeboxes':
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Min'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       0, column_number+1, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Max'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       0, column_number+2, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='A'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       0, column_number+3, QtCore.Qt.AlignCenter)
+                        texts = ['Min', 'Max', 'A']
+                        for i, text in enumerate(texts):
+                            grid.addWidget(set_formatting(QtWidgets.QLabel(self, text=text), 
+                                                          formatting_dict['column_header_label_popup']), 
+                                        0, column_number+i+1, QtCore.Qt.AlignCenter)
                     elif menu_type == 'multispecies':
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Network'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       1, column_number, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Matrix'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       1, column_number+1, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Species'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       1, column_number+2, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Min'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       1, column_number+3, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Max'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       1, column_number+4, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='Fill value'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       1, column_number+5, QtCore.Qt.AlignCenter)
-                        grid.addWidget(set_formatting(QtWidgets.QLabel(self, text='A'), 
-                                                      formatting_dict['column_header_label_popup']), 
-                                       1, column_number+6, QtCore.Qt.AlignCenter)                        
-            
+                        if len(self.menu_current['multispecies']['labels']) > 0:
+                            texts = ['Network', 'Matrix', 'Species', 'Min', 'Max', 'Fill value', 'A']
+                            for i, text in enumerate(texts):
+                                grid.addWidget(set_formatting(QtWidgets.QLabel(self, text=text), 
+                                                              formatting_dict['column_header_label_popup']), 
+                                                1, i, QtCore.Qt.AlignCenter)
+
             # set horizontal scroll properties
             scroll_area = QtWidgets.QScrollArea() 
             scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -865,14 +895,22 @@ class PopUpWindow(QtWidgets.QWidget):
         # get widget line
         label_ii = len(self.menu_current['multispecies']['labels'])
 
+        # initalise labels
+        if len(self.menu_current['multispecies']['labels']) == 0:
+            texts = ['Network', 'Matrix', 'Species', 'Min', 'Max', 'Fill value', 'A']
+            for i, text in enumerate(texts):
+                grid.addWidget(set_formatting(QtWidgets.QLabel(self, text=text), 
+                                              formatting_dict['column_header_label_popup']), 
+                                1, i, QtCore.Qt.AlignCenter)
+
         # update menu_current labels
         # check if they exist since they might have been added with the function multispecies_conf
         if 'networkspeci_' + str(label_ii) not in self.menu_current['multispecies']['labels']:
             self.menu_current['multispecies']['labels'].append('networkspeci_' + str(label_ii))
 
         # add new line only when add_row button is pressed
-        for (element_ii, element), widget in zip(enumerate(self.page_memory['multispecies']['ordered_elements'][1:]),
-                                                           self.page_memory['multispecies']['widget'][1:]):
+        for (element_ii, element), widget in zip(enumerate(self.page_memory['multispecies']['ordered_elements']),
+                                                           self.page_memory['multispecies']['widget']):
             
             # add element to memory
             self.page_memory['multispecies'][element].append(set_formatting(widget(), 
@@ -933,9 +971,9 @@ class PopUpWindow(QtWidgets.QWidget):
         if self.read_instance.multispecies_initialisation:
             
             # set initial selected config variables as set .conf files or defaults
-            self.read_instance.selected_widget_network.update({label_ii: copy.deepcopy(self.read_instance.network[0])})
-            self.read_instance.selected_widget_matrix.update({label_ii: self.read_instance.parameter_dictionary[self.read_instance.species[0]]['matrix']})
-            self.read_instance.selected_widget_species.update({label_ii: copy.deepcopy(self.read_instance.species[0])})
+            self.read_instance.selected_widget_network.update({label_ii: copy.deepcopy(self.read_instance.selected_network)})
+            self.read_instance.selected_widget_matrix.update({label_ii: self.read_instance.parameter_dictionary[self.read_instance.selected_species]['matrix']})
+            self.read_instance.selected_widget_species.update({label_ii: copy.deepcopy(self.read_instance.selected_species)})
             self.read_instance.selected_widget_lower.update({label_ii: str(np.nan)})
             self.read_instance.selected_widget_upper.update({label_ii: str(np.nan)})
             self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: str(np.nan)})
@@ -943,13 +981,14 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
-        self.page_memory['multispecies']['network'][label_ii].clear()
-        self.page_memory['multispecies']['matrix'][label_ii].clear()
-        self.page_memory['multispecies']['species'][label_ii].clear()
-        self.page_memory['multispecies']['current_lower'][label_ii].setText(str(np.nan))
-        self.page_memory['multispecies']['current_upper'][label_ii].setText(str(np.nan))
-        self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(np.nan))
-        self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+        if len(self.menu_current['multispecies']['labels']) > 0:
+            self.page_memory['multispecies']['network'][label_ii].clear()
+            self.page_memory['multispecies']['matrix'][label_ii].clear()
+            self.page_memory['multispecies']['species'][label_ii].clear()
+            self.page_memory['multispecies']['current_lower'][label_ii].setText(str(np.nan))
+            self.page_memory['multispecies']['current_upper'][label_ii].setText(str(np.nan))
+            self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(np.nan))
+            self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
 
         # if have no available observational data, return from function, updating variable informing that have no data
         if len(self.read_instance.available_observation_data) == 0:
@@ -1023,9 +1062,12 @@ class PopUpWindow(QtWidgets.QWidget):
         if len(self.menu_current['multispecies']['previous_lower'].keys()) > 0:
             for label_ii, label in enumerate(self.menu_current['multispecies']['labels']):
                 if (label_ii+1) <= len(self.menu_current['multispecies']['previous_lower'].keys()):
-                    self.page_memory['multispecies']['current_lower'][label_ii].setText(str(self.menu_current['multispecies']['previous_lower'][label_ii]))
-                    self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.menu_current['multispecies']['previous_upper'][label_ii]))
-                    self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(self.menu_current['multispecies']['previous_filter_species_fill_value'][label_ii]))
+                    self.page_memory['multispecies']['current_lower'][label_ii].setText(
+                        str(self.menu_current['multispecies']['previous_lower'][label_ii]))
+                    self.page_memory['multispecies']['current_upper'][label_ii].setText(
+                        str(self.menu_current['multispecies']['previous_upper'][label_ii]))
+                    self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(
+                        str(self.menu_current['multispecies']['previous_filter_species_fill_value'][label_ii]))
                     if self.menu_current['multispecies']['previous_apply'][label_ii]:
                         self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Checked)
                     else:
@@ -1139,4 +1181,97 @@ class PopUpWindow(QtWidgets.QWidget):
                                 self.menu_current[menu_type]['previous_apply'].update({label_ii: True})
                             else:
                                 self.menu_current[menu_type]['previous_apply'].update({label_ii: False})
-                                
+
+def multispecies_conf(instance):
+    """ Function used when loading from a configuration file. 
+        Sets defined multispecies filtering variables, rest of variables are set to default. 
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+    """
+
+    if hasattr(instance, 'filter_species'):
+        for (networkspeci_ii, networkspeci), bounds in zip(enumerate(instance.filter_species.keys()),
+                                                                    instance.filter_species.values()):
+            
+            # update menu_current
+            if networkspeci_ii > 0:
+                instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
+
+            # add values
+            instance.multispecies_menu['multispecies']['current_lower'][networkspeci_ii] = bounds[0]
+            instance.multispecies_menu['multispecies']['current_upper'][networkspeci_ii] = bounds[1]
+            instance.multispecies_menu['multispecies']['current_filter_species_fill_value'][networkspeci_ii] = bounds[2]
+            instance.multispecies_menu['multispecies']['apply_selected'][networkspeci_ii] = True
+
+            # set initial selected config variables as set .conf files or defaults
+            instance.selected_widget_network.update({networkspeci_ii: networkspeci.split('|')[0]})
+            instance.selected_widget_matrix.update({networkspeci_ii: instance.parameter_dictionary[networkspeci.split('|')[1]]['matrix']})
+            instance.selected_widget_species.update({networkspeci_ii: networkspeci.split('|')[1]})
+            instance.selected_widget_lower.update({networkspeci_ii: bounds[0]})
+            instance.selected_widget_upper.update({networkspeci_ii: bounds[1]})
+            instance.selected_widget_filter_species_fill_value.update({networkspeci_ii: bounds[2]})
+            instance.selected_widget_apply.update({networkspeci_ii: True})
+
+            update_filter_species(instance, networkspeci_ii)
+
+            # filtering tab is initialized from conf
+            instance.multispecies_initialisation = False
+
+def update_filter_species(instance, label_ii, add_filter_species=True):
+    """ Function to update filter species after launching the dashboard with a configuration file or 
+        by editing the fields in the multispecies filtering tab in the dashboard. 
+
+        :param instance: Instance of class ProvidentiaMainWindow
+        :type instance: object
+        :param label_ii: Corresponding widget line in dashboard
+        :type label_ii: int
+        :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
+        :type add_filter_species: boolean
+    """
+
+    # update previous filter species
+    instance.previous_filter_species = copy.deepcopy(instance.filter_species)
+
+    # get selected network, species and bounds
+    network = instance.selected_widget_network[label_ii]
+    speci = instance.selected_widget_species[label_ii]
+    networkspeci = network + '|' + speci
+    current_lower = instance.selected_widget_lower[label_ii]
+    current_upper = instance.selected_widget_upper[label_ii]
+    current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
+
+    # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
+    if add_filter_species:
+
+        # add or update networkspeci
+        # check selected lower and upper bounds and fill value are numbers or nan
+        try:
+            instance.filter_species[networkspeci] = [float(current_lower), float(current_upper),
+                                                     float(current_filter_species_fill_value)]
+            
+        # if any of the fields are not numbers, return from function
+        except ValueError:
+            print("Warning: Data limit fields must be numeric")
+            return
+
+        # get quality flags for species if the information is not available in qa_per_species
+        if speci not in instance.qa_per_species:
+            # get species in memory 
+            species = copy.deepcopy(instance.species)
+            filter_species = [val.split('|')[1] for val in list(copy.deepcopy(instance.filter_species).keys())]
+            qa_species = species + filter_species
+            
+            # add
+            qa_species.append(speci)
+            instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
+
+    # if apply button is unchecked, remove networkspecies from filter_species
+    else:
+        # remove from filter_species
+        if networkspeci in instance.filter_species.keys():
+            del instance.filter_species[networkspeci]
+
+        # remove from qa_per_species
+        if speci in instance.qa_per_species:
+            del instance.qa_per_species[speci]

@@ -2,9 +2,12 @@
 from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow
+from .toolbar import multispecies_conf
+from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow, InputDialog
 from .dashboard_aux import set_formatting
+from .aux import show_message
 from .read import DataReader
+from .read_aux import get_default_qa
 from providentia import aux
 
 import os
@@ -12,6 +15,7 @@ import copy
 import datetime
 import json
 import sys
+import matplotlib
 from functools import partial
 from collections import OrderedDict
 from weakref import WeakKeyDictionary
@@ -19,6 +23,7 @@ from weakref import WeakKeyDictionary
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
 import pandas as pd
+from pandas.plotting import register_matplotlib_converters
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -35,6 +40,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     # create signals that are fired upon resizing/moving of main Providentia window
     resized = QtCore.pyqtSignal()
     move = QtCore.pyqtSignal()
+
+    # make sure that we are using Qt5 backend with matplotlib
+    matplotlib.use('Qt5Agg')
+    register_matplotlib_converters()
 
     def __init__(self, **kwargs):
 
@@ -66,16 +75,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 # config defined, section undefined
                 aux.load_conf(self, fpath=kwargs['config'])    
                 all_sections = self.sub_opts.keys()
+                
                 if len(all_sections) == 1:
                     okpressed = False
                     selected_section = list(all_sections)[0]
                 else:
-                    selected_section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
-                                                                                 'Select section to load',  
-                                                                                 all_sections, 0, False)
+                    title = 'Sections'
+                    msg = 'Select section to load'
+                    dialog = InputDialog(self, title, msg, all_sections)
+                    selected_section, okpressed = dialog.selected_option, dialog.okpressed
+
                 if okpressed or (len(all_sections) == 1):
                     self.from_conf = True
                     self.current_config = self.sub_opts[selected_section]
+
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
@@ -133,19 +146,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         return super(ProvidentiaMainWindow, self).moveEvent(event)
 
     def get_geometry(self):
-        """ Get current geometry of main Providentia window and buttons. """
+        """ Update current geometry of main Providentia window and buttons. """
 
         # get geometry of main window
         self.main_window_geometry = copy.deepcopy(self.geometry())
 
-        # get and update geometry of settings menus
+        # update geometry of setting menus
         self.update_buttons_geometry()
 
     def update_buttons_geometry(self):
         """ Update current geometry of buttons. """
         
-        for i, position in enumerate([self.position_1, self.position_2, self.position_3, 
-                                      self.position_4, self.position_5]):
+        for position_ii, position in enumerate([self.position_1, self.position_2, self.position_3, 
+                                                self.position_4, self.position_5]):
             for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
                                                          self.mpl_canvas.save_buttons, 
                                                          self.mpl_canvas.elements):
@@ -158,18 +171,32 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 if position == plot_type:
                     
                     # calculate proportional geometry of buttons respect main window
-                    x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'+str(i+1)]['x'] * 
-                        self.main_window_geometry.width()) / 1848
-                    y = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'+str(i+1)]['y'] * 
-                        self.main_window_geometry.height()) / 1016
+                    x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
+                         + str(position_ii+1)]['x'] * self.main_window_geometry.width()) / 1848
+                    y = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_' 
+                         + str(position_ii+1)]['y'] * self.main_window_geometry.height()) / 1016
                     
                     # get geometries
                     old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
                     new_button_geometry = QtCore.QRect(x, y, 18, 18)
                     
-                    # apply new geometry to menu and save button
+                    # apply new geometry to menu and save buttons
                     menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(menu_button.x(), menu_button.y()-25, 20, 20)
+                    save_button.setGeometry(menu_button.x()-25, menu_button.y(), 20, 20)
+
+                    # apply new geometry to layout buttons
+                    if position_ii > 0:
+                        cb_position = getattr(self, 'cb_position_{}'.format(position_ii+1))
+                        # layout selector at position 2 needs to be further from menu
+                        if (position_ii + 1) == 2:
+                            width_diff = 915
+                        else:
+                            width_diff = 570
+                        height_diff = 1
+                        width = (width_diff * self.main_window_geometry.width()) / 1848
+                        height = (height_diff * self.main_window_geometry.height()) / 1848
+                        cb_position.move(menu_button.x()-width, menu_button.y()+height)
+                        cb_position.resize(cb_position.x(), 20)
 
                     # apply new geometry to container elements
                     for sub_element in element:
@@ -330,33 +357,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
         self.cb_resampling_switch = set_formatting(Switch(self), formatting_dict['switch_menu'])
         self.cb_resampling_switch.setToolTip('Activate/Deactivate resampling')
-        self.vertical_splitter_4 = QVLine()
-        self.vertical_splitter_4.setMaximumWidth(20)
-
-        # layout section
-        self.lb_layout_selection = set_formatting(QtWidgets.QLabel(self, text="Layout"),
-                                                  formatting_dict['title_menu'])
-        self.cb_position_1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_1.setFixedWidth(100)
-        self.cb_position_1.AdjustToContents
-        self.cb_position_1.setEnabled(False)
-        self.cb_position_1.setToolTip('Select plot type in top left position')
-        self.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_2.setFixedWidth(100)
-        self.cb_position_2.AdjustToContents
-        self.cb_position_2.setToolTip('Select plot type in top right position')
-        self.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_3.setFixedWidth(100)
-        self.cb_position_3.AdjustToContents
-        self.cb_position_3.setToolTip('Select plot type in bottom left position')
-        self.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_4.setFixedWidth(100)
-        self.cb_position_4.AdjustToContents
-        self.cb_position_4.setToolTip('Select plot type in bottom centre position')
-        self.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_5.setFixedWidth(100)
-        self.cb_position_5.AdjustToContents
-        self.cb_position_5.setToolTip('Select plot type in bottom right position')
 
         # position objects on gridded configuration bar
         # data selection section
@@ -369,8 +369,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.le_end_date, 2, 2, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_QA, 1, 3, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_flags, 2, 3, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_multispecies, 1, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_experiments, 2, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_experiments, 1, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_multispecies, 2, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_colocate, 1, 5, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_1, 0, 6, 4, 1, QtCore.Qt.AlignLeft)
@@ -392,21 +392,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.ch_select_all, 1, 11, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_intersect, 2, 11, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.ch_extent, 3, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_4, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
 
         # resampling section
         config_bar.addWidget(self.lb_resampling, 0, 13, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_resampling_resolution, 1, 13, 1, 1, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_resampling_switch, 1, 14, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 15, 4, 1, QtCore.Qt.AlignLeft)
-
-        # layout section
-        config_bar.addWidget(self.lb_layout_selection, 0, 20, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_1, 1, 20, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_2, 1, 21, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_3, 2, 20, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_4, 2, 21, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_5, 2, 22, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
@@ -428,11 +419,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.metadata_vars_to_read = []
         aux.init_metadata(self)
 
-        # data bounds of the main network and speci will be set by default in the data filter
-        # but can also bet set in the multispecies filtering tab
-        # if they are set in the tab, this variable will be True
-        self.bounds_set_on_multispecies = False
-
         # Setup MPL canvas of plots
         # set variable that blocks updating of MPL canvas until some data has been read
         self.block_MPL_canvas_updates = True
@@ -452,7 +438,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.handle_data_selection_update()
 
             # set filtered multispecies if any
-            aux.multispecies_conf(self)
+            multispecies_conf(self)
 
             # set fields available for filtering
             aux.representativity_conf(self)
@@ -489,13 +475,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
         self.ch_intersect.stateChanged.connect(self.mpl_canvas.select_intersect_stations)
         self.ch_extent.stateChanged.connect(self.mpl_canvas.select_extent_stations)
-
-        # enable updating of plots layout
-        self.cb_position_1.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_2.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_3.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_4.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_5.currentTextChanged.connect(self.handle_layout_update)
 
         # Generate MPL navigation toolbar
         self.navi_toolbar = NavigationToolbar(read_instance=self, canvas_instance=self.mpl_canvas)
@@ -559,9 +538,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # set initial selected config variables as set .conf files or defaults
             self.selected_network = copy.deepcopy(self.network[0])
             self.selected_resolution = copy.deepcopy(self.resolution)
-            self.selected_resampling_resolution = ''
             self.selected_matrix = self.parameter_dictionary[self.species[0]]['matrix']
             self.selected_species = copy.deepcopy(self.species[0])
+            self.selected_resampling_resolution = copy.deepcopy(self.resampling_resolution)
+            self.selected_resampling = copy.deepcopy(self.resampling)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -582,6 +562,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.flag_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.flags)
             self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa_per_species[self.selected_species])
 
+            # set initial filter species
+            self.previous_filter_species = {}
+            self.filter_species = {}
+             
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
             aux.get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
@@ -636,6 +620,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         else:
             self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
 
+        # update resampling switch
+        if self.selected_resampling:
+            self.cb_resampling_switch.setChecked(True)
+        else:
+            self.cb_resampling_switch.setChecked(False)
+
         # update matrix field
         available_matrices = sorted(self.available_observation_data[self.selected_network][self.selected_resolution])
         self.cb_matrix.addItems(available_matrices)
@@ -674,7 +664,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                             for exp in self.experiments_menu['checkboxes']['keep_selected']}
 
         # update default qa
-        default_qa = aux.get_default_qa(self, self.selected_species)
+        default_qa = get_default_qa(self, self.selected_species)
         self.qa_menu['checkboxes']['remove_default'] = default_qa
 
         # update layout fields
@@ -691,7 +681,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # update layout field buttons
         # clear fields
-        self.cb_position_1.clear()
         self.cb_position_2.clear()
         self.cb_position_3.clear()
         self.cb_position_4.clear()
@@ -705,9 +694,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if not self.temporal_colocation:
             if 'scatter' in layout_options:
                 layout_options.remove('scatter')
-
-        # update position 1 in layout (always map)
-        self.cb_position_1.addItems(['map'])
         
         # update position 2 in layout
         self.cb_position_2.addItems(layout_options)
@@ -764,10 +750,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
 
-            elif event_source == self.cb_resampling_resolution:
-                self.selected_resampling_resolution = changed_param
-                self.cb_resampling_switch.setChecked(False)
-
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
                 self.selected_species = sorted(list(
@@ -776,12 +758,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
 
+            elif event_source == self.cb_resampling_resolution:
+                self.selected_resampling_resolution = changed_param
+                self.selected_resampling = False
+
+            elif event_source == self.cb_resampling_switch:
+                self.selected_resampling = changed_param
+
             # set variable to check if date range changes
             self.date_range_has_changed = False
 
             # check if start date/end date have changed
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
                 self.date_range_has_changed = True
+
+            # initalise multispecies tab if network, resolution, matrix or species change
+            if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
+                aux.init_multispecies(self)
 
             # update configuration bar fields
             self.update_configuration_bar_fields()
@@ -1005,7 +998,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if self.no_data_to_read:
             return
 
-        # Update mouse cursor to a waiting cursor
+        # update mouse cursor to a waiting cursor
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # set variable that blocks updating of MPL canvas until all data has been updated
@@ -1021,7 +1014,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
-        self.previous_filter_species = {}
+        self.previous_filter_species = self.previous_filter_species
         self.previous_plot_options = {}
         for plot_type in self.mpl_canvas.all_plots:
             self.previous_plot_options[plot_type] = []
@@ -1040,12 +1033,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
+        self.filter_species = self.filter_species
+        self.current_plot_options = {}
+        for plot_type in self.mpl_canvas.all_plots:
+            self.current_plot_options[plot_type] = []
 
-        # if spatial_colocation is not active, force filter_species to be empty dict if it is not akready
+        # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {} 
-            print('Warning: "spatial_colocation" must be set to True if wanting to use "filter_species" option.')
+            msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
+            show_message(msg)
 
         # set read operations to be empty list initially
         read_operations = []
@@ -1118,11 +1116,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # has date range changed?
         if len(read_operations) > 0:
-           
+            
+            # inactivate resampling
+            self.resampling = False
+
             # set current time array, as previous time array
             self.previous_time_array = self.time_array
+
             # set current station references, as previous station references
             self.previous_station_references = self.station_references
+            
             # set current relevant yearmonths, as previous relevant yearmonths
             self.previous_yearmonths = self.yearmonths
 
@@ -1130,15 +1133,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, 
                                        experiments_to_read=experiments_to_read)
             
-            #clear canvas entirely if have no valid data after read
+            # clear canvas entirely if have no valid data after read
             if self.invalid_read:
                 # clear axes
                 for plot_type, ax in self.mpl_canvas.plot_axes.items():
-                    if isinstance(ax, dict):
-                        for sub_ax in ax.values():
-                            sub_ax.remove()
-                    else:
-                        ax.remove() 
+                    self.mpl_canvas.remove_axis_elements(ax, plot_type)
                 # update MPL canvas
                 self.mpl_canvas.figure.canvas.draw()  
                 # restore mouse cursor to normal
@@ -1155,13 +1154,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # if species has changed, or first read, update species specific lower/upper limits
         if (self.first_read) or (self.species[0] != self.previous_species[0]):
-            # have bounds not been set in multispecies filtering tab?
-            if not self.bounds_set_on_multispecies:
-                # get default GHOST limits
-                self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
-                self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
-                self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
-                self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
+            # get default GHOST limits
+            self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
+            self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
+            self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
+            self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
 
         # run function to update filter
         self.mpl_canvas.handle_data_filter_update()
@@ -1194,9 +1191,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
         self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
         self.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-
-        # turn off resampling switch
-        self.cb_resampling_switch.setChecked(False)
 
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
@@ -1235,16 +1229,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_metadata(self)
         aux.update_metadata_fields(self)
 
-        # have bounds not been set in multispecies filtering tab?
-        if not self.bounds_set_on_multispecies:
-            
-            # reset bounds
-            species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
-            species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
-            
-            # set default limits
-            self.le_minimum_value.setText(str(species_lower_limit))
-            self.le_maximum_value.setText(str(species_upper_limit))
+        # reset bounds
+        species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
+        species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
+        
+        # set default limits
+        self.le_minimum_value.setText(str(species_lower_limit))
+        self.le_maximum_value.setText(str(species_upper_limit))
         
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
