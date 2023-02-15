@@ -17,10 +17,9 @@ import numpy as np
 import pandas as pd
 import scipy.stats as st
 import seaborn as sns
-from PyQt5 import QtCore
 
 from .statistics import get_z_statistic_info
-from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases
+from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases, show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -64,7 +63,10 @@ class Plot:
 
         # add all valid defined plots to plot_characteristics
         for plot_type in plot_types:
-        
+            
+            # initialize condition
+            valid_plot_type = True
+
             # do not create empty plots
             if plot_type == 'None':
                 continue
@@ -78,21 +80,21 @@ class Plot:
             # remove plots where setting 'obs' and 'bias' options together
             if ('obs' in plot_options) & ('bias' in plot_options): 
                 if self.read_instance.offline:
-                    print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together")
-                    continue
+                    print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together.")
+                    valid_plot_type = False
 
             # if no experiments are defined, remove all bias plots 
             if ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                 if len(self.read_instance.data_labels) == 1:
                     if self.read_instance.offline:
-                        print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created')
-                        continue
+                        print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created.')
+                        valid_plot_type = False
 
             # if are making an experiment bias plot, and temporal_colocation is off, then remove plot
             if (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
                 if self.read_instance.offline:
-                    print(f'Warning: To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created')
-                    continue
+                    print(f'Warning: To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.')
+                    valid_plot_type = False
 
             # add new keys to make plots with stats (map, periodic, heatmap, table)
             if zstat:
@@ -105,18 +107,25 @@ class Plot:
                 # check all defined plot options are allowed for current plot type
                 if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
                     if self.read_instance.offline:
-                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid')
-                        continue
+                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid.')
+                        valid_plot_type = False
                 # check desired statistic is defined in stats dict
                 if base_zstat not in stats_dict:
                     if self.read_instance.offline:
                         print(f"Warning: {plot_type} cannot be created as {base_zstat} not defined in Providentia's statistical library.")
-                        continue
+                        valid_plot_type = False
                 # remove plots where setting 'obs', but z_statistic_sign is 'bias'
                 elif ('obs' in plot_options) & (z_statistic_sign == 'bias'):
                     if self.read_instance.offline:
-                        print(f"Warning: {plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set")
-                        continue
+                        print(f"Warning: {plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set.")
+                        valid_plot_type = False
+
+                if not valid_plot_type:
+                    if plot_type in self.read_instance.summary_plots_to_make:
+                        self.read_instance.summary_plots_to_make.remove(plot_type)
+                    if plot_type in self.read_instance.station_plots_to_make:
+                        self.read_instance.station.plots_to_make.remove(plot_type)
+                    continue
 
                 # add information for plot type from base plot type template 
                 self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
@@ -139,18 +148,26 @@ class Plot:
                 # check all defined plot options are allowed for current plot type
                 if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
                     if self.read_instance.offline:
-                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid')
-                        continue
+                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid.')
+                        valid_plot_type = False
                 # warning for scatter plot if the temporal colocation is not active
                 elif ('scatter' == base_plot_type) & (not self.read_instance.temporal_colocation):
                     if self.read_instance.offline:
-                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
-                        continue
+                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
+                        valid_plot_type = False
                 # warning for timeseries bias plot if the temporal colocation is not active
                 elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
                     if self.read_instance.offline:
-                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active')
-                        continue
+                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
+                        valid_plot_type = False
+
+                # break loop if the plot type is not valid and remove plot type from lists
+                if not valid_plot_type:
+                    if plot_type in self.read_instance.summary_plots_to_make:
+                        self.read_instance.summary_plots_to_make.remove(plot_type)
+                    if plot_type in self.read_instance.station_plots_to_make:
+                        self.read_instance.station.plots_to_make.remove(plot_type)
+                    continue
 
                 # add information for plot type for base plot type 
                 self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
@@ -761,6 +778,11 @@ class Plot:
                                                   color=self.read_instance.plotting_params[data_label]['colour'], 
                                                   **plot_characteristics['plot'])
 
+        # update maximum smooth value
+        if not self.read_instance.offline:
+            if self.canvas_instance.timeseries_smooth_sl.value() != (len(ts)*2 - 1):
+                self.canvas_instance.timeseries_smooth_sl.setMaximum(len(ts)*2 - 1)
+
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
             self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
@@ -1052,16 +1074,24 @@ class Plot:
 
         # make boxplot for data_label for multispecies
         if 'multispecies' in plot_options:
-            widths = plot_characteristics['group_widths']['multispecies'] / (len(self.read_instance.data_labels) + 1)
-            gap_after_plot = widths / len(self.read_instance.data_labels)
-            if ('individual' in plot_options) or ('obs' in plot_options):
-                offset = plot_characteristics['group_widths']['multispecies'] / 2.0
+
+            if ('individual' in plot_options) or ('obs' in plot_options) or (len(self.read_instance.networkspecies) == 1):
+                widths = plot_characteristics['group_widths']['singlespecies']
             else:
-                offset = ((widths * (self.read_instance.data_labels.index(data_label) + 1)) - (widths/2.0)) + (gap_after_plot * (self.read_instance.data_labels.index(data_label)))
+                available_width = plot_characteristics['group_widths']['multispecies']
+                remainder_width = 1.0 - available_width
+                start_point = -0.5 + (remainder_width / 2.0)
+                widths = available_width / (len(self.read_instance.data_labels) + 0.15)
+                spacing = (available_width - (widths * len(self.read_instance.data_labels))) / (len(self.read_instance.data_labels) - 1)
 
             for ns_ii, ns in enumerate(self.read_instance.networkspecies):
-                positions = [(ns_ii - (plot_characteristics['group_widths']['multispecies'] / 2.0)) + (offset)]
-                
+                if ('individual' in plot_options) or ('obs' in plot_options):
+                    positions = [ns_ii]
+                elif (len(self.read_instance.networkspecies) == 1):
+                    positions = [self.read_instance.data_labels.index(data_label)]
+                else:
+                    positions = [((start_point + (widths/2.0)) + (spacing * self.read_instance.data_labels.index(data_label)) + (widths * self.read_instance.data_labels.index(data_label))) + ns_ii]  
+
                 # check have data_label to plot for networkspecies?
                 if data_label in self.canvas_instance.selected_station_data[ns]: 
                 
@@ -1097,7 +1127,7 @@ class Plot:
 
         # set xticklabels (if not already plotted)
         if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
-            if 'multispecies' in plot_options:
+            if ('multispecies' in plot_options) & (len(self.read_instance.networkspecies) > 1):
                 xticks = np.arange(len(self.read_instance.networkspecies))
                 #if all networks or species are same, drop them from xtick label
                 if len(np.unique(self.read_instance.network)) == 1:
@@ -1376,7 +1406,10 @@ class Plot:
                 bias = False
 
             # make smooth line
-            smooth_line = relevant_axis.plot(ts.rolling(plot_characteristics['smooth']['window'], min_periods=plot_characteristics['smooth']['min_points'], center=True).mean().dropna(),
+            smooth_line_data = ts.rolling(plot_characteristics['smooth']['window'], 
+                                     min_periods=plot_characteristics['smooth']['min_points'], 
+                                     center=True).mean()
+            smooth_line = relevant_axis.plot(smooth_line_data,
                                              color=self.read_instance.plotting_params[data_label]['colour'],
                                              zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
                                              **plot_characteristics['smooth']['format'])
@@ -1407,10 +1440,12 @@ class Plot:
 
         # get stats wished to be annotated
         stats = plot_characteristics['annotate_stats']
-
+        
         # if no stats defined, then return
         if len(stats) == 0:
-            print(f'Warning: No annotation statistics have not been defined for {base_plot_type} in plot_characteristics_offline.py')
+            msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.json.'.format(base_plot_type)
+            msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.json.'.format(base_plot_type)
+            show_message(msg=msg_dashboard, offline=self.read_instance.offline, msg_offline=msg_offline)
             return
 
         # initialise list of strs to annotate, and colours of annotations

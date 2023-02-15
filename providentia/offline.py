@@ -28,6 +28,9 @@ expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
 
+    # make sure that we are not using Qt5 backend with matplotlib
+    matplotlib.use('Agg')
+
     def __init__(self, **kwargs):
         print("Starting Providentia offline...")
 
@@ -41,6 +44,7 @@ class ProvidentiaOffline:
         # update variables from config file
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             aux.load_conf(self, kwargs['config'])
+            self.from_conf = True
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
@@ -115,7 +119,8 @@ class ProvidentiaOffline:
 
             # read data
             self.datareader.read_setup(['reset'])
-            #initialise previous QA, flags and filter species as section values
+            
+            # initialise previous QA, flags and filter species as section values
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
@@ -124,26 +129,47 @@ class ProvidentiaOffline:
             if self.invalid_read:
                 print('No valid data for {} section'.format(section))
                 continue
-
-            # set plot characteristics
-            try:
-                plot_types = self.report_plots[self.report_type]
-            except KeyError:
+            
+            # check if report type is valid
+            if self.report_type not in self.report_plots.keys():
                 msg = 'Error: The report type {0} cannot be found in conf/report_plots.json. '.format(self.report_type)
                 msg += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
                 sys.exit(msg)
-            self.plot.set_plot_characteristics(plot_types)
-
-            # define dictionary to store plot figures per page
-            self.plot_dictionary = {}
 
             # set plots that need to be made (summary and station specific)
-            self.summary_plots_to_make = list(self.plot_characteristics.keys())
+            self.summary_plots_to_make = []
             self.station_plots_to_make = []
-            for plot_type in self.summary_plots_to_make:
-                # there can be no station specific plots for map plot type
-                if plot_type[:4] != 'map-':
-                    self.station_plots_to_make.append(plot_type)
+            if isinstance(self.report_plots[self.report_type], list):
+                self.summary_plots_to_make = self.report_plots[self.report_type]
+                for plot_type in self.report_plots[self.report_type]:
+                    # there can be no station specific plots for map plot type
+                    if plot_type[:4] != 'map-':
+                        self.station_plots_to_make.append(plot_type)
+            elif isinstance(self.report_plots[self.report_type], dict):
+                # get summary plots
+                if 'summary' in self.report_plots[self.report_type].keys():
+                    if not self.report_summary:
+                        print('Warning: report_summary is False, summary plots will not be created.')
+                    else:
+                        self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
+                # get station plots
+                if 'station' in self.report_plots[self.report_type].keys():
+                    if not self.report_stations:
+                        print('Warning: report_stations is False, station plots will not be created.')
+                    else:
+                        for plot_type in self.report_plots[self.report_type]['station']:
+                            # there can be no station specific plots for map plot type
+                            if plot_type[:4] != 'map-':
+                                self.station_plots_to_make.append(plot_type)
+
+            # set plot characteristics for all plot types (summary, station)
+            self.plots_to_make = list(self.summary_plots_to_make)
+            self.plots_to_make.extend(x for x in self.station_plots_to_make
+                                      if x not in self.summary_plots_to_make)
+            self.plot.set_plot_characteristics(self.plots_to_make)
+            
+            # define dictionary to store plot figures per page
+            self.plot_dictionary = {}
 
             # start making PDF
             self.start_pdf()
@@ -679,7 +705,8 @@ class ProvidentiaOffline:
                         print('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
 
                     if not made_networkspeci_summary_plots:
-                        # get median timeseries across data from filtered data, and place it pandas dataframe
+                        
+                        # put selected data for each data array into pandas dataframe
                         to_pandas_dataframe(read_instance=self, canvas_instance=self, 
                                             networkspecies=self.networkspecies)
 
@@ -733,6 +760,10 @@ class ProvidentiaOffline:
                     # update variable now summary plots have been made for a networkspecies
                     made_networkspeci_summary_plots = True
 
+                # update variable to keep track if have setup summary plot geometry yet for a subsection
+                if made_networkspeci_summary_plots:
+                    summary_plot_geometry_setup = True
+
             # make station specific plots?
             if self.report_stations:      
 
@@ -778,15 +809,15 @@ class ProvidentiaOffline:
                         # gather some information about current station
                         self.station_ind += 1
                         valid_station_references = self.metadata_in_memory[networkspeci]['station_reference'][relevant_station_ind, :]
-                        self.current_station_reference = valid_station_references[pd.notnull(valid_station_references)][0]
+                        self.current_station_reference = str(valid_station_references[pd.notnull(valid_station_references)][0])
                         valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][relevant_station_ind, :]
-                        self.current_station_name = valid_station_names[pd.notnull(valid_station_names)][0]
+                        self.current_station_name = str(valid_station_names[pd.notnull(valid_station_names)][0])
                         current_lons = self.metadata_in_memory[networkspeci]['longitude'][relevant_station_ind, :]
                         self.current_lon = round(current_lons[pd.notnull(current_lons)][0], 2)
                         current_lats = self.metadata_in_memory[networkspeci]['latitude'][relevant_station_ind, :]
                         self.current_lat = round(current_lats[pd.notnull(current_lats)][0], 2)
                         
-                        # put station data in pandas dataframe
+                        # put selected data for each data array into pandas dataframe
                         to_pandas_dataframe(read_instance=self, canvas_instance=self, 
                                             networkspecies=[networkspeci], 
                                             station_index=relevant_station_ind, 
@@ -841,7 +872,8 @@ class ProvidentiaOffline:
                             print('Making station {2} for {3} ({0}/{1})'.format(i+1, 
                                                                                 len(self.relevant_station_inds),
                                                                                 plot_type, 
-                                                                                self.current_station_name))                                
+                                                                                self.current_station_name))   
+
                             plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
 
                             # do formatting 
@@ -860,10 +892,6 @@ class ProvidentiaOffline:
                         vars(self).pop(k)
                     except:
                         pass
-
-            # update variable to keep track if have setup summary plot geometry yet for a subsection
-            if made_networkspeci_summary_plots:
-                summary_plot_geometry_setup = True
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """ Function that calls making of any type of plot. """

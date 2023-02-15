@@ -15,7 +15,6 @@
                                   "height": 20, "color": "black"},
 
     "combobox_menu":             {"font": {"style": "SansSerif", "size": 9.5},
-                                  "height": 20, 
                                   "color": "black", "background-color": "white", 
                                   "selection-color": "white", "selection-background-color": "black"},
 

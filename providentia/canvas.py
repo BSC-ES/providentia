@@ -26,11 +26,7 @@ from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
 from .dashboard_aux import set_formatting
 from .dashboard_aux import ComboBox, CheckableComboBox
-from .aux import get_relevant_temporal_resolutions
-
-# make sure that we are using Qt5 backend with matplotlib
-matplotlib.use('Qt5Agg')
-register_matplotlib_converters()
+from .aux import get_relevant_temporal_resolutions, show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -59,9 +55,6 @@ class MPLCanvas(FigureCanvas):
 
         # initialise plot elements
         self.plot_elements = {}
-
-        # initialise resampling
-        self.resampling = False
 
         # add general plot characteristics to self
         for k, val in self.plot_characteristics_templates['general'].items():
@@ -238,6 +231,7 @@ class MPLCanvas(FigureCanvas):
             return
 
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
         if self.filter_data is None:
             self.filter_data = DataFilter(self.read_instance)
         else:
@@ -252,14 +246,19 @@ class MPLCanvas(FigureCanvas):
         """ Function which handles updates of resampling. """
 
         if (self.read_instance.temporal_colocation == False) and (len(self.read_instance.data_labels) > 1):
-            print('Warning: It is not possible to resample the data without first activating the temporal colocation.')
+
+            msg = 'It is not possible to resample the data without first activating the temporal colocation.'
+            show_message(msg)
             self.read_instance.cb_resampling_switch.setChecked(False)
             return
 
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
-            
+                
+                # update mouse cursor to a waiting cursor
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
                 # clear all previously plotted artists from selected station plots and hide axes 
                 for plot_type in self.read_instance.active_dashboard_plots:
                     self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
@@ -268,18 +267,24 @@ class MPLCanvas(FigureCanvas):
 
                 # activate or deactivate resampling option
                 if event_source.isChecked():
-                    self.resampling = True
+                    self.read_instance.resampling = True
+                    self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
                 else:
-                    self.resampling = False
+                    self.read_instance.resampling = False
+                    self.read_instance.resampling_resolution = None
 
                 # update associated plots with selected stations
                 self.update_associated_active_dashboard_plots()
 
-                # re-draw
-                #self.figure.canvas.draw()
-            
+                # draw changes
+                self.figure.canvas.draw()
+
+                # restore mouse cursor to normal
+                QtWidgets.QApplication.restoreOverrideCursor()
+
             else:
-                print('Warning: Select the data you want to plot before resampling.')
+                msg = 'Select the data you want to plot before resampling.'
+                show_message(msg)
                 self.read_instance.cb_resampling_switch.setChecked(False)
                 return
 
@@ -532,15 +537,6 @@ class MPLCanvas(FigureCanvas):
                                                     self.plot_characteristics['periodic'], 
                                                     plot_options, relim=True, autoscale=True)
 
-            # set title
-            if 'hour' in self.read_instance.relevant_temporal_resolutions:
-                relevant_temporal_resolutions_title = ['hour']
-            else:
-                relevant_temporal_resolutions_title = ['month']
-            self.plot.set_axis_title(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'], 
-                                     relevant_temporal_resolutions=relevant_temporal_resolutions_title)
-            self.plot_characteristics['periodic']['axis_title']['label'] = 'periodic'
-
             # set ylabel
             self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
 
@@ -668,14 +664,6 @@ class MPLCanvas(FigureCanvas):
                     self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                          plot_options, relim=True, autoscale=True)
 
-                # set title
-                if 'hour' in self.read_instance.relevant_temporal_resolutions:
-                    relevant_temporal_resolutions_title = ['hour']
-                else:
-                    relevant_temporal_resolutions_title = ['month']
-                self.plot.set_axis_title(ax, plot_type, self.plot_characteristics[plot_type], relevant_temporal_resolutions=relevant_temporal_resolutions_title)
-                self.plot_characteristics[plot_type]['axis_title']['label'] = plot_type
-
                 # set xlabel
                 self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
 
@@ -702,20 +690,26 @@ class MPLCanvas(FigureCanvas):
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
                 
-                if self.resampling:
-                    # put selected data for each data array into resampled pandas dataframe
-                    to_resampled_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self)
-                else:
-                    # put selected data for each data array into pandas dataframes
-                    to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
-                                        networkspecies=[self.read_instance.networkspeci])
+                # put selected data for each data array into pandas dataframe
+                to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
+                                    networkspecies=[self.read_instance.networkspeci])
+
+                for data_label in self.selected_station_data[self.read_instance.networkspeci].keys():
+                    dates = self.selected_station_data[self.read_instance.networkspeci][data_label]['pandas_df'].index
+                    if len(dates) < 2:
+                        msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
+                        msg += 'Plots will only be created when period is longer than 2 timesteps.'
+                        show_message(msg)
+                        return
 
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
 
                     # if there are no temporal resolutions (only yearly), skip periodic plots
                     if (plot_type in ['periodic', 'periodic-violin']) and (not self.read_instance.relevant_temporal_resolutions):
-                        print('Warning: Currently it is not possible to get annual periodic plots.')
+                        msg = 'It is not possible to make periodic plots using annual resolution data.'
+                        show_message(msg)
+                        continue
 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
@@ -1064,6 +1058,11 @@ class MPLCanvas(FigureCanvas):
         elif plot_type == 'boxplot':
             self.boxplot_menu_button.show()
             self.boxplot_save_button.show()
+        
+        if plot_type in self.read_instance.active_dashboard_plots:
+            position = self.read_instance.active_dashboard_plots.index(plot_type) + 2
+            cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
+            cb_position.show()
 
         return None
 
@@ -1073,31 +1072,14 @@ class MPLCanvas(FigureCanvas):
             or just one specific type.
         """
 
-        checked_options = {}
         for plot_type in plot_types:
-            for option_box in self.options:
-                option_plot_type = option_box.objectName().split('_option')[0]
-                if plot_type != option_plot_type:
-                    continue
-                option = option_box.objectName().split('option_')[1]
-                if option_box.isChecked():
-                    if plot_type not in checked_options:
-                        checked_options[plot_type] = {} 
-                    checked_options[plot_type][option] = option_box      
-
-        for plot_type in checked_options:
-
-            if 'bias' in checked_options[plot_type]:
-                self.read_instance.block_MPL_canvas_updates = True
-                checked_options[plot_type]['bias'].setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.block_MPL_canvas_updates = False
-                checked_options[plot_type]['bias'].setCheckState(QtCore.Qt.Checked)
-            else:
-                for option, option_box in checked_options[plot_type].items():
-                    self.read_instance.block_MPL_canvas_updates = True
-                    option_box.setCheckState(QtCore.Qt.Unchecked)
-                    self.read_instance.block_MPL_canvas_updates = False
-                    option_box.setCheckState(QtCore.Qt.Checked)
+            all_plot_options = self.plot_characteristics[plot_type]['plot_options']
+            checked_options = self.read_instance.current_plot_options[plot_type]
+            cb_options = getattr(self, plot_type + '_options')
+            for checked_option in checked_options:
+                index = all_plot_options.index(checked_option)
+                cb_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+                cb_options.model().item(index).setCheckState(QtCore.Qt.Checked)
 
         return None
 
@@ -1466,7 +1448,39 @@ class MPLCanvas(FigureCanvas):
         """ Function to create settings menus for each plot and their elements."""
 
         self.interactive_elements = {}
-        self.options = []
+
+        # LAYOUT OPTIONS #
+        # add position 2 plot selector
+        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_2.setFixedWidth(100)
+        self.read_instance.cb_position_2.AdjustToContents
+        self.read_instance.cb_position_2.setToolTip('Select plot type in top right position')
+        self.read_instance.cb_position_2.currentTextChanged.connect(self.read_instance.handle_layout_update)
+        self.read_instance.cb_position_2.hide()
+
+        # add position 3 plot selector
+        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_3.setFixedWidth(100)
+        self.read_instance.cb_position_3.AdjustToContents
+        self.read_instance.cb_position_3.setToolTip('Select plot type in bottom left position')
+        self.read_instance.cb_position_3.currentTextChanged.connect(self.read_instance.handle_layout_update)
+        self.read_instance.cb_position_3.hide()
+
+        # add position 4 plot selector
+        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_4.setFixedWidth(100)
+        self.read_instance.cb_position_4.AdjustToContents
+        self.read_instance.cb_position_4.setToolTip('Select plot type in bottom centre position')
+        self.read_instance.cb_position_4.currentTextChanged.connect(self.read_instance.handle_layout_update)
+        self.read_instance.cb_position_4.hide()
+
+        # add position 5 plot selector
+        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_5.setFixedWidth(100)
+        self.read_instance.cb_position_5.AdjustToContents
+        self.read_instance.cb_position_5.setToolTip('Select plot type in bottom right position')
+        self.read_instance.cb_position_5.currentTextChanged.connect(self.read_instance.handle_layout_update)
+        self.read_instance.cb_position_5.hide()
 
         # MAP SETTINGS MENU #
         # add button to map to show and hide settings menu
@@ -1482,21 +1496,21 @@ class MPLCanvas(FigureCanvas):
                                             formatting_dict['settings_container'])
         self.map_container.setGeometry(self.map_menu_button.geometry().x()-230,
                                        self.map_menu_button.geometry().y()+25, 
-                                       250, 440)
+                                       250, 430)
         self.map_container.hide()
 
         # add settings label
         self.map_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
                                                  formatting_dict['settings_label'])
         self.map_settings_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                            self.map_menu_button.geometry().y()+40, 
+                                            self.map_menu_button.geometry().y()+30, 
                                             230, 20)
         self.map_settings_label.hide()
 
         # add map stat label ('Statistic') to layout
         self.map_z_stat_label = QtWidgets.QLabel('Statistic', self)
         self.map_z_stat_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                          self.map_menu_button.geometry().y()+60, 
+                                          self.map_menu_button.geometry().y()+50, 
                                           230, 20)
         self.map_z_stat_label.hide()
 
@@ -1504,14 +1518,14 @@ class MPLCanvas(FigureCanvas):
         self.map_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z_stat.AdjustToContents
         self.map_z_stat.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                    self.map_menu_button.geometry().y()+85, 
+                                    self.map_menu_button.geometry().y()+75, 
                                     110, 20)
         self.map_z_stat.hide()
 
         # add map dataset 1 label ('Dataset 1') to layout
         self.map_z1_label = QtWidgets.QLabel('Dataset 1', self)
         self.map_z1_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                      self.map_menu_button.geometry().y()+110, 
+                                      self.map_menu_button.geometry().y()+100, 
                                       230, 20)
         self.map_z1_label.hide()
 
@@ -1519,14 +1533,14 @@ class MPLCanvas(FigureCanvas):
         self.map_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z1.AdjustToContents
         self.map_z1.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                self.map_menu_button.geometry().y()+135, 
+                                self.map_menu_button.geometry().y()+125, 
                                 110, 20)
         self.map_z1.hide()
 
         # add map dataset 2 label ('Dataset 2') to layout
         self.map_z2_label = QtWidgets.QLabel('Dataset 2', self)
         self.map_z2_label.setGeometry(self.map_menu_button.geometry().x()-100, 
-                                      self.map_menu_button.geometry().y()+110, 
+                                      self.map_menu_button.geometry().y()+100, 
                                       230, 20)
         self.map_z2_label.hide()
 
@@ -1534,14 +1548,14 @@ class MPLCanvas(FigureCanvas):
         self.map_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z2.AdjustToContents
         self.map_z2.setGeometry(self.map_menu_button.geometry().x()-100, 
-                                self.map_menu_button.geometry().y()+135, 
+                                self.map_menu_button.geometry().y()+125, 
                                 110, 20)
         self.map_z2.hide()
 
         # add map general text for unselected stations ('Unselected stations')
         self.map_unsel_label = QtWidgets.QLabel("Unselected stations", self)
         self.map_unsel_label.setGeometry(self.map_menu_button.geometry().x()-220,
-                                         self.map_menu_button.geometry().y()+160, 
+                                         self.map_menu_button.geometry().y()+150, 
                                          230, 20)
         self.map_unsel_label.hide()
 
@@ -1549,7 +1563,7 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_unsel_sl_label = QtWidgets.QLabel('Size', self)
         self.map_markersize_unsel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_markersize_unsel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220,
-                                                       self.map_menu_button.geometry().y()+185, 
+                                                       self.map_menu_button.geometry().y()+175, 
                                                        230, 20)
         self.map_markersize_unsel_sl_label.hide()
 
@@ -1560,8 +1574,9 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_unsel_sl.setMaximum(80)
         self.map_markersize_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['s'])
         self.map_markersize_unsel_sl.setTickInterval(2)
+        self.map_markersize_unsel_sl.setTracking(False)
         self.map_markersize_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                 self.map_menu_button.geometry().y()+210, 
+                                                 self.map_menu_button.geometry().y()+200, 
                                                  230, 20)
         self.map_markersize_unsel_sl.hide()
 
@@ -1569,7 +1584,7 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_unsel_sl_label = QtWidgets.QLabel('Opacity', self)
         self.map_opacity_unsel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_opacity_unsel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                    self.map_menu_button.geometry().y()+235, 
+                                                    self.map_menu_button.geometry().y()+225, 
                                                     230, 20)
         self.map_opacity_unsel_sl_label.hide()
 
@@ -1580,15 +1595,16 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_unsel_sl.setMaximum(10)
         self.map_opacity_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['alpha']*10)
         self.map_opacity_unsel_sl.setTickInterval(1)
+        self.map_opacity_unsel_sl.setTracking(False)
         self.map_opacity_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                              self.map_menu_button.geometry().y()+260, 
+                                              self.map_menu_button.geometry().y()+250, 
                                               230, 20)
         self.map_opacity_unsel_sl.hide()
 
         # add map general text for selected stations ('Selected stations')
         self.map_sel_label = QtWidgets.QLabel("Selected stations", self)
         self.map_sel_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                       self.map_menu_button.geometry().y()+285, 
+                                       self.map_menu_button.geometry().y()+275, 
                                        230, 20)
         self.map_sel_label.hide()
 
@@ -1596,7 +1612,7 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_sel_sl_label = QtWidgets.QLabel('Size', self)
         self.map_markersize_sel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_markersize_sel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                     self.map_menu_button.geometry().y()+310, 
+                                                     self.map_menu_button.geometry().y()+300, 
                                                      230, 20)
         self.map_markersize_sel_sl_label.hide()
 
@@ -1607,8 +1623,9 @@ class MPLCanvas(FigureCanvas):
         self.map_markersize_sel_sl.setMaximum(80)
         self.map_markersize_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['s'])
         self.map_markersize_sel_sl.setTickInterval(2)
+        self.map_markersize_sel_sl.setTracking(False)
         self.map_markersize_sel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                               self.map_menu_button.geometry().y()+335, 
+                                               self.map_menu_button.geometry().y()+325, 
                                                230, 20)
         self.map_markersize_sel_sl.hide()
 
@@ -1616,7 +1633,7 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_sel_sl_label = QtWidgets.QLabel('Opacity', self)
         self.map_opacity_sel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
         self.map_opacity_sel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                  self.map_menu_button.geometry().y()+360, 
+                                                  self.map_menu_button.geometry().y()+350, 
                                                   230, 20)
         self.map_opacity_sel_sl_label.hide()
 
@@ -1627,15 +1644,16 @@ class MPLCanvas(FigureCanvas):
         self.map_opacity_sel_sl.setMaximum(10)
         self.map_opacity_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['alpha']*10)
         self.map_opacity_sel_sl.setTickInterval(1)
+        self.map_opacity_sel_sl.setTracking(False)
         self.map_opacity_sel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                            self.map_menu_button.geometry().y()+385, 
+                                            self.map_menu_button.geometry().y()+375, 
                                             230, 20)
         self.map_opacity_sel_sl.hide()
 
         # add map options name ('Options') to layout
         self.map_options_label = QtWidgets.QLabel("Options", self)
         self.map_options_label.setGeometry(self.map_menu_button.geometry().x()-220,
-                                           self.map_menu_button.geometry().y()+410, 
+                                           self.map_menu_button.geometry().y()+400, 
                                            230, 20)
         self.map_options_label.hide()
 
@@ -1644,7 +1662,7 @@ class MPLCanvas(FigureCanvas):
         self.map_options.setObjectName('map_options')
         self.map_options.addItems(self.plot_characteristics['map']['plot_options'])        
         self.map_options.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                     self.map_menu_button.geometry().y()+435, 
+                                     self.map_menu_button.geometry().y()+425, 
                                      230, 20)
         self.map_options.currentTextChanged.connect(self.update_plot_option)
         self.map_options.hide()
@@ -1703,7 +1721,7 @@ class MPLCanvas(FigureCanvas):
                                                    formatting_dict['settings_container'])
         self.timeseries_container.setGeometry(self.timeseries_menu_button.geometry().x()-230,
                                               self.timeseries_menu_button.geometry().y()+25, 
-                                              250, 130)
+                                              250, 180)
         self.timeseries_container.hide()
 
         # add settings label
@@ -1728,15 +1746,35 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_markersize_sl.setMaximum(self.plot_characteristics['timeseries']['plot']['markersize']*10)
         self.timeseries_markersize_sl.setValue(self.plot_characteristics['timeseries']['plot']['markersize'])
         self.timeseries_markersize_sl.setTickInterval(2)
+        self.timeseries_markersize_sl.setTracking(False)
         self.timeseries_markersize_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
                                                   self.timeseries_menu_button.geometry().y()+75, 
                                                   230, 20)
         self.timeseries_markersize_sl.hide()
 
+        # add timeseries smooth slider name ('Smooth') to layout
+        self.timeseries_smooth_sl_label = QtWidgets.QLabel('Smooth', self)
+        self.timeseries_smooth_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
+                                                    self.timeseries_menu_button.geometry().y()+100, 
+                                                    230, 20)
+        self.timeseries_smooth_sl_label.hide()
+
+        # add timeseries smooth slider
+        self.timeseries_smooth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.timeseries_smooth_sl.setObjectName('timeseries_smooth_sl')
+        self.timeseries_smooth_sl.setMinimum(0)
+        self.timeseries_smooth_sl.setValue(0)
+        self.timeseries_smooth_sl.setTickInterval(2)
+        self.timeseries_smooth_sl.setTracking(False)
+        self.timeseries_smooth_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
+                                              self.timeseries_menu_button.geometry().y()+125, 
+                                              230, 20)
+        self.timeseries_smooth_sl.hide()
+
         # add timeseries plot options name ('Options') to layout
         self.timeseries_options_label = QtWidgets.QLabel("Options", self)
         self.timeseries_options_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                  self.timeseries_menu_button.geometry().y()+100, 
+                                                  self.timeseries_menu_button.geometry().y()+150, 
                                                   230, 20)
         self.timeseries_options_label.hide()
 
@@ -1745,7 +1783,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_options.setObjectName('timeseries_options')
         self.timeseries_options.addItems(self.plot_characteristics['timeseries']['plot_options'])        
         self.timeseries_options.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                            self.timeseries_menu_button.geometry().y()+125, 
+                                            self.timeseries_menu_button.geometry().y()+175, 
                                             230, 20)
         self.timeseries_options.currentTextChanged.connect(self.update_plot_option)
         self.timeseries_options.hide()
@@ -1761,16 +1799,19 @@ class MPLCanvas(FigureCanvas):
         # set show/hide actions
         self.timeseries_elements = [self.timeseries_container, self.timeseries_settings_label, 
                                     self.timeseries_markersize_sl_label, self.timeseries_markersize_sl,
+                                    self.timeseries_smooth_sl_label, self.timeseries_smooth_sl,
                                     self.timeseries_options_label, self.timeseries_options]
         self.interactive_elements['timeseries'] = {'button': self.timeseries_menu_button, 
                                                    'hidden': True,
                                                    'elements': self.timeseries_elements,
                                                    'markersize_sl': [self.timeseries_markersize_sl],
                                                    'opacity_sl': [],
-                                                   'linewidth_sl': []
+                                                   'linewidth_sl': [],
+                                                   'smooth_sl': [self.timeseries_smooth_sl]
                                                    }
         self.timeseries_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.timeseries_markersize_sl.valueChanged.connect(self.update_markersize_func)
+        self.timeseries_smooth_sl.valueChanged.connect(self.update_smooth_func)
         self.timeseries_save_button.clicked.connect(self.save_axis_figure_func)
 
         # PERIODIC PLOT SETTINGS MENU #
@@ -1807,6 +1848,7 @@ class MPLCanvas(FigureCanvas):
         
         # add periodic stat combobox
         self.periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.periodic_stat.AdjustToContents
         self.periodic_stat.setGeometry(self.periodic_menu_button.geometry().x()-220, 
                                        self.periodic_menu_button.geometry().y()+75, 
                                        110, 20)
@@ -1826,6 +1868,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_markersize_sl.setMaximum(self.plot_characteristics['periodic']['plot']['markersize']*10)
         self.periodic_markersize_sl.setValue(self.plot_characteristics['periodic']['plot']['markersize'])
         self.periodic_markersize_sl.setTickInterval(2)
+        self.periodic_markersize_sl.setTracking(False)
         self.periodic_markersize_sl.setGeometry(self.periodic_menu_button.geometry().x()-220, 
                                                 self.periodic_menu_button.geometry().y()+125, 
                                                 230, 20)
@@ -1845,6 +1888,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_linewidth_sl.setMaximum(self.plot_characteristics['periodic']['plot']['linewidth']*100)
         self.periodic_linewidth_sl.setValue(self.plot_characteristics['periodic']['plot']['linewidth']*10)
         self.periodic_linewidth_sl.setTickInterval(2)
+        self.periodic_linewidth_sl.setTracking(False)
         self.periodic_linewidth_sl.setGeometry(self.periodic_menu_button.geometry().x()-220, 
                                                self.periodic_menu_button.geometry().y()+175, 
                                                230, 20)
@@ -1934,6 +1978,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_markersize_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['p50']['markersize']*10)
         self.periodic_violin_markersize_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['p50']['markersize'])
         self.periodic_violin_markersize_sl.setTickInterval(2)
+        self.periodic_violin_markersize_sl.setTracking(False)
         self.periodic_violin_markersize_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220,
                                                        self.periodic_menu_button.geometry().y()+75, 
                                                        230, 20)
@@ -1953,6 +1998,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_linewidth_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['p50']['linewidth']*100)
         self.periodic_violin_linewidth_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['p50']['linewidth']*10)
         self.periodic_violin_linewidth_sl.setTickInterval(2)
+        self.periodic_violin_linewidth_sl.setTracking(False)
         self.periodic_violin_linewidth_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220, 
                                                       self.periodic_violin_menu_button.geometry().y()+125, 
                                                       230, 20)
@@ -2103,6 +2149,7 @@ class MPLCanvas(FigureCanvas):
         self.distribution_linewidth_sl.setMaximum(self.plot_characteristics['distribution']['plot']['linewidth']*100)
         self.distribution_linewidth_sl.setValue(self.plot_characteristics['distribution']['plot']['linewidth']*10)
         self.distribution_linewidth_sl.setTickInterval(2)
+        self.distribution_linewidth_sl.setTracking(False)
         self.distribution_linewidth_sl.setGeometry(self.distribution_menu_button.geometry().x()-220, 
                                                    self.distribution_menu_button.geometry().y()+75, 
                                                    230, 20)
@@ -2187,6 +2234,7 @@ class MPLCanvas(FigureCanvas):
         self.scatter_markersize_sl.setMaximum(self.plot_characteristics['scatter']['plot']['markersize']*100)
         self.scatter_markersize_sl.setValue(self.plot_characteristics['scatter']['plot']['markersize']*10)
         self.scatter_markersize_sl.setTickInterval(2)
+        self.scatter_markersize_sl.setTracking(False)
         self.scatter_markersize_sl.setGeometry(self.scatter_menu_button.geometry().x()-220, 
                                               self.scatter_menu_button.geometry().y()+75, 
                                               230, 20)
@@ -2461,21 +2509,26 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def update_smooth_func(self):
+        
+        # get source
+        event_source = self.sender()
+        plot_type = event_source.objectName().split('_smooth')[0]
+        for element in self.interactive_elements[plot_type]['smooth_sl']:
+            smooth_window = element.value()
+            break
+
+        self.update_smooth_window(self.plot_axes[plot_type], plot_type, smooth_window, 
+                                  self.read_instance.current_plot_options[plot_type])
+
+        return None
+
     def update_plot_option(self):
         """ Function to handle the update of the plot options. """
-
+        
         if not self.read_instance.block_MPL_canvas_updates:
 
-            # if do not have selected station_station_data in memory, then no data has been read
-            # so return
-            if not hasattr(self, 'selected_station_data'):
-                return 
-
-            # return from function if selected_station_data has not been updated for new species yet.
-            if self.read_instance.networkspeci not in self.selected_station_data:
-                return
-
-            # get option and plot names
+            # get source
             event_source = self.sender()
             plot_type_alt = event_source.objectName().split('_options')[0]
 
@@ -2485,308 +2538,322 @@ class MPLCanvas(FigureCanvas):
             else:
                 plot_type = copy.deepcopy(plot_type_alt)
 
-            # get plot options (previous and currently selected)
-            plot_options = event_source.currentData()
-            current_plot_options = copy.deepcopy(plot_options)
-            for previous_plot_option in self.read_instance.previous_plot_options[plot_type]:
-                if previous_plot_option not in plot_options:
-                    current_plot_options.append(previous_plot_option)
-            all_plot_options = self.plot_characteristics[plot_type]['plot_options']
+            # an option is selected or there are options in previous to undo?
+            if event_source.currentData() or self.read_instance.previous_plot_options[plot_type]:
 
-            for option in current_plot_options:
+                # get plot options (previous and currently selected)
+                self.read_instance.current_plot_options[plot_type] = copy.deepcopy(event_source.currentData())
+                all_plot_options = self.plot_characteristics[plot_type]['plot_options']
                 
-                # get index to raise errors and uncheck options
-                index = all_plot_options.index(option)
-
-                # undo plot options that were selected before but not now
-                if ((option in self.read_instance.previous_plot_options[plot_type]) 
-                    and (option not in plot_options)):
-                    undo = True
-                # do plot options that were not selected before
-                elif ((option not in self.read_instance.previous_plot_options[plot_type]) 
-                    and (option in plot_options)):
-                    undo = False
-                # do nothing if options were selected before and now
-                elif ((option in self.read_instance.previous_plot_options[plot_type]) 
-                    and (option in plot_options)):
-                    continue
+                for option in all_plot_options:
                     
-                # if plot type not in plot_elements, then return
-                if plot_type not in self.plot_elements:
-                    return
+                    # get index to raise errors and uncheck options
+                    index = all_plot_options.index(option)
 
-                # if no selected stations then remove all plot_elements for active plot_options,
-                # and then return
-                if (len(self.relative_selected_station_inds) == 0):
-                    for active_type in self.plot_elements[plot_type]:
-                        if active_type != 'active':
-                            for data_label in self.plot_elements[plot_type][active_type]:
-                                for plot_option in plot_options:
-                                    if plot_option in self.plot_elements[plot_type][active_type][data_label]:
-                                        for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
-                                            plot_element.remove()
-                                        del self.plot_elements[plot_type][active_type][data_label][plot_option]
-                    return 
-
-                # remove current option elements (both absolute and bias)
-                for active_type in self.plot_elements[plot_type]:
-                    if active_type != 'active':
-                        for data_label in self.plot_elements[plot_type][active_type]:
-                            if option in self.plot_elements[plot_type][active_type][data_label]:
-                                for plot_element in self.plot_elements[plot_type][active_type][data_label][option]:
-                                    plot_element.remove()
-                                del self.plot_elements[plot_type][active_type][data_label][option]
-
-                # if option is 'bias', then remove current option elements (both absolute and bias)
-                if option == 'bias':
-                    for active_type in self.plot_elements[plot_type]:
-                        if active_type != 'active':
-                            for data_label in self.plot_elements[plot_type][active_type]:
-                                for plot_option in plot_options:
-                                    if plot_option in self.plot_elements[plot_type][active_type][data_label]:
-                                        for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
-                                            plot_element.remove()
-                                        del self.plot_elements[plot_type][active_type][data_label][plot_option] 
-
-                # get active (absolute / bias)
-                active = self.plot_elements[plot_type]['active']
-
-                # options 'logy' and 'logx' 
-                # only plot if axis has all positive values
-                if (option == 'logy') or (option == 'logx'):
-                    if isinstance(self.plot_axes[plot_type], dict):
-                        for temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                            log_validity = self.plot.log_validity(sub_ax, option)
-                            if log_validity:
-                                self.plot.log_axes(sub_ax, option, self.plot_characteristics[plot_type], undo=undo)
-                            else:
-                                msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
-                                msg += "in {0} with negative values.".format(plot_type)
-                                print(msg)
-                                self.read_instance.block_MPL_canvas_updates = True
-                                event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                                self.read_instance.block_MPL_canvas_updates = False
-                                return None
-                    else:
-                        log_validity = self.plot.log_validity(self.plot_axes[plot_type], option)
-                        if log_validity:
-                            self.plot.log_axes(self.plot_axes[plot_type], option, self.plot_characteristics[plot_type], 
-                                            undo=undo)
-                        else:
-                            msg = "Warning: It is not possible to log the {0}-axis ".format(option[-1])
-                            msg += "in {0} with negative values.".format(plot_type)
-                            print(msg)
-                            self.read_instance.block_MPL_canvas_updates = True
-                            event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                            self.read_instance.block_MPL_canvas_updates = False
-                            return None
-
-                # option 'annotate'
-                # only plot if have selected stations (for map annotations)
-                elif option == 'annotate':
-                    if not undo:
-                        if isinstance(self.plot_axes[plot_type], dict):
-                            for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                                if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                                    self.plot.annotation(sub_ax,
-                                                        self.read_instance.networkspeci,
-                                                        list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                        plot_type,
-                                                        self.plot_characteristics[plot_type], 
-                                                        plot_options=plot_options)
-                                    break
-                        else:
-                            self.plot.annotation(self.plot_axes[plot_type], 
-                                                self.read_instance.networkspeci,
-                                                list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                plot_type,
-                                                self.plot_characteristics[plot_type], 
-                                                plot_options=plot_options)
-
-                # option 'smooth'
-                elif option == 'smooth':
-                    if not undo:
-                        self.plot.smooth(self.plot_axes[plot_type], 
-                                        self.read_instance.networkspeci,
-                                        list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                        plot_type,
-                                        self.plot_characteristics[plot_type], 
-                                        plot_options=plot_options)
-                
-                # option 'regression'
-                elif option == 'regression':
-                    if not undo:
-                        self.plot.linear_regression(self.plot_axes[plot_type], 
-                                                    self.read_instance.networkspeci,
-                                                    list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                    plot_type,
-                                                    self.plot_characteristics[plot_type],  
-                                                    plot_options=plot_options)
-
-                # option 'bias'
-                elif option == 'bias':
-
-                    # firstly if just 1 data label then cannot make bias plot 
-                    if len(list(self.selected_station_data[self.read_instance.networkspeci].keys())) == 1:
-                        print("Warning: It is not possible to make a bias plot with just observations loaded.")
+                    # if do not have selected station_station_data in memory, then no data has been read
+                    # so return
+                    if not hasattr(self, 'selected_station_data'):
+                        msg = 'Select at least one station in the plot to apply options.'
+                        show_message(msg)
                         self.read_instance.block_MPL_canvas_updates = True
                         event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                         self.read_instance.block_MPL_canvas_updates = False
-                        self.plot_elements[plot_type]['active'] = 'absolute'
-                        plot_options.remove('bias')
+                        return
 
-                        # create other active plot option elements for now absolute plot (if do not already exist)
-                        self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                plot_type, 'absolute', plot_options)
+                    # return from function if selected_station_data has not been updated for new species yet.
+                    if self.read_instance.networkspeci not in self.selected_station_data:
+                        return
 
-                    # if bias option is enabled then first check if bias elements stored
-                    elif not undo:
+                    # undo plot options that were selected before but not now
+                    if ((option in self.read_instance.previous_plot_options[plot_type]) 
+                        and (option not in self.read_instance.current_plot_options[plot_type])):
+                        undo = True
+                    # do plot options that were not selected before
+                    elif ((option not in self.read_instance.previous_plot_options[plot_type]) 
+                        and (option in self.read_instance.current_plot_options[plot_type])):
+                        undo = False
+                    # do nothing if options were selected before and now
+                    elif ((option in self.read_instance.previous_plot_options[plot_type]) 
+                        and (option in self.read_instance.current_plot_options[plot_type])):
+                        continue
+                    # do nothing if options were never selected
+                    elif ((option not in self.read_instance.previous_plot_options[plot_type]) 
+                        and (option not in self.read_instance.current_plot_options[plot_type])):
+                        continue
 
-                        # update active (bias)
-                        self.plot_elements[plot_type]['active'] = 'bias' 
+                    # if plot type not in plot_elements, then return
+                    if plot_type not in self.plot_elements:
+                        return
 
-                        # handle some special cases for periodic plot
-                        if plot_type in ['periodic']:
+                    # if no selected stations then remove all plot_elements for active plot_options,
+                    # and then return
+                    if (len(self.relative_selected_station_inds) == 0):
+                        for active_type in self.plot_elements[plot_type]:
+                            if active_type != 'active':
+                                for data_label in self.plot_elements[plot_type][active_type]:
+                                    for plot_option in self.read_instance.current_plot_options[plot_type]:
+                                        if plot_option in self.plot_elements[plot_type][active_type][data_label]:
+                                            for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
+                                                plot_element.remove()
+                                            del self.plot_elements[plot_type][active_type][data_label][plot_option]
+                        return 
 
-                            # get currently selected periodic statistic name
-                            base_zstat = self.periodic_stat.currentText()
-                            zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
+                    # remove current option elements (both absolute and bias)
+                    for active_type in self.plot_elements[plot_type]:
+                        if active_type != 'active':
+                            for data_label in self.plot_elements[plot_type][active_type]:
+                                if option in self.plot_elements[plot_type][active_type][data_label]:
+                                    for plot_element in self.plot_elements[plot_type][active_type][data_label][option]:
+                                        plot_element.remove()
+                                    del self.plot_elements[plot_type][active_type][data_label][option]
 
-                            # get zstat information 
-                            zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat) 
+                    # if option is 'bias', then remove current option elements (both absolute and bias)
+                    if option == 'bias':
+                        for active_type in self.plot_elements[plot_type]:
+                            if active_type != 'active':
+                                for data_label in self.plot_elements[plot_type][active_type]:
+                                    for plot_option in self.read_instance.current_plot_options[plot_type]:
+                                        if plot_option in self.plot_elements[plot_type][active_type][data_label]:
+                                            for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
+                                                plot_element.remove()
+                                            del self.plot_elements[plot_type][active_type][data_label][plot_option] 
 
-                            # if get_z_statistic_type == 'expbias' then return as bias already plotted
-                            if z_statistic_type == 'expbias':
+                    # options 'logy' and 'logx' 
+                    # only plot if axis has all positive values
+                    if (option == 'logy') or (option == 'logx'):
+                        if isinstance(self.plot_axes[plot_type], dict):
+                            for temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
+                                log_validity = self.plot.log_validity(sub_ax, option)
+                                if log_validity:
+                                    self.plot.log_axes(sub_ax, option, self.plot_characteristics[plot_type], undo=undo)
+                                else:
+                                    msg = "It is not possible to log the {0}-axis ".format(option[-1])
+                                    msg += "in {0} with negative values.".format(plot_type)
+                                    show_message(msg)
+                                    self.read_instance.block_MPL_canvas_updates = True
+                                    event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+                                    self.read_instance.block_MPL_canvas_updates = False
+                                    return None
+                        else:
+                            log_validity = self.plot.log_validity(self.plot_axes[plot_type], option)
+                            if log_validity:
+                                self.plot.log_axes(self.plot_axes[plot_type], option, self.plot_characteristics[plot_type], 
+                                                undo=undo)
+                            else:
+                                msg = "It is not possible to log the {0}-axis ".format(option[-1])
+                                msg += "in {0} with negative values.".format(plot_type)
+                                show_message(msg)
                                 self.read_instance.block_MPL_canvas_updates = True
                                 event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                 self.read_instance.block_MPL_canvas_updates = False
-                                self.plot_elements[plot_type]['active'] = 'absolute'
                                 return None
 
-                        # handle some special cases for statsummary plot
-                        elif plot_type in ['statsummary']:
+                    # option 'annotate'
+                    # only plot if have selected stations (for map annotations)
+                    elif option == 'annotate':
+                        if not undo:
+                            if isinstance(self.plot_axes[plot_type], dict):
+                                for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
+                                    if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                                        self.plot.annotation(sub_ax,
+                                                            self.read_instance.networkspeci,
+                                                            list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                                            plot_type,
+                                                            self.plot_characteristics[plot_type], 
+                                                            plot_options=self.read_instance.current_plot_options[plot_type])
+                                        break
+                            else:
+                                self.plot.annotation(self.plot_axes[plot_type], 
+                                                    self.read_instance.networkspeci,
+                                                    list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                                    plot_type,
+                                                    self.plot_characteristics[plot_type], 
+                                                    plot_options=self.read_instance.current_plot_options[plot_type])
 
-                            # create structure to store data for statsummary plot
-                            relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
-                            stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
+                    # option 'smooth'
+                    elif option == 'smooth':
+                        if not undo:
+                            self.plot.smooth(self.plot_axes[plot_type], 
+                                             self.read_instance.networkspeci,
+                                             list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                             plot_type,
+                                             self.plot_characteristics[plot_type], 
+                                             plot_options=self.read_instance.current_plot_options[plot_type])
+                          
+                    # option 'regression'
+                    elif option == 'regression':
+                        if not undo:
+                            self.plot.linear_regression(self.plot_axes[plot_type], 
+                                                        self.read_instance.networkspeci,
+                                                        list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                                        plot_type,
+                                                        self.plot_characteristics[plot_type],  
+                                                        plot_options=self.read_instance.current_plot_options[plot_type])
 
-                        # get plotting function for specific plot
-                        if plot_type == 'statsummary':
-                            func = getattr(self.plot, 'make_table')
-                        else:
-                            func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+                    # option 'bias'
+                    elif option == 'bias':
 
-                        # iterate through valid data labels 
-                        first_data_label = True
-                        for data_label in list(self.selected_station_data[self.read_instance.networkspeci].keys()) + ['ALL']:
+                        # firstly if just 1 data label then cannot make bias plot 
+                        if len(list(self.selected_station_data[self.read_instance.networkspeci].keys())) == 1:
+                            msg = 'It is not possible to make a bias plot with just observations loaded.'
+                            show_message(msg)
+                            self.read_instance.block_MPL_canvas_updates = True
+                            event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+                            self.read_instance.block_MPL_canvas_updates = False
+                            self.plot_elements[plot_type]['active'] = 'absolute'
+                            self.read_instance.current_plot_options[plot_type].remove('bias')
 
-                            # hide absolute plot elements
-                            if data_label in self.plot_elements[plot_type]['absolute']:
-                                for element_type in self.plot_elements[plot_type]['absolute'][data_label]:
-                                    for element in self.plot_elements[plot_type]['absolute'][data_label][element_type]:
-                                        element.set_visible(False)
+                            # create other active plot option elements for now absolute plot (if do not already exist)
+                            self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                                       plot_type, 'absolute', self.read_instance.current_plot_options[plot_type])
 
-                            # if have bias elements pre-stored then simply show bias elements (if data label on legend is active)
-                            set_bias = False
-                            if 'bias' in self.plot_elements[plot_type]:
-                                if data_label in self.plot_elements[plot_type]['bias']:
-                                    set_bias = True
-                                    if (data_label in self.plot_elements['data_labels_active']) or (data_label == 'ALL'):
-                                        for element_type in self.plot_elements[plot_type]['bias'][data_label]:
-                                            for element in self.plot_elements[plot_type]['bias'][data_label][element_type]:
-                                                element.set_visible(True)
+                        # if bias option is enabled then first check if bias elements stored
+                        elif not undo:
 
-                            # if do not already have bias elements, then make them (tracking plot elements also) 
-                            if not set_bias:
-                                # skip if data array is observations / ALL
-                                if data_label in ['observations', 'ALL']:
-                                    continue
+                            # update active (bias)
+                            self.plot_elements[plot_type]['active'] = 'bias' 
 
-                                # gather data for statsummary plot
-                                if plot_type in ['statsummary']:
-                                    for relevant_zstat in relevant_zstats:
-                                        # if relevant stat is expbias stat, then ensure temporal colocation is active
-                                        # otherwise set value as NaN
-                                        if (relevant_zstat in expbias_stats) & (not self.read_instance.temporal_colocation):
-                                            stat_val = np.NaN
-                                        else:
-                                            stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
-                                        stats_df[relevant_zstat].append(stat_val)
+                            # handle some special cases for periodic plot
+                            if plot_type in ['periodic']:
 
-                                # other plot types
-                                else:
-                                    # call plotting function
-                                    if plot_type in ['periodic']:
-                                        func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
-                                            self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options, 
-                                            first_data_label=first_data_label)
-                                    else: 
-                                        func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
-                                            self.plot_characteristics[plot_type], plot_options=plot_options, 
-                                            first_data_label=first_data_label)
-                                    first_data_label = False
+                                # get currently selected periodic statistic name
+                                base_zstat = self.periodic_stat.currentText()
+                                zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
 
-                        # make statsummary bias plot (if not previously made)
-                        if (plot_type in ['statsummary']) & ('bias' not in self.plot_elements[plot_type]):
-                            if len(stats_df[list(stats_df.keys())[0]]) > 0:
-                                index = [data_label for data_label in self.selected_station_data[self.read_instance.networkspeci] if data_label != 'observations']
-                                stats_df = pd.DataFrame(data=stats_df,index=index)
-                                func(self.plot_axes[plot_type], stats_df, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options, statsummary=True)
+                                # get zstat information 
+                                zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat) 
 
-                        # create other active plot option elements for bias plot (if do not already exist)
-                        self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                plot_type, 'bias', plot_options)
+                                # if get_z_statistic_type == 'expbias' then return as bias already plotted
+                                if z_statistic_type == 'expbias':
+                                    self.read_instance.block_MPL_canvas_updates = True
+                                    event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+                                    self.read_instance.block_MPL_canvas_updates = False
+                                    self.plot_elements[plot_type]['active'] = 'absolute'
 
-                    # if bias option is not enabled then hide bias plot elements and show absolute plots again
-                    else:
+                            # handle some special cases for statsummary plot
+                            elif plot_type in ['statsummary']:
 
-                        # update active (absolute)
-                        self.plot_elements[plot_type]['active'] = 'absolute' 
+                                # create structure to store data for statsummary plot
+                                relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
+                                stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
 
-                        # iterate through valid data labels
-                        for data_label in list(self.selected_station_data[self.read_instance.networkspeci].keys()) + ['ALL']:
+                            # get plotting function for specific plot
+                            if plot_type == 'statsummary':
+                                func = getattr(self.plot, 'make_table')
+                            else:
+                                func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
 
-                            # hide bias plot elements 
-                            if 'bias' in self.plot_elements[plot_type]:
-                                if data_label in self.plot_elements[plot_type]['bias']:
-                                    for element_type in self.plot_elements[plot_type]['bias'][data_label]:
-                                        for element in self.plot_elements[plot_type]['bias'][data_label][element_type]:
-                                            element.set_visible(False)
+                            # iterate through valid data labels 
+                            first_data_label = True
+                            for data_label in list(self.selected_station_data[self.read_instance.networkspeci].keys()) + ['ALL']:
 
-                            # show absolute plot elements (if data label on legend is active)
-                            if data_label in self.plot_elements[plot_type]['absolute']:
-                                if (data_label in self.plot_elements['data_labels_active']) or (data_label == 'ALL'):
+                                # hide absolute plot elements
+                                if data_label in self.plot_elements[plot_type]['absolute']:
                                     for element_type in self.plot_elements[plot_type]['absolute'][data_label]:
                                         for element in self.plot_elements[plot_type]['absolute'][data_label][element_type]:
-                                            element.set_visible(True)
+                                            element.set_visible(False)
 
-                        # create other active plot option elements for absolute plot (if do not already exist)
-                        self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
-                                                plot_type, 'absolute', plot_options)
+                                # if have bias elements pre-stored then simply show bias elements (if data label on legend is active)
+                                set_bias = False
+                                if 'bias' in self.plot_elements[plot_type]:
+                                    if data_label in self.plot_elements[plot_type]['bias']:
+                                        set_bias = True
+                                        if (data_label in self.plot_elements['data_labels_active']) or (data_label == 'ALL'):
+                                            for element_type in self.plot_elements[plot_type]['bias'][data_label]:
+                                                for element in self.plot_elements[plot_type]['bias'][data_label][element_type]:
+                                                    element.set_visible(True)
 
-                # reset axes limits (harmonising across subplots for periodic plots) 
-                if plot_type != 'map':
-                    if plot_type == 'periodic-violin':
-                        self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                            self.plot_characteristics[plot_type], plot_options, 
-                                                            ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                self.selected_station_data_max[self.read_instance.networkspeci]],
-                                                            relim=True, autoscale_x=True)
-                    elif plot_type == 'scatter':
-                        self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                            self.plot_characteristics[plot_type], plot_options, 
-                                                            relim=True)
-                    else:
-                        self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                            self.plot_characteristics[plot_type], plot_options, 
-                                                            relim=True, autoscale=True)                       
+                                # if do not already have bias elements, then make them (tracking plot elements also) 
+                                if not set_bias:
+                                    # skip if data array is observations / ALL
+                                    if data_label in ['observations', 'ALL']:
+                                        continue
 
-            # save current plot options as previous
-            self.read_instance.previous_plot_options[plot_type] = plot_options
+                                    # gather data for statsummary plot
+                                    if plot_type in ['statsummary']:
+                                        for relevant_zstat in relevant_zstats:
+                                            # if relevant stat is expbias stat, then ensure temporal colocation is active
+                                            # otherwise set value as NaN
+                                            if (relevant_zstat in expbias_stats) & (not self.read_instance.temporal_colocation):
+                                                stat_val = np.NaN
+                                            else:
+                                                stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
+                                            stats_df[relevant_zstat].append(stat_val)
 
-            # draw changes
-            self.figure.canvas.draw()
+                                    # other plot types
+                                    else:
+                                        # call plotting function
+                                        if plot_type in ['periodic']:
+                                            func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
+                                                self.plot_characteristics[plot_type], zstat=zstat, plot_options=self.read_instance.current_plot_options[plot_type], 
+                                                first_data_label=first_data_label)
+                                        else: 
+                                            func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
+                                                self.plot_characteristics[plot_type], plot_options=self.read_instance.current_plot_options[plot_type], 
+                                                first_data_label=first_data_label)
+                                        first_data_label = False
+
+                            # make statsummary bias plot (if not previously made)
+                            if (plot_type in ['statsummary']) & ('bias' not in self.plot_elements[plot_type]):
+                                if len(stats_df[list(stats_df.keys())[0]]) > 0:
+                                    index = [data_label for data_label in self.selected_station_data[self.read_instance.networkspeci] if data_label != 'observations']
+                                    stats_df = pd.DataFrame(data=stats_df,index=index)
+                                    func(self.plot_axes[plot_type], stats_df, self.plot_characteristics[plot_type], 
+                                         plot_options=self.read_instance.current_plot_options[plot_type], statsummary=True)
+
+                            # create other active plot option elements for bias plot (if do not already exist)
+                            self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                                       plot_type, 'bias', self.read_instance.current_plot_options[plot_type])
+
+                        # if bias option is not enabled then hide bias plot elements and show absolute plots again
+                        else:
+
+                            # update active (absolute)
+                            self.plot_elements[plot_type]['active'] = 'absolute' 
+
+                            # iterate through valid data labels
+                            for data_label in list(self.selected_station_data[self.read_instance.networkspeci].keys()) + ['ALL']:
+
+                                # hide bias plot elements 
+                                if 'bias' in self.plot_elements[plot_type]:
+                                    if data_label in self.plot_elements[plot_type]['bias']:
+                                        for element_type in self.plot_elements[plot_type]['bias'][data_label]:
+                                            for element in self.plot_elements[plot_type]['bias'][data_label][element_type]:
+                                                element.set_visible(False)
+
+                                # show absolute plot elements (if data label on legend is active)
+                                if data_label in self.plot_elements[plot_type]['absolute']:
+                                    if (data_label in self.plot_elements['data_labels_active']) or (data_label == 'ALL'):
+                                        for element_type in self.plot_elements[plot_type]['absolute'][data_label]:
+                                            for element in self.plot_elements[plot_type]['absolute'][data_label][element_type]:
+                                                element.set_visible(True)
+
+                            # create other active plot option elements for absolute plot (if do not already exist)
+                            self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
+                                                       plot_type, 'absolute', self.read_instance.current_plot_options[plot_type])
+
+                    # reset axes limits (harmonising across subplots for periodic plots) 
+                    if plot_type != 'map':
+                        if plot_type == 'periodic-violin':
+                            self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
+                                                                ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                    self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                                relim=True, autoscale_x=True)
+                        elif plot_type == 'scatter':
+                            self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                 self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
+                                                                 relim=True)
+                        else:
+                            self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
+                                                                 self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
+                                                                 relim=True, autoscale=True)                       
+
+                # save current plot options as previous
+                self.read_instance.previous_plot_options[plot_type] = self.read_instance.current_plot_options[plot_type]
+
+                # draw changes
+                self.figure.canvas.draw()
 
         return None
 
@@ -2978,6 +3045,30 @@ class MPLCanvas(FigureCanvas):
             self.plot_characteristics[plot_type]['plot']['p50']['linewidth'] = linewidth
         else:
             self.plot_characteristics[plot_type]['plot']['linewidth'] = linewidth
+
+        # redraw points
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
+
+        return None
+
+    def update_smooth_window(self, ax, plot_type, smooth_window, plot_options):
+
+        # update characteristics per plot type
+        self.plot_characteristics[plot_type]['smooth']['window'] = smooth_window
+        
+        # get index of smooth in plot options
+        all_plot_options = self.plot_characteristics[plot_type]['plot_options']
+        index = all_plot_options.index('smooth')
+
+        # remove smooth plot option
+        self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+
+        # create smooth lines
+        if smooth_window > 0:
+            
+            # add smooth plot option
+            self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Checked)
 
         # redraw points
         self.figure.canvas.draw()
@@ -3965,21 +4056,19 @@ class MPLCanvas(FigureCanvas):
 
                 # iterate through plot types stored in plot_elements (if have selected stations)
                 if len(self.relative_selected_station_inds) > 0:
-                    for plot_type in self.plot_elements:
+                    for plot_type_alt in self.plot_elements:  
+
+                        # correct perodic-violin name for plot_options
+                        if plot_type_alt == 'periodic-violin':
+                            plot_type = 'periodic_violin'
+                        else:
+                            plot_type = copy.deepcopy(plot_type_alt)
+
                         if plot_type not in ['data_labels_active', 'metadata', 'map', 'heatmap', 
                                              'table', 'statsummary']:
 
-                            # correct perodic-violin name for plot_options
-                            if plot_type == 'periodic-violin':
-                                plot_type_alt = 'periodic_violin'
-                            else:
-                                plot_type_alt = copy.deepcopy(plot_type)
-
                             # get currently selected options for plot
-                            plot_options = []
-                            for other_option, other_option_obj in getattr(self, '{}_options'.format(plot_type_alt)).items():
-                                if other_option_obj.isChecked():
-                                    plot_options.append(other_option)
+                            plot_options = self.read_instance.current_plot_options[plot_type]
                         
                             # get active (absolute / bias)
                             active = self.plot_elements[plot_type]['active']
