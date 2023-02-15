@@ -44,6 +44,7 @@ class ProvidentiaOffline:
         # update variables from config file
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             aux.load_conf(self, kwargs['config'])
+            self.from_conf = True
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
