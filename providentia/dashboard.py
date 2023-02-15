@@ -1033,7 +1033,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         for plot_type in self.mpl_canvas.all_plots:
             self.current_plot_options[plot_type] = []
 
-        # if spatial_colocation is not active, force filter_species to be empty dict if it is not akready
+        # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {} 
