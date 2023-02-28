@@ -1184,15 +1184,15 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
 
 def get_basic_metadata(instance):     
     """ Get basic unique metadata across networkspecies wanting to read
-        The basic fields are: station_reference, longitude, latitude, station_classification and area_classification
+        The basic fields are: station_reference, station_name, longitude, latitude, measurement_altitude, station_classification and area_classification
 
         If have multiple species, then spatially cocolocate across species 
         to get matching stations across stations.
 
         :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
         :type instance: object
-        :return: station_references per networkspecies, longitudes per networkspecies, latitudes per networkspecies, station_classifications per networkspecies, area_classifications per networkspecies 
-        :rtype: dict, dict, dict, dict, dict
+        :return: station_references per networkspecies, station_name per networkspecies, longitudes per networkspecies, latitudes per networkspecies, measurement altitudes per networkspecies, station_classifications per networkspecies, area_classifications per networkspecies, nonghost_units 
+        :rtype: dict, dict, dict, dict, dict, dict, dict, dict
     """
 
     # define dictionaries for storing basic metadata across all species to read
