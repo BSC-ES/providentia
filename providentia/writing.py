@@ -154,11 +154,12 @@ def export_netcdf(canvas_instance, fname):
             var.description = 'Labels associated with each data array, e.g. observations, experiment_1, etc.'
             var[:] = np.array(read_instance.data_labels)
             
-            var = fout.createVariable('ghost_data_variables', str, ('ghost_data_variable',))
-            var.standard_name = 'ghost_data_variables'
-            var.long_name = 'ghost_data_variables'
-            var.description = 'The names of the GHOST data variables used for additional filtering.'
-            var[:] = np.array(read_instance.ghost_data_vars_to_read)
+            if read_instance.reading_ghost:
+                var = fout.createVariable('ghost_data_variables', str, ('ghost_data_variable',))
+                var.standard_name = 'ghost_data_variables'
+                var.long_name = 'ghost_data_variables'
+                var.description = 'The names of the GHOST data variables used for additional filtering.'
+                var[:] = np.array(read_instance.ghost_data_vars_to_read)
          
         # data
         current_data_type = type_map[data_format_dict[speci]['data_type']]
