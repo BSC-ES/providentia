@@ -228,12 +228,11 @@ def read_netcdf_data(tuple_arguments):
                     # some extra str formatting
                     if meta_var in ['station_reference', 'station_name', 'station_classification', 
                                     'area_classification']:
-                        if meta_dtype != np.str:
-                            if meta_dtype != np.dtype(object):
-                                meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
-                                                    for val in meta_val], dtype=np.str)
-                            else:
-                                meta_val = np.array([''.join(val) for val in meta_val])
+                        if (meta_dtype != np.dtype(object)) and (meta_dtype != np.str):
+                            meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
+                                                for val in meta_val], dtype=np.str)
+                        else:
+                            meta_val = np.array([''.join(val) for val in meta_val])
 
                 # GHOST metadata
                 else:
