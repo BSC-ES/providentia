@@ -55,16 +55,6 @@ class ProvidentiaOffline:
         # load report plot presets
         self.report_plots = json.load(open(os.path.join(CURRENT_PATH, 'conf/report_plots.json')))
 
-        # check for self defined plot characteristics file
-        if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = os.path.join(CURRENT_PATH, 'conf/plot_characteristics_offline.json')
-        self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
-        self.plot_characteristics = {}
-
-        # add general plot characteristics to self
-        for k, val in self.plot_characteristics_templates['general'].items():
-            setattr(self, k, val)
-
         # create dictionary of all available observational GHOST data
         self.all_observation_data = aux.get_ghost_observational_tree(self)
 
@@ -77,9 +67,6 @@ class ProvidentiaOffline:
 
         # initialise DataReader class
         self.datareader = DataReader(self)
-
-        # initialise Plot class
-        self.plot = Plot(read_instance=self, canvas_instance=self)
 
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
@@ -101,6 +88,19 @@ class ProvidentiaOffline:
             # update self with section variables
             for k, val in self.section_opts.items():
                 setattr(self, k, provconf.parse_parameter(k, val))
+
+            # check for self defined plot characteristics file
+            if self.plot_characteristics_filename == '':
+                self.plot_characteristics_filename = os.path.join(CURRENT_PATH, 'conf/plot_characteristics_offline.json')
+            self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
+            self.plot_characteristics = {}
+
+            # initialise Plot class
+            self.plot = Plot(read_instance=self, canvas_instance=self)
+
+            # add general plot characteristics to self
+            for k, val in self.plot_characteristics_templates['general'].items():
+                setattr(self, k, val)
 
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             provconf.check_validity()
