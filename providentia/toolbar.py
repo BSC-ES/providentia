@@ -85,6 +85,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                     aux.show_message(msg)
                 except Exception as e:
                     msg = 'There was an error saving the file.'
+                    print(e)
                     aux.show_message(msg)
 
     def conf_dialogs(self):
