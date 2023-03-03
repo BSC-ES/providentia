@@ -1075,6 +1075,8 @@ class MPLCanvas(FigureCanvas):
         for plot_type in plot_types:
             all_plot_options = self.plot_characteristics[plot_type]['plot_options']
             checked_options = self.read_instance.current_plot_options[plot_type]
+            if plot_type == 'periodic-violin':
+                plot_type = 'periodic_violin'
             cb_options = getattr(self, plot_type + '_options')
             for checked_option in checked_options:
                 index = all_plot_options.index(checked_option)
