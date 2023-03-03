@@ -205,6 +205,11 @@ def read_netcdf_data(tuple_arguments):
                             meta_var_nc = 'lat'
                         else:
                             meta_var_nc = 'latitude'
+                    elif meta_var == 'altitude':
+                        if "altitude" not in ncdf_root.variables:
+                            meta_var_nc = 'alt'
+                        else:
+                            meta_var_nc = 'altitude'
                     elif meta_var == 'station_reference':
                         if "station_reference" not in ncdf_root.variables:
                             meta_var_nc = 'station_code'
@@ -216,17 +221,18 @@ def read_netcdf_data(tuple_arguments):
                     # check meta variable is in netCDF
                     if meta_var_nc not in ncdf_root.variables:
                         continue
+
+                    meta_dtype = ncdf_root[meta_var_nc].dtype
                     meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
                     
                     # some extra str formatting
                     if meta_var in ['station_reference', 'station_name', 'station_classification', 
                                     'area_classification']:
-                        if meta_val.dtype != np.str:
-                            if meta_val.dtype != np.dtype(object):
-                                meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
-                                                    for val in meta_val], dtype=np.str)
-                            else:
-                                meta_val = np.array([''.join(val) for val in meta_val])
+                        if (meta_dtype != np.dtype(object)) and (meta_dtype != np.str):
+                            meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
+                                                for val in meta_val], dtype=np.str)
+                        else:
+                            meta_val = np.array([''.join(val) for val in meta_val])
 
                 # GHOST metadata
                 else:
