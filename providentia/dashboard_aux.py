@@ -1195,7 +1195,7 @@ def multispecies_conf(instance):
                                                                     instance.filter_species.values()):
             
             # update menu_current
-            if networkspeci_ii > 0:
+            if ('networkspeci_' + str(networkspeci_ii)) not in instance.multispecies_menu['multispecies']['labels']:
                 instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
 
             # add values
