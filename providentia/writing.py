@@ -1,7 +1,7 @@
 """ Module storing writing functions """
 
 import sys
-
+import copy
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset, num2date
@@ -280,7 +280,13 @@ def export_configuration(prv, cname, separator="||"):
 
     # add information about filter species if any
     if len(prv.filter_species) > 0:
-        options['section'].update({'filter_species': prv.filter_species
+        filter_species = str(copy.deepcopy(prv.filter_species))
+        filter_species = filter_species.replace("[", "(").replace("]", ")")
+        filter_species = filter_species.replace("{", "").replace("}", "")
+        filter_species = filter_species.replace("'", "")
+        filter_species = filter_species.replace(":", "")
+        filter_species = filter_species.replace("|", ":")
+        options['section'].update({'filter_species': filter_species
                                   })
 
     # add information about report
@@ -293,8 +299,7 @@ def export_configuration(prv, cname, separator="||"):
 
     # add other miscellaneous fields
     options['section'].update({'map_extent': ",".join(str(i) for i in prv.map_extent),
-                               'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots),
-                               'plot_characteristics_filename': prv.plot_characteristics_filename
+                               'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots)
                               })
     
     if subsection != None:
