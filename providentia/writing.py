@@ -1,7 +1,7 @@
 """ Module storing writing functions """
 
 import sys
-
+import copy
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset, num2date
@@ -109,9 +109,14 @@ def export_netcdf(canvas_instance, fname):
     # iterate through networkspecies 
     for speci_ii, networkspeci in enumerate(read_instance.networkspecies):
 
-        # get network / species
-        network = networkspeci.split('|')[0]
+        # get species
         speci = networkspeci.split('|')[1]
+
+        # get prefix (name of networkspeci) to be added to variable names
+        if read_instance.reading_ghost:
+            var_prefix = networkspeci
+        else:
+            var_prefix = networkspeci.replace('/', '_')
 
         # get some key variables for speci
         parameter_details = parameter_dictionary[speci]
@@ -163,7 +168,7 @@ def export_netcdf(canvas_instance, fname):
          
         # data
         current_data_type = type_map[data_format_dict[speci]['data_type']]
-        var = fout.createVariable('{}_data'.format(networkspeci), current_data_type, 
+        var = fout.createVariable('{}_data'.format(var_prefix), current_data_type, 
                                   ('data_label', 'station', 'time',))
         
         # set attributes
@@ -204,10 +209,13 @@ def export_netcdf(canvas_instance, fname):
             metadata_arr = read_instance.metadata_in_memory[networkspeci][stations_after_filter_inds, :]
         else:
             metadata_arr = read_instance.metadata_in_memory[networkspeci]
+        
         for metadata_var in metadata_arr.dtype.names:
-            current_data_type = type_map[metadata_format_dict[metadata_var]['data_type']]
-            var = fout.createVariable('{}_{}'.format(networkspeci, metadata_var), 
+            
+            current_data_type = type_map[metadata_format_dict[metadata_var]['data_type']] 
+            var = fout.createVariable('{}_{}'.format(var_prefix, metadata_var), 
                                       current_data_type, ('station', 'month',))
+
             # set attributes
             var.standard_name = metadata_format_dict[metadata_var]['standard_name']
             var.long_name = metadata_format_dict[metadata_var]['long_name']
@@ -272,7 +280,13 @@ def export_configuration(prv, cname, separator="||"):
 
     # add information about filter species if any
     if len(prv.filter_species) > 0:
-        options['section'].update({'filter_species': prv.filter_species
+        filter_species = str(copy.deepcopy(prv.filter_species))
+        filter_species = filter_species.replace("[", "(").replace("]", ")")
+        filter_species = filter_species.replace("{", "").replace("}", "")
+        filter_species = filter_species.replace("'", "")
+        filter_species = filter_species.replace(":", "")
+        filter_species = filter_species.replace("|", ":")
+        options['section'].update({'filter_species': filter_species
                                   })
 
     # add information about report
@@ -285,8 +299,7 @@ def export_configuration(prv, cname, separator="||"):
 
     # add other miscellaneous fields
     options['section'].update({'map_extent': ",".join(str(i) for i in prv.map_extent),
-                               'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots),
-                               'plot_characteristics_filename': prv.plot_characteristics_filename
+                               'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots)
                               })
     
     if subsection != None:
