@@ -758,9 +758,13 @@ class PopUpWindow(QtWidgets.QWidget):
                                 self.page_memory[menu_type][element][label_ii].textChanged.connect(self.handle_multispecies_params_change)
 
                     # add element to grid (aligned left)
-                    grid.addWidget(self.page_memory[menu_type][element][label_ii], 
-                                   start_row_n+row_n, element_ii+1, QtCore.Qt.AlignLeft)
-
+                    if menu_type == 'multispecies':
+                        grid.addWidget(self.page_memory[menu_type][element][label_ii], 
+                                       start_row_n+row_n, element_ii+1, QtCore.Qt.AlignLeft)
+                    else:
+                        grid.addWidget(self.page_memory[menu_type][element][label_ii], 
+                                       start_row_n+row_n, column_n+element_ii, QtCore.Qt.AlignLeft)
+                
                 # update multispecies filtering fields for each row
                 if menu_type == 'multispecies':
                     self.update_multispecies_fields(label_ii)
@@ -784,20 +788,20 @@ class PopUpWindow(QtWidgets.QWidget):
                         for i, text in enumerate(texts):
                             grid.addWidget(set_formatting(QtWidgets.QLabel(self, text=text), 
                                                           formatting_dict['column_header_label_popup']), 
-                                        0, column_number+i+1, QtCore.Qt.AlignCenter)
+                                           0, column_number+i+1, QtCore.Qt.AlignCenter)
                     elif menu_type == 'rangeboxes':
                         texts = ['Min', 'Max', 'A']
                         for i, text in enumerate(texts):
                             grid.addWidget(set_formatting(QtWidgets.QLabel(self, text=text), 
                                                           formatting_dict['column_header_label_popup']), 
-                                        0, column_number+i+1, QtCore.Qt.AlignCenter)
+                                           0, column_number+i+1, QtCore.Qt.AlignCenter)
                     elif menu_type == 'multispecies':
                         if len(self.menu_current['multispecies']['labels']) > 0:
                             texts = ['Network', 'Matrix', 'Species', 'Min', 'Max', 'Fill value', 'A']
                             for i, text in enumerate(texts):
                                 grid.addWidget(set_formatting(QtWidgets.QLabel(self, text=text), 
                                                               formatting_dict['column_header_label_popup']), 
-                                                1, i, QtCore.Qt.AlignCenter)
+                                               1, i, QtCore.Qt.AlignCenter)
 
             # set horizontal scroll properties
             scroll_area = QtWidgets.QScrollArea() 
@@ -1195,7 +1199,7 @@ def multispecies_conf(instance):
                                                                     instance.filter_species.values()):
             
             # update menu_current
-            if networkspeci_ii > 0:
+            if ('networkspeci_' + str(networkspeci_ii)) not in instance.multispecies_menu['multispecies']['labels']:
                 instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
 
             # add values

@@ -66,7 +66,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     self.from_conf = True
                     self.current_config = self.sub_opts[kwargs['section']]
                 else:
-                    error = 'Error: The section specified in the command line does not exist.'
+                    error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
                     tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
                     tip += 'before the subsection name (e.g. SECTIONA·Spain).'
                     sys.exit(error + '\n' + tip)
@@ -93,6 +93,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
         
+        # set initial filter species
+        self.previous_filter_species = {}
+        self.filter_species = {}
+
         # update variables from defined config file
         if self.current_config:
             for k, val in self.current_config.items():
@@ -100,7 +104,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
-
+        
         # load characteristics per plot type
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
@@ -423,7 +427,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable that blocks updating of MPL canvas until some data has been read
         self.block_MPL_canvas_updates = True
         self.mpl_canvas = MPLCanvas(self)
-                                          
+              
         # initialise configuration bar fields
         self.config_bar_initialisation = True
         self.update_configuration_bar_fields()
@@ -434,6 +438,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # launch with configuriton file?
         if self.from_conf: 
+            
             # read
             self.handle_data_selection_update()
 
@@ -561,10 +566,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update qa / flags checkboxes 
             self.flag_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.flags)
             self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa_per_species[self.selected_species])
-
-            # set initial filter species
-            self.previous_filter_species = {}
-            self.filter_species = {}
              
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
@@ -1229,6 +1230,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_metadata(self)
         aux.update_metadata_fields(self)
 
+        # reset multispecies
+        aux.init_multispecies(self)
+        
         # reset bounds
         species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
         species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
