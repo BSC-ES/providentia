@@ -808,12 +808,16 @@ class ProvidentiaOffline:
 
                         # gather some information about current station
                         self.station_ind += 1
-                        valid_station_references = self.metadata_in_memory[networkspeci]['station_reference'][relevant_station_ind, :]
-                        self.current_station_reference = str(valid_station_references[pd.notnull(valid_station_references)][0])
+                        
                         valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][relevant_station_ind, :]
                         self.current_station_name = str(valid_station_names[pd.notnull(valid_station_names)][0])
+                        
+                        valid_station_references = self.station_references[networkspeci][relevant_station_ind]
+                        self.current_station_reference = str(valid_station_references[pd.notnull(valid_station_references)][0])
+                        
                         current_lons = self.metadata_in_memory[networkspeci]['longitude'][relevant_station_ind, :]
                         self.current_lon = round(current_lons[pd.notnull(current_lons)][0], 2)
+                        
                         current_lats = self.metadata_in_memory[networkspeci]['latitude'][relevant_station_ind, :]
                         self.current_lat = round(current_lats[pd.notnull(current_lats)][0], 2)
                         
