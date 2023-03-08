@@ -721,13 +721,6 @@ class Plot:
                                                       c=z_statistic, transform=self.canvas_instance.datacrs,
                                                       **plot_characteristics['plot'])
         
-        # add gridlines
-        """
-        if 'gridlines' in plot_characteristics:
-            self.canvas_instance.map_gl = relevant_axis.gridlines(crs=self.canvas_instance.datacrs, 
-                                                                  **plot_characteristics['gridlines'])
-            print('add map gl')
-        """
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
             self.track_plot_elements('observations', 'map', 'plot', [self.stations_scatter], bias=False)
