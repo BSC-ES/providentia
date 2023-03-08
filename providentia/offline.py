@@ -975,10 +975,15 @@ class ProvidentiaOffline:
 
                 # set axis title
                 if relevant_axis.get_title() == '':
-                    if self.n_stations == 1:
-                        axis_title_label = '{}\n{} ({} station)'.format(data_label, self.subsection, self.n_stations)
+                    if data_label == 'observations':
+                        label = data_label 
                     else:
-                        axis_title_label = '{}\n{} ({} stations)'.format(data_label, self.subsection, self.n_stations)
+                        label = self.experiments[data_label]
+                    axis_title_label = '{}\n{} '.format(label, self.subsection)
+                    if self.n_stations == 1:
+                        axis_title_label += '(1 station)'
+                    else:
+                        axis_title_label += '({} stations)'.format(self.n_stations)
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
                 # set map extent ? 
