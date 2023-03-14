@@ -72,7 +72,8 @@ class MPLCanvas(FigureCanvas):
 
         # define all possible plots
         self.all_plots = ['legend', 'map', 'timeseries', 'periodic-violin', 'periodic', 
-                          'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot']
+                          'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot',
+                          'taylor']
 
         # parse active dashboard plot string        
         if isinstance(self.read_instance.active_dashboard_plots, str):
@@ -553,7 +554,7 @@ class MPLCanvas(FigureCanvas):
 
     def update_associated_active_dashboard_plot(self, plot_type):
         """ Function that updates a plot associated with selected stations on map. """
-    
+
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
 
@@ -589,12 +590,13 @@ class MPLCanvas(FigureCanvas):
                     xlabel = ''
 
                 # create structure to store data for statsummary plot
-                elif plot_type in ['statsummary']:
+                elif plot_type in ['statsummary', 'taylor']:
                     # get list of statistics to create lists for
                     relevant_zstats = self.plot_characteristics[plot_type]['basic']
                     stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
                     xlabel = ''
                     ylabel = ''
+
                 # setup xlabel / ylabel for other plot_types
                 else:    
                     # set new xlabel
@@ -628,10 +630,23 @@ class MPLCanvas(FigureCanvas):
                         func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], 
                              zstat=zstat, plot_options=plot_options, first_data_label=first_data_label)
                         first_data_label = False
-                    # gather data for statsummary plot
+                    # gather data for statsummary and taylor diagram plots
                     elif plot_type in ['statsummary']:
                         for relevant_zstat in relevant_zstats:
                             stats_df[relevant_zstat].append(self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0])
+                    elif plot_type == 'taylor':
+                        for relevant_zstat in relevant_zstats:
+                            # set value as NaN for correlation for observations
+                            if (data_label == 'observations') and relevant_zstat == 'r':
+                                stat_val = np.NaN
+                            # if relevant stat is expbias stat, then ensure temporal colocation is active
+                            # otherwise set value as NaN
+                            elif (relevant_zstat in expbias_stats) & (not self.read_instance.temporal_colocation):
+                                stat_val = np.NaN
+                            else:
+                                stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
+                            stats_df[relevant_zstat].append(stat_val)
+
                     # other plots
                     else: 
                         if plot_type == 'metadata':
@@ -644,11 +659,16 @@ class MPLCanvas(FigureCanvas):
                              plot_options=plot_options, first_data_label=first_data_label)
                         first_data_label = False
 
-                # make statsummary plot
-                if plot_type in ['statsummary']:
-                    stats_df = pd.DataFrame(data=stats_df, index=self.selected_station_data[self.read_instance.networkspeci])
-                    func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, statsummary=True)
-
+                # make statsummary and taylor diagram plots
+                if plot_type in ['statsummary', 'taylor']:
+                    stats_df = pd.DataFrame(data=stats_df, 
+                                            index=self.selected_station_data[self.read_instance.networkspeci])
+                    if plot_type == 'statsummary':
+                        func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
+                             statsummary=True)
+                    else:
+                        func(ax, stats_df, self.plot_characteristics[plot_type])
+                        
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 if plot_type == 'periodic-violin':
                     self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
@@ -873,6 +893,8 @@ class MPLCanvas(FigureCanvas):
             for relevant_temporal_resolution, sub_ax in ax.items():
                 axs_to_remove.append(sub_ax)
         else:
+            if hasattr(self.plot, 'taylor_polar_relevant_axis') and plot_type == 'taylor':
+               axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
             axs_to_remove.append(ax)
 
         # iterate through axes
@@ -932,6 +954,10 @@ class MPLCanvas(FigureCanvas):
                 ax_to_remove.lines = []
                 ax_to_remove.artists = []
 
+            elif plot_type == 'taylor':
+                ax_to_remove.lines = []
+                ax_to_remove.artists = []
+
             # hide axis
             ax_to_remove.axis('off')
             ax_to_remove.set_visible(False)
@@ -981,6 +1007,10 @@ class MPLCanvas(FigureCanvas):
         elif plot_type == 'boxplot':
             self.boxplot_menu_button.hide()
             self.boxplot_save_button.hide()
+
+        elif plot_type == 'taylor':
+            self.taylor_menu_button.hide()
+            self.taylor_save_button.hide()
 
         # hide interactive elements
         if plot_type in self.interactive_elements:
@@ -1055,7 +1085,11 @@ class MPLCanvas(FigureCanvas):
         elif plot_type == 'boxplot':
             self.boxplot_menu_button.show()
             self.boxplot_save_button.show()
-        
+
+        elif plot_type == 'taylor':
+            self.taylor_menu_button.show()
+            self.taylor_save_button.show()
+
         if plot_type in self.read_instance.active_dashboard_plots:
             position = self.read_instance.active_dashboard_plots.index(plot_type) + 2
             cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
@@ -2398,24 +2432,108 @@ class MPLCanvas(FigureCanvas):
         self.boxplot_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.boxplot_save_button.clicked.connect(self.save_axis_figure_func)
 
+        # TAYLOR DIAGRAM SETTINGS MENU #
+        # add button to taylor diagram to show and hide settings menu
+        self.taylor_menu_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                  formatting_dict['settings_icon'])
+        self.taylor_menu_button.setObjectName('taylor_menu_button')
+        self.taylor_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
+        self.taylor_menu_button.setIconSize(QtCore.QSize(31, 37))
+        self.taylor_menu_button.hide()
+
+        # add white container
+        self.taylor_container = set_formatting(QtWidgets.QWidget(self),
+                                                formatting_dict['settings_container'])
+        self.taylor_container.setGeometry(self.taylor_menu_button.geometry().x()-230,
+                                          self.taylor_menu_button.geometry().y()+25, 
+                                          250, 130)
+        self.taylor_container.hide()
+
+        # add settings label
+        self.taylor_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
+                                                     formatting_dict['settings_label'])
+        self.taylor_settings_label.setGeometry(self.taylor_menu_button.geometry().x()-220, 
+                                               self.taylor_menu_button.geometry().y()+30, 
+                                               230, 20)
+        self.taylor_settings_label.hide()
+
+        # add taylor diagram markersize slider name ('Size') to layout
+        self.taylor_markersize_sl_label = QtWidgets.QLabel('Size', self)
+        self.taylor_markersize_sl_label.setGeometry(self.taylor_menu_button.geometry().x()-220,
+                                                    self.taylor_menu_button.geometry().y()+50, 
+                                                    230, 20)
+        self.taylor_markersize_sl_label.hide()
+
+        # add taylor diagram markersize slider
+        self.taylor_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.taylor_markersize_sl.setObjectName('taylor_markersize_sl')
+        self.taylor_markersize_sl.setMinimum(0)
+        self.taylor_markersize_sl.setMaximum(self.plot_characteristics['taylor']['plot']['markersize']*100)
+        self.taylor_markersize_sl.setValue(self.plot_characteristics['taylor']['plot']['markersize']*10)
+        self.taylor_markersize_sl.setTickInterval(2)
+        self.taylor_markersize_sl.setTracking(False)
+        self.taylor_markersize_sl.setGeometry(self.taylor_menu_button.geometry().x()-220, 
+                                              self.taylor_menu_button.geometry().y()+75, 
+                                              230, 20)
+        self.taylor_markersize_sl.hide()
+
+        # add taylor diagram options name ('Options') to layout
+        self.taylor_options_label = QtWidgets.QLabel("Options", self)
+        self.taylor_options_label.setGeometry(self.taylor_menu_button.geometry().x()-220,
+                                              self.taylor_menu_button.geometry().y()+100, 
+                                              230, 20)
+        self.taylor_options_label.hide()
+
+        # add taylor diagram options checkboxes
+        self.taylor_options = CheckableComboBox(self)
+        self.taylor_options.setObjectName('taylor_options')
+        self.taylor_options.addItems(self.plot_characteristics['taylor']['plot_options'])        
+        self.taylor_options.setGeometry(self.taylor_menu_button.geometry().x()-220, 
+                                        self.taylor_menu_button.geometry().y()+125, 
+                                        230, 20)
+        self.taylor_options.currentTextChanged.connect(self.update_plot_option)
+        self.taylor_options.hide()
+
+        # add taylor figure save button
+        self.taylor_save_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
+        self.taylor_save_button.setObjectName('taylor_save_button')
+        self.taylor_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        self.taylor_save_button.setIconSize(QtCore.QSize(20, 20))
+        self.taylor_save_button.hide()
+
+        # set show/hide actions
+        self.taylor_elements = [self.taylor_container, self.taylor_settings_label, 
+                                 self.taylor_markersize_sl_label, self.taylor_markersize_sl,
+                                 self.taylor_options_label, self.taylor_options]
+        self.interactive_elements['taylor'] = {'button': self.taylor_menu_button, 
+                                                'hidden': True,
+                                                'elements': self.taylor_elements,
+                                                'markersize_sl': [self.taylor_markersize_sl],
+                                                'opacity_sl': [],
+                                                'linewidth_sl': []
+                                               }
+        self.taylor_menu_button.clicked.connect(self.interactive_elements_button_func)
+        self.taylor_markersize_sl.valueChanged.connect(self.update_markersize_func)
+        self.taylor_save_button.clicked.connect(self.save_axis_figure_func)
+
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
         self.menu_buttons = [self.map_menu_button, self.timeseries_menu_button,
                              self.periodic_menu_button, self.periodic_violin_menu_button,
                              self.metadata_menu_button, self.distribution_menu_button, 
                              self.scatter_menu_button, self.statsummary_menu_button, 
-                             self.boxplot_menu_button]
+                             self.boxplot_menu_button, self.taylor_menu_button]
 
         self.save_buttons = [self.map_save_button, self.timeseries_save_button,
                              self.periodic_save_button, self.periodic_violin_save_button,
                              self.metadata_save_button, self.distribution_save_button, 
                              self.scatter_save_button, self.statsummary_save_button,
-                             self.boxplot_save_button]
+                             self.boxplot_save_button, self.taylor_save_button]
 
         self.elements = [self.map_elements, self.timeseries_elements, 
                          self.periodic_elements, self.periodic_violin_elements,
                          self.metadata_elements, self.distribution_elements, 
                          self.scatter_elements, self.statsummary_elements, 
-                         self.boxplot_elements]
+                         self.boxplot_elements, self.taylor_elements]
 
         # make sure white containers are above buttons
         for element in self.elements:
@@ -2784,21 +2902,26 @@ class MPLCanvas(FigureCanvas):
                                         # call plotting function
                                         if plot_type in ['periodic']:
                                             func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
-                                                self.plot_characteristics[plot_type], zstat=zstat, plot_options=self.read_instance.current_plot_options[plot_type], 
+                                                self.plot_characteristics[plot_type], zstat=zstat, 
+                                                plot_options=self.read_instance.current_plot_options[plot_type], 
                                                 first_data_label=first_data_label)
                                         else: 
                                             func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
-                                                self.plot_characteristics[plot_type], plot_options=self.read_instance.current_plot_options[plot_type], 
+                                                self.plot_characteristics[plot_type], 
+                                                plot_options=self.read_instance.current_plot_options[plot_type], 
                                                 first_data_label=first_data_label)
                                         first_data_label = False
 
                             # make statsummary bias plot (if not previously made)
                             if (plot_type in ['statsummary']) & ('bias' not in self.plot_elements[plot_type]):
                                 if len(stats_df[list(stats_df.keys())[0]]) > 0:
-                                    index = [data_label for data_label in self.selected_station_data[self.read_instance.networkspeci] if data_label != 'observations']
-                                    stats_df = pd.DataFrame(data=stats_df,index=index)
+                                    index = [data_label for data_label 
+                                             in self.selected_station_data[self.read_instance.networkspeci] 
+                                             if data_label != 'observations']
+                                    stats_df = pd.DataFrame(data=stats_df, index=index)
                                     func(self.plot_axes[plot_type], stats_df, self.plot_characteristics[plot_type], 
-                                         plot_options=self.read_instance.current_plot_options[plot_type], statsummary=True)
+                                         plot_options=self.read_instance.current_plot_options[plot_type], 
+                                         statsummary=True)
 
                             # create other active plot option elements for bias plot (if do not already exist)
                             self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
@@ -2908,19 +3031,23 @@ class MPLCanvas(FigureCanvas):
         """ Update markers size for each plot type. """
         
         # set markersize
-        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin']:
-
+        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin', 'taylor']:
+            
             if isinstance(ax, dict):
                 for sub_ax in ax.values():
                     for line in sub_ax.lines:
                         line.set_markersize(markersize)
             else:
-                for line in ax.lines:
-                    line.set_markersize(markersize)
+                if plot_type == 'taylor':
+                    for line in self.plot.taylor_polar_relevant_axis.lines:
+                        line.set_markersize(markersize)
+                else:
+                    for line in ax.lines:
+                        line.set_markersize(markersize)
 
             # update characteristics per plot type
             # this is made to keep the changes when selecting stations with lasso
-            if plot_type in ['timeseries', 'periodic', 'scatter']:
+            if plot_type in ['timeseries', 'periodic', 'scatter', 'taylor']:
                 self.plot_characteristics[plot_type]['plot']['markersize'] = markersize
             elif plot_type == 'periodic-violin':
                 self.plot_characteristics[plot_type]['plot']['p50']['markersize'] = markersize

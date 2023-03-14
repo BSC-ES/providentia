@@ -16,6 +16,8 @@ import datetime
 import json
 import sys
 import matplotlib
+import mpl_toolkits.axisartist.floating_axes as fa
+from matplotlib.projections import PolarAxes
 from functools import partial
 from collections import OrderedDict
 from weakref import WeakKeyDictionary
@@ -689,7 +691,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # update available layout options
         layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
-                          'periodic-violin', 'scatter', 'statsummary', 'timeseries']
+                          'periodic-violin', 'scatter', 'statsummary', 'timeseries',
+                          'taylor']
 
         # remove scatter plots from list if the temporal colocation is not active
         if not self.temporal_colocation:
@@ -876,6 +879,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def update_plot_axis(self, canvas_instance, changed_position, changed_plot_type):
         """ Update plot axis position from layout options."""
 
+        # since we have no data, we need to use a random reference to initialize the polar axes
+        # the axis will be updated when we create the taylor diagram
+        reference_std_dev = 10
+
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
@@ -885,6 +892,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=30))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=34))
+            elif changed_plot_type == 'taylor':
+                tmax, smin, smax, gl1, tf1 = canvas_instance.plot.get_taylor_diagram_info(reference_std_dev)
+                ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
+                                                   extremes=(0, tmax, smin, smax),
+                                                   grid_locator1=gl1, tick_formatter1=tf1)
+                rect = canvas_instance.gridspec.new_subplotspec((10, 60), rowspan=38, colspan=18)
+                ax = fa.FloatingSubplot(canvas_instance.figure, rect, grid_helper=ghelper)
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(ax)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=49))
             
@@ -897,6 +912,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 0), rowspan=18, colspan=18))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 10), rowspan=38, colspan=19))
+            elif changed_plot_type == 'taylor':
+                tmax, smin, smax, gl1, tf1 = canvas_instance.plot.get_taylor_diagram_info(reference_std_dev)
+                ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
+                                                   extremes=(0, tmax, smin, smax),
+                                                   grid_locator1=gl1, tick_formatter1=tf1)
+                rect = canvas_instance.gridspec.new_subplotspec((60, 5), rowspan=38, colspan=18)
+                ax = fa.FloatingSubplot(canvas_instance.figure, rect, grid_helper=ghelper)
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(ax)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=38, colspan=29))
 
@@ -909,6 +932,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 35), rowspan=18, colspan=18))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 45), rowspan=38, colspan=19))
+            elif changed_plot_type == 'taylor':
+                tmax, smin, smax, gl1, tf1 = canvas_instance.plot.get_taylor_diagram_info(reference_std_dev)
+                ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
+                                                   extremes=(0, tmax, smin, smax),
+                                                   grid_locator1=gl1, tick_formatter1=tf1)
+                rect = canvas_instance.gridspec.new_subplotspec((60, 40), rowspan=38, colspan=18)
+                ax = fa.FloatingSubplot(canvas_instance.figure, rect, grid_helper=ghelper)
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(ax)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=29))
             
@@ -921,6 +952,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 70), rowspan=18, colspan=18))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 80), rowspan=38, colspan=19))
+            elif changed_plot_type == 'taylor':
+                tmax, smin, smax, gl1, tf1 = canvas_instance.plot.get_taylor_diagram_info(reference_std_dev)
+                ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
+                                                   extremes=(0, tmax, smin, smax),
+                                                   grid_locator1=gl1, tick_formatter1=tf1)
+                rect = canvas_instance.gridspec.new_subplotspec((60, 75), rowspan=38, colspan=18)
+                ax = fa.FloatingSubplot(canvas_instance.figure, rect, grid_helper=ghelper)
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(ax)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=29))
 

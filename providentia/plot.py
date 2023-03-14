@@ -13,6 +13,9 @@ from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
+from matplotlib.projections import PolarAxes
+import mpl_toolkits.axisartist.floating_axes as fa
+import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
 import scipy.stats as st
@@ -1300,6 +1303,92 @@ class Plot:
                 self.track_plot_elements('observations', 'statsummary', 'plot', [table], bias=bias)
             else:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
+    
+    def get_taylor_diagram_info(self, reference_std_dev, srange=(0, 1.5)):
+        
+        # correlation labels
+        rlocs = np.array(self.canvas_instance.plot_characteristics['taylor']['rlocs'])
+
+        # diagram limited to positive correlations
+        tmax = np.pi/2
+
+        # convert correlation values into polar angles
+        tlocs = np.arccos(rlocs)
+        gl1 = gf.FixedLocator(tlocs)
+        tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
+
+        # get standard deviation axis extent
+        smin = srange[0] * reference_std_dev
+        smax = srange[1] * reference_std_dev
+
+        return tmax, smin, smax, gl1, tf1
+
+    def get_reference_std_dev(self):
+        
+        # reference dataset
+        x = np.linspace(0, 4*np.pi, 100)
+        data = np.sin(x)
+        reference_std_dev = data.std(ddof=1)
+
+        return reference_std_dev
+
+    def make_taylor(self, relevant_axis, stats_df, plot_characteristics, 
+                    plot_options=[], first_data_label=False):
+        # https://gist.github.com/ycopin/3342888
+        
+        print(stats_df)
+        
+        # get info
+        reference_std_dev = stats_df['StdDev'][0]
+        tmax, smin, smax, gl1, tf1 = self.get_taylor_diagram_info(reference_std_dev)
+
+        # update gridliner and standard deviation range
+        # relevant_axis.get_grid_helper().update_grid_finder(
+        #     extreme_finder=fa.ExtremeFinderFixed((0, tmax, smin, smax)),
+        #     grid_locator1=gl1, tick_formatter1=tf1)
+        # relevant_axis.clear()
+        # relevant_axis.adjust_axes_lim()
+        
+        # adjust top axis
+        relevant_axis.axis["top"].label.set_text("Correlation")
+        relevant_axis.axis["top"].set_axis_direction("bottom")
+        relevant_axis.axis["top"].toggle(ticklabels=True, label=True)
+        relevant_axis.axis["top"].major_ticklabels.set_axis_direction("top")
+        relevant_axis.axis["top"].label.set_axis_direction("top")
+        
+        # adjust left axis
+        relevant_axis.axis["left"].label.set_text("Standard deviation")
+        relevant_axis.axis["left"].set_axis_direction("bottom")
+
+        # adjust right axis
+        relevant_axis.axis["right"].set_axis_direction("top")
+        relevant_axis.axis["right"].toggle(ticklabels=True)
+        relevant_axis.axis["right"].major_ticklabels.set_axis_direction("left")
+
+        # adjust bottom axis
+        relevant_axis.axis["bottom"].toggle(ticklabels=False, label=False)
+
+        # add grid
+        relevant_axis.grid()
+
+        # get axis in polar coordinates
+        self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
+
+        # add reference contour
+        ref_x = np.linspace(0, tmax)
+        ref_y = np.zeros_like(ref_x) + reference_std_dev
+        self.taylor_polar_relevant_axis.plot(ref_x, ref_y, plot_characteristics['contour']['fmt'])
+
+        # add models
+        stats_df_exp = stats_df.drop(index=('observations'))
+        for exp_label, stddev, corrcoef in zip(stats_df_exp.index, 
+                                               stats_df_exp['StdDev'], 
+                                               stats_df_exp['r']):
+            self.taylor_polar_relevant_axis.plot(np.arccos(corrcoef), stddev,
+                                                 **plot_characteristics['plot'],
+                                                 mfc=self.read_instance.plotting_params[exp_label]['colour'], 
+                                                 mec=self.read_instance.plotting_params[exp_label]['colour'],
+                                                 label=exp_label) 
 
     def log_axes(self, relevant_axis, log_ax, plot_characteristics, undo=False):
         """ Log plot axes.
