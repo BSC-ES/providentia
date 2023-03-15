@@ -124,9 +124,11 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                 
                 # get array for specific data label
                 data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:])
+                
                 # temporally colocate data array
                 if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                     data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                
                 # cut data array for station indices
                 data_array = data_array[read_instance.station_inds,:]
                     
@@ -150,6 +152,9 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                 # resample data to output resolution
                 if read_instance.resampling:
                     canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].resample(temporal_resolution_to_output_code, axis=0).mean()
+
+                # apply calibration operation (if any)
+                apply_calibration_factor(read_instance, canvas_instance, networkspeci, data_label)
 
                 # get min / max across all selected station data per network / species
                 current_min = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].min()
@@ -828,3 +833,19 @@ def get_z_statistic_info(plot_type=None, zstat=None):
         z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
 
     return zstat, base_zstat, z_statistic_type, z_statistic_sign
+
+def apply_calibration_factor(read_instance, canvas_instance, networkspeci, data_label):
+
+    if hasattr(read_instance, 'calibration_factor'):
+        if '-' in read_instance.calibration_factor:
+            canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] -= \
+                float(read_instance.calibration_factor.replace('-', ''))
+        elif '*' in read_instance.calibration_factor:
+            canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] *= \
+                float(read_instance.calibration_factor.replace('*', ''))
+        elif '/' in read_instance.calibration_factor:
+            canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] /= \
+                float(read_instance.calibration_factor.replace('/', ''))
+        else:
+            canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] += \
+                float(read_instance.calibration_factor)
