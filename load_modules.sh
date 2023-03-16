@@ -4,7 +4,7 @@ module purge
 # CTE Power9
 if [ "${BSC_MACHINE}" == "power" ]; then
     module load Python/3.7.0-foss-2018b \
-     Cartopy/0.17.0-foss-2018b-Python-3.7.0 \
+     Cartopy/0.20.3-foss-2018b-Python-3.7.0 \
      cftime/1.0.3.4-foss-2018b-Python-3.7.0 \
      matplotlib/3.1.1-foss-2018b-Python-3.7.0 \
      netcdf4-python/1.5.1.2-foss-2018b-Python-3.7.0 \
@@ -35,6 +35,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
      pyproj/3.2.1-foss-2019b-Python-3.7.4
 
 # Workstations
+# TODO: Review modules
 else
     module load Python/3.7.3-foss-2015a \
      ConfigArgParse/0.14.0-foss-2015a-Python-3.7.3 \
