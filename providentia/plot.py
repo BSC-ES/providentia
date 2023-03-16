@@ -1463,8 +1463,9 @@ class Plot:
             stats_annotate = []
             for zstat in stats:
                 if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
-                    stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
-                                          plot_characteristics['annotate_text']['round_decimal_places'])))
+                    stats_annotate.append("{0}: {1:.{2}f}".format(zstat, 
+                        self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0],
+                        plot_characteristics['annotate_text']['round_decimal_places']))
 
             # show number of stations if defined
             if plot_characteristics['annotate_text']['n_stations']:
