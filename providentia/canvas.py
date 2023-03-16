@@ -695,7 +695,8 @@ class MPLCanvas(FigureCanvas):
                 for data_label in self.selected_station_data[self.read_instance.networkspeci].keys():
                     dates = self.selected_station_data[self.read_instance.networkspeci][data_label]['pandas_df'].index
                     if len(dates) < 2:
-                        msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
+                        msg = 'Extend the time range or enhance the resolution '
+                        msg += '(e.g. from monthly to daily) to create plots. '
                         msg += 'Plots will only be created when period is longer than 2 timesteps.'
                         show_message(msg)
                         return
@@ -704,8 +705,15 @@ class MPLCanvas(FigureCanvas):
                 for plot_type in self.read_instance.active_dashboard_plots:
 
                     # if there are no temporal resolutions (only yearly), skip periodic plots
-                    if (plot_type in ['periodic', 'periodic-violin']) and (not self.read_instance.relevant_temporal_resolutions):
+                    if ((plot_type in ['periodic', 'periodic-violin']) and 
+                        (not self.read_instance.relevant_temporal_resolutions)):
                         msg = 'It is not possible to make periodic plots using annual resolution data.'
+                        show_message(msg)
+                        continue
+                    
+                    # if temporal colocation is turned off, skip scatter plot
+                    if (plot_type == 'scatter') and (not self.read_instance.temporal_colocation):
+                        msg = 'It is not possible to make scatter plots without activating the temporal colocation.'
                         show_message(msg)
                         continue
 
