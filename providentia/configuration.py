@@ -326,7 +326,7 @@ class ProvConfiguration:
                     # iterate through networkspecies, saving list of limits per networkspecies
                     filter_networkspecies_dict = {}
                     for networkspeci_split in networkspecies_split:
-
+                        print(networkspeci_split)
                         networkspeci_split_2 = networkspeci_split.split('(')
 
                         # get networkspeci
@@ -346,8 +346,13 @@ class ProvConfiguration:
                             filter_species_fill_value = np.nan
 
                         # save limits per networkspecies
-                        filter_networkspecies_dict[networkspeci] = [lower_limit, upper_limit, filter_species_fill_value]
-
+                        if networkspeci in filter_networkspecies_dict:
+                             filter_networkspecies_dict[networkspeci].append([lower_limit, upper_limit, 
+                                                                              filter_species_fill_value])
+                        else:
+                            filter_networkspecies_dict[networkspeci] = [[lower_limit, upper_limit, 
+                                                                         filter_species_fill_value]]
+                    
                     return filter_networkspecies_dict
 
         elif key == 'lower_bound':
