@@ -406,6 +406,12 @@ class ProvConfiguration:
             if isinstance(value, str):
                 return value.strip()
 
+        elif key == 'calibration_factor':
+            # parse calibration factor
+
+            if np.issubdtype(type(value), np.number):
+                return str(value)
+
         # if no special parsing treatment for variable, simply return value
         return value
 
