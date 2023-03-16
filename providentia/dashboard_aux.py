@@ -1195,13 +1195,14 @@ def multispecies_conf(instance):
     """
 
     if hasattr(instance, 'filter_species'):
-        for (networkspeci_ii, networkspeci), networkspeci_bounds in zip(enumerate(instance.filter_species.keys()),
-                                                                     instance.filter_species.values()):
+        filter_species = copy.deepcopy(instance.filter_species)
+        print('filter species', filter_species)
+        for (networkspeci_ii, networkspeci), networkspeci_bounds in zip(enumerate(filter_species.keys()),
+                                                                        filter_species.values()):
 
             for bounds in networkspeci_bounds:
 
-                print('i', networkspeci_ii)
-                print(networkspeci, bounds)
+                print('MULTISPECIES_CONF', 'i', networkspeci_ii)
 
                 # update menu_current
                 if ('networkspeci_' + str(networkspeci_ii)) not in instance.multispecies_menu['multispecies']['labels']:
@@ -1253,8 +1254,7 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
     current_upper = instance.selected_widget_upper[label_ii]
     current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
     
-    print('HERE')
-    print(label_ii, current_lower, current_upper)
+    print('UPDATE_FILTER_SPECIES', label_ii, current_lower, current_upper)
 
     # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
     if add_filter_species:
@@ -1262,8 +1262,13 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
         # add or update networkspeci
         # check selected lower and upper bounds and fill value are numbers or nan
         try:
-            instance.filter_species[networkspeci] = [[float(current_lower), float(current_upper),
-                                                      float(current_filter_species_fill_value)]]
+            if not instance.filter_species:
+                if networkspeci in instance.filter_species:
+                    instance.filter_species[networkspeci].append([float(current_lower), float(current_upper),
+                                                                float(current_filter_species_fill_value)])
+                else:
+                    instance.filter_species[networkspeci] = [[float(current_lower), float(current_upper),
+                                                            float(current_filter_species_fill_value)]]
             print(instance.filter_species)
 
         # if any of the fields are not numbers, return from function
