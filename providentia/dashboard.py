@@ -41,10 +41,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     resized = QtCore.pyqtSignal()
     move = QtCore.pyqtSignal()
 
-    # make sure that we are using Qt5 backend with matplotlib
-    matplotlib.use('Qt5Agg')
-    register_matplotlib_converters()
-
     def __init__(self, **kwargs):
 
         # allow access to methods of parent class QtWidgets.QWidget
