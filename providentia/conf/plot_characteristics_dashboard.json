@@ -245,7 +245,7 @@
                                      "exp_labels": true, "color": "", "round_decimal_places": 2},
                    "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
                    "group_widths": {"singlespecies":0.7, "multispecies":0.9}, 
-                   "plot": {"patch_artist": true, "manage_xticks": false, "showfliers": false},
+                   "plot": {"patch_artist": true, "manage_ticks": false, "showfliers": false},
                    "plot_options": ["annotate", "logy"]},
 
        "heatmap": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"}, 
