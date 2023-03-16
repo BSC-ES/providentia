@@ -1253,23 +1253,26 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
     current_lower = instance.selected_widget_lower[label_ii]
     current_upper = instance.selected_widget_upper[label_ii]
     current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
-    
-    print('UPDATE_FILTER_SPECIES', label_ii, current_lower, current_upper)
+    current_apply = instance.selected_widget_apply[label_ii]
+
+    print('UPDATE_FILTER_SPECIES', current_lower, current_upper, current_filter_species_fill_value)
 
     # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
     if add_filter_species:
-
+        print('ADD')
         # add or update networkspeci
         # check selected lower and upper bounds and fill value are numbers or nan
         try:
-            if not instance.filter_species:
-                if networkspeci in instance.filter_species:
-                    instance.filter_species[networkspeci].append([float(current_lower), float(current_upper),
+            print(networkspeci in instance.filter_species)
+            print('Before:', instance.filter_species)
+            if networkspeci in instance.filter_species:
+                instance.filter_species[networkspeci].append([float(current_lower), float(current_upper),
                                                                 float(current_filter_species_fill_value)])
-                else:
-                    instance.filter_species[networkspeci] = [[float(current_lower), float(current_upper),
+            else:
+                instance.filter_species[networkspeci] = [[float(current_lower), float(current_upper),
                                                             float(current_filter_species_fill_value)]]
-            print(instance.filter_species)
+            
+            print('After:', instance.filter_species)
 
         # if any of the fields are not numbers, return from function
         except ValueError:
@@ -1289,10 +1292,18 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
 
     # if apply button is unchecked, remove networkspecies from filter_species
     else:
+        print('REMOVE')
         # remove from filter_species
         if networkspeci in instance.filter_species.keys():
-            del instance.filter_species[networkspeci]
-
+            for networkspeci_ii, networkspeci in enumerate(instance.filter_species[networkspeci]):
+                print('Before:', instance.filter_species)
+                print(networkspeci_ii, networkspeci)
+                if ((float(current_lower) == instance.filter_species[networkspeci][networkspeci_ii][0]) 
+                     and (float(current_upper) == instance.filter_species[networkspeci][networkspeci_ii][1])
+                     and (float(current_filter_species_fill_value) == instance.filter_species[networkspeci][networkspeci_ii][2])):
+                    del instance.filter_species[networkspeci][networkspeci_ii]
+                print('After:', instance.filter_species)
+        
         # remove from qa_per_species
-        if speci in instance.qa_per_species:
+        if (speci in instance.qa_per_species) and (networkspeci not in instance.filter_species.keys()):
             del instance.qa_per_species[speci]
