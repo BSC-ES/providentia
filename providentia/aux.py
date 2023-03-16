@@ -833,8 +833,6 @@ def update_plotting_parameters(instance):
 
         :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
         :type instance: object
-        :param data_label: label of data array
-        :type data_label: text
     """
 
     # generate a list of RGB tuples for number of experiments there are
