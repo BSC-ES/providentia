@@ -62,17 +62,20 @@ class DataFilter:
             inds_to_filter = np.full(self.read_instance.data_in_memory_filtered[self.read_instance.networkspecies[0]][self.obs_index,:,:].shape, False)    
 
             # iterate through all species to filter by
-            for filter_networkspeci, speci_limits in self.read_instance.filter_species.items():
+            for filter_networkspeci, speci_all_limits in self.read_instance.filter_species.items():
+                
+                # initialise array with fill values
+                filter_species_fill_values = []
 
-                # get where data is outside bounds, or NaN
-                for speci_limit in speci_limits:
+                # get where data is outside bounds or NaN
+                for speci_limit in speci_all_limits:
 
                     # get lower and upper limits for species
                     lower_limit = speci_limit[0]
                     upper_limit = speci_limit[1]
-                    filter_species_fill_value = speci_limit[2]
+                    filter_species_fill_values.append(speci_limit[2])
 
-                    # get condition
+                    # get filter conditions
                     if filter_networkspeci in self.read_instance.networkspecies:
                         filter_conditions = (self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] < lower_limit,
                                              self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] > upper_limit,
@@ -81,14 +84,36 @@ class DataFilter:
                         filter_conditions = (self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < lower_limit,
                                              self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > upper_limit,
                                              np.isnan(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:]))
-                    
-                    # update inds_to_filter array, making True all instances where have data outside bounds
-                    invalid_inds_per_species = np.logical_or.reduce(filter_conditions)
-                    inds_to_filter = np.any([inds_to_filter, invalid_inds_per_species], axis=0)
 
-                    # set all inds to filter as NaN for all networkspecies in memory
-                    for networkspeci in self.read_instance.networkspecies:
-                        self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
+                    # stack conditions (if there are multiple bounds)
+                    if speci_limit == speci_all_limits[0]:
+                        invalid_inds_per_species = np.logical_or.reduce(filter_conditions)
+                    else:
+                        if len(invalid_inds_per_species.shape) != len(np.logical_or.reduce(filter_conditions).shape):
+                            invalid_inds_per_species = np.concatenate((invalid_inds_per_species, 
+                                                                       np.logical_or.reduce(filter_conditions)[np.newaxis, :]), axis=0)
+                        else:
+                            invalid_inds_per_species = np.stack((invalid_inds_per_species, 
+                                                                 np.logical_or.reduce(filter_conditions)))
+
+                # aggregate filter conditions (if there are multiple bounds)
+                if len(invalid_inds_per_species.shape) == 3:
+                    invalid_inds_per_species = np.logical_and.reduce(invalid_inds_per_species) 
+                
+                # update inds_to_filter array, making True all instances where we have data outside of bounds
+                inds_to_filter = np.any([inds_to_filter, invalid_inds_per_species], axis=0)
+
+                # get fill value
+                filter_species_fill_value = filter_species_fill_values[0]
+                if len(np.unique(filter_species_fill_values)) != 1:
+                    msg = 'There cannot be multiple fill values for the same network-species. '
+                    msg += 'The first defined fill value ({0}) will be used '.format(filter_species_fill_value)
+                    msg += 'to filter by {0}.'.format(filter_networkspeci)
+                    show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+
+                # set all inds to filter as NaN for all networkspecies in memory
+                for networkspeci in self.read_instance.networkspecies:
+                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
                 
     def filter_data_limits(self):
         """ Filter out (set to NaN) data which exceed the lower/upper limits. """
