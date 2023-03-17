@@ -7,9 +7,8 @@
                  "periodic-MB", "periodic-StdDev_bias", "periodic-NMB", "periodic-NME", "periodic-RMSE", "periodic-r",
                  "distribution", "distribution_bias", "scatter"],
     
-    "operational": ["timeseries_annotate", "periodic-violin_annotate", "scatter",
-                    "map-MB_annotate", "map-RMSE_annotate", "map-r_annotate", "map-r2_annotate",
-                    "heatmap-MB", "heatmap-RMSE", "heatmap-r", "heatmap-r2"],
+    "operational": ["timeseries", "statsummary","periodic-violin", "scatter_annotate",
+                    "map-MB_annotate", "map-RMSE_annotate", "map-r_annotate", "map-r2_annotate"],
 
     "dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "distribution", "distribution_bias",
             "statsummary", "statsummary_bias", 
@@ -19,8 +18,9 @@
 
     "sizedist": ["boxplot_multispecies"],
 
-    "debug": ["metadata", "map-p50", "map-p95_bias", "map-RMSE", "timeseries", "timeseries_bias", "periodic-Mean", 
-              "periodic-p50_bias", "periodic-r", "periodic-violin", "distribution", "distribution_bias", "boxplot", 
-              "heatmap-p50_annotate","heatmap-p95_bias_annotate","heatmap-r_annotate", "table-p99","table-Mean_bias", 
-              "statsummary", "statsummary_bias", "scatter_annotate"]
+    "cams2_40": ["metadata", "timeseries_annotate", "timeseries_bias", "periodic-violin", "periodic-r", "periodic-r2", 
+                 "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
+
+    "debug": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
+              "station": ["timeseries", "scatter"]}
 }

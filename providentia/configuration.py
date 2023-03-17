@@ -7,14 +7,13 @@ import os
 import sys
 import re
 import subprocess
-
-from .aux import check_for_ghost, multispecies_mapping, get_default_qa
-
 import numpy as np
 import pandas as pd
 
-MACHINE = os.environ.get('BSC_MACHINE', '')
+from .aux import check_for_ghost, multispecies_mapping, show_message
+from .read_aux import get_default_qa
 
+MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 def parse_path(dir, f):
@@ -44,9 +43,12 @@ class ProvConfiguration:
             'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                       '3hourly_instantaneous', '6hourly_instantaneous',
                                       'daily', 'monthly'],
-            'available_networks': ['AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN','CHILE_SINCA',
-                                   'EANET','EBAS','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX',
-                                   'MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA',
+            'available_networks': ['GHOST','AERONET_v3_lev1.5','AERONET_v3_lev2.0','CANADA_NAPS','CAPMoN',
+                                   'CHILE_SINCA','EANET','EBAS', 'EBAS-ACTRIS', 'EBAS-AMAP', 'EBAS-CAMP', 'EBAS-EMEP',
+                                   'EBAS-EUCAARI', 'EBAS-EUSAAR', 'EBAS-HELCOM', 'EBAS-HTAP', 'EBAS-Independent', 
+                                   'EBAS-MOE','EBAS-NILU', 'EBAS-NOAA_ESRL', 'EBAS-OECD', 'EBAS-UK_DECC', 
+                                   'EBAS-WMO_WDCA', 'EBAS-WMO_WDCRG','EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES',
+                                   'MEXICO_CDMX','MITECO','NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA',
                                    'SEARCH','UK_AIR','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN',
                                    'WMO_WDCGG'], 
             'network': None,
@@ -69,6 +71,8 @@ class ProvConfiguration:
             'report_title': 'Providentia Offline Report',
             'report_filename': 'PROVIDENTIA_Report',
             'active_dashboard_plots': None,
+            'resampling': False,
+            'resampling_resolution': None,
             'plot_characteristics_filename': '',
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline',
@@ -310,30 +314,46 @@ class ProvConfiguration:
 
             # per networkspecies to filter by, save in dict as networkspecies:[lower_limit, upper_limit] 
             if isinstance(value, str):
+
                 # strip all whitespace
                 value_strip = "".join(value.split())
+
                 # return empty dict if empty str
                 if value_strip == '':
                     return {}
                 else:
                     # split per networkspecies
                     networkspecies_split = value_strip.split('),')
+
                     # iterate through networkspecies, saving list of limits per networkspecies
                     filter_networkspecies_dict = {}
                     for networkspeci_split in networkspecies_split:
+
                         networkspeci_split_2 = networkspeci_split.split('(')
+
                         # get networkspeci
                         networkspeci = networkspeci_split_2[0].replace(':','|')
+
                         # get lower and upper limits
                         networkspeci_split_3 = networkspeci_split_2[1].split(',')
                         lower_limit = float(networkspeci_split_3[0])
-                        upper_limit = float(networkspeci_split_3[1].replace(')',''))
+                        
+                        # if it has fill value
+                        if len(networkspeci_split_3) > 2:
+                            upper_limit = float(networkspeci_split_3[1])
+                            filter_species_fill_value = float(networkspeci_split_3[2].replace(')',''))
+                        # only bounds, fill value will be nan
+                        else:
+                            upper_limit = float(networkspeci_split_3[1].replace(')',''))
+                            filter_species_fill_value = np.nan
+
                         # save limits per networkspecies
-                        filter_networkspecies_dict[networkspeci] = [lower_limit, upper_limit]
+                        filter_networkspecies_dict[networkspeci] = [lower_limit, upper_limit, filter_species_fill_value]
+
                     return filter_networkspecies_dict
 
         elif key == 'lower_bound':
-            #parse lower_bound
+            # parse lower_bound
             
             # if not None then set lower_bound by that given
             # make sure it is a list of values
@@ -364,7 +384,7 @@ class ProvConfiguration:
                     return [np.float32(c.strip()) for c in value.split(',')]
                 elif (isinstance(value, int)) or (isinstance(value, float)):
                     return [value]
-                #otherwise must be a already a list of values
+                # otherwise must be a already a list of values
                 else:
                     return value
             # upper_bound empty?
@@ -382,6 +402,36 @@ class ProvConfiguration:
                 else:
                     return [value.strip()]
 
+        elif key == 'resampling_resolution':
+            # parse resampling resolution
+
+            if isinstance(value, str):
+                return value.strip()
+
+        elif key == 'calibration_factor':
+            # parse calibration factor
+            
+            if isinstance(value, str):
+
+                # strip all whitespace
+                value_strip = "".join(value.split())
+
+                calibration_by_experiment = False
+                for experiment in self.read_instance.experiments.keys():
+                    if experiment in value_strip:
+                        calibration_by_experiment = True
+                        break
+                
+                if calibration_by_experiment:
+                    calibration_factor_dict = {}
+                    for i, experiment in enumerate(self.read_instance.experiments.keys()):
+                        calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
+                        calibration_factor_dict[experiment] = calibration_factor_exp
+                    return calibration_factor_dict
+                else:
+                    if np.issubdtype(type(value), np.number):
+                        return str(value)
+
         # if no special parsing treatment for variable, simply return value
         return value
 
@@ -391,17 +441,17 @@ class ProvConfiguration:
         # check have network information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:
-            default = ['EBAS']
-            if self.read_instance.offline:
-                print('Warning: "network" field not defined in .conf file. Using default: {}'.format(default))
+            default = ['GHOST']
+            msg = 'Network (network) was not defined in the configuration file. Using {} as default.'.format(default)
+            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
             self.read_instance.network = default
 
         # check have species information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.species:
             default = ['sconco3']
-            if self.read_instance.offline:
-                print('Warning: "species" field not defined in .conf file. Using default: {}'.format(default))
+            msg = 'Species (species) was not defined in the configuration file. Using {} as default.'.format(default)
+            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
             self.read_instance.species = default
 
         # if number of networks and species is not the same,
@@ -439,24 +489,24 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.resolution:
             default = 'hourly'
-            if self.read_instance.offline:
-                print('Warning: "resolution" field not defined in .conf file. Using default: {}'.format(default))
+            msg = 'Resolution (resolution) was not defined in the configuration file. Using {} as default.'.format(default)
+            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
             self.read_instance.resolution = default
 
         # check have start_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.start_date:
             default = '20180101'
-            if self.read_instance.offline:
-                print('Warning: "start_date" field not defined in .conf file. Using default: {}'.format(default))
+            msg = 'Start date (start_date) was not defined in the configuration file. Using {} as default.'.format(default)
+            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
             self.read_instance.start_date = default
 
         # check have end_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.end_date:
             default = '20190101'
-            if self.read_instance.offline:
-                print('Warning: "end_date" field not defined in .conf file. Using default: {}'.format(default))
+            msg = 'End date (end_date) was not defined in the configuration file. Using {} as default.'.format(default)
+            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
             self.read_instance.end_date = default
 
         # check have correct active_dashboard_plots information, 
@@ -472,7 +522,8 @@ class ProvConfiguration:
         # set filter_species to empty dict and advise user of this
         if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
             self.read_instance.filter_species = {}
-            print('Warning: "spatial_colocation" must be set to True if wanting to use "filter_species" option.')
+            msg = 'Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species.'
+            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
 
         # map to multiple species if have * wildcard
         # also duplicate out associated network
@@ -558,11 +609,22 @@ class ProvConfiguration:
             self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
-        if (len(self.read_instance.network) > 1) & (len(self.read_instance.species) > 1) & (not self.read_instance.offline):
+        if ((len(self.read_instance.network) > 1) & (len(self.read_instance.species) > 1) & 
+            (not self.read_instance.offline)):
+             
+            msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
+            show_message(msg, from_conf=self.read_instance.from_conf)
+
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
-            print('Warning: Multiple networks/species not supported for dashboard. First network / species taken.')
 
+        # check have resampling_resolution if resampling is True
+        # if offline, throw message, stating error
+        if (self.read_instance.resampling) and (self.read_instance.resampling_resolution is None):
+            msg = 'Resampling will not be applied because resampling resolution was not defined.'
+            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            self.read_instance.resampling = False
+            
 def read_conf(fpath=None):
     """ Read configuration files. """
 
@@ -597,7 +659,7 @@ def read_conf(fpath=None):
                 subsection = line.strip()
                 # if first character is comment do not parse subsection
                 if subsection[0] != '#':
-                    subsection_modified = section_modified + '|' + line.split('[[')[1].split(']]')[0]
+                    subsection_modified = section_modified + '·' + line.split('[[')[1].split(']]')[0]
                     subsections.append(subsection)
                     subsections_modified.append(subsection_modified)
                     all_sections_modified.append(subsection_modified)
@@ -669,17 +731,28 @@ def read_conf(fpath=None):
                 # set section attributes
                 if copy:
                     if line_strip != '':
-                        key = line_strip.split('=')[0].strip()
-                        value = line_strip.split('=')[1].strip()
-                        config[section_modified][key] = value
+                        # initial definition of parameter - value
+                        if '=' in line_strip:
+                            key = line_strip.split('=')[0].strip()
+                            value = line_strip.split('=')[1].strip()
+                            config[section_modified][key] = value
+                        # lines after adding line breaks
+                        else:
+                            # get last key and add current value to values from last key
+                            last_key = list(config[section_modified].keys())[-1]
+                            value = config[section_modified][last_key] + line_strip.strip()
+
+                            # update values for last key in dict
+                            del config[section_modified][last_key]
+                            config[section_modified][last_key] = value
 
     # add section attributes to subsection if do not exist there (e.g. add SECTIONA values to SECTIONA-Spain)
     for section_modified in all_sections_modified:
         
         # determine if subsection or not
-        if '|' in section_modified:
+        if '·' in section_modified:
             is_subsection = True
-            par_section = section_modified.split('|')[0]
+            par_section = section_modified.split('·')[0]
             # add attributes from parent section
             for par_k, par_val in config[par_section].items():
                 # if first character of key is comment character (#), do not parse this attribute
@@ -733,7 +806,7 @@ def write_conf(section, subsection, fpath, opts):
     with open(fpath, 'w') as configfile:
         config.write(configfile)
 
-def split_options(conf_string, separator="||"):
+def split_options(read_instance, conf_string, separator="||"):
     """ For the options in the configuration that define the keep and remove
         options. Returns the values in two lists, the keeps and removes.
     """
@@ -752,7 +825,8 @@ def split_options(conf_string, separator="||"):
             removes = removes.split(",")
             removes = [r.strip() for r in removes]
         elif ("keep:" in conf_string) and ("remove:" in conf_string):
-            print('Warning: In order to define the keep and remove options, these must be separated by ||.')
+            msg = 'In order to define the keep and remove options, these must be separated by ||.'
+            show_message(msg, offline=read_instance.offline, from_conf=self.read_instance.from_conf)
     else:
         if "keep:" in conf_string:
             keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)

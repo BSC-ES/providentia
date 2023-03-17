@@ -28,6 +28,9 @@ expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
 
+    # make sure that we are not using Qt5 backend with matplotlib
+    matplotlib.use('Agg')
+
     def __init__(self, **kwargs):
         print("Starting Providentia offline...")
 
@@ -41,6 +44,7 @@ class ProvidentiaOffline:
         # update variables from config file
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             aux.load_conf(self, kwargs['config'])
+            self.from_conf = True
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
@@ -50,16 +54,6 @@ class ProvidentiaOffline:
 
         # load report plot presets
         self.report_plots = json.load(open(os.path.join(CURRENT_PATH, 'conf/report_plots.json')))
-
-        # check for self defined plot characteristics file
-        if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = os.path.join(CURRENT_PATH, 'conf/plot_characteristics_offline.json')
-        self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
-        self.plot_characteristics = {}
-
-        # add general plot characteristics to self
-        for k, val in self.plot_characteristics_templates['general'].items():
-            setattr(self, k, val)
 
         # create dictionary of all available observational GHOST data
         self.all_observation_data = aux.get_ghost_observational_tree(self)
@@ -73,9 +67,6 @@ class ProvidentiaOffline:
 
         # initialise DataReader class
         self.datareader = DataReader(self)
-
-        # initialise Plot class
-        self.plot = Plot(read_instance=self, canvas_instance=self)
 
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
@@ -98,6 +89,19 @@ class ProvidentiaOffline:
             for k, val in self.section_opts.items():
                 setattr(self, k, provconf.parse_parameter(k, val))
 
+            # check for self defined plot characteristics file
+            if self.plot_characteristics_filename == '':
+                self.plot_characteristics_filename = os.path.join(CURRENT_PATH, 'conf/plot_characteristics_offline.json')
+            self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
+            self.plot_characteristics = {}
+
+            # initialise Plot class
+            self.plot = Plot(read_instance=self, canvas_instance=self)
+
+            # add general plot characteristics to self
+            for k, val in self.plot_characteristics_templates['general'].items():
+                setattr(self, k, val)
+
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             provconf.check_validity()
 
@@ -115,7 +119,8 @@ class ProvidentiaOffline:
 
             # read data
             self.datareader.read_setup(['reset'])
-            #initialise previous QA, flags and filter species as section values
+            
+            # initialise previous QA, flags and filter species as section values
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
@@ -124,26 +129,47 @@ class ProvidentiaOffline:
             if self.invalid_read:
                 print('No valid data for {} section'.format(section))
                 continue
-
-            # set plot characteristics
-            try:
-                plot_types = self.report_plots[self.report_type]
-            except KeyError:
+            
+            # check if report type is valid
+            if self.report_type not in self.report_plots.keys():
                 msg = 'Error: The report type {0} cannot be found in conf/report_plots.json. '.format(self.report_type)
                 msg += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
                 sys.exit(msg)
-            self.plot.set_plot_characteristics(plot_types)
-
-            # define dictionary to store plot figures per page
-            self.plot_dictionary = {}
 
             # set plots that need to be made (summary and station specific)
-            self.summary_plots_to_make = list(self.plot_characteristics.keys())
+            self.summary_plots_to_make = []
             self.station_plots_to_make = []
-            for plot_type in self.summary_plots_to_make:
-                # there can be no station specific plots for map plot type
-                if plot_type[:4] != 'map-':
-                    self.station_plots_to_make.append(plot_type)
+            if isinstance(self.report_plots[self.report_type], list):
+                self.summary_plots_to_make = self.report_plots[self.report_type]
+                for plot_type in self.report_plots[self.report_type]:
+                    # there can be no station specific plots for map plot type
+                    if plot_type[:4] != 'map-':
+                        self.station_plots_to_make.append(plot_type)
+            elif isinstance(self.report_plots[self.report_type], dict):
+                # get summary plots
+                if 'summary' in self.report_plots[self.report_type].keys():
+                    if not self.report_summary:
+                        print('Warning: report_summary is False, summary plots will not be created.')
+                    else:
+                        self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
+                # get station plots
+                if 'station' in self.report_plots[self.report_type].keys():
+                    if not self.report_stations:
+                        print('Warning: report_stations is False, station plots will not be created.')
+                    else:
+                        for plot_type in self.report_plots[self.report_type]['station']:
+                            # there can be no station specific plots for map plot type
+                            if plot_type[:4] != 'map-':
+                                self.station_plots_to_make.append(plot_type)
+
+            # set plot characteristics for all plot types (summary, station)
+            self.plots_to_make = list(self.summary_plots_to_make)
+            self.plots_to_make.extend(x for x in self.station_plots_to_make
+                                      if x not in self.summary_plots_to_make)
+            self.plot.set_plot_characteristics(self.plots_to_make)
+            
+            # define dictionary to store plot figures per page
+            self.plot_dictionary = {}
 
             # start making PDF
             self.start_pdf()
@@ -189,7 +215,7 @@ class ProvidentiaOffline:
 
             # get subsection names
             self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
-                                           if self.section == subsection_name.split('|')[0]]
+                                           if self.section == subsection_name.split('·')[0]]
             if len(self.child_subsection_names) > 0:
                 self.subsections = self.child_subsection_names
             else:
@@ -294,8 +320,7 @@ class ProvidentiaOffline:
                             continue
 
                         # get relevant axs and plot types per networkspeci / plot type
-                        relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type(networkspeci, 
-                                                                                                              base_plot_type, 
+                        relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type(base_plot_type, 
                                                                                                               relevant_pages)
 
                         # if have no relevant axs, continue to next paradigm
@@ -583,6 +608,10 @@ class ProvidentiaOffline:
         # create variable to keep track if have setup summary plot geometry yet (done for all subsections at once)
         summary_plot_geometry_setup = False
 
+        # set default markersize from density
+        if do_plot_geometry_setup:
+            self.plot.map_markersize_from_density = False
+
         # iterate through subsections
         for subsection_ind, subsection in enumerate(self.subsections):
 
@@ -676,7 +705,8 @@ class ProvidentiaOffline:
                         print('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
 
                     if not made_networkspeci_summary_plots:
-                        # get median timeseries across data from filtered data, and place it pandas dataframe
+                        
+                        # put selected data for each data array into pandas dataframe
                         to_pandas_dataframe(read_instance=self, canvas_instance=self, 
                                             networkspecies=self.networkspecies)
 
@@ -700,6 +730,7 @@ class ProvidentiaOffline:
 
                         # get zstat information from plot_type
                         zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+                        
                         # get base plot type (without stat and options)
                         if zstat:
                             base_plot_type = plot_type.split('-')[0] 
@@ -718,10 +749,8 @@ class ProvidentiaOffline:
                         plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
 
                         # do formatting
-                        relevant_axs = [self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'] 
-                                        for relevant_page, page_ind in plot_indices]
-                        relevant_data_labels = [self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'] 
-                                                for relevant_page, page_ind in plot_indices]
+                        relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(base_plot_type, 
+                                                                                                                       plot_indices)
                         self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
                                                 base_plot_type, plot_type, plot_options, 'summary')
 
@@ -730,6 +759,10 @@ class ProvidentiaOffline:
 
                     # update variable now summary plots have been made for a networkspecies
                     made_networkspeci_summary_plots = True
+
+                # update variable to keep track if have setup summary plot geometry yet for a subsection
+                if made_networkspeci_summary_plots:
+                    summary_plot_geometry_setup = True
 
             # make station specific plots?
             if self.report_stations:      
@@ -775,16 +808,20 @@ class ProvidentiaOffline:
 
                         # gather some information about current station
                         self.station_ind += 1
-                        valid_station_references = self.metadata_in_memory[networkspeci]['station_reference'][relevant_station_ind, :]
-                        self.current_station_reference = valid_station_references[pd.notnull(valid_station_references)][0]
+                        
                         valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][relevant_station_ind, :]
-                        self.current_station_name = valid_station_names[pd.notnull(valid_station_names)][0]
+                        self.current_station_name = str(valid_station_names[pd.notnull(valid_station_names)][0])
+                        
+                        valid_station_references = self.station_references[networkspeci][relevant_station_ind]
+                        self.current_station_reference = str(valid_station_references[pd.notnull(valid_station_references)][0])
+                        
                         current_lons = self.metadata_in_memory[networkspeci]['longitude'][relevant_station_ind, :]
                         self.current_lon = round(current_lons[pd.notnull(current_lons)][0], 2)
+                        
                         current_lats = self.metadata_in_memory[networkspeci]['latitude'][relevant_station_ind, :]
                         self.current_lat = round(current_lats[pd.notnull(current_lats)][0], 2)
                         
-                        # put station data in pandas dataframe
+                        # put selected data for each data array into pandas dataframe
                         to_pandas_dataframe(read_instance=self, canvas_instance=self, 
                                             networkspecies=[networkspeci], 
                                             station_index=relevant_station_ind, 
@@ -839,14 +876,13 @@ class ProvidentiaOffline:
                             print('Making station {2} for {3} ({0}/{1})'.format(i+1, 
                                                                                 len(self.relevant_station_inds),
                                                                                 plot_type, 
-                                                                                self.current_station_name))                                
+                                                                                self.current_station_name))   
+
                             plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
 
                             # do formatting 
-                            relevant_axs = [self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'] 
-                                            for relevant_page, page_ind in plot_indices]
-                            relevant_data_labels = [self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'] 
-                                                    for relevant_page, page_ind in plot_indices]
+                            relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(base_plot_type, 
+                                                                                                                           plot_indices)
                             self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
                                                     base_plot_type, plot_type, plot_options, 'station')
 
@@ -860,10 +896,6 @@ class ProvidentiaOffline:
                         vars(self).pop(k)
                     except:
                         pass
-
-            # update variable to keep track if have setup summary plot geometry yet for a subsection
-            if made_networkspeci_summary_plots:
-                summary_plot_geometry_setup = True
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """ Function that calls making of any type of plot. """
@@ -907,9 +939,9 @@ class ProvidentiaOffline:
             data_range_max = self.data_range_max_station[networkspeci]
 
         # iterate through all data arrays
-        first_data_label = True 
+        first_data_label = True
         for data_label in all_data_labels:
-
+            
             # set how experiment should be referred to in heatmap/table
             if data_label == 'observations':
                 data_label_legend = copy.deepcopy(data_label)
@@ -943,10 +975,15 @@ class ProvidentiaOffline:
 
                 # set axis title
                 if relevant_axis.get_title() == '':
-                    if self.n_stations == 1:
-                        axis_title_label = '{}\n{} ({} station)'.format(data_label, self.subsection, self.n_stations)
+                    if data_label == 'observations':
+                        label = data_label 
                     else:
-                        axis_title_label = '{}\n{} ({} stations)'.format(data_label, self.subsection, self.n_stations)
+                        label = self.experiments[data_label]
+                    axis_title_label = '{}\n{} '.format(label, self.subsection)
+                    if self.n_stations == 1:
+                        axis_title_label += '(1 station)'
+                    else:
+                        axis_title_label += '({} stations)'.format(self.n_stations)
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
                 # set map extent ? 
@@ -966,7 +1003,7 @@ class ProvidentiaOffline:
 
                 # make map plot
                 self.plot.make_map(relevant_axis, networkspeci, self.z_statistic, self.plot_characteristics[plot_type], 
-                                    plot_options=plot_options)
+                                   plot_options=plot_options, first_data_label=first_data_label)
                 
                 # save plot information for later formatting 
                 if z2 == '':
@@ -980,6 +1017,8 @@ class ProvidentiaOffline:
                 # turn axis on
                 relevant_axis.axis('on')
                 relevant_axis.set_visible(True)
+
+                first_data_label = False
 
             # heatmap and table
             elif base_plot_type in ['heatmap', 'table']:
@@ -1050,6 +1089,7 @@ class ProvidentiaOffline:
                             break
                 else:
                     axis_title = relevant_axis.get_title()
+
                 # axis title is empty?
                 if axis_title == '':
                     if plotting_paradigm == 'summary':
@@ -1347,9 +1387,9 @@ class ProvidentiaOffline:
 
         return all_relevant_pages[axis_ind], page_inds[axis_ind], relevant_axes[axis_ind]['handle']
 
-    def get_relevant_axs_per_networkspeci_plot_type(self, networkspeci, base_plot_type, relevant_pages):
-        """Get relevant axs per networkspeci, per plot type"""
-
+    def get_relevant_axs_per_networkspeci_plot_type(self, base_plot_type, relevant_pages):
+        """Get relevant axs per plot type"""
+        
         relevant_axs = []
         relevant_data_labels = []
         for relevant_page in relevant_pages:
@@ -1364,7 +1404,23 @@ class ProvidentiaOffline:
                     relevant_data_labels.append(ax['data_labels'])
 
         return relevant_axs, relevant_data_labels
-        
+    
+    def get_relevant_axs_per_networkspeci_plot_type_page_ind(self, base_plot_type, plot_indices):
+        """Get relevant axs per plot type and page ind"""
+
+        relevant_axs = []
+        relevant_data_labels = []
+        for relevant_page, page_ind in plot_indices:
+            if base_plot_type in ['periodic', 'periodic-violin']:
+                for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                    relevant_axs.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'][relevant_temporal_resolution])
+                    relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'])
+            else:
+                relevant_axs.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'])
+                relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'])
+
+        return relevant_axs, relevant_data_labels
+
 def main(**kwargs):
     """ Main function when running offine reports. """
    
