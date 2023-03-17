@@ -328,7 +328,7 @@ class ProvConfiguration:
                     # iterate through networkspecies, saving list of limits per networkspecies
                     filter_networkspecies_dict = {}
                     for networkspeci_split in networkspecies_split:
-                        print(networkspeci_split)
+                        
                         networkspeci_split_2 = networkspeci_split.split('(')
 
                         # get networkspeci
