@@ -5,8 +5,8 @@ import copy
 import numpy as np
 import pandas as pd
 
-from PyQt5 import QtWidgets
 from providentia import aux
+from .aux import show_message
 
 class DataFilter:
     """ Class that filters observational/experiment data into memory as required. """
@@ -49,7 +49,7 @@ class DataFilter:
     def filter_by_species(self):
         """ Function which filters read species by other species.
             For N other species a lower and upper limit are set. 
-            Where values for each species are outside of these ranges,
+            Where values for each species are outside of these ranges, or NaN,
             then impose NaNs upon all read species in memory.
             Only filter if spatial colocation is True.
         """
@@ -63,26 +63,29 @@ class DataFilter:
 
             # iterate through all species to filter by
             for filter_networkspeci, speci_limits in self.read_instance.filter_species.items():
-                
+
                 # get lower and upper limits for species
                 lower_limit = speci_limits[0]
                 upper_limit = speci_limits[1]
+                filter_species_fill_value = speci_limits[2]
 
-                # get where data is outside bounds
+                # get where data is outside bounds, or NaN
                 if filter_networkspeci in self.read_instance.networkspecies:
-                    invalid_inds_per_species = np.logical_or(self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] < lower_limit,
-                                                             self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] > upper_limit)
+                    invalid_inds_per_species = np.logical_or.reduce((self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] < lower_limit,
+                                                                     self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] > upper_limit,
+                                                                     np.isnan(self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:])))
                 else:
-                    invalid_inds_per_species = np.logical_or(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < lower_limit,
-                                                             self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > upper_limit)
+                    invalid_inds_per_species = np.logical_or.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < lower_limit,
+                                                                     self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > upper_limit,
+                                                                     np.isnan(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:])))
 
                 # update inds_to_filter array, making True all instances where have data outside bounds
                 inds_to_filter = np.any([inds_to_filter, invalid_inds_per_species], axis=0)
 
             # set all inds to filter as NaN for all networkspecies in memory
             for networkspeci in self.read_instance.networkspecies:
-                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = np.NaN       
-
+                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
+                
     def filter_data_limits(self):
         """ Filter out (set to NaN) data which exceed the lower/upper limits. """
 
@@ -92,7 +95,7 @@ class DataFilter:
             # get speci str
             speci = networkspeci.split('|')[1]
 
-            # get set lower/upper data bounds
+            # get lower/upper data bounds
             if self.read_instance.offline:
                 lower_bound = self.read_instance.lower_bound[speci]
                 upper_bound = self.read_instance.upper_bound[speci]
@@ -106,7 +109,8 @@ class DataFilter:
                 upper_bound = np.float32(upper_bound)
             # if any of the fields are not numbers, return from function
             except ValueError:
-                print("Warning: Data limit fields must be numeric")
+                msg = 'Data limit fields must be numeric.'
+                show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
                 return
 
             # filter all observational/experiment data out of bounds of lower/upper limits
@@ -120,7 +124,7 @@ class DataFilter:
         keeps, removes = [], []
         if self.read_instance.offline:
             if hasattr(self.read_instance, 'period'):
-                keeps, removes = split_options(self.read_instance.period)
+                keeps, removes = split_options(self.read_instance, self.read_instance.period)
         else:
             keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
             removes = self.read_instance.period_menu['checkboxes']['remove_selected']
@@ -219,7 +223,8 @@ class DataFilter:
                     np.float32(self.read_instance.representativity_menu['rangeboxes']['current_lower'][var_ii]))
         # if any of the fields are not numbers, return from function
         except ValueError:
-            print("Warning: Data availability fields must be numeric")
+            msg = 'Data availability fields must be numeric.'
+            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
             return
 
         # filter observations by native percentage data availability variables (only GHOST data)
@@ -297,13 +302,14 @@ class DataFilter:
     def filter_by_metadata(self):
         """ Filter data by selected metadata. """
 
-        # validate fields before filtering
-        if not self.validate_values():
-            return
-
         # iterate through metadata in memory
         for meta_var in self.read_instance.metadata_vars_to_read:
             
+            # validate field before filtering
+            if not self.validate_values(meta_var):
+                # go to next variable if filter cannot be applied
+                continue
+
             if meta_var == 'lat':
                 meta_var = 'latitude'
             elif meta_var == 'lon':
@@ -378,34 +384,29 @@ class DataFilter:
                                                     self.read_instance.N_inds_per_yearmonth, axis=1)
                             self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_nan] = np.NaN
 
-    def validate_values(self):
+    def validate_values(self, meta_var):
         """ Validate that field inserted by user is float. """
-
-        # iterate through metadata in memory
-        for meta_var in self.read_instance.metadata_vars_to_read:
-
-            metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
-            metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
-
-            if metadata_data_type != np.object:
-                meta_var_index = self.read_instance.metadata_menu[metadata_type][
-                    'rangeboxes']['labels'].index(meta_var)
-                try:
-                    np.float32(self.read_instance.metadata_menu[metadata_type][
-                                   'rangeboxes']['current_lower'][meta_var_index])
-                    np.float32(self.read_instance.metadata_menu[metadata_type][
-                                   'rangeboxes']['current_upper'][meta_var_index])
-                    return True
-                except ValueError as e:
-                    if self.read_instance.offline:
-                        print("Warning: Error in metadata fields. The field of '{}' "
-                              "should be numeric, \n{}".format(meta_var, str(e)))
-                    else:
-                        QtWidgets.QMessageBox.critical(self.read_instance, "Error in metadata fields",
-                                                       "The field of '{}' should be numeric, \n{}"
-                                                       .format(meta_var, str(e)),
-                                                       QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.NoButton)
-                    return False
+        
+        metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
+        metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
+        
+        if metadata_data_type != np.object:
+            meta_var_index = self.read_instance.metadata_menu[metadata_type][
+                'rangeboxes']['labels'].index(meta_var)
+            try:
+                np.float32(self.read_instance.metadata_menu[metadata_type][
+                                'rangeboxes']['current_lower'][meta_var_index])
+                np.float32(self.read_instance.metadata_menu[metadata_type][
+                                'rangeboxes']['current_upper'][meta_var_index])
+                return True
+            except ValueError as e:
+                msg = "Error in metadata fields. The field of '{}' should be numeric.".format(meta_var)
+                show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+                if not self.read_instance.offline:
+                    self.read_instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
+                return False
+        else:
+            return True
 
     def temporally_colocate_data(self):
         """ Define function which temporally colocates observational and experiment data.

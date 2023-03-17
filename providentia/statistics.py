@@ -4,7 +4,7 @@ Contains functions for the processing/calculation of statistics and colourbars
 from .calculate import Stats
 from .calculate import ExpBias
 from .read_aux import drop_nans
-from .aux import exceedance_lim
+from .aux import exceedance_lim, get_relevant_temporal_resolutions
 
 import copy
 import json
@@ -43,6 +43,30 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
         :param data_range_max: current maximum of data range per networkspecies
         :type data_range_max: dict
     """
+    
+    if read_instance.resampling:
+
+        # update relevant temporal resolutions 
+        read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resampling_resolution)
+                        
+        # transform resolution to code for .resample function
+        if read_instance.resampling_resolution in ['hourly', 'hourly_instantaneous']:
+            temporal_resolution_to_output_code = 'H'
+        elif read_instance.resampling_resolution in ['3hourly', '3hourly_instantaneous']:
+            temporal_resolution_to_output_code = '3H'
+        elif read_instance.resampling_resolution in ['6hourly', '6hourly_instantaneous']:
+            temporal_resolution_to_output_code = '6H'
+        elif read_instance.resampling_resolution == 'daily':
+            temporal_resolution_to_output_code = 'D'
+        elif read_instance.resampling_resolution == 'monthly':
+            temporal_resolution_to_output_code = 'MS'
+        elif read_instance.resampling_resolution == 'yearly':
+            temporal_resolution_to_output_code = 'AS'
+    
+    else:
+
+        # update relevant temporal resolutions 
+        read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resolution)    
 
     # create new dictionary to store selection station data by network / species, per data label
     canvas_instance.selected_station_data = {}
@@ -100,9 +124,11 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                 
                 # get array for specific data label
                 data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:])
+                
                 # temporally colocate data array
                 if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                     data_array[read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                
                 # cut data array for station indices
                 data_array = data_array[read_instance.station_inds,:]
                     
@@ -122,6 +148,14 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                     canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), 
                                                                                                                 index=read_instance.time_array, 
                                                                                                                 columns=['data'])
+                
+                # resample data to output resolution
+                if read_instance.resampling:
+                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].resample(
+                        temporal_resolution_to_output_code, axis=0).mean()
+
+                # apply calibration operation (if any)
+                apply_calibration_factor(read_instance, canvas_instance, networkspeci, networkspeci_ii, data_label)
 
                 # get min / max across all selected station data per network / species
                 current_min = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].min()
@@ -144,7 +178,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
         # observations and experiment data arrays
         if len(canvas_instance.selected_station_data[networkspeci]) > 1:
             calculate_temporally_aggregated_experiment_statistic(read_instance, canvas_instance, networkspeci)
-            
+
 def pandas_temporal_aggregation(read_instance, canvas_instance, networkspeci):
     """ Function that aggregates pandas dataframe data, for all data arrays,
         into desired temporal groupings also calculates all defined basic
@@ -800,3 +834,50 @@ def get_z_statistic_info(plot_type=None, zstat=None):
         z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
 
     return zstat, base_zstat, z_statistic_type, z_statistic_sign
+
+def apply_calibration_factor(read_instance, canvas_instance, networkspeci, networkspeci_ii, data_label):
+    """ Apply calibration factor to add or subtract a number to the experiments, 
+        multiply or divide the experiment data by a certain value.
+    
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type read_instance: object
+        :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type canvas_instance: object
+        :param networkspeci: name of networkspeci str
+        :type networkspeci: str
+        :param networkspeci: position of networkspeci str in networkspecies
+        :type networkspeci: int
+        :param data_label: name of data array to plot
+        :type data_label: str
+    """
+
+    if hasattr(read_instance, 'calibration_factor'):
+        
+        # do not apply calibration factor to observations
+        if data_label != 'observations':
+            
+            # get calibration factor per experiment
+            calibration_factor = copy.deepcopy(read_instance.calibration_factor[data_label])
+
+            # get calibration factor per networkspeci
+            if (len(read_instance.networkspecies) > 1) and (',' in calibration_factor):
+                calibration_factor = calibration_factor.split(',')[networkspeci_ii]
+            
+            print('{0} in {1}'.format(calibration_factor, data_label))
+            
+            # apply calibration factor
+            if '*' in read_instance.calibration_factor[data_label]:
+                canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] *= \
+                    float(calibration_factor.replace('*', ''))
+            elif '/' in read_instance.calibration_factor[data_label]:
+                canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] /= \
+                    float(calibration_factor.replace('/', ''))
+            elif '-' in read_instance.calibration_factor[data_label]:
+                canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] -= \
+                    float(calibration_factor.replace('-', ''))
+            else:
+                canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] += \
+                    float(calibration_factor)
+        
+        else:
+            print('Calibrating data for {0}:'.format(networkspeci))
