@@ -115,5 +115,27 @@
             "sconco3": [],
             "sconcso2": []
             }
+    },
+
+    "ineris/eionet-cams2_40-vra": {
+        "hourly": {
+            "pm10": [],
+            "pm2p5": [],
+            "sconcco": [],
+            "sconcno2": [],
+            "sconco3": [],
+            "sconcso2": []
+            }
+    },
+
+    "ineris/eionet-cams2_40-ira": {
+        "hourly": {
+            "pm10": [],
+            "pm2p5": [],
+            "sconcco": [],
+            "sconcno2": [],
+            "sconco3": [],
+            "sconcso2": []
+            }
     }
 }
