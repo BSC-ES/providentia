@@ -493,8 +493,9 @@ class Plot:
             txt += 'Filter Species : {}\n'.format(self.read_instance.filter_species)
 
         # add calibration factor to header if have it set
-        if self.read_instance.calibration_factor: 
-            txt += 'Calibration : {}\n'.format(self.read_instance.calibration_factor)
+        if hasattr(self.read_instance, 'calibration_factor'):
+            if self.read_instance.calibration_factor: 
+                txt += 'Calibration : {}\n'.format(self.read_instance.calibration_factor)
 
         # add subsections to header
         txt += 'Subsections : {}\n'.format(self.read_instance.subsections)
