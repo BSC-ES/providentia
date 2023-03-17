@@ -1,25 +1,46 @@
 """ Module storing writing functions """
 
 import sys
-
+import copy
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset, num2date
 from .configuration import write_conf
+from .dashboard_aux import InputDialog
 
 
 def export_data_npz(canvas_instance, fname):
     """ Function that writes out current data / ghost data / metadata in memory to .npy file. """
 
+    # open dialog to choose if data is filtered or not
+    title = 'Export data'
+    msg = 'Select option'
+    options = ['Apply metadata filters to exported data', 
+               'Do not apply metadata filters to exported data']
+    dialog = InputDialog(canvas_instance.read_instance, title, msg, options)
+    selected_option, okpressed = dialog.selected_option, dialog.okpressed
+    if selected_option == options[0]:
+        apply_filters = True
+    elif selected_option == options[1]:
+        apply_filters = False
+
     # create dict to save data
     save_data_dict = {}
 
     # save data / ghost data / metadata
-    for networkspeci in self.canvas_instance.read_instance.networkspecies:
-        if canvas_instance.read_instance.reading_ghost:
-            save_data_dict['{}_ghost_data'.format(networkspeci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci]
-        save_data_dict['{}_data'.format(networkspeci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci]
-        save_data_dict['{}_metadata'.format(networkspeci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci]
+    for networkspeci in canvas_instance.read_instance.networkspecies:
+        if apply_filters:
+            if canvas_instance.read_instance.reading_ghost:
+                save_data_dict['{}_ghost_data'.format(networkspeci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci][:, ~np.isnan(canvas_instance.read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))]
+            save_data_dict['{}_data'.format(networkspeci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci][:, ~np.isnan(canvas_instance.read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))]
+            stations_after_filter_inds = np.array(np.where(~np.isnan(canvas_instance.read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))))
+            stations_after_filter_inds = np.reshape(stations_after_filter_inds, stations_after_filter_inds.shape[1])
+            save_data_dict['{}_metadata'.format(networkspeci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci][stations_after_filter_inds, :]
+        else:
+            if canvas_instance.read_instance.reading_ghost:
+                save_data_dict['{}_ghost_data'.format(networkspeci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci]
+            save_data_dict['{}_data'.format(networkspeci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci]
+            save_data_dict['{}_metadata'.format(networkspeci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci]
 
     # save out miscellaneous variables 
     save_data_dict['time'] = canvas_instance.read_instance.time_array
@@ -40,6 +61,18 @@ def export_data_npz(canvas_instance, fname):
 def export_netcdf(canvas_instance, fname):
     """ Write data and metadata to netcdf file. """
 
+    # open dialog to choose if data is filtered or not
+    title = 'Export data'
+    msg = 'Select option'
+    options = ['Apply metadata filters to exported data', 
+               'Do not apply metadata filters to exported data']
+    dialog = InputDialog(canvas_instance.read_instance, title, msg, options)
+    selected_option, okpressed = dialog.selected_option, dialog.okpressed
+    if selected_option == options[0]:
+        apply_filters = True
+    elif selected_option == options[1]:
+        apply_filters = False
+        
     # set up some structural variables
     read_instance = canvas_instance.read_instance
     sys.path.append('/gpfs/projects/bsc32/AC_cache/obs/ghost/GHOST_standards/{}'
@@ -76,9 +109,14 @@ def export_netcdf(canvas_instance, fname):
     # iterate through networkspecies 
     for speci_ii, networkspeci in enumerate(read_instance.networkspecies):
 
-        # get network / species
-        network = networkspeci.split('|')[0]
+        # get species
         speci = networkspeci.split('|')[1]
+
+        # get prefix (name of networkspeci) to be added to variable names
+        if read_instance.reading_ghost:
+            var_prefix = networkspeci
+        else:
+            var_prefix = networkspeci.replace('/', '_')
 
         # get some key variables for speci
         parameter_details = parameter_dictionary[speci]
@@ -121,15 +159,16 @@ def export_netcdf(canvas_instance, fname):
             var.description = 'Labels associated with each data array, e.g. observations, experiment_1, etc.'
             var[:] = np.array(read_instance.data_labels)
             
-            var = fout.createVariable('ghost_data_variables', str, ('ghost_data_variable',))
-            var.standard_name = 'ghost_data_variables'
-            var.long_name = 'ghost_data_variables'
-            var.description = 'The names of the GHOST data variables used for additional filtering.'
-            var[:] = np.array(read_instance.ghost_data_vars_to_read)
+            if read_instance.reading_ghost:
+                var = fout.createVariable('ghost_data_variables', str, ('ghost_data_variable',))
+                var.standard_name = 'ghost_data_variables'
+                var.long_name = 'ghost_data_variables'
+                var.description = 'The names of the GHOST data variables used for additional filtering.'
+                var[:] = np.array(read_instance.ghost_data_vars_to_read)
          
         # data
         current_data_type = type_map[data_format_dict[speci]['data_type']]
-        var = fout.createVariable('{}_data'.format(networkspeci), current_data_type, 
+        var = fout.createVariable('{}_data'.format(var_prefix), current_data_type, 
                                   ('data_label', 'station', 'time',))
         
         # set attributes
@@ -145,8 +184,11 @@ def export_netcdf(canvas_instance, fname):
         var.filter_species = str(read_instance.filter_species)
         if read_instance.reading_ghost:
             var.ghost_version = str(read_instance.ghost_version)
-        var[:] = read_instance.data_in_memory[networkspeci]
-        
+        if apply_filters:
+            var[:] = read_instance.data_in_memory_filtered[networkspeci][:, ~np.isnan(read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))]
+        else:
+            var[:] = read_instance.data_in_memory[networkspeci]
+
         # GHOST data
         if read_instance.reading_ghost:
             var = fout.createVariable('{}_ghost_data'.format(networkspeci), 'f4', 
@@ -155,13 +197,25 @@ def export_netcdf(canvas_instance, fname):
             var.standard_name = '{}_ghost_data'.format(networkspeci) 
             var.long_name = '{}_ghost_data'.format(networkspeci)
             var.description = 'GHOST data variables used for additional filtering.'
-            var[:] = read_instance.ghost_data_in_memory[networkspeci]
+            if apply_filters:
+                var[:] = read_instance.ghost_data_in_memory[networkspeci][:, ~np.isnan(read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))]
+            else:
+                var[:] = read_instance.ghost_data_in_memory[networkspeci]
 
         # save metadata (as individual variables)
-        metadata_arr = read_instance.metadata_in_memory[networkspeci]
+        if apply_filters:
+            stations_after_filter_inds = np.array(np.where(~np.isnan(read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))))
+            stations_after_filter_inds = np.reshape(stations_after_filter_inds, stations_after_filter_inds.shape[1])
+            metadata_arr = read_instance.metadata_in_memory[networkspeci][stations_after_filter_inds, :]
+        else:
+            metadata_arr = read_instance.metadata_in_memory[networkspeci]
+        
         for metadata_var in metadata_arr.dtype.names:
-            current_data_type = type_map[metadata_format_dict[metadata_var]['data_type']]
-            var = fout.createVariable('{}_{}'.format(networkspeci,metadata_var), current_data_type, ('station', 'month',))
+            
+            current_data_type = type_map[metadata_format_dict[metadata_var]['data_type']] 
+            var = fout.createVariable('{}_{}'.format(var_prefix, metadata_var), 
+                                      current_data_type, ('station', 'month',))
+
             # set attributes
             var.standard_name = metadata_format_dict[metadata_var]['standard_name']
             var.long_name = metadata_format_dict[metadata_var]['long_name']
@@ -226,7 +280,13 @@ def export_configuration(prv, cname, separator="||"):
 
     # add information about filter species if any
     if len(prv.filter_species) > 0:
-        options['section'].update({'filter_species': prv.filter_species
+        filter_species = str(copy.deepcopy(prv.filter_species))
+        filter_species = filter_species.replace("[", "(").replace("]", ")")
+        filter_species = filter_species.replace("{", "").replace("}", "")
+        filter_species = filter_species.replace("'", "")
+        filter_species = filter_species.replace(":", "")
+        filter_species = filter_species.replace("|", ":")
+        options['section'].update({'filter_species': filter_species
                                   })
 
     # add information about report
@@ -239,8 +299,7 @@ def export_configuration(prv, cname, separator="||"):
 
     # add other miscellaneous fields
     options['section'].update({'map_extent': ",".join(str(i) for i in prv.map_extent),
-                               'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots),
-                               'plot_characteristics_filename': prv.plot_characteristics_filename
+                               'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots)
                               })
     
     if subsection != None:

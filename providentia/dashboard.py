@@ -2,20 +2,20 @@
 from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .dashboard_aux import ComboBox
-from .dashboard_aux import QVLine
-from .dashboard_aux import PopUpWindow
-from .dashboard_aux import formatting_dict
+from .toolbar import multispecies_conf
+from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow, InputDialog
 from .dashboard_aux import set_formatting
+from .aux import show_message
 from .read import DataReader
+from .read_aux import get_default_qa
 from providentia import aux
 
+import os
 import copy
 import datetime
-import os
-import os.path
 import json
 import sys
+import matplotlib
 from functools import partial
 from collections import OrderedDict
 from weakref import WeakKeyDictionary
@@ -23,6 +23,7 @@ from weakref import WeakKeyDictionary
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
 import pandas as pd
+from pandas.plotting import register_matplotlib_converters
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -30,6 +31,8 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
+formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
+
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
     """ Class that generates Providentia dashboard. """
@@ -50,6 +53,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update variables from config file (if available)
         self.from_conf = False
         self.current_config = {}
+        
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             if 'section' in kwargs:
                 # config and section defined 
@@ -58,28 +62,37 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     self.from_conf = True
                     self.current_config = self.sub_opts[kwargs['section']]
                 else:
-                    error = 'Error: The section specified in the command line does not exist.'
-                    tip = 'Tip: For subsections, add the name of the parent section followed by a vertical bar (|) before the subsection name (e.g. SECTIONA|Spain).'
+                    error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
+                    tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                    tip += 'before the subsection name (e.g. SECTIONA·Spain).'
                     sys.exit(error + '\n' + tip)
 
             elif 'section' not in kwargs:
                 # config defined, section undefined
                 aux.load_conf(self, fpath=kwargs['config'])    
                 all_sections = self.sub_opts.keys()
+                
                 if len(all_sections) == 1:
                     okpressed = False
                     selected_section = list(all_sections)[0]
                 else:
-                    selected_section, okpressed = QtWidgets.QInputDialog.getItem(self, 'Sections',
-                                                                                 'Select section to load',  
-                                                                                 all_sections, 0, False)
+                    title = 'Sections'
+                    msg = 'Select section to load'
+                    dialog = InputDialog(self, title, msg, all_sections)
+                    selected_section, okpressed = dialog.selected_option, dialog.okpressed
+
                 if okpressed or (len(all_sections) == 1):
                     self.from_conf = True
                     self.current_config = self.sub_opts[selected_section]
+
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
             sys.exit(error)
         
+        # set initial filter species
+        self.previous_filter_species = {}
+        self.filter_species = {}
+
         # update variables from defined config file
         if self.current_config:
             for k, val in self.current_config.items():
@@ -87,7 +100,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
-
+        
         # load characteristics per plot type
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
@@ -133,19 +146,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         return super(ProvidentiaMainWindow, self).moveEvent(event)
 
     def get_geometry(self):
-        """ Get current geometry of main Providentia window and buttons. """
+        """ Update current geometry of main Providentia window and buttons. """
 
         # get geometry of main window
         self.main_window_geometry = copy.deepcopy(self.geometry())
 
-        # get and update geometry of settings menus
+        # update geometry of setting menus
         self.update_buttons_geometry()
 
     def update_buttons_geometry(self):
         """ Update current geometry of buttons. """
         
-        for i, position in enumerate([self.position_1, self.position_2, self.position_3, 
-                                      self.position_4, self.position_5]):
+        for position_ii, position in enumerate([self.position_1, self.position_2, self.position_3, 
+                                                self.position_4, self.position_5]):
             for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
                                                          self.mpl_canvas.save_buttons, 
                                                          self.mpl_canvas.elements):
@@ -158,18 +171,32 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 if position == plot_type:
                     
                     # calculate proportional geometry of buttons respect main window
-                    x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'+str(i+1)]['x'] * 
-                        self.main_window_geometry.width()) / 1848
-                    y = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'+str(i+1)]['y'] * 
-                        self.main_window_geometry.height()) / 1016
+                    x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
+                         + str(position_ii+1)]['x'] * self.main_window_geometry.width()) / 1848
+                    y = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_' 
+                         + str(position_ii+1)]['y'] * self.main_window_geometry.height()) / 1016
                     
                     # get geometries
                     old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
                     new_button_geometry = QtCore.QRect(x, y, 18, 18)
                     
-                    # apply new geometry to menu and save button
+                    # apply new geometry to menu and save buttons
                     menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(menu_button.x(), menu_button.y()-25, 20, 20)
+                    save_button.setGeometry(menu_button.x()-25, menu_button.y(), 20, 20)
+
+                    # apply new geometry to layout buttons
+                    if position_ii > 0:
+                        cb_position = getattr(self, 'cb_position_{}'.format(position_ii+1))
+                        # layout selector at position 2 needs to be further from menu
+                        if (position_ii + 1) == 2:
+                            width_diff = 915
+                        else:
+                            width_diff = 570
+                        height_diff = 1
+                        width = (width_diff * self.main_window_geometry.width()) / 1848
+                        height = (height_diff * self.main_window_geometry.height()) / 1848
+                        cb_position.move(menu_button.x()-width, menu_button.y()+height)
+                        cb_position.resize(cb_position.x(), 20)
 
                     # apply new geometry to container elements
                     for sub_element in element:
@@ -205,8 +232,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         parent_layout.setContentsMargins(0, 0, 0, 0)
 
         # define stylesheet for tooltips
-        self.setStyleSheet("QToolTip { font: %spt %s}" % (formatting_dict['tooltip']['font'].pointSizeF(),
-                                                          formatting_dict['tooltip']['font'].family()))
+        self.setStyleSheet("QToolTip { font: %spt %s}" % (formatting_dict['tooltip']['font']['size'],
+                                                          formatting_dict['tooltip']['font']['style']))
 
         # setup configuration bar with combo boxes, input boxes and buttons
         # use a gridded layout to place objects
@@ -222,6 +249,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         hbox = QtWidgets.QHBoxLayout()
 
         # define all configuration box objects (labels, comboboxes etc.)
+        # data selection section
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"),
                                                 formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
@@ -231,6 +259,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), formatting_dict['checkbox_menu'])
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
+        self.ch_colocate.setMaximumWidth(80)
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_network.setFixedWidth(100)
         self.cb_network.AdjustToContents
@@ -264,8 +293,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), formatting_dict['button_menu'])
         self.bu_experiments.setFixedWidth(80)
         self.bu_experiments.setToolTip('Select experiment/s data to read')
+        self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), formatting_dict['button_menu'])
+        self.bu_multispecies.setFixedWidth(80)
+        self.bu_multispecies.setToolTip('Select data to filter by')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
+
+        # filters section
         self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), formatting_dict['title_menu'])
         self.lb_data_filter.setFixedWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
@@ -298,30 +332,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
-        self.lb_z = set_formatting(QtWidgets.QLabel(self, text="Map Stat"), formatting_dict['title_menu'])
-        self.lb_z.setToolTip('Set plotted map statistic')
-        self.cb_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z_stat.setFixedWidth(125)
-        self.cb_z_stat.AdjustToContents
-        self.cb_z_stat.setToolTip('Select map statistic')
-        self.cb_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z1.setFixedWidth(125)
-        self.cb_z1.AdjustToContents
-        self.cb_z1.setToolTip('Select map dataset 1')
-        self.cb_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_z2.setFixedWidth(125)
-        self.cb_z2.AdjustToContents
-        self.cb_z2.setToolTip('Select map dataset 2')
-        self.vertical_splitter_3 = QVLine()
-        self.vertical_splitter_3.setMaximumWidth(20)
-        self.lb_periodic_stat = set_formatting(QtWidgets.QLabel(self, text="Periodic Stat"),
-                                                 formatting_dict['title_menu'])
-        self.lb_periodic_stat.setToolTip('Set plotted periodic statistic')
-        self.cb_periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_periodic_stat.setFixedWidth(136)
-        self.cb_periodic_stat.setToolTip('Select periodic statistic')
-        self.vertical_splitter_4 = QVLine()
-        self.vertical_splitter_4.setMaximumWidth(20)
+
+        # station selection section
         self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
                                                    formatting_dict['title_menu'])
         self.lb_station_selection.setToolTip('Select stations')
@@ -334,78 +346,63 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), formatting_dict['checkbox_menu'])
         self.ch_extent.setToolTip('Select stations that are within the map extent')
         self.ch_extent.setFixedWidth(80)
-        self.vertical_splitter_5 = QVLine()
-        self.vertical_splitter_5.setMaximumWidth(20)
-        self.lb_layout_selection = set_formatting(QtWidgets.QLabel(self, text="Layout"),
-                                                  formatting_dict['title_menu'])
-        self.cb_position_1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_1.setFixedWidth(100)
-        self.cb_position_1.AdjustToContents
-        self.cb_position_1.setToolTip('Select plot type in top left position')
-        self.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_2.setFixedWidth(100)
-        self.cb_position_2.AdjustToContents
-        self.cb_position_2.setToolTip('Select plot type in top right position')
-        self.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_3.setFixedWidth(100)
-        self.cb_position_3.AdjustToContents
-        self.cb_position_3.setToolTip('Select plot type in bottom left position')
-        self.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_4.setFixedWidth(100)
-        self.cb_position_4.AdjustToContents
-        self.cb_position_4.setToolTip('Select plot type in bottom centre position')
-        self.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_position_5.setFixedWidth(100)
-        self.cb_position_5.AdjustToContents
-        self.cb_position_5.setToolTip('Select plot type in bottom right position')
+        self.vertical_splitter_3 = QVLine()
+        self.vertical_splitter_3.setMaximumWidth(20)
+
+        # resampling section
+        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
+        self.lb_resampling.setToolTip('Set resampling options')
+        self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_resampling_resolution.setFixedWidth(100)
+        self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
+        self.cb_resampling_switch = set_formatting(Switch(self), formatting_dict['switch_menu'])
+        self.cb_resampling_switch.setToolTip('Activate/Deactivate resampling')
 
         # position objects on gridded configuration bar
+        # data selection section
         config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_network, 1, 0)
-        config_bar.addWidget(self.cb_resolution, 2, 0)
-        config_bar.addWidget(self.cb_matrix, 1, 1)
-        config_bar.addWidget(self.cb_species, 1, 2)
-        config_bar.addWidget(self.le_start_date, 2, 1)
-        config_bar.addWidget(self.le_end_date, 2, 2)
-        config_bar.addWidget(self.bu_QA, 1, 3)
-        config_bar.addWidget(self.bu_flags, 2, 3)
-        config_bar.addWidget(self.bu_experiments, 1, 4)
-        config_bar.addWidget(self.ch_colocate, 2, 4)
-        config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignRight)
-        config_bar.addWidget(self.vertical_splitter_1, 0, 5, 4, 1)
-        config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_data_bounds, 1, 6, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_minimum_value, 1, 7)
-        config_bar.addWidget(self.le_maximum_value, 1, 8)
-        config_bar.addWidget(self.bu_rep, 2, 6)
-        config_bar.addWidget(self.bu_period, 2, 7)
-        config_bar.addWidget(self.bu_meta, 2, 8)
-        config_bar.addWidget(self.bu_reset, 3, 7)
-        config_bar.addWidget(self.bu_screen, 3, 8)
-        config_bar.addWidget(self.vertical_splitter_2, 0, 9, 4, 1)
-        config_bar.addWidget(self.lb_z, 0, 10, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_z_stat, 1, 10)
-        config_bar.addWidget(self.cb_z1, 2, 10)
-        config_bar.addWidget(self.cb_z2, 3, 10)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 11, 4, 1)
-        config_bar.addWidget(self.lb_periodic_stat, 0, 12, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_periodic_stat, 1, 12)
-        config_bar.addWidget(self.vertical_splitter_4, 0, 13, 4, 1)
-        config_bar.addWidget(self.lb_station_selection, 0, 14, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 14)
-        config_bar.addWidget(self.ch_intersect, 2, 14)
-        config_bar.addWidget(self.ch_extent, 3, 14)
-        config_bar.addWidget(self.vertical_splitter_5, 0, 15, 4, 1)
-        config_bar.addWidget(self.lb_layout_selection, 0, 16, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_position_1, 1, 16)
-        config_bar.addWidget(self.cb_position_2, 1, 17)
-        config_bar.addWidget(self.cb_position_3, 2, 16)
-        config_bar.addWidget(self.cb_position_4, 2, 17)
-        config_bar.addWidget(self.cb_position_5, 2, 18)
+        config_bar.addWidget(self.cb_network, 1, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resolution, 2, 0, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_matrix, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_species, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_start_date, 2, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_end_date, 2, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_QA, 1, 3, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_flags, 2, 3, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_experiments, 1, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_multispecies, 2, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_colocate, 1, 5, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_1, 0, 6, 4, 1, QtCore.Qt.AlignLeft)
+
+        # filters section
+        config_bar.addWidget(self.lb_data_filter, 0, 7, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_bounds, 1, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_minimum_value, 1, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_maximum_value, 1, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_rep, 2, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_period, 2, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_meta, 2, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_reset, 3, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_screen, 3, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_2, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
+
+        # station selection section
+        config_bar.addWidget(self.lb_station_selection, 0, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
+
+        # resampling section
+        config_bar.addWidget(self.lb_resampling, 0, 13, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_resolution, 1, 13, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_switch, 1, 14, 1, 1, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
+        self.cb_resampling_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
@@ -416,58 +413,69 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_flags(self)
         aux.init_qa(self)
         aux.init_experiments(self)
+        aux.init_multispecies(self)
         aux.init_representativity(self)
         aux.init_period(self)
         self.metadata_vars_to_read = []
         aux.init_metadata(self)
 
-        # enable pop up configuration windows
-        self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
-        self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
-        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window, self.experiments_menu))
-        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window, self.metadata_menu))
-        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
-        self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
-
         # Setup MPL canvas of plots
         # set variable that blocks updating of MPL canvas until some data has been read
         self.block_MPL_canvas_updates = True
         self.mpl_canvas = MPLCanvas(self)
-                                          
+              
         # initialise configuration bar fields
         self.config_bar_initialisation = True
         self.update_configuration_bar_fields()
         self.config_bar_initialisation = False
 
+        # initialise multispecies tab
+        self.multispecies_initialisation = True
+
+        # launch with configuriton file?
+        if self.from_conf: 
+            
+            # read
+            self.handle_data_selection_update()
+
+            # set filtered multispecies if any
+            multispecies_conf(self)
+
+            # set fields available for filtering
+            aux.representativity_conf(self)
+            aux.period_conf(self)
+            aux.metadata_conf(self)
+            self.mpl_canvas.handle_data_filter_update()
+
+        # enable pop up configuration windows
+        self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
+        self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
+        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window, self.experiments_menu))
+        self.bu_multispecies.clicked.connect(partial(self.generate_pop_up_window, self.multispecies_menu))
+        self.bu_meta.clicked.connect(partial(self.generate_pop_up_window, self.metadata_menu))
+        self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
+        self.bu_period.clicked.connect(partial(self.generate_pop_up_window, self.period_menu))
+
         # Enable interactivity of functions which update MPL canvas
         # enable READ button
         self.bu_read.clicked.connect(self.handle_data_selection_update)
+
         # enable RESET button
         self.bu_reset.clicked.connect(self.reset_options)
+
         # enable interactivity of temporal colocation checkbox
         self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_temporal_colocate_update)
+
         # enable FILTER button
         self.bu_screen.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
-        # enable updating of map z statistic
-        self.cb_z_stat.currentTextChanged.connect(self.mpl_canvas.handle_map_z_statistic_update)
-        self.cb_z1.currentTextChanged.connect(self.mpl_canvas.handle_map_z_statistic_update)
-        self.cb_z2.currentTextChanged.connect(self.mpl_canvas.handle_map_z_statistic_update)
-
-        # enable updating of periodic statistic
-        self.cb_periodic_stat.currentTextChanged.connect(self.mpl_canvas.handle_periodic_statistic_update)
+        # enable activating the resampling
+        self.cb_resampling_switch.clicked.connect(self.mpl_canvas.handle_resampling_update)
 
         # enable interactivity of station selection checkboxes
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
         self.ch_intersect.stateChanged.connect(self.mpl_canvas.select_intersect_stations)
         self.ch_extent.stateChanged.connect(self.mpl_canvas.select_extent_stations)
-
-        # enable updating of plots layout
-        self.cb_position_1.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_2.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_3.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_4.currentTextChanged.connect(self.handle_layout_update)
-        self.cb_position_5.currentTextChanged.connect(self.handle_layout_update)
 
         # Generate MPL navigation toolbar
         self.navi_toolbar = NavigationToolbar(read_instance=self, canvas_instance=self.mpl_canvas)
@@ -486,27 +494,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # add MPL canvas of plots to parent frame
         parent_layout.addWidget(self.mpl_canvas)
 
-        # starting from a configuration file?
-        if self.from_conf: 
-            # read
-            self.handle_data_selection_update()
-            # set fields available for filtering
-            aux.representativity_conf(self)
-            aux.period_conf(self)
-            aux.metadata_conf(self)
-            self.mpl_canvas.handle_data_filter_update()
-
         # set finalised layout
         self.setLayout(parent_layout)
+
         # plot whole dashboard
         self.show()
+
         # maximise window to fit screen
         self.showMaximized()
 
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
         
-        self.pop_up_window = PopUpWindow(menu_root, [], self.main_window_geometry)
+        self.pop_up_window = PopUpWindow(self, menu_root, [], self.main_window_geometry)
 
     def update_configuration_bar_fields(self):
         """ Function that initialises/updates configuration bar fields. """
@@ -532,6 +532,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.time_array = None
             self.yearmonths = None
             self.data_labels = None
+            
             # set initial station references to be empty dict
             self.station_references = {}
 
@@ -540,7 +541,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_resolution = copy.deepcopy(self.resolution)
             self.selected_matrix = self.parameter_dictionary[self.species[0]]['matrix']
             self.selected_species = copy.deepcopy(self.species[0])
+            self.selected_resampling_resolution = copy.deepcopy(self.resampling_resolution)
+            self.selected_resampling = copy.deepcopy(self.resampling)
 
+            # set initial filter species in widgets as empty dictionaries
+            self.selected_widget_network = dict()
+            self.selected_widget_matrix = dict()
+            self.selected_widget_species = dict()
+            self.selected_widget_lower = dict()
+            self.selected_widget_upper = dict()
+            self.selected_widget_filter_species_fill_value = dict()
+            self.selected_widget_apply = dict()
+            
             # set variable stating first read
             self.first_read = True
 
@@ -550,7 +562,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update qa / flags checkboxes 
             self.flag_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.flags)
             self.qa_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.qa_per_species[self.selected_species])
-
+             
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
             aux.get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
@@ -561,6 +573,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_resolution.clear()
         self.cb_matrix.clear()
         self.cb_species.clear()
+        self.cb_resampling_resolution.clear()
 
         # if have no available observational data, return from function, updating variable informing that have no data
         if len(self.available_observation_data) == 0:
@@ -594,6 +607,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.cb_resolution.setCurrentText(self.selected_resolution)
         else:
             self.selected_resolution = self.cb_resolution.currentText()
+        
+        # update resampling resolution field
+        resampling_available_resolutions = copy.deepcopy(available_resolutions)[available_resolutions.index(self.selected_resolution)+1:]
+        resampling_available_resolutions.append('yearly')
+        self.cb_resampling_resolution.addItems(resampling_available_resolutions)
+        if self.selected_resampling_resolution in resampling_available_resolutions:
+            self.cb_resampling_resolution.setCurrentText(self.selected_resampling_resolution)
+        else:
+            self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
+
+        # update resampling switch
+        if self.selected_resampling:
+            self.cb_resampling_switch.setChecked(True)
+        else:
+            self.cb_resampling_switch.setChecked(False)
 
         # update matrix field
         available_matrices = sorted(self.available_observation_data[self.selected_network][self.selected_resolution])
@@ -618,7 +646,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update experiments -- keeping previously selected experiments if available
         if self.config_bar_initialisation:   
             self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in self.experiments
-                                                                    if experiment in self.experiments_menu['checkboxes']['map_vars']]
+                                                                    if experiment in 
+                                                                    self.experiments_menu['checkboxes']['map_vars']]
             self.experiments = {experiment:experiment_alias for experiment, experiment_alias in self.experiments.items()
                                 if experiment in self.experiments_menu['checkboxes']['map_vars']}
 
@@ -628,10 +657,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                 if previous_selected_experiment in
                                                                 self.experiments_menu['checkboxes']['map_vars']]
         previous_experiments = self.experiments
-        self.experiments = {exp:previous_experiments[exp] if exp in previous_experiments else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
+        self.experiments = {exp:previous_experiments[exp] if exp in previous_experiments else exp 
+                            for exp in self.experiments_menu['checkboxes']['keep_selected']}
 
         # update default qa
-        default_qa = aux.get_default_qa(self, self.selected_species)
+        default_qa = get_default_qa(self, self.selected_species)
         self.qa_menu['checkboxes']['remove_default'] = default_qa
 
         # update layout fields
@@ -648,7 +678,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # update layout field buttons
         # clear fields
-        self.cb_position_1.clear()
         self.cb_position_2.clear()
         self.cb_position_3.clear()
         self.cb_position_4.clear()
@@ -662,9 +691,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if not self.temporal_colocation:
             if 'scatter' in layout_options:
                 layout_options.remove('scatter')
-
-        # update position 1 in layout (always map)
-        self.cb_position_1.addItems(['map'])
         
         # update position 2 in layout
         self.cb_position_2.addItems(layout_options)
@@ -712,18 +738,29 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # get event origin source
             event_source = self.sender()
+
             # if network, resolution, matrix or species have changed then respective
             # current selection for the changed param
             if event_source == self.cb_network:
                 self.selected_network = changed_param
+
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
+
             elif event_source == self.cb_matrix:
                 self.selected_matrix = changed_param
                 self.selected_species = sorted(list(
                     self.available_observation_data[self.selected_network][self.selected_resolution][self.selected_matrix].keys()))[0]
+            
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
+
+            elif event_source == self.cb_resampling_resolution:
+                self.selected_resampling_resolution = changed_param
+                self.selected_resampling = False
+
+            elif event_source == self.cb_resampling_switch:
+                self.selected_resampling = changed_param
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
@@ -731,6 +768,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # check if start date/end date have changed
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
                 self.date_range_has_changed = True
+
+            # initalise multispecies tab if network, resolution, matrix or species change
+            if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
+                aux.init_multispecies(self)
 
             # update configuration bar fields
             self.update_configuration_bar_fields()
@@ -847,37 +888,37 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if changed_position == self.cb_position_3 or changed_position == 3:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 0), rowspan=20, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 19), rowspan=20, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 0), rowspan=20, colspan=18))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=18, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 19), rowspan=18, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 0), rowspan=18, colspan=18))
             elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 10), rowspan=44, colspan=19))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 10), rowspan=38, colspan=19))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 0),  rowspan=44, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=38, colspan=29))
 
         # position 4 (bottom centre)
         if changed_position == self.cb_position_4 or changed_position == 4:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 35), rowspan=20, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 54), rowspan=20, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 35), rowspan=20, colspan=18))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=18, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 54), rowspan=18, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 35), rowspan=18, colspan=18))
             elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 45),  rowspan=44, colspan=19))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 45), rowspan=38, colspan=19))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 35),  rowspan=44, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=29))
             
         # position 5 (bottom right)
         if changed_position == self.cb_position_5 or changed_position == 5:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 70), rowspan=20, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 89), rowspan=20, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((80, 70), rowspan=20, colspan=18))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=18, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 89), rowspan=18, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 70), rowspan=18, colspan=18))
             elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 80),  rowspan=44, colspan=19))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 80), rowspan=38, colspan=19))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((56, 70),  rowspan=44, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=29))
 
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         if changed_plot_type == 'timeseries':
@@ -888,7 +929,36 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_timeseries_annotation = False
             canvas_instance.timeseries_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                     canvas_instance.hover_timeseries_annotation)
+
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
+        elif changed_plot_type == 'scatter':
+
+            # setup scatter annotation
+            canvas_instance.create_scatter_annotation()
+            canvas_instance.lock_scatter_annotation = False
+            canvas_instance.scatter_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                 canvas_instance.hover_scatter_annotation)
+
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
+        elif changed_plot_type == 'distribution':
+
+            # setup distribution annotation
+            canvas_instance.create_distribution_annotation()
+            canvas_instance.create_distribution_annotation_vline()
+            canvas_instance.lock_distribution_annotation = False
+            canvas_instance.distribution_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                      canvas_instance.hover_distribution_annotation)
+
         elif changed_plot_type == 'periodic':
+            
+            # setup periodic annotation
+            canvas_instance.create_periodic_annotation()
+            canvas_instance.create_periodic_annotation_vline()
+            canvas_instance.lock_periodic_annotation = dict()
+            for resolution in canvas_instance.plot_axes['periodic'].keys():
+                canvas_instance.lock_periodic_annotation[resolution] = False
+            canvas_instance.periodic_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                  canvas_instance.hover_periodic_annotation)
 
             # update periodic statistic combobox
             self.block_config_bar_handling_updates = False
@@ -905,6 +975,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update periodic statistic in dashboard
             canvas_instance.handle_periodic_statistic_update()
 
+        elif changed_plot_type == 'periodic-violin':
+            
+            # setup periodic violin annotation
+            canvas_instance.create_periodic_violin_annotation()
+            canvas_instance.create_periodic_violin_annotation_vline()
+            canvas_instance.lock_periodic_violin_annotation = dict()
+            for resolution in canvas_instance.plot_axes['periodic-violin'].keys():
+                canvas_instance.lock_periodic_violin_annotation[resolution] = False
+            canvas_instance.periodic_violin_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                         canvas_instance.hover_periodic_violin_annotation)
+
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
             and MPL canvas upon pressing of READ button.
@@ -914,7 +995,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if self.no_data_to_read:
             return
 
-        # Update mouse cursor to a waiting cursor
+        # update mouse cursor to a waiting cursor
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # set variable that blocks updating of MPL canvas until all data has been updated
@@ -930,7 +1011,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
-        self.previous_filter_species = {}
+        self.previous_filter_species = self.previous_filter_species
+        self.previous_plot_options = {}
+        for plot_type in self.mpl_canvas.all_plots:
+            self.previous_plot_options[plot_type] = []
         
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
@@ -938,22 +1022,25 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.network = [self.selected_network]
         self.resolution = self.selected_resolution
         self.species = [self.selected_species]  
-        self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp for exp in self.experiments_menu['checkboxes']['keep_selected']}
+        self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp 
+                            for exp in self.experiments_menu['checkboxes']['keep_selected']}
         self.qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
         self.qa_per_species[self.selected_species] = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
-        self.networkspeci = '{}|{}'.format(self.network[0],self.species[0])
-        self.networkspecies = [self.networkspeci]
+        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
+        self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
-        
-        # upddate filter_species here with contents of filter_species pop-up menu
-        #self.filter_species = 
+        self.filter_species = self.filter_species
+        self.current_plot_options = {}
+        for plot_type in self.mpl_canvas.all_plots:
+            self.current_plot_options[plot_type] = []
 
-        # if spatial_colocation is not active, force filter_species to be empty dict if it is not akready
+        # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {} 
-            print('Warning: "spatial_colocation" must be set to True if wanting to use "filter_species" option.')
+            msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
+            show_message(msg)
 
         # set read operations to be empty list initially
         read_operations = []
@@ -1026,11 +1113,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # has date range changed?
         if len(read_operations) > 0:
-           
+            
+            # inactivate resampling
+            self.resampling = False
+
             # set current time array, as previous time array
             self.previous_time_array = self.time_array
+
             # set current station references, as previous station references
             self.previous_station_references = self.station_references
+            
             # set current relevant yearmonths, as previous relevant yearmonths
             self.previous_yearmonths = self.yearmonths
 
@@ -1038,15 +1130,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, 
                                        experiments_to_read=experiments_to_read)
             
-            #clear canvas entirely if have no valid data after read
+            # clear canvas entirely if have no valid data after read
             if self.invalid_read:
                 # clear axes
                 for plot_type, ax in self.mpl_canvas.plot_axes.items():
-                    if isinstance(ax, dict):
-                        for sub_ax in ax.values():
-                            sub_ax.remove()
-                    else:
-                        ax.remove() 
+                    self.mpl_canvas.remove_axis_elements(ax, plot_type)
                 # update MPL canvas
                 self.mpl_canvas.figure.canvas.draw()  
                 # restore mouse cursor to normal
@@ -1138,6 +1226,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_metadata(self)
         aux.update_metadata_fields(self)
 
+        # reset multispecies
+        aux.init_multispecies(self)
+        
         # reset bounds
         species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
         species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
