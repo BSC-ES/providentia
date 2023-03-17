@@ -82,9 +82,9 @@ class DataFilter:
                 # update inds_to_filter array, making True all instances where have data outside bounds
                 inds_to_filter = np.any([inds_to_filter, invalid_inds_per_species], axis=0)
 
-            # set all inds to filter as NaN for all networkspecies in memory
-            for networkspeci in self.read_instance.networkspecies:
-                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
+                # set all inds to filter as NaN for all networkspecies in memory
+                for networkspeci in self.read_instance.networkspecies:
+                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
                 
     def filter_data_limits(self):
         """ Filter out (set to NaN) data which exceed the lower/upper limits. """
