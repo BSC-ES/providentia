@@ -93,6 +93,12 @@ class DataReader:
                         self.read_instance.le_minimum_value.setText(current_lower)
                         self.read_instance.le_maximum_value.setText(current_upper)
                         
+                        current_fill_value = str(self.read_instance.filter_species[networkspeci][2])
+                        if current_fill_value != str(np.nan):
+                            msg = 'It is not possible to apply a fill value to the current network-species. '
+                            msg += '{0} will be ignored, fill value will remain as NaN.'.format(current_fill_value)
+                            show_message(msg)
+                            
                         del self.read_instance.filter_species[networkspeci]
 
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)

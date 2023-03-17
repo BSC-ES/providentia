@@ -314,8 +314,10 @@ class ProvConfiguration:
 
             # per networkspecies to filter by, save in dict as networkspecies:[lower_limit, upper_limit] 
             if isinstance(value, str):
+
                 # strip all whitespace
                 value_strip = "".join(value.split())
+
                 # return empty dict if empty str
                 if value_strip == '':
                     return {}
@@ -413,9 +415,27 @@ class ProvConfiguration:
 
         elif key == 'calibration_factor':
             # parse calibration factor
+            
+            if isinstance(value, str):
 
-            if np.issubdtype(type(value), np.number):
-                return str(value)
+                # strip all whitespace
+                value_strip = "".join(value.split())
+
+                calibration_by_experiment = False
+                for experiment in self.read_instance.experiments.keys():
+                    if experiment in value_strip:
+                        calibration_by_experiment = True
+                        break
+                
+                if calibration_by_experiment:
+                    calibration_factor_dict = {}
+                    for i, experiment in enumerate(self.read_instance.experiments.keys()):
+                        calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
+                        calibration_factor_dict[experiment] = calibration_factor_exp
+                    return calibration_factor_dict
+                else:
+                    if np.issubdtype(type(value), np.number):
+                        return str(value)
 
         # if no special parsing treatment for variable, simply return value
         return value
