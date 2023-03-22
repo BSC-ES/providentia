@@ -67,9 +67,11 @@ class DataReader:
                 self.read_instance.invalid_read = True
                 msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
-                show_message(msg)
+                show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
                 if (self.read_instance.from_conf) and (not self.read_instance.offline):
                     sys.exit('Error: Providentia will not be launched.')
+                elif (self.read_instance.offline):
+                    sys.exit('Error: Offline report will not be created.')
                 else:
                     self.read_instance.first_read = True
             else:
@@ -81,25 +83,14 @@ class DataReader:
                         if networkspeci not in self.read_instance.networkspecies:
                             self.read_instance.filter_networkspecies.append(networkspeci)
                     
-                    # update le_minimum_value and le_maximum_value (data bounds) for current networkspecies
-                    if networkspeci in self.read_instance.networkspecies:
-                        
-                        msg = 'The current network-species has been selected in the MULTI tab, '
-                        msg += 'this will change the data bounds.'
-                        show_message(msg)
-
-                        current_lower = str(self.read_instance.filter_species[networkspeci][0])
-                        current_upper = str(self.read_instance.filter_species[networkspeci][1])
-                        self.read_instance.le_minimum_value.setText(current_lower)
-                        self.read_instance.le_maximum_value.setText(current_upper)
-                        
-                        current_fill_value = str(self.read_instance.filter_species[networkspeci][2])
-                        if current_fill_value != str(np.nan):
-                            msg = 'It is not possible to apply a fill value to the current network-species. '
-                            msg += '{0} will be ignored, fill value will remain as NaN.'.format(current_fill_value)
-                            show_message(msg)
-                            
-                        del self.read_instance.filter_species[networkspeci]
+                    # do not update data bounds for current networkspecies
+                    filter_species = copy.deepcopy(self.read_instance.filter_species)
+                    for networkspeci in filter_species:
+                        if networkspeci in self.read_instance.networkspecies:
+                            msg = 'The current network-species ({}) cannot be selected as a filter species. '.format(networkspeci)
+                            msg += 'If you want to change its data bounds, use the lower and upper bounds parameters.'
+                            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+                            del self.read_instance.filter_species[networkspeci]
 
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)
                 self.read_instance.yearmonths = list(np.unique(['{}0{}'.format(dti.year,dti.month) if len(str(dti.month)) == 1 else '{}{}'.format(dti.year,dti.month) \
