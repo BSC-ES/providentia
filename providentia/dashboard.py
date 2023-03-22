@@ -1040,7 +1040,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {} 
             msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
-            show_message(msg)
+            show_message(self.read_instance, msg)
 
         # set read operations to be empty list initially
         read_operations = []
@@ -1057,7 +1057,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.species[0] != self.previous_species[0]) or (
                 np.array_equal(self.qa, self.previous_qa) == False) or (
                 np.array_equal(self.flags, self.previous_flags) == False) or (
-                list(self.filter_species.keys()) != list(self.previous_filter_species.keys())):
+                self.filter_species != self.previous_filter_species):
             read_operations = ['reset']
 
         # key variables have not changed, has start/end date?
@@ -1226,9 +1226,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_metadata(self)
         aux.update_metadata_fields(self)
 
-        # reset multispecies
-        aux.init_multispecies(self)
-        
         # reset bounds
         species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
         species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])

@@ -1089,7 +1089,13 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # get line
             label_ii = int(event_source.objectName().split('_')[1])
-            
+
+            # reset bounds and apply values on widgets
+            self.read_instance.selected_widget_apply.update({label_ii: False})
+
+            # remove previous networkspeci from lists
+            update_filter_species(self.read_instance, label_ii, add_filter_species=False)
+
             # if network, matrix or species have changed then respective
             # current selection for the changed param
             if event_source == self.page_memory['multispecies']['network'][label_ii]:
@@ -1109,11 +1115,6 @@ class PopUpWindow(QtWidgets.QWidget):
             elif event_source == self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii]:
                 self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: changed_param})
 
-            # reset bounds and apply values on widgets
-            self.read_instance.selected_widget_apply.update({label_ii: False})
-
-            # remove networkspeci from lists
-            update_filter_species(self.read_instance, label_ii, add_filter_species=False)
 
             # update multispecies filtering fields
             self.update_multispecies_fields(label_ii)
@@ -1196,14 +1197,10 @@ def multispecies_conf(instance):
 
     if hasattr(instance, 'filter_species'):
         filter_species = copy.deepcopy(instance.filter_species)
-        print('filter species', filter_species)
         for (networkspeci_ii, networkspeci), networkspeci_bounds in zip(enumerate(filter_species.keys()),
                                                                         filter_species.values()):
 
             for bounds in networkspeci_bounds:
-
-                print('MULTISPECIES_CONF', 'i', networkspeci_ii)
-
                 # update menu_current
                 if ('networkspeci_' + str(networkspeci_ii)) not in instance.multispecies_menu['multispecies']['labels']:
                     instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
@@ -1253,26 +1250,24 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
     current_lower = instance.selected_widget_lower[label_ii]
     current_upper = instance.selected_widget_upper[label_ii]
     current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
-    current_apply = instance.selected_widget_apply[label_ii]
-
-    print('UPDATE_FILTER_SPECIES', current_lower, current_upper, current_filter_species_fill_value)
+    current_filter_species = [current_lower, current_upper, current_filter_species_fill_value]
 
     # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
     if add_filter_species:
-        print('ADD')
+        
+        # do not add to filter_species if lower and upper bounds are nan
+        if current_lower == str(np.nan) or current_upper == str(np.nan):
+            print("Warning: Data bounds cannot be empty")
+            return
+
         # add or update networkspeci
         # check selected lower and upper bounds and fill value are numbers or nan
         try:
-            print(networkspeci in instance.filter_species)
-            print('Before:', instance.filter_species)
-            if networkspeci in instance.filter_species:
-                instance.filter_species[networkspeci].append([float(current_lower), float(current_upper),
-                                                                float(current_filter_species_fill_value)])
+            if networkspeci in instance.filter_species.keys():
+                if current_filter_species not in instance.filter_species[networkspeci]:
+                    instance.filter_species[networkspeci].append(current_filter_species)
             else:
-                instance.filter_species[networkspeci] = [[float(current_lower), float(current_upper),
-                                                            float(current_filter_species_fill_value)]]
-            
-            print('After:', instance.filter_species)
+                instance.filter_species[networkspeci] = [current_filter_species]
 
         # if any of the fields are not numbers, return from function
         except ValueError:
@@ -1292,18 +1287,16 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
 
     # if apply button is unchecked, remove networkspecies from filter_species
     else:
-        print('REMOVE')
         # remove from filter_species
-        if networkspeci in instance.filter_species.keys():
-            for networkspeci_ii, networkspeci in enumerate(instance.filter_species[networkspeci]):
-                print('Before:', instance.filter_species)
-                print(networkspeci_ii, networkspeci)
-                if ((float(current_lower) == instance.filter_species[networkspeci][networkspeci_ii][0]) 
-                     and (float(current_upper) == instance.filter_species[networkspeci][networkspeci_ii][1])
-                     and (float(current_filter_species_fill_value) == instance.filter_species[networkspeci][networkspeci_ii][2])):
-                    del instance.filter_species[networkspeci][networkspeci_ii]
-                print('After:', instance.filter_species)
-        
+        filter_species_aux = copy.deepcopy(instance.filter_species)
+        if networkspeci in filter_species_aux.keys():
+            for networkspeci in filter_species_aux:
+                if current_filter_species in filter_species_aux[networkspeci]:
+                    sub_networkspeci_ii = instance.filter_species[networkspeci].index(current_filter_species)
+                    del instance.filter_species[networkspeci][sub_networkspeci_ii]
+                    if len(instance.filter_species[networkspeci]) == 0:
+                        del instance.filter_species[networkspeci]
+
         # remove from qa_per_species
         if (speci in instance.qa_per_species) and (networkspeci not in instance.filter_species.keys()):
             del instance.qa_per_species[speci]
