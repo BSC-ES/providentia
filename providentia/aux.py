@@ -1767,9 +1767,9 @@ def resolve_duplicate_spatial_colocation_matches(idx, nondup_idx, dup_idx,
 
     return idx, unresolved_dup_idx, fs_wtol_inds, ns_wtol_inds 
 
-def show_message(msg, offline=False, msg_offline=None, from_conf=None):
+def show_message(read_instance, msg, msg_offline=None, from_conf=None):
 
-    if offline:
+    if read_instance.offline:
         if msg_offline is not None:
             print('Warning: ' + msg_offline)
         else:
