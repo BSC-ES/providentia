@@ -336,15 +336,15 @@ class ProvConfiguration:
 
                         # get lower and upper limits
                         networkspeci_split_3 = networkspeci_split_2[1].split(',')
-                        lower_limit = float(networkspeci_split_3[0])
-                        
+                        lower_limit = networkspeci_split_3[0]
+
                         # if it has fill value
                         if len(networkspeci_split_3) > 2:
-                            upper_limit = float(networkspeci_split_3[1])
+                            upper_limit = networkspeci_split_3[1]
                             filter_species_fill_value = float(networkspeci_split_3[2].replace(')',''))
                         # only bounds, fill value will be nan
                         else:
-                            upper_limit = float(networkspeci_split_3[1].replace(')',''))
+                            upper_limit = networkspeci_split_3[1].replace(')','')
                             filter_species_fill_value = np.nan
 
                         # save limits per networkspecies
@@ -448,7 +448,7 @@ class ProvConfiguration:
         if not self.read_instance.network:
             default = ['GHOST']
             msg = 'Network (network) was not defined in the configuration file. Using {} as default.'.format(default)
-            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.network = default
 
         # check have species information, 
@@ -456,7 +456,7 @@ class ProvConfiguration:
         if not self.read_instance.species:
             default = ['sconco3']
             msg = 'Species (species) was not defined in the configuration file. Using {} as default.'.format(default)
-            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.species = default
 
         # if number of networks and species is not the same,
@@ -495,7 +495,7 @@ class ProvConfiguration:
         if not self.read_instance.resolution:
             default = 'hourly'
             msg = 'Resolution (resolution) was not defined in the configuration file. Using {} as default.'.format(default)
-            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.resolution = default
 
         # check have start_date information, 
@@ -503,7 +503,7 @@ class ProvConfiguration:
         if not self.read_instance.start_date:
             default = '20180101'
             msg = 'Start date (start_date) was not defined in the configuration file. Using {} as default.'.format(default)
-            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.start_date = default
 
         # check have end_date information, 
@@ -511,7 +511,7 @@ class ProvConfiguration:
         if not self.read_instance.end_date:
             default = '20190101'
             msg = 'End date (end_date) was not defined in the configuration file. Using {} as default.'.format(default)
-            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.end_date = default
 
         # check have correct active_dashboard_plots information, 
@@ -528,7 +528,7 @@ class ProvConfiguration:
         if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
             self.read_instance.filter_species = {}
             msg = 'Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species.'
-            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
         # map to multiple species if have * wildcard
         # also duplicate out associated network
@@ -560,7 +560,9 @@ class ProvConfiguration:
         # lower_bound
         # type is dict, then set as default limit per species using GHOST limits
         if isinstance(self.read_instance.lower_bound, dict):
-            self.read_instance.lower_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit']) for speci in species_plus_filter_species}
+            self.read_instance.lower_bound = {speci:
+                                              np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit']) 
+                                              for speci in species_plus_filter_species}
         # otherwise set list values to dict, saving limits per species
         # if have just 1 limit apply for all read species, but if have multiple, set limits per species
         # throw error if have multiple lower bounds, but not equal to number of species to read  
@@ -575,7 +577,7 @@ class ProvConfiguration:
                     sys.exit(error)
                 else:
                     for speci_ii, speci in enumerate(self.read_instance.species):
-                        lower_bound_dict[speci] = value[speci_ii] 
+                        lower_bound_dict[speci] = self.read_instance.lower_bound[speci_ii] 
                     # add filter_species (using GHOST limits)
                     for speci in filter_species:
                         lower_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit'])
@@ -584,7 +586,8 @@ class ProvConfiguration:
         # upper_bound
         # type is dict, then set as default limit per species using GHOST limits
         if isinstance(self.read_instance.upper_bound, dict):
-            self.read_instance.upper_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit']) for speci in species_plus_filter_species}
+            self.read_instance.upper_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit']) 
+                                              for speci in species_plus_filter_species}
         # otherwise set list values to dict, saving limits per species
         # if have just 1 limit apply for all read species, but if have multiple, set limits per species
         # throw error if have multiple upper bounds, but not equal to number of species to read  
@@ -599,7 +602,7 @@ class ProvConfiguration:
                     sys.exit(error)
                 else:
                     for speci_ii, speci in enumerate(self.read_instance.species):
-                        upper_bound_dict[speci] = value[speci_ii] 
+                        upper_bound_dict[speci] = self.read_instance.upper_bound[speci_ii] 
                     # add filter_species (using GHOST limits)
                     for speci in filter_species:
                         upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
@@ -607,7 +610,8 @@ class ProvConfiguration:
 
         # create a variable to set qa per species (including filter species)
         if isinstance(self.read_instance.qa, dict):
-            self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) for speci in species_plus_filter_species}
+            self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
+                                                 for speci in species_plus_filter_species}
             # set qa to be first of qa per species pairs
             self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
         else:
@@ -627,9 +631,47 @@ class ProvConfiguration:
         # if offline, throw message, stating error
         if (self.read_instance.resampling) and (self.read_instance.resampling_resolution is None):
             msg = 'Resampling will not be applied because resampling resolution was not defined.'
-            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.resampling = False
-            
+        
+        # check bounds inside filter_species
+        if self.read_instance.filter_species:
+            for networkspeci in self.read_instance.filter_species: 
+                for networkspeci_limit_ii, networkspeci_limit in enumerate(self.read_instance.filter_species[networkspeci]):
+                    
+                    # get bounds
+                    lower_limit = networkspeci_limit[0]
+                    upper_limit = networkspeci_limit[1]
+                    filter_species_fill_value = networkspeci_limit[2]
+                    
+                    # modify lower bound to be :, or contain > or >=
+                    if ('<' in lower_limit):
+                        msg = 'Lower bound ({}) for {} cannot contain < or <=. '.format(lower_limit, networkspeci)
+                        lower_limit = '>=' + lower_limit.replace('<', '').replace('=', '')
+                        msg += 'Setting it to be {}.'.format(lower_limit)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    elif (':' not in lower_limit) and ('>' not in lower_limit):
+                        msg = 'Lower bound ({}) for {} should contain > or >=. '.format(lower_limit, networkspeci)
+                        lower_limit = '>=' + lower_limit
+                        msg += 'Setting it to be {}.'.format(lower_limit)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+
+                    # modify upper bound to be :, or contain < or <=
+                    if ('>' in upper_limit):
+                        msg = 'Upper bound ({}) for {} cannot contain > or >=. '.format(upper_limit, networkspeci)
+                        upper_limit = '<=' + upper_limit.replace('>', '').replace('=', '')
+                        msg += 'Setting it to be {}.'.format(upper_limit)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    elif (':' not in upper_limit) and ('<' not in upper_limit):
+                        msg = 'Upper bound ({}) for {} should contain < or <=. '.format(upper_limit, networkspeci)
+                        upper_limit = '<=' + upper_limit
+                        msg += 'Setting it to be {}.'.format(upper_limit)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    
+                    # update symbols next to values
+                    self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
+                                                                                              filter_species_fill_value]
+
 def read_conf(fpath=None):
     """ Read configuration files. """
 
