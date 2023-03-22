@@ -1777,7 +1777,7 @@ def show_message(msg, offline=False, msg_offline=None, from_conf=None):
     
     else:
         # there are some warnings that will only be shown if we launch the dashboard
-        # using a configuration file (those in filter.py and configuration.py)
+        # using a configuration file (those in filter.py, read.py and configuration.py)
         if (from_conf is None) or (from_conf):
             from .dashboard_aux import MessageBox
             MessageBox(msg)
