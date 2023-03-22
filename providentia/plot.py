@@ -124,7 +124,7 @@ class Plot:
                     if plot_type in self.read_instance.summary_plots_to_make:
                         self.read_instance.summary_plots_to_make.remove(plot_type)
                     if plot_type in self.read_instance.station_plots_to_make:
-                        self.read_instance.station.plots_to_make.remove(plot_type)
+                        self.read_instance.station_plots_to_make.remove(plot_type)
                     continue
 
                 # add information for plot type from base plot type template 
@@ -166,7 +166,7 @@ class Plot:
                     if plot_type in self.read_instance.summary_plots_to_make:
                         self.read_instance.summary_plots_to_make.remove(plot_type)
                     if plot_type in self.read_instance.station_plots_to_make:
-                        self.read_instance.station.plots_to_make.remove(plot_type)
+                        self.read_instance.station_plots_to_make.remove(plot_type)
                     continue
 
                 # add information for plot type for base plot type 
