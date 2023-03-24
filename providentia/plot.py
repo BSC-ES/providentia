@@ -326,19 +326,29 @@ class Plot:
         ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
 
     def get_map_extent(self, ax):
-        """ Get map extent from xlim and ylim. """
+        """ Get map extent from xlim and ylim. """ 
 
-        current_xlim = ax.get_xlim()
-        current_ylim = ax.get_ylim()
+        # get plot extent
+        coords = np.array(ax.get_extent())
+        current_xlim = coords[0:2]
+        current_ylim = coords[2:4]
+
+        # calculate means
         mlon = np.mean(current_xlim)
         mlat = np.mean(current_ylim)
+
+        # get coordinates
         xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
         ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
+
+        # transform coordinates to projected data
         transformed_coords = self.canvas_instance.datacrs.transform_points(self.canvas_instance.plotcrs, 
                                                                            xcoords, ycoords)[:, :2]
+        
+        # get map extent
         map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(),
                       transformed_coords[:,1].min(), transformed_coords[:,1].max()]
-
+        
         return map_extent
 
     def set_equal_axes(self, ax):

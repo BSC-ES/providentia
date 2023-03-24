@@ -1333,8 +1333,10 @@ class MPLCanvas(FigureCanvas):
         # get coordinates of drawn lasso
         lasso_path = Path(verts)
         lasso_path_vertices = lasso_path.vertices
+
         # transform lasso coordinates from projected to standard geographic coordinates
         lasso_path.vertices = self.datacrs.transform_points(self.plotcrs, lasso_path_vertices[:, 0], lasso_path_vertices[:, 1])[:, :2]
+
         # get absolute selected indices of stations on map (the station coordinates contained within lasso)
         self.absolute_selected_station_inds = np.nonzero(lasso_path.contains_points(self.map_points_coordinates))[0]
 
@@ -1342,10 +1344,13 @@ class MPLCanvas(FigureCanvas):
         if len(self.absolute_selected_station_inds) == 0:
             # take first selected point coordinates and get matches of stations within tolerance 
             self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
-            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
+            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
+                                    self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
+
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
             self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
+            
             # if more than 1 point selected, limit this to be just nearest point
             if len(self.absolute_selected_station_inds) > 1:
                 self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int)
