@@ -20,6 +20,7 @@ from matplotlib.figure import Figure
 from matplotlib.path import Path
 from matplotlib.widgets import LassoSelector, Slider
 import matplotlib.gridspec as gridspec
+import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
@@ -31,6 +32,7 @@ from .aux import get_relevant_temporal_resolutions, show_message
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
 register_matplotlib_converters()
+mplstyle.use('fast')
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -907,8 +909,10 @@ class MPLCanvas(FigureCanvas):
 
                 inds_to_remove = []
                 for col_ii, col in enumerate(ax_to_remove.collections): 
-                    if ((isinstance(col, matplotlib.collections.PathCollection))
-                        or (isinstance(col, matplotlib.collections.LineCollection))):
+                    # TODO: Put line collection back into place when we turn on the auto_update in gridlines
+                    # if ((isinstance(col, matplotlib.collections.PathCollection))
+                    #     or (isinstance(col, matplotlib.collections.LineCollection))):
+                    if (isinstance(col, matplotlib.collections.PathCollection)):
                         inds_to_remove.append(col_ii)
                 ax_to_remove.collections = list(np.delete(np.array(ax_to_remove.collections), inds_to_remove))
 
