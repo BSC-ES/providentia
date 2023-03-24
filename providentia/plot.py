@@ -4,6 +4,7 @@ import json
 import os
 
 import math
+import pyproj
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -20,6 +21,9 @@ import seaborn as sns
 
 from .statistics import get_z_statistic_info
 from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases, show_message
+
+# speed up transformations in cartopy
+pyproj.set_use_global_context()
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
