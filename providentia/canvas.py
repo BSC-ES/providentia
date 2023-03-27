@@ -10,33 +10,37 @@ import time
 import datetime
 import math
 from weakref import WeakKeyDictionary
+import time
 
 import matplotlib
 from matplotlib.offsetbox import AnchoredOffsetbox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
         as FigureCanvas
+from matplotlib.backend_bases import FigureCanvasBase
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.path import Path
-from matplotlib.widgets import LassoSelector, Slider
+from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
+import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_aux import set_formatting
-from .dashboard_aux import ComboBox, CheckableComboBox
+from .dashboard_aux import set_formatting, ComboBox, CheckableComboBox, LassoSelector
 from .aux import get_relevant_temporal_resolutions, show_message
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
 register_matplotlib_converters()
 
+# use matplotlib fast style: https://matplotlib.org/stable/users/explain/performance.html
+mplstyle.use('fast')
+
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
-
 
 class MPLCanvas(FigureCanvas):
     """ Class that handles the creation and updates of
@@ -132,14 +136,14 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.mpl_connect('pick_event', self.legend_picker_func)
 
         # setup interactive lasso on map
-        self.lasso_left = LassoSelector(self.plot_axes['map'], onselect=self.onlassoselect_left,
-                                        useblit=True, lineprops=self.lasso, button=[1])
-        self.lasso_right = LassoSelector(self.plot_axes['map'], onselect=self.onlassoselect_right,
-                                         useblit=True, lineprops=self.lasso, button=[3])
+        self.lasso_left = LassoSelector(self, self.plot_axes['map'], onselect=self.onlassoselect_left,
+                                        useblit=False, props=self.lasso, button=[1])
+        self.lasso_right = LassoSelector(self, self.plot_axes['map'], onselect=self.onlassoselect_right,
+                                         useblit=False, props=self.lasso, button=[3])
 
         # setup station annotations
         self.create_station_annotation()
-        self.lock_map_annotation = False
+        self.map_annotation_disconnect = False
         self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', self.hover_map_annotation)
 
         # setup zoom on scroll wheel on map
@@ -907,8 +911,10 @@ class MPLCanvas(FigureCanvas):
 
                 inds_to_remove = []
                 for col_ii, col in enumerate(ax_to_remove.collections): 
-                    if ((isinstance(col, matplotlib.collections.PathCollection))
-                        or (isinstance(col, matplotlib.collections.LineCollection))):
+                    # TODO: Put line collection back into place when we turn on the auto_update in gridlines
+                    # if ((isinstance(col, matplotlib.collections.PathCollection))
+                    #     or (isinstance(col, matplotlib.collections.LineCollection))):
+                    if (isinstance(col, matplotlib.collections.PathCollection)):
                         inds_to_remove.append(col_ii)
                 ax_to_remove.collections = list(np.delete(np.array(ax_to_remove.collections), inds_to_remove))
 
@@ -1314,11 +1320,6 @@ class MPLCanvas(FigureCanvas):
         if len(self.active_map_valid_station_inds) == 0:
             return
 
-        if self.lock_station_pick == False:
-
-            # lock stations pick
-            self.lock_station_pick = True
-
         # unselect all/intersect checkboxes
         self.read_instance.block_MPL_canvas_updates = True
         self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
@@ -1333,8 +1334,10 @@ class MPLCanvas(FigureCanvas):
         # get coordinates of drawn lasso
         lasso_path = Path(verts)
         lasso_path_vertices = lasso_path.vertices
+
         # transform lasso coordinates from projected to standard geographic coordinates
         lasso_path.vertices = self.datacrs.transform_points(self.plotcrs, lasso_path_vertices[:, 0], lasso_path_vertices[:, 1])[:, :2]
+
         # get absolute selected indices of stations on map (the station coordinates contained within lasso)
         self.absolute_selected_station_inds = np.nonzero(lasso_path.contains_points(self.map_points_coordinates))[0]
 
@@ -1342,10 +1345,12 @@ class MPLCanvas(FigureCanvas):
         if len(self.absolute_selected_station_inds) == 0:
             # take first selected point coordinates and get matches of stations within tolerance 
             self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
-            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
+            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
+                                    self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
             self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
+            
             # if more than 1 point selected, limit this to be just nearest point
             if len(self.absolute_selected_station_inds) > 1:
                 self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int)
@@ -1367,9 +1372,6 @@ class MPLCanvas(FigureCanvas):
 
         # draw changes
         self.figure.canvas.draw()
-
-        # unlock stations pick 
-        self.lock_station_pick = False
 
         return None
 
@@ -3283,31 +3285,24 @@ class MPLCanvas(FigureCanvas):
     def hover_map_annotation(self, event):
         """ Show or hide annotation for each station that is hovered. """
 
-        # activate hover over map if any
-        if event.inaxes == self.plot_axes['map']:
-            if (hasattr(self.plot, 'stations_scatter')) and (self.lock_map_annotation == False):
-                # lock annotation
-                self.lock_map_annotation = True
+        if (not self.lock_zoom) & (event.inaxes == self.plot_axes['map']):
 
-                if not self.lock_zoom:
+            # activate hover over map
+            if (hasattr(self.plot, 'stations_scatter')):
                     
-                    is_contained, annotation_index = self.plot.stations_scatter.contains(event)
-                    
-                    if is_contained:
-                        # update annotation if hovered
-                        self.update_station_annotation(annotation_index)
-                        self.station_annotation.set_visible(True)
-                    else:
-                        # hide annotation if not hovered
-                        if self.station_annotation.get_visible():
-                            self.station_annotation.set_visible(False)
-
-                    # redraw points
-                    self.figure.canvas.draw()
-                    self.figure.canvas.flush_events()
+                is_contained, annotation_index = self.plot.stations_scatter.contains(event)
                 
-                # unlock annotation 
-                self.lock_map_annotation = False
+                if is_contained:
+                    # update annotation if hovered
+                    self.update_station_annotation(annotation_index)
+                    self.station_annotation.set_visible(True)
+                else:
+                    # hide annotation if not hovered
+                    if self.station_annotation.get_visible():
+                        self.station_annotation.set_visible(False)
+
+                # redraw points
+                self.figure.canvas.draw()
 
         return None
 
@@ -4018,19 +4013,12 @@ class MPLCanvas(FigureCanvas):
             to avoid interferences.
         """
 
-        if event.inaxes == self.plot_axes['map']:
-            # block legend picker inside map
-            self.lock_station_pick = False
-            self.lock_legend_pick = True
-        
-        elif event.inaxes == self.plot_axes['legend']:
-            # block stations picker inside legend
-            self.lock_station_pick = True
+        if event.inaxes == self.plot_axes['legend']:
+            # unblock legend picker in legend
             self.lock_legend_pick = False
         
         else:
-            # block stations picker and legend picker
-            self.lock_station_pick = True
+            # block legend picker
             self.lock_legend_pick = True
 
         return None
