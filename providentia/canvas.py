@@ -33,7 +33,6 @@ from .aux import get_relevant_temporal_resolutions, show_message
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
 register_matplotlib_converters()
-mplstyle.use('fast')
 
 # use matplotlib fast style: https://matplotlib.org/stable/users/explain/performance.html
 mplstyle.use('fast')
@@ -145,7 +144,6 @@ class MPLCanvas(FigureCanvas):
         # setup station annotations
         self.create_station_annotation()
         self.map_annotation_disconnect = False
-        self.time_map_annotation = time.time()
         self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', self.hover_map_annotation)
 
         # setup zoom on scroll wheel on map
@@ -711,6 +709,7 @@ class MPLCanvas(FigureCanvas):
                         msg += '(e.g. from monthly to daily) to create plots. '
                         msg += 'Plots will only be created when period is longer than 2 timesteps.'
                         show_message(msg)
+                        self.read_instance.cb_resampling_switch.setChecked(False)
                         return
 
                 # iterate through active_dashboard_plots
@@ -1322,10 +1321,6 @@ class MPLCanvas(FigureCanvas):
         if len(self.active_map_valid_station_inds) == 0:
             return
 
-        # lock stations pick
-        if self.lock_station_pick == False:
-            self.lock_station_pick = True
-
         # unselect all/intersect checkboxes
         self.read_instance.block_MPL_canvas_updates = True
         self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
@@ -1353,7 +1348,6 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
             tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
                                     self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
-
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
             self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
@@ -1379,9 +1373,6 @@ class MPLCanvas(FigureCanvas):
 
         # draw changes
         self.figure.canvas.draw()
-
-        # unlock stations pick 
-        self.lock_station_pick = False
 
         return None
 
@@ -4023,19 +4014,12 @@ class MPLCanvas(FigureCanvas):
             to avoid interferences.
         """
 
-        if event.inaxes == self.plot_axes['map']:
-            # block legend picker inside map
-            self.lock_station_pick = False
-            self.lock_legend_pick = True
-        
-        elif event.inaxes == self.plot_axes['legend']:
-            # block stations picker inside legend
-            self.lock_station_pick = True
+        if event.inaxes == self.plot_axes['legend']:
+            # unblock legend picker in legend
             self.lock_legend_pick = False
         
         else:
-            # block stations picker and legend picker
-            self.lock_station_pick = True
+            # block legend picker
             self.lock_legend_pick = True
 
         return None
