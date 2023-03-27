@@ -493,7 +493,7 @@ class ProvConfiguration:
         # check have resolution information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.resolution:
-            default = 'hourly'
+            default = 'monthly'
             msg = 'Resolution (resolution) was not defined in the configuration file. Using {} as default.'.format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.resolution = default
