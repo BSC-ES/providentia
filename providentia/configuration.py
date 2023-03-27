@@ -622,7 +622,7 @@ class ProvConfiguration:
             (not self.read_instance.offline)):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
-            show_message(msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
@@ -780,8 +780,8 @@ def read_conf(fpath=None):
                     if line_strip != '':
                         # initial definition of parameter - value
                         if '=' in line_strip:
-                            key = line_strip.split('=')[0].strip()
-                            value = line_strip.split('=')[1].strip()
+                            key = line_strip.split('=', 1)[0].strip()
+                            value = line_strip.split('=', 1)[1].strip()
                             config[section_modified][key] = value
                         # lines after adding line breaks
                         else:

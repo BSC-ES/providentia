@@ -9,6 +9,7 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
 from functools import partial
 from .read_aux import get_default_qa
+from .aux import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
@@ -1250,6 +1251,8 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
     current_lower = instance.selected_widget_lower[label_ii]
     current_upper = instance.selected_widget_upper[label_ii]
     current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
+
+    # get filter species after changes
     current_filter_species = [current_lower, current_upper, current_filter_species_fill_value]
 
     # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
@@ -1257,7 +1260,28 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
         
         # do not add to filter_species if lower and upper bounds are nan
         if current_lower == str(np.nan) or current_upper == str(np.nan):
-            print("Warning: Data bounds cannot be empty")
+            msg = 'Data bounds cannot be empty.'
+            show_message(instance, msg, from_conf=instance.from_conf)
+            return
+
+        # only add to filter_species when lower bound if it contains :, > or >=
+        if ('<' in current_lower):
+            msg = 'Lower bound ({}) for {} cannot contain < or <=.'.format(current_lower, networkspeci)
+            show_message(instance, msg, from_conf=instance.from_conf)
+            return
+        elif (':' not in current_lower) and ('>' not in current_lower):
+            msg = 'Lower bound ({}) for {} should contain > or >=.'.format(current_lower, networkspeci)
+            show_message(instance, msg, from_conf=instance.from_conf)
+            return
+
+        # only add to filter_species when upper bound if it contains :, < or <=
+        if ('>' in current_upper):
+            msg = 'Upper bound ({}) for {} cannot contain > or >=.'.format(current_upper, networkspeci)
+            show_message(instance, msg, from_conf=instance.from_conf)
+            return
+        elif (':' not in current_upper) and ('<' not in current_upper):
+            msg = 'Upper bound ({}) for {} should contain < or <=.'.format(current_upper, networkspeci)
+            show_message(instance, msg, from_conf=instance.from_conf)
             return
 
         # add or update networkspeci
@@ -1271,7 +1295,8 @@ def update_filter_species(instance, label_ii, add_filter_species=True):
 
         # if any of the fields are not numbers, return from function
         except ValueError:
-            print("Warning: Data limit fields must be numeric")
+            msg = 'Warning: Data limit fields must be numeric.'
+            show_message(instance, msg, from_conf=instance.from_conf)
             return
 
         # get quality flags for species if the information is not available in qa_per_species
