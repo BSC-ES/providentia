@@ -67,13 +67,14 @@ class DataReader:
                 self.read_instance.invalid_read = True
                 msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
-                show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+                show_message(msg)
                 if (self.read_instance.from_conf) and (not self.read_instance.offline):
                     sys.exit('Error: Providentia will not be launched.')
                 elif (self.read_instance.offline):
                     sys.exit('Error: Offline report will not be created.')
                 else:
                     self.read_instance.first_read = True
+                    return
             else:
                 # get list of extra networkspecies to read, used for filtering data
                 # read only networkspecies not present in current networkspecies to read
@@ -89,7 +90,7 @@ class DataReader:
                         if networkspeci in self.read_instance.networkspecies:
                             msg = 'The current network-species ({}) cannot be selected as a filter species. '.format(networkspeci)
                             msg += 'If you want to change its data bounds, use the lower and upper bounds parameters.'
-                            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+                            show_message(msg)
                             del self.read_instance.filter_species[networkspeci]
 
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)
