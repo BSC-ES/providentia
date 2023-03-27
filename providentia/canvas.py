@@ -10,33 +10,37 @@ import time
 import datetime
 import math
 from weakref import WeakKeyDictionary
+import time
 
 import matplotlib
 from matplotlib.offsetbox import AnchoredOffsetbox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
         as FigureCanvas
+from matplotlib.backend_bases import FigureCanvasBase
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.path import Path
-from matplotlib.widgets import LassoSelector, Slider
+from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
+import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_aux import set_formatting
-from .dashboard_aux import ComboBox, CheckableComboBox
+from .dashboard_aux import set_formatting, ComboBox, CheckableComboBox, LassoSelector
 from .aux import get_relevant_temporal_resolutions, show_message
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
 register_matplotlib_converters()
 
+# use matplotlib fast style: https://matplotlib.org/stable/users/explain/performance.html
+mplstyle.use('fast')
+
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
-
 
 class MPLCanvas(FigureCanvas):
     """ Class that handles the creation and updates of
@@ -132,14 +136,15 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.mpl_connect('pick_event', self.legend_picker_func)
 
         # setup interactive lasso on map
-        self.lasso_left = LassoSelector(self.plot_axes['map'], onselect=self.onlassoselect_left,
-                                        useblit=True, lineprops=self.lasso, button=[1])
-        self.lasso_right = LassoSelector(self.plot_axes['map'], onselect=self.onlassoselect_right,
-                                         useblit=True, lineprops=self.lasso, button=[3])
+        self.lasso_left = LassoSelector(self, self.plot_axes['map'], onselect=self.onlassoselect_left,
+                                        useblit=False, props=self.lasso, button=[1])
+        self.lasso_right = LassoSelector(self, self.plot_axes['map'], onselect=self.onlassoselect_right,
+                                         useblit=False, props=self.lasso, button=[3])
 
         # setup station annotations
         self.create_station_annotation()
-        self.lock_map_annotation = False
+        self.map_annotation_disconnect = False
+        self.time_map_annotation = time.time()
         self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', self.hover_map_annotation)
 
         # setup zoom on scroll wheel on map
@@ -1314,9 +1319,8 @@ class MPLCanvas(FigureCanvas):
         if len(self.active_map_valid_station_inds) == 0:
             return
 
+        # lock stations pick
         if self.lock_station_pick == False:
-
-            # lock stations pick
             self.lock_station_pick = True
 
         # unselect all/intersect checkboxes
@@ -3288,31 +3292,24 @@ class MPLCanvas(FigureCanvas):
     def hover_map_annotation(self, event):
         """ Show or hide annotation for each station that is hovered. """
 
-        # activate hover over map if any
-        if event.inaxes == self.plot_axes['map']:
-            if (hasattr(self.plot, 'stations_scatter')) and (self.lock_map_annotation == False):
-                # lock annotation
-                self.lock_map_annotation = True
+        if (not self.lock_zoom) & (event.inaxes == self.plot_axes['map']):
 
-                if not self.lock_zoom:
+            # activate hover over map
+            if (hasattr(self.plot, 'stations_scatter')):
                     
-                    is_contained, annotation_index = self.plot.stations_scatter.contains(event)
-                    
-                    if is_contained:
-                        # update annotation if hovered
-                        self.update_station_annotation(annotation_index)
-                        self.station_annotation.set_visible(True)
-                    else:
-                        # hide annotation if not hovered
-                        if self.station_annotation.get_visible():
-                            self.station_annotation.set_visible(False)
-
-                    # redraw points
-                    self.figure.canvas.draw()
-                    self.figure.canvas.flush_events()
+                is_contained, annotation_index = self.plot.stations_scatter.contains(event)
                 
-                # unlock annotation 
-                self.lock_map_annotation = False
+                if is_contained:
+                    # update annotation if hovered
+                    self.update_station_annotation(annotation_index)
+                    self.station_annotation.set_visible(True)
+                else:
+                    # hide annotation if not hovered
+                    if self.station_annotation.get_visible():
+                        self.station_annotation.set_visible(False)
+
+                # redraw points
+                self.figure.canvas.draw()
 
         return None
 
