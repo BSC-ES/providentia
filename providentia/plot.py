@@ -13,6 +13,7 @@ from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
+import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
 import scipy.stats as st
