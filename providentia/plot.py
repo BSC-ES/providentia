@@ -14,6 +14,7 @@ from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
+import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
 import scipy.stats as st
@@ -348,11 +349,41 @@ class Plot:
         # transform coordinates to projected data
         transformed_coords = self.canvas_instance.datacrs.transform_points(self.canvas_instance.plotcrs, 
                                                                            xcoords, ycoords)[:, :2]
-        
+    
+        # keep longitudes between -180 and 180
+        lon_change = False
+        if (np.isnan(transformed_coords[0, 0])) or (transformed_coords[0, 0] == -179.99999999999932):
+            transformed_coords[0, 0] = -180
+            lon_change = True
+        if (np.isnan(transformed_coords[2, 0])) or (transformed_coords[2, 0] == 179.99999999999932):
+            transformed_coords[2, 0] = 180  
+            lon_change = True 
+
+        # keep latitudes between -90 and 90
+        lat_change = False
+        if (np.isnan(transformed_coords[1, 1])) or (transformed_coords[1, 1] == -89.99999999999966):
+            transformed_coords[1, 1] = -90
+            lat_change = True  
+        if (np.isnan(transformed_coords[3, 1])) or (transformed_coords[3, 1] == 89.99999999999966):
+            transformed_coords[3, 1] = 90
+            lat_change = True  
+
+        # recalculate means
+        if lon_change or lat_change:
+            # recalculate longitude means
+            mlon = np.mean(np.array([transformed_coords[0, 0], transformed_coords[2, 0]]))
+            transformed_coords[1, 0] = mlon
+            transformed_coords[3, 0] = mlon
+
+            # recalculate latitude means
+            mlat = np.mean(np.array([transformed_coords[1, 1], transformed_coords[3, 1]]))
+            transformed_coords[0, 1] = mlat
+            transformed_coords[2, 1] = mlat
+
         # get map extent
         map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(),
                       transformed_coords[:,1].min(), transformed_coords[:,1].max()]
-        
+
         return map_extent
 
     def set_equal_axes(self, ax):
