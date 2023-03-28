@@ -2,10 +2,8 @@
 from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .toolbar import multispecies_conf
 from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow, InputDialog
 from .dashboard_aux import set_formatting
-from .aux import show_message
 from .read import DataReader
 from .read_aux import get_default_qa
 from providentia import aux
@@ -439,7 +437,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.handle_data_selection_update()
 
             # set filtered multispecies if any
-            multispecies_conf(self)
+            aux.multispecies_conf(self)
 
             # set fields available for filtering
             aux.representativity_conf(self)
@@ -1040,7 +1038,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {} 
             msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
-            show_message(msg)
+            aux.show_message(self.read_instance, msg)
 
         # set read operations to be empty list initially
         read_operations = []
@@ -1057,7 +1055,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.species[0] != self.previous_species[0]) or (
                 np.array_equal(self.qa, self.previous_qa) == False) or (
                 np.array_equal(self.flags, self.previous_flags) == False) or (
-                list(self.filter_species.keys()) != list(self.previous_filter_species.keys())):
+                self.filter_species != self.previous_filter_species):
             read_operations = ['reset']
 
         # key variables have not changed, has start/end date?
@@ -1226,9 +1224,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_metadata(self)
         aux.update_metadata_fields(self)
 
-        # reset multispecies
-        aux.init_multispecies(self)
-        
         # reset bounds
         species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
         species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])
