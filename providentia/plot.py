@@ -1488,7 +1488,7 @@ class Plot:
         if len(stats) == 0:
             msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.json.'.format(base_plot_type)
             msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.json.'.format(base_plot_type)
-            show_message(msg=msg_dashboard, offline=self.read_instance.offline, msg_offline=msg_offline)
+            show_message(self.read_instance, msg=msg_dashboard, msg_offline=msg_offline)
             return
 
         # initialise list of strs to annotate, and colours of annotations
