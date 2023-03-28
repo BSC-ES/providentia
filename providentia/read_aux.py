@@ -1,6 +1,6 @@
 """ Module storing static reading functions """
-from netCDF4 import num2date
-from netCDF4 import Dataset
+from netCDF4 import Dataset, num2date, chartostring
+from netCDF4 import 
 import numpy as np
 import pandas as pd
 import bisect
@@ -94,14 +94,18 @@ def read_netcdf_data(tuple_arguments):
         else: 
             print('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
             sys.exit()
-        if ncdf_root[station_reference_var].dtype == np.str:
-            file_station_references = ncdf_root[station_reference_var][:]
-        else:
-            if ncdf_root[station_reference_var].dtype == np.dtype(object):
-                file_station_references = np.array([''.join(val) for val in ncdf_root[station_reference_var][:]])
+
+        meta_shape = ncdf_root[station_reference_var].shape
+        file_station_references = ncdf_root[station_reference_var][:]
+        meta_val_dtype = np.array([file_station_references[0]]).dtype
+
+        if len(meta_shape) == 2:
+            if meta_val_dtype == np.dtype(object):
+                file_station_references = np.array([''.join(val) for val in file_station_references])
             else:
-                file_station_references = np.array([st_name.tostring().decode('ascii').replace('\x00', '')
-                                                    for st_name in ncdf_root[station_reference_var][:]], dtype=np.str)
+                file_station_references = chartostring(file_station_references)
+
+    # GHOST and interpolated experiment data
     else:
         file_station_references = ncdf_root['station_reference'][:]
 
@@ -222,17 +226,19 @@ def read_netcdf_data(tuple_arguments):
                     if meta_var_nc not in ncdf_root.variables:
                         continue
 
-                    meta_dtype = ncdf_root[meta_var_nc].dtype
+                    meta_shape = ncdf_root[meta_var_nc].shape
                     meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
-                    
+                    meta_val_dtype = np.array([meta_val[0]]).dtype
+
                     # some extra str formatting
                     if meta_var in ['station_reference', 'station_name', 'station_classification', 
                                     'area_classification']:
-                        if (meta_dtype != np.dtype(object)) and (meta_dtype != np.str):
-                            meta_val = np.array([val.tostring().decode('ascii').replace('\x00', '')
-                                                for val in meta_val], dtype=np.str)
-                        else:
-                            meta_val = np.array([''.join(val) for val in meta_val])
+
+                        if len(meta_shape) == 2:
+                            if meta_val_dtype == np.dtype(object):
+                                meta_val = np.array([''.join(val) for val in meta_val])
+                            else:
+                                meta_val = chartostring(meta_val)
 
                 # GHOST metadata
                 else:
