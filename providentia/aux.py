@@ -730,6 +730,44 @@ def update_metadata_fields(instance):
                 if meta_var in instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected']:
                     instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
 
+def multispecies_conf(instance):
+    """ Function used when loading from a configuration file. 
+        Sets defined multispecies filtering variables, rest of variables are set to default. 
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+    """
+
+    if hasattr(instance, 'filter_species'):
+        filter_species = copy.deepcopy(instance.filter_species)
+        for (networkspeci_ii, networkspeci), networkspeci_bounds in zip(enumerate(filter_species.keys()),
+                                                                        filter_species.values()):
+
+            for bounds in networkspeci_bounds:
+                # update menu_current
+                if ('networkspeci_' + str(networkspeci_ii)) not in instance.multispecies_menu['multispecies']['labels']:
+                    instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
+
+                # add values
+                instance.multispecies_menu['multispecies']['current_lower'][networkspeci_ii] = bounds[0]
+                instance.multispecies_menu['multispecies']['current_upper'][networkspeci_ii] = bounds[1]
+                instance.multispecies_menu['multispecies']['current_filter_species_fill_value'][networkspeci_ii] = bounds[2]
+                instance.multispecies_menu['multispecies']['apply_selected'][networkspeci_ii] = True
+
+                # set initial selected config variables as set .conf files or defaults
+                instance.selected_widget_network.update({networkspeci_ii: networkspeci.split('|')[0]})
+                instance.selected_widget_matrix.update({networkspeci_ii: instance.parameter_dictionary[networkspeci.split('|')[1]]['matrix']})
+                instance.selected_widget_species.update({networkspeci_ii: networkspeci.split('|')[1]})
+                instance.selected_widget_lower.update({networkspeci_ii: bounds[0]})
+                instance.selected_widget_upper.update({networkspeci_ii: bounds[1]})
+                instance.selected_widget_filter_species_fill_value.update({networkspeci_ii: bounds[2]})
+                instance.selected_widget_apply.update({networkspeci_ii: True})
+
+                networkspeci_ii += 1
+
+            # filtering tab is initialized from conf
+            instance.multispecies_initialisation = False
+
 def representativity_conf(instance):
     """ Function used when loading from a configuration file. 
         Sets defined representativity filter variables, rest of variables are set to default. 
