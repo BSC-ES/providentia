@@ -1,6 +1,5 @@
 """ Module storing static reading functions """
 from netCDF4 import Dataset, num2date, chartostring
-from netCDF4 import 
 import numpy as np
 import pandas as pd
 import bisect
