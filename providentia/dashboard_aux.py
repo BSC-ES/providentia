@@ -1296,31 +1296,31 @@ class PopUpWindow(QtWidgets.QWidget):
             # do not add to filter_species if lower and upper bounds are nan
             if current_lower == str(np.nan) or current_upper == str(np.nan):
                 msg = 'Data bounds cannot be empty.'
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg)
                 self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 return
 
             # only add to filter_species when lower bound if it contains :, > or >=
             if ('<' in current_lower):
                 msg = 'Lower bound ({}) for {} cannot contain < or <=. '.format(current_lower, networkspeci)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg)
                 self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 return
             elif (':' not in current_lower) and ('>' not in current_lower):
                 msg = 'Lower bound ({}) for {} should contain > or >=. '.format(current_lower, networkspeci)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg)
                 self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 return
 
             # only add to filter_species when upper bound if it contains :, < or <=
             if ('>' in current_upper):
                 msg = 'Upper bound ({}) for {} cannot contain > or >=. '.format(current_upper, networkspeci)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg)
                 self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 return
             elif (':' not in current_upper) and ('<' not in current_upper):
                 msg = 'Upper bound ({}) for {} should contain < or <=. '.format(current_upper, networkspeci)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg)
                 self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 return
 
@@ -1336,7 +1336,7 @@ class PopUpWindow(QtWidgets.QWidget):
             # if any of the fields are not numbers, return from function
             except ValueError:
                 msg = 'Warning: Data limit fields must be numeric.'
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg)
                 self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 return
 
