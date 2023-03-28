@@ -60,7 +60,7 @@ class DataFilter:
             # iterate through all species to filter by
             for filter_networkspeci, speci_all_limits in self.read_instance.filter_species.items():
                 
-                # get where data is inside bounds
+                # get where data is inside bounds or NaN
                 for speci_limit in speci_all_limits:
 
                     # initialise array to set where temporally to filter species
@@ -106,6 +106,9 @@ class DataFilter:
                             valid_inds_per_species = np.logical_and.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > lower_limit_val,
                                                                             self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < upper_limit_val))
 
+                    valid_inds_per_species = np.logical_or.reduce((valid_inds_per_species, 
+                                                                   np.isnan(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:])))
+                    
                     # update inds_to_filter array, making True all instances where we have data inside of bounds
                     inds_to_filter = np.any([inds_to_filter, valid_inds_per_species], axis=0)
                     
