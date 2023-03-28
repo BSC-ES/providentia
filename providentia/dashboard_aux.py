@@ -1034,9 +1034,9 @@ class PopUpWindow(QtWidgets.QWidget):
         label_ii = int(event_source.objectName().split('_')[1])
         
         if event_source.isChecked():
-            update_filter_species(self.read_instance, label_ii)
+            self.update_filter_species(label_ii)
         else:
-            update_filter_species(self.read_instance, label_ii, add_filter_species=False)
+            self.update_filter_species(label_ii, add_filter_species=False)
 
     def update_multispecies_fields(self, label_ii):
         """ Update multispecies fields in tab.
@@ -1171,7 +1171,7 @@ class PopUpWindow(QtWidgets.QWidget):
             self.read_instance.selected_widget_apply.update({label_ii: False})
 
             # remove previous networkspeci from lists
-            update_filter_species(self.read_instance, label_ii, add_filter_species=False)
+            self.update_filter_species(label_ii, add_filter_species=False)
 
             # if network, matrix or species have changed then respective
             # current selection for the changed param
@@ -1264,140 +1264,108 @@ class PopUpWindow(QtWidgets.QWidget):
                             else:
                                 self.menu_current[menu_type]['previous_apply'].update({label_ii: False})
 
-def multispecies_conf(instance):
-    """ Function used when loading from a configuration file. 
-        Sets defined multispecies filtering variables, rest of variables are set to default. 
+    def update_filter_species(self, label_ii, add_filter_species=True):
+        """ Function to update filter species after launching the dashboard with a configuration file or 
+            by editing the fields in the multispecies filtering tab in the dashboard. 
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-        :type instance: object
-    """
+            :param instance: Instance of class ProvidentiaMainWindow
+            :type instance: object
+            :param label_ii: Corresponding widget line in dashboard
+            :type label_ii: int
+            :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
+            :type add_filter_species: boolean
+        """
 
-    if hasattr(instance, 'filter_species'):
-        filter_species = copy.deepcopy(instance.filter_species)
-        for (networkspeci_ii, networkspeci), networkspeci_bounds in zip(enumerate(filter_species.keys()),
-                                                                        filter_species.values()):
+        # update previous filter species
+        self.read_instance.previous_filter_species = copy.deepcopy(self.read_instance.filter_species)
 
-            for bounds in networkspeci_bounds:
-                # update menu_current
-                if ('networkspeci_' + str(networkspeci_ii)) not in instance.multispecies_menu['multispecies']['labels']:
-                    instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
+        # get selected network, species and bounds
+        network = self.read_instance.selected_widget_network[label_ii]
+        speci = self.read_instance.selected_widget_species[label_ii]
+        networkspeci = network + '|' + speci
+        current_lower = self.read_instance.selected_widget_lower[label_ii]
+        current_upper = self.read_instance.selected_widget_upper[label_ii]
+        current_filter_species_fill_value = self.read_instance.selected_widget_filter_species_fill_value[label_ii]
 
-                # add values
-                instance.multispecies_menu['multispecies']['current_lower'][networkspeci_ii] = bounds[0]
-                instance.multispecies_menu['multispecies']['current_upper'][networkspeci_ii] = bounds[1]
-                instance.multispecies_menu['multispecies']['current_filter_species_fill_value'][networkspeci_ii] = bounds[2]
-                instance.multispecies_menu['multispecies']['apply_selected'][networkspeci_ii] = True
+        # get filter species after changes
+        current_filter_species = [current_lower, current_upper, current_filter_species_fill_value]
 
-                # set initial selected config variables as set .conf files or defaults
-                instance.selected_widget_network.update({networkspeci_ii: networkspeci.split('|')[0]})
-                instance.selected_widget_matrix.update({networkspeci_ii: instance.parameter_dictionary[networkspeci.split('|')[1]]['matrix']})
-                instance.selected_widget_species.update({networkspeci_ii: networkspeci.split('|')[1]})
-                instance.selected_widget_lower.update({networkspeci_ii: bounds[0]})
-                instance.selected_widget_upper.update({networkspeci_ii: bounds[1]})
-                instance.selected_widget_filter_species_fill_value.update({networkspeci_ii: bounds[2]})
-                instance.selected_widget_apply.update({networkspeci_ii: True})
-
-                # add networkspeci to lists
-                update_filter_species(instance, networkspeci_ii)
-
-                networkspeci_ii += 1
-
-            # filtering tab is initialized from conf
-            instance.multispecies_initialisation = False
-
-def update_filter_species(instance, label_ii, add_filter_species=True):
-    """ Function to update filter species after launching the dashboard with a configuration file or 
-        by editing the fields in the multispecies filtering tab in the dashboard. 
-
-        :param instance: Instance of class ProvidentiaMainWindow
-        :type instance: object
-        :param label_ii: Corresponding widget line in dashboard
-        :type label_ii: int
-        :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
-        :type add_filter_species: boolean
-    """
-
-    # update previous filter species
-    instance.previous_filter_species = copy.deepcopy(instance.filter_species)
-
-    # get selected network, species and bounds
-    network = instance.selected_widget_network[label_ii]
-    speci = instance.selected_widget_species[label_ii]
-    networkspeci = network + '|' + speci
-    current_lower = instance.selected_widget_lower[label_ii]
-    current_upper = instance.selected_widget_upper[label_ii]
-    current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
-
-    # get filter species after changes
-    current_filter_species = [current_lower, current_upper, current_filter_species_fill_value]
-
-    # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
-    if add_filter_species:
-        
-        # do not add to filter_species if lower and upper bounds are nan
-        if current_lower == str(np.nan) or current_upper == str(np.nan):
-            msg = 'Data bounds cannot be empty.'
-            show_message(instance, msg, from_conf=instance.from_conf)
-            return
-
-        # only add to filter_species when lower bound if it contains :, > or >=
-        if ('<' in current_lower):
-            msg = 'Lower bound ({}) for {} cannot contain < or <=.'.format(current_lower, networkspeci)
-            show_message(instance, msg, from_conf=instance.from_conf)
-            return
-        elif (':' not in current_lower) and ('>' not in current_lower):
-            msg = 'Lower bound ({}) for {} should contain > or >=.'.format(current_lower, networkspeci)
-            show_message(instance, msg, from_conf=instance.from_conf)
-            return
-
-        # only add to filter_species when upper bound if it contains :, < or <=
-        if ('>' in current_upper):
-            msg = 'Upper bound ({}) for {} cannot contain > or >=.'.format(current_upper, networkspeci)
-            show_message(instance, msg, from_conf=instance.from_conf)
-            return
-        elif (':' not in current_upper) and ('<' not in current_upper):
-            msg = 'Upper bound ({}) for {} should contain < or <=.'.format(current_upper, networkspeci)
-            show_message(instance, msg, from_conf=instance.from_conf)
-            return
-
-        # add or update networkspeci
-        # check selected lower and upper bounds and fill value are numbers or nan
-        try:
-            if networkspeci in instance.filter_species.keys():
-                if current_filter_species not in instance.filter_species[networkspeci]:
-                    instance.filter_species[networkspeci].append(current_filter_species)
-            else:
-                instance.filter_species[networkspeci] = [current_filter_species]
-
-        # if any of the fields are not numbers, return from function
-        except ValueError:
-            msg = 'Warning: Data limit fields must be numeric.'
-            show_message(instance, msg, from_conf=instance.from_conf)
-            return
-
-        # get quality flags for species if the information is not available in qa_per_species
-        if speci not in instance.qa_per_species:
-            # get species in memory 
-            species = copy.deepcopy(instance.species)
-            filter_species = [val.split('|')[1] for val in list(copy.deepcopy(instance.filter_species).keys())]
-            qa_species = species + filter_species
+        # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
+        if add_filter_species:
             
-            # add
-            qa_species.append(speci)
-            instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
+            # do not add to filter_species if lower and upper bounds are nan
+            if current_lower == str(np.nan) or current_upper == str(np.nan):
+                msg = 'Data bounds cannot be empty.'
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
 
-    # if apply button is unchecked, remove networkspecies from filter_species
-    else:
-        # remove from filter_species
-        filter_species_aux = copy.deepcopy(instance.filter_species)
-        if networkspeci in filter_species_aux.keys():
-            for networkspeci in filter_species_aux:
-                if current_filter_species in filter_species_aux[networkspeci]:
-                    sub_networkspeci_ii = instance.filter_species[networkspeci].index(current_filter_species)
-                    del instance.filter_species[networkspeci][sub_networkspeci_ii]
-                    if len(instance.filter_species[networkspeci]) == 0:
-                        del instance.filter_species[networkspeci]
+            # only add to filter_species when lower bound if it contains :, > or >=
+            if ('<' in current_lower):
+                msg = 'Lower bound ({}) for {} cannot contain < or <=. '.format(current_lower, networkspeci)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
+            elif (':' not in current_lower) and ('>' not in current_lower):
+                msg = 'Lower bound ({}) for {} should contain > or >=. '.format(current_lower, networkspeci)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
 
-        # remove from qa_per_species
-        if (speci in instance.qa_per_species) and (networkspeci not in instance.filter_species.keys()):
-            del instance.qa_per_species[speci]
+            # only add to filter_species when upper bound if it contains :, < or <=
+            if ('>' in current_upper):
+                msg = 'Upper bound ({}) for {} cannot contain > or >=. '.format(current_upper, networkspeci)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
+            elif (':' not in current_upper) and ('<' not in current_upper):
+                msg = 'Upper bound ({}) for {} should contain < or <=. '.format(current_upper, networkspeci)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
+
+            # add or update networkspeci
+            # check selected lower and upper bounds and fill value are numbers or nan
+            try:
+                if networkspeci in self.read_instance.filter_species.keys():
+                    if current_filter_species not in self.read_instance.filter_species[networkspeci]:
+                        self.read_instance.filter_species[networkspeci].append(current_filter_species)
+                else:
+                    self.read_instance.filter_species[networkspeci] = [current_filter_species]
+
+            # if any of the fields are not numbers, return from function
+            except ValueError:
+                msg = 'Warning: Data limit fields must be numeric.'
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
+
+            # get quality flags for species if the information is not available in qa_per_species
+            if speci not in self.read_instance.qa_per_species:
+                # get species in memory 
+                species = copy.deepcopy(self.read_instance.species)
+                filter_species = [val.split('|')[1] 
+                                  for val in list(copy.deepcopy(self.read_instance.filter_species).keys())]
+                qa_species = species + filter_species
+                
+                # add
+                qa_species.append(speci)
+                self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
+                                                     for speci in qa_species}
+
+        # if apply button is unchecked, remove networkspecies from filter_species
+        else:
+            # remove from filter_species
+            filter_species_aux = copy.deepcopy(self.read_instance.filter_species)
+            if networkspeci in filter_species_aux.keys():
+                for networkspeci in filter_species_aux:
+                    if current_filter_species in filter_species_aux[networkspeci]:
+                        sub_networkspeci_ii = self.read_instance.filter_species[networkspeci].index(current_filter_species)
+                        del self.read_instance.filter_species[networkspeci][sub_networkspeci_ii]
+                        if len(self.read_instance.filter_species[networkspeci]) == 0:
+                            del self.read_instance.filter_species[networkspeci]
+
+            # remove from qa_per_species
+            if ((speci in self.read_instance.qa_per_species) and 
+                (networkspeci not in self.read_instance.filter_species.keys())):
+                del self.read_instance.qa_per_species[speci]
