@@ -187,13 +187,13 @@ class ComboBox(QtWidgets.QComboBox):
     def __init__(self, parent=None):
         
         super(ComboBox, self).__init__(parent)
-        
+
     def showPopup(self):
         """ Shows popups. """
 
         super().showPopup()
         #self.view().parent().move(self.mapToGlobal(QtCore.QPoint(0, 0)))
-        #self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         
 class CheckableComboBox(QtWidgets.QComboBox):
     """ Create combobox with multiple selection options.
