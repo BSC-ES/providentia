@@ -258,20 +258,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
         self.ch_colocate.setMaximumWidth(80)
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_network.setFixedWidth(100)
         self.cb_network.AdjustToContents
         self.cb_network.setToolTip('Select providing observational data network. '
                                    'Names starting with * indicate non-GHOST datasets')
         self.cb_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_resolution.setFixedWidth(100)
         self.cb_resolution.AdjustToContents
         self.cb_resolution.setToolTip('Select temporal resolution of data')
         self.cb_matrix = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_matrix.setFixedWidth(100)
         self.cb_matrix.AdjustToContents
         self.cb_matrix.setToolTip('Select data matrix')
         self.cb_species = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_species.setFixedWidth(100)
         self.cb_species.AdjustToContents
         self.cb_species.setToolTip('Select species')
         self.cb_species.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
