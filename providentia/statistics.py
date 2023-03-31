@@ -9,6 +9,7 @@ from .aux import exceedance_lim, get_relevant_temporal_resolutions
 import copy
 import json
 import os
+import sys
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -118,9 +119,11 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                 else:
                     # get valid station indices
                     if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                        read_instance.station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
+                        read_instance.station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, 
+                                                                    read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label])
                     else:
-                        read_instance.station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, read_instance.valid_station_inds[networkspeci][data_label])
+                        read_instance.station_inds = np.intersect1d(canvas_instance.relative_selected_station_inds, 
+                                                                    read_instance.valid_station_inds[networkspeci][data_label])
                 
                 # get array for specific data label
                 data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_label),:,:])
@@ -145,7 +148,8 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                                                                                                                 index=read_instance.time_array, 
                                                                                                                 columns=['data'])
                 else:
-                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(np.nanmedian(data_array, axis=0), 
+                    aggregated_data = apply_aggregation_statistic(read_instance, data_array)
+                    canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] = pd.DataFrame(aggregated_data, 
                                                                                                                 index=read_instance.time_array, 
                                                                                                                 columns=['data'])
                 
@@ -881,3 +885,29 @@ def apply_calibration_factor(read_instance, canvas_instance, networkspeci, netwo
         
         else:
             print('Calibrating data for {0}:'.format(networkspeci))
+
+        return None
+    
+def apply_aggregation_statistic(read_instance, data_array):
+    """ Aggregate the stations data using a given statistic
+    
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type read_instance: object
+        :param data_array: array of data
+        :type data_array: numpy.ndarray
+    """
+
+    if read_instance.aggregation_statistic == 'Median':
+        aggregated_data = np.nanmedian(data_array, axis=0)
+    elif read_instance.aggregation_statistic == 'Mean':
+        aggregated_data = np.nanmean(data_array, axis=0)
+    elif read_instance.aggregation_statistic in ['p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']:
+            aggregated_data = np.nanpercentile(data_array, 
+                                               q=int(read_instance.aggregation_statistic.split('p')[1]), 
+                                               axis=0)
+    else:
+        error = 'Aggregation statistic {0} is not available. '.format(read_instance.aggregation_statistic)
+        error += 'The options are: Median, Mean, p1, p5, p10, p25, p75, p90, p95 and p99'
+        sys.exit(error)
+
+    return aggregated_data
