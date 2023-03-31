@@ -73,6 +73,7 @@ class ProvConfiguration:
             'active_dashboard_plots': None,
             'resampling': False,
             'resampling_resolution': None,
+            'aggregation_statistic': None,
             'plot_characteristics_filename': '',
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline',
@@ -513,6 +514,14 @@ class ProvConfiguration:
             msg = 'End date (end_date) was not defined in the configuration file. Using {} as default.'.format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.end_date = default
+
+        # check have aggregation_statistic information,
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.aggregation_statistic:
+            default = 'Median'
+            msg = 'Aggregation statistic (aggregation_statistic) was not defined in the configuration file. Using {} as default.'.format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            self.read_instance.aggregation_statistic = default
 
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
