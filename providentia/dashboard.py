@@ -252,7 +252,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                 formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
         self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
-        self.bu_read.setFixedWidth(80)
         self.bu_read.setStyleSheet("color: green;")
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), formatting_dict['checkbox_menu'])
@@ -277,22 +276,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_species.setToolTip('Select species')
         self.cb_species.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
-        self.le_start_date.setFixedWidth(100)
         self.le_start_date.setToolTip('Set data start date: YYYYMMDD')
         self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
-        self.le_end_date.setFixedWidth(100)
         self.le_end_date.setToolTip('Set data end date: YYYYMMDD')
         self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), formatting_dict['button_menu'])
-        self.bu_QA.setFixedWidth(80)
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
         self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), formatting_dict['button_menu'])
-        self.bu_flags.setFixedWidth(80)
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
         self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), formatting_dict['button_menu'])
-        self.bu_experiments.setFixedWidth(80)
         self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), formatting_dict['button_menu'])
-        self.bu_multispecies.setFixedWidth(80)
         self.bu_multispecies.setToolTip('Select data to filter by')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
@@ -302,34 +295,39 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.lb_data_filter.setFixedWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
         self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), formatting_dict['button_menu'])
-        self.bu_rep.setFixedWidth(80)
         self.bu_rep.setToolTip('Select % desired representativity in data across '
                                'whole record and for specific temporal periods')
         self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), formatting_dict['button_menu'])
-        self.bu_meta.setFixedWidth(80)
         self.bu_meta.setToolTip('Select metadata to filter by')
         self.bu_reset = set_formatting(QtWidgets.QPushButton('RESET', self), formatting_dict['button_menu'])
-        self.bu_reset.setFixedWidth(80)
         self.bu_reset.setToolTip('Reset filter fields to initial values')
         self.bu_reset.setStyleSheet("color: red;")
         self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), formatting_dict['button_menu'])
-        self.bu_period.setFixedWidth(80)
         self.bu_period.setToolTip('Select data in specific periods')
-        self.bu_screen = set_formatting(QtWidgets.QPushButton('FILTER', self), formatting_dict['button_menu'])
-        self.bu_screen.setFixedWidth(80)
-        self.bu_screen.setStyleSheet("color: blue;")
-        self.bu_screen.setToolTip('Filter data')
+        self.bu_filter = set_formatting(QtWidgets.QPushButton('FILTER', self), formatting_dict['button_menu'])
+        self.bu_filter.setStyleSheet("color: blue;")
+        self.bu_filter.setToolTip('Filter data')
         self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text="Bounds"), formatting_dict['label_menu'])
-        self.lb_data_bounds.setFixedWidth(80)
         self.lb_data_bounds.setToolTip('Set lower/upper bounds of data')
         self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
-        self.le_minimum_value.setFixedWidth(80)
         self.le_minimum_value.setToolTip('Set lower bound of data')
         self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
-        self.le_maximum_value.setFixedWidth(80)
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
+
+        # station aggregation section
+        self.lb_aggregation = set_formatting(QtWidgets.QLabel(self, text="Aggregation"),
+                                             formatting_dict['title_menu'])
+        self.lb_aggregation.setToolTip('Select the statistic to aggregate the stations data')
+        self.cb_aggregation_statistic = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_aggregation_statistic.setFixedWidth(100)
+        self.cb_aggregation_statistic.setToolTip('Select statistic')
+        self.bu_apply = set_formatting(QtWidgets.QPushButton('APPLY', self), formatting_dict['button_menu'])
+        self.bu_apply.setStyleSheet("color: blue;")
+        self.bu_apply.setToolTip('Apply statistic')
+        self.vertical_splitter_3 = QVLine()
+        self.vertical_splitter_3.setMaximumWidth(20)
 
         # station selection section
         self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
@@ -344,8 +342,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), formatting_dict['checkbox_menu'])
         self.ch_extent.setToolTip('Select stations that are within the map extent')
         self.ch_extent.setFixedWidth(80)
-        self.vertical_splitter_3 = QVLine()
-        self.vertical_splitter_3.setMaximumWidth(20)
+        self.vertical_splitter_4 = QVLine()
+        self.vertical_splitter_4.setMaximumWidth(20)
 
         # resampling section
         self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
@@ -382,29 +380,36 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.bu_period, 2, 8, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_meta, 2, 9, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_reset, 3, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_screen, 3, 9, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_filter, 3, 9, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_2, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
 
-        # station selection section
-        config_bar.addWidget(self.lb_station_selection, 0, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_intersect, 2, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_extent, 3, 11, QtCore.Qt.AlignLeft)
+        # station aggregation section
+        config_bar.addWidget(self.lb_aggregation, 0, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_aggregation_statistic, 1, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_apply, 3, 11, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
 
+        # station selection section
+        config_bar.addWidget(self.lb_station_selection, 0, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_4, 0, 14, 4, 1, QtCore.Qt.AlignLeft)
+
         # resampling section
-        config_bar.addWidget(self.lb_resampling, 0, 13, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resampling_resolution, 1, 13, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resampling_switch, 1, 14, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_resampling, 0, 15, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_resolution, 1, 15, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_switch, 1, 16, 1, 1, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
-        self.cb_resampling_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
         self.le_end_date.textChanged.connect(self.handle_config_bar_params_change)
+        self.cb_aggregation_statistic.currentTextChanged.connect(self.handle_config_bar_params_change)
+        self.cb_resampling_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
 
         # setup pop-up window menu tree for flags, qa, experiments, 
         # % data representativity, data periods and metadata
@@ -465,10 +470,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_temporal_colocate_update)
 
         # enable FILTER button
-        self.bu_screen.clicked.connect(self.mpl_canvas.handle_data_filter_update)
+        self.bu_filter.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
-        # enable activating the resampling
+        # enable switch to activate the resampling
         self.cb_resampling_switch.clicked.connect(self.mpl_canvas.handle_resampling_update)
+
+        # enable APPLY button
+        self.bu_apply.clicked.connect(self.mpl_canvas.handle_aggregation_update)
 
         # enable interactivity of station selection checkboxes
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
@@ -541,6 +549,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_species = copy.deepcopy(self.species[0])
             self.selected_resampling_resolution = copy.deepcopy(self.resampling_resolution)
             self.selected_resampling = copy.deepcopy(self.resampling)
+            self.selected_aggregation_statistic = copy.deepcopy(self.aggregation_statistic)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -572,6 +581,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_matrix.clear()
         self.cb_species.clear()
         self.cb_resampling_resolution.clear()
+        self.cb_aggregation_statistic.clear()
 
         # if have no available observational data, return from function, updating variable informing that have no data
         if len(self.available_observation_data) == 0:
@@ -605,21 +615,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.cb_resolution.setCurrentText(self.selected_resolution)
         else:
             self.selected_resolution = self.cb_resolution.currentText()
-        
-        # update resampling resolution field
-        resampling_available_resolutions = copy.deepcopy(available_resolutions)[available_resolutions.index(self.selected_resolution)+1:]
-        resampling_available_resolutions.append('yearly')
-        self.cb_resampling_resolution.addItems(resampling_available_resolutions)
-        if self.selected_resampling_resolution in resampling_available_resolutions:
-            self.cb_resampling_resolution.setCurrentText(self.selected_resampling_resolution)
-        else:
-            self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
-
-        # update resampling switch
-        if self.selected_resampling:
-            self.cb_resampling_switch.setChecked(True)
-        else:
-            self.cb_resampling_switch.setChecked(False)
 
         # update matrix field
         available_matrices = sorted(self.available_observation_data[self.selected_network][self.selected_resolution])
@@ -636,6 +631,29 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.cb_species.setCurrentText(self.selected_species)
         else:
             self.selected_species = self.cb_species.currentText()
+
+        # update aggregation statistic field
+        available_aggregation_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+        self.cb_aggregation_statistic.addItems(available_aggregation_statistics)
+        if self.selected_aggregation_statistic in available_aggregation_statistics:
+            self.cb_aggregation_statistic.setCurrentText(self.selected_aggregation_statistic)
+        else:
+            self.selected_aggregation_statistic = self.cb_aggregation_statistic.currentText()
+
+        # update resampling resolution field
+        available_resampling_resolutions = copy.deepcopy(available_resolutions)[available_resolutions.index(self.selected_resolution)+1:]
+        available_resampling_resolutions.append('yearly')
+        self.cb_resampling_resolution.addItems(available_resampling_resolutions)
+        if self.selected_resampling_resolution in available_resampling_resolutions:
+            self.cb_resampling_resolution.setCurrentText(self.selected_resampling_resolution)
+        else:
+            self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
+
+        # update resampling switch
+        if self.selected_resampling:
+            self.cb_resampling_switch.setChecked(True)
+        else:
+            self.cb_resampling_switch.setChecked(False)
 
         # update available experiments for selected fields
         aux.get_valid_experiments(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
@@ -752,6 +770,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
+
+            elif event_source == self.cb_aggregation_statistic:
+                self.selected_aggregation_statistic = changed_param
 
             elif event_source == self.cb_resampling_resolution:
                 self.selected_resampling_resolution = changed_param
@@ -1028,10 +1049,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
-        self.filter_species = self.filter_species
         self.current_plot_options = {}
         for plot_type in self.mpl_canvas.all_plots:
             self.current_plot_options[plot_type] = []
+        self.aggregation_statistic = self.selected_aggregation_statistic
 
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
