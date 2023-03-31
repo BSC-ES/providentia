@@ -4,11 +4,11 @@
                                   "color": "black"},
 
     "label_menu":                {"font": {"style": "SansSerif", "size": 9.5},
-                                  "height": 20, 
+                                  "height": 20, "width": 100,
                                   "color": "black"},
 
     "button_menu":               {"font": {"style": "SansSerif", "size": 9.5}, 
-                                  "height": 20, 
+                                  "height": 20, "width": 100,
                                   "color": "black", "background-color": "white"},
 
     "checkbox_menu":             {"font": {"style": "SansSerif", "size": 9.5},
@@ -19,7 +19,7 @@
                                   "selection-color": "white", "selection-background-color": "black"},
 
     "lineedit_menu":             {"font": {"style": "SansSerif", "size": 9.5},
-                                  "height": 20, 
+                                  "height": 20, "width": 100,
                                   "color": "black"},
 
     "switch_menu":               {"font": {"style": "SansSerif", "size": 9},
