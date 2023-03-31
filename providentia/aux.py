@@ -1220,14 +1220,17 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
 
 def get_basic_metadata(instance):     
     """ Get basic unique metadata across networkspecies wanting to read
-        The basic fields are: station_reference, station_name, longitude, latitude, measurement_altitude, station_classification and area_classification
+        The basic fields are: station_reference, station_name, longitude, latitude, measurement_altitude, 
+        station_classification and area_classification
 
         If have multiple species, then spatially cocolocate across species 
         to get matching stations across stations.
 
         :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
         :type instance: object
-        :return: station_references per networkspecies, station_name per networkspecies, longitudes per networkspecies, latitudes per networkspecies, measurement altitudes per networkspecies, station_classifications per networkspecies, area_classifications per networkspecies, nonghost_units 
+        :return: station_references per networkspecies, station_name per networkspecies, longitudes per networkspecies, 
+                 latitudes per networkspecies, measurement altitudes per networkspecies, station_classifications per 
+                 networkspecies, area_classifications per networkspecies, nonghost_units 
         :rtype: dict, dict, dict, dict, dict, dict, dict, dict
     """
 
@@ -1301,8 +1304,10 @@ def get_basic_metadata(instance):
                 speci_station_names = np.append(speci_station_names, ncdf_root['station_name'][:])
                 speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
                 speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
-                speci_station_measurement_altitudes = np.append(speci_station_measurement_altitudes, ncdf_root['measurement_altitude'][:])
-                speci_station_classifications = np.append(speci_station_classifications, ncdf_root['station_classification'][:])
+                speci_station_measurement_altitudes = np.append(speci_station_measurement_altitudes, 
+                                                                ncdf_root['measurement_altitude'][:])
+                speci_station_classifications = np.append(speci_station_classifications, 
+                                                          ncdf_root['station_classification'][:])
                 speci_area_classifications = np.append(speci_area_classifications, ncdf_root['area_classification'][:])
                 ncdf_root.close()
 
@@ -1326,20 +1331,22 @@ def get_basic_metadata(instance):
             elif 'station_name' in ncdf_root.variables:
                 station_reference_var = 'station_name'
             else: 
-                print('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
-                sys.exit()
+                error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+                sys.exit(error)
 
             meta_shape = ncdf_root[station_reference_var].shape
             station_references[networkspeci] = ncdf_root[station_reference_var][:]
             meta_val_dtype = np.array([station_references[networkspeci][0]]).dtype
             if len(meta_shape) == 2:
                 if meta_val_dtype == np.dtype(object):
-                    station_references[networkspeci] = np.array([''.join(val) for val in station_references[networkspeci]])
+                    station_references[networkspeci] = np.array([''.join(val) 
+                                                                 for val in station_references[networkspeci]])
                 else:
                     station_references[networkspeci] = chartostring(station_references[networkspeci])
 
             # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
-            non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(station_references[networkspeci]) if ref.lower() != 'nan'])
+            non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(station_references[networkspeci]) 
+                                                if ref.lower() != 'nan'])
             station_references[networkspeci] = station_references[networkspeci][non_nan_station_indices]
 
             if "latitude" in ncdf_root.variables:
@@ -1365,7 +1372,8 @@ def get_basic_metadata(instance):
                 meta_val_dtype = np.array([station_classifications[networkspeci][0]]).dtype
                 if len(meta_shape) == 2:
                     if meta_val_dtype == np.dtype(object):
-                        station_classifications[networkspeci] = np.array([''.join(val) for val in station_classifications[networkspeci]])
+                        station_classifications[networkspeci] = np.array([''.join(val) 
+                                                                          for val in station_classifications[networkspeci]])
                     else:
                         station_classifications[networkspeci] = chartostring(station_classifications[networkspeci])
 
@@ -1375,7 +1383,8 @@ def get_basic_metadata(instance):
                 meta_val_dtype = np.array([area_classifications[networkspeci][0]]).dtype
                 if len(meta_shape) == 2:
                     if meta_val_dtype == np.dtype(object):
-                        area_classifications[networkspeci] = np.array([''.join(val) for val in area_classifications[networkspeci]])
+                        area_classifications[networkspeci] = np.array([''.join(val) 
+                                                                       for val in area_classifications[networkspeci]])
                     else:
                         area_classifications[networkspeci] = chartostring(area_classifications[networkspeci])
 
@@ -1389,9 +1398,11 @@ def get_basic_metadata(instance):
     if (len((instance.networkspecies + instance.filter_networkspecies)) > 1) & (instance.spatial_colocation):
         # get intersecting station indices across species (handle both GHOST and non-GHOST cases)
         if instance.reading_ghost:
-            intersecting_indices = spatial_colocation_ghost(station_longitudes, station_latitudes, station_measurement_altitudes)
+            intersecting_indices = spatial_colocation_ghost(station_longitudes, station_latitudes, 
+                                                            station_measurement_altitudes)
         else:
-            intersecting_indices = spatial_colocation_nonghost(station_references, station_longitudes, station_latitudes)
+            intersecting_indices = spatial_colocation_nonghost(station_references, station_longitudes, 
+                                                               station_latitudes)
         
         # iterate through networkspecies specific intersecting indices, setting 
         for ns, ns_intersects in intersecting_indices.items():

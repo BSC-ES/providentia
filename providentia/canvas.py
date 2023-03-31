@@ -89,9 +89,9 @@ class MPLCanvas(FigureCanvas):
         # stop running if plot type in active_dashboard_plots does not exist
         for plot_type in self.read_instance.active_dashboard_plots:
             if plot_type not in self.all_plots:
-                msg = "Error: Plot type {0} is not an option. ".format(plot_type)
-                msg += "The available plots are: {0}.".format(self.all_plots[2:])
-                sys.exit(msg)
+                error = "Error: Plot type {0} is not an option. ".format(plot_type)
+                error += "The available plots are: {0}.".format(self.all_plots[2:])
+                sys.exit(error)
 
         # initialize layout positions
         self.read_instance.position_1 = 'map'
@@ -316,6 +316,32 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def handle_aggregation_update(self):
+        """ Function that handles the update of the MPL canvas
+            when we change the way we aggregate the stations data upon clicking APPLY button.
+        """
+
+        # update mouse cursor to a waiting cursor
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+        # clear all previously plotted artists from selected station plots and hide axes 
+        for plot_type in self.read_instance.active_dashboard_plots:
+            self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+
+        # get statistic
+        self.read_instance.aggregation_statistic = self.read_instance.cb_aggregation_statistic.currentText()
+
+        # update associated plots with selected stations
+        self.update_associated_active_dashboard_plots()
+
+        # draw changes
+        self.figure.canvas.draw()
+
+        # restore mouse cursor to normal
+        QtWidgets.QApplication.restoreOverrideCursor()
+
+        return None
+    
     def handle_temporal_colocate_update(self):
         """ Function that handles the update of the MPL canvas
             with colocated data upon checking of the temporal colocate checkbox.
@@ -2852,17 +2878,20 @@ class MPLCanvas(FigureCanvas):
                     if plot_type != 'map':
                         if plot_type == 'periodic-violin':
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
-                                                                ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                    self.selected_station_data_max[self.read_instance.networkspeci]],
-                                                                relim=True, autoscale_x=True)
+                                                                 self.plot_characteristics[plot_type], 
+                                                                 self.read_instance.current_plot_options[plot_type], 
+                                                                 ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                       self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                                 relim=True, autoscale_x=True)
                         elif plot_type == 'scatter':
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                 self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
+                                                                 self.plot_characteristics[plot_type], 
+                                                                 self.read_instance.current_plot_options[plot_type], 
                                                                  relim=True)
                         else:
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                 self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
+                                                                 self.plot_characteristics[plot_type], 
+                                                                 self.read_instance.current_plot_options[plot_type], 
                                                                  relim=True, autoscale=True)                       
 
                 # save current plot options as previous
