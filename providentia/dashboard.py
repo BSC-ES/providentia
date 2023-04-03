@@ -319,9 +319,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_aggregation_statistic = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_aggregation_statistic.setFixedWidth(100)
         self.cb_aggregation_statistic.setToolTip('Select statistic')
-        self.bu_apply = set_formatting(QtWidgets.QPushButton('APPLY', self), formatting_dict['button_menu'])
-        self.bu_apply.setStyleSheet("color: blue;")
-        self.bu_apply.setToolTip('Apply statistic')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
 
@@ -382,7 +379,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # station aggregation section
         config_bar.addWidget(self.lb_aggregation, 0, 11, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_aggregation_statistic, 1, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_apply, 3, 11, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
 
         # station selection section
@@ -404,7 +400,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
         self.le_end_date.textChanged.connect(self.handle_config_bar_params_change)
-        self.cb_aggregation_statistic.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_resampling_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
 
         # setup pop-up window menu tree for flags, qa, experiments, 
@@ -468,11 +463,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # enable FILTER button
         self.bu_filter.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
+        # enable aggregation by changing the statistic
+        self.cb_aggregation_statistic.currentTextChanged.connect(self.mpl_canvas.handle_aggregation_update)
+
         # enable switch to activate the resampling
         self.cb_resampling_switch.clicked.connect(self.mpl_canvas.handle_resampling_update)
-
-        # enable APPLY button
-        self.bu_apply.clicked.connect(self.mpl_canvas.handle_aggregation_update)
 
         # enable interactivity of station selection checkboxes
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
@@ -766,9 +761,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
-
-            elif event_source == self.cb_aggregation_statistic:
-                self.selected_aggregation_statistic = changed_param
 
             elif event_source == self.cb_resampling_resolution:
                 self.selected_resampling_resolution = changed_param

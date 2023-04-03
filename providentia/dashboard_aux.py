@@ -197,20 +197,15 @@ class ComboBox(QtWidgets.QComboBox):
         self.lineEdit().setFrame(False)
         self.lineEdit().setReadOnly(True)
 
-        # simulate enter event to change the current text
-        self.keyPressEvent(QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Enter, QtCore.Qt.NoModifier))
-        self.activated.connect(self.highlightCurrent)
+    def showPopup(self):
+        """ Show pop-up. """
 
-    def highlightCurrent(self):
-        """ Set index of selected choice to highlight it. """
-
+        # set index of selected choice to highlight it
         text = self.lineEdit().text()
         index = self.findText(text, QtCore.Qt.MatchFixedString)
         self.setCurrentIndex(index)
 
-    def showPopup(self):
-        """ Show pop-up. """
-
+        # show pop-up
         super().showPopup()
 
         # add vertical scroll bar
