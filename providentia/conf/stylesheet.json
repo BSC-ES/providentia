@@ -17,11 +17,13 @@
     "combobox_menu":             {"font": {"style": "SansSerif", "size": 9.5},
                                   "width": 100,
                                   "color": "black", "background-color": "white", 
-                                  "selection-color": "white", "selection-background-color": "black"},
+                                  "selection-color": "white", "selection-background-color": "grey",
+                                  "border": {"colour": "lightgrey", "size": 1}},
 
     "lineedit_menu":             {"font": {"style": "SansSerif", "size": 9.5},
                                   "height": 20, "width": 100,
-                                  "color": "black"},
+                                  "color": "black",
+                                  "border": {"colour": "lightgrey", "size": 1}},
 
     "switch_menu":               {"font": {"style": "SansSerif", "size": 9},
                                   "height": 20, "width": 50, "color": "black", 
