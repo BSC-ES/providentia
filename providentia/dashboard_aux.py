@@ -181,8 +181,7 @@ class LassoSelector(_SelectorWidget):
         self.update()
 
 class ComboBox(QtWidgets.QComboBox):
-    """ Modify default class of PyQT5 combobox to always dropdown from fixed
-        position box position, stopping truncation of data. """
+    """ Modify default class of PyQT5 combobox. """
 
     def __init__(self, parent=None):
 
