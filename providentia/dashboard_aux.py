@@ -185,17 +185,38 @@ class ComboBox(QtWidgets.QComboBox):
         position box position, stopping truncation of data. """
 
     def __init__(self, parent=None):
-        
+
         super(ComboBox, self).__init__(parent)
+
+        # setMaxVisibleItems only works if the box is editable
+        # this creates a line edit that we need to overwrite
         self.setEditable(True)
         self.setMaxVisibleItems(15)
 
+        # overwrite default line edit by an invisible one
+        self.lineEdit().setFrame(False)
+        self.lineEdit().setReadOnly(True)
+
+        # simulate enter event to change the current text
+        self.keyPressEvent(QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Enter, QtCore.Qt.NoModifier))
+        self.activated.connect(self.highlightCurrent)
+
+    def highlightCurrent(self):
+        """ Set index of selected choice to highlight it. """
+
+        text = self.lineEdit().text()
+        index = self.findText(text, QtCore.Qt.MatchFixedString)
+        self.setCurrentIndex(index)
+
     def showPopup(self):
-        """ Shows popups. """
+        """ Show pop-up. """
 
         super().showPopup()
-        #self.view().parent().move(self.mapToGlobal(QtCore.QPoint(0, 0)))
+
+        # add vertical scroll bar
         self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+
+        # increase the width of the elements on popup so they can be read
         self.view().setMinimumWidth(self.view().sizeHintForColumn(0))
 
 class CheckableComboBox(QtWidgets.QComboBox):
@@ -212,7 +233,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
         self.lineEdit().setPlaceholderText('Select option/s:')
         self.lineEdit().setReadOnly(True)
 
-        # make the lineedit the same color as QPushButton
+        # make the lineedit the same color as QComboBox
         palette = QtWidgets.QApplication.palette()
         palette.setBrush(QtGui.QPalette.Base, palette.button())
         self.lineEdit().setPalette(palette)
