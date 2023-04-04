@@ -267,10 +267,6 @@ class MPLCanvas(FigureCanvas):
                 # update mouse cursor to a waiting cursor
                 QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-                # clear all previously plotted artists from selected station plots and hide axes 
-                for plot_type in self.read_instance.active_dashboard_plots:
-                    self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
-
                 event_source = self.sender()
 
                 # activate or deactivate resampling option
@@ -321,24 +317,22 @@ class MPLCanvas(FigureCanvas):
             when we change the way we aggregate the stations data upon clicking APPLY button.
         """
 
-        # update mouse cursor to a waiting cursor
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        if not self.read_instance.block_MPL_canvas_updates:
 
-        # clear all previously plotted artists from selected station plots and hide axes 
-        for plot_type in self.read_instance.active_dashboard_plots:
-            self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-        # get statistic
-        self.read_instance.aggregation_statistic = self.read_instance.cb_aggregation_statistic.currentText()
+            # get statistic
+            self.read_instance.aggregation_statistic = self.read_instance.cb_aggregation_statistic.currentText()
+            
+            # update associated plots with selected stations
+            self.update_associated_active_dashboard_plots()
+            
+            # draw changes
+            self.figure.canvas.draw()
 
-        # update associated plots with selected stations
-        self.update_associated_active_dashboard_plots()
-
-        # draw changes
-        self.figure.canvas.draw()
-
-        # restore mouse cursor to normal
-        QtWidgets.QApplication.restoreOverrideCursor()
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
