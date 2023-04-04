@@ -270,7 +270,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_species = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_species.AdjustToContents
         self.cb_species.setToolTip('Select species')
-        self.cb_species.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
         self.le_start_date.setToolTip('Set data start date: YYYYMMDD')
         self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
@@ -317,7 +316,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                              formatting_dict['title_menu'])
         self.lb_aggregation.setToolTip('Select the statistic to aggregate the stations data')
         self.cb_aggregation_statistic = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_aggregation_statistic.setFixedWidth(100)
         self.cb_aggregation_statistic.setToolTip('Select statistic')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
@@ -342,7 +340,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
         self.lb_resampling.setToolTip('Set resampling options')
         self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_resampling_resolution.setFixedWidth(100)
         self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
         self.cb_resampling_switch = set_formatting(Switch(self), formatting_dict['switch_menu'])
         self.cb_resampling_switch.setToolTip('Activate/Deactivate resampling')
@@ -511,6 +508,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
 
+        # set variable to avoid updating the canvas while updating config bar parameters
+        self.block_MPL_canvas_updates = True
+
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
 
@@ -676,6 +676,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
+
+        # unset variable to allow updating the canvas
+        self.block_MPL_canvas_updates = True
 
     def update_layout_fields(self):
         """ Function which updates layout fields. """
@@ -1142,10 +1145,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 # clear axes
                 for plot_type, ax in self.mpl_canvas.plot_axes.items():
                     self.mpl_canvas.remove_axis_elements(ax, plot_type)
+                
                 # update MPL canvas
                 self.mpl_canvas.figure.canvas.draw()  
+                
                 # restore mouse cursor to normal
-                QtWidgets.QApplication.restoreOverrideCursor()    
+                QtWidgets.QApplication.restoreOverrideCursor()
+                
                 return
 
             # update fields available for filtering

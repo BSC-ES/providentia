@@ -195,7 +195,16 @@ class ComboBox(QtWidgets.QComboBox):
         # overwrite default line edit by an invisible one
         self.lineEdit().setFrame(False)
         self.lineEdit().setReadOnly(True)
+        self.currentTextChanged.connect(self.fixCursorPosition)
 
+    def fixCursorPosition(self):
+        """ Move (invisible) cursor to first position to avoid cutting off the start. """
+
+        # apply only to visible comboboxes with text lengths of more than 10 chars
+        if (self.isVisible()) and (len(self.lineEdit().text()) >= 10):
+            self.lineEdit().setCursorPosition(0)
+            self.lineEdit().setFocus()
+    
     def showPopup(self):
         """ Show pop-up. """
 
