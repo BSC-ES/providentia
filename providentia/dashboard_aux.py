@@ -200,8 +200,8 @@ class ComboBox(QtWidgets.QComboBox):
     def fixCursorPosition(self):
         """ Move (invisible) cursor to first position to avoid cutting off the start. """
 
-        # apply only to visible comboboxes with text lengths of more than 10 chars
-        if (self.isVisible()) and (len(self.lineEdit().text()) >= 10):
+        # apply only to comboboxes with text lengths of more than 10 chars
+        if len(self.lineEdit().text()) >= 10:
             self.lineEdit().setCursorPosition(0)
             self.lineEdit().setFocus()
     
