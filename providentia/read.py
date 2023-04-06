@@ -138,6 +138,9 @@ class DataReader:
         # need to reset all data structures 
         if 'reset' in operations:  
 
+            # uninitialise filter object
+            self.read_instance.mpl_canvas.filter_data = None
+
             # data
             self.read_instance.data_in_memory = {networkspeci: 
                                                  np.full((len(self.read_instance.data_labels),
