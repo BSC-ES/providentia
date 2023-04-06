@@ -346,7 +346,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # position objects on gridded configuration bar
         # data selection section
-        config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_network, 1, 0, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_resolution, 2, 0, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_matrix, 1, 1, QtCore.Qt.AlignLeft)
