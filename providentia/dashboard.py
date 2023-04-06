@@ -256,7 +256,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), formatting_dict['checkbox_menu'])
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
-        self.ch_colocate.setMaximumWidth(80)
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_network.AdjustToContents
         self.cb_network.setToolTip('Select providing observational data network. '
@@ -287,7 +286,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # filters section
         self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), formatting_dict['title_menu'])
-        self.lb_data_filter.setFixedWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
         self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), formatting_dict['button_menu'])
         self.bu_rep.setToolTip('Select % desired representativity in data across '
@@ -326,13 +324,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.lb_station_selection.setToolTip('Select stations')
         self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), formatting_dict['checkbox_menu'])
         self.ch_select_all.setToolTip('Select all stations')
-        self.ch_select_all.setFixedWidth(80)
         self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), formatting_dict['checkbox_menu'])
         self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
-        self.ch_intersect.setFixedWidth(80)
         self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), formatting_dict['checkbox_menu'])
         self.ch_extent.setToolTip('Select stations that are within the map extent')
-        self.ch_extent.setFixedWidth(80)
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
 
