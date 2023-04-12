@@ -4,6 +4,7 @@ import json
 import os
 
 import math
+import pyproj
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -16,6 +17,7 @@ import matplotlib.pyplot as plt
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
+import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
 import scipy.stats as st
@@ -23,6 +25,9 @@ import seaborn as sns
 
 from .statistics import get_z_statistic_info
 from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases, show_message
+
+# speed up transformations in cartopy
+pyproj.set_use_global_context()
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -127,7 +132,7 @@ class Plot:
                     if plot_type in self.read_instance.summary_plots_to_make:
                         self.read_instance.summary_plots_to_make.remove(plot_type)
                     if plot_type in self.read_instance.station_plots_to_make:
-                        self.read_instance.station.plots_to_make.remove(plot_type)
+                        self.read_instance.station_plots_to_make.remove(plot_type)
                     continue
 
                 # add information for plot type from base plot type template 
@@ -169,7 +174,7 @@ class Plot:
                     if plot_type in self.read_instance.summary_plots_to_make:
                         self.read_instance.summary_plots_to_make.remove(plot_type)
                     if plot_type in self.read_instance.station_plots_to_make:
-                        self.read_instance.station.plots_to_make.remove(plot_type)
+                        self.read_instance.station_plots_to_make.remove(plot_type)
                     continue
 
                 # add information for plot type for base plot type 
@@ -307,7 +312,8 @@ class Plot:
 
                 # add gridlines ?
                 if 'gridlines' in plot_characteristics_vars:
-                    ax_to_format.gridlines(crs=self.canvas_instance.datacrs, **plot_characteristics['gridlines'])
+                    ax_to_format.gridlines(crs=self.canvas_instance.datacrs, 
+                                           **plot_characteristics['gridlines'])
 
                 # set map extent (if wanted)
                 if set_extent:
@@ -328,16 +334,56 @@ class Plot:
         ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
 
     def get_map_extent(self, ax):
-        """ Get map extent from xlim and ylim. """
+        """ Get map extent from xlim and ylim. """ 
 
-        current_xlim = ax.get_xlim()
-        current_ylim = ax.get_ylim()
+        # get plot extent
+        coords = np.array(ax.get_extent())
+        current_xlim = coords[0:2]
+        current_ylim = coords[2:4]
+
+        # calculate means
         mlon = np.mean(current_xlim)
         mlat = np.mean(current_ylim)
+
+        # get coordinates
         xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
         ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
+
+        # transform coordinates to projected data
         transformed_coords = self.canvas_instance.datacrs.transform_points(self.canvas_instance.plotcrs, 
                                                                            xcoords, ycoords)[:, :2]
+    
+        # keep longitudes between -180 and 180
+        lon_change = False
+        if (np.isnan(transformed_coords[0, 0])) or (transformed_coords[0, 0] == -179.99999999999932):
+            transformed_coords[0, 0] = -180
+            lon_change = True
+        if (np.isnan(transformed_coords[2, 0])) or (transformed_coords[2, 0] == 179.99999999999932):
+            transformed_coords[2, 0] = 180  
+            lon_change = True 
+
+        # keep latitudes between -90 and 90
+        lat_change = False
+        if (np.isnan(transformed_coords[1, 1])) or (transformed_coords[1, 1] == -89.99999999999966):
+            transformed_coords[1, 1] = -90
+            lat_change = True  
+        if (np.isnan(transformed_coords[3, 1])) or (transformed_coords[3, 1] == 89.99999999999966):
+            transformed_coords[3, 1] = 90
+            lat_change = True  
+
+        # recalculate means
+        if lon_change or lat_change:
+            # recalculate longitude means
+            mlon = np.mean(np.array([transformed_coords[0, 0], transformed_coords[2, 0]]))
+            transformed_coords[1, 0] = mlon
+            transformed_coords[3, 0] = mlon
+
+            # recalculate latitude means
+            mlat = np.mean(np.array([transformed_coords[1, 1], transformed_coords[3, 1]]))
+            transformed_coords[0, 1] = mlat
+            transformed_coords[2, 1] = mlat
+
+        # get map extent
         map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(),
                       transformed_coords[:,1].min(), transformed_coords[:,1].max()]
 
@@ -493,6 +539,11 @@ class Plot:
         # add filter species to header if have it set
         if self.read_instance.filter_species: 
             txt += 'Filter Species : {}\n'.format(self.read_instance.filter_species)
+
+        # add calibration factor to header if have it set
+        if hasattr(self.read_instance, 'calibration_factor'):
+            if self.read_instance.calibration_factor: 
+                txt += 'Calibration : {}\n'.format(self.read_instance.calibration_factor)
 
         # add subsections to header
         txt += 'Subsections : {}\n'.format(self.read_instance.subsections)
@@ -722,7 +773,7 @@ class Plot:
                                                       self.read_instance.station_latitudes[networkspeci][self.canvas_instance.active_map_valid_station_inds], 
                                                       c=z_statistic, transform=self.canvas_instance.datacrs,
                                                       **plot_characteristics['plot'])
-
+        
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
             self.track_plot_elements('observations', 'map', 'plot', [self.stations_scatter], bias=False)
@@ -1526,7 +1577,7 @@ class Plot:
         if len(stats) == 0:
             msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.json.'.format(base_plot_type)
             msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.json.'.format(base_plot_type)
-            show_message(msg=msg_dashboard, offline=self.read_instance.offline, msg_offline=msg_offline)
+            show_message(self.read_instance, msg=msg_dashboard, msg_offline=msg_offline)
             return
 
         # initialise list of strs to annotate, and colours of annotations
@@ -1551,8 +1602,9 @@ class Plot:
             stats_annotate = []
             for zstat in stats:
                 if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
-                    stats_annotate.append(zstat + ': ' + str(round(self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0], 
-                                          plot_characteristics['annotate_text']['round_decimal_places'])))
+                    stats_annotate.append("{0}: {1:.{2}f}".format(zstat, 
+                        self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0],
+                        plot_characteristics['annotate_text']['round_decimal_places']))
 
             # show number of stations if defined
             if plot_characteristics['annotate_text']['n_stations']:

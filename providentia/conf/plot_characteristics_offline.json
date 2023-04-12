@@ -248,7 +248,7 @@
                    "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
                    "group_widths": {"singlespecies":0.7, "multispecies":0.9}, 
                    "round_decimal_places": 2,
-                   "plot": {"patch_artist": true, "manage_xticks": false, "showfliers": false},
+                   "plot": {"patch_artist": true, "manage_ticks": false, "showfliers": false},
                    "plot_options": ["obs", "individual", "annotate", "logy", "multispecies"]},
 
        "heatmap": {"orientation": "landscape",
