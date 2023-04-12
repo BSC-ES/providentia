@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset
-from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data, get_default_qa
+from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data, get_default_qa, get_frequency_code
 from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -41,17 +41,8 @@ class DataReader:
             # determine if reading GHOST or non-GHOST
             self.read_instance.reading_ghost = check_for_ghost(self.read_instance.network[0])
 
-            # set active frequency code
-            if (self.read_instance.resolution == 'hourly') or (self.read_instance.resolution == 'hourly_instantaneous'):
-                self.read_instance.active_frequency_code = 'H'
-            elif (self.read_instance.resolution == '3hourly') or (self.read_instance.resolution == '3hourly_instantaneous'):
-                self.read_instance.active_frequency_code = '3H'
-            elif (self.read_instance.resolution == '6hourly') or (self.read_instance.resolution == '6hourly_instantaneous'):
-                self.read_instance.active_frequency_code = '6H'
-            elif self.read_instance.resolution == 'daily':
-                self.read_instance.active_frequency_code = 'D'
-            elif self.read_instance.resolution == 'monthly':
-                self.read_instance.active_frequency_code = 'MS'
+            # get active frequency code
+            self.read_instance.active_frequency_code = get_frequency_code(self.read_instance.resolution)
 
             # get time array
             self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str(self.read_instance.start_date)[:4]),
@@ -67,11 +58,14 @@ class DataReader:
                 self.read_instance.invalid_read = True
                 msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
-                show_message(msg)
+                show_message(self.read_instance, msg)
                 if (self.read_instance.from_conf) and (not self.read_instance.offline):
                     sys.exit('Error: Providentia will not be launched.')
+                elif (self.read_instance.offline):
+                    sys.exit('Error: Offline report will not be created.')
                 else:
                     self.read_instance.first_read = True
+                    return
             else:
                 # get list of extra networkspecies to read, used for filtering data
                 # read only networkspecies not present in current networkspecies to read
@@ -81,19 +75,14 @@ class DataReader:
                         if networkspeci not in self.read_instance.networkspecies:
                             self.read_instance.filter_networkspecies.append(networkspeci)
                     
-                    # update le_minimum_value and le_maximum_value (data bounds) for current networkspecies
-                    if networkspeci in self.read_instance.networkspecies:
-                        
-                        msg = 'The current network-species has been selected in the MULTI tab, '
-                        msg += 'this will change the data bounds.'
-                        show_message(msg)
-
-                        current_lower = str(self.read_instance.filter_species[networkspeci][0])
-                        current_upper = str(self.read_instance.filter_species[networkspeci][1])
-                        self.read_instance.le_minimum_value.setText(current_lower)
-                        self.read_instance.le_maximum_value.setText(current_upper)
-                        
-                        del self.read_instance.filter_species[networkspeci]
+                    # do not update data bounds for current networkspecies
+                    filter_species = copy.deepcopy(self.read_instance.filter_species)
+                    for networkspeci in filter_species:
+                        if networkspeci in self.read_instance.networkspecies:
+                            msg = 'The current network-species ({}) cannot be selected as a filter species. '.format(networkspeci)
+                            msg += 'If you want to change its data bounds, use the lower and upper bounds parameters.'
+                            show_message(self.read_instance, msg)
+                            del self.read_instance.filter_species[networkspeci]
 
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)
                 self.read_instance.yearmonths = list(np.unique(['{}0{}'.format(dti.year,dti.month) if len(str(dti.month)) == 1 else '{}{}'.format(dti.year,dti.month) \
@@ -139,6 +128,9 @@ class DataReader:
 
         # need to reset all data structures 
         if 'reset' in operations:  
+
+            # uninitialise filter object
+            self.read_instance.mpl_canvas.filter_data = None
 
             # data
             self.read_instance.data_in_memory = {networkspeci: 
