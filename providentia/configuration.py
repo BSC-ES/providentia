@@ -638,7 +638,7 @@ class ProvConfiguration:
 
         # check have resampling_resolution if resampling is True
         # if offline, throw message, stating error
-        if (self.read_instance.resampling) and (self.read_instance.resampling_resolution is None):
+        if (self.read_instance.resampling) and (self.read_instance.resampling_resolution == 'None'):
             msg = 'Resampling will not be applied because resampling resolution was not defined.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.resampling = False
@@ -882,7 +882,7 @@ def split_options(read_instance, conf_string, separator="||"):
             removes = [r.strip() for r in removes]
         elif ("keep:" in conf_string) and ("remove:" in conf_string):
             msg = 'In order to define the keep and remove options, these must be separated by ||.'
-            show_message(msg, offline=read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(msg, offline=read_instance.offline, from_conf=read_instance.from_conf)
     else:
         if "keep:" in conf_string:
             keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)

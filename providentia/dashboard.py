@@ -2,10 +2,10 @@
 from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow, InputDialog
+from .dashboard_aux import ComboBox, QVLine, PopUpWindow, InputDialog
 from .dashboard_aux import set_formatting
 from .read import DataReader
-from .read_aux import get_default_qa
+from .read_aux import get_default_qa, get_frequency_code
 from providentia import aux
 
 import os
@@ -251,11 +251,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"),
                                                 formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
-        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
-        self.bu_read.setStyleSheet("color: green;")
-        self.bu_read.setToolTip('Read selected configuration of data into memory')
-        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), formatting_dict['checkbox_menu'])
-        self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.cb_network.AdjustToContents
         self.cb_network.setToolTip('Select providing observational data network. '
@@ -281,6 +276,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), formatting_dict['button_menu'])
         self.bu_multispecies.setToolTip('Select data to filter by')
+        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
+        self.bu_read.setStyleSheet("color: green;")
+        self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
 
@@ -317,6 +315,22 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_aggregation_statistic.setToolTip('Select statistic')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
+        
+        # colocation section
+        self.lb_colocate = set_formatting(QtWidgets.QLabel(self, text="Colocation"), formatting_dict['title_menu'])
+        self.lb_colocate.setToolTip('Set colocation')
+        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Temporal"), formatting_dict['checkbox_menu'])
+        self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
+        self.vertical_splitter_4 = QVLine()
+        self.vertical_splitter_4.setMaximumWidth(20)
+
+        # resampling section
+        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
+        self.lb_resampling.setToolTip('Set resampling options')
+        self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
+        self.vertical_splitter_5 = QVLine()
+        self.vertical_splitter_5.setMaximumWidth(20)
 
         # station selection section
         self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
@@ -328,16 +342,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
         self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), formatting_dict['checkbox_menu'])
         self.ch_extent.setToolTip('Select stations that are within the map extent')
-        self.vertical_splitter_4 = QVLine()
-        self.vertical_splitter_4.setMaximumWidth(20)
-
-        # resampling section
-        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
-        self.lb_resampling.setToolTip('Set resampling options')
-        self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
-        self.cb_resampling_switch = set_formatting(Switch(self), formatting_dict['switch_menu'])
-        self.cb_resampling_switch.setToolTip('Activate/Deactivate resampling')
 
         # position objects on gridded configuration bar
         # data selection section
@@ -353,37 +357,40 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.bu_experiments, 1, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_multispecies, 2, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_colocate, 1, 5, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_1, 0, 6, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_1, 0, 5, 4, 1, QtCore.Qt.AlignLeft)
 
         # filters section
-        config_bar.addWidget(self.lb_data_filter, 0, 7, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_data_bounds, 1, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_minimum_value, 1, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_maximum_value, 1, 9, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_rep, 2, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_period, 2, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_meta, 2, 9, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_reset, 3, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_filter, 3, 9, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_2, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_bounds, 1, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_minimum_value, 1, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_maximum_value, 1, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_rep, 2, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_period, 2, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_meta, 2, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_reset, 3, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_filter, 3, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_2, 0, 9, 4, 1, QtCore.Qt.AlignLeft)
 
         # station aggregation section
-        config_bar.addWidget(self.lb_aggregation, 0, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_aggregation_statistic, 1, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_aggregation, 0, 10, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_aggregation_statistic, 1, 10, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_3, 0, 11, 4, 1, QtCore.Qt.AlignLeft)
 
-        # station selection section
-        config_bar.addWidget(self.lb_station_selection, 0, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_intersect, 2, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_extent, 3, 13, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_4, 0, 14, 4, 1, QtCore.Qt.AlignLeft)
+        # colocation section
+        config_bar.addWidget(self.lb_colocate, 0, 12, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_colocate, 1, 12, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_4, 0, 13, 4, 1, QtCore.Qt.AlignLeft)
 
         # resampling section
-        config_bar.addWidget(self.lb_resampling, 0, 15, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resampling_resolution, 1, 15, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resampling_switch, 1, 16, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_resampling, 0, 14, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_resolution, 1, 14, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_5, 0, 15, 4, 1, QtCore.Qt.AlignLeft)
+
+        # station selection section
+        config_bar.addWidget(self.lb_station_selection, 0, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 16, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 16, QtCore.Qt.AlignLeft)
 
         # enable dynamic updating of configuration bar fields which filter data files
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
@@ -449,17 +456,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # enable RESET button
         self.bu_reset.clicked.connect(self.reset_options)
 
-        # enable interactivity of temporal colocation checkbox
-        self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_temporal_colocate_update)
-
         # enable FILTER button
         self.bu_filter.clicked.connect(self.mpl_canvas.handle_data_filter_update)
 
         # enable aggregation by changing the statistic
         self.cb_aggregation_statistic.currentTextChanged.connect(self.mpl_canvas.handle_aggregation_update)
 
-        # enable switch to activate the resampling
-        self.cb_resampling_switch.clicked.connect(self.mpl_canvas.handle_resampling_update)
+        # enable interactivity of temporal colocation checkbox
+        self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_temporal_colocate_update)
+
+        # enable resampling by changing the temporal resolution
+        self.cb_resampling_resolution.currentTextChanged.connect(self.mpl_canvas.handle_resampling_update)
 
         # enable interactivity of station selection checkboxes
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
@@ -626,20 +633,35 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         else:
             self.selected_aggregation_statistic = self.cb_aggregation_statistic.currentText()
 
-        # update resampling resolution field
+        # get available resampling resolutions
         available_resampling_resolutions = copy.deepcopy(available_resolutions)[available_resolutions.index(self.selected_resolution)+1:]
         available_resampling_resolutions.append('yearly')
+
+        # remove resolutions if resampled data would be less than 2 timesteps
+        resampling_resolutions = copy.deepcopy(available_resampling_resolutions)
+        for resampling_resolution in resampling_resolutions:
+            # get active frequency code
+            active_frequency_code = get_frequency_code(resampling_resolution)
+
+            # get time array
+            start_date = self.le_start_date.text()
+            end_date = self.le_end_date.text()
+            time_array = pd.date_range(start=datetime.datetime(int(start_date[:4]), int(start_date[4:6]),
+                                                               int(start_date[6:8])),
+                                       end=datetime.datetime(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:8])),
+                                       freq=active_frequency_code)[:-1]
+
+            # show warning when the data consists only of less than 2 timesteps
+            if len(time_array) < 2:
+                available_resampling_resolutions.remove(resampling_resolution)
+            
+        # update resampling resolution field
+        available_resampling_resolutions = ['None',] + available_resampling_resolutions
         self.cb_resampling_resolution.addItems(available_resampling_resolutions)
         if self.selected_resampling_resolution in available_resampling_resolutions:
             self.cb_resampling_resolution.setCurrentText(self.selected_resampling_resolution)
         else:
             self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
-
-        # update resampling switch
-        if self.selected_resampling:
-            self.cb_resampling_switch.setChecked(True)
-        else:
-            self.cb_resampling_switch.setChecked(False)
 
         # update available experiments for selected fields
         aux.get_valid_experiments(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
@@ -673,7 +695,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.block_config_bar_handling_updates = False
 
         # unset variable to allow updating the canvas
-        self.block_MPL_canvas_updates = True
+        self.block_MPL_canvas_updates = False
 
     def update_layout_fields(self):
         """ Function which updates layout fields. """
@@ -763,9 +785,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif event_source == self.cb_resampling_resolution:
                 self.selected_resampling_resolution = changed_param
                 self.selected_resampling = False
-
-            elif event_source == self.cb_resampling_switch:
-                self.selected_resampling = changed_param
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
@@ -1003,6 +1022,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update mouse cursor to a waiting cursor
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
+        # clear and then hide all axes 
+        for plot_type, ax in self.mpl_canvas.plot_axes.items():
+            self.mpl_canvas.remove_axis_elements(ax, plot_type)
+        
+        # update MPL canvas
+        self.mpl_canvas.figure.canvas.draw()  
+        self.mpl_canvas.figure.canvas.flush_events()
+
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
         
@@ -1135,18 +1162,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, 
                                        experiments_to_read=experiments_to_read)
             
-            # clear canvas entirely if have no valid data after read
+            # restore mouse cursor to normal if have no valid data after read
             if self.invalid_read:
-                # clear axes
-                for plot_type, ax in self.mpl_canvas.plot_axes.items():
-                    self.mpl_canvas.remove_axis_elements(ax, plot_type)
-                
-                # update MPL canvas
-                self.mpl_canvas.figure.canvas.draw()  
-                
-                # restore mouse cursor to normal
                 QtWidgets.QApplication.restoreOverrideCursor()
-                
                 return
 
             # update fields available for filtering
@@ -1192,10 +1210,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update periodic statistic combobox
         self.mpl_canvas.handle_periodic_statistic_update()
     
-        # reset station select checkboxes to be unchecked
-        self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
-        self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-        self.ch_extent.setCheckState(QtCore.Qt.Unchecked)
+        # unselect all/intersect/extent checkboxes
+        self.mpl_canvas.unselect_map_checkboxes()
+        
+        # reset resampling
+        self.cb_resampling_resolution.setCurrentText('None')
 
         # unset variable to allow updating of MPL canvas
         self.block_MPL_canvas_updates = False
@@ -1208,6 +1227,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if self.first_read:
             self.first_read = False
             if self.ch_colocate.checkState() == QtCore.Qt.Checked:
+                print('handle temporal')
                 self.mpl_canvas.handle_temporal_colocate_update()
 
         # restore mouse cursor to normal
