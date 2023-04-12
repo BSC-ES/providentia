@@ -12,7 +12,6 @@ from .configuration import ProvConfiguration
 from .writing import export_data_npz, export_netcdf, export_configuration
 from providentia import aux
 from .dashboard_aux import InputDialog
-from .dashboard_aux import multispecies_conf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -44,6 +43,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         actions = self.findChildren(QtWidgets.QAction)
         self._actions['save_data'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_icon.png")))
         self._actions['conf_dialogs'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/conf_icon.png")))
+        self._actions['home'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/world_icon.png")))
         self._actions['zoom'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/zoom_icon.png")))
         self._actions['save_figure'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         
@@ -82,11 +82,11 @@ class NavigationToolbar(NavigationToolbar2QT):
                         export_netcdf(self.canvas_instance, fname)
                     QtWidgets.QApplication.restoreOverrideCursor()
                     msg = 'The data was successfully saved in {}.'.format(fname)
-                    aux.show_message(msg)
+                    aux.show_message(self.read_instance, msg)
                 except Exception as e:
                     msg = 'There was an error saving the file.'
                     print(e)
-                    aux.show_message(msg)
+                    aux.show_message(self.read_instance, msg)
 
     def conf_dialogs(self):
         """ Pop window for selecting configuration file. If file selcted, pops an
@@ -118,7 +118,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         
         except Exception as e:
             msg = 'There was an error loading the configuration file.'
-            aux.show_message(msg)
+            aux.show_message(self.read_instance, msg)
 
     def filename_dialog(self):
         """" Open dialog to choose configuration file. """
@@ -158,7 +158,6 @@ class NavigationToolbar(NavigationToolbar2QT):
         provconf.check_validity()
 
         # update species, experiments, qa & flags
-        self.read_instance.block_MPL_canvas_updates = True
         self.read_instance.config_bar_initialisation = True
         self.read_instance.update_configuration_bar_fields()
         self.read_instance.config_bar_initialisation = False
@@ -170,7 +169,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.reset_options()
 
         # set fields available for filtering
-        multispecies_conf(self.read_instance)
+        aux.multispecies_conf(self.read_instance)
         aux.representativity_conf(self.read_instance)
         aux.period_conf(self.read_instance)
         aux.metadata_conf(self.read_instance)

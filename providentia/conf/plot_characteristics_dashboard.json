@@ -79,7 +79,7 @@
                "map_coastline_resolution": "medium",
                "land_polygon": {"facecolor": "0.85"},
                "projection": "Robinson",
-               "gridlines": {"linestyle": "-", "alpha": 0.4},
+               "gridlines": {"linestyle": "-", "alpha": 0.4, "auto_update": false},
                "axis_title": {"label": "", "fontsize": 8.5, "pad": 3, "loc": "center"},
                "cb": {"vmin_absolute": "", "vmax_absolute": "", "vmin_bias": "", "vmax_bias": "", "cmap_absolute": "", 
                       "cmap_bias": "", "n_ticks": 8, "orientation": "horizontal", "discrete": true, "n_discrete": 7},
@@ -245,7 +245,7 @@
                                      "exp_labels": true, "color": "", "round_decimal_places": 2},
                    "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
                    "group_widths": {"singlespecies":0.7, "multispecies":0.9}, 
-                   "plot": {"patch_artist": true, "manage_xticks": false, "showfliers": false},
+                   "plot": {"patch_artist": true, "manage_ticks": false, "showfliers": false},
                    "plot_options": ["annotate", "logy"]},
 
        "heatmap": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"}, 
