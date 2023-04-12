@@ -10,29 +10,37 @@ import time
 import datetime
 import math
 from weakref import WeakKeyDictionary
+import time
 
 import matplotlib
 from matplotlib.offsetbox import AnchoredOffsetbox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
         as FigureCanvas
+from matplotlib.backend_bases import FigureCanvasBase
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.path import Path
-from matplotlib.widgets import LassoSelector, Slider
+from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
+import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_aux import set_formatting
-from .dashboard_aux import ComboBox, CheckableComboBox
+from .dashboard_aux import set_formatting, ComboBox, CheckableComboBox, LassoSelector
 from .aux import get_relevant_temporal_resolutions, show_message
+
+# make sure that we are using Qt5 backend with matplotlib
+matplotlib.use('Qt5Agg')
+register_matplotlib_converters()
+
+# use matplotlib fast style: https://matplotlib.org/stable/users/explain/performance.html
+mplstyle.use('fast')
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
-
 
 class MPLCanvas(FigureCanvas):
     """ Class that handles the creation and updates of
@@ -82,9 +90,9 @@ class MPLCanvas(FigureCanvas):
         # stop running if plot type in active_dashboard_plots does not exist
         for plot_type in self.read_instance.active_dashboard_plots:
             if plot_type not in self.all_plots:
-                msg = "Error: Plot type {0} is not an option. ".format(plot_type)
-                msg += "The available plots are: {0}.".format(self.all_plots[2:])
-                sys.exit(msg)
+                error = "Error: Plot type {0} is not an option. ".format(plot_type)
+                error += "The available plots are: {0}.".format(self.all_plots[2:])
+                sys.exit(error)
 
         # initialize layout positions
         self.read_instance.position_1 = 'map'
@@ -129,14 +137,14 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.mpl_connect('pick_event', self.legend_picker_func)
 
         # setup interactive lasso on map
-        self.lasso_left = LassoSelector(self.plot_axes['map'], onselect=self.onlassoselect_left,
-                                        useblit=True, lineprops=self.lasso, button=[1])
-        self.lasso_right = LassoSelector(self.plot_axes['map'], onselect=self.onlassoselect_right,
-                                         useblit=True, lineprops=self.lasso, button=[3])
+        self.lasso_left = LassoSelector(self, self.plot_axes['map'], onselect=self.onlassoselect_left,
+                                        useblit=False, props=self.lasso, button=[1])
+        self.lasso_right = LassoSelector(self, self.plot_axes['map'], onselect=self.onlassoselect_right,
+                                         useblit=False, props=self.lasso, button=[3])
 
         # setup station annotations
         self.create_station_annotation()
-        self.lock_map_annotation = False
+        self.map_annotation_disconnect = False
         self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', self.hover_map_annotation)
 
         # setup zoom on scroll wheel on map
@@ -155,10 +163,6 @@ class MPLCanvas(FigureCanvas):
         """ Function that updates MPL canvas upon clicking
             the 'READ' button, and when colocating data.
         """
-
-        # clear and then hide all axes 
-        for plot_type, ax in self.plot_axes.items():
-            self.remove_axis_elements(ax, plot_type)
 
         # reset relative index lists of selected station on map as empty lists
         self.previous_relative_selected_station_inds = np.array([], dtype=np.int)
@@ -245,49 +249,42 @@ class MPLCanvas(FigureCanvas):
 
     def handle_resampling_update(self):
         """ Function which handles updates of resampling. """
+        
+        if not self.read_instance.block_MPL_canvas_updates:
 
-        if (self.read_instance.temporal_colocation == False) and (len(self.read_instance.data_labels) > 1):
+            # if there are experiments selected, temporal colocation must be on
+            if ((self.read_instance.temporal_colocation == False) 
+                and (len(self.read_instance.data_labels) > 1)
+                and (self.read_instance.cb_resampling_resolution.currentText() != 'None')):
+                    msg = 'It is not possible to resample the data without first activating the temporal colocation.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.block_config_bar_handling_updates = True
+                    self.read_instance.cb_resampling_resolution.setCurrentText('None')
+                    self.read_instance.block_config_bar_handling_updates = False
+                    return
 
-            msg = 'It is not possible to resample the data without first activating the temporal colocation.'
-            show_message(msg)
-            self.read_instance.cb_resampling_switch.setChecked(False)
-            return
-
-        # if have selected stations on map, then now remake plots
-        if hasattr(self, 'relative_selected_station_inds'):
-            if len(self.relative_selected_station_inds) > 0:
-                
-                # update mouse cursor to a waiting cursor
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-                # clear all previously plotted artists from selected station plots and hide axes 
-                for plot_type in self.read_instance.active_dashboard_plots:
-                    self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
-
-                event_source = self.sender()
-
-                # activate or deactivate resampling option
-                if event_source.isChecked():
-                    self.read_instance.resampling = True
-                    self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
-                else:
-                    self.read_instance.resampling = False
-                    self.read_instance.resampling_resolution = None
-
-                # update associated plots with selected stations
-                self.update_associated_active_dashboard_plots()
-
-                # draw changes
-                self.figure.canvas.draw()
-
-                # restore mouse cursor to normal
-                QtWidgets.QApplication.restoreOverrideCursor()
-
+            # activate or deactivate resampling
+            self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
+            if self.read_instance.resampling_resolution == 'None':
+                self.read_instance.resampling = False
             else:
-                msg = 'Select the data you want to plot before resampling.'
-                show_message(msg)
-                self.read_instance.cb_resampling_switch.setChecked(False)
-                return
+                self.read_instance.resampling = True
+
+            # if have selected stations on map, then now remake plots
+            if hasattr(self, 'relative_selected_station_inds'):
+                if len(self.relative_selected_station_inds) > 0:
+                    
+                    # update mouse cursor to a waiting cursor
+                    QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+                    # update associated plots with selected stations
+                    self.update_associated_active_dashboard_plots()
+
+                    # draw changes
+                    self.figure.canvas.draw()
+
+                    # restore mouse cursor to normal
+                    QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -309,12 +306,39 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def handle_aggregation_update(self):
+        """ Function that handles the update of the MPL canvas
+            when we change the way we aggregate the stations data upon clicking APPLY button.
+        """
+
+        if not self.read_instance.block_MPL_canvas_updates:
+
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # get statistic
+            self.read_instance.aggregation_statistic = self.read_instance.cb_aggregation_statistic.currentText()
+            
+            # update associated plots with selected stations
+            self.update_associated_active_dashboard_plots()
+            
+            # draw changes
+            self.figure.canvas.draw()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
+
+        return None
+    
     def handle_temporal_colocate_update(self):
         """ Function that handles the update of the MPL canvas
             with colocated data upon checking of the temporal colocate checkbox.
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
+            
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # if only have 1 data array in memory (i.e. observations), no colocation is possible,
             # therefore set colocation to be False, and return
@@ -324,6 +348,7 @@ class MPLCanvas(FigureCanvas):
 
             # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
             check_state = self.read_instance.ch_colocate.checkState()
+
             # update variable to inform plotting functions whether to use colocated data/or not
             if check_state == QtCore.Qt.Checked:
                 self.read_instance.temporal_colocation = True
@@ -348,7 +373,29 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.figure.canvas.draw()
 
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
+
+    def unselect_map_checkboxes(self):
+        """ Function to uncheck All, Intersect and Extent checkboxes without updating canvas. """
+
+        self.read_instance.block_MPL_canvas_updates = True
+
+        # if select all stations checkbox is checked then uncheck it
+        if self.read_instance.ch_select_all.checkState() == QtCore.Qt.Checked:
+            self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
+
+        # if select intersect stations checkbox is checked then uncheck it
+        elif self.read_instance.ch_intersect.checkState() == QtCore.Qt.Checked:
+            self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
+
+        # if select extent stations checkbox is checked then uncheck it
+        elif self.read_instance.ch_extent.checkState() == QtCore.Qt.Checked:
+            self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
+
+        self.read_instance.block_MPL_canvas_updates = False
 
     def update_map_z_statistic(self):
         """ Function that updates plotted z statistic on map, with colourbar. """
@@ -394,7 +441,8 @@ class MPLCanvas(FigureCanvas):
             self.absolute_non_selected_station_inds = np.array([], dtype=np.int)
 
             # plot map with 0 stations
-            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, self.plot_characteristics['map'])
+            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, 
+                               self.plot_characteristics['map'])
 
             # activate map
             self.activate_axis(self.plot_axes['map'], 'map')
@@ -407,11 +455,7 @@ class MPLCanvas(FigureCanvas):
             if not np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)):
                 
                 # unselect all/intersect/extent checkboxes
-                self.read_instance.block_MPL_canvas_updates = True
-                self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.block_MPL_canvas_updates = False
+                self.unselect_map_checkboxes()
                 
                 # reset relative/absolute selected station indices to be empty lists
                 self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -442,6 +486,7 @@ class MPLCanvas(FigureCanvas):
 
         # re-draw (needed to update plotted colours before update_map_station_selection)
         self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
 
         # update map selection appropriately for z statistic
         self.update_map_station_selection()
@@ -489,7 +534,7 @@ class MPLCanvas(FigureCanvas):
                     # set new markersizes and alphas
                     collection.set_sizes(markersizes)
                     collection.set_facecolor(rgba_tuples)
-                    
+        
         # redraw points
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
@@ -712,21 +757,20 @@ class MPLCanvas(FigureCanvas):
                 to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
                                     networkspecies=[self.read_instance.networkspeci])
 
-                for data_label in self.selected_station_data[self.read_instance.networkspeci].keys():
-                    dates = self.selected_station_data[self.read_instance.networkspeci][data_label]['pandas_df'].index
-                    if len(dates) < 2:
-                        msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
-                        msg += 'Plots will only be created when period is longer than 2 timesteps.'
-                        show_message(msg)
-                        return
-
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
 
                     # if there are no temporal resolutions (only yearly), skip periodic plots
-                    if (plot_type in ['periodic', 'periodic-violin']) and (not self.read_instance.relevant_temporal_resolutions):
+                    if ((plot_type in ['periodic', 'periodic-violin']) and 
+                        (not self.read_instance.relevant_temporal_resolutions)):
                         msg = 'It is not possible to make periodic plots using annual resolution data.'
-                        show_message(msg)
+                        show_message(self.read_instance, msg)
+                        continue
+                    
+                    # if temporal colocation is turned off, skip scatter plot
+                    if (plot_type == 'scatter') and (not self.read_instance.temporal_colocation):
+                        msg = 'It is not possible to make scatter plots without activating the temporal colocation.'
+                        show_message(self.read_instance, msg)
                         continue
 
                     # update plot
@@ -914,8 +958,11 @@ class MPLCanvas(FigureCanvas):
                 ax_to_remove.artists = list(np.delete(np.array(ax_to_remove.artists), inds_to_remove))
 
                 inds_to_remove = []
-                for col_ii, col in enumerate(ax_to_remove.collections):            
-                    if isinstance(col, matplotlib.collections.PathCollection):
+                for col_ii, col in enumerate(ax_to_remove.collections): 
+                    # TODO: Put line collection back into place when we turn on the auto_update in gridlines
+                    # if ((isinstance(col, matplotlib.collections.PathCollection))
+                    #     or (isinstance(col, matplotlib.collections.LineCollection))):
+                    if (isinstance(col, matplotlib.collections.PathCollection)):
                         inds_to_remove.append(col_ii)
                 ax_to_remove.collections = list(np.delete(np.array(ax_to_remove.collections), inds_to_remove))
 
@@ -1027,6 +1074,12 @@ class MPLCanvas(FigureCanvas):
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias'] 
 
+        # hide layout plot options
+        if plot_type in self.read_instance.active_dashboard_plots:
+            position = self.read_instance.active_dashboard_plots.index(plot_type) + 2
+            cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
+            cb_position.hide()
+
         return None
 
     def activate_axis(self, ax, plot_type):
@@ -1123,11 +1176,20 @@ class MPLCanvas(FigureCanvas):
 
         if not self.read_instance.block_MPL_canvas_updates:
 
-            # make copy of current full array relative selected stations indices, before selecting new ones
-            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-
             # check if checkbox to select all stations is checked or unchecked
             check_state = self.read_instance.ch_select_all.checkState()
+
+            # show warning and uncheck box
+            if not hasattr(self, 'relative_selected_station_inds'):
+                if check_state == QtCore.Qt.Checked:
+                    msg = 'Data must be read into memory before selecting the data.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.block_MPL_canvas_updates = True
+                    self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
+                    self.read_instance.block_MPL_canvas_updates = False
+
+            # make copy of current full array relative selected stations indices, before selecting new ones
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
             # if checkbox is checked, select all plotted stations
             if check_state == QtCore.Qt.Checked:
@@ -1176,11 +1238,20 @@ class MPLCanvas(FigureCanvas):
 
         if not self.read_instance.block_MPL_canvas_updates:
 
-            # make copy of current full array relative selected stations indices, before selecting new ones
-            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-
             # check if checkbox to select intersection of stations is checked or unchecked
             check_state = self.read_instance.ch_intersect.checkState()
+
+            # show warning and uncheck box
+            if not hasattr(self, 'relative_selected_station_inds'):
+                if check_state == QtCore.Qt.Checked:
+                    msg = 'Data must be read into memory before selecting the data.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.block_MPL_canvas_updates = True
+                    self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
+                    self.read_instance.block_MPL_canvas_updates = False
+
+            # make copy of current full array relative selected stations indices, before selecting new ones
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
             # if checkbox is unchecked then unselect all plotted stations
             if check_state == QtCore.Qt.Unchecked:
@@ -1254,15 +1325,24 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
+            
+            # check if checkbox to select extent of stations is checked or unchecked
+            check_state = self.read_instance.ch_extent.checkState()
 
+            # show warning and uncheck box
+            if not hasattr(self, 'relative_selected_station_inds'):
+                if check_state == QtCore.Qt.Checked:
+                    msg = 'Data must be read into memory before selecting the data.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.block_MPL_canvas_updates = True
+                    self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
+                    self.read_instance.block_MPL_canvas_updates = False
+        
             # get map extent (in data coords)
             self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-
-            # check if checkbox to select extent of stations is checked or unchecked
-            check_state = self.read_instance.ch_extent.checkState()
 
             # if checkbox is checked, select all plotted stations
             if check_state == QtCore.Qt.Checked:
@@ -1333,17 +1413,8 @@ class MPLCanvas(FigureCanvas):
         if len(self.active_map_valid_station_inds) == 0:
             return
 
-        if self.lock_station_pick == False:
-
-            # lock stations pick
-            self.lock_station_pick = True
-
-        # unselect all/intersect checkboxes
-        self.read_instance.block_MPL_canvas_updates = True
-        self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.block_MPL_canvas_updates = False
+        # unselect all/intersect/extent checkboxes
+        self.unselect_map_checkboxes()
 
         # make copy of current full array absolute abd relative selected stations indices, before selecting new ones
         self.previous_absolute_selected_station_inds = copy.deepcopy(self.absolute_selected_station_inds)
@@ -1352,8 +1423,10 @@ class MPLCanvas(FigureCanvas):
         # get coordinates of drawn lasso
         lasso_path = Path(verts)
         lasso_path_vertices = lasso_path.vertices
+
         # transform lasso coordinates from projected to standard geographic coordinates
         lasso_path.vertices = self.datacrs.transform_points(self.plotcrs, lasso_path_vertices[:, 0], lasso_path_vertices[:, 1])[:, :2]
+
         # get absolute selected indices of stations on map (the station coordinates contained within lasso)
         self.absolute_selected_station_inds = np.nonzero(lasso_path.contains_points(self.map_points_coordinates))[0]
 
@@ -1361,10 +1434,12 @@ class MPLCanvas(FigureCanvas):
         if len(self.absolute_selected_station_inds) == 0:
             # take first selected point coordinates and get matches of stations within tolerance 
             self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
-            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
+            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
+                                    self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
             self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
+            
             # if more than 1 point selected, limit this to be just nearest point
             if len(self.absolute_selected_station_inds) > 1:
                 self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int)
@@ -1387,9 +1462,6 @@ class MPLCanvas(FigureCanvas):
         # draw changes
         self.figure.canvas.draw()
 
-        # unlock stations pick 
-        self.lock_station_pick = False
-
         return None
 
     def onlassoselect_right(self, verts):
@@ -1406,12 +1478,8 @@ class MPLCanvas(FigureCanvas):
         if len(self.active_map_valid_station_inds) == 0:
             return
 
-        # unselect all/intersect checkboxes
-        self.read_instance.block_MPL_canvas_updates = True
-        self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.block_MPL_canvas_updates = False
+        # unselect all/intersect/extent checkboxes
+        self.unselect_map_checkboxes()
 
         # make copy of current full array relative selected stations indices, before selecting new ones
         previous_absolute_selected_station_inds = copy.deepcopy(self.absolute_selected_station_inds)
@@ -1485,7 +1553,6 @@ class MPLCanvas(FigureCanvas):
         # LAYOUT OPTIONS #
         # add position 2 plot selector
         self.read_instance.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.read_instance.cb_position_2.setFixedWidth(100)
         self.read_instance.cb_position_2.AdjustToContents
         self.read_instance.cb_position_2.setToolTip('Select plot type in top right position')
         self.read_instance.cb_position_2.currentTextChanged.connect(self.read_instance.handle_layout_update)
@@ -1493,7 +1560,6 @@ class MPLCanvas(FigureCanvas):
 
         # add position 3 plot selector
         self.read_instance.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.read_instance.cb_position_3.setFixedWidth(100)
         self.read_instance.cb_position_3.AdjustToContents
         self.read_instance.cb_position_3.setToolTip('Select plot type in bottom left position')
         self.read_instance.cb_position_3.currentTextChanged.connect(self.read_instance.handle_layout_update)
@@ -1501,7 +1567,6 @@ class MPLCanvas(FigureCanvas):
 
         # add position 4 plot selector
         self.read_instance.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.read_instance.cb_position_4.setFixedWidth(100)
         self.read_instance.cb_position_4.AdjustToContents
         self.read_instance.cb_position_4.setToolTip('Select plot type in bottom centre position')
         self.read_instance.cb_position_4.currentTextChanged.connect(self.read_instance.handle_layout_update)
@@ -1509,7 +1574,6 @@ class MPLCanvas(FigureCanvas):
 
         # add position 5 plot selector
         self.read_instance.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.read_instance.cb_position_5.setFixedWidth(100)
         self.read_instance.cb_position_5.AdjustToContents
         self.read_instance.cb_position_5.setToolTip('Select plot type in bottom right position')
         self.read_instance.cb_position_5.currentTextChanged.connect(self.read_instance.handle_layout_update)
@@ -2671,7 +2735,7 @@ class MPLCanvas(FigureCanvas):
                     # so return
                     if not hasattr(self, 'selected_station_data'):
                         msg = 'Select at least one station in the plot to apply options.'
-                        show_message(msg)
+                        show_message(self.read_instance, msg)
                         self.read_instance.block_MPL_canvas_updates = True
                         event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                         self.read_instance.block_MPL_canvas_updates = False
@@ -2746,7 +2810,7 @@ class MPLCanvas(FigureCanvas):
                                 else:
                                     msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                     msg += "in {0} with negative values.".format(plot_type)
-                                    show_message(msg)
+                                    show_message(self.read_instance, msg)
                                     self.read_instance.block_MPL_canvas_updates = True
                                     event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                     self.read_instance.block_MPL_canvas_updates = False
@@ -2759,7 +2823,7 @@ class MPLCanvas(FigureCanvas):
                             else:
                                 msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                 msg += "in {0} with negative values.".format(plot_type)
-                                show_message(msg)
+                                show_message(self.read_instance, msg)
                                 self.read_instance.block_MPL_canvas_updates = True
                                 event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                 self.read_instance.block_MPL_canvas_updates = False
@@ -2813,7 +2877,7 @@ class MPLCanvas(FigureCanvas):
                         # firstly if just 1 data label then cannot make bias plot 
                         if len(list(self.selected_station_data[self.read_instance.networkspeci].keys())) == 1:
                             msg = 'It is not possible to make a bias plot with just observations loaded.'
-                            show_message(msg)
+                            show_message(self.read_instance, msg)
                             self.read_instance.block_MPL_canvas_updates = True
                             event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                             self.read_instance.block_MPL_canvas_updates = False
@@ -2958,17 +3022,20 @@ class MPLCanvas(FigureCanvas):
                     if plot_type != 'map':
                         if plot_type == 'periodic-violin':
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
-                                                                ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                    self.selected_station_data_max[self.read_instance.networkspeci]],
-                                                                relim=True, autoscale_x=True)
+                                                                 self.plot_characteristics[plot_type], 
+                                                                 self.read_instance.current_plot_options[plot_type], 
+                                                                 ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                                       self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                                 relim=True, autoscale_x=True)
                         elif plot_type == 'scatter':
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                 self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
+                                                                 self.plot_characteristics[plot_type], 
+                                                                 self.read_instance.current_plot_options[plot_type], 
                                                                  relim=True)
                         else:
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                 self.plot_characteristics[plot_type], self.read_instance.current_plot_options[plot_type], 
+                                                                 self.plot_characteristics[plot_type], 
+                                                                 self.read_instance.current_plot_options[plot_type], 
                                                                  relim=True, autoscale=True)                       
 
                 # save current plot options as previous
@@ -3395,31 +3462,24 @@ class MPLCanvas(FigureCanvas):
     def hover_map_annotation(self, event):
         """ Show or hide annotation for each station that is hovered. """
 
-        # activate hover over map if any
-        if event.inaxes == self.plot_axes['map']:
-            if (hasattr(self.plot, 'stations_scatter')) and (self.lock_map_annotation == False):
-                # lock annotation
-                self.lock_map_annotation = True
+        if (not self.lock_zoom) & (event.inaxes == self.plot_axes['map']):
 
-                if not self.lock_zoom:
+            # activate hover over map
+            if (hasattr(self.plot, 'stations_scatter')):
                     
-                    is_contained, annotation_index = self.plot.stations_scatter.contains(event)
-                    
-                    if is_contained:
-                        # update annotation if hovered
-                        self.update_station_annotation(annotation_index)
-                        self.station_annotation.set_visible(True)
-                    else:
-                        # hide annotation if not hovered
-                        if self.station_annotation.get_visible():
-                            self.station_annotation.set_visible(False)
-
-                    # redraw points
-                    self.figure.canvas.draw()
-                    self.figure.canvas.flush_events()
+                is_contained, annotation_index = self.plot.stations_scatter.contains(event)
                 
-                # unlock annotation 
-                self.lock_map_annotation = False
+                if is_contained:
+                    # update annotation if hovered
+                    self.update_station_annotation(annotation_index)
+                    self.station_annotation.set_visible(True)
+                else:
+                    # hide annotation if not hovered
+                    if self.station_annotation.get_visible():
+                        self.station_annotation.set_visible(False)
+
+                # redraw points
+                self.figure.canvas.draw()
 
         return None
 
@@ -4130,19 +4190,12 @@ class MPLCanvas(FigureCanvas):
             to avoid interferences.
         """
 
-        if event.inaxes == self.plot_axes['map']:
-            # block legend picker inside map
-            self.lock_station_pick = False
-            self.lock_legend_pick = True
-        
-        elif event.inaxes == self.plot_axes['legend']:
-            # block stations picker inside legend
-            self.lock_station_pick = True
+        if event.inaxes == self.plot_axes['legend']:
+            # unblock legend picker in legend
             self.lock_legend_pick = False
         
         else:
-            # block stations picker and legend picker
-            self.lock_station_pick = True
+            # block legend picker
             self.lock_legend_pick = True
 
         return None
