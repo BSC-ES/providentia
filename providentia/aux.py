@@ -1223,7 +1223,7 @@ def get_basic_metadata(instance):
         The basic fields are: station_reference, station_name, longitude, latitude, measurement_altitude, 
         station_classification and area_classification
 
-        If have multiple species, then spatially cocolocate across species 
+        If have multiple species, then spatially colocate across species 
         to get matching stations across stations.
 
         :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
