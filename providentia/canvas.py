@@ -163,10 +163,6 @@ class MPLCanvas(FigureCanvas):
             the 'READ' button, and when colocating data.
         """
 
-        # clear and then hide all axes 
-        for plot_type, ax in self.plot_axes.items():
-            self.remove_axis_elements(ax, plot_type)
-
         # reset relative index lists of selected station on map as empty lists
         self.previous_relative_selected_station_inds = np.array([], dtype=np.int)
         self.relative_selected_station_inds = np.array([], dtype=np.int)
@@ -252,45 +248,42 @@ class MPLCanvas(FigureCanvas):
 
     def handle_resampling_update(self):
         """ Function which handles updates of resampling. """
+        
+        if not self.read_instance.block_MPL_canvas_updates:
 
-        if (self.read_instance.temporal_colocation == False) and (len(self.read_instance.data_labels) > 1):
+            # if there are experiments selected, temporal colocation must be on
+            if ((self.read_instance.temporal_colocation == False) 
+                and (len(self.read_instance.data_labels) > 1)
+                and (self.read_instance.cb_resampling_resolution.currentText() != 'None')):
+                    msg = 'It is not possible to resample the data without first activating the temporal colocation.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.block_config_bar_handling_updates = True
+                    self.read_instance.cb_resampling_resolution.setCurrentText('None')
+                    self.read_instance.block_config_bar_handling_updates = False
+                    return
 
-            msg = 'It is not possible to resample the data without first activating the temporal colocation.'
-            show_message(self.read_instance, msg)
-            self.read_instance.cb_resampling_switch.setChecked(False)
-            return
-
-        # if have selected stations on map, then now remake plots
-        if hasattr(self, 'relative_selected_station_inds'):
-            if len(self.relative_selected_station_inds) > 0:
-                
-                # update mouse cursor to a waiting cursor
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-                event_source = self.sender()
-
-                # activate or deactivate resampling option
-                if event_source.isChecked():
-                    self.read_instance.resampling = True
-                    self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
-                else:
-                    self.read_instance.resampling = False
-                    self.read_instance.resampling_resolution = None
-
-                # update associated plots with selected stations
-                self.update_associated_active_dashboard_plots()
-
-                # draw changes
-                self.figure.canvas.draw()
-
-                # restore mouse cursor to normal
-                QtWidgets.QApplication.restoreOverrideCursor()
-
+            # activate or deactivate resampling
+            self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
+            if self.read_instance.resampling_resolution == 'None':
+                self.read_instance.resampling = False
             else:
-                msg = 'Select the data you want to plot before resampling.'
-                show_message(self.read_instance, msg)
-                self.read_instance.cb_resampling_switch.setChecked(False)
-                return
+                self.read_instance.resampling = True
+
+            # if have selected stations on map, then now remake plots
+            if hasattr(self, 'relative_selected_station_inds'):
+                if len(self.relative_selected_station_inds) > 0:
+                    
+                    # update mouse cursor to a waiting cursor
+                    QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+                    # update associated plots with selected stations
+                    self.update_associated_active_dashboard_plots()
+
+                    # draw changes
+                    self.figure.canvas.draw()
+
+                    # restore mouse cursor to normal
+                    QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -342,6 +335,9 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
+            
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # if only have 1 data array in memory (i.e. observations), no colocation is possible,
             # therefore set colocation to be False, and return
@@ -351,6 +347,7 @@ class MPLCanvas(FigureCanvas):
 
             # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
             check_state = self.read_instance.ch_colocate.checkState()
+
             # update variable to inform plotting functions whether to use colocated data/or not
             if check_state == QtCore.Qt.Checked:
                 self.read_instance.temporal_colocation = True
@@ -375,7 +372,29 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.figure.canvas.draw()
 
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
+
+    def unselect_map_checkboxes(self):
+        """ Function to uncheck All, Intersect and Extent checkboxes without updating canvas. """
+
+        self.read_instance.block_MPL_canvas_updates = True
+
+        # if select all stations checkbox is checked then uncheck it
+        if self.read_instance.ch_select_all.checkState() == QtCore.Qt.Checked:
+            self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
+
+        # if select intersect stations checkbox is checked then uncheck it
+        elif self.read_instance.ch_intersect.checkState() == QtCore.Qt.Checked:
+            self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
+
+        # if select extent stations checkbox is checked then uncheck it
+        elif self.read_instance.ch_extent.checkState() == QtCore.Qt.Checked:
+            self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
+
+        self.read_instance.block_MPL_canvas_updates = False
 
     def update_map_z_statistic(self):
         """ Function that updates plotted z statistic on map, with colourbar. """
@@ -435,11 +454,7 @@ class MPLCanvas(FigureCanvas):
             if not np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)):
                 
                 # unselect all/intersect/extent checkboxes
-                self.read_instance.block_MPL_canvas_updates = True
-                self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.block_MPL_canvas_updates = False
+                self.unselect_map_checkboxes()
                 
                 # reset relative/absolute selected station indices to be empty lists
                 self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -721,15 +736,6 @@ class MPLCanvas(FigureCanvas):
                 # put selected data for each data array into pandas dataframe
                 to_pandas_dataframe(read_instance=self.read_instance, canvas_instance=self, 
                                     networkspecies=[self.read_instance.networkspeci])
-
-                for data_label in self.selected_station_data[self.read_instance.networkspeci].keys():
-                    dates = self.selected_station_data[self.read_instance.networkspeci][data_label]['pandas_df'].index
-                    if len(dates) < 2:
-                        msg = 'Extend the time range or enhance the resolution '
-                        msg += '(e.g. from monthly to daily) to create plots. '
-                        msg += 'Plots will only be created when period is longer than 2 timesteps.'
-                        show_message(self.read_instance, msg)
-                        return
 
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
@@ -1038,6 +1044,12 @@ class MPLCanvas(FigureCanvas):
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias'] 
 
+        # hide layout plot options
+        if plot_type in self.read_instance.active_dashboard_plots:
+            position = self.read_instance.active_dashboard_plots.index(plot_type) + 2
+            cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
+            cb_position.hide()
+
         return None
 
     def activate_axis(self, ax, plot_type):
@@ -1130,11 +1142,20 @@ class MPLCanvas(FigureCanvas):
 
         if not self.read_instance.block_MPL_canvas_updates:
 
-            # make copy of current full array relative selected stations indices, before selecting new ones
-            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-
             # check if checkbox to select all stations is checked or unchecked
             check_state = self.read_instance.ch_select_all.checkState()
+
+            # show warning and uncheck box
+            if not hasattr(self, 'relative_selected_station_inds'):
+                if check_state == QtCore.Qt.Checked:
+                    msg = 'Data must be read into memory before selecting the data.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.block_MPL_canvas_updates = True
+                    self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
+                    self.read_instance.block_MPL_canvas_updates = False
+
+            # make copy of current full array relative selected stations indices, before selecting new ones
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
             # if checkbox is checked, select all plotted stations
             if check_state == QtCore.Qt.Checked:
@@ -1183,11 +1204,20 @@ class MPLCanvas(FigureCanvas):
 
         if not self.read_instance.block_MPL_canvas_updates:
 
-            # make copy of current full array relative selected stations indices, before selecting new ones
-            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-
             # check if checkbox to select intersection of stations is checked or unchecked
             check_state = self.read_instance.ch_intersect.checkState()
+
+            # show warning and uncheck box
+            if not hasattr(self, 'relative_selected_station_inds'):
+                if check_state == QtCore.Qt.Checked:
+                    msg = 'Data must be read into memory before selecting the data.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.block_MPL_canvas_updates = True
+                    self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
+                    self.read_instance.block_MPL_canvas_updates = False
+
+            # make copy of current full array relative selected stations indices, before selecting new ones
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
             # if checkbox is unchecked then unselect all plotted stations
             if check_state == QtCore.Qt.Unchecked:
@@ -1261,15 +1291,24 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
+            
+            # check if checkbox to select extent of stations is checked or unchecked
+            check_state = self.read_instance.ch_extent.checkState()
 
+            # show warning and uncheck box
+            if not hasattr(self, 'relative_selected_station_inds'):
+                if check_state == QtCore.Qt.Checked:
+                    msg = 'Data must be read into memory before selecting the data.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.block_MPL_canvas_updates = True
+                    self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
+                    self.read_instance.block_MPL_canvas_updates = False
+        
             # get map extent (in data coords)
             self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-
-            # check if checkbox to select extent of stations is checked or unchecked
-            check_state = self.read_instance.ch_extent.checkState()
 
             # if checkbox is checked, select all plotted stations
             if check_state == QtCore.Qt.Checked:
@@ -1340,12 +1379,8 @@ class MPLCanvas(FigureCanvas):
         if len(self.active_map_valid_station_inds) == 0:
             return
 
-        # unselect all/intersect checkboxes
-        self.read_instance.block_MPL_canvas_updates = True
-        self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.block_MPL_canvas_updates = False
+        # unselect all/intersect/extent checkboxes
+        self.unselect_map_checkboxes()
 
         # make copy of current full array absolute abd relative selected stations indices, before selecting new ones
         self.previous_absolute_selected_station_inds = copy.deepcopy(self.absolute_selected_station_inds)
@@ -1409,12 +1444,8 @@ class MPLCanvas(FigureCanvas):
         if len(self.active_map_valid_station_inds) == 0:
             return
 
-        # unselect all/intersect checkboxes
-        self.read_instance.block_MPL_canvas_updates = True
-        self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
-        self.read_instance.block_MPL_canvas_updates = False
+        # unselect all/intersect/extent checkboxes
+        self.unselect_map_checkboxes()
 
         # make copy of current full array relative selected stations indices, before selecting new ones
         previous_absolute_selected_station_inds = copy.deepcopy(self.absolute_selected_station_inds)
