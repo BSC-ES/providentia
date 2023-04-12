@@ -304,3 +304,21 @@ def get_default_qa(instance, speci):
         return sorted(instance.default_qa_met)
     else:
         return sorted(instance.default_qa_standard)
+    
+def get_frequency_code(resolution):
+    """ Get frequency code. """
+    
+    if resolution in ['hourly', 'hourly_instantaneous']:
+        active_frequency_code = 'H'
+    elif resolution in ['3hourly', '3hourly_instantaneous']:
+        active_frequency_code = '3H'
+    elif resolution in ['6hourly', '6hourly_instantaneous']:
+        active_frequency_code = '6H'
+    elif resolution == 'daily':
+        active_frequency_code = 'D'
+    elif resolution == 'monthly':
+        active_frequency_code = 'MS'
+    elif resolution == 'yearly':
+        active_frequency_code = 'AS'
+
+    return active_frequency_code
