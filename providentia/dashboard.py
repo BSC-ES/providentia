@@ -1266,7 +1266,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if self.first_read:
             self.first_read = False
             if self.ch_colocate.checkState() == QtCore.Qt.Checked:
-                print('handle temporal')
                 self.mpl_canvas.handle_temporal_colocate_update()
 
         # restore mouse cursor to normal
