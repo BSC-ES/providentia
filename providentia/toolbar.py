@@ -158,7 +158,6 @@ class NavigationToolbar(NavigationToolbar2QT):
         provconf.check_validity()
 
         # update species, experiments, qa & flags
-        self.read_instance.block_MPL_canvas_updates = True
         self.read_instance.config_bar_initialisation = True
         self.read_instance.update_configuration_bar_fields()
         self.read_instance.config_bar_initialisation = False

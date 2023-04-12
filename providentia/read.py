@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
 from netCDF4 import Dataset
-from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data, get_default_qa
+from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data, get_default_qa, get_frequency_code
 from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -41,17 +41,8 @@ class DataReader:
             # determine if reading GHOST or non-GHOST
             self.read_instance.reading_ghost = check_for_ghost(self.read_instance.network[0])
 
-            # set active frequency code
-            if (self.read_instance.resolution == 'hourly') or (self.read_instance.resolution == 'hourly_instantaneous'):
-                self.read_instance.active_frequency_code = 'H'
-            elif (self.read_instance.resolution == '3hourly') or (self.read_instance.resolution == '3hourly_instantaneous'):
-                self.read_instance.active_frequency_code = '3H'
-            elif (self.read_instance.resolution == '6hourly') or (self.read_instance.resolution == '6hourly_instantaneous'):
-                self.read_instance.active_frequency_code = '6H'
-            elif self.read_instance.resolution == 'daily':
-                self.read_instance.active_frequency_code = 'D'
-            elif self.read_instance.resolution == 'monthly':
-                self.read_instance.active_frequency_code = 'MS'
+            # get active frequency code
+            self.read_instance.active_frequency_code = get_frequency_code(self.read_instance.resolution)
 
             # get time array
             self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str(self.read_instance.start_date)[:4]),
