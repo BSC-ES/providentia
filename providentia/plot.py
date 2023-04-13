@@ -1355,7 +1355,9 @@ class Plot:
             else:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
     
-    def get_taylor_diagram_info(self, reference_std_dev, srange=(0, 1.5)):
+    def get_taylor_diagram_ghelper(self, reference_std_dev, srange=(0, 1.5)):
+        
+        reference_std_dev = 7.5
         
         # correlation labels
         rlocs = np.array(self.canvas_instance.plot_characteristics['taylor']['rlocs'])
@@ -1371,8 +1373,13 @@ class Plot:
         # get standard deviation axis extent
         smin = srange[0] * reference_std_dev
         smax = srange[1] * reference_std_dev
+        
+        # get grid helper
+        ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
+                                           extremes=(0, tmax, smin, smax),
+                                           grid_locator1=gl1, tick_formatter1=tf1)
 
-        return tmax, smin, smax, gl1, tf1
+        return ghelper
 
     def get_reference_std_dev(self):
         
@@ -1390,15 +1397,17 @@ class Plot:
         print(stats_df)
         
         # get info
-        reference_std_dev = stats_df['StdDev'][0]
-        tmax, smin, smax, gl1, tf1 = self.get_taylor_diagram_info(reference_std_dev)
+        #reference_std_dev = stats_df['StdDev'][0]
+        reference_std_dev = 7.5
+        grid_helper = self.get_taylor_diagram_ghelper(reference_std_dev)
 
         # update gridliner and standard deviation range
+        # relevant_axis.get_grid_helper().update_grid_finder(grid_helper)
         # relevant_axis.get_grid_helper().update_grid_finder(
         #     extreme_finder=fa.ExtremeFinderFixed((0, tmax, smin, smax)),
         #     grid_locator1=gl1, tick_formatter1=tf1)
         # relevant_axis.clear()
-        # relevant_axis.adjust_axes_lim()
+        #relevant_axis.adjust_axes_lim()
         
         # adjust top axis
         relevant_axis.axis["top"].label.set_text("Correlation")
@@ -1421,11 +1430,12 @@ class Plot:
 
         # add grid
         relevant_axis.grid()
-
-        # get axis in polar coordinates
+        
+        #get axis in polar coordinates
         self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
 
         # add reference contour
+        tmax = np.pi/2
         ref_x = np.linspace(0, tmax)
         ref_y = np.zeros_like(ref_x) + reference_std_dev
         self.taylor_polar_relevant_axis.plot(ref_x, ref_y, plot_characteristics['contour']['fmt'])

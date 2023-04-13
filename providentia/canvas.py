@@ -2567,14 +2567,14 @@ class MPLCanvas(FigureCanvas):
 
         # set show/hide actions
         self.taylor_elements = [self.taylor_container, self.taylor_settings_label, 
-                                 self.taylor_markersize_sl_label, self.taylor_markersize_sl,
-                                 self.taylor_options_label, self.taylor_options]
+                                self.taylor_markersize_sl_label, self.taylor_markersize_sl,
+                                self.taylor_options_label, self.taylor_options]
         self.interactive_elements['taylor'] = {'button': self.taylor_menu_button, 
-                                                'hidden': True,
-                                                'elements': self.taylor_elements,
-                                                'markersize_sl': [self.taylor_markersize_sl],
-                                                'opacity_sl': [],
-                                                'linewidth_sl': []
+                                               'hidden': True,
+                                               'elements': self.taylor_elements,
+                                               'markersize_sl': [self.taylor_markersize_sl],
+                                               'opacity_sl': [],
+                                               'linewidth_sl': []
                                                }
         self.taylor_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.taylor_markersize_sl.valueChanged.connect(self.update_markersize_func)
