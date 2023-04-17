@@ -1065,7 +1065,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.current_plot_options = {}
         for plot_type in self.mpl_canvas.all_plots:
             self.current_plot_options[plot_type] = []
-        self.aggregation_statistic = self.selected_aggregation_statistic
 
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
