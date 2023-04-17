@@ -317,7 +317,7 @@ class MPLCanvas(FigureCanvas):
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # get statistic
-            self.read_instance.aggregation_statistic = self.read_instance.cb_aggregation_statistic.currentText()
+            self.read_instance.selected_aggregation_statistic = self.read_instance.cb_aggregation_statistic.currentText()
             
             # update associated plots with selected stations
             self.update_associated_active_dashboard_plots()
