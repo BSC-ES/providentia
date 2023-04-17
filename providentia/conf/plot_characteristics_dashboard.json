@@ -297,10 +297,12 @@
                        "plot": {"loc": "center left", "rowLoc": "right", "colLoc": "center", "cellLoc": "center"},
                        "plot_options": ["bias"]},
 
-       "taylor": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
+       "taylor": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
+                  "axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
                   "basic": ["r", "StdDev"],
                   "extend": false,
-                  "contour": {"fmt": "k--"},
+                  "contour": {"color": "black", "marker": null, "linestyle": "dashed"},
+                  "srange": [0, 1.5],
                   "rlocs": [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99],
                   "plot": {"marker": "o", "markersize": 6, "linestyle": "None"},
                   "plot_options": ["annotate"]}

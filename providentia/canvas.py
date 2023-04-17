@@ -723,15 +723,18 @@ class MPLCanvas(FigureCanvas):
                 elif plot_type == 'scatter':
                         self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, relim=True)
-                else:
+                # skip harmonise for taylor
+                elif plot_type != 'taylor':
                     self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                          plot_options, relim=True, autoscale=True)
 
-                # set xlabel
-                self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
+                # skip setting axes labels for Taylor diagram
+                if plot_type != 'taylor':
+                    # set xlabel
+                    self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
 
-                # set ylabel
-                self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
+                    # set ylabel
+                    self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
 
                 # activate axis
                 self.activate_axis(ax, plot_type)
@@ -937,8 +940,8 @@ class MPLCanvas(FigureCanvas):
             for relevant_temporal_resolution, sub_ax in ax.items():
                 axs_to_remove.append(sub_ax)
         else:
-            if hasattr(self.plot, 'taylor_polar_relevant_axis') and plot_type == 'taylor':
-               axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
+            if (plot_type == 'taylor') and (hasattr(self.plot, 'taylor_polar_relevant_axis')):
+                axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
             axs_to_remove.append(ax)
 
         # iterate through axes
@@ -2499,7 +2502,7 @@ class MPLCanvas(FigureCanvas):
         # TAYLOR DIAGRAM SETTINGS MENU #
         # add button to taylor diagram to show and hide settings menu
         self.taylor_menu_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                  formatting_dict['settings_icon'])
+                                                 formatting_dict['settings_icon'])
         self.taylor_menu_button.setObjectName('taylor_menu_button')
         self.taylor_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
         self.taylor_menu_button.setIconSize(QtCore.QSize(31, 37))
@@ -2507,7 +2510,7 @@ class MPLCanvas(FigureCanvas):
 
         # add white container
         self.taylor_container = set_formatting(QtWidgets.QWidget(self),
-                                                formatting_dict['settings_container'])
+                                               formatting_dict['settings_container'])
         self.taylor_container.setGeometry(self.taylor_menu_button.geometry().x()-230,
                                           self.taylor_menu_button.geometry().y()+25, 
                                           250, 130)
@@ -2515,7 +2518,7 @@ class MPLCanvas(FigureCanvas):
 
         # add settings label
         self.taylor_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                     formatting_dict['settings_label'])
+                                                    formatting_dict['settings_label'])
         self.taylor_settings_label.setGeometry(self.taylor_menu_button.geometry().x()-220, 
                                                self.taylor_menu_button.geometry().y()+30, 
                                                230, 20)
