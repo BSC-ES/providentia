@@ -897,16 +897,17 @@ def apply_aggregation_statistic(read_instance, data_array):
         :type data_array: numpy.ndarray
     """
 
-    if read_instance.aggregation_statistic == 'Median':
+
+    if read_instance.selected_aggregation_statistic == 'Median':
         aggregated_data = np.nanmedian(data_array, axis=0)
-    elif read_instance.aggregation_statistic == 'Mean':
+    elif read_instance.selected_aggregation_statistic == 'Mean':
         aggregated_data = np.nanmean(data_array, axis=0)
-    elif read_instance.aggregation_statistic in ['p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']:
+    elif read_instance.selected_aggregation_statistic in ['p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']:
             aggregated_data = np.nanpercentile(data_array, 
-                                               q=int(read_instance.aggregation_statistic.split('p')[1]), 
+                                               q=int(read_instance.selected_aggregation_statistic.split('p')[1]), 
                                                axis=0)
     else:
-        error = 'Aggregation statistic {0} is not available. '.format(read_instance.aggregation_statistic)
+        error = 'Aggregation statistic {0} is not available. '.format(read_instance.selected_aggregation_statistic)
         error += 'The options are: Median, Mean, p1, p5, p10, p25, p75, p90, p95 and p99'
         sys.exit(error)
 
