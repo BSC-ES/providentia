@@ -901,7 +901,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # since we have no data, we need to use a random reference to initialize the polar axes
         # the axis will be updated when we create the taylor diagram
-        reference_std_dev = 7.5
+        if changed_plot_type == 'taylor':
+            reference_std_dev = 7.5
+            ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_std_dev)
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
@@ -913,10 +915,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=34))
             elif changed_plot_type == 'taylor':
-                ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_std_dev)
-                rect = canvas_instance.gridspec.new_subplotspec((10, 60), rowspan=38, colspan=18)
-                ax = fa.FloatingSubplot(canvas_instance.figure, rect, grid_helper=ghelper)
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(ax)
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((10, 60), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=49))
             
@@ -930,10 +930,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 10), rowspan=38, colspan=19))
             elif changed_plot_type == 'taylor':
-                ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_std_dev)
-                rect = canvas_instance.gridspec.new_subplotspec((60, 5), rowspan=38, colspan=18)
-                ax = fa.FloatingSubplot(canvas_instance.figure, rect, grid_helper=ghelper)
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(ax)
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 5), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=38, colspan=29))
 
@@ -947,10 +945,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 45), rowspan=38, colspan=19))
             elif changed_plot_type == 'taylor':
-                ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_std_dev)
-                rect = canvas_instance.gridspec.new_subplotspec((60, 40), rowspan=38, colspan=18)
-                ax = fa.FloatingSubplot(canvas_instance.figure, rect, grid_helper=ghelper)
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(ax)
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 40), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=29))
             
@@ -964,10 +960,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 80), rowspan=38, colspan=19))
             elif changed_plot_type == 'taylor':
-                ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_std_dev)
-                rect = canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=18)
-                ax = fa.FloatingSubplot(canvas_instance.figure, rect, grid_helper=ghelper)
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(ax)
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=29))
 

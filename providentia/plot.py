@@ -1355,9 +1355,7 @@ class Plot:
             else:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
     
-    def get_taylor_diagram_ghelper(self, reference_std_dev, srange=(0, 1.5)):
-        
-        reference_std_dev = 7.5
+    def get_taylor_diagram_ghelper(self, reference_std_dev):
         
         # correlation labels
         rlocs = np.array(self.canvas_instance.plot_characteristics['taylor']['rlocs'])
@@ -1371,9 +1369,10 @@ class Plot:
         tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
 
         # get standard deviation axis extent
+        srange = self.canvas_instance.plot_characteristics['taylor']['srange']
         smin = srange[0] * reference_std_dev
         smax = srange[1] * reference_std_dev
-        
+
         # get grid helper
         ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
                                            extremes=(0, tmax, smin, smax),
@@ -1381,34 +1380,22 @@ class Plot:
 
         return ghelper
 
-    def get_reference_std_dev(self):
-        
-        # reference dataset
-        x = np.linspace(0, 4*np.pi, 100)
-        data = np.sin(x)
-        reference_std_dev = data.std(ddof=1)
-
-        return reference_std_dev
-
     def make_taylor(self, relevant_axis, stats_df, plot_characteristics, 
                     plot_options=[], first_data_label=False):
-        # https://gist.github.com/ycopin/3342888
-        
+        """ Make Taylor diagram plot.
+            Reference: https://gist.github.com/ycopin/3342888.
+        """
+
         print(stats_df)
         
-        # get info
-        #reference_std_dev = stats_df['StdDev'][0]
-        reference_std_dev = 7.5
-        grid_helper = self.get_taylor_diagram_ghelper(reference_std_dev)
-
         # update gridliner and standard deviation range
+        reference_std_dev = 7.5
+        # reference_std_dev = stats_df['StdDev'][0]
+        # grid_helper = self.get_taylor_diagram_ghelper(reference_std_dev)
         # relevant_axis.get_grid_helper().update_grid_finder(grid_helper)
-        # relevant_axis.get_grid_helper().update_grid_finder(
-        #     extreme_finder=fa.ExtremeFinderFixed((0, tmax, smin, smax)),
-        #     grid_locator1=gl1, tick_formatter1=tf1)
         # relevant_axis.clear()
-        #relevant_axis.adjust_axes_lim()
-        
+        # relevant_axis.adjust_axes_lim()
+
         # adjust top axis
         relevant_axis.axis["top"].label.set_text("Correlation")
         relevant_axis.axis["top"].set_axis_direction("bottom")
@@ -1428,17 +1415,15 @@ class Plot:
         # adjust bottom axis
         relevant_axis.axis["bottom"].toggle(ticklabels=False, label=False)
 
-        # add grid
-        relevant_axis.grid()
         
-        #get axis in polar coordinates
+        # get axis in polar coordinates
         self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
 
         # add reference contour
         tmax = np.pi/2
         ref_x = np.linspace(0, tmax)
         ref_y = np.zeros_like(ref_x) + reference_std_dev
-        self.taylor_polar_relevant_axis.plot(ref_x, ref_y, plot_characteristics['contour']['fmt'])
+        self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contour'])
 
         # add models
         stats_df_exp = stats_df.drop(index=('observations'))
@@ -1887,7 +1872,7 @@ class Plot:
         all_ylim_lower = []
         all_ylim_upper = []
 
-        #initialise variables for setting axis limits
+        # initialise variables for setting axis limits
         xlim_min = None
         xlim_max = None
         ylim_min = None
