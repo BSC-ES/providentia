@@ -318,6 +318,9 @@ class MPLCanvas(FigureCanvas):
             # get statistic
             self.read_instance.selected_aggregation_statistic = self.read_instance.cb_aggregation_statistic.currentText()
             
+            # update statistic in memory
+            self.read_instance.aggregation_statistic = self.read_instance.selected_aggregation_statistic 
+
             # update associated plots with selected stations
             self.update_associated_active_dashboard_plots()
             
