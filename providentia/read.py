@@ -130,7 +130,8 @@ class DataReader:
         if 'reset' in operations:  
 
             # uninitialise filter object
-            self.read_instance.mpl_canvas.filter_data = None
+            if not self.read_instance.offline:
+                self.read_instance.mpl_canvas.filter_data = None
 
             # data
             self.read_instance.data_in_memory = {networkspeci: 
