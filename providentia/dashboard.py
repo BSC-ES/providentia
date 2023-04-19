@@ -713,7 +713,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_position_5.clear()
 
         # remove plot types that need active temporal colocation and experiments data
-        for plot_type in ['scatter']:
+        for plot_type in ['scatter', 'taylor']:
             if ((not self.temporal_colocation) 
                 or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
                 if plot_type in canvas_instance.layout_options:
@@ -918,7 +918,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=34))
             elif changed_plot_type == 'taylor':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((10, 60), rowspan=38, colspan=18),
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((9, 65), rowspan=36, colspan=18),
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=49))

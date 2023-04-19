@@ -85,7 +85,7 @@ class MPLCanvas(FigureCanvas):
 
         # define all possible plots in layout options
         self.layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
-                               'periodic-violin', 'scatter', 'statsummary', 'timeseries']
+                               'periodic-violin', 'scatter', 'statsummary', 'timeseries', 'taylor']
 
         # parse active dashboard plot string        
         if isinstance(self.read_instance.active_dashboard_plots, str):
@@ -761,7 +761,7 @@ class MPLCanvas(FigureCanvas):
 
         # skip plots that need active temporal colocation and experiments data
         self.plots_to_skip = []
-        for plot_type in ['scatter']:
+        for plot_type in ['scatter', 'taylor']:
             if plot_type in self.read_instance.active_dashboard_plots:
                 if ((not self.read_instance.temporal_colocation) 
                     or ((self.read_instance.temporal_colocation) and (len(self.read_instance.experiments) == 0))): 
