@@ -691,7 +691,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.qa_menu['checkboxes']['remove_default'] = default_qa
 
         # update layout fields
-        self.update_layout_fields()
+        self.update_layout_fields(self.mpl_canvas)
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
@@ -699,7 +699,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # unset variable to allow updating the canvas
         self.block_MPL_canvas_updates = False
 
-    def update_layout_fields(self):
+    def update_layout_fields(self, canvas_instance):
         """ Function which updates layout fields. """
 
         # set variable to block interactive handling while updating config bar parameters
@@ -712,16 +712,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_position_4.clear()
         self.cb_position_5.clear()
 
-        # update available layout options
-        layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
-                          'periodic-violin', 'scatter', 'statsummary', 'timeseries',
-                          'taylor']
-
-        # remove scatter plots from list if the temporal colocation is not active
-        if not self.temporal_colocation:
-            if 'scatter' in layout_options:
-                layout_options.remove('scatter')
+        # remove plot types that need active temporal colocation and experiments data
+        for plot_type in ['scatter']:
+            if ((not self.temporal_colocation) 
+                or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+                if plot_type in canvas_instance.layout_options:
+                    canvas_instance.layout_options.remove('scatter')
+            else:
+                if plot_type not in canvas_instance.layout_options:
+                    canvas_instance.layout_options.append('scatter')            
         
+        # order alphabetically
+        layout_options = sorted(canvas_instance.layout_options)
+
         # update position 2 in layout
         self.cb_position_2.addItems(layout_options)
         if self.position_2 in layout_options:
@@ -886,7 +889,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
 
             # update layout fields
-            self.update_layout_fields()
+            self.update_layout_fields(self.mpl_canvas)
 
             # update buttons geometry
             self.update_buttons_geometry()
