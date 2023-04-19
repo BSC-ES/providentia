@@ -1354,7 +1354,8 @@ class Plot:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
     
     def get_taylor_diagram_extremes(self, reference_std_dev):
-        
+        """ Make Taylor diagram plot axis extremes. """
+
         # diagram limited to positive correlations
         tmax = np.pi/2
 
@@ -1366,7 +1367,8 @@ class Plot:
         return tmax, smin, smax
     
     def get_taylor_diagram_ghelper(self, reference_std_dev):
-        
+        """ Make Taylor diagram plot grid helper. """
+
         # correlation labels
         rlocs = np.array(self.canvas_instance.plot_characteristics['taylor']['rlocs'])
 
@@ -1391,10 +1393,12 @@ class Plot:
             Reference: https://gist.github.com/ycopin/3342888.
         """
 
-        print(stats_df)
+        # get labels
+        rlabel = stats_df.columns[0]
+        xylabel = stats_df.columns[1]
 
         # update axis extremes
-        reference_std_dev = stats_df['StdDev'][0]
+        reference_std_dev = stats_df[xylabel][0]
         tmax, smin, smax = self.get_taylor_diagram_extremes(reference_std_dev)
         relevant_axis.get_grid_helper().update_grid_finder(
             extreme_finder=fa.ExtremeFinderFixed((0, tmax, smin, smax)))
@@ -1405,24 +1409,29 @@ class Plot:
         relevant_axis.grid(**plot_characteristics['grid'])
         relevant_axis.adjust_axes_lim()
 
-        # adjust top axis
-        relevant_axis.axis["top"].label.set_text("Correlation")
-        relevant_axis.axis["top"].set_axis_direction("bottom")
-        relevant_axis.axis["top"].toggle(ticklabels=True, label=True)
-        relevant_axis.axis["top"].major_ticklabels.set_axis_direction("top")
-        relevant_axis.axis["top"].label.set_axis_direction("top")
-        
-        # adjust left axis
-        relevant_axis.axis["left"].label.set_text("Standard deviation")
-        relevant_axis.axis["left"].set_axis_direction("bottom")
+        # adjust top axis (curve)
+        relevant_axis.axis['top'].set_axis_direction('bottom')
+        relevant_axis.axis['top'].toggle(ticklabels=True, label=True)
+        relevant_axis.axis['top'].major_ticklabels.set_axis_direction('top')
+        relevant_axis.axis['top'].major_ticklabels.set(**plot_characteristics['rtick_params'])
+        relevant_axis.axis['top'].label.set_text(rlabel)
+        relevant_axis.axis['top'].label.set_fontsize(plot_characteristics['rlabel']['fontsize'])
+        relevant_axis.axis['top'].label.set_axis_direction('top')
 
-        # adjust right axis
-        relevant_axis.axis["right"].set_axis_direction("top")
-        relevant_axis.axis["right"].toggle(ticklabels=True)
-        relevant_axis.axis["right"].major_ticklabels.set_axis_direction("left")
+        # adjust left axis (x axis)
+        relevant_axis.axis['left'].set_axis_direction('bottom')
+        relevant_axis.axis['left'].major_ticklabels.set(**plot_characteristics['xytick_params'])
+        relevant_axis.axis['left'].label.set_text(xylabel)
+        relevant_axis.axis['left'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])
+
+        # adjust right axis (y axis)
+        relevant_axis.axis['right'].set_axis_direction('top')
+        relevant_axis.axis['right'].toggle(ticklabels=True)
+        relevant_axis.axis['right'].major_ticklabels.set_axis_direction('left')
+        relevant_axis.axis['right'].major_ticklabels.set(**plot_characteristics['xytick_params'])
 
         # adjust bottom axis
-        relevant_axis.axis["bottom"].toggle(ticklabels=False, label=False)
+        relevant_axis.axis['bottom'].toggle(ticklabels=False, label=False)
 
         # get axis in polar coordinates
         self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
@@ -1435,8 +1444,8 @@ class Plot:
         # add models
         stats_df_exp = stats_df.drop(index=('observations'))
         for exp_label, stddev, corrcoef in zip(stats_df_exp.index, 
-                                               stats_df_exp['StdDev'], 
-                                               stats_df_exp['r']):
+                                               stats_df_exp[xylabel], 
+                                               stats_df_exp[rlabel]):
             self.taylor_polar_relevant_axis.plot(np.arccos(corrcoef), stddev,
                                                  **plot_characteristics['plot'],
                                                  mfc=self.read_instance.plotting_params[exp_label]['colour'], 
@@ -1646,7 +1655,7 @@ class Plot:
         lines = [TextArea(line, textprops=dict(color=colour, 
                                                size=plot_characteristics['annotate_text']['fontsize'])) 
                     for line, colour in zip(str_to_annotate, colours)]
-        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
+        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align='left', pad=0, sep=1),
                                  loc=plot_characteristics['annotate_text']['loc'],
                                  bbox_transform=relevant_axis.transAxes)
         bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
