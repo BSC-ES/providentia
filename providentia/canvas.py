@@ -1129,6 +1129,7 @@ class MPLCanvas(FigureCanvas):
         elif plot_type == 'boxplot':
             self.boxplot_menu_button.show()
             self.boxplot_save_button.show()
+
         elif plot_type == 'taylor':
             self.taylor_menu_button.show()
             self.taylor_save_button.show()
