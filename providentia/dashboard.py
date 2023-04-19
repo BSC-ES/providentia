@@ -715,10 +715,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if ((not self.temporal_colocation) 
                 or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
                 if plot_type in canvas_instance.layout_options:
-                    canvas_instance.layout_options.remove('scatter')
+                    canvas_instance.layout_options.remove(plot_type)
             else:
                 if plot_type not in canvas_instance.layout_options:
-                    canvas_instance.layout_options.append('scatter')            
+                    canvas_instance.layout_options.append(plot_type)          
         
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
