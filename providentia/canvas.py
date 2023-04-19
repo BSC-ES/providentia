@@ -786,11 +786,7 @@ class MPLCanvas(FigureCanvas):
         """ Function that plots grid domain edges of experiments in memory. """
 
         # remove grid domain polygon if previously plotted
-        inds_to_remove = []
-        for pol_ii, pol in enumerate(self.plot_axes['map'].patches):
-            if isinstance(pol, matplotlib.patches.Polygon):
-                inds_to_remove.append(pol_ii)
-        self.plot_axes['map'].patches = list(np.delete(np.array(self.plot_axes['map'].patches), inds_to_remove))
+        self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
 
         # create grid edge polygons for experiments in memory
         grid_edge_polygons = self.plot.make_experiment_domain_polygons()
@@ -931,6 +927,27 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def remove_axis_objects(self, ax_elements, elements_to_skip=[], types_to_remove=[]):
+        """ Remove objects (artists, lines, collections, patches) from axis. """
+
+        # It is not possible to remove the elements directly with index from a FeatureArtist
+        # First we need to find the indices of the elements to be removed and remove them 
+        # by index one by one (sorting is needed)
+        inds_to_remove = []
+        for element_ii, element in enumerate(ax_elements):
+            if element not in elements_to_skip:
+                if len(types_to_remove) > 0:
+                    if isinstance(element, tuple(types_to_remove)):
+                        inds_to_remove.append(element_ii)
+                else:
+                    inds_to_remove.append(element_ii)
+
+        # Remove
+        for element_ii in sorted(inds_to_remove, reverse=True):
+            ax_elements[element_ii].remove()
+
+        return None
+    
     def remove_axis_elements(self, ax, plot_type):
         """ Remove all plotted axis elements and hide axis. """
        
@@ -954,77 +971,51 @@ class MPLCanvas(FigureCanvas):
                     leg.remove()
 
             elif plot_type == 'map':
-                inds_to_remove = []
-                for artist_ii, artist in enumerate(ax_to_remove.artists):         
-                    if type(artist) == AnchoredOffsetbox:
-                        inds_to_remove.append(artist_ii)
-                ax_to_remove.artists = list(np.delete(np.array(ax_to_remove.artists), inds_to_remove))
-
-                inds_to_remove = []
-                for col_ii, col in enumerate(ax_to_remove.collections): 
-                    # TODO: Put line collection back into place when we turn on the auto_update in gridlines
-                    # if ((isinstance(col, matplotlib.collections.PathCollection))
-                    #     or (isinstance(col, matplotlib.collections.LineCollection))):
-                    if (isinstance(col, matplotlib.collections.PathCollection)):
-                        inds_to_remove.append(col_ii)
-                ax_to_remove.collections = list(np.delete(np.array(ax_to_remove.collections), inds_to_remove))
+                self.remove_axis_objects(ax_to_remove.artists, types_to_remove=[AnchoredOffsetbox])
+                self.remove_axis_objects(ax_to_remove.collections, types_to_remove=[matplotlib.collections.PathCollection])
+                # # TODO: Put line collection back into place when we turn on the auto_update in gridlines
+                # self.remove_axis_objects(ax_to_remove.collections, types_to_remove=[matplotlib.collections.PathCollection],
+                #                                                                     matplotlib.collections.LineCollection])
 
             elif plot_type == 'cb':
-                ax_to_remove.artists = []
-                ax_to_remove.collections = [] 
+                for objects in [ax_to_remove.artists, ax_to_remove.collections]:
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'timeseries':
-                ax_to_remove.lines = [self.timeseries_vline]
-                ax_to_remove.artists = []
-            
-            elif plot_type == 'periodic':
-                ax_to_remove.lines = []
-                ax_to_remove.artists = []
+                self.remove_axis_objects(ax_to_remove.lines, elements_to_skip=[self.timeseries_vline])
+                self.remove_axis_objects(ax_to_remove.artists)
 
             elif plot_type == 'periodic-violin':
-                ax_to_remove.lines = []
-                ax_to_remove.artists = []
-                ax_to_remove.collections = []
+                for objects in [ax_to_remove.lines, ax_to_remove.artists, ax_to_remove.collections]:
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'metadata':
-                ax_to_remove.texts = []
+                self.remove_axis_objects(ax_to_remove.texts)
 
             elif plot_type == 'distribution':
-                ax_to_remove.lines = [self.distribution_vline]
-                ax_to_remove.artists = []
-
-            elif plot_type == 'scatter':
-                ax_to_remove.lines = []
-                ax_to_remove.artists = []
+                self.remove_axis_objects(ax_to_remove.lines, elements_to_skip=[self.distribution_vline])
+                self.remove_axis_objects(ax_to_remove.artists)
 
             elif plot_type == 'statsummary':
-                ax_to_remove.tables = []
+                self.remove_axis_objects(ax_to_remove.tables)
 
-            elif plot_type == 'boxplot':
-                ax_to_remove.lines = []
-                ax_to_remove.artists = []
-
-            elif plot_type == 'taylor':
-                ax_to_remove.lines = []
-                ax_to_remove.artists = []
+            elif plot_type in ['taylor', 'boxplot', 'scatter', 'periodic']:
+                for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects)
 
             # hide axis
             ax_to_remove.axis('off')
             ax_to_remove.set_visible(False)
 
-        # append vertical lines to periodic and periodic violin plots
-        if plot_type == 'periodic':
-            for resolution in self.plot_axes['periodic'].keys():
-                ax_to_remove.lines.append(self.periodic_vline[resolution])
-        
-        elif plot_type == 'periodic-violin':
-            for resolution in self.plot_axes['periodic-violin'].keys():
-                ax_to_remove.lines.append(self.periodic_violin_vline[resolution])
-                
         # hide plot buttons
         if plot_type == 'map':
             self.map_menu_button.hide()
             self.map_save_button.hide()
+
+            # hide layout options buttons when there is no map
+            for position in range(2, 6):
+                cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
+                cb_position.hide()
 
         elif plot_type == 'timeseries':
             self.timeseries_menu_button.hide()
@@ -1075,13 +1066,7 @@ class MPLCanvas(FigureCanvas):
         if plot_type in self.plot_elements:
             self.plot_elements[plot_type]['absolute'] = {}
             if 'bias' in self.plot_elements[plot_type]:
-                del self.plot_elements[plot_type]['bias'] 
-
-        # hide layout plot options
-        if plot_type in self.read_instance.active_dashboard_plots:
-            position = self.read_instance.active_dashboard_plots.index(plot_type) + 2
-            cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
-            cb_position.hide()
+                del self.plot_elements[plot_type]['bias']
 
         return None
 
@@ -1145,12 +1130,13 @@ class MPLCanvas(FigureCanvas):
         elif plot_type == 'taylor':
             self.taylor_menu_button.show()
             self.taylor_save_button.show()
-
-        if plot_type in self.read_instance.active_dashboard_plots:
-            position = self.read_instance.active_dashboard_plots.index(plot_type) + 2
-            cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
-            cb_position.show()
-
+        
+        # show layout options buttons when there are selected stations
+        if len(self.relative_selected_station_inds) > 0:
+            for position in range(2, 6):
+                cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
+                cb_position.show()
+            
         return None
 
     def update_plot_options(self, plot_types):
@@ -1190,7 +1176,8 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = True
                     self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
-
+                    return
+            
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
@@ -1252,7 +1239,8 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = True
                     self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
-
+                    return
+            
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
@@ -1340,7 +1328,8 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = True
                     self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
-        
+                    return
+                
             # get map extent (in data coords)
             self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
 
@@ -3420,7 +3409,7 @@ class MPLCanvas(FigureCanvas):
         transform = self.datacrs._as_mpl_transform(self.plot_axes['map'])
 
         # in the newest version of matplotlib, s corresponds to text
-        self.station_annotation = self.plot_axes['map'].annotate(s='', xy=(0, 0), xycoords=transform,
+        self.station_annotation = self.plot_axes['map'].annotate(text='', xy=(0, 0), xycoords=transform,
                                                                  **self.plot_characteristics['map']['stations_annotate'],
                                                                  bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
                                                                  arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
@@ -3490,7 +3479,7 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation at (0, 0) that will be updated later. """
 
         # in the newest version of matplotlib, s corresponds to text
-        self.timeseries_annotation = self.plot_axes['timeseries'].annotate(s='', xy=(0, 0), xycoords='data',
+        self.timeseries_annotation = self.plot_axes['timeseries'].annotate(text='', xy=(0, 0), xycoords='data',
                                                                            **self.plot_characteristics['timeseries']['marker_annotate'],
                                                                            bbox={**self.plot_characteristics['timeseries']['marker_annotate_bbox']},
                                                                            arrowprops={**self.plot_characteristics['timeseries']['marker_annotate_arrowprops']})
@@ -3620,7 +3609,7 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation at (0, 0) that will be updated later. """
 
         # in the newest version of matplotlib, s corresponds to text
-        self.scatter_annotation = self.plot_axes['scatter'].annotate(s='', xy=(0, 0), xycoords='data',
+        self.scatter_annotation = self.plot_axes['scatter'].annotate(text='', xy=(0, 0), xycoords='data',
                                                                      **self.plot_characteristics['scatter']['marker_annotate'],
                                                                      bbox={**self.plot_characteristics['scatter']['marker_annotate_bbox']},
                                                                      arrowprops={**self.plot_characteristics['scatter']['marker_annotate_arrowprops']})
@@ -3715,7 +3704,7 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation at (0, 0) that will be updated later. """
 
         # in the newest version of matplotlib, s corresponds to text
-        self.distribution_annotation = self.plot_axes['distribution'].annotate(s='', xy=(0, 0), xycoords='data',
+        self.distribution_annotation = self.plot_axes['distribution'].annotate(text='', xy=(0, 0), xycoords='data',
                                                                                **self.plot_characteristics['distribution']['marker_annotate'],
                                                                                bbox={**self.plot_characteristics['distribution']['marker_annotate_bbox']},
                                                                                arrowprops={**self.plot_characteristics['distribution']['marker_annotate_arrowprops']})
@@ -3847,7 +3836,7 @@ class MPLCanvas(FigureCanvas):
         # in the newest version of matplotlib, s corresponds to text
         self.periodic_annotation = dict()
         for resolution in self.plot_axes['periodic'].keys():
-            self.periodic_annotation[resolution] = self.plot_axes['periodic'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
+            self.periodic_annotation[resolution] = self.plot_axes['periodic'][resolution].annotate(text='', xy=(0, 0), xycoords='data',
                                                                                                    **self.plot_characteristics['periodic']['marker_annotate'],
                                                                                                    bbox={**self.plot_characteristics['periodic']['marker_annotate_bbox']},
                                                                                                    arrowprops={**self.plot_characteristics['periodic']['marker_annotate_arrowprops']})
@@ -3994,7 +3983,7 @@ class MPLCanvas(FigureCanvas):
         # in the newest version of matplotlib, s corresponds to text
         self.periodic_violin_annotation = dict()
         for resolution in self.plot_axes['periodic-violin'].keys():
-            self.periodic_violin_annotation[resolution] = self.plot_axes['periodic-violin'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
+            self.periodic_violin_annotation[resolution] = self.plot_axes['periodic-violin'][resolution].annotate(text='', xy=(0, 0), xycoords='data',
                                                                                                                  **self.plot_characteristics['periodic-violin']['marker_annotate'],
                                                                                                                  bbox={**self.plot_characteristics['periodic-violin']['marker_annotate_bbox']},
                                                                                                                  arrowprops={**self.plot_characteristics['periodic-violin']['marker_annotate_arrowprops']})
