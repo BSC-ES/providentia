@@ -1000,11 +1000,6 @@ class MPLCanvas(FigureCanvas):
             self.map_menu_button.hide()
             self.map_save_button.hide()
 
-            # hide layout options buttons when there is no map
-            for position in range(2, 6):
-                cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
-                cb_position.hide()
-
         elif plot_type == 'timeseries':
             self.timeseries_menu_button.hide()
             self.timeseries_save_button.hide()
@@ -1051,6 +1046,13 @@ class MPLCanvas(FigureCanvas):
             self.plot_elements[plot_type]['absolute'] = {}
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias'] 
+
+        # hide layout options buttons when there is no selected data
+        if hasattr(self, 'relative_selected_station_inds'):
+            if len(self.relative_selected_station_inds) == 0:
+                for position in range(2, 6):
+                    cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
+                    cb_position.hide()
 
         return None
 
