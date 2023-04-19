@@ -1353,23 +1353,30 @@ class Plot:
             else:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
     
+    def get_taylor_diagram_extremes(self, reference_std_dev):
+        
+        # diagram limited to positive correlations
+        tmax = np.pi/2
+
+        # get standard deviation axis extent
+        srange = self.canvas_instance.plot_characteristics['taylor']['srange']
+        smin = srange[0] * reference_std_dev
+        smax = srange[1] * reference_std_dev
+
+        return tmax, smin, smax
+    
     def get_taylor_diagram_ghelper(self, reference_std_dev):
         
         # correlation labels
         rlocs = np.array(self.canvas_instance.plot_characteristics['taylor']['rlocs'])
-
-        # diagram limited to positive correlations
-        tmax = np.pi/2
 
         # convert correlation values into polar angles
         tlocs = np.arccos(rlocs)
         gl1 = gf.FixedLocator(tlocs)
         tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
 
-        # get standard deviation axis extent
-        srange = self.canvas_instance.plot_characteristics['taylor']['srange']
-        smin = srange[0] * reference_std_dev
-        smax = srange[1] * reference_std_dev
+        # get axis extremes
+        tmax, smin, smax = self.get_taylor_diagram_extremes(reference_std_dev)
 
         # get grid helper
         ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
@@ -1385,13 +1392,17 @@ class Plot:
         """
 
         print(stats_df)
-        
-        # update gridliner and standard deviation range
-        # reference_std_dev = 7.5
+
+        # update axis extremes
         reference_std_dev = stats_df['StdDev'][0]
-        grid_helper = self.get_taylor_diagram_ghelper(reference_std_dev)
-        relevant_axis.get_grid_helper().update_grid_finder(grid_helper)
+        tmax, smin, smax = self.get_taylor_diagram_extremes(reference_std_dev)
+        relevant_axis.get_grid_helper().update_grid_finder(
+            extreme_finder=fa.ExtremeFinderFixed((0, tmax, smin, smax)))
+        
+        # clear axis, add grid and adjust limits 
+        # as suggested by the Matpotlib devs in https://github.com/matplotlib/matplotlib/issues/25426
         relevant_axis.clear()
+        relevant_axis.grid(**plot_characteristics['grid'])
         relevant_axis.adjust_axes_lim()
 
         # adjust top axis
@@ -1417,7 +1428,6 @@ class Plot:
         self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
 
         # add reference contour
-        tmax = np.pi/2
         ref_x = np.linspace(0, tmax)
         ref_y = np.zeros_like(ref_x) + reference_std_dev
         self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contour'])
