@@ -1000,6 +1000,11 @@ class MPLCanvas(FigureCanvas):
             self.map_menu_button.hide()
             self.map_save_button.hide()
 
+            # hide layout options buttons when there is no map
+            for position in range(2, 6):
+                cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
+                cb_position.hide()
+
         elif plot_type == 'timeseries':
             self.timeseries_menu_button.hide()
             self.timeseries_save_button.hide()
@@ -1046,12 +1051,6 @@ class MPLCanvas(FigureCanvas):
             self.plot_elements[plot_type]['absolute'] = {}
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias'] 
-
-        # hide layout plot options
-        if plot_type in self.read_instance.active_dashboard_plots:
-            position = self.read_instance.active_dashboard_plots.index(plot_type) + 2
-            cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
-            cb_position.hide()
 
         return None
 
@@ -1112,10 +1111,11 @@ class MPLCanvas(FigureCanvas):
             self.boxplot_menu_button.show()
             self.boxplot_save_button.show()
         
-        if plot_type in self.read_instance.active_dashboard_plots:
-            position = self.read_instance.active_dashboard_plots.index(plot_type) + 2
-            cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
-            cb_position.show()
+        # show layout options buttons when there are selected stations
+        if len(self.relative_selected_station_inds) > 0:
+            for position in range(2, 6):
+                cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
+                cb_position.show()
 
         return None
 
@@ -1156,6 +1156,7 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = True
                     self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
+                    return
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1218,6 +1219,7 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = True
                     self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
+                    return
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1306,6 +1308,7 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = True
                     self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
+                    return
         
             # get map extent (in data coords)
             self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
