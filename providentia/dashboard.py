@@ -1043,6 +1043,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update mouse cursor to a waiting cursor
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
+        # clear previously selected relative/absolute station indices
+        self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int)
+        self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int)
+        self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int)
+        
         # clear and then hide all axes 
         for plot_type, ax in self.mpl_canvas.plot_axes.items():
             self.mpl_canvas.remove_axis_elements(ax, plot_type)
