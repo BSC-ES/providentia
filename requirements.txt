@@ -9,4 +9,4 @@ seaborn>=0.9.0
 scipy>=1.10.1
 Shapely>=1.6.4.post2
 ConfigArgParse>=1.5.3
-cftime>=1.6.2
+cftime==1.0.3.4
