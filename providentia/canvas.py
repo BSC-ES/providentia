@@ -319,6 +319,9 @@ class MPLCanvas(FigureCanvas):
             # get statistic
             self.read_instance.selected_aggregation_statistic = self.read_instance.cb_aggregation_statistic.currentText()
             
+            # update statistic in memory
+            self.read_instance.aggregation_statistic = self.read_instance.selected_aggregation_statistic 
+
             # update associated plots with selected stations
             self.update_associated_active_dashboard_plots()
             
@@ -1126,7 +1129,6 @@ class MPLCanvas(FigureCanvas):
         elif plot_type == 'boxplot':
             self.boxplot_menu_button.show()
             self.boxplot_save_button.show()
-
         elif plot_type == 'taylor':
             self.taylor_menu_button.show()
             self.taylor_save_button.show()
@@ -1136,7 +1138,7 @@ class MPLCanvas(FigureCanvas):
             for position in range(2, 6):
                 cb_position = getattr(self.read_instance, 'cb_position_{}'.format(position))
                 cb_position.show()
-            
+
         return None
 
     def update_plot_options(self, plot_types):
