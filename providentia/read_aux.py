@@ -70,6 +70,7 @@ def read_netcdf_data(tuple_arguments):
     else:
         file_time = num2date(ncdf_root['time'][:], time_units)
         # remove microseconds and convert to integer
+        print(file_time)
         file_time = pd.to_datetime([t.replace(microsecond=0) for t in file_time])
     
     # get file time as integer timestamp
