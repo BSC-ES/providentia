@@ -91,8 +91,12 @@ else
     salloc_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
 fi
 
-# load modules
-eval "${load_command}"
+# load modules from load_modules.sh
+# eval "${load_command}"
+
+# load modules from conda environment
+EXPORTPATH="/gpfs/home/bsc32/bsc32781/.conda/envs/myenv/lib/python3.9/site-packages"
+export PYTHONPATH=${EXPORTPATH}:${PYTHONPATH}
 
 # execution
 # CTE POWER 9

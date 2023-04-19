@@ -49,11 +49,6 @@ class Plot:
         proj_class = getattr(ccrs, self.canvas_instance.plot_characteristics_templates['map']['projection']) 
         self.canvas_instance.plotcrs = proj_class()
         
-        # setup land polygons on map
-        self.canvas_instance.feature = cfeature.NaturalEarthFeature('physical', 'land',
-            get_land_polygon_resolution(self.canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
-                **self.canvas_instance.plot_characteristics_templates['map']['land_polygon'])
-
         # set miscellaneous vars
         self.canvas_instance.temporal_axis_mapping_dict = temp_axis_dict()
         self.canvas_instance.periodic_xticks = periodic_xticks()
@@ -308,7 +303,10 @@ class Plot:
             elif base_plot_type == 'map':
 
                 # add land polygons
-                ax_to_format.add_feature(self.canvas_instance.feature)
+                feature = cfeature.NaturalEarthFeature(category='physical', name='land',
+                                                       scale=get_land_polygon_resolution(self.canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
+                                                       **self.canvas_instance.plot_characteristics_templates['map']['land_polygon'])
+                ax_to_format.add_feature(feature)
 
                 # add gridlines ?
                 if 'gridlines' in plot_characteristics_vars:
@@ -1389,12 +1387,12 @@ class Plot:
         print(stats_df)
         
         # update gridliner and standard deviation range
-        reference_std_dev = 7.5
-        # reference_std_dev = stats_df['StdDev'][0]
-        # grid_helper = self.get_taylor_diagram_ghelper(reference_std_dev)
-        # relevant_axis.get_grid_helper().update_grid_finder(grid_helper)
-        # relevant_axis.clear()
-        # relevant_axis.adjust_axes_lim()
+        # reference_std_dev = 7.5
+        reference_std_dev = stats_df['StdDev'][0]
+        grid_helper = self.get_taylor_diagram_ghelper(reference_std_dev)
+        relevant_axis.get_grid_helper().update_grid_finder(grid_helper)
+        relevant_axis.clear()
+        relevant_axis.adjust_axes_lim()
 
         # adjust top axis
         relevant_axis.axis["top"].label.set_text("Correlation")
@@ -1415,7 +1413,6 @@ class Plot:
         # adjust bottom axis
         relevant_axis.axis["bottom"].toggle(ticklabels=False, label=False)
 
-        
         # get axis in polar coordinates
         self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
 
