@@ -83,6 +83,10 @@ class MPLCanvas(FigureCanvas):
                           'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot',
                           'taylor']
 
+        # define all possible plots in layout options
+        self.layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
+                               'periodic-violin', 'scatter', 'statsummary', 'timeseries']
+
         # parse active dashboard plot string        
         if isinstance(self.read_instance.active_dashboard_plots, str):
             self.read_instance.active_dashboard_plots = [c.strip() for c in self.read_instance.active_dashboard_plots.split(',')]
@@ -125,7 +129,7 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.update_plot_axis(self, position + 2, plot_type)
         
         # update layout fields
-        self.read_instance.update_layout_fields()
+        self.read_instance.update_layout_fields(self)
 
         # initialise variable of valid station indices plotted on map as empty list
         self.active_map_valid_station_inds = np.array([], dtype=np.int)
@@ -365,7 +369,7 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_MPL_canvas_updates = False
 
             # update layout fields
-            self.read_instance.update_layout_fields()
+            self.read_instance.update_layout_fields(self)
 
             # update plotted map z statistic
             self.update_map_z_statistic()
@@ -755,6 +759,29 @@ class MPLCanvas(FigureCanvas):
         for plot_type in self.read_instance.active_dashboard_plots:
             self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
 
+        # skip plots that need active temporal colocation and experiments data
+        self.plots_to_skip = []
+        for plot_type in ['scatter']:
+            if plot_type in self.read_instance.active_dashboard_plots:
+                if ((not self.read_instance.temporal_colocation) 
+                    or ((self.read_instance.temporal_colocation) and (len(self.read_instance.experiments) == 0))): 
+                    # show warning
+                    if (not self.read_instance.temporal_colocation):
+                        msg = f'It is not possible to make {plot_type} plots without activating the temporal colocation.'
+                    else:
+                        msg = f'It is not possible to make {plot_type} plots without loading experiments.'
+                    show_message(self.read_instance, msg)
+
+                    # remove plot type from options in layout options
+                    self.plots_to_skip.append(plot_type)
+                else:
+                    # add plot type to options in layout options
+                    if plot_type in self.plots_to_skip:
+                        self.plots_to_skip.remove(plot_type)
+            
+            # update plot options in buttons
+            self.read_instance.update_layout_fields(self)
+
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
@@ -765,22 +792,22 @@ class MPLCanvas(FigureCanvas):
 
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
-
-                    # if there are no temporal resolutions (only yearly), skip periodic plots
-                    if ((plot_type in ['periodic', 'periodic-violin']) and 
-                        (not self.read_instance.relevant_temporal_resolutions)):
-                        msg = 'It is not possible to make periodic plots using annual resolution data.'
-                        show_message(self.read_instance, msg)
-                        continue
+                    if plot_type not in self.plots_to_skip:
+                        # if there are no temporal resolutions (only yearly), skip periodic plots
+                        if ((plot_type in ['periodic', 'periodic-violin']) and 
+                            (not self.read_instance.relevant_temporal_resolutions)):
+                            msg = 'It is not possible to make periodic plots using annual resolution data.'
+                            show_message(self.read_instance, msg)
+                            continue
                     
-                    # if temporal colocation is turned off, skip scatter plot
-                    if (plot_type == 'scatter') and (not self.read_instance.temporal_colocation):
-                        msg = 'It is not possible to make scatter plots without activating the temporal colocation.'
-                        show_message(self.read_instance, msg)
-                        continue
+                        # if temporal colocation is turned off, skip scatter plot
+                        if (plot_type == 'scatter') and (not self.read_instance.temporal_colocation):
+                            msg = 'It is not possible to make scatter plots without activating the temporal colocation.'
+                            show_message(self.read_instance, msg)
+                            continue
 
-                    # update plot
-                    self.update_associated_active_dashboard_plot(plot_type)
+                        # update plot
+                        self.update_associated_active_dashboard_plot(plot_type)
             
             # update map plot options
             self.update_plot_options(plot_types=['map'])
@@ -3544,6 +3571,10 @@ class MPLCanvas(FigureCanvas):
             if self.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
                 continue
 
+            # do not annotate if plot is cleared
+            if data_label not in self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']].keys():
+                continue
+
             # retrieve concentration
             line = self.plot_elements['timeseries'][self.plot_elements['timeseries']['active']][data_label]['plot'][0]
             concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
@@ -3769,6 +3800,10 @@ class MPLCanvas(FigureCanvas):
             if self.plot_elements['distribution']['active'] == 'bias' and data_label == 'observations':
                 continue
 
+            # do not annotate if plot is cleared
+            if data_label not in self.plot_elements['distribution'][self.plot_elements['distribution']['active']].keys():
+                continue
+
             # retrieve density
             line = self.plot_elements['distribution'][self.plot_elements['distribution']['active']][data_label]['plot'][0]
             density = line.get_ydata()[np.where(line.get_xdata() == concentration)[0]]
@@ -3913,7 +3948,11 @@ class MPLCanvas(FigureCanvas):
             # skip observations for bias plot
             if self.plot_elements['periodic']['active'] == 'bias' and data_label == 'observations':
                 continue
-            
+
+            # do not annotate if plot is cleared
+            if data_label not in self.plot_elements['periodic'][self.plot_elements['periodic']['active']].keys():
+                continue
+
             # retrieve concentration
             line = self.plot_elements['periodic'][self.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
             concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
@@ -4060,7 +4099,11 @@ class MPLCanvas(FigureCanvas):
             # skip observations for bias plot
             if self.plot_elements['periodic-violin']['active'] == 'bias' and data_label == 'observations':
                 continue
-            
+
+            # do not annotate if plot is cleared
+            if data_label not in self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']].keys():
+                continue
+
             # retrieve concentration
             line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
             concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
