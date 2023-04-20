@@ -769,7 +769,6 @@ class MPLCanvas(FigureCanvas):
 
                         # update plot options in buttons
                         self.read_instance.update_layout_fields(self)
-                        continue
 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
