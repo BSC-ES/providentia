@@ -1387,13 +1387,13 @@ class Plot:
 
         return ghelper
 
-    def make_taylor(self, relevant_axis, stats_df, data_label, plot_characteristics, 
+    def make_taylor(self, relevant_axis, stats_df, plot_characteristics, 
                     plot_options=[], first_data_label=False):
         """ Make Taylor diagram plot.
             Reference: https://gist.github.com/ycopin/3342888.
         """
 
-        print(data_label, stats_df)
+        print(stats_df)
         
         # get labels 
         rlabel = stats_df.columns[0]
@@ -1444,15 +1444,20 @@ class Plot:
         self.taylor_plot = self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contour'])
 
         # add models
-        self.taylor_polar_relevant_axis.plot(np.arccos(stats_df[rlabel][data_label]), stats_df[xylabel][data_label],
-                                             **plot_characteristics['plot'],
-                                             mfc=self.read_instance.plotting_params[data_label]['colour'], 
-                                             mec=self.read_instance.plotting_params[data_label]['colour'],
-                                             label=data_label) 
+        for data_label, stddev, corrcoef in zip(stats_df.index, 
+                                                stats_df[xylabel], 
+                                                stats_df[rlabel]):
+            if data_label == 'observations':
+                continue
+            self.taylor_polar_relevant_axis.plot(np.arccos(corrcoef), stddev,
+                                                 **plot_characteristics['plot'],
+                                                 mfc=self.read_instance.plotting_params[data_label]['colour'], 
+                                                 mec=self.read_instance.plotting_params[data_label]['colour'],
+                                                 label=data_label) 
 
-        # track plot elements if using dashboard 
-        if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
           
     def log_axes(self, relevant_axis, log_ax, plot_characteristics, undo=False):
         """ Log plot axes.

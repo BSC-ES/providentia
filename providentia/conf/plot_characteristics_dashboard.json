@@ -299,7 +299,7 @@
 
        "taylor": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                   "axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
-                  "xystat": ["StdDev"],
+                  "basic": ["r", "StdDev"],
                   "contour": {"color": "black", "marker": null, "linestyle": "dashed", "linewidth": 1},
                   "srange": [0, 1.5],
                   "xylabel": {"fontsize": 8},
