@@ -997,6 +997,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.distribution_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                       canvas_instance.hover_distribution_annotation)
 
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'periodic':
             
             # setup periodic annotation
@@ -1023,6 +1024,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update periodic statistic in dashboard
             canvas_instance.handle_periodic_statistic_update()
 
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'periodic-violin':
             
             # setup periodic violin annotation
@@ -1033,6 +1035,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.lock_periodic_violin_annotation[resolution] = False
             canvas_instance.periodic_violin_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                          canvas_instance.hover_periodic_violin_annotation)
+
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
+        elif changed_plot_type == 'taylor':
+
+            # setup taylor annotation
+            canvas_instance.create_taylor_annotation()
+            canvas_instance.lock_taylor_annotation = False
+            canvas_instance.taylor_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                canvas_instance.hover_taylor_annotation)
 
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
