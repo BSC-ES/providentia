@@ -174,13 +174,12 @@ class ProvidentiaOffline:
             # start making PDF
             self.start_pdf()
 
-            # remove section variables from memory (if not last section)
-            if section_ind != (len(self.parent_section_names) - 1):
-                for k in self.section_opts:
-                    try:
-                        vars(self).pop(k)
-                    except:
-                        pass
+            # remove section variables from memory 
+            for k in self.section_opts:
+                try:
+                    vars(self).pop(k)
+                except:
+                    pass
 
     def start_pdf(self):
         """ Create PDF document where plots will be stored. """
@@ -889,13 +888,15 @@ class ProvidentiaOffline:
                     # update variable now station plots have been made for a networkspecies
                     made_networkspeci_station_plots = True
 
-            # remove subsection variables from memory (if have one, and not last subsection)
-            if (len(self.child_subsection_names) > 0) & (subsection_ind != (len(self.subsections) - 1)):
+            # remove subsection variables from memory (if have subsections)
+            # do not remove fixed section variables
+            if (len(self.child_subsection_names) > 0):
                 for k in self.subsection_opts:
-                    try:
-                        vars(self).pop(k)
-                    except:
-                        pass
+                    if k not in self.fixed_section_vars:
+                        try:
+                            vars(self).pop(k)
+                        except:
+                            pass
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """ Function that calls making of any type of plot. """
