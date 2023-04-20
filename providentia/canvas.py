@@ -350,6 +350,8 @@ class MPLCanvas(FigureCanvas):
             # if only have 1 data array in memory (i.e. observations), no colocation is possible,
             # therefore set colocation to be False, and return
             if len(self.read_instance.data_labels) == 1:
+                msg = 'Load experiments before activating the temporal colocation'
+                show_message(self.read_instance, msg)
                 self.read_instance.temporal_colocation = False
                 self.read_instance.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
                 return
