@@ -350,6 +350,7 @@ class MPLCanvas(FigureCanvas):
             # therefore set colocation to be False, and return
             if len(self.read_instance.data_labels) == 1:
                 self.read_instance.temporal_colocation = False
+                self.read_instance.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
                 return
 
             # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
