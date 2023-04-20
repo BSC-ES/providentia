@@ -349,7 +349,10 @@ class MPLCanvas(FigureCanvas):
             # if only have 1 data array in memory (i.e. observations), no colocation is possible,
             # therefore set colocation to be False, and return
             if len(self.read_instance.data_labels) == 1:
+                msg = 'Load experiments before activating the temporal colocation'
+                show_message(self.read_instance, msg)
                 self.read_instance.temporal_colocation = False
+                self.read_instance.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
                 return
 
             # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
@@ -736,29 +739,6 @@ class MPLCanvas(FigureCanvas):
         for plot_type in self.read_instance.active_dashboard_plots:
             self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
 
-        # skip plots that need active temporal colocation and experiments data
-        self.plots_to_skip = []
-        for plot_type in ['scatter']:
-            if plot_type in self.read_instance.active_dashboard_plots:
-                if ((not self.read_instance.temporal_colocation) 
-                    or ((self.read_instance.temporal_colocation) and (len(self.read_instance.experiments) == 0))): 
-                    # show warning
-                    if (not self.read_instance.temporal_colocation):
-                        msg = f'It is not possible to make {plot_type} plots without activating the temporal colocation.'
-                    else:
-                        msg = f'It is not possible to make {plot_type} plots without loading experiments.'
-                    show_message(self.read_instance, msg)
-
-                    # remove plot type from options in layout options
-                    self.plots_to_skip.append(plot_type)
-                else:
-                    # add plot type to options in layout options
-                    if plot_type in self.plots_to_skip:
-                        self.plots_to_skip.remove(plot_type)
-            
-            # update plot options in buttons
-            self.read_instance.update_layout_fields(self)
-
         # if have selected stations on map, then now remake plots
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
@@ -769,22 +749,29 @@ class MPLCanvas(FigureCanvas):
 
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
-                    if plot_type not in self.plots_to_skip:
-                        # if there are no temporal resolutions (only yearly), skip periodic plots
-                        if ((plot_type in ['periodic', 'periodic-violin']) and 
-                            (not self.read_instance.relevant_temporal_resolutions)):
-                            msg = 'It is not possible to make periodic plots using annual resolution data.'
-                            show_message(self.read_instance, msg)
-                            continue
+                    # if there are no temporal resolutions (only yearly), skip periodic plots
+                    if ((plot_type in ['periodic', 'periodic-violin']) and 
+                        (not self.read_instance.relevant_temporal_resolutions)):
+                        msg = 'It is not possible to make periodic plots using annual resolution data.'
+                        show_message(self.read_instance, msg)
+                        continue
                     
-                        # if temporal colocation is turned off, skip scatter plot
-                        if (plot_type == 'scatter') and (not self.read_instance.temporal_colocation):
-                            msg = 'It is not possible to make scatter plots without activating the temporal colocation.'
+                    # if temporal colocation is turned off or there are no experiments, skip scatter plot
+                    if plot_type in ['scatter']:
+                        if ((not self.read_instance.temporal_colocation) 
+                            or ((self.read_instance.temporal_colocation) and (len(self.read_instance.experiments) == 0))):
+                            if (not self.read_instance.temporal_colocation):
+                                msg = f'It is not possible to make {plot_type} plots without activating the temporal colocation.'
+                            else:
+                                msg = f'It is not possible to make {plot_type} plots without loading experiments.'
                             show_message(self.read_instance, msg)
                             continue
 
-                        # update plot
-                        self.update_associated_active_dashboard_plot(plot_type)
+                        # update plot options in buttons
+                        self.read_instance.update_layout_fields(self)
+
+                    # update plot
+                    self.update_associated_active_dashboard_plot(plot_type)
             
             # update map plot options
             self.update_plot_options(plot_types=['map'])
