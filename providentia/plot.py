@@ -1387,13 +1387,15 @@ class Plot:
 
         return ghelper
 
-    def make_taylor(self, relevant_axis, stats_df, plot_characteristics, 
+    def make_taylor(self, relevant_axis, stats_df, data_label, plot_characteristics, 
                     plot_options=[], first_data_label=False):
         """ Make Taylor diagram plot.
             Reference: https://gist.github.com/ycopin/3342888.
         """
 
-        # get labels
+        print(data_label, stats_df)
+        
+        # get labels 
         rlabel = stats_df.columns[0]
         xylabel = stats_df.columns[1]
 
@@ -1431,7 +1433,7 @@ class Plot:
         relevant_axis.axis['right'].major_ticklabels.set(**plot_characteristics['xytick_params'])
 
         # adjust bottom axis
-        relevant_axis.axis['bottom'].toggle(ticklabels=False, label=False)
+        relevant_axis.axis["bottom"].set_visible(False) 
 
         # get axis in polar coordinates
         self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
@@ -1439,19 +1441,19 @@ class Plot:
         # add reference contour
         ref_x = np.linspace(0, tmax)
         ref_y = np.zeros_like(ref_x) + reference_std_dev
-        self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contour'])
+        self.taylor_plot = self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contour'])
 
         # add models
-        stats_df_exp = stats_df.drop(index=('observations'))
-        for exp_label, stddev, corrcoef in zip(stats_df_exp.index, 
-                                               stats_df_exp[xylabel], 
-                                               stats_df_exp[rlabel]):
-            self.taylor_polar_relevant_axis.plot(np.arccos(corrcoef), stddev,
-                                                 **plot_characteristics['plot'],
-                                                 mfc=self.read_instance.plotting_params[exp_label]['colour'], 
-                                                 mec=self.read_instance.plotting_params[exp_label]['colour'],
-                                                 label=exp_label) 
+        self.taylor_polar_relevant_axis.plot(np.arccos(stats_df[rlabel][data_label]), stats_df[xylabel][data_label],
+                                             **plot_characteristics['plot'],
+                                             mfc=self.read_instance.plotting_params[data_label]['colour'], 
+                                             mec=self.read_instance.plotting_params[data_label]['colour'],
+                                             label=data_label) 
 
+        # track plot elements if using dashboard 
+        if not self.read_instance.offline:
+            self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
+          
     def log_axes(self, relevant_axis, log_ax, plot_characteristics, undo=False):
         """ Log plot axes.
 
