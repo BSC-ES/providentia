@@ -643,7 +643,7 @@ class MPLCanvas(FigureCanvas):
                     xlabel = ''
 
                 # create structure to store data for statsummary plot
-                elif plot_type in ['statsummary']:
+                elif plot_type in ['statsummary', 'taylor']:
                     # get list of statistics to create lists for
                     relevant_zstats = self.plot_characteristics[plot_type]['basic']
                     stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
@@ -684,20 +684,14 @@ class MPLCanvas(FigureCanvas):
                              zstat=zstat, plot_options=plot_options, first_data_label=first_data_label)
                         first_data_label = False
                     # gather data for statsummary and taylor diagram plots
-                    elif plot_type in ['statsummary']:
+                    elif plot_type in ['statsummary', 'taylor']:
                         for relevant_zstat in relevant_zstats:
-                            stats_df[relevant_zstat].append(self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0])
-                    elif plot_type == 'taylor':
-                        relevant_zstats = ["r", self.plot_characteristics[plot_type]['xystat']]
-                        stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
-                        for relevant_zstat in relevant_zstats:
-                            # set value as NaN for observations
-                            if (data_label == 'observations') and relevant_zstat == 'r':
+                            # set r/r2 value as NaN for observations in Taylor diagram
+                            if (plot_type == 'taylor') and (data_label == 'observations') and (relevant_zstat in ['r', 'r2']):
                                 stat_val = np.NaN
                             else:
                                 stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
                             stats_df[relevant_zstat].append(stat_val)
-                        func(ax, stats_df, data_label, self.plot_characteristics[plot_type])
                         
                     # other plots
                     else: 
@@ -712,11 +706,14 @@ class MPLCanvas(FigureCanvas):
                         first_data_label = False
 
                 # make statsummary and taylor diagram plots
-                if plot_type in ['statsummary']:
+                if plot_type in ['statsummary', 'scatter']:
                     stats_df = pd.DataFrame(data=stats_df, 
                                             index=self.selected_station_data[self.read_instance.networkspeci])
-                    func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
-                         statsummary=True)
+                    if plot_type == 'statsummary':
+                        func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
+                            statsummary=True)
+                    else:
+                        func(ax, stats_df, self.plot_characteristics[plot_type])
                         
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 if plot_type == 'periodic-violin':
