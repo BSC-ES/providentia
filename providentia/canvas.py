@@ -642,7 +642,7 @@ class MPLCanvas(FigureCanvas):
                     xlabel = ''
 
                 # create structure to store data for statsummary plot
-                elif plot_type in ['statsummary', 'taylor']:
+                elif plot_type in ['statsummary']:
                     # get list of statistics to create lists for
                     relevant_zstats = self.plot_characteristics[plot_type]['basic']
                     stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
@@ -687,18 +687,17 @@ class MPLCanvas(FigureCanvas):
                         for relevant_zstat in relevant_zstats:
                             stats_df[relevant_zstat].append(self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0])
                     elif plot_type == 'taylor':
+                        relevant_zstats = ["r", self.plot_characteristics[plot_type]['xystat']]
+                        stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
                         for relevant_zstat in relevant_zstats:
-                            # set value as NaN for correlation for observations
+                            # set value as NaN for observations
                             if (data_label == 'observations') and relevant_zstat == 'r':
-                                stat_val = np.NaN
-                            # if relevant stat is expbias stat, then ensure temporal colocation is active
-                            # otherwise set value as NaN
-                            elif (relevant_zstat in expbias_stats) & (not self.read_instance.temporal_colocation):
                                 stat_val = np.NaN
                             else:
                                 stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
                             stats_df[relevant_zstat].append(stat_val)
-
+                        func(ax, stats_df, data_label, self.plot_characteristics[plot_type])
+                        
                     # other plots
                     else: 
                         if plot_type == 'metadata':
@@ -712,20 +711,18 @@ class MPLCanvas(FigureCanvas):
                         first_data_label = False
 
                 # make statsummary and taylor diagram plots
-                if plot_type in ['statsummary', 'taylor']:
+                if plot_type in ['statsummary']:
                     stats_df = pd.DataFrame(data=stats_df, 
                                             index=self.selected_station_data[self.read_instance.networkspeci])
-                    if plot_type == 'statsummary':
-                        func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
-                             statsummary=True)
-                    else:
-                        func(ax, stats_df, self.plot_characteristics[plot_type])
+                    func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
+                         statsummary=True)
                         
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 if plot_type == 'periodic-violin':
                     self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                         plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                             self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                         plot_options, 
+                                                         ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                               self.selected_station_data_max[self.read_instance.networkspeci]],
                                                          relim=True, autoscale_x=True)
                 elif plot_type == 'scatter':
                         self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
@@ -4169,6 +4166,104 @@ class MPLCanvas(FigureCanvas):
                                 
                             # unlock annotation 
                             self.lock_periodic_violin_annotation[resolution] = False
+
+        return None
+
+    def create_taylor_annotation(self):
+        """ Create annotation at (0, 0) that will be updated later. """
+
+        # in the newest version of matplotlib, s corresponds to text
+        self.taylor_annotation = self.plot_axes['taylor'].annotate(text='', xy=(0, 0), xycoords='data',
+                                                                   **self.plot_characteristics['taylor']['marker_annotate'],
+                                                                   bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
+                                                                   arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})
+        self.taylor_annotation.set_visible(False)
+
+        return None
+
+    def update_taylor_annotation(self, annotation_index):
+
+        for data_label in self.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.taylor_annotate_data_label:
+                
+                # do not annotate if plot is cleared
+                if data_label not in self.plot_elements['taylor'][self.plot_elements['taylor']['active']].keys():
+                    continue
+
+                # retrieve time and concentration
+                line = self.plot_elements['taylor'][self.plot_elements['taylor']['active']][data_label]['plot'][0]
+                concentration_x = line.get_xdata()[annotation_index['ind'][0]]
+                concentration_y = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.taylor_annotation.xy = (concentration_x, concentration_y)
+
+                # update bbox position
+                concentration_x_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if concentration_x > concentration_x_middle:
+                    self.taylor_annotation.set_x(-10)
+                    self.taylor_annotation.set_ha('right')
+                else:
+                    self.taylor_annotation.set_x(10)
+                    self.taylor_annotation.set_ha('left')
+
+                # create annotation text
+                # observations label
+                text_label = ('{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
+                                                       concentration_x)
+                # experiment label
+                exp_alias = self.read_instance.experiments[data_label]
+                text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration_y)
+                text_label += 'HEY'
+    
+        self.taylor_annotation.set_text(text_label)
+
+        return None
+
+    def hover_taylor_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the Taylor diagram. """
+        
+        # activate hover over Taylor diagram
+        if ('taylor' in self.read_instance.active_dashboard_plots):
+            if event.inaxes == self.plot_axes['taylor']:
+                if ((hasattr(self.plot, 'taylor_plot')) and ('taylor' in self.plot_elements)
+                    and (self.lock_taylor_annotation == False)):
+                    print('here')
+                    # lock annotation
+                    self.lock_taylor_annotation = True
+                    is_contained = False
+
+                    for data_label in self.plot_elements['data_labels_active']:
+                        
+                        # do not annotate if plot is cleared
+                        if data_label not in self.plot_elements['taylor'][self.plot_elements['taylor']['active']].keys():
+                            print('not annotate')
+                            continue
+
+                        line = self.plot_elements['taylor'][self.plot_elements['taylor']['active']][data_label]['plot'][0]
+                        is_contained, annotation_index = line.contains(event)
+                        if is_contained:
+                            print(data_label)
+                            self.taylor_annotate_data_label = data_label
+                            break
+                    
+                    if is_contained:
+                        # update annotation if hovered
+                        self.update_taylor_annotation(annotation_index)
+                        self.taylor_annotation.set_visible(True)
+                    else:
+                        # hide annotation if not hovered
+                        if self.taylor_annotation.get_visible():
+                            self.taylor_annotation.set_visible(False)
+                            
+                    # redraw points
+                    self.figure.canvas.draw()
+                    self.figure.canvas.flush_events()
+                        
+                    # unlock annotation 
+                    self.lock_taylor_annotation = False
 
         return None
 

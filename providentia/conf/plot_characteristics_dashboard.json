@@ -299,7 +299,7 @@
 
        "taylor": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                   "axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
-                  "basic": ["r", "StdDev"],
+                  "xystat": ["StdDev"],
                   "contour": {"color": "black", "marker": null, "linestyle": "dashed", "linewidth": 1},
                   "srange": [0, 1.5],
                   "xylabel": {"fontsize": 8},
@@ -307,6 +307,12 @@
                   "xytick_params": {"fontsize": 7},
                   "rtick_params": {"fontsize": 7},
                   "rlocs": [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99],
+                  "marker_annotate": {"xytext": [0, 0], "textcoords": "offset points", "size": 8, "ha": "left", 
+                                      "va": "center", "zorder": 100},
+                  "marker_annotate_bbox": {"boxstyle": "round", "linewidth": 0.5, "facecolor": "white", 
+                                           "edgecolor": "#757575"},
+                  "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, "color": "#757575", 
+                                                 "edgecolor": "#5e5e5e"},
                   "plot": {"marker": "o", "markersize": 6, "linestyle": "None"},
                   "plot_options": ["annotate"]}
 }
