@@ -1803,8 +1803,21 @@ class Plot:
                 relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
                                 relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
 
+        # get mapped resolution per axis for periodic plots
+        if base_plot_type in ['periodic', 'periodic-violin']:
+            mapped_resolutions = self.read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(self.read_instance.relevant_temporal_resolutions)))
+
+        # remove any axes from relevant_axs which are not active
+        relevant_axs_active = []
+        mapped_resolutions_active = []
+        for ax_ii, ax in enumerate(relevant_axs):
+            if ax.axison:
+                relevant_axs_active.append(ax)
+                if base_plot_type in ['periodic', 'periodic-violin']:
+                    mapped_resolutions_active.append(mapped_resolutions[ax_ii])
+
         # get lower and upper limits across all relevant axes
-        for ax in relevant_axs:
+        for ax in relevant_axs_active:
             if 'equal_aspect' in plot_characteristics:
                 self.set_equal_axes(ax)
             else:
@@ -1836,7 +1849,7 @@ class Plot:
                 all_ylim_upper.append(ylim_upper)
 
         # get minimum and maximum from all axes and set limits
-        for ax in relevant_axs:
+        for ax in relevant_axs_active:
             # get xlim
             if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic', 'periodic-violin']:
@@ -1873,9 +1886,8 @@ class Plot:
 
         # get minimum and maximum from all axes and set limits for periodic plots
         if base_plot_type in ['periodic', 'periodic-violin']:
-            mapped_resolutions = self.read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(self.read_instance.relevant_temporal_resolutions)))
             if xlim is None and ('xlim' not in plot_characteristics):
-                for temporal_resolution, sub_ax in zip(mapped_resolutions, relevant_axs):
+                for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
                     # adjust plot x axis to have correct margin on edges
                     xlim_lower, xlim_upper = sub_ax.get_xlim()
                     first_valid_x = self.canvas_instance.periodic_xticks[temporal_resolution][(np.abs(self.canvas_instance.periodic_xticks[temporal_resolution] - xlim_lower)).argmin()]
@@ -1893,7 +1905,7 @@ class Plot:
                     sub_ax.set_xlim(xlim)
             elif 'xlim' in plot_characteristics:
                 xlim = plot_characteristics['xlim']
-                for temporal_resolution, sub_ax in zip(mapped_resolutions, relevant_axs):
+                for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
                     sub_ax.set_xlim(xlim)
 
         # get minimum and maximum from all axes and set limits for timeseries
@@ -1946,7 +1958,7 @@ class Plot:
                     xticks = np.append(xticks, xlim[1])
 
                 # set modified xticks
-                for ax in relevant_axs:
+                for ax in relevant_axs_active:
                     ax.xaxis.set_ticks(xticks)
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics, 
