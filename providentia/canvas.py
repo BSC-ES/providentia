@@ -694,7 +694,6 @@ class MPLCanvas(FigureCanvas):
                             else:
                                 stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
                             stats_df[relevant_zstat].append(stat_val)
-                        
                     # other plots
                     else: 
                         if plot_type == 'metadata':
@@ -708,7 +707,7 @@ class MPLCanvas(FigureCanvas):
                         first_data_label = False
 
                 # make statsummary and taylor diagram plots
-                if plot_type in ['statsummary', 'scatter']:
+                if plot_type in ['statsummary', 'taylor']:
                     stats_df = pd.DataFrame(data=stats_df, 
                                             index=self.selected_station_data[self.read_instance.networkspeci])
                     if plot_type == 'statsummary':
