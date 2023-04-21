@@ -1807,14 +1807,19 @@ class Plot:
         if base_plot_type in ['periodic', 'periodic-violin']:
             mapped_resolutions = self.read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(self.read_instance.relevant_temporal_resolutions)))
 
-        # remove any axes from relevant_axs which are not active
-        relevant_axs_active = []
-        mapped_resolutions_active = []
-        for ax_ii, ax in enumerate(relevant_axs):
-            if ax.axison:
-                relevant_axs_active.append(ax)
-                if base_plot_type in ['periodic', 'periodic-violin']:
-                    mapped_resolutions_active.append(mapped_resolutions[ax_ii])
+        # remove any axes from relevant_axs which are not active (only for offline)
+        if self.read_instance.offline:
+            relevant_axs_active = []
+            mapped_resolutions_active = []
+            for ax_ii, ax in enumerate(relevant_axs):
+                if ax.axison:
+                    relevant_axs_active.append(ax)
+                    if base_plot_type in ['periodic', 'periodic-violin']:
+                        mapped_resolutions_active.append(mapped_resolutions[ax_ii])
+        else:
+            relevant_axs_active = relevant_axs
+            if base_plot_type in ['periodic', 'periodic-violin']:
+                mapped_resolutions_active = mapped_resolutions
 
         # get lower and upper limits across all relevant axes
         for ax in relevant_axs_active:
