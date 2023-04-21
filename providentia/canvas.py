@@ -2536,8 +2536,8 @@ class MPLCanvas(FigureCanvas):
         self.taylor_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.taylor_markersize_sl.setObjectName('taylor_markersize_sl')
         self.taylor_markersize_sl.setMinimum(0)
-        self.taylor_markersize_sl.setMaximum(self.plot_characteristics['taylor']['plot']['markersize']*100)
-        self.taylor_markersize_sl.setValue(self.plot_characteristics['taylor']['plot']['markersize']*10)
+        self.taylor_markersize_sl.setMaximum(self.plot_characteristics['taylor']['plot']['markersize']*10)
+        self.taylor_markersize_sl.setValue(self.plot_characteristics['taylor']['plot']['markersize'])
         self.taylor_markersize_sl.setTickInterval(2)
         self.taylor_markersize_sl.setTracking(False)
         self.taylor_markersize_sl.setGeometry(self.taylor_menu_button.geometry().x()-220, 
