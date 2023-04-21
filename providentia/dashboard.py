@@ -1038,6 +1038,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'taylor':
+            
+            # create polar axis
+            canvas_instance.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
 
             # setup taylor annotation
             canvas_instance.create_taylor_annotation()
