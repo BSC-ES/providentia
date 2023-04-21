@@ -2316,8 +2316,8 @@ class MPLCanvas(FigureCanvas):
         self.scatter_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.scatter_markersize_sl.setObjectName('scatter_markersize_sl')
         self.scatter_markersize_sl.setMinimum(0)
-        self.scatter_markersize_sl.setMaximum(self.plot_characteristics['scatter']['plot']['markersize']*100)
-        self.scatter_markersize_sl.setValue(self.plot_characteristics['scatter']['plot']['markersize']*10)
+        self.scatter_markersize_sl.setMaximum(self.plot_characteristics['scatter']['plot']['markersize']*10)
+        self.scatter_markersize_sl.setValue(self.plot_characteristics['scatter']['plot']['markersize'])
         self.scatter_markersize_sl.setTickInterval(2)
         self.scatter_markersize_sl.setTracking(False)
         self.scatter_markersize_sl.setGeometry(self.scatter_menu_button.geometry().x()-220, 
