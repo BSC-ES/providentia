@@ -905,8 +905,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # since we have no data, we need to use a random reference to initialize the polar axes
         # the axis will be updated when we create the taylor diagram
         if changed_plot_type == 'taylor':
-            reference_std_dev = 7.5
-            ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_std_dev)
+            reference_stddev = 7.5
+            ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_stddev)
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
