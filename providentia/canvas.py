@@ -967,8 +967,8 @@ class MPLCanvas(FigureCanvas):
             for relevant_temporal_resolution, sub_ax in ax.items():
                 axs_to_remove.append(sub_ax)
         else:
-            if (plot_type == 'taylor') and (hasattr(self.plot, 'taylor_polar_relevant_axis')):
-                axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
+            if (plot_type == 'taylor') and (hasattr(self, 'taylor_polar_relevant_axis')):
+                axs_to_remove.append(self.taylor_polar_relevant_axis)
             axs_to_remove.append(ax)
 
         # iterate through axes
@@ -3110,7 +3110,7 @@ class MPLCanvas(FigureCanvas):
                         line.set_markersize(markersize)
             else:
                 if plot_type == 'taylor':
-                    for line in self.plot.taylor_polar_relevant_axis.lines:
+                    for line in self.taylor_polar_relevant_axis.lines:
                         line.set_markersize(markersize)
                 else:
                     for line in ax.lines:
@@ -3662,13 +3662,14 @@ class MPLCanvas(FigureCanvas):
                     self.scatter_annotation.set_ha('left')
 
                 # create annotation text
-                # observations label
-                text_label = ('{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
-                                                       concentration_x)
                 # experiment label
                 exp_alias = self.read_instance.experiments[data_label]
-                text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration_y)
-    
+                text_label = exp_alias
+                # observations label
+                text_label += ('\n{0}: {1:.2f}').format('x', concentration_x)
+                # experiment label
+                text_label += ('\n{0}: {1:.2f}').format('y', concentration_y)
+
         self.scatter_annotation.set_text(text_label)
 
         return None
@@ -3683,7 +3684,7 @@ class MPLCanvas(FigureCanvas):
                     and (self.lock_scatter_annotation == False)):
 
                     # lock annotation
-                    self.lock_scatter_annotation = True
+                    self.lock_scattscatter_annotationer_annotation = True
                     is_contained = False
 
                     for data_label in self.plot_elements['data_labels_active']:
@@ -4156,10 +4157,10 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation at (0, 0) that will be updated later. """
 
         # in the newest version of matplotlib, s corresponds to text
-        self.taylor_annotation = self.plot_axes['taylor'].annotate(text='', xy=(0, 0), xycoords='data',
-                                                                   **self.plot_characteristics['taylor']['marker_annotate'],
-                                                                   bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
-                                                                   arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})
+        self.taylor_annotation = self.taylor_polar_relevant_axis.annotate(text='', xy=(0, 0), xycoords='data',
+                                                                          **self.plot_characteristics['taylor']['marker_annotate'],
+                                                                          bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
+                                                                          arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})
         self.taylor_annotation.set_visible(False)
 
         return None
@@ -4177,29 +4178,33 @@ class MPLCanvas(FigureCanvas):
 
                 # retrieve time and concentration
                 line = self.plot_elements['taylor'][self.plot_elements['taylor']['active']][data_label]['plot'][0]
-                concentration_x = line.get_xdata()[annotation_index['ind'][0]]
-                concentration_y = line.get_ydata()[annotation_index['ind'][0]]
-
+                corrcoef = line.get_xdata()[annotation_index['ind'][0]]
+                stddev = line.get_ydata()[annotation_index['ind'][0]]
+                
                 # update location
-                self.taylor_annotation.xy = (concentration_x, concentration_y)
-
-                # update bbox position
-                concentration_x_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
-                if concentration_x > concentration_x_middle:
-                    self.taylor_annotation.set_x(-10)
-                    self.taylor_annotation.set_ha('right')
-                else:
-                    self.taylor_annotation.set_x(10)
-                    self.taylor_annotation.set_ha('left')
+                #self.taylor_annotation.xy = (np.arccos(corrcoef), stddev)
+                self.taylor_annotation.xy = (6, np.pi/4)
+                
+                # # update bbox position
+                # corrcoef_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                # if corrcoef > corrcoef_middle:
+                #     self.taylor_annotation.set_x(-10)
+                #     self.taylor_annotation.set_ha('right')
+                # else:
+                #     self.taylor_annotation.set_x(10)
+                #     self.taylor_annotation.set_ha('left')
 
                 # create annotation text
-                # observations label
-                text_label = ('{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
-                                                       concentration_x)
                 # experiment label
                 exp_alias = self.read_instance.experiments[data_label]
-                text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration_y)
-                text_label += 'HEY'
+                text_label = exp_alias
+                # correlation label
+                text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['taylor']['basic'][0], 
+                                                        corrcoef)
+                # experiment label
+                text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['taylor']['basic'][1], 
+                                                        stddev)
+                print(text_label)
     
         self.taylor_annotation.set_text(text_label)
 
@@ -4213,22 +4218,21 @@ class MPLCanvas(FigureCanvas):
             if event.inaxes == self.plot_axes['taylor']:
                 if ((hasattr(self.plot, 'taylor_plot')) and ('taylor' in self.plot_elements)
                     and (self.lock_taylor_annotation == False)):
-                    print('here')
+                    
                     # lock annotation
                     self.lock_taylor_annotation = True
                     is_contained = False
-
+                    
                     for data_label in self.plot_elements['data_labels_active']:
                         
                         # do not annotate if plot is cleared
                         if data_label not in self.plot_elements['taylor'][self.plot_elements['taylor']['active']].keys():
-                            print('not annotate')
                             continue
-
+                        
                         line = self.plot_elements['taylor'][self.plot_elements['taylor']['active']][data_label]['plot'][0]
+                        
                         is_contained, annotation_index = line.contains(event)
                         if is_contained:
-                            print(data_label)
                             self.taylor_annotate_data_label = data_label
                             break
                     
