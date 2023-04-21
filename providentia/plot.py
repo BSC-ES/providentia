@@ -1435,13 +1435,10 @@ class Plot:
         # adjust bottom axis
         relevant_axis.axis["bottom"].set_visible(False) 
 
-        # get axis in polar coordinates
-        self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
-
         # add reference contour
         ref_x = np.linspace(0, tmax)
         ref_y = np.zeros_like(ref_x) + reference_std_dev
-        self.taylor_plot = self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contour'])
+        self.canvas_instance.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contour'])
 
         # add models
         for data_label, stddev, corrcoef in zip(stats_df.index, 
@@ -1449,11 +1446,11 @@ class Plot:
                                                 stats_df[rlabel]):
             if data_label == 'observations':
                 continue
-            self.taylor_polar_relevant_axis.plot(np.arccos(corrcoef), stddev,
-                                                 **plot_characteristics['plot'],
-                                                 mfc=self.read_instance.plotting_params[data_label]['colour'], 
-                                                 mec=self.read_instance.plotting_params[data_label]['colour'],
-                                                 label=data_label) 
+            self.taylor_plot = self.canvas_instance.taylor_polar_relevant_axis.plot(np.arccos(corrcoef), stddev,
+                                                                                    **plot_characteristics['plot'],
+                                                                                    mfc=self.read_instance.plotting_params[data_label]['colour'], 
+                                                                                    mec=self.read_instance.plotting_params[data_label]['colour'],
+                                                                                    label=data_label) 
 
             # track plot elements if using dashboard 
             if not self.read_instance.offline:
