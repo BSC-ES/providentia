@@ -1353,7 +1353,7 @@ class Plot:
             else:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
     
-    def get_taylor_diagram_extremes(self, reference_std_dev):
+    def get_taylor_diagram_extremes(self, reference_stddev):
         """ Make Taylor diagram plot axis extremes. """
 
         # diagram limited to positive correlations
@@ -1361,12 +1361,12 @@ class Plot:
 
         # get standard deviation axis extent
         srange = self.canvas_instance.plot_characteristics['taylor']['srange']
-        smin = srange[0] * reference_std_dev
-        smax = srange[1] * reference_std_dev
+        smin = srange[0] * reference_stddev
+        smax = srange[1] * reference_stddev
 
         return tmax, smin, smax
     
-    def get_taylor_diagram_ghelper(self, reference_std_dev):
+    def get_taylor_diagram_ghelper(self, reference_stddev):
         """ Make Taylor diagram plot grid helper. """
 
         # correlation labels
@@ -1378,7 +1378,7 @@ class Plot:
         tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
 
         # get axis extremes
-        tmax, smin, smax = self.get_taylor_diagram_extremes(reference_std_dev)
+        tmax, smin, smax = self.get_taylor_diagram_extremes(reference_stddev)
 
         # get grid helper
         ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
@@ -1400,8 +1400,8 @@ class Plot:
         xylabel = stats_df.columns[1]
 
         # update axis extremes
-        reference_std_dev = stats_df[xylabel][0]
-        tmax, smin, smax = self.get_taylor_diagram_extremes(reference_std_dev)
+        reference_stddev = stats_df[xylabel][0]
+        tmax, smin, smax = self.get_taylor_diagram_extremes(reference_stddev)
         relevant_axis.get_grid_helper().update_grid_finder(
             extreme_finder=fa.ExtremeFinderFixed((0, tmax, smin, smax)))
         
@@ -1435,10 +1435,22 @@ class Plot:
         # adjust bottom axis
         relevant_axis.axis["bottom"].set_visible(False) 
 
+        # add contours
+        num_levels = plot_characteristics['contours']['levels']['number']
+        rs, ts = np.meshgrid(np.linspace(smin, smax), np.linspace(0, tmax))
+        rms = np.sqrt(reference_stddev**2 + rs**2 - 2*reference_stddev*rs*np.cos(ts))
+        contours = self.canvas_instance.taylor_polar_relevant_axis.contour(ts, rs, rms, num_levels,
+            **plot_characteristics['contours']['style']['general'])
+
+        # add contour labels
+        self.canvas_instance.taylor_polar_relevant_axis.clabel(contours, contours.levels, inline=True, 
+                                                               fmt = '%r', fontsize=6)
+
         # add reference contour
         ref_x = np.linspace(0, tmax)
-        ref_y = np.zeros_like(ref_x) + reference_std_dev
-        self.canvas_instance.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contour'])
+        ref_y = np.zeros_like(ref_x) + reference_stddev
+        self.canvas_instance.taylor_polar_relevant_axis.plot(ref_x, ref_y, 
+                                                             **plot_characteristics['contours']['style']['obs'])
 
         # add models
         for data_label, stddev, corrcoef in zip(stats_df.index, 
