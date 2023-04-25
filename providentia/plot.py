@@ -1353,36 +1353,45 @@ class Plot:
             else:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
     
-    def get_taylor_diagram_extremes(self, reference_stddev):
-        """ Make Taylor diagram plot axis extremes. """
+    def get_taylor_diagram_ghelper_info(self, reference_stddev, extend=False):
+        """ Make Taylor diagram plot axis extremes and labels. """
 
+        tmin = 0
+
+        # diagram extended to negative correlations
+        if extend:
+            tmax = np.pi
         # diagram limited to positive correlations
-        tmax = np.pi/2
+        else:
+            tmax = np.pi/2
 
         # get standard deviation axis extent
         srange = self.canvas_instance.plot_characteristics['taylor']['srange']
         smin = srange[0] * reference_stddev
         smax = srange[1] * reference_stddev
 
-        return tmax, smin, smax
-    
-    def get_taylor_diagram_ghelper(self, reference_stddev):
-        """ Make Taylor diagram plot grid helper. """
-
         # correlation labels
         rlocs = np.array(self.canvas_instance.plot_characteristics['taylor']['rlocs'])
+        if extend:
+            rlocs = np.concatenate((-rlocs[:0:-1], rlocs))
 
         # convert correlation values into polar angles
         tlocs = np.arccos(rlocs)
         gl1 = gf.FixedLocator(tlocs)
         tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
 
+        return tmin, tmax, smin, smax, gl1, tf1
+    
+    def get_taylor_diagram_ghelper(self, reference_stddev, extend=False):
+        """ Make Taylor diagram plot grid helper. """
+
         # get axis extremes
-        tmax, smin, smax = self.get_taylor_diagram_extremes(reference_stddev)
+        tmin, tmax, smin, smax, gl1, tf1 = self.get_taylor_diagram_ghelper_info(reference_stddev, 
+                                                                                extend)
 
         # get grid helper
         ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
-                                           extremes=(0, tmax, smin, smax),
+                                           extremes=(tmin, tmax, smin, smax),
                                            grid_locator1=gl1, tick_formatter1=tf1)
 
         return ghelper
@@ -1392,19 +1401,52 @@ class Plot:
         """ Make Taylor diagram plot.
             Reference: https://gist.github.com/ycopin/3342888.
         """
-
-        print(stats_df)
         
         # get labels 
         rlabel = stats_df.columns[0]
         xylabel = stats_df.columns[1]
 
-        # update axis extremes
-        reference_stddev = stats_df[xylabel][0]
-        tmax, smin, smax = self.get_taylor_diagram_extremes(reference_stddev)
-        relevant_axis.get_grid_helper().update_grid_finder(
-            extreme_finder=fa.ExtremeFinderFixed((0, tmax, smin, smax)))
+        # check if we need to extend the axis to negative correlations
+        extend = False
+        if np.nanmin(stats_df[rlabel]) < 0:
+            extend = True
         
+        # update axis extremes and labels
+        reference_stddev = np.nanmax(stats_df[xylabel])
+        tmin, tmax, smin, smax, gl1, tf1 = self.get_taylor_diagram_ghelper_info(reference_stddev, extend)
+        relevant_axis.get_grid_helper().update_grid_finder(
+            extreme_finder=fa.ExtremeFinderFixed((tmin, tmax, smin, smax)),
+            grid_locator1=gl1, tick_formatter1=tf1)
+        
+        # find Taylor plot position in layout
+        for plot_position in range(2, 6):
+            plot_type = getattr(self.read_instance, 'position_{}'.format(plot_position))
+            if plot_type == 'taylor':
+                break
+        
+        # update axis position and size
+        # changing the extend reduces the size of the plot and changes its start position
+        if extend:
+            old_position = relevant_axis.get_position().bounds
+            if plot_position == 2:
+                new_position = (0.60, 0.42, 0.288, 0.594)
+            elif plot_position == 3:
+                new_position = (0.03, 0, 0.256, 0.56)
+            elif plot_position == 4:
+                new_position = (0.37, 0, 0.256, 0.56)
+            elif plot_position == 5:
+                new_position = (0.70, 0, 0.256, 0.56)
+        else:
+            if plot_position == 2:
+                new_position = (0.64, 0.57, 0.16, 0.33)
+            elif plot_position == 3:
+                new_position = (0.08, 0.08, 0.16, 0.35)
+            elif plot_position == 4:
+                new_position = (0.41, 0.08, 0.16, 0.35)
+            elif plot_position == 5:
+                new_position = (0.69, 0.08, 0.16, 0.35)
+        relevant_axis.set_position(new_position)
+
         # clear axis, add grid and adjust limits 
         # as suggested by the Matpotlib devs in https://github.com/matplotlib/matplotlib/issues/25426
         relevant_axis.clear()
@@ -1420,19 +1462,19 @@ class Plot:
         relevant_axis.axis['top'].label.set_fontsize(plot_characteristics['rlabel']['fontsize'])
         relevant_axis.axis['top'].label.set_axis_direction('top')
 
+        # adjust right axis (y axis)
+        relevant_axis.axis['right'].set_axis_direction('top')
+        relevant_axis.axis['right'].toggle(ticklabels=True)
+        relevant_axis.axis['right'].major_ticklabels.set_axis_direction("bottom" if extend else "left")
+        relevant_axis.axis['right'].major_ticklabels.set(**plot_characteristics['xytick_params'])
+
         # adjust left axis (x axis)
         relevant_axis.axis['left'].set_axis_direction('bottom')
         relevant_axis.axis['left'].major_ticklabels.set(**plot_characteristics['xytick_params'])
         relevant_axis.axis['left'].label.set_text(xylabel)
-        relevant_axis.axis['left'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])
+        relevant_axis.axis['left'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])  
 
-        # adjust right axis (y axis)
-        relevant_axis.axis['right'].set_axis_direction('top')
-        relevant_axis.axis['right'].toggle(ticklabels=True)
-        relevant_axis.axis['right'].major_ticklabels.set_axis_direction('left')
-        relevant_axis.axis['right'].major_ticklabels.set(**plot_characteristics['xytick_params'])
-
-        # adjust bottom axis
+        # adjust bottom axis (hide)
         relevant_axis.axis["bottom"].set_visible(False) 
 
         # add contours
