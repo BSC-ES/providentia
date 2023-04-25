@@ -369,6 +369,7 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_MPL_canvas_updates = True
             self.handle_map_z_statistic_update()
             self.handle_periodic_statistic_update()
+            self.handle_taylor_correlation_statistic_update()
             self.read_instance.block_MPL_canvas_updates = False
 
             # update layout fields
@@ -588,8 +589,8 @@ class MPLCanvas(FigureCanvas):
 
             # reset axes limits (harmonising across subplots for periodic plots) 
             self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
-                                                    self.plot_characteristics['periodic'], 
-                                                    plot_options, relim=True, autoscale=True)
+                                                 self.plot_characteristics['periodic'], 
+                                                 plot_options, relim=True, autoscale=True)
 
             # set ylabel
             self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
@@ -602,6 +603,30 @@ class MPLCanvas(FigureCanvas):
 
             # update plot options
             self.update_plot_options(plot_types=['periodic'])
+
+            # draw changes
+            self.figure.canvas.draw()
+            self.figure.canvas.flush_events()
+
+    def update_taylor_corr_statistic(self):
+
+        # update periodic plot/s if have some stations selected on map
+        if len(self.relative_selected_station_inds) > 0:
+
+            # clear and turn off all relevant axes before updating
+            self.remove_axis_elements(self.plot_axes['taylor'], 'taylor')
+
+            # do plot with updated correlation statistic
+            self.update_associated_active_dashboard_plot('taylor')
+
+            # activate axis
+            self.activate_axis(self.plot_axes['taylor'], 'taylor')
+
+            # reset navigation toolbar stack for plot
+            self.reset_ax_navigation_toolbar_stack(self.plot_axes['taylor'])
+
+            # update plot options
+            self.update_plot_options(plot_types=['taylor'])
 
             # draw changes
             self.figure.canvas.draw()
@@ -645,12 +670,19 @@ class MPLCanvas(FigureCanvas):
                     xlabel = ''
 
                 # create structure to store data for statsummary plot
-                elif plot_type in ['statsummary', 'taylor']:
+                elif plot_type == 'statsummary':
                     # get list of statistics to create lists for
                     relevant_zstats = self.plot_characteristics[plot_type]['basic']
                     stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
                     xlabel = ''
                     ylabel = ''
+                
+                # create structure to store data for Taylor diagram
+                elif plot_type == 'taylor':
+                    # get r or r2 as correlation statistic
+                    corr_stat = self.plot_characteristics[plot_type]['corr_stat']
+                    relevant_zstats = [corr_stat, "StdDev"]
+                    stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
 
                 # setup xlabel / ylabel for other plot_types
                 else:    
@@ -934,6 +966,45 @@ class MPLCanvas(FigureCanvas):
             # update plotted periodic statistic
             if not self.read_instance.block_MPL_canvas_updates:
                 self.update_periodic_statistic(zstat)
+
+        return None
+
+    def handle_taylor_correlation_statistic_update(self):
+        
+        if not self.read_instance.block_config_bar_handling_updates:
+            
+            # update taylor diagram correlation statistic combobox
+            # set variable that blocks configuration bar handling updates until all
+            # changes to the statistic combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # get currently selected items
+            corr_stat = self.taylor_corr_stat.currentText()
+
+            # get available stats
+            available_corr_stats = ['r', 'r2']
+
+            # if correlation stat is empty string, it is because fields are being initialised for the first time
+            if corr_stat == '':
+                # set stat to be the one in plot characteristics
+                corr_stat = self.plot_characteristics['taylor']['corr_stat']
+
+            # update statistic combobox (clear, then add items)
+            self.taylor_corr_stat.clear()
+            self.taylor_corr_stat.addItems(available_corr_stats)
+
+            # maintain currently selected statistic
+            self.taylor_corr_stat.setCurrentText(corr_stat)
+
+            # update dictionary
+            self.plot_characteristics['taylor']['corr_stat'] = corr_stat
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update plotted taylor diagram statistic
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_taylor_corr_statistic()
 
         return None
 
@@ -2514,7 +2585,7 @@ class MPLCanvas(FigureCanvas):
                                                formatting_dict['settings_container'])
         self.taylor_container.setGeometry(self.taylor_menu_button.geometry().x()-230,
                                           self.taylor_menu_button.geometry().y()+25, 
-                                          250, 130)
+                                          250, 180)
         self.taylor_container.hide()
 
         # add settings label
@@ -2525,10 +2596,25 @@ class MPLCanvas(FigureCanvas):
                                                230, 20)
         self.taylor_settings_label.hide()
 
+        # add map stat label ('Correlation statistic') to layout
+        self.taylor_corr_stat_label = QtWidgets.QLabel('Correlation statistic', self)
+        self.taylor_corr_stat_label.setGeometry(self.taylor_menu_button.geometry().x()-220, 
+                                               self.taylor_menu_button.geometry().y()+50, 
+                                               230, 20)
+        self.taylor_corr_stat_label.hide()
+
+        # add map stat combobox
+        self.taylor_corr_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.taylor_corr_stat.AdjustToContents
+        self.taylor_corr_stat.setGeometry(self.map_menu_button.geometry().x()-220, 
+                                         self.map_menu_button.geometry().y()+75, 
+                                         110, 20)
+        self.taylor_corr_stat.hide()
+
         # add taylor diagram markersize slider name ('Size') to layout
         self.taylor_markersize_sl_label = QtWidgets.QLabel('Size', self)
         self.taylor_markersize_sl_label.setGeometry(self.taylor_menu_button.geometry().x()-220,
-                                                    self.taylor_menu_button.geometry().y()+50, 
+                                                    self.taylor_menu_button.geometry().y()+100, 
                                                     230, 20)
         self.taylor_markersize_sl_label.hide()
 
@@ -2541,14 +2627,14 @@ class MPLCanvas(FigureCanvas):
         self.taylor_markersize_sl.setTickInterval(2)
         self.taylor_markersize_sl.setTracking(False)
         self.taylor_markersize_sl.setGeometry(self.taylor_menu_button.geometry().x()-220, 
-                                              self.taylor_menu_button.geometry().y()+75, 
+                                              self.taylor_menu_button.geometry().y()+125, 
                                               230, 20)
         self.taylor_markersize_sl.hide()
 
         # add taylor diagram options name ('Options') to layout
         self.taylor_options_label = QtWidgets.QLabel("Options", self)
         self.taylor_options_label.setGeometry(self.taylor_menu_button.geometry().x()-220,
-                                              self.taylor_menu_button.geometry().y()+100, 
+                                              self.taylor_menu_button.geometry().y()+150, 
                                               230, 20)
         self.taylor_options_label.hide()
 
@@ -2557,7 +2643,7 @@ class MPLCanvas(FigureCanvas):
         self.taylor_options.setObjectName('taylor_options')
         self.taylor_options.addItems(self.plot_characteristics['taylor']['plot_options'])        
         self.taylor_options.setGeometry(self.taylor_menu_button.geometry().x()-220, 
-                                        self.taylor_menu_button.geometry().y()+125, 
+                                        self.taylor_menu_button.geometry().y()+175, 
                                         230, 20)
         self.taylor_options.currentTextChanged.connect(self.update_plot_option)
         self.taylor_options.hide()
@@ -2571,6 +2657,7 @@ class MPLCanvas(FigureCanvas):
 
         # set show/hide actions
         self.taylor_elements = [self.taylor_container, self.taylor_settings_label, 
+                                self.taylor_corr_stat_label,self.taylor_corr_stat,
                                 self.taylor_markersize_sl_label, self.taylor_markersize_sl,
                                 self.taylor_options_label, self.taylor_options]
         self.interactive_elements['taylor'] = {'button': self.taylor_menu_button, 
@@ -2583,6 +2670,7 @@ class MPLCanvas(FigureCanvas):
         self.taylor_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.taylor_markersize_sl.valueChanged.connect(self.update_markersize_func)
         self.taylor_save_button.clicked.connect(self.save_axis_figure_func)
+        self.taylor_corr_stat.currentTextChanged.connect(self.handle_taylor_correlation_statistic_update)
 
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
         self.menu_buttons = [self.map_menu_button, self.timeseries_menu_button,
@@ -4183,7 +4271,7 @@ class MPLCanvas(FigureCanvas):
                 
                 # update location
                 #self.taylor_annotation.xy = (np.arccos(corrcoef), stddev)
-                self.taylor_annotation.xy = (6, np.pi/4)
+                self.taylor_annotation.xy = (np.pi/4, 6)
                 
                 # # update bbox position
                 # corrcoef_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
@@ -4199,11 +4287,10 @@ class MPLCanvas(FigureCanvas):
                 exp_alias = self.read_instance.experiments[data_label]
                 text_label = exp_alias
                 # correlation label
-                text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['taylor']['basic'][0], 
+                text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics[plot_type]['corr_stat'], 
                                                         corrcoef)
-                # experiment label
-                text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['taylor']['basic'][1], 
-                                                        stddev)
+                # standard deviation label
+                text_label += ('\n{0}: {1:.2f}').format('StdDev', stddev)
                 print(text_label)
     
         self.taylor_annotation.set_text(text_label)
