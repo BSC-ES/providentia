@@ -299,8 +299,8 @@
 
        "taylor": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                   "axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
-                  "basic": ["r", "StdDev"],
                   "srange": [0, 1.5],
+                  "corr_stat": "r", 
                   "xylabel": {"fontsize": 8},
                   "rlabel": {"fontsize": 8},
                   "xytick_params": {"fontsize": 7},
