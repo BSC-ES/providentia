@@ -726,6 +726,14 @@ class MPLCanvas(FigureCanvas):
                             else:
                                 stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
                             stats_df[relevant_zstat].append(stat_val)
+
+                        # add standard deviation for Taylor diagram (only 1 per label)
+                        self.stddev_df = []
+                        if plot_type == 'taylor':
+                            for data_label_ii in self.selected_station_data[self.read_instance.networkspeci].keys():
+                                stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label_ii]['all']['StdDev'][0]
+                                self.stddev_df.append(stat_val)
+
                     # other plots
                     else: 
                         if plot_type == 'metadata':
@@ -746,7 +754,7 @@ class MPLCanvas(FigureCanvas):
                         func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
                             statsummary=True)
                     else:
-                        func(ax, stats_df, self.plot_characteristics[plot_type])
+                        func(ax, self.read_instance.networkspeci, stats_df, self.plot_characteristics[plot_type])
                         
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 if plot_type == 'periodic-violin':
@@ -1038,8 +1046,8 @@ class MPLCanvas(FigureCanvas):
             for relevant_temporal_resolution, sub_ax in ax.items():
                 axs_to_remove.append(sub_ax)
         else:
-            if (plot_type == 'taylor') and (hasattr(self, 'taylor_polar_relevant_axis')):
-                axs_to_remove.append(self.taylor_polar_relevant_axis)
+            if plot_type == 'taylor':
+                axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
             axs_to_remove.append(ax)
 
         # iterate through axes
@@ -1163,6 +1171,8 @@ class MPLCanvas(FigureCanvas):
                 if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
                     axs_to_activate.append(sub_ax)
         else:
+            if plot_type == 'taylor':
+                axs_to_activate.append(self.plot.taylor_polar_relevant_axis)
             axs_to_activate.append(ax)
 
         # iterate through axes
@@ -3198,7 +3208,7 @@ class MPLCanvas(FigureCanvas):
                         line.set_markersize(markersize)
             else:
                 if plot_type == 'taylor':
-                    for line in self.taylor_polar_relevant_axis.lines:
+                    for line in self.plot.taylor_polar_relevant_axis.lines:
                         line.set_markersize(markersize)
                 else:
                     for line in ax.lines:
@@ -3699,7 +3709,7 @@ class MPLCanvas(FigureCanvas):
                         if self.timeseries_annotation.get_visible():
                             self.timeseries_annotation.set_visible(False)
                             self.timeseries_vline.set_visible(False)
-                            
+
                     # redraw points
                     self.figure.canvas.draw()
                     self.figure.canvas.flush_events()
@@ -4245,10 +4255,10 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation at (0, 0) that will be updated later. """
 
         # in the newest version of matplotlib, s corresponds to text
-        self.taylor_annotation = self.taylor_polar_relevant_axis.annotate(text='', xy=(0, 0), xycoords='data',
-                                                                          **self.plot_characteristics['taylor']['marker_annotate'],
-                                                                          bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
-                                                                          arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})
+        self.taylor_annotation = self.plot.taylor_polar_relevant_axis.annotate(text='', xy=(0, 0), xycoords='data',
+                                                                               **self.plot_characteristics['taylor']['marker_annotate'],
+                                                                               bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
+                                                                               arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})
         self.taylor_annotation.set_visible(False)
 
         return None
@@ -4266,33 +4276,32 @@ class MPLCanvas(FigureCanvas):
 
                 # retrieve time and concentration
                 line = self.plot_elements['taylor'][self.plot_elements['taylor']['active']][data_label]['plot'][0]
-                corrcoef = line.get_xdata()[annotation_index['ind'][0]]
+                corr_stat = line.get_xdata()[annotation_index['ind'][0]]
                 stddev = line.get_ydata()[annotation_index['ind'][0]]
-                
+
                 # update location
-                #self.taylor_annotation.xy = (np.arccos(corrcoef), stddev)
-                self.taylor_annotation.xy = (np.pi/4, 6)
+                self.taylor_annotation.xy = (np.arccos(0.93), stddev)
                 
                 # # update bbox position
-                # corrcoef_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
-                # if corrcoef > corrcoef_middle:
-                #     self.taylor_annotation.set_x(-10)
-                #     self.taylor_annotation.set_ha('right')
-                # else:
-                #     self.taylor_annotation.set_x(10)
-                #     self.taylor_annotation.set_ha('left')
+                corr_stat_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if corr_stat > corr_stat_middle:
+                    self.taylor_annotation.set_x(-10)
+                    self.taylor_annotation.set_ha('right')
+                else:
+                    self.taylor_annotation.set_x(10)
+                    self.taylor_annotation.set_ha('left')
 
                 # create annotation text
                 # experiment label
                 exp_alias = self.read_instance.experiments[data_label]
                 text_label = exp_alias
                 # correlation label
-                text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics[plot_type]['corr_stat'], 
-                                                        corrcoef)
+                text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['taylor']['corr_stat'], 
+                                                        np.cos(corr_stat))
                 # standard deviation label
                 text_label += ('\n{0}: {1:.2f}').format('StdDev', stddev)
-                print(text_label)
-    
+        
+        print(text_label)
         self.taylor_annotation.set_text(text_label)
 
         return None
@@ -4311,7 +4320,11 @@ class MPLCanvas(FigureCanvas):
                     is_contained = False
                     
                     for data_label in self.plot_elements['data_labels_active']:
-                        
+
+                        # skip observations
+                        if data_label == 'observations':
+                            continue
+
                         # do not annotate if plot is cleared
                         if data_label not in self.plot_elements['taylor'][self.plot_elements['taylor']['active']].keys():
                             continue
@@ -4331,7 +4344,7 @@ class MPLCanvas(FigureCanvas):
                         # hide annotation if not hovered
                         if self.taylor_annotation.get_visible():
                             self.taylor_annotation.set_visible(False)
-                            
+
                     # redraw points
                     self.figure.canvas.draw()
                     self.figure.canvas.flush_events()
