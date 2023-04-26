@@ -906,7 +906,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # the axis will be updated when we create the taylor diagram
         if changed_plot_type == 'taylor':
             reference_stddev = 7.5
-            ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_stddev)
+            plot_characteristics = canvas_instance.plot_characteristics['taylor']
+            ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
@@ -1039,8 +1040,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'taylor':
             
-            # create polar axis
-            canvas_instance.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
+            # initialise polar axis
+            canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
 
             # setup taylor annotation
             canvas_instance.create_taylor_annotation()
