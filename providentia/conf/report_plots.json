@@ -24,5 +24,5 @@
     "debug": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
               "station": ["timeseries", "scatter"]},
 
-    "debug2": ["taylor-r", "timeseries"]
+    "debug2": ["timeseries", "taylor-r_annotate", "scatter"]
 }

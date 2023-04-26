@@ -563,7 +563,8 @@ class ProvidentiaOffline:
 
                             # get references to periodic label annotations made, and then hide them
                             for relevant_temporal_resolution in self.relevant_temporal_resolutions:
-                                annotations = [child for child in grid_dict[relevant_temporal_resolution].get_children() if isinstance(child, matplotlib.text.Annotation)]
+                                annotations = [child for child in grid_dict[relevant_temporal_resolution].get_children() 
+                                               if isinstance(child, matplotlib.text.Annotation)]
                                 # hide annotations
                                 for annotation in annotations:
                                     annotation.set_visible(False)
@@ -837,6 +838,11 @@ class ProvidentiaOffline:
 
                     # turn on variable to make Taylor diagram and make plot (after standard deviations have been stored)
                     if self.stddev_df:
+
+                        # restart index
+                        self.station_ind = -1
+
+                        # make Taylor diagram
                         self.have_stddev_data = True
                         taylor_plot_to_make = [plot_type for plot_type in station_plots_to_make if plot_type.startswith('taylor')]
                         self.make_station_plots(networkspeci, taylor_plot_to_make)
@@ -863,7 +869,6 @@ class ProvidentiaOffline:
 
             valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][relevant_station_ind, :]
             self.current_station_name = str(valid_station_names[pd.notnull(valid_station_names)][0])
-            print(self.current_station_name)
             valid_station_references = self.station_references[networkspeci][relevant_station_ind]
             self.current_station_reference = str(valid_station_references[pd.notnull(valid_station_references)][0])
             
@@ -910,9 +915,6 @@ class ProvidentiaOffline:
                         # get standard deviation for observations and add to list
                         stat_val = self.selected_station_data[networkspeci][data_label]['all']['StdDev'][0]
                         self.stddev_df.append(stat_val)
-
-                    # remove ind that was added before until we don't make the Taylor diagram
-                    self.station_ind -= 1
 
                 # skip Taylor diagram until we have all standard deviations in stddev_df
                 else:
@@ -1320,7 +1322,7 @@ class ProvidentiaOffline:
             # get relevant axis to plot on
             create_plot = False
             if plotting_paradigm == 'summary':
-                if base_plot_type == 'statsummary':
+                if base_plot_type in ['statsummary', 'taylor']:
                     axis_ind = self.subsection_ind
                     create_plot = True
                 else: 
@@ -1333,6 +1335,7 @@ class ProvidentiaOffline:
             
             # make plot ?
             if create_plot:
+                
                 relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, 
                                                                                      plot_type, axis_ind)
             
@@ -1371,7 +1374,7 @@ class ProvidentiaOffline:
                         else:
                             relevant_zstats = self.plot_characteristics[plot_type]['basic']
                             relevant_data_labels = self.selected_station_data[networkspeci]
-                    else:
+                    elif base_plot_type == 'taylor':
                         # create structure to store data for Taylor diagram plot
                         relevant_zstats = [zstat, "StdDev"]
                         stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
@@ -1422,7 +1425,7 @@ class ProvidentiaOffline:
                 # set axis title
                 if relevant_axis.get_title() == '':
                     if plotting_paradigm == 'summary':
-                        if base_plot_type == 'statsummary':
+                        if base_plot_type in ['statsummary', 'taylor']:
                             if self.n_stations == 1:
                                 axis_title_label = '{} ({} station)'.format(self.subsection, self.n_stations)
                             else:
@@ -1437,7 +1440,6 @@ class ProvidentiaOffline:
                                                                               self.current_lat,
                                                                               self.plot_characteristics[plot_type]['round_decimal_places'])
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
-
 
         return plot_indices
 
