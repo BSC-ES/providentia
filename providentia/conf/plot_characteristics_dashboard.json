@@ -311,7 +311,7 @@
                                                  "linewidth": 1},
                                          "general": {"colors": "grey", "linestyles": "solid", "linewidths": 0.9}}},
                   "annotate_stats": ["r", "StdDev"],
-                  "annotate_text": {"s": "", "loc": "upper right", "fontsize": 8, "n_stations": false, 
+                  "annotate_text": {"s": "", "loc": "upper left", "fontsize": 8, "n_stations": false, 
                                     "exp_labels": true, "color": "", "round_decimal_places": 2},
                   "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
                   "marker_annotate": {"xytext": [0, 0], "textcoords": "offset points", "size": 8, "ha": "left", 
