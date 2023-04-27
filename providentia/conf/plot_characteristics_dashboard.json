@@ -79,7 +79,7 @@
                "map_coastline_resolution": "medium",
                "land_polygon": {"facecolor": "0.85", "edgecolor": null},
                "projection": "Robinson",
-               "gridlines": {"linestyle": "-", "alpha": 0.4, "auto_update": true},
+               "gridlines": {"linestyle": "-", "alpha": 0.4, "auto_update": false},
                "axis_title": {"label": "", "fontsize": 8.5, "pad": 3, "loc": "center"},
                "cb": {"vmin_absolute": "", "vmax_absolute": "", "vmin_bias": "", "vmax_bias": "", "cmap_absolute": "", 
                       "cmap_bias": "", "n_ticks": 8, "orientation": "horizontal", "discrete": true, "n_discrete": 7},
