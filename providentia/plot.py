@@ -14,6 +14,9 @@ from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
+from matplotlib.projections import PolarAxes
+import mpl_toolkits.axisartist.floating_axes as fa
+import mpl_toolkits.axisartist.grid_finder as gf
 import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
@@ -46,11 +49,6 @@ class Plot:
         proj_class = getattr(ccrs, self.canvas_instance.plot_characteristics_templates['map']['projection']) 
         self.canvas_instance.plotcrs = proj_class()
         
-        # setup land polygons on map
-        self.canvas_instance.feature = cfeature.NaturalEarthFeature('physical', 'land',
-            get_land_polygon_resolution(self.canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
-                **self.canvas_instance.plot_characteristics_templates['map']['land_polygon'])
-
         # set miscellaneous vars
         self.canvas_instance.temporal_axis_mapping_dict = temp_axis_dict()
         self.canvas_instance.periodic_xticks = periodic_xticks()
@@ -305,7 +303,10 @@ class Plot:
             elif base_plot_type == 'map':
 
                 # add land polygons
-                ax_to_format.add_feature(self.canvas_instance.feature)
+                feature = cfeature.NaturalEarthFeature(category='physical', name='land',
+                                                       scale=get_land_polygon_resolution(self.canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
+                                                       **self.canvas_instance.plot_characteristics_templates['map']['land_polygon'])
+                ax_to_format.add_feature(feature)
 
                 # add gridlines ?
                 if 'gridlines' in plot_characteristics_vars:
@@ -1351,7 +1352,172 @@ class Plot:
                 self.track_plot_elements('observations', 'statsummary', 'plot', [table], bias=bias)
             else:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
+    
+    def get_taylor_diagram_ghelper_info(self, reference_stddev, plot_characteristics, extend=False):
+        """ Make Taylor diagram plot axis extremes and labels. """
 
+        tmin = 0
+
+        # diagram extended to negative correlations
+        if extend:
+            tmax = np.pi
+        # diagram limited to positive correlations
+        else:
+            tmax = np.pi/2
+
+        # get standard deviation axis extent
+        srange = plot_characteristics['srange']
+        smin = srange[0] * reference_stddev
+        smax = srange[1] * reference_stddev
+
+        # correlation labels
+        rlocs = np.array(plot_characteristics['rlocs'])
+        if extend:
+            rlocs = np.concatenate((-rlocs[:0:-1], rlocs))
+
+        # convert correlation values into polar angles
+        tlocs = np.arccos(rlocs)
+        gl1 = gf.FixedLocator(tlocs)
+        tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
+
+        return tmin, tmax, smin, smax, gl1, tf1
+    
+    def get_taylor_diagram_ghelper(self, reference_stddev, plot_characteristics, extend=False):
+        """ Make Taylor diagram plot grid helper. """
+
+        # get axis extremes
+        tmin, tmax, smin, smax, gl1, tf1 = self.get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, 
+                                                                                extend)
+
+        # get grid helper
+        ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
+                                           extremes=(tmin, tmax, smin, smax),
+                                           grid_locator1=gl1, tick_formatter1=tf1)
+
+        return ghelper
+
+    def make_taylor(self, relevant_axis, networkspeci, stats_df, plot_characteristics):
+        """ Make Taylor diagram plot.
+            Reference: https://gist.github.com/ycopin/3342888.
+        """
+
+        # get polar axis here
+        self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
+
+        # get labels 
+        rlabel = stats_df.columns[0]
+        xylabel = stats_df.columns[1]
+
+        # check if we need to extend the axis to negative correlations
+        extend = False
+        if np.nanmin(stats_df[rlabel]) < 0:
+            extend = True
+        
+        # get maximum standard deviation across all labels as reference
+        # in the offline reports, also across all stations
+        srange_reference = np.nanmax(self.canvas_instance.stddev_df)
+
+        # update axis extremes and labels
+        tmin, tmax, smin, smax, gl1, tf1 = self.get_taylor_diagram_ghelper_info(srange_reference, 
+                                                                                plot_characteristics,
+                                                                                extend)
+        relevant_axis.get_grid_helper().update_grid_finder(
+            extreme_finder=fa.ExtremeFinderFixed((tmin, tmax, smin, smax)),
+            grid_locator1=gl1, tick_formatter1=tf1)
+        
+        # update axis position and size in dashboard
+        if not self.read_instance.offline:
+
+            # find Taylor plot position in layout
+            for plot_position in range(2, 6):
+                plot_type = getattr(self.read_instance, 'position_{}'.format(plot_position))
+                if plot_type == 'taylor':
+                    break
+            
+            # changing the extend reduces the size of the plot and changes its start position
+            if extend:
+                old_position = relevant_axis.get_position().bounds
+                if plot_position == 2:
+                    new_position = (0.60, 0.42, 0.288, 0.594)
+                elif plot_position == 3:
+                    new_position = (0.03, 0, 0.256, 0.56)
+                elif plot_position == 4:
+                    new_position = (0.37, 0, 0.256, 0.56)
+                elif plot_position == 5:
+                    new_position = (0.70, 0, 0.256, 0.56)
+            else:
+                if plot_position == 2:
+                    new_position = (0.64, 0.57, 0.16, 0.33)
+                elif plot_position == 3:
+                    new_position = (0.08, 0.08, 0.16, 0.35)
+                elif plot_position == 4:
+                    new_position = (0.41, 0.08, 0.16, 0.35)
+                elif plot_position == 5:
+                    new_position = (0.69, 0.08, 0.16, 0.35)
+            relevant_axis.set_position(new_position)
+
+        # clear axis, add grid and adjust limits 
+        # as suggested by the Matpotlib devs in https://github.com/matplotlib/matplotlib/issues/25426
+        relevant_axis.clear()
+        relevant_axis.grid(**plot_characteristics['grid'])
+        relevant_axis.adjust_axes_lim()
+
+        # adjust top axis (curve)
+        relevant_axis.axis['top'].set_axis_direction('bottom')
+        relevant_axis.axis['top'].toggle(ticklabels=True, label=True)
+        relevant_axis.axis['top'].major_ticklabels.set_axis_direction('top')
+        relevant_axis.axis['top'].major_ticklabels.set(**plot_characteristics['rtick_params'])
+        relevant_axis.axis['top'].label.set_text(rlabel)
+        relevant_axis.axis['top'].label.set_fontsize(plot_characteristics['rlabel']['fontsize'])
+        relevant_axis.axis['top'].label.set_axis_direction('top')
+
+        # adjust right axis (y axis)
+        relevant_axis.axis['right'].set_axis_direction('top')
+        relevant_axis.axis['right'].toggle(ticklabels=True)
+        relevant_axis.axis['right'].major_ticklabels.set_axis_direction("bottom" if extend else "left")
+        relevant_axis.axis['right'].major_ticklabels.set(**plot_characteristics['xytick_params'])
+
+        # adjust left axis (x axis)
+        relevant_axis.axis['left'].set_axis_direction('bottom')
+        relevant_axis.axis['left'].major_ticklabels.set(**plot_characteristics['xytick_params'])
+        relevant_axis.axis['left'].label.set_text(xylabel)
+        relevant_axis.axis['left'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])  
+
+        # adjust bottom axis (hide)
+        relevant_axis.axis["bottom"].set_visible(False) 
+
+        # add contours around observations standard deviation
+        reference_stddev = stats_df[xylabel][0]
+        num_levels = plot_characteristics['contours']['levels']['number']
+        rs, ts = np.meshgrid(np.linspace(smin, smax), np.linspace(0, tmax))
+        rms = np.sqrt(reference_stddev**2 + rs**2 - 2*reference_stddev*rs*np.cos(ts))
+        contours = self.taylor_polar_relevant_axis.contour(ts, rs, rms, num_levels,
+            **plot_characteristics['contours']['style']['general'])
+
+        # add contour labels
+        self.taylor_polar_relevant_axis.clabel(contours, contours.levels, inline=True, fmt = '%r', fontsize=6)
+
+        # add reference contour of observations standard deviation
+        ref_x = np.linspace(0, tmax)
+        ref_y = np.zeros_like(ref_x) + reference_stddev
+        self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contours']['style']['obs'])
+
+        # add models
+        for data_label, stddev, corr_stat in zip(stats_df.index, 
+                                                 stats_df[xylabel], 
+                                                 stats_df[rlabel]):
+            if data_label == 'observations':
+                continue
+            self.taylor_plot = self.taylor_polar_relevant_axis.plot(np.arccos(corr_stat), stddev,
+                                                                    **plot_characteristics['plot'],
+                                                                    mfc=self.read_instance.plotting_params[data_label]['colour'], 
+                                                                    mec=self.read_instance.plotting_params[data_label]['colour'],
+                                                                    label=data_label) 
+
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
+          
     def log_axes(self, relevant_axis, log_ax, plot_characteristics, undo=False):
         """ Log plot axes.
 
@@ -1555,7 +1721,7 @@ class Plot:
         lines = [TextArea(line, textprops=dict(color=colour, 
                                                size=plot_characteristics['annotate_text']['fontsize'])) 
                     for line, colour in zip(str_to_annotate, colours)]
-        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
+        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align='left', pad=0, sep=1),
                                  loc=plot_characteristics['annotate_text']['loc'],
                                  bbox_transform=relevant_axis.transAxes)
         bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
@@ -1788,7 +1954,7 @@ class Plot:
         all_ylim_lower = []
         all_ylim_upper = []
 
-        #initialise variables for setting axis limits
+        # initialise variables for setting axis limits
         xlim_min = None
         xlim_max = None
         ylim_min = None
@@ -1866,7 +2032,7 @@ class Plot:
 
             # set xlim
             if xlim is not None:
-                if base_plot_type not in ['timeseries']:
+                if base_plot_type != 'timeseries':
                     ax.set_xlim(xlim)
 
             # get ylim

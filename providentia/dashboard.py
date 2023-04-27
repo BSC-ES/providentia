@@ -14,6 +14,8 @@ import datetime
 import json
 import sys
 import matplotlib
+import mpl_toolkits.axisartist.floating_axes as fa
+from matplotlib.projections import PolarAxes
 from functools import partial
 from collections import OrderedDict
 from weakref import WeakKeyDictionary
@@ -710,7 +712,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_position_4.clear()
         self.cb_position_5.clear()
 
+        # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.7.2 is available
+        # # remove plot types that need active temporal colocation and experiments data
+        # for plot_type in ['scatter', 'taylor']:
+        #     if ((not self.temporal_colocation) 
+        #         or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+        #         if plot_type in canvas_instance.layout_options:
+        #             canvas_instance.layout_options.remove(plot_type)
+        #     else:
+        #         if plot_type not in canvas_instance.layout_options:
+        #             canvas_instance.layout_options.append(plot_type)          
+
         # remove plot types that need active temporal colocation and experiments data
+        if 'taylor' in canvas_instance.layout_options:
+            canvas_instance.layout_options.remove('taylor')
         for plot_type in ['scatter']:
             if ((not self.temporal_colocation) 
                 or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
@@ -719,7 +734,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             else:
                 if plot_type not in canvas_instance.layout_options:
                     canvas_instance.layout_options.append(plot_type)          
-        
+ 
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
 
@@ -900,6 +915,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def update_plot_axis(self, canvas_instance, changed_position, changed_plot_type):
         """ Update plot axis position from layout options."""
 
+        # since we have no data, we need to use a random reference to initialize the polar axes
+        # the axis will be updated when we create the taylor diagram
+        if changed_plot_type == 'taylor':
+            reference_stddev = 7.5
+            plot_characteristics = canvas_instance.plot_characteristics['taylor']
+            ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
+
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
             if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
@@ -909,6 +931,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=30))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=34))
+            elif changed_plot_type == 'taylor':
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((9, 65), rowspan=36, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=49))
             
@@ -921,6 +946,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 0), rowspan=18, colspan=18))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 10), rowspan=38, colspan=19))
+            elif changed_plot_type == 'taylor':
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 5), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=38, colspan=29))
 
@@ -933,6 +961,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 35), rowspan=18, colspan=18))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 45), rowspan=38, colspan=19))
+            elif changed_plot_type == 'taylor':
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 40), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=29))
             
@@ -945,6 +976,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 70), rowspan=18, colspan=18))
             elif changed_plot_type == 'statsummary':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 80), rowspan=38, colspan=19))
+            elif changed_plot_type == 'taylor':
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=29))
 
@@ -977,6 +1011,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.distribution_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                       canvas_instance.hover_distribution_annotation)
 
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'periodic':
             
             # setup periodic annotation
@@ -1003,6 +1038,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update periodic statistic in dashboard
             canvas_instance.handle_periodic_statistic_update()
 
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'periodic-violin':
             
             # setup periodic violin annotation
@@ -1013,6 +1049,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.lock_periodic_violin_annotation[resolution] = False
             canvas_instance.periodic_violin_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                          canvas_instance.hover_periodic_violin_annotation)
+
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
+        elif changed_plot_type == 'taylor':
+            
+            # initialise polar axis
+            canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
+
+            # setup taylor annotation
+            canvas_instance.create_taylor_annotation()
+            canvas_instance.lock_taylor_annotation = False
+            canvas_instance.taylor_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                canvas_instance.hover_taylor_annotation)
 
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
@@ -1217,7 +1265,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # update periodic statistic combobox
         self.mpl_canvas.handle_periodic_statistic_update()
-    
+
+        # update taylor diagram statistic combobox
+        self.mpl_canvas.handle_taylor_correlation_statistic_update()
+        
         # unselect all/intersect/extent checkboxes
         self.mpl_canvas.unselect_map_checkboxes()
         

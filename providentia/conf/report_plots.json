@@ -22,5 +22,7 @@
                  "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
 
     "debug": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
-              "station": ["timeseries", "scatter"]}
+              "station": ["timeseries", "scatter"]},
+
+    "debug2": ["timeseries", "taylor-r_annotate"]
 }
