@@ -712,8 +712,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_position_4.clear()
         self.cb_position_5.clear()
 
+        # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.7.2 is available
+        # # remove plot types that need active temporal colocation and experiments data
+        # for plot_type in ['scatter', 'taylor']:
+        #     if ((not self.temporal_colocation) 
+        #         or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+        #         if plot_type in canvas_instance.layout_options:
+        #             canvas_instance.layout_options.remove(plot_type)
+        #     else:
+        #         if plot_type not in canvas_instance.layout_options:
+        #             canvas_instance.layout_options.append(plot_type)          
+
         # remove plot types that need active temporal colocation and experiments data
-        for plot_type in ['scatter', 'taylor']:
+        if 'taylor' in canvas_instance.layout_options:
+            canvas_instance.layout_options.remove('taylor')
+        for plot_type in ['scatter']:
             if ((not self.temporal_colocation) 
                 or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
                 if plot_type in canvas_instance.layout_options:
@@ -721,7 +734,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             else:
                 if plot_type not in canvas_instance.layout_options:
                     canvas_instance.layout_options.append(plot_type)          
-        
+ 
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
 
