@@ -10,6 +10,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.backends.backend_pdf import PdfPages
+import mpl_toolkits.axisartist.floating_axes as fa
+from matplotlib.projections import PolarAxes
 
 from .read import DataReader
 from .filter import DataFilter
@@ -161,6 +163,11 @@ class ProvidentiaOffline:
                             # there can be no station specific plots for map plot type
                             if plot_type[:4] != 'map-':
                                 self.station_plots_to_make.append(plot_type)
+
+            # TODO: For Taylor diagrams, remove this piece of code until Matplotlib 3.7.2 is available
+            if 'taylor' in self.station_plots_to_make or 'taylor' in self.summary_plots_to_make:
+                error = 'It is not possible to create Taylor diagrams yet, please remove.'
+                sys.exit(error)
 
             # set plot characteristics for all plot types (summary, station)
             self.plots_to_make = list(self.summary_plots_to_make)
@@ -342,7 +349,7 @@ class ProvidentiaOffline:
                                                networkspeci.split('|')[-1])
 
                         # harmonise xy limits for plot paradigm
-                        if base_plot_type not in ['map', 'heatmap', 'table']: 
+                        if base_plot_type not in ['map', 'heatmap', 'table', 'taylor']: 
                             if base_plot_type == 'periodic-violin':
                                 self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
                                                                      self.plot_characteristics[plot_type], plot_options, 
@@ -496,6 +503,11 @@ class ProvidentiaOffline:
 
                 if base_plot_type == 'map':
                     plot_characteristics['figure']['subplot_kw'] = {'projection': self.plotcrs}
+                elif base_plot_type == 'taylor':
+                    reference_stddev = 7.5
+                    ghelper = self.plot.get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
+                    plot_characteristics['figure']['subplot_kw'] = {'axes_class': fa.FloatingAxes,
+                                                                    'grid_helper': ghelper}
                 fig, axs = plt.subplots(**plot_characteristics['figure'])
 
                 # each page is handled as 1 figure
@@ -556,13 +568,16 @@ class ProvidentiaOffline:
 
                             # get references to periodic label annotations made, and then hide them
                             for relevant_temporal_resolution in self.relevant_temporal_resolutions:
-                                annotations = [child for child in grid_dict[relevant_temporal_resolution].get_children() if isinstance(child, matplotlib.text.Annotation)]
+                                annotations = [child for child in grid_dict[relevant_temporal_resolution].get_children() 
+                                               if isinstance(child, matplotlib.text.Annotation)]
                                 # hide annotations
                                 for annotation in annotations:
                                     annotation.set_visible(False)
 
                         # rest of plot types
                         else:
+                            
+                            # collect axes in dict
                             self.plot_dictionary[page_n]['axs'].append({'handle':ax, 'data_labels':[]})
                             
                             # format axis 
@@ -703,6 +718,10 @@ class ProvidentiaOffline:
                     else:
                         print('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
 
+                    # initialise dataframe that stores observations standard deviations for Taylor diagram
+                    self.stddev_df = []
+                    self.have_stddev_data = False
+
                     if not made_networkspeci_summary_plots:
                         
                         # put selected data for each data array into pandas dataframe
@@ -715,7 +734,7 @@ class ProvidentiaOffline:
                                 self.data_range_min_summary[ns] = copy.deepcopy(self.selected_station_data_min[ns]) 
                             if self.selected_station_data_max[ns] > self.data_range_max_summary[ns]:
                                 self.data_range_max_summary[ns] = copy.deepcopy(self.selected_station_data_max[ns])
-                    
+
                     # if have no valid data across data labels (no observations or experiments), then continue 
                     if not self.selected_station_data[networkspeci]:
                         continue
@@ -723,7 +742,7 @@ class ProvidentiaOffline:
                     # setup plotting geometry for summary plots per networkspeci (for all subsections)
                     if (not summary_plot_geometry_setup) & (do_plot_geometry_setup):
                         self.setup_plot_geometry('summary', networkspeci, made_networkspeci_summary_plots)
-                    
+
                     # iterate through plots to make
                     for plot_type in summary_plots_to_make:
 
@@ -736,8 +755,20 @@ class ProvidentiaOffline:
                         else:
                             base_plot_type = plot_type.split('_')[0] 
 
-                        #get options defined to configure plot (e.g. bias, individual, annotate, etc.)
+                        # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                         plot_options = plot_type.split('_')[1:]
+
+                        # update standard deviation list for taylor plot
+                        if base_plot_type == 'taylor' and not self.have_stddev_data:
+                
+                            # add standard deviation for Taylor diagram (only 1 per label for summary plots)
+                            for data_label in self.selected_station_data[networkspeci].keys():
+                                stat_val = self.selected_station_data[networkspeci][data_label]['all']['StdDev'][0]
+                                self.stddev_df.append(stat_val)
+                        
+                        # turn on variable to make Taylor diagram
+                        if self.stddev_df:
+                            self.have_stddev_data = True
 
                         # if a multispecies plot is wanted then only make this on first instance of plotting a networkspecies
                         if ('multispecies' in plot_options) & (made_networkspeci_summary_plots):
@@ -803,88 +834,24 @@ class ProvidentiaOffline:
                     # initialise station ind as -1
                     self.station_ind = -1
 
-                    for i, relevant_station_ind in enumerate(self.relevant_station_inds):
+                    # initialise dataframe that stores observations standard deviations for Taylor diagram
+                    self.stddev_df = []
+                    self.have_stddev_data = False
 
-                        # gather some information about current station
-                        self.station_ind += 1
+                    # make plots per station
+                    self.make_station_plots(networkspeci, station_plots_to_make)
+
+                    # turn on variable to make Taylor diagram and make plot (after standard deviations have been stored)
+                    if self.stddev_df:
+
+                        # restart index
+                        self.station_ind = -1
+
+                        # make Taylor diagram
+                        self.have_stddev_data = True
+                        taylor_plot_to_make = [plot_type for plot_type in station_plots_to_make if plot_type.startswith('taylor')]
+                        self.make_station_plots(networkspeci, taylor_plot_to_make)
                         
-                        valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][relevant_station_ind, :]
-                        self.current_station_name = str(valid_station_names[pd.notnull(valid_station_names)][0])
-                        
-                        valid_station_references = self.station_references[networkspeci][relevant_station_ind]
-                        self.current_station_reference = str(valid_station_references[pd.notnull(valid_station_references)][0])
-                        
-                        current_lons = self.metadata_in_memory[networkspeci]['longitude'][relevant_station_ind, :]
-                        self.current_lon = round(current_lons[pd.notnull(current_lons)][0], 2)
-                        
-                        current_lats = self.metadata_in_memory[networkspeci]['latitude'][relevant_station_ind, :]
-                        self.current_lat = round(current_lats[pd.notnull(current_lats)][0], 2)
-                        
-                        # put selected data for each data array into pandas dataframe
-                        to_pandas_dataframe(read_instance=self, canvas_instance=self, 
-                                            networkspecies=[networkspeci], 
-                                            station_index=relevant_station_ind, 
-                                            data_range_min=self.data_range_min_station, 
-                                            data_range_max=self.data_range_max_station)
-
-                        # if have no valid data across data labels (no observations or experiments), then continue 
-                        if not self.selected_station_data[networkspeci]:
-                            continue
-                        
-                        # update data range min/maxes for station paradigm
-                        if self.selected_station_data_min[networkspeci] < self.data_range_min_station[networkspeci]:
-                            self.data_range_min_station[networkspeci] = copy.deepcopy(self.selected_station_data_min[networkspeci]) 
-                        if self.selected_station_data_max[networkspeci] > self.data_range_max_station[networkspeci]:
-                            self.data_range_max_station[networkspeci] = copy.deepcopy(self.selected_station_data_max[networkspeci])
-
-                        # iterate through plots to make
-                        for plot_type in station_plots_to_make:
-
-                            # get zstat information from plot_type
-                            zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
-                            # get base plot type (without stat and options)
-                            if zstat:
-                                base_plot_type = plot_type.split('-')[0] 
-                            else:
-                                base_plot_type = plot_type.split('_')[0] 
-
-                            # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
-                            plot_options = plot_type.split('_')[1:]
-
-                            # if have multispecies option: 
-                            #   put multiple species data in pandas dataframe if first networkspeci being plotted and spatial_colocation is active 
-                            #   if not, then continue
-                            if 'multispecies' in plot_options: 
-                                if (not made_networkspeci_station_plots) & (self.spatial_colocation):
-                                    to_pandas_dataframe(read_instance=self, canvas_instance=self, 
-                                                        networkspecies=self.networkspecies, 
-                                                        station_index=relevant_station_ind, 
-                                                        data_range_min=self.data_range_min_station, 
-                                                        data_range_max=self.data_range_max_station)
-                                    
-                                    # update data range min/maxes for station paradigm
-                                    for ns in self.networkspecies:
-                                        if self.selected_station_data_min[ns] < self.data_range_min_station[ns]:
-                                            self.data_range_min_station[ns] = copy.deepcopy(self.selected_station_data_min[ns]) 
-                                        if self.selected_station_data_max[ns] > self.data_range_max_station[ns]:
-                                            self.data_range_max_station[ns] = copy.deepcopy(self.selected_station_data_max[ns])
-                                else:
-                                    continue
-                            
-                            # make plot
-                            print('Making station {2} for {3} ({0}/{1})'.format(i+1, 
-                                                                                len(self.relevant_station_inds),
-                                                                                plot_type, 
-                                                                                self.current_station_name))   
-
-                            plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
-
-                            # do formatting 
-                            relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(base_plot_type, 
-                                                                                                                           plot_indices)
-                            self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
-                                                    base_plot_type, plot_type, plot_options, 'station')
-
                     # update variable now station plots have been made for a networkspecies
                     made_networkspeci_station_plots = True
 
@@ -897,6 +864,102 @@ class ProvidentiaOffline:
                             vars(self).pop(k)
                         except:
                             pass
+
+    def make_station_plots(self, networkspeci, station_plots_to_make):
+
+        for i, relevant_station_ind in enumerate(self.relevant_station_inds):
+            
+            # gather some information about current station
+            self.station_ind += 1
+
+            valid_station_names = self.metadata_in_memory[networkspeci]['station_name'][relevant_station_ind, :]
+            self.current_station_name = str(valid_station_names[pd.notnull(valid_station_names)][0])
+            valid_station_references = self.station_references[networkspeci][relevant_station_ind]
+            self.current_station_reference = str(valid_station_references[pd.notnull(valid_station_references)][0])
+            
+            current_lons = self.metadata_in_memory[networkspeci]['longitude'][relevant_station_ind, :]
+            self.current_lon = round(current_lons[pd.notnull(current_lons)][0], 2)
+            
+            current_lats = self.metadata_in_memory[networkspeci]['latitude'][relevant_station_ind, :]
+            self.current_lat = round(current_lats[pd.notnull(current_lats)][0], 2)
+            
+            # put selected data for each data array into pandas dataframe
+            to_pandas_dataframe(read_instance=self, canvas_instance=self, 
+                                networkspecies=[networkspeci], 
+                                station_index=relevant_station_ind, 
+                                data_range_min=self.data_range_min_station, 
+                                data_range_max=self.data_range_max_station)
+
+            # if have no valid data across data labels (no observations or experiments), then continue 
+            if not self.selected_station_data[networkspeci]:
+                continue
+            
+            # update data range min/maxes for station paradigm
+            if self.selected_station_data_min[networkspeci] < self.data_range_min_station[networkspeci]:
+                self.data_range_min_station[networkspeci] = copy.deepcopy(self.selected_station_data_min[networkspeci]) 
+            if self.selected_station_data_max[networkspeci] > self.data_range_max_station[networkspeci]:
+                self.data_range_max_station[networkspeci] = copy.deepcopy(self.selected_station_data_max[networkspeci])
+
+            # iterate through plots to make
+            for plot_type in station_plots_to_make:
+                
+                # get zstat information from plot_type
+                zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+                
+                # get base plot type (without stat and options)
+                if zstat:
+                    base_plot_type = plot_type.split('-')[0] 
+                else:
+                    base_plot_type = plot_type.split('_')[0] 
+
+                # update standard deviation list for taylor plot
+                if base_plot_type == 'taylor' and not self.have_stddev_data:
+                    
+                    # add standard deviation for Taylor diagram (1 per label and per station for station plots)
+                    for data_label in self.selected_station_data[networkspeci].keys():
+                        # get standard deviation for observations and add to list
+                        stat_val = self.selected_station_data[networkspeci][data_label]['all']['StdDev'][0]
+                        self.stddev_df.append(stat_val)
+
+                # skip Taylor diagram until we have all standard deviations in stddev_df
+                else:
+
+                    # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
+                    plot_options = plot_type.split('_')[1:]
+
+                    # if have multispecies option: 
+                    #   put multiple species data in pandas dataframe if first networkspeci being plotted and spatial_colocation is active 
+                    #   if not, then continue
+                    if 'multispecies' in plot_options: 
+                        if (not made_networkspeci_station_plots) & (self.spatial_colocation):
+                            to_pandas_dataframe(read_instance=self, canvas_instance=self, 
+                                                networkspecies=self.networkspecies, 
+                                                station_index=relevant_station_ind, 
+                                                data_range_min=self.data_range_min_station, 
+                                                data_range_max=self.data_range_max_station)
+                            
+                            # update data range min/maxes for station paradigm
+                            for ns in self.networkspecies:
+                                if self.selected_station_data_min[ns] < self.data_range_min_station[ns]:
+                                    self.data_range_min_station[ns] = copy.deepcopy(self.selected_station_data_min[ns]) 
+                                if self.selected_station_data_max[ns] > self.data_range_max_station[ns]:
+                                    self.data_range_max_station[ns] = copy.deepcopy(self.selected_station_data_max[ns])
+                        else:
+                            continue
+                    
+                    # make plot
+                    print('Making station {2} for {3} ({0}/{1})'.format(i+1, 
+                                                                        len(self.relevant_station_inds),
+                                                                        plot_type, 
+                                                                        self.current_station_name))   
+
+                    plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
+
+                    # do formatting
+                    relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(base_plot_type, 
+                                                                                                                   plot_indices)
+                    self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
+                                            base_plot_type, plot_type, plot_options, 'station')
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
         """ Function that calls making of any type of plot. """
@@ -956,7 +1019,7 @@ class ProvidentiaOffline:
             # skip observations data label when plotting bias
             if (z_statistic_sign == 'bias') & (data_label == 'observations'):
                 continue
-                
+
             # map plots (1 plot per data array/s (1 array if absolute plot,
             # 2 arrays if making bias plot), per subsection)
             if base_plot_type == 'map':
@@ -1055,7 +1118,8 @@ class ProvidentiaOffline:
                         self.subsection_stats_station[self.current_station_reference][zstat][data_label_legend][self.subsection] = data_to_add
 
             # other plots (1 plot per subsection with multiple data arrays for summary paradigm, 1 plot per subsection per station for station paradigm)
-            elif base_plot_type != 'statsummary':
+            elif base_plot_type not in ['statsummary', 'taylor']:
+                
                 # get relevant axis to plot on
                 if plotting_paradigm == 'summary':
                     if 'individual' in plot_options:
@@ -1108,6 +1172,7 @@ class ProvidentiaOffline:
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places'],
                                                                                   self.current_lat,
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places'])
+                            
                     # set title
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
@@ -1257,12 +1322,12 @@ class ProvidentiaOffline:
             self.current_plot_ind += 1     
 
         # then make plot heatmap / table / statsummary plot
-        if base_plot_type in ['heatmap', 'table', 'statsummary']:
+        if base_plot_type in ['heatmap', 'table', 'statsummary', 'taylor']:
 
             # get relevant axis to plot on
             create_plot = False
             if plotting_paradigm == 'summary':
-                if base_plot_type == 'statsummary':
+                if base_plot_type in ['statsummary', 'taylor']:
                     axis_ind = self.subsection_ind
                     create_plot = True
                 else: 
@@ -1275,6 +1340,7 @@ class ProvidentiaOffline:
             
             # make plot ?
             if create_plot:
+                
                 relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, 
                                                                                      plot_type, axis_ind)
             
@@ -1303,13 +1369,20 @@ class ProvidentiaOffline:
                             stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
                                                     index=[self.subsection])
         
-                elif base_plot_type == 'statsummary':
-                    # create structure to store data for statsummary plot
-                    if 'bias' in plot_options:
-                        relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
-                        relevant_data_labels = [data_label for data_label in all_data_labels if data_label != 'observations']
-                    else:
-                        relevant_zstats = self.plot_characteristics[plot_type]['basic']
+                elif base_plot_type in ['statsummary', 'taylor']:
+
+                    if base_plot_type == 'statsummary':
+                        # create structure to store data for statsummary plot
+                        if 'bias' in plot_options:
+                            relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
+                            relevant_data_labels = [data_label for data_label in all_data_labels if data_label != 'observations']
+                        else:
+                            relevant_zstats = self.plot_characteristics[plot_type]['basic']
+                            relevant_data_labels = self.selected_station_data[networkspeci]
+                    elif base_plot_type == 'taylor':
+                        # create structure to store data for Taylor diagram plot
+                        relevant_zstats = [zstat, "StdDev"]
+                        stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
                         relevant_data_labels = self.selected_station_data[networkspeci]
                         
                     stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
@@ -1317,17 +1390,47 @@ class ProvidentiaOffline:
                         for relevant_zstat in relevant_zstats:                    
                             # if relevant stat is expbias stat, then ensure temporal colocation is active
                             # otherwise set value as NaN
-                            if (relevant_zstat in expbias_stats) & (not self.temporal_colocation):
+                            if (plot_type == 'statsummary') and (relevant_zstat in expbias_stats) & (not self.temporal_colocation):
                                 stat_val = np.NaN
+                            # set r/r2 value as NaN for observations in Taylor diagram
+                            elif (base_plot_type == 'taylor') and (data_label == 'observations') and (relevant_zstat in ['r', 'r2']):
+                                    stat_val = np.NaN
                             else:
                                 stat_val = self.selected_station_data[networkspeci][data_label]['all'][relevant_zstat][0]
                             stats_df[relevant_zstat].append(stat_val)
+                            
                     stats_df = pd.DataFrame(data=stats_df, index=relevant_data_labels)
+                
+                # turn on relevant axis if dataframe has values or not all NaN
+                if (len(stats_df.index) > 0) & (not stats_df.isnull().values.all()):
+                    # make plot
+                    if base_plot_type == 'statsummary':
+                        func = getattr(self.plot, 'make_table')
+                        func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
+                             statsummary=True)
+                    elif base_plot_type == 'taylor':
+                        if self.have_stddev_data:
+                            func = getattr(self.plot, 'make_taylor')
+                            func(relevant_axis, networkspeci, stats_df, self.plot_characteristics[plot_type])
+                    else:
+                        func = getattr(self.plot, 'make_{}'.format(base_plot_type))
+                        func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
+
+                    # save plot information for later formatting
+                    self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(stats_df.index.tolist())
+
+                    plot_index = [relevant_page, page_ind]
+                    if plot_index not in plot_indices:
+                        plot_indices.append(plot_index)
+
+                    # turn axis on
+                    relevant_axis.axis('on')
+                    relevant_axis.set_visible(True)
 
                 # set axis title
                 if relevant_axis.get_title() == '':
                     if plotting_paradigm == 'summary':
-                        if base_plot_type == 'statsummary':
+                        if base_plot_type in ['statsummary', 'taylor']:
                             if self.n_stations == 1:
                                 axis_title_label = '{} ({} station)'.format(self.subsection, self.n_stations)
                             else:
@@ -1342,30 +1445,6 @@ class ProvidentiaOffline:
                                                                               self.current_lat,
                                                                               self.plot_characteristics[plot_type]['round_decimal_places'])
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
-
-                # turn off relevant axis if dataframe is empty or all NaN
-                if (len(stats_df.index) > 0) & (not stats_df.isnull().values.all()):
-                    # make plot
-                    if base_plot_type == 'statsummary':
-                        func = getattr(self.plot, 'make_table')
-                        func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
-                             statsummary=True)
-                        # save plot information for later formatting
-                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(stats_df.index.tolist())
-
-                    else:
-                        func = getattr(self.plot, 'make_{}'.format(base_plot_type))
-                        func(relevant_axis, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options)
-                        # save plot information for later formatting
-                        self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(stats_df.columns.tolist())
-
-                    plot_index = [relevant_page, page_ind]
-                    if plot_index not in plot_indices:
-                        plot_indices.append(plot_index)
-
-                    # turn axis on
-                    relevant_axis.axis('on')
-                    relevant_axis.set_visible(True)
 
         return plot_indices
 

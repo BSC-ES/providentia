@@ -80,11 +80,12 @@ class MPLCanvas(FigureCanvas):
 
         # define all possible plots
         self.all_plots = ['legend', 'map', 'timeseries', 'periodic-violin', 'periodic', 
-                          'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot']
+                          'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot',
+                          'taylor']
 
         # define all possible plots in layout options
         self.layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
-                               'periodic-violin', 'scatter', 'statsummary', 'timeseries']
+                               'periodic-violin', 'scatter', 'statsummary', 'timeseries', 'taylor']
 
         # parse active dashboard plot string        
         if isinstance(self.read_instance.active_dashboard_plots, str):
@@ -368,6 +369,7 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_MPL_canvas_updates = True
             self.handle_map_z_statistic_update()
             self.handle_periodic_statistic_update()
+            self.handle_taylor_correlation_statistic_update()
             self.read_instance.block_MPL_canvas_updates = False
 
             # update layout fields
@@ -587,8 +589,8 @@ class MPLCanvas(FigureCanvas):
 
             # reset axes limits (harmonising across subplots for periodic plots) 
             self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
-                                                    self.plot_characteristics['periodic'], 
-                                                    plot_options, relim=True, autoscale=True)
+                                                 self.plot_characteristics['periodic'], 
+                                                 plot_options, relim=True, autoscale=True)
 
             # set ylabel
             self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
@@ -606,9 +608,33 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw()
             self.figure.canvas.flush_events()
 
+    def update_taylor_corr_statistic(self):
+
+        # update periodic plot/s if have some stations selected on map
+        if len(self.relative_selected_station_inds) > 0:
+
+            # clear and turn off all relevant axes before updating
+            self.remove_axis_elements(self.plot_axes['taylor'], 'taylor')
+
+            # do plot with updated correlation statistic
+            self.update_associated_active_dashboard_plot('taylor')
+
+            # activate axis
+            self.activate_axis(self.plot_axes['taylor'], 'taylor')
+
+            # reset navigation toolbar stack for plot
+            self.reset_ax_navigation_toolbar_stack(self.plot_axes['taylor'])
+
+            # update plot options
+            self.update_plot_options(plot_types=['taylor'])
+
+            # draw changes
+            self.figure.canvas.draw()
+            self.figure.canvas.flush_events()
+
     def update_associated_active_dashboard_plot(self, plot_type):
         """ Function that updates a plot associated with selected stations on map. """
-    
+
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
 
@@ -644,12 +670,20 @@ class MPLCanvas(FigureCanvas):
                     xlabel = ''
 
                 # create structure to store data for statsummary plot
-                elif plot_type in ['statsummary']:
+                elif plot_type == 'statsummary':
                     # get list of statistics to create lists for
                     relevant_zstats = self.plot_characteristics[plot_type]['basic']
                     stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
                     xlabel = ''
                     ylabel = ''
+                
+                # create structure to store data for Taylor diagram
+                elif plot_type == 'taylor':
+                    # get r or r2 as correlation statistic
+                    corr_stat = self.plot_characteristics[plot_type]['corr_stat']
+                    relevant_zstats = [corr_stat, "StdDev"]
+                    stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
+
                 # setup xlabel / ylabel for other plot_types
                 else:    
                     # set new xlabel
@@ -683,10 +717,23 @@ class MPLCanvas(FigureCanvas):
                         func(ax, self.read_instance.networkspeci, data_label, self.plot_characteristics[plot_type], 
                              zstat=zstat, plot_options=plot_options, first_data_label=first_data_label)
                         first_data_label = False
-                    # gather data for statsummary plot
-                    elif plot_type in ['statsummary']:
+                    # gather data for statsummary and taylor diagram plots
+                    elif plot_type in ['statsummary', 'taylor']:
                         for relevant_zstat in relevant_zstats:
-                            stats_df[relevant_zstat].append(self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0])
+                            # set r/r2 value as NaN for observations in Taylor diagram
+                            if (plot_type == 'taylor') and (data_label == 'observations') and (relevant_zstat in ['r', 'r2']):
+                                stat_val = np.NaN
+                            else:
+                                stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
+                            stats_df[relevant_zstat].append(stat_val)
+
+                        # add standard deviation for Taylor diagram (only 1 per label)
+                        self.stddev_df = []
+                        if plot_type == 'taylor':
+                            for data_label_ii in self.selected_station_data[self.read_instance.networkspeci].keys():
+                                stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label_ii]['all']['StdDev'][0]
+                                self.stddev_df.append(stat_val)
+
                     # other plots
                     else: 
                         if plot_type == 'metadata':
@@ -699,29 +746,38 @@ class MPLCanvas(FigureCanvas):
                              plot_options=plot_options, first_data_label=first_data_label)
                         first_data_label = False
 
-                # make statsummary plot
-                if plot_type in ['statsummary']:
-                    stats_df = pd.DataFrame(data=stats_df, index=self.selected_station_data[self.read_instance.networkspeci])
-                    func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, statsummary=True)
-
+                # make statsummary and taylor diagram plots
+                if plot_type in ['statsummary', 'taylor']:
+                    stats_df = pd.DataFrame(data=stats_df, 
+                                            index=self.selected_station_data[self.read_instance.networkspeci])
+                    if plot_type == 'statsummary':
+                        func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
+                            statsummary=True)
+                    else:
+                        func(ax, self.read_instance.networkspeci, stats_df, self.plot_characteristics[plot_type])
+                        
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 if plot_type == 'periodic-violin':
                     self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                         plot_options, ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                                             self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                         plot_options, 
+                                                         ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                               self.selected_station_data_max[self.read_instance.networkspeci]],
                                                          relim=True, autoscale_x=True)
                 elif plot_type == 'scatter':
                         self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                              plot_options, relim=True)
-                else:
+                # skip harmonise for taylor
+                elif plot_type != 'taylor':
                     self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                          plot_options, relim=True, autoscale=True)
 
-                # set xlabel
-                self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
+                # skip setting axes labels for Taylor diagram
+                if plot_type != 'taylor':
+                    # set xlabel
+                    self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
 
-                # set ylabel
-                self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
+                    # set ylabel
+                    self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
 
                 # activate axis
                 self.activate_axis(ax, plot_type)
@@ -757,7 +813,7 @@ class MPLCanvas(FigureCanvas):
                         continue
                     
                     # if temporal colocation is turned off or there are no experiments, skip scatter plot
-                    if plot_type in ['scatter']:
+                    if plot_type in ['scatter', 'taylor']:
                         if ((not self.read_instance.temporal_colocation) 
                             or ((self.read_instance.temporal_colocation) and (len(self.read_instance.experiments) == 0))):
                             if (not self.read_instance.temporal_colocation):
@@ -780,11 +836,7 @@ class MPLCanvas(FigureCanvas):
         """ Function that plots grid domain edges of experiments in memory. """
 
         # remove grid domain polygon if previously plotted
-        inds_to_remove = []
-        for pol_ii, pol in enumerate(self.plot_axes['map'].patches):
-            if isinstance(pol, matplotlib.patches.Polygon):
-                inds_to_remove.append(pol_ii)
-        self.plot_axes['map'].patches = list(np.delete(np.array(self.plot_axes['map'].patches), inds_to_remove))
+        self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
 
         # create grid edge polygons for experiments in memory
         grid_edge_polygons = self.plot.make_experiment_domain_polygons()
@@ -925,6 +977,66 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def handle_taylor_correlation_statistic_update(self):
+        
+        if not self.read_instance.block_config_bar_handling_updates:
+            
+            # update taylor diagram correlation statistic combobox
+            # set variable that blocks configuration bar handling updates until all
+            # changes to the statistic combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # get currently selected items
+            corr_stat = self.taylor_corr_stat.currentText()
+
+            # get available stats
+            available_corr_stats = ['r', 'r2']
+
+            # if correlation stat is empty string, it is because fields are being initialised for the first time
+            if corr_stat == '':
+                # set stat to be the one in plot characteristics
+                corr_stat = self.plot_characteristics['taylor']['corr_stat']
+
+            # update statistic combobox (clear, then add items)
+            self.taylor_corr_stat.clear()
+            self.taylor_corr_stat.addItems(available_corr_stats)
+
+            # maintain currently selected statistic
+            self.taylor_corr_stat.setCurrentText(corr_stat)
+
+            # update dictionary
+            self.plot_characteristics['taylor']['corr_stat'] = corr_stat
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update plotted taylor diagram statistic
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_taylor_corr_statistic()
+
+        return None
+
+    def remove_axis_objects(self, ax_elements, elements_to_skip=[], types_to_remove=[]):
+        """ Remove objects (artists, lines, collections, patches) from axis. """
+
+        # It is not possible to remove the elements directly with index from a FeatureArtist
+        # First we need to find the indices of the elements to be removed and remove them 
+        # by index one by one (sorting is needed)
+        inds_to_remove = []
+        for element_ii, element in enumerate(ax_elements):
+            if element not in elements_to_skip:
+                if len(types_to_remove) > 0:
+                    if isinstance(element, tuple(types_to_remove)):
+                        inds_to_remove.append(element_ii)
+                else:
+                    inds_to_remove.append(element_ii)
+
+        # Remove
+        for element_ii in sorted(inds_to_remove, reverse=True):
+            ax_elements[element_ii].remove()
+
+        return None
+    
     def remove_axis_elements(self, ax, plot_type):
         """ Remove all plotted axis elements and hide axis. """
        
@@ -934,6 +1046,8 @@ class MPLCanvas(FigureCanvas):
             for relevant_temporal_resolution, sub_ax in ax.items():
                 axs_to_remove.append(sub_ax)
         else:
+            if plot_type == 'taylor':
+                axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
             axs_to_remove.append(ax)
 
         # iterate through axes
@@ -946,69 +1060,42 @@ class MPLCanvas(FigureCanvas):
                     leg.remove()
 
             elif plot_type == 'map':
-                inds_to_remove = []
-                for artist_ii, artist in enumerate(ax_to_remove.artists):         
-                    if type(artist) == AnchoredOffsetbox:
-                        inds_to_remove.append(artist_ii)
-                ax_to_remove.artists = list(np.delete(np.array(ax_to_remove.artists), inds_to_remove))
-
-                inds_to_remove = []
-                for col_ii, col in enumerate(ax_to_remove.collections): 
-                    # TODO: Put line collection back into place when we turn on the auto_update in gridlines
-                    # if ((isinstance(col, matplotlib.collections.PathCollection))
-                    #     or (isinstance(col, matplotlib.collections.LineCollection))):
-                    if (isinstance(col, matplotlib.collections.PathCollection)):
-                        inds_to_remove.append(col_ii)
-                ax_to_remove.collections = list(np.delete(np.array(ax_to_remove.collections), inds_to_remove))
+                self.remove_axis_objects(ax_to_remove.artists, types_to_remove=[AnchoredOffsetbox])
+                self.remove_axis_objects(ax_to_remove.collections, types_to_remove=[matplotlib.collections.PathCollection])
+                # # TODO: Put line collection back into place when we turn on the auto_update in gridlines
+                # self.remove_axis_objects(ax_to_remove.collections, types_to_remove=[matplotlib.collections.PathCollection],
+                #                                                                     matplotlib.collections.LineCollection])
 
             elif plot_type == 'cb':
-                ax_to_remove.artists = []
-                ax_to_remove.collections = [] 
+                for objects in [ax_to_remove.artists, ax_to_remove.collections]:
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'timeseries':
-                ax_to_remove.lines = [self.timeseries_vline]
-                ax_to_remove.artists = []
-            
-            elif plot_type == 'periodic':
-                ax_to_remove.lines = []
-                ax_to_remove.artists = []
+                self.remove_axis_objects(ax_to_remove.lines, elements_to_skip=[self.timeseries_vline])
+                self.remove_axis_objects(ax_to_remove.artists)
 
             elif plot_type == 'periodic-violin':
-                ax_to_remove.lines = []
-                ax_to_remove.artists = []
-                ax_to_remove.collections = []
+                for objects in [ax_to_remove.lines, ax_to_remove.artists, ax_to_remove.collections]:
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'metadata':
-                ax_to_remove.texts = []
+                self.remove_axis_objects(ax_to_remove.texts)
 
             elif plot_type == 'distribution':
-                ax_to_remove.lines = [self.distribution_vline]
-                ax_to_remove.artists = []
-
-            elif plot_type == 'scatter':
-                ax_to_remove.lines = []
-                ax_to_remove.artists = []
+                self.remove_axis_objects(ax_to_remove.lines, elements_to_skip=[self.distribution_vline])
+                self.remove_axis_objects(ax_to_remove.artists)
 
             elif plot_type == 'statsummary':
-                ax_to_remove.tables = []
+                self.remove_axis_objects(ax_to_remove.tables)
 
-            elif plot_type == 'boxplot':
-                ax_to_remove.lines = []
-                ax_to_remove.artists = []
+            elif plot_type in ['taylor', 'boxplot', 'scatter', 'periodic']:
+                for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects)
 
             # hide axis
             ax_to_remove.axis('off')
             ax_to_remove.set_visible(False)
 
-        # append vertical lines to periodic and periodic violin plots
-        if plot_type == 'periodic':
-            for resolution in self.plot_axes['periodic'].keys():
-                ax_to_remove.lines.append(self.periodic_vline[resolution])
-        
-        elif plot_type == 'periodic-violin':
-            for resolution in self.plot_axes['periodic-violin'].keys():
-                ax_to_remove.lines.append(self.periodic_violin_vline[resolution])
-                
         # hide plot buttons
         if plot_type == 'map':
             self.map_menu_button.hide()
@@ -1046,6 +1133,10 @@ class MPLCanvas(FigureCanvas):
             self.boxplot_menu_button.hide()
             self.boxplot_save_button.hide()
 
+        elif plot_type == 'taylor':
+            self.taylor_menu_button.hide()
+            self.taylor_save_button.hide()
+
         # hide interactive elements
         if plot_type in self.interactive_elements:
             for element in self.interactive_elements[plot_type]['elements']:
@@ -1059,7 +1150,7 @@ class MPLCanvas(FigureCanvas):
         if plot_type in self.plot_elements:
             self.plot_elements[plot_type]['absolute'] = {}
             if 'bias' in self.plot_elements[plot_type]:
-                del self.plot_elements[plot_type]['bias'] 
+                del self.plot_elements[plot_type]['bias']
 
         # hide layout options buttons when there is no selected data
         if hasattr(self, 'relative_selected_station_inds'):
@@ -1080,6 +1171,8 @@ class MPLCanvas(FigureCanvas):
                 if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
                     axs_to_activate.append(sub_ax)
         else:
+            if plot_type == 'taylor':
+                axs_to_activate.append(self.plot.taylor_polar_relevant_axis)
             axs_to_activate.append(ax)
 
         # iterate through axes
@@ -1126,6 +1219,10 @@ class MPLCanvas(FigureCanvas):
         elif plot_type == 'boxplot':
             self.boxplot_menu_button.show()
             self.boxplot_save_button.show()
+
+        elif plot_type == 'taylor':
+            self.taylor_menu_button.show()
+            self.taylor_save_button.show()
         
         # show layout options buttons when there are selected stations
         if len(self.relative_selected_station_inds) > 0:
@@ -1173,7 +1270,7 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
                     return
-
+            
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
@@ -1236,7 +1333,7 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
                     return
-
+            
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
@@ -1325,7 +1422,7 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.ch_extent.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
                     return
-        
+                
             # get map extent (in data coords)
             self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
 
@@ -2484,24 +2581,125 @@ class MPLCanvas(FigureCanvas):
         self.boxplot_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.boxplot_save_button.clicked.connect(self.save_axis_figure_func)
 
+        # TAYLOR DIAGRAM SETTINGS MENU #
+        # add button to taylor diagram to show and hide settings menu
+        self.taylor_menu_button = set_formatting(QtWidgets.QPushButton(self), 
+                                                 formatting_dict['settings_icon'])
+        self.taylor_menu_button.setObjectName('taylor_menu_button')
+        self.taylor_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
+        self.taylor_menu_button.setIconSize(QtCore.QSize(31, 37))
+        self.taylor_menu_button.hide()
+
+        # add white container
+        self.taylor_container = set_formatting(QtWidgets.QWidget(self),
+                                               formatting_dict['settings_container'])
+        self.taylor_container.setGeometry(self.taylor_menu_button.geometry().x()-230,
+                                          self.taylor_menu_button.geometry().y()+25, 
+                                          250, 180)
+        self.taylor_container.hide()
+
+        # add settings label
+        self.taylor_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
+                                                    formatting_dict['settings_label'])
+        self.taylor_settings_label.setGeometry(self.taylor_menu_button.geometry().x()-220, 
+                                               self.taylor_menu_button.geometry().y()+30, 
+                                               230, 20)
+        self.taylor_settings_label.hide()
+
+        # add map stat label ('Correlation statistic') to layout
+        self.taylor_corr_stat_label = QtWidgets.QLabel('Correlation statistic', self)
+        self.taylor_corr_stat_label.setGeometry(self.taylor_menu_button.geometry().x()-220, 
+                                               self.taylor_menu_button.geometry().y()+50, 
+                                               230, 20)
+        self.taylor_corr_stat_label.hide()
+
+        # add map stat combobox
+        self.taylor_corr_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.taylor_corr_stat.AdjustToContents
+        self.taylor_corr_stat.setGeometry(self.map_menu_button.geometry().x()-220, 
+                                         self.map_menu_button.geometry().y()+75, 
+                                         110, 20)
+        self.taylor_corr_stat.hide()
+
+        # add taylor diagram markersize slider name ('Size') to layout
+        self.taylor_markersize_sl_label = QtWidgets.QLabel('Size', self)
+        self.taylor_markersize_sl_label.setGeometry(self.taylor_menu_button.geometry().x()-220,
+                                                    self.taylor_menu_button.geometry().y()+100, 
+                                                    230, 20)
+        self.taylor_markersize_sl_label.hide()
+
+        # add taylor diagram markersize slider
+        self.taylor_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.taylor_markersize_sl.setObjectName('taylor_markersize_sl')
+        self.taylor_markersize_sl.setMinimum(0)
+        self.taylor_markersize_sl.setMaximum(self.plot_characteristics['taylor']['plot']['markersize']*10)
+        self.taylor_markersize_sl.setValue(self.plot_characteristics['taylor']['plot']['markersize'])
+        self.taylor_markersize_sl.setTickInterval(2)
+        self.taylor_markersize_sl.setTracking(False)
+        self.taylor_markersize_sl.setGeometry(self.taylor_menu_button.geometry().x()-220, 
+                                              self.taylor_menu_button.geometry().y()+125, 
+                                              230, 20)
+        self.taylor_markersize_sl.hide()
+
+        # add taylor diagram options name ('Options') to layout
+        self.taylor_options_label = QtWidgets.QLabel("Options", self)
+        self.taylor_options_label.setGeometry(self.taylor_menu_button.geometry().x()-220,
+                                              self.taylor_menu_button.geometry().y()+150, 
+                                              230, 20)
+        self.taylor_options_label.hide()
+
+        # add taylor diagram options checkboxes
+        self.taylor_options = CheckableComboBox(self)
+        self.taylor_options.setObjectName('taylor_options')
+        self.taylor_options.addItems(self.plot_characteristics['taylor']['plot_options'])        
+        self.taylor_options.setGeometry(self.taylor_menu_button.geometry().x()-220, 
+                                        self.taylor_menu_button.geometry().y()+175, 
+                                        230, 20)
+        self.taylor_options.currentTextChanged.connect(self.update_plot_option)
+        self.taylor_options.hide()
+
+        # add taylor figure save button
+        self.taylor_save_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
+        self.taylor_save_button.setObjectName('taylor_save_button')
+        self.taylor_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        self.taylor_save_button.setIconSize(QtCore.QSize(20, 20))
+        self.taylor_save_button.hide()
+
+        # set show/hide actions
+        self.taylor_elements = [self.taylor_container, self.taylor_settings_label, 
+                                self.taylor_corr_stat_label,self.taylor_corr_stat,
+                                self.taylor_markersize_sl_label, self.taylor_markersize_sl,
+                                self.taylor_options_label, self.taylor_options]
+        self.interactive_elements['taylor'] = {'button': self.taylor_menu_button, 
+                                               'hidden': True,
+                                               'elements': self.taylor_elements,
+                                               'markersize_sl': [self.taylor_markersize_sl],
+                                               'opacity_sl': [],
+                                               'linewidth_sl': []
+                                               }
+        self.taylor_menu_button.clicked.connect(self.interactive_elements_button_func)
+        self.taylor_markersize_sl.valueChanged.connect(self.update_markersize_func)
+        self.taylor_save_button.clicked.connect(self.save_axis_figure_func)
+        self.taylor_corr_stat.currentTextChanged.connect(self.handle_taylor_correlation_statistic_update)
+
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
         self.menu_buttons = [self.map_menu_button, self.timeseries_menu_button,
                              self.periodic_menu_button, self.periodic_violin_menu_button,
                              self.metadata_menu_button, self.distribution_menu_button, 
                              self.scatter_menu_button, self.statsummary_menu_button, 
-                             self.boxplot_menu_button]
+                             self.boxplot_menu_button, self.taylor_menu_button]
 
         self.save_buttons = [self.map_save_button, self.timeseries_save_button,
                              self.periodic_save_button, self.periodic_violin_save_button,
                              self.metadata_save_button, self.distribution_save_button, 
                              self.scatter_save_button, self.statsummary_save_button,
-                             self.boxplot_save_button]
+                             self.boxplot_save_button, self.taylor_save_button]
 
         self.elements = [self.map_elements, self.timeseries_elements, 
                          self.periodic_elements, self.periodic_violin_elements,
                          self.metadata_elements, self.distribution_elements, 
                          self.scatter_elements, self.statsummary_elements, 
-                         self.boxplot_elements]
+                         self.boxplot_elements, self.taylor_elements]
 
         # make sure white containers are above buttons
         for element in self.elements:
@@ -2870,21 +3068,26 @@ class MPLCanvas(FigureCanvas):
                                         # call plotting function
                                         if plot_type in ['periodic']:
                                             func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
-                                                self.plot_characteristics[plot_type], zstat=zstat, plot_options=self.read_instance.current_plot_options[plot_type], 
+                                                self.plot_characteristics[plot_type], zstat=zstat, 
+                                                plot_options=self.read_instance.current_plot_options[plot_type], 
                                                 first_data_label=first_data_label)
                                         else: 
                                             func(self.plot_axes[plot_type], self.read_instance.networkspeci, data_label, 
-                                                self.plot_characteristics[plot_type], plot_options=self.read_instance.current_plot_options[plot_type], 
+                                                self.plot_characteristics[plot_type], 
+                                                plot_options=self.read_instance.current_plot_options[plot_type], 
                                                 first_data_label=first_data_label)
                                         first_data_label = False
 
                             # make statsummary bias plot (if not previously made)
                             if (plot_type in ['statsummary']) & ('bias' not in self.plot_elements[plot_type]):
                                 if len(stats_df[list(stats_df.keys())[0]]) > 0:
-                                    index = [data_label for data_label in self.selected_station_data[self.read_instance.networkspeci] if data_label != 'observations']
-                                    stats_df = pd.DataFrame(data=stats_df,index=index)
+                                    index = [data_label for data_label 
+                                             in self.selected_station_data[self.read_instance.networkspeci] 
+                                             if data_label != 'observations']
+                                    stats_df = pd.DataFrame(data=stats_df, index=index)
                                     func(self.plot_axes[plot_type], stats_df, self.plot_characteristics[plot_type], 
-                                         plot_options=self.read_instance.current_plot_options[plot_type], statsummary=True)
+                                         plot_options=self.read_instance.current_plot_options[plot_type], 
+                                         statsummary=True)
 
                             # create other active plot option elements for bias plot (if do not already exist)
                             self.redraw_active_options(list(self.selected_station_data[self.read_instance.networkspeci].keys()), 
@@ -2997,19 +3200,23 @@ class MPLCanvas(FigureCanvas):
         """ Update markers size for each plot type. """
         
         # set markersize
-        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin']:
-
+        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin', 'taylor']:
+            
             if isinstance(ax, dict):
                 for sub_ax in ax.values():
                     for line in sub_ax.lines:
                         line.set_markersize(markersize)
             else:
-                for line in ax.lines:
-                    line.set_markersize(markersize)
+                if plot_type == 'taylor':
+                    for line in self.plot.taylor_polar_relevant_axis.lines:
+                        line.set_markersize(markersize)
+                else:
+                    for line in ax.lines:
+                        line.set_markersize(markersize)
 
             # update characteristics per plot type
             # this is made to keep the changes when selecting stations with lasso
-            if plot_type in ['timeseries', 'periodic', 'scatter']:
+            if plot_type in ['timeseries', 'periodic', 'scatter', 'taylor']:
                 self.plot_characteristics[plot_type]['plot']['markersize'] = markersize
             elif plot_type == 'periodic-violin':
                 self.plot_characteristics[plot_type]['plot']['p50']['markersize'] = markersize
@@ -3312,7 +3519,7 @@ class MPLCanvas(FigureCanvas):
         transform = self.datacrs._as_mpl_transform(self.plot_axes['map'])
 
         # in the newest version of matplotlib, s corresponds to text
-        self.station_annotation = self.plot_axes['map'].annotate(s='', xy=(0, 0), xycoords=transform,
+        self.station_annotation = self.plot_axes['map'].annotate(text='', xy=(0, 0), xycoords=transform,
                                                                  **self.plot_characteristics['map']['stations_annotate'],
                                                                  bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
                                                                  arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
@@ -3382,7 +3589,7 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation at (0, 0) that will be updated later. """
 
         # in the newest version of matplotlib, s corresponds to text
-        self.timeseries_annotation = self.plot_axes['timeseries'].annotate(s='', xy=(0, 0), xycoords='data',
+        self.timeseries_annotation = self.plot_axes['timeseries'].annotate(text='', xy=(0, 0), xycoords='data',
                                                                            **self.plot_characteristics['timeseries']['marker_annotate'],
                                                                            bbox={**self.plot_characteristics['timeseries']['marker_annotate_bbox']},
                                                                            arrowprops={**self.plot_characteristics['timeseries']['marker_annotate_arrowprops']})
@@ -3502,7 +3709,7 @@ class MPLCanvas(FigureCanvas):
                         if self.timeseries_annotation.get_visible():
                             self.timeseries_annotation.set_visible(False)
                             self.timeseries_vline.set_visible(False)
-                            
+
                     # redraw points
                     self.figure.canvas.draw()
                     self.figure.canvas.flush_events()
@@ -3516,7 +3723,7 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation at (0, 0) that will be updated later. """
 
         # in the newest version of matplotlib, s corresponds to text
-        self.scatter_annotation = self.plot_axes['scatter'].annotate(s='', xy=(0, 0), xycoords='data',
+        self.scatter_annotation = self.plot_axes['scatter'].annotate(text='', xy=(0, 0), xycoords='data',
                                                                      **self.plot_characteristics['scatter']['marker_annotate'],
                                                                      bbox={**self.plot_characteristics['scatter']['marker_annotate_bbox']},
                                                                      arrowprops={**self.plot_characteristics['scatter']['marker_annotate_arrowprops']})
@@ -3553,13 +3760,14 @@ class MPLCanvas(FigureCanvas):
                     self.scatter_annotation.set_ha('left')
 
                 # create annotation text
-                # observations label
-                text_label = ('{0}: {1:.2f}').format(self.plot_characteristics['legend']['handles']['obs_label'], 
-                                                       concentration_x)
                 # experiment label
                 exp_alias = self.read_instance.experiments[data_label]
-                text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration_y)
-    
+                text_label = exp_alias
+                # observations label
+                text_label += ('\n{0}: {1:.2f}').format('x', concentration_x)
+                # experiment label
+                text_label += ('\n{0}: {1:.2f}').format('y', concentration_y)
+
         self.scatter_annotation.set_text(text_label)
 
         return None
@@ -3574,7 +3782,7 @@ class MPLCanvas(FigureCanvas):
                     and (self.lock_scatter_annotation == False)):
 
                     # lock annotation
-                    self.lock_scatter_annotation = True
+                    self.lock_scattscatter_annotationer_annotation = True
                     is_contained = False
 
                     for data_label in self.plot_elements['data_labels_active']:
@@ -3611,7 +3819,7 @@ class MPLCanvas(FigureCanvas):
         """ Create annotation at (0, 0) that will be updated later. """
 
         # in the newest version of matplotlib, s corresponds to text
-        self.distribution_annotation = self.plot_axes['distribution'].annotate(s='', xy=(0, 0), xycoords='data',
+        self.distribution_annotation = self.plot_axes['distribution'].annotate(text='', xy=(0, 0), xycoords='data',
                                                                                **self.plot_characteristics['distribution']['marker_annotate'],
                                                                                bbox={**self.plot_characteristics['distribution']['marker_annotate_bbox']},
                                                                                arrowprops={**self.plot_characteristics['distribution']['marker_annotate_arrowprops']})
@@ -3747,7 +3955,7 @@ class MPLCanvas(FigureCanvas):
         # in the newest version of matplotlib, s corresponds to text
         self.periodic_annotation = dict()
         for resolution in self.plot_axes['periodic'].keys():
-            self.periodic_annotation[resolution] = self.plot_axes['periodic'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
+            self.periodic_annotation[resolution] = self.plot_axes['periodic'][resolution].annotate(text='', xy=(0, 0), xycoords='data',
                                                                                                    **self.plot_characteristics['periodic']['marker_annotate'],
                                                                                                    bbox={**self.plot_characteristics['periodic']['marker_annotate_bbox']},
                                                                                                    arrowprops={**self.plot_characteristics['periodic']['marker_annotate_arrowprops']})
@@ -3898,7 +4106,7 @@ class MPLCanvas(FigureCanvas):
         # in the newest version of matplotlib, s corresponds to text
         self.periodic_violin_annotation = dict()
         for resolution in self.plot_axes['periodic-violin'].keys():
-            self.periodic_violin_annotation[resolution] = self.plot_axes['periodic-violin'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
+            self.periodic_violin_annotation[resolution] = self.plot_axes['periodic-violin'][resolution].annotate(text='', xy=(0, 0), xycoords='data',
                                                                                                                  **self.plot_characteristics['periodic-violin']['marker_annotate'],
                                                                                                                  bbox={**self.plot_characteristics['periodic-violin']['marker_annotate_bbox']},
                                                                                                                  arrowprops={**self.plot_characteristics['periodic-violin']['marker_annotate_arrowprops']})
@@ -4040,6 +4248,109 @@ class MPLCanvas(FigureCanvas):
                                 
                             # unlock annotation 
                             self.lock_periodic_violin_annotation[resolution] = False
+
+        return None
+
+    def create_taylor_annotation(self):
+        """ Create annotation at (0, 0) that will be updated later. """
+
+        # in the newest version of matplotlib, s corresponds to text
+        self.taylor_annotation = self.plot.taylor_polar_relevant_axis.annotate(text='', xy=(0, 0), xycoords='data',
+                                                                               **self.plot_characteristics['taylor']['marker_annotate'],
+                                                                               bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
+                                                                               arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})
+        self.taylor_annotation.set_visible(False)
+
+        return None
+
+    def update_taylor_annotation(self, annotation_index):
+
+        for data_label in self.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.taylor_annotate_data_label:
+                
+                # do not annotate if plot is cleared
+                if data_label not in self.plot_elements['taylor'][self.plot_elements['taylor']['active']].keys():
+                    continue
+
+                # retrieve time and concentration
+                line = self.plot_elements['taylor'][self.plot_elements['taylor']['active']][data_label]['plot'][0]
+                corr_stat = line.get_xdata()[annotation_index['ind'][0]]
+                stddev = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.taylor_annotation.xy = (np.arccos(0.93), stddev)
+                
+                # # update bbox position
+                corr_stat_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if corr_stat > corr_stat_middle:
+                    self.taylor_annotation.set_x(-10)
+                    self.taylor_annotation.set_ha('right')
+                else:
+                    self.taylor_annotation.set_x(10)
+                    self.taylor_annotation.set_ha('left')
+
+                # create annotation text
+                # experiment label
+                exp_alias = self.read_instance.experiments[data_label]
+                text_label = exp_alias
+                # correlation label
+                text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['taylor']['corr_stat'], 
+                                                        np.cos(corr_stat))
+                # standard deviation label
+                text_label += ('\n{0}: {1:.2f}').format('StdDev', stddev)
+        
+        print(text_label)
+        self.taylor_annotation.set_text(text_label)
+
+        return None
+
+    def hover_taylor_annotation(self, event):
+        """ Show or hide annotation for each point that is hovered in the Taylor diagram. """
+        
+        # activate hover over Taylor diagram
+        if ('taylor' in self.read_instance.active_dashboard_plots):
+            if event.inaxes == self.plot_axes['taylor']:
+                if ((hasattr(self.plot, 'taylor_plot')) and ('taylor' in self.plot_elements)
+                    and (self.lock_taylor_annotation == False)):
+                    
+                    # lock annotation
+                    self.lock_taylor_annotation = True
+                    is_contained = False
+                    
+                    for data_label in self.plot_elements['data_labels_active']:
+
+                        # skip observations
+                        if data_label == 'observations':
+                            continue
+
+                        # do not annotate if plot is cleared
+                        if data_label not in self.plot_elements['taylor'][self.plot_elements['taylor']['active']].keys():
+                            continue
+                        
+                        line = self.plot_elements['taylor'][self.plot_elements['taylor']['active']][data_label]['plot'][0]
+                        
+                        is_contained, annotation_index = line.contains(event)
+                        if is_contained:
+                            self.taylor_annotate_data_label = data_label
+                            break
+                    
+                    if is_contained:
+                        # update annotation if hovered
+                        self.update_taylor_annotation(annotation_index)
+                        self.taylor_annotation.set_visible(True)
+                    else:
+                        # hide annotation if not hovered
+                        if self.taylor_annotation.get_visible():
+                            self.taylor_annotation.set_visible(False)
+
+                    # redraw points
+                    self.figure.canvas.draw()
+                    self.figure.canvas.flush_events()
+                        
+                    # unlock annotation 
+                    self.lock_taylor_annotation = False
 
         return None
 
