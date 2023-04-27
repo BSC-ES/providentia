@@ -528,6 +528,12 @@ class ProvConfiguration:
         if not self.read_instance.active_dashboard_plots:
             default = ['timeseries', 'statsummary', 'distribution', 'periodic']
             self.read_instance.active_dashboard_plots = default
+        # TODO: For Taylor diagrams, remove this piece of code until Matplotlib 3.7.2 is available
+        else:
+            if 'taylor' in self.read_instance.active_dashboard_plots:
+                error = 'It is not possible to create Taylor diagrams yet, please remove.'
+                sys.exit(error)
+
         if (len(self.read_instance.active_dashboard_plots) != 4) & (not self.read_instance.offline):
             error = 'Error: there must be 4 "active_dashboard_plots"'
             sys.exit(error)
