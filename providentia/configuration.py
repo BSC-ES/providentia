@@ -414,6 +414,28 @@ class ProvConfiguration:
             if isinstance(value, str):
                 return value.strip()
 
+        elif key == 'plot_characteristics_filename':
+            # parse plot characteristics filename
+    
+            if isinstance(value, str):
+                if value != "":
+                    # two paths were provided
+                    if "," in value:
+                        if "dashboard:" in value and "offline:" in value:
+                            plot_characteristics_filename_dashboard = value.split("dashboard:")[1].split(',')[0]
+                            plot_characteristics_filename_offline = value.split("offline:")[1].split(',')[0]
+                            if self.read_instance.offline:
+                                return plot_characteristics_filename_offline
+                            else:
+                                return plot_characteristics_filename_dashboard
+                        else:
+                            msg = 'It is necessary to include the words dashboard and offline to set two plot characteristics filenames, as in: '
+                            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.json, offline:/path/plot_characteristics_offline.json.'
+                            sys.exit(msg)
+                    # one path was provided
+                    else:
+                        return value
+
         elif key == 'calibration_factor':
             # parse calibration factor
             
