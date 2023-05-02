@@ -108,6 +108,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 CURRENT_PATH, 'conf/plot_characteristics_dashboard.json')
         self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
 
+        # error when using wrong custom plot characteristics path to launch dashboard
+        if 'header' in self.plot_characteristics_templates.keys():
+            msg = 'It is not possible to use the offline plot characteristics path to launch the dashboard. Consider adding another path to plot_characteristics_filename, as in: '
+            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.json, offline:/path/plot_characteristics_offline.json.'
+            sys.exit(msg)
+
         # arguments are only local
         self.main_window_geometry = None
 
