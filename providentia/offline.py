@@ -97,6 +97,12 @@ class ProvidentiaOffline:
             self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
             self.plot_characteristics = {}
 
+            # error when using wrong custom plot characteristics path to launch dashboard
+            if 'header' not in self.plot_characteristics_templates.keys():
+                msg = 'It is not possible to use the dashboard plot characteristics path to generate offline reports. Consider adding another path to plot_characteristics_filename, as in: '
+                msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.json, offline:/path/plot_characteristics_offline.json.'
+                sys.exit(msg)
+
             # initialise Plot class
             self.plot = Plot(read_instance=self, canvas_instance=self)
 
