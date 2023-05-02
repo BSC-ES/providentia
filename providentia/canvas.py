@@ -3518,8 +3518,8 @@ class MPLCanvas(FigureCanvas):
         # get axes transformation
         transform = self.datacrs._as_mpl_transform(self.plot_axes['map'])
 
-        # in the newest version of matplotlib, s corresponds to text
-        self.station_annotation = self.plot_axes['map'].annotate(text='', xy=(0, 0), xycoords=transform,
+        # TODO: using the newest version of matplotlib, s corresponds to text
+        self.station_annotation = self.plot_axes['map'].annotate(s='', xy=(0, 0), xycoords=transform,
                                                                  **self.plot_characteristics['map']['stations_annotate'],
                                                                  bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
                                                                  arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
@@ -3588,8 +3588,8 @@ class MPLCanvas(FigureCanvas):
     def create_timeseries_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # in the newest version of matplotlib, s corresponds to text
-        self.timeseries_annotation = self.plot_axes['timeseries'].annotate(text='', xy=(0, 0), xycoords='data',
+        # TODO: using the newest version of matplotlib, s corresponds to text
+        self.timeseries_annotation = self.plot_axes['timeseries'].annotate(s='', xy=(0, 0), xycoords='data',
                                                                            **self.plot_characteristics['timeseries']['marker_annotate'],
                                                                            bbox={**self.plot_characteristics['timeseries']['marker_annotate_bbox']},
                                                                            arrowprops={**self.plot_characteristics['timeseries']['marker_annotate_arrowprops']})
@@ -3722,8 +3722,8 @@ class MPLCanvas(FigureCanvas):
     def create_scatter_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # in the newest version of matplotlib, s corresponds to text
-        self.scatter_annotation = self.plot_axes['scatter'].annotate(text='', xy=(0, 0), xycoords='data',
+        # TODO: using the newest version of matplotlib, s corresponds to text
+        self.scatter_annotation = self.plot_axes['scatter'].annotate(s='', xy=(0, 0), xycoords='data',
                                                                      **self.plot_characteristics['scatter']['marker_annotate'],
                                                                      bbox={**self.plot_characteristics['scatter']['marker_annotate_bbox']},
                                                                      arrowprops={**self.plot_characteristics['scatter']['marker_annotate_arrowprops']})
@@ -3818,8 +3818,8 @@ class MPLCanvas(FigureCanvas):
     def create_distribution_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # in the newest version of matplotlib, s corresponds to text
-        self.distribution_annotation = self.plot_axes['distribution'].annotate(text='', xy=(0, 0), xycoords='data',
+        # TODO: using the newest version of matplotlib, s corresponds to text
+        self.distribution_annotation = self.plot_axes['distribution'].annotate(s='', xy=(0, 0), xycoords='data',
                                                                                **self.plot_characteristics['distribution']['marker_annotate'],
                                                                                bbox={**self.plot_characteristics['distribution']['marker_annotate_bbox']},
                                                                                arrowprops={**self.plot_characteristics['distribution']['marker_annotate_arrowprops']})
@@ -3952,10 +3952,10 @@ class MPLCanvas(FigureCanvas):
     def create_periodic_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # in the newest version of matplotlib, s corresponds to text
+        # TODO: using the newest version of matplotlib, s corresponds to text
         self.periodic_annotation = dict()
         for resolution in self.plot_axes['periodic'].keys():
-            self.periodic_annotation[resolution] = self.plot_axes['periodic'][resolution].annotate(text='', xy=(0, 0), xycoords='data',
+            self.periodic_annotation[resolution] = self.plot_axes['periodic'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
                                                                                                    **self.plot_characteristics['periodic']['marker_annotate'],
                                                                                                    bbox={**self.plot_characteristics['periodic']['marker_annotate_bbox']},
                                                                                                    arrowprops={**self.plot_characteristics['periodic']['marker_annotate_arrowprops']})
@@ -4103,10 +4103,10 @@ class MPLCanvas(FigureCanvas):
     def create_periodic_violin_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # in the newest version of matplotlib, s corresponds to text
+        # TODO: using the newest version of matplotlib, s corresponds to text
         self.periodic_violin_annotation = dict()
         for resolution in self.plot_axes['periodic-violin'].keys():
-            self.periodic_violin_annotation[resolution] = self.plot_axes['periodic-violin'][resolution].annotate(text='', xy=(0, 0), xycoords='data',
+            self.periodic_violin_annotation[resolution] = self.plot_axes['periodic-violin'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
                                                                                                                  **self.plot_characteristics['periodic-violin']['marker_annotate'],
                                                                                                                  bbox={**self.plot_characteristics['periodic-violin']['marker_annotate_bbox']},
                                                                                                                  arrowprops={**self.plot_characteristics['periodic-violin']['marker_annotate_arrowprops']})
@@ -4254,8 +4254,8 @@ class MPLCanvas(FigureCanvas):
     def create_taylor_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # in the newest version of matplotlib, s corresponds to text
-        self.taylor_annotation = self.plot.taylor_polar_relevant_axis.annotate(text='', xy=(0, 0), xycoords='data',
+        # TODO: using the newest version of matplotlib, s corresponds to text
+        self.taylor_annotation = self.plot.taylor_polar_relevant_axis.annotate(s='', xy=(0, 0), xycoords='data',
                                                                                **self.plot_characteristics['taylor']['marker_annotate'],
                                                                                bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
                                                                                arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})
