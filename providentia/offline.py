@@ -679,7 +679,7 @@ class ProvidentiaOffline:
             aux.update_metadata_fields(self)
             aux.metadata_conf(self)
 
-            #set previous QA, flags and filter species as subsection
+            # set previous QA, flags and filter species as subsection
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
@@ -717,7 +717,7 @@ class ProvidentiaOffline:
                     # get N stations for networkspeci
                     self.n_stations = len(self.relevant_station_inds)
 
-                    #if have 0 relevant stations, continue to next networkspeci
+                    # if have 0 relevant stations, continue to next networkspeci
                     if self.n_stations == 0:
                         print('No valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
                         continue
@@ -845,7 +845,7 @@ class ProvidentiaOffline:
                     self.have_stddev_data = False
 
                     # make plots per station
-                    self.make_station_plots(networkspeci, station_plots_to_make)
+                    self.make_station_plots(networkspeci, station_plots_to_make, made_networkspeci_station_plots)
 
                     # turn on variable to make Taylor diagram and make plot (after standard deviations have been stored)
                     if self.stddev_df:
@@ -856,7 +856,7 @@ class ProvidentiaOffline:
                         # make Taylor diagram
                         self.have_stddev_data = True
                         taylor_plot_to_make = [plot_type for plot_type in station_plots_to_make if plot_type.startswith('taylor')]
-                        self.make_station_plots(networkspeci, taylor_plot_to_make)
+                        self.make_station_plots(networkspeci, taylor_plot_to_make, made_networkspeci_station_plots)
                         
                     # update variable now station plots have been made for a networkspecies
                     made_networkspeci_station_plots = True
@@ -871,7 +871,7 @@ class ProvidentiaOffline:
                         except:
                             pass
 
-    def make_station_plots(self, networkspeci, station_plots_to_make):
+    def make_station_plots(self, networkspeci, station_plots_to_make, made_networkspeci_station_plots):
 
         for i, relevant_station_ind in enumerate(self.relevant_station_inds):
             
