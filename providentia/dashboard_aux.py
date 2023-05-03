@@ -191,6 +191,7 @@ class ComboBox(QtWidgets.QComboBox):
         # this creates a line edit that we need to overwrite
         self.setEditable(True)
         self.setMaxVisibleItems(15)
+        self.AdjustToContents
 
         # overwrite default line edit by an invisible one
         self.lineEdit().setFrame(False)
@@ -216,11 +217,11 @@ class ComboBox(QtWidgets.QComboBox):
         # show pop-up
         super().showPopup()
 
+        # increase the width of the elements on popup so they can be read
+        self.view().setMinimumWidth(self.view().sizeHintForColumn(0) + 10)
+
         # add vertical scroll bar
         self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-
-        # increase the width of the elements on popup so they can be read
-        self.view().setMinimumWidth(self.view().sizeHintForColumn(0))
 
 class CheckableComboBox(QtWidgets.QComboBox):
     """ Create combobox with multiple selection options.
