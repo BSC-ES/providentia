@@ -564,6 +564,9 @@ class MPLCanvas(FigureCanvas):
             # set plot options as empty
             plot_options = []
 
+            # format axis
+            self.plot.format_axis(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'])
+
             # set new ylabel
             if z_statistic_type == 'basic':
                 ylabel = basic_stats[base_zstat]['label']
@@ -589,8 +592,10 @@ class MPLCanvas(FigureCanvas):
 
             # reset axes limits (harmonising across subplots for periodic plots) 
             self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
-                                                 self.plot_characteristics['periodic'], 
-                                                 plot_options, relim=True, autoscale=True)
+                                                 self.plot_characteristics['periodic'], plot_options,
+                                                 ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                       self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                 relim=True, autoscale_x=True)
 
             # set ylabel
             self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
@@ -618,9 +623,6 @@ class MPLCanvas(FigureCanvas):
 
             # do plot with updated correlation statistic
             self.update_associated_active_dashboard_plot('taylor')
-
-            # activate axis
-            self.activate_axis(self.plot_axes['taylor'], 'taylor')
 
             # reset navigation toolbar stack for plot
             self.reset_ax_navigation_toolbar_stack(self.plot_axes['taylor'])
@@ -757,7 +759,7 @@ class MPLCanvas(FigureCanvas):
                         func(ax, self.read_instance.networkspeci, stats_df, self.plot_characteristics[plot_type])
                         
                 # reset axes limits (harmonising across subplots for periodic plots) 
-                if plot_type == 'periodic-violin':
+                if plot_type in ['periodic-violin', 'periodic']:
                     self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
                                                          plot_options, 
                                                          ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
@@ -3122,7 +3124,7 @@ class MPLCanvas(FigureCanvas):
 
                     # reset axes limits (harmonising across subplots for periodic plots) 
                     if plot_type != 'map':
-                        if plot_type == 'periodic-violin':
+                        if plot_type in ['periodic-violin', 'periodic']:
                             self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                                  self.plot_characteristics[plot_type], 
                                                                  self.read_instance.current_plot_options[plot_type], 
@@ -4484,7 +4486,7 @@ class MPLCanvas(FigureCanvas):
                                             plot_element.set_visible(False)
 
                             # reset axes limits (harmonising across subplots for periodic plots) 
-                            if plot_type == 'periodic-violin':
+                            if plot_type in ['periodic-violin', 'periodic']:
                                 self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
                                                                      self.plot_characteristics[plot_type], 
                                                                      plot_options, 
