@@ -174,7 +174,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 if position == 'periodic-violin':
                     position = 'periodic_violin'
 
-                if position == plot_type:
+                if position == plot_type or position == 'None':
                     
                     # calculate proportional geometry of buttons respect main window
                     x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
@@ -890,11 +890,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # update plot axis for new plot type
             self.update_plot_axis(self.mpl_canvas, event_source, changed_plot_type)
-
-            # hide axis for new plot type before replot
-            if (changed_plot_type in self.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
-                ax = self.mpl_canvas.plot_axes[changed_plot_type]
-                self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
 
             # update plot if changed_plot_type != None
             if changed_plot_type != 'None':
