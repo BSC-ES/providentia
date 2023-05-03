@@ -1640,28 +1640,24 @@ class MPLCanvas(FigureCanvas):
         # LAYOUT OPTIONS #
         # add position 2 plot selector
         self.read_instance.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.read_instance.cb_position_2.AdjustToContents
         self.read_instance.cb_position_2.setToolTip('Select plot type in top right position')
         self.read_instance.cb_position_2.currentTextChanged.connect(self.read_instance.handle_layout_update)
         self.read_instance.cb_position_2.hide()
 
         # add position 3 plot selector
         self.read_instance.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.read_instance.cb_position_3.AdjustToContents
         self.read_instance.cb_position_3.setToolTip('Select plot type in bottom left position')
         self.read_instance.cb_position_3.currentTextChanged.connect(self.read_instance.handle_layout_update)
         self.read_instance.cb_position_3.hide()
 
         # add position 4 plot selector
         self.read_instance.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.read_instance.cb_position_4.AdjustToContents
         self.read_instance.cb_position_4.setToolTip('Select plot type in bottom centre position')
         self.read_instance.cb_position_4.currentTextChanged.connect(self.read_instance.handle_layout_update)
         self.read_instance.cb_position_4.hide()
 
         # add position 5 plot selector
         self.read_instance.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.read_instance.cb_position_5.AdjustToContents
         self.read_instance.cb_position_5.setToolTip('Select plot type in bottom right position')
         self.read_instance.cb_position_5.currentTextChanged.connect(self.read_instance.handle_layout_update)
         self.read_instance.cb_position_5.hide()
@@ -1700,10 +1696,9 @@ class MPLCanvas(FigureCanvas):
 
         # add map stat combobox
         self.map_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.map_z_stat.AdjustToContents
-        self.map_z_stat.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                    self.map_menu_button.geometry().y()+75, 
-                                    110, 20)
+        self.map_z_stat.move(self.map_menu_button.geometry().x()-220, 
+                             self.map_menu_button.geometry().y()+75)
+        self.map_z_stat.setFixedWidth(100)
         self.map_z_stat.hide()
 
         # add map dataset 1 label ('Dataset 1') to layout
@@ -1715,25 +1710,23 @@ class MPLCanvas(FigureCanvas):
 
         # add map dataset 1 combobox
         self.map_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.map_z1.AdjustToContents
-        self.map_z1.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                self.map_menu_button.geometry().y()+125, 
-                                110, 20)
+        self.map_z1.move(self.map_menu_button.geometry().x()-220, 
+                         self.map_menu_button.geometry().y()+125)
+        self.map_z1.setFixedWidth(100)
         self.map_z1.hide()
 
         # add map dataset 2 label ('Dataset 2') to layout
         self.map_z2_label = QtWidgets.QLabel('Dataset 2', self)
-        self.map_z2_label.setGeometry(self.map_menu_button.geometry().x()-100, 
+        self.map_z2_label.setGeometry(self.map_menu_button.geometry().x()-90, 
                                       self.map_menu_button.geometry().y()+100, 
                                       230, 20)
         self.map_z2_label.hide()
 
         # add map dataset 2 combobox
         self.map_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.map_z2.AdjustToContents
-        self.map_z2.setGeometry(self.map_menu_button.geometry().x()-100, 
-                                self.map_menu_button.geometry().y()+125, 
-                                110, 20)
+        self.map_z2.move(self.map_menu_button.geometry().x()-90, 
+                         self.map_menu_button.geometry().y()+125)
+        self.map_z2.setFixedWidth(100)
         self.map_z2.hide()
 
         # add map general text for unselected stations ('Unselected stations')
@@ -2032,10 +2025,9 @@ class MPLCanvas(FigureCanvas):
         
         # add periodic stat combobox
         self.periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.periodic_stat.AdjustToContents
-        self.periodic_stat.setGeometry(self.periodic_menu_button.geometry().x()-220, 
-                                       self.periodic_menu_button.geometry().y()+75, 
-                                       110, 20)
+        self.periodic_stat.move(self.periodic_menu_button.geometry().x()-220, 
+                                self.periodic_menu_button.geometry().y()+75)
+        self.periodic_stat.setFixedWidth(100)
         self.periodic_stat.hide()
 
         # add periodic markersize slider name ('Size') to layout
@@ -2617,7 +2609,6 @@ class MPLCanvas(FigureCanvas):
 
         # add map stat combobox
         self.taylor_corr_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.taylor_corr_stat.AdjustToContents
         self.taylor_corr_stat.setGeometry(self.map_menu_button.geometry().x()-220, 
                                          self.map_menu_button.geometry().y()+75, 
                                          110, 20)
