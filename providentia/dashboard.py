@@ -1053,7 +1053,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
 
             # setup taylor annotation
-            canvas_instance.create_taylor_annotation()
             canvas_instance.lock_taylor_annotation = False
             canvas_instance.taylor_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                 canvas_instance.hover_taylor_annotation)

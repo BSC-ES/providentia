@@ -1371,9 +1371,11 @@ class Plot:
         smax = srange[1] * reference_stddev
 
         # correlation labels
-        rlocs = np.array(plot_characteristics['rlocs'])
         if extend:
+            rlocs = np.array(plot_characteristics['rlocs']['all'])
             rlocs = np.concatenate((-rlocs[:0:-1], rlocs))
+        else:
+            rlocs = np.array(plot_characteristics['rlocs']['positive'])
 
         # convert correlation values into polar angles
         tlocs = np.arccos(rlocs)
@@ -1462,6 +1464,9 @@ class Plot:
         relevant_axis.grid(**plot_characteristics['grid'])
         relevant_axis.adjust_axes_lim()
 
+        # create and hide annotation at (0, 0)
+        self.canvas_instance.create_taylor_annotation()
+
         # adjust top axis (curve)
         relevant_axis.axis['top'].set_axis_direction('bottom')
         relevant_axis.axis['top'].toggle(ticklabels=True, label=True)
@@ -1474,17 +1479,25 @@ class Plot:
         # adjust right axis (y axis)
         relevant_axis.axis['right'].set_axis_direction('top')
         relevant_axis.axis['right'].toggle(ticklabels=True)
-        relevant_axis.axis['right'].major_ticklabels.set_axis_direction("bottom" if extend else "left")
+        relevant_axis.axis['right'].major_ticklabels.set_axis_direction('bottom' if extend else 'left')
         relevant_axis.axis['right'].major_ticklabels.set(**plot_characteristics['xytick_params'])
 
         # adjust left axis (x axis)
         relevant_axis.axis['left'].set_axis_direction('bottom')
         relevant_axis.axis['left'].major_ticklabels.set(**plot_characteristics['xytick_params'])
-        relevant_axis.axis['left'].label.set_text(xylabel)
-        relevant_axis.axis['left'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])  
 
-        # adjust bottom axis (hide)
-        relevant_axis.axis["bottom"].set_visible(False) 
+        # hide bottom axis ticks and tick labels
+        relevant_axis.axis['bottom'].major_ticklabels.set_visible(False)
+        relevant_axis.axis['bottom'].major_ticks.set_visible(False)
+
+        # show label
+        if extend:
+            relevant_axis.axis['bottom'].label.set_text(xylabel)
+            relevant_axis.axis['bottom'].label.set_pad(10)
+            relevant_axis.axis['bottom'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])
+        else:
+            relevant_axis.axis['left'].label.set_text(xylabel)
+            relevant_axis.axis['left'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])  
 
         # add contours around observations standard deviation
         reference_stddev = stats_df[xylabel][0]
