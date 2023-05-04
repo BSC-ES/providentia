@@ -4273,9 +4273,9 @@ class MPLCanvas(FigureCanvas):
                 stddev = line.get_ydata()[annotation_index['ind'][0]]
 
                 # update location
-                self.taylor_annotation.xy = (np.arccos(0.93), stddev)
+                self.taylor_annotation.xy = (corr_stat, stddev)
                 
-                # # update bbox position
+                # update bbox position
                 corr_stat_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
                 if corr_stat > corr_stat_middle:
                     self.taylor_annotation.set_x(-10)
@@ -4285,16 +4285,12 @@ class MPLCanvas(FigureCanvas):
                     self.taylor_annotation.set_ha('left')
 
                 # create annotation text
-                # experiment label
                 exp_alias = self.read_instance.experiments[data_label]
                 text_label = exp_alias
-                # correlation label
                 text_label += ('\n{0}: {1:.2f}').format(self.plot_characteristics['taylor']['corr_stat'], 
                                                         np.cos(corr_stat))
-                # standard deviation label
                 text_label += ('\n{0}: {1:.2f}').format('StdDev', stddev)
         
-        print(text_label)
         self.taylor_annotation.set_text(text_label)
 
         return None
