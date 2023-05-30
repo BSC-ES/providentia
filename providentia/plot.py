@@ -1489,6 +1489,10 @@ class Plot:
                 
                 # reset index
                 stats_df = stats_df.reset_index()
+                
+                # update observation label
+                if 'observations' in data_labels:
+                    stats_df['index'] = [obs_label if item == 'observations' else item for item in stats_df['index']]
 
                 # get number of "empty" cells (without stats)
                 empty_cells = 1
