@@ -730,11 +730,11 @@ class MPLCanvas(FigureCanvas):
                             stats_df[relevant_zstat].append(stat_val)
 
                         # add standard deviation for Taylor diagram (only 1 per label)
-                        self.stddev_df = []
+                        stddev_df = []
                         if plot_type == 'taylor':
                             for data_label_ii in self.selected_station_data[self.read_instance.networkspeci].keys():
                                 stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label_ii]['all']['StdDev'][0]
-                                self.stddev_df.append(stat_val)
+                                stddev_df.append(stat_val)
 
                     # other plots
                     else: 
@@ -753,10 +753,11 @@ class MPLCanvas(FigureCanvas):
                     stats_df = pd.DataFrame(data=stats_df, 
                                             index=self.selected_station_data[self.read_instance.networkspeci])
                     if plot_type == 'statsummary':
-                        func(ax, stats_df, self.plot_characteristics[plot_type], plot_options=plot_options, 
-                            statsummary=True)
-                    else:
-                        func(ax, self.read_instance.networkspeci, stats_df, self.plot_characteristics[plot_type])
+                        func(ax, stats_df, self.plot_characteristics[plot_type], self.read_instance.networkspeci,
+                             plot_options=plot_options, statsummary=True)
+                    elif plot_type == 'taylor':
+                        reference_stddev = np.nanmax(stddev_df)
+                        func(ax, stats_df, reference_stddev, self.plot_characteristics[plot_type])
                         
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 if plot_type in ['periodic-violin', 'periodic']:
@@ -3525,7 +3526,7 @@ class MPLCanvas(FigureCanvas):
         """ Update annotation for each station that is hovered. """
 
         # retrieve stations references and coordinates
-        station_names = self.read_instance.metadata_in_memory[self.read_instance.networkspeci]['station_name'][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
+        station_names = self.read_instance.station_names[self.read_instance.networkspeci][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
         station_reference = self.read_instance.station_references[self.read_instance.networkspeci][self.active_map_valid_station_inds[annotation_index['ind'][0]]]
         station_location = self.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
         station_value = self.z_statistic[annotation_index['ind'][0]]
