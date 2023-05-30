@@ -22,7 +22,7 @@ expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_
 
 
 def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, 
-                        station_index=False, data_range_min=False, data_range_max=False):
+                        station_index=False, data_range_min=False, data_range_max=False, stddev_max=False):
     """ Function that takes data in memory puts it in a pandas dataframe, per network / species, per data label.
         For summary plots this involves take the median timeseries across the timeseries.
         For station plots it is just the station in question.
@@ -74,6 +74,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
     canvas_instance.selected_station_data_number_non_nan = {}
     canvas_instance.selected_station_data_min = {}
     canvas_instance.selected_station_data_max = {}
+    canvas_instance.selected_station_stddev_max = {}
 
     # iterate through networks / species  
     for networkspeci_ii, networkspeci in enumerate(networkspecies):
@@ -89,6 +90,10 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_data_max[networkspeci] = data_range_max[networkspeci]
         else:
             canvas_instance.selected_station_data_max[networkspeci] = 0.0
+        if stddev_max:
+            canvas_instance.selected_station_stddev_max[networkspeci] = stddev_max[networkspeci]
+        else:
+            canvas_instance.selected_station_stddev_max[networkspeci] = 0.0      
 
         # iterate through data labels
         for data_label in read_instance.data_labels:
@@ -164,10 +169,13 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
                 # get min / max across all selected station data per network / species
                 current_min = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].min()
                 current_max = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].max()
+                current_stddev_max = canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].std()
                 if current_min < canvas_instance.selected_station_data_min[networkspeci]:
                     canvas_instance.selected_station_data_min[networkspeci] = current_min
                 if current_max > canvas_instance.selected_station_data_max[networkspeci]:
                     canvas_instance.selected_station_data_max[networkspeci] = current_max
+                if current_stddev_max > canvas_instance.selected_station_stddev_max[networkspeci]:
+                    canvas_instance.selected_station_stddev_max[networkspeci] = current_stddev_max
 
                 # get number of points per data label
                 n_points = len(canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna())

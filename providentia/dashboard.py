@@ -925,8 +925,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=15, colspan=49))
                 canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 81), rowspan=15, colspan=18))
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=30))
-            elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=34))
             elif changed_plot_type == 'taylor':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((9, 65), rowspan=36, colspan=18),
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
@@ -940,8 +938,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=18, colspan=29))
                 canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 19), rowspan=18, colspan=10))
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 0), rowspan=18, colspan=18))
-            elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 10), rowspan=38, colspan=19))
             elif changed_plot_type == 'taylor':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 5), rowspan=38, colspan=18),
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
@@ -955,8 +951,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=18, colspan=29))
                 canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 54), rowspan=18, colspan=10))
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 35), rowspan=18, colspan=18))
-            elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 45), rowspan=38, colspan=19))
             elif changed_plot_type == 'taylor':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 40), rowspan=38, colspan=18),
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
@@ -970,8 +964,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=18, colspan=29))
                 canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 89), rowspan=18, colspan=10))
                 canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 70), rowspan=18, colspan=18))
-            elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 80), rowspan=38, colspan=19))
             elif changed_plot_type == 'taylor':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=18),
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
