@@ -429,8 +429,8 @@ class Plot:
             tickmax = ytickmax
 
         # set equal ticks
-        ax.set_xlim(math.floor(tickmin), math.ceil(tickmax))
-        ax.set_ylim(math.floor(tickmin), math.ceil(tickmax))
+        ax.set_xlim(tickmin, tickmax)
+        ax.set_ylim(tickmin, tickmax)
 
         return None
 
@@ -2047,6 +2047,10 @@ class Plot:
             if xlim is not None:
                 if base_plot_type != 'timeseries':
                     ax.set_xlim(xlim)
+                    if 'round_decimal_places' in plot_characteristics:
+                        xticklabels = ['{:.{}f}'.format(tick, plot_characteristics['round_decimal_places']) 
+                                       for tick in ax.get_xticks()]
+                        ax.set_xticklabels(xticklabels)
 
             # get ylim
             if ylim is None and ('ylim' not in plot_characteristics):
@@ -2067,7 +2071,11 @@ class Plot:
             # set ylim
             if ylim is not None:
                 ax.set_ylim(ylim)
-
+                if 'round_decimal_places' in plot_characteristics:
+                    ytickslabels = ['{:.{}f}'.format(tick, plot_characteristics['round_decimal_places']) 
+                                    for tick in ax.get_yticks()]
+                    ax.set_yticklabels(ytickslabels)
+            
         # get minimum and maximum from all axes and set limits for periodic plots
         if base_plot_type in ['periodic', 'periodic-violin']:
             if xlim is None and ('xlim' not in plot_characteristics):
