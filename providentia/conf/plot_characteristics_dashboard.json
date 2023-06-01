@@ -223,7 +223,6 @@
                    "1:2_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
                    "2:1_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
                    "equal_aspect": true,
-                   "round_decimal_places": 2,
                    "plot": {"marker": "o", "linestyle": "None", "markersize": 2, "alpha": 0.5},
                    "plot_options": ["annotate", "logx", "logy", "regression"],
                    "marker_annotate": {"xytext": [0, 0], "textcoords": "offset points", "size": 8, "ha": "left", 
