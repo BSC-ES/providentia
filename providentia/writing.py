@@ -267,7 +267,10 @@ def export_configuration(prv, cname, separator="||"):
                           'resolution': prv.resolution,
                           'start_date': prv.start_date,
                           'end_date': prv.end_date,
-                          'aggregation_statistic': prv.aggregation_statistic,
+                          'statistic_mode': prv.statistic_mode,
+                          'statistic_aggregation': prv.statistic_aggregation,
+                          'periodic_statistic_mode': prv.periodic_statistic_mode,
+                          'periodic_statistic_aggregation': prv.periodic_statistic_aggregation
                           }
 
     # experiments

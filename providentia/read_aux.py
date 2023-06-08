@@ -10,15 +10,8 @@ import sys
 shared_memory_vars = {}
 
 def drop_nans(data):
-    """ Function that returns list of lists of station data with NaNs removed. """
-
-    # reshape numpy array to have lists of data per station
-    data_nonan = []
-    # iterate through each list of station data and remove NaNs
-    for station_ii, station_data in enumerate(data):
-        data_nonan.append(station_data[~np.isnan(station_data)])
-    # return nested list of station data with NaNs removed
-    return data_nonan
+    """ Function that return 1D numpy array with NaNs removed. """
+    return data[~pd.isnull(data)]
 
 def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghost_data_in_memory, 
                                       ghost_data_in_memory_shape, timestamp_array, qa, flags):
@@ -41,6 +34,8 @@ def read_netcdf_data(tuple_arguments):
         returns None.
     """
 
+    start = time.time()
+
     # assign arguments from tuple to variables
     relevant_file, station_references, station_names, speci,\
     data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
@@ -56,7 +51,7 @@ def read_netcdf_data(tuple_arguments):
                                                  dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'][:])
     timestamp_array = np.frombuffer(shared_memory_vars['timestamp_array'], dtype=np.int64)
 
-    # read netCDF frame, if files doesn't exist, return with None
+    # read netCDF frame
     ncdf_root = Dataset(relevant_file)
 
     # get time units
@@ -264,6 +259,81 @@ def read_netcdf_data(tuple_arguments):
     # return metadata if reading observations
     if (data_label == 'observations') & (not filter_read):
         return file_metadata
+
+
+def read_netcdf_metadata(tuple_arguments):
+
+    """ Function that handles reading of observational basic metadata from a netCDF"""
+
+    # assign arguments from tuple to variables
+    relevant_file, reading_ghost = tuple_arguments
+
+    # read netCDF frame
+    ncdf_root = Dataset(relevant_file)
+
+    # set metadata variables to read
+    metadata_vars_to_read = ['station_reference', 'station_name', 'longitude', 'latitude', 'measurement_altitude']
+    metadata_read = []
+
+    # iterate though metadata variables to read
+    for meta_var in metadata_vars_to_read:
+        # do extra work for non-GHOST data 
+        if not reading_ghost:
+            # get correct variable name for .nc
+            if meta_var == 'longitude':
+                if "longitude" not in ncdf_root.variables:
+                    meta_var_nc = 'lon'
+                else:
+                    meta_var_nc = 'longitude'
+            elif meta_var == 'latitude':
+                if "latitude" not in ncdf_root.variables:
+                    meta_var_nc = 'lat'
+                else:
+                    meta_var_nc = 'latitude'
+            elif meta_var == 'altitude':
+                if "altitude" not in ncdf_root.variables:
+                    meta_var_nc = 'alt'
+                else:
+                    meta_var_nc = 'altitude'
+            elif meta_var == 'station_reference':
+                if "station_reference" not in ncdf_root.variables:
+                    meta_var_nc = 'station_code'
+                else:
+                    meta_var_nc = 'station_reference'
+            else:
+                meta_var_nc = meta_var
+
+            # check meta variable is in netCDF, otherwise append empty list
+            if meta_var_nc not in ncdf_root.variables:
+                metadata_read.append([])
+                continue
+
+            meta_shape = ncdf_root[meta_var_nc].shape
+            meta_val = ncdf_root[meta_var_nc][:]
+            meta_val_dtype = np.array([meta_val[0]]).dtype
+
+            # some extra str formatting
+            if meta_var in ['station_reference', 'station_name', 'station_classification', 
+                            'area_classification']:
+
+                if len(meta_shape) == 2:
+                    if meta_val_dtype == np.dtype(object):
+                        meta_val = np.array([''.join(val) for val in meta_val])
+                    else:
+                        meta_val = chartostring(meta_val)
+
+        # GHOST metadata
+        else:
+            meta_val = ncdf_root[meta_var][:]
+
+        # append read metadata 
+        metadata_read.append(meta_val)
+
+    # close netCDF
+    ncdf_root.close()
+
+    # return read metadata
+    return metadata_read
 
 def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to_read, resolution):
     """ Function that returns the yearmonths of the files to be read.

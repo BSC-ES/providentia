@@ -532,6 +532,7 @@ class DataFilter:
                         np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
 
                     if len(self.read_instance.data_labels) > 1:
+
                         # get colocated obs data array (if have experiments)
                         obs_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
 
