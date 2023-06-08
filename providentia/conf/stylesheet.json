@@ -21,6 +21,12 @@
                                   "selection-color": "white", "selection-background-color": "grey",
                                   "border": {"colour": "lightgrey", "size": 1}},
 
+    "checkable_combobox_menu":   {"font": {"style": "SansSerif", "size": 9.5},
+                                  "height": 20, "width": 230,
+                                  "color": "black", "background-color": "white", 
+                                  "selection-color": "white", "selection-background-color": "grey",
+                                  "border": {"colour": "lightgrey", "size": 1}},
+
     "lineedit_menu":             {"font": {"style": "SansSerif", "size": 9.5},
                                   "height": 20, "width": 90,
                                   "color": "black",
