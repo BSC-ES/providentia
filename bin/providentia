@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # init
 cores=12
 jobname="PRV"
@@ -38,7 +37,6 @@ PARSED=$(getopt --options ${SHORT} \
                 --longoptions ${LONG} \
                 --name "$0" \
                 -- "$@")         # pass all the args to this script to getopt
-
 # exit if getopt has complained about wrong arguments to stdout
 if [[ $? -ne 0 ]]; then
     exit 2
