@@ -39,7 +39,7 @@
                     "minimum_bias": [0.0], "units": "measurement_units", "cmap_absolute": "viridis", 
                     "cmap_bias": "bwr"},
 
-    "p50" :        {"function": "calculate_percentile", "order": 9, "label": "p50", "arguments": {"percentile": 50.0}, 
+    "p50" :        {"function": "calculate_median", "order": 9, "label": "p50", "arguments": {}, 
                     "minimum_bias": [0.0], "units": "measurement_units", "cmap_absolute": "viridis", 
                     "cmap_bias": "bwr"},
 

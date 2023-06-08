@@ -17,7 +17,7 @@ from .read import DataReader
 from .filter import DataFilter
 from .plot import Plot
 from .statistics import to_pandas_dataframe
-from .statistics import calculate_z_statistic
+from .statistics import calculate_statistic
 from .statistics import generate_colourbar
 from .statistics import get_z_statistic_info
 from .configuration import ProvConfiguration
@@ -279,12 +279,12 @@ class ProvidentiaOffline:
                     # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                     plot_options = plot_type.split('_')[1:]
 
-                    # if a multispecies plot is wanted then this is only made on first instance of formatting a networkspeci 
+                    # if a multispecies plot is active then only format on first pass
                     if ('multispecies' in plot_options) & (formatted_networkspeci_plots):
                         continue
 
                     # get zstat information from plot_type
-                    zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+                    zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type)
 
                     # get base plot type (without stat and options)
                     if zstat:
@@ -434,7 +434,7 @@ class ProvidentiaOffline:
                     self.station_pages[plot_type][networkspeci][self.subsection] = []
 
             # get zstat information from plot_type
-            zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+            zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type)
 
             # get base plot type (without stat and options)
             if zstat:
@@ -753,7 +753,7 @@ class ProvidentiaOffline:
                     for plot_type in summary_plots_to_make:
 
                         # get zstat information from plot_type
-                        zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+                        zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type)
                         
                         # get base plot type (without stat and options)
                         if zstat:
@@ -910,7 +910,7 @@ class ProvidentiaOffline:
             for plot_type in station_plots_to_make:
                 
                 # get zstat information from plot_type
-                zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+                zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type)
                 
                 # get base plot type (without stat and options)
                 if zstat:
@@ -977,7 +977,7 @@ class ProvidentiaOffline:
         plot_indices = []
 
         # get zstat information from plot_type
-        zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type=plot_type)
+        zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type)
 
         # get base plot type (without stat and options)
         if zstat:
@@ -1068,8 +1068,8 @@ class ProvidentiaOffline:
                     continue
 
                 # calculate z statistic
-                self.z_statistic, active_map_valid_station_inds = calculate_z_statistic(self, z1, z2, zstat, networkspeci)
-                self.active_map_valid_station_inds = active_map_valid_station_inds
+                self.z_statistic, self.active_map_valid_station_inds = calculate_statistic(self, self, zstat, z1, z2,
+                                                                                           map=True)
 
                 # make map plot
                 self.plot.make_map(relevant_axis, networkspeci, self.z_statistic, self.plot_characteristics[plot_type], 
@@ -1361,7 +1361,8 @@ class ProvidentiaOffline:
                                 stats_per_data_label.append(stat)
                         stats_to_plot[zstat][data_label] = stats_per_data_label
                         stats_df = pd.DataFrame(data=stats_to_plot[zstat],
-                                                index=self.subsections)
+                                                index=self.subsections,
+                                                dtype=np.float32)
                     elif plotting_paradigm == 'station':
                         if self.current_station_reference not in self.subsection_stats_station:
                             stats_df = pd.DataFrame()
@@ -1373,7 +1374,8 @@ class ProvidentiaOffline:
                                     stats_per_data_label.append(stat)
                             stats_to_plot[self.current_station_reference][zstat][data_label] = stats_per_data_label
                             stats_df = pd.DataFrame(data=self.subsection_stats_station[self.current_station_reference][zstat],
-                                                    index=[self.subsection])
+                                                    index=[self.subsection],
+                                                    dtype=np.float32)
         
                 elif base_plot_type in ['statsummary', 'taylor']:
 
@@ -1405,7 +1407,7 @@ class ProvidentiaOffline:
                                 stat_val = self.selected_station_data[networkspeci][data_label]['all'][relevant_zstat][0]
                             stats_df[relevant_zstat].append(stat_val)
                             
-                    stats_df = pd.DataFrame(data=stats_df, index=relevant_data_labels)
+                    stats_df = pd.DataFrame(data=stats_df, index=relevant_data_labels, dtype=np.float32)
                 
                 # turn on relevant axis if dataframe has values or not all NaN
                 if (len(stats_df.index) > 0) & (not stats_df.isnull().values.all()):

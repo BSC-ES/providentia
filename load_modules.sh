@@ -32,7 +32,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
      PyQt5/5.13.1-GCCcore-8.3.0-Python-3.7.4 \
      Qt5/5.14.1-GCCcore-8.3.0 \
      OpenMPI/4.0.5-GCC-8.3.0-nord3-v2 \
-     pyproj/3.2.1-foss-2019b-Python-3.7.4
+     pyproj/3.2.1-foss-2019b-Python-3.7.4\
 
 # Workstations
 # TODO: Review modules
