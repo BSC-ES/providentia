@@ -9,7 +9,7 @@ import pyproj
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-import matplotlib 
+import matplotlib as mpl 
 from matplotlib.dates import num2date
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
@@ -23,6 +23,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as st
 import seaborn as sns
+from itertools import groupby
 
 from .statistics import get_z_statistic_info, calculate_statistic
 from .aux import (get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels,
@@ -432,8 +433,8 @@ class Plot:
             tickmax = ytickmax
 
         # set equal ticks
-        ax.set_xlim(math.floor(tickmin), math.ceil(tickmax))
-        ax.set_ylim(math.floor(tickmin), math.ceil(tickmax))
+        ax.set_xlim(tickmin, tickmax)
+        ax.set_ylim(tickmin, tickmax)
 
         return None
 
@@ -1274,7 +1275,8 @@ class Plot:
         print(time.time()-start)
 
     def make_heatmap(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
-                     zstats=None, plot_options=[]):
+                     zstats=None, plot_options=[], networkspeci=None, subsection=None, 
+                     plotting_paradigm=None):
         """ Make heatmap plot.
 
             :param relevant_axis: axis to plot on 
@@ -1321,27 +1323,148 @@ class Plot:
         # round dataframe
         stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
 
+        # get subsections
+        subsections = list(np.unique(stats_df.index.get_level_values(1)))
+
+        # get relevant data
+        if plotting_paradigm == 'station':
+            stats_df = stats_df.iloc[stats_df.index.get_level_values('subsections') == subsection]
+        if 'multispecies' not in plot_options:
+            stats_df = stats_df.iloc[stats_df.index.get_level_values('networkspecies') == networkspeci]
+        else:
+            # replace subsection name by networkspecies if there is only one
+            if (len(subsections) == 1) or (plotting_paradigm == 'station'):
+                stats_df = stats_df.droplevel(level='subsections')
+
         # plot heatmap
         heatmap = sns.heatmap(stats_df, 
                               ax=relevant_axis, 
                               annot=annotate,
                               **plot_characteristics['plot'])
 
-        # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
-        if len(stats_df.index) > 1:
-            bottom, top = relevant_axis.get_ylim()
-            relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+        # remove networkspecies-subsections label from y-axis
+        relevant_axis.set_ylabel("")
 
-        # vertically align yticklabels due to bug again in matplotlib - hack fix. Remove in Future!
-        for tick in relevant_axis.get_yticklabels():
-            tick.set_verticalalignment("center")
+        # if there is only one subsection or station data
+        if (plotting_paradigm == 'station') or (len(subsections) == 1):
+            # for multispecies, remove network names from labels
+            if ('multispecies' in plot_options) and (not plot_characteristics['multispecies']['network_names']):
+                if not plot_characteristics['multispecies']['network_names']:
+                    yticklabels = [networkspeci.split('|')[1] if '|' in networkspeci else networkspeci 
+                                   for networkspeci in stats_df.index]
+            # for non multispecies, remove subsection names from labels
+            elif ('multispecies' not in plot_options) and (not plot_characteristics['parent_section_names']):
+                yticklabels = []
+                for subsection_label in stats_df.index.get_level_values(1):
+                    if "·" in subsection_label:
+                        subsection_label = subsection_label.split('·')[1]
+                    yticklabels.append(subsection_label)
+            # keep original labels
+            else:
+                yticklabels = stats_df.index
+        # if there is summary data for more than one subsection
+        elif (plotting_paradigm == 'summary') and (len(subsections) > 1):
+            # remove parent names from subsections
+            if not plot_characteristics['parent_section_names']:
+                yticklabels = []
+                for subsection_label in stats_df.index.get_level_values(1):
+                    if "·" in subsection_label:
+                        subsection_label = subsection_label.split('·')[1]
+                    yticklabels.append(subsection_label)
+            # keep original labels
+            else:
+                yticklabels = stats_df.index.get_level_values(1)
+        relevant_axis.set_yticklabels(yticklabels, **plot_characteristics['yticklabels'])
+
+        # set xticklabels
+        xticklabels = stats_df.columns
+        if 'observations' in xticklabels:
+            if plot_characteristics['obs_label']:
+                obs_label = plot_characteristics['obs_label']
+                xticklabels = [obs_label if item == 'observations' else item for item in xticklabels]
+        relevant_axis.set_xticklabels(xticklabels, **plot_characteristics['xticklabels'])
+
+        # format for multispecies
+        if 'multispecies' in plot_options:
+            # if we have more than one subsection and we are plotting summaries
+            if (len(subsections) > 1) and (plotting_paradigm == 'summary'):
+                # add horizontal lines to separate networkspecies
+                networkspecies = list(stats_df.index.get_level_values(0)[::(len(subsections))])
+                y_separators = []
+                for networkspeci_ii in range(len(networkspecies)+1):
+                    y_separators.append(len(subsections)*networkspeci_ii)
+                relevant_axis.hlines(y=y_separators, xmin=plot_characteristics['multispecies']['xmin'], 
+                                     xmax=0, clip_on=False, **plot_characteristics['multispecies']['hlines'])
+
+                # annotate networkspecies names on the left
+                for networkspeci, y_separator in zip(networkspecies, y_separators[:-1]):
+                    y_position = (len(subsections)/2) + y_separator
+                    # remove network names from networkspecies
+                    if not plot_characteristics['multispecies']['network_names']:
+                        networkspeci_label = networkspeci.split('|')[1]
+                    else:
+                        networkspeci_label = networkspeci
+                    relevant_axis.annotate(s=networkspeci_label, annotation_clip=False,
+                                           xy=(plot_characteristics['multispecies']['xmin'], y_position), 
+                                           **plot_characteristics['multispecies']['yticklabels'])
+        
+        # format for non multispecies
+        else:
+            # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
+            # if len(stats_df.index) > 1:
+            #     bottom, top = relevant_axis.get_ylim()
+            #     relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+
+            # vertically align yticklabels due to bug again in matplotlib - hack fix. Remove in Future!
+            for tick in relevant_axis.get_yticklabels():
+                tick.set_verticalalignment("center")
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
             self.track_plot_elements('observations', 'heatmap', 'plot', heatmap, bias=bias)
 
+    def merge_cells(self, table, cells):
+        """
+        Merge cells in matplotlib.Table. Reference: https://stackoverflow.com/a/53819765/12684122.
+
+        :param table: table
+        :type table: matplotlib.Table
+        :param cells: cells to merge in table coordinates, e.g. [(0,1), (0,0), (0,2)]
+        :type cells: list
+        """
+
+        cells_array = [np.asarray(c) for c in cells]
+        h = np.array([cells_array[i+1][0] - cells_array[i][0] for i in range(len(cells_array) - 1)])
+        v = np.array([cells_array[i+1][1] - cells_array[i][1] for i in range(len(cells_array) - 1)])
+
+        # if it's a horizontal merge, all values for `h` are 0
+        if not np.any(h):
+            # sort by horizontal coord
+            cells = np.array(sorted(list(cells), key=lambda v: v[1]))
+            edges = ['BTL'] + ['BT' for i in range(len(cells) - 2)] + ['BTR']
+        elif not np.any(v):
+            cells = np.array(sorted(list(cells), key=lambda h: h[0]))
+            edges = ['TRL'] + ['RL' for i in range(len(cells) - 2)] + ['BRL']
+        else:
+            raise ValueError("Only horizontal and vertical merges allowed")
+
+        for cell, e in zip(cells, edges):
+            table[cell[0], cell[1]].visible_edges = e
+            
+        txts = [table[cell[0], cell[1]].get_text() for cell in cells]
+        tpos = [np.array(t.get_position()) for t in txts]
+
+        # transpose the text of the left cell
+        trans = (tpos[-1] - tpos[0])/2
+
+        # didn't had to check for ha because I only want ha='center'
+        txts[0].set_transform(mpl.transforms.Affine2D().translate(*trans))
+        for txt in txts[1:]:
+            txt.set_visible(False)
+
     def make_table(self, relevant_axis, networkspeci, data_labels, plot_characteristics,
-                   zstats=None, statsummary=False, plot_options=[],):
+                   zstats=None, statsummary=False, plot_options=[], networkspeci=None, 
+                   subsection=None, plotting_paradigm=None):
         """ Make table plot.
 
             :param relevant_axis: axis to plot on 
@@ -1352,8 +1475,14 @@ class Plot:
             :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
-            :param zstats: name of statistics
-            :type zstats: list
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param subsection: str of currently active subsection
+            :type subsection: str
+            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+            :type plotting_paradigm: str
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
             :param statsummary: boolean indiciating if making alternative statistical summary table plot  
             :type statsummary: boolean
             :param plot_options: list of options to configure plot  
@@ -1391,53 +1520,147 @@ class Plot:
         # round dataframe
         stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
 
-        # set row_colours and col_colours
+        # get observations label
+        if 'legend' in plot_characteristics:
+            obs_label = plot_characteristics['legend']['handles']['obs_label'] 
+        elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
+            obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
+        else:
+            obs_label = 'Observations'
+
+        # offline reports
+        if self.read_instance.offline:
+            
+            # get relevant data
+            if 'multispecies' not in plot_options:
+                stats_df = stats_df.iloc[stats_df.index.get_level_values('networkspecies') == networkspeci]
+            if plotting_paradigm == 'station':
+                stats_df = stats_df.iloc[stats_df.index.get_level_values('subsections') == subsection]
+
+            # get labels
+            networkspecies = list(stats_df.index.get_level_values('networkspecies'))
+            subsections = list(stats_df.index.get_level_values('subsections'))
+            if statsummary:
+                data_labels = list(stats_df.index.get_level_values('labels'))
+                stats = list(stats_df.columns)
+            else:
+                data_labels = list(stats_df.columns)
+
+            # reset index after filtering
+            stats_df = stats_df.reset_index()
+
+            # hide subsections from station plots or if there is only 1 section
+            if self.read_instance.offline:
+                if plotting_paradigm == 'station' or len(np.unique(subsections)) == 1:
+                    stats_df = stats_df.drop(columns='subsections')
+        
+            # hide networkspecies from plots that are not multispecies
+            if 'multispecies' not in plot_options:
+                stats_df = stats_df.drop(columns='networkspecies')
+        
+            # remove parent names from subsections
+            if ('subsections' in stats_df.columns) and (not plot_characteristics['parent_section_names']):
+                stats_df['subsections'] = [subsection_label.split('·')[1] if '·' in subsection_label 
+                                           else subsection_label for subsection_label in subsections]
+
+            # remove network names from networkspecies
+            if (('multispecies' in plot_options) and ('networkspecies' in stats_df.columns) and 
+                (not plot_characteristics['multispecies']['network_names'])):
+                stats_df['networkspecies'] = [networkspeci_label.split('|')[1] for networkspeci_label in networkspecies]
+            
+            # get number of "empty" cells (without stats) and 
+            # column labels (hide networkspecies, subsections and data labels)
+            if statsummary:
+                empty_cells = len(stats_df.columns) - len(stats)
+                col_labels = ['']*empty_cells + stats
+                if 'observations' in data_labels:
+                    stats_df['labels'] = [obs_label if item == 'observations' else item for item in stats_df['labels']]
+            else:
+                empty_cells = len(stats_df.columns) - len(data_labels)
+                col_labels = ['']*empty_cells + data_labels
+                if 'observations' in col_labels:
+                    col_labels = [obs_label if item == 'observations' else item for item in col_labels]
+
+        # dashboard
+        else:
+            # there is only statsummary
+            if statsummary:
+
+                # get labels
+                data_labels = list(stats_df.index)
+                stats = list(stats_df.columns)
+                
+                # reset index
+                stats_df = stats_df.reset_index()
+                
+                # update observation label
+                if 'observations' in data_labels:
+                    stats_df['index'] = [obs_label if item == 'observations' else item for item in stats_df['index']]
+
+                # get number of "empty" cells (without stats)
+                empty_cells = 1
+                col_labels = ['']*empty_cells + stats
+
+        # set cell colors
         if statsummary:
-            if 'row_colours' in plot_characteristics:
-                if plot_characteristics['row_colours']:
-                    plot_characteristics['plot']['rowColours'] = ['white' if data_label == 'observations' else 
-                                                                  self.read_instance.plotting_params[data_label]['colour'] 
-                                                                  for data_label in row_labels]
+            if 'cell_colours' in plot_characteristics:
+                if plot_characteristics['cell_colours']:
+                    cell_colours = [[]] * (stats_df.shape[1])
+                    for col in range(stats_df.shape[1]):
+                        # custom colors for data labels cells
+                        if col == (empty_cells-1):
+                            for data_label in data_labels:
+                                # observations in white
+                                if data_label == 'observations':
+                                    color = 'white'
+                                # experiments in legend colors
+                                else:
+                                    exp_label = list(self.read_instance.experiments.keys())[list(self.read_instance.experiments.values()).index(data_label)]
+                                    color = self.read_instance.plotting_params[exp_label]['colour']
+                                cell_colours[col].append(color)
+                        # white for other cells
+                        else:
+                            cell_colours[col] = ['white'] * stats_df.shape[0]
+                    plot_characteristics['plot']['cellColours'] = np.array(cell_colours).T
         else:
             if 'col_colours' in plot_characteristics:
                 if plot_characteristics['col_colours']:
-                    plot_characteristics['plot']['colColours'] = []
-                    for data_label in col_labels:
+                    col_colours = []
+                    for data_label in data_labels:
+                        # observations in white
                         if data_label == 'observations':
-                            plot_characteristics['plot']['colColours'].extend(['white'])
+                            color = 'white'
+                        # experiments in legend colors
                         else:
                             exp_label = list(self.read_instance.experiments.keys())[list(self.read_instance.experiments.values()).index(data_label)]
-                            plot_characteristics['plot']['colColours'].extend([self.read_instance.plotting_params[exp_label]['colour']])
-        
-        # if plot is statsummary, then remove bias from col_labels, and use alises for row_labels
-        if statsummary:
-            col_labels = [col_label.split('_bias')[0] if '_bias' in col_label else col_label for col_label in col_labels]
-            for row_label_ii, row_label in enumerate(row_labels):
-                if row_label == 'observations':
-                    if 'legend' in plot_characteristics:
-                        row_labels[row_label_ii] = plot_characteristics['legend']['handles']['obs_label'] 
-                    elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
-                        row_labels[row_label_ii] = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
-                    else:
-                        row_labels[row_label_ii] = 'Observations'
-                else:
-                    row_labels[row_label_ii] = self.read_instance.experiments[row_label]  
+                            color = self.read_instance.plotting_params[exp_label]['colour']
+                        col_colours.extend([color])
+                    plot_characteristics['plot']['colColours'] = ['white']*empty_cells + col_colours
 
         # make table
         table = relevant_axis.table(cellText=stats_df.values, 
-                                    colLabels=col_labels, 
-                                    rowLabels=row_labels, 
+                                    colLabels=col_labels,
                                     **plot_characteristics['plot'])
+
+        # merge cells in networkspecies and subsections columns (if any)
+        if self.read_instance.offline:
+            column_ii = 0
+            for column, rows in zip(['networkspecies', 'subsections'], (networkspecies, subsections)):
+                if column in stats_df.columns:
+                    # count consecutive duplicates
+                    count_dups = [sum(1 for _ in group) for _, group in groupby(rows)]
+                    
+                    # merge cells that have consecutive duplicates
+                    current_row = 0
+                    for count_ii, count in enumerate(count_dups):
+                        cells_to_merge = [(current_row + i, column_ii) for i in range(1, count+1)]
+                        self.merge_cells(table, cells_to_merge)
+                        current_row += count
+                    column_ii += 1
 
         # adjust cell height
         if 'cell_height' in plot_characteristics:
             table.scale(1, plot_characteristics['cell_height'])
-
-        # adjust cell padding ()
-        if 'cell_pad_rowlabel' in plot_characteristics:
-            for (row, col), cell in table.get_celld().items():    
-                if col == -1:             
-                    cell.PAD = plot_characteristics['cell_pad_rowlabel']
 
         # adjust fontsize
         if 'fontsize' in plot_characteristics:
@@ -1453,7 +1676,15 @@ class Plot:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
     
     def get_taylor_diagram_ghelper_info(self, reference_stddev, plot_characteristics, extend=False):
-        """ Make Taylor diagram plot axis extremes and labels. """
+        """ Make Taylor diagram plot axis extremes and labels. 
+            
+            :param reference_stddev: reference standard deviation to set the limits
+            :type reference_stddev: float
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param extend: extend to negative correlations
+            :type undo: boolean
+        """
 
         tmin = 0
 
@@ -1484,7 +1715,15 @@ class Plot:
         return tmin, tmax, smin, smax, gl1, tf1
     
     def get_taylor_diagram_ghelper(self, reference_stddev, plot_characteristics, extend=False):
-        """ Make Taylor diagram plot grid helper. """
+        """ Make Taylor diagram plot grid helper. 
+
+            :param reference_stddev: reference standard deviation to set the limits
+            :type reference_stddev: float
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param extend: extend to negative correlations
+            :type undo: boolean
+        """
 
         # get axis extremes
         tmin, tmax, smin, smax, gl1, tf1 = self.get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, 
@@ -1562,7 +1801,7 @@ class Plot:
         relevant_axis.get_grid_helper().update_grid_finder(
             extreme_finder=fa.ExtremeFinderFixed((tmin, tmax, smin, smax)),
             grid_locator1=gl1, tick_formatter1=tf1)
-        
+
         # update axis position and size in dashboard
         if not self.read_instance.offline:
 
@@ -1601,7 +1840,8 @@ class Plot:
         relevant_axis.adjust_axes_lim()
 
         # create and hide annotation at (0, 0)
-        self.canvas_instance.create_taylor_annotation()
+        if not self.read_instance.offline:
+            self.canvas_instance.create_taylor_annotation()
 
         # adjust top axis (curve)
         relevant_axis.axis['top'].set_axis_direction('bottom')
@@ -2184,6 +2424,10 @@ class Plot:
             if xlim is not None:
                 if base_plot_type != 'timeseries':
                     ax.set_xlim(xlim)
+                    if 'round_decimal_places' in plot_characteristics:
+                        xticklabels = ['{:.{}f}'.format(tick, plot_characteristics['round_decimal_places']) 
+                                       for tick in ax.get_xticks()]
+                        ax.set_xticklabels(xticklabels)
 
             # get ylim
             if ylim is None and ('ylim' not in plot_characteristics):
@@ -2204,7 +2448,11 @@ class Plot:
             # set ylim
             if ylim is not None:
                 ax.set_ylim(ylim)
-
+                if 'round_decimal_places' in plot_characteristics:
+                    ytickslabels = ['{:.{}f}'.format(tick, plot_characteristics['round_decimal_places']) 
+                                    for tick in ax.get_yticks()]
+                    ax.set_yticklabels(ytickslabels)
+            
         # get minimum and maximum from all axes and set limits for periodic plots
         if base_plot_type in ['periodic', 'periodic-violin']:
             if xlim is None and ('xlim' not in plot_characteristics):
@@ -2230,7 +2478,7 @@ class Plot:
                     sub_ax.set_xlim(xlim)
 
         # get minimum and maximum from all axes and set limits for timeseries
-        if base_plot_type == 'timeseries':
+        elif base_plot_type == 'timeseries':
             if plot_characteristics['xtick_alteration']['define']:
             
                 # get steps for all data labels
@@ -2253,9 +2501,9 @@ class Plot:
 
                 # show hours if number of days is less than 7
                 if n_days < 7:
-                    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+                    ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %H:%M'))
                 else:
-                    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
+                    ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d'))
 
                 # define time slices
                 if n_months >= 3:
