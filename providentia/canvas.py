@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_aux import set_formatting, ComboBox, CheckableComboBox, LassoSelector
+from .dashboard_aux import set_formatting, ComboBox, StatsComboBox, CheckableComboBox, LassoSelector
 from .aux import get_relevant_temporal_resolutions, show_message
 
 # make sure that we are using Qt5 backend with matplotlib
@@ -1698,7 +1698,7 @@ class MPLCanvas(FigureCanvas):
         self.map_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z_stat.move(self.map_menu_button.geometry().x()-220, 
                              self.map_menu_button.geometry().y()+75)
-        self.map_z_stat.setFixedWidth(100)
+        self.map_z_stat.setFixedWidth(105)
         self.map_z_stat.hide()
 
         # add map dataset 1 label ('Dataset 1') to layout
@@ -1712,21 +1712,21 @@ class MPLCanvas(FigureCanvas):
         self.map_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z1.move(self.map_menu_button.geometry().x()-220, 
                          self.map_menu_button.geometry().y()+125)
-        self.map_z1.setFixedWidth(100)
+        self.map_z1.setFixedWidth(105)
         self.map_z1.hide()
 
         # add map dataset 2 label ('Dataset 2') to layout
         self.map_z2_label = QtWidgets.QLabel('Dataset 2', self)
-        self.map_z2_label.setGeometry(self.map_menu_button.geometry().x()-90, 
+        self.map_z2_label.setGeometry(self.map_menu_button.geometry().x()-95, 
                                       self.map_menu_button.geometry().y()+100, 
                                       230, 20)
         self.map_z2_label.hide()
 
         # add map dataset 2 combobox
         self.map_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.map_z2.move(self.map_menu_button.geometry().x()-90, 
+        self.map_z2.move(self.map_menu_button.geometry().x()-95, 
                          self.map_menu_button.geometry().y()+125)
-        self.map_z2.setFixedWidth(100)
+        self.map_z2.setFixedWidth(105)
         self.map_z2.hide()
 
         # add map general text for unselected stations ('Unselected stations')
@@ -1835,7 +1835,7 @@ class MPLCanvas(FigureCanvas):
         self.map_options_label.hide()
 
         # add map options checkboxes
-        self.map_options = CheckableComboBox(self)
+        self.map_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.map_options.setObjectName('map_options')
         self.map_options.addItems(self.plot_characteristics['map']['plot_options'])        
         self.map_options.setGeometry(self.map_menu_button.geometry().x()-220, 
@@ -1956,7 +1956,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_options_label.hide()
 
         # add timeseries plot options checkboxes
-        self.timeseries_options = CheckableComboBox(self)
+        self.timeseries_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.timeseries_options.setObjectName('timeseries_options')
         self.timeseries_options.addItems(self.plot_characteristics['timeseries']['plot_options'])        
         self.timeseries_options.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
@@ -2017,7 +2017,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_settings_label.hide()
 
         # add periodic stat label ('Statistic') to layout
-        self.periodic_stat_label = QtWidgets.QLabel("Statistic", self)
+        self.periodic_stat_label = QtWidgets.QLabel('Statistic', self)
         self.periodic_stat_label.setGeometry(self.periodic_menu_button.geometry().x()-220, 
                                              self.periodic_menu_button.geometry().y()+50, 
                                              230, 20)
@@ -2027,7 +2027,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.periodic_stat.move(self.periodic_menu_button.geometry().x()-220, 
                                 self.periodic_menu_button.geometry().y()+75)
-        self.periodic_stat.setFixedWidth(100)
+        self.periodic_stat.setFixedWidth(105)
         self.periodic_stat.hide()
 
         # add periodic markersize slider name ('Size') to layout
@@ -2078,7 +2078,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_options_label.hide()
 
         # add periodic plot options checkboxes
-        self.periodic_options = CheckableComboBox(self)
+        self.periodic_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.periodic_options.setObjectName('periodic_options')
         self.periodic_options.addItems(self.plot_characteristics['periodic']['plot_options'])        
         self.periodic_options.setGeometry(self.periodic_menu_button.geometry().x()-220, 
@@ -2188,7 +2188,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_options_label.hide()
 
         # add periodic violin plot options checkboxes
-        self.periodic_violin_options = CheckableComboBox(self)
+        self.periodic_violin_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.periodic_violin_options.setObjectName('periodic_violin_options')
         self.periodic_violin_options.addItems(self.plot_characteristics['periodic-violin']['plot_options'])        
         self.periodic_violin_options.setGeometry(self.periodic_violin_menu_button.geometry().x()-220, 
@@ -2256,7 +2256,7 @@ class MPLCanvas(FigureCanvas):
         self.metadata_options_label.hide()
 
         # add metadata plot options checkboxes
-        self.metadata_options = CheckableComboBox(self)
+        self.metadata_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.metadata_options.setObjectName('metadata_options')
         self.metadata_options.addItems(self.plot_characteristics['metadata']['plot_options'])        
         self.metadata_options.setGeometry(self.metadata_menu_button.geometry().x()-220, 
@@ -2339,7 +2339,7 @@ class MPLCanvas(FigureCanvas):
         self.distribution_options_label.hide()
 
         # add distribution plot options checkboxes
-        self.distribution_options = CheckableComboBox(self)
+        self.distribution_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.distribution_options.setObjectName('distribution_options')
         self.distribution_options.addItems(self.plot_characteristics['distribution']['plot_options'])        
         self.distribution_options.setGeometry(self.distribution_menu_button.geometry().x()-220, 
@@ -2424,7 +2424,7 @@ class MPLCanvas(FigureCanvas):
         self.scatter_options_label.hide()
 
         # add scatter plot options checkboxes
-        self.scatter_options = CheckableComboBox(self)
+        self.scatter_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.scatter_options.setObjectName('scatter_options')
         self.scatter_options.addItems(self.plot_characteristics['scatter']['plot_options'])        
         self.scatter_options.setGeometry(self.scatter_menu_button.geometry().x()-220, 
@@ -2467,7 +2467,7 @@ class MPLCanvas(FigureCanvas):
         self.statsummary_container = set_formatting(QtWidgets.QWidget(self), formatting_dict['settings_container'])
         self.statsummary_container.setGeometry(self.statsummary_menu_button.geometry().x()-230,
                                                self.statsummary_menu_button.geometry().y()+25, 
-                                               250, 80)
+                                               250, 130)
         self.statsummary_container.hide()
 
         # add settings label
@@ -2478,19 +2478,48 @@ class MPLCanvas(FigureCanvas):
                                                     230, 20)
         self.statsummary_settings_label.hide()
 
+        # add statsummary stat label ('Statistic') to layout
+        self.statsummary_stat_label = QtWidgets.QLabel('Statistic', self)
+        self.statsummary_stat_label.setGeometry(self.statsummary_menu_button.geometry().x()-95, 
+                                                self.statsummary_menu_button.geometry().y()+50, 
+                                                230, 20)
+        self.statsummary_stat_label.hide()
+
+        # add combobox stat combobox
+        self.statsummary_stat = set_formatting(set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu']), formatting_dict['combobox_menu'])
+        self.statsummary_stat.move(self.statsummary_menu_button.geometry().x()-95, 
+                                   self.statsummary_menu_button.geometry().y()+75)
+        self.statsummary_stat.setFixedWidth(105)
+        self.statsummary_stat.hide()
+
+        # add statsummary cycle label ('Periodic cycle') to layout
+        self.statsummary_cycle_label = QtWidgets.QLabel('Periodic cycle', self)
+        self.statsummary_cycle_label.setGeometry(self.statsummary_menu_button.geometry().x()-220, 
+                                                self.statsummary_menu_button.geometry().y()+50, 
+                                                230, 20)
+        self.statsummary_cycle_label.hide()
+
+        # add statsummary periodic cycle combobox
+        self.statsummary_cycle = set_formatting(StatsComboBox(self), formatting_dict['combobox_menu'])
+        self.statsummary_cycle.addItems(['None', 'Diurnal', 'Weekly', 'Monthly'])
+        self.statsummary_cycle.move(self.statsummary_menu_button.geometry().x()-220, 
+                                    self.statsummary_menu_button.geometry().y()+75)
+        self.statsummary_cycle.setFixedWidth(105)
+        self.statsummary_cycle.hide()
+
         # add statsummary plot options name ('Options') to layout
         self.statsummary_options_label = QtWidgets.QLabel("Options", self)
         self.statsummary_options_label.setGeometry(self.statsummary_menu_button.geometry().x()-220,
-                                                   self.statsummary_menu_button.geometry().y()+50, 
+                                                   self.statsummary_menu_button.geometry().y()+100, 
                                                    230, 20)
         self.statsummary_options_label.hide()
 
         # add statsummary plot options checkboxes
-        self.statsummary_options = CheckableComboBox(self)
+        self.statsummary_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.statsummary_options.setObjectName('statsummary_options')
         self.statsummary_options.addItems(self.plot_characteristics['statsummary']['plot_options'])        
         self.statsummary_options.setGeometry(self.statsummary_menu_button.geometry().x()-220, 
-                                             self.statsummary_menu_button.geometry().y()+75, 
+                                             self.statsummary_menu_button.geometry().y()+125, 
                                              230, 20)
         self.statsummary_options.currentTextChanged.connect(self.update_plot_option)
         self.statsummary_options.hide()
@@ -2504,6 +2533,8 @@ class MPLCanvas(FigureCanvas):
 
         # set show/hide actions
         self.statsummary_elements = [self.statsummary_container, self.statsummary_settings_label, 
+                                     self.statsummary_cycle_label, self.statsummary_cycle, 
+                                     self.statsummary_stat_label, self.statsummary_stat,
                                      self.statsummary_options_label, self.statsummary_options]
         self.interactive_elements['statsummary'] = {'button': self.statsummary_menu_button, 
                                                     'hidden': True,
@@ -2512,6 +2543,7 @@ class MPLCanvas(FigureCanvas):
                                                     'opacity_sl': [],
                                                     'linewidth_sl': []
                                                     }
+        self.statsummary_stat.currentTextChanged.connect(self.update_statsummary_stats)
         self.statsummary_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.statsummary_save_button.clicked.connect(self.save_axis_figure_func)
 
@@ -2546,7 +2578,7 @@ class MPLCanvas(FigureCanvas):
         self.boxplot_options_label.hide()
 
         # add boxplot options checkboxes
-        self.boxplot_options = CheckableComboBox(self)
+        self.boxplot_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.boxplot_options.setObjectName('boxplot_options')
         self.boxplot_options.addItems(self.plot_characteristics['boxplot']['plot_options'])        
         self.boxplot_options.setGeometry(self.boxplot_menu_button.geometry().x()-220, 
@@ -2642,7 +2674,7 @@ class MPLCanvas(FigureCanvas):
         self.taylor_options_label.hide()
 
         # add taylor diagram options checkboxes
-        self.taylor_options = CheckableComboBox(self)
+        self.taylor_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.taylor_options.setObjectName('taylor_options')
         self.taylor_options.addItems(self.plot_characteristics['taylor']['plot_options'])        
         self.taylor_options.setGeometry(self.taylor_menu_button.geometry().x()-220, 
@@ -3132,12 +3164,25 @@ class MPLCanvas(FigureCanvas):
                                                                  self.plot_characteristics[plot_type], 
                                                                  self.read_instance.current_plot_options[plot_type], 
                                                                  relim=True, autoscale=True)                       
+                    
+                    # update statistic options in statsummary
+                    if plot_type == 'statsummary':
+                        self.statsummary_cycle.updateStats()
 
                 # save current plot options as previous
                 self.read_instance.previous_plot_options[plot_type] = self.read_instance.current_plot_options[plot_type]
 
                 # draw changes
                 self.figure.canvas.draw()
+
+        return None
+
+    def update_statsummary_stats(self):
+        
+        # save stats before updating them
+        periodic_cycle = self.statsummary_cycle.lineEdit().text()
+        self.statsummary_stats[periodic_cycle] = self.statsummary_stat.currentData()
+        print(self.statsummary_stats)
 
         return None
 
