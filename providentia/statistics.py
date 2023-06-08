@@ -23,7 +23,7 @@ expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_
 
 
 def to_pandas_dataframe(read_instance, canvas_instance, networkspecies, 
-                        station_index=False, data_range_min=False, data_range_max=False):
+                        station_index=False, data_range_min=False, data_range_max=False, stddev_max=False):
     """ Function that takes data in memory puts it in a pandas dataframe, per network / species, per data label.
 
         :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
@@ -38,6 +38,8 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
         :type data_range_min: dict
         :param data_range_max: current maximum of data range per networkspecies
         :type data_range_max: dict
+        :param stddev_max: current maximum of StdDev per networkspecies
+        :type stddev_max: dict
     """
 
     if read_instance.resampling:
@@ -67,6 +69,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
     canvas_instance.selected_station_data = {}
     canvas_instance.selected_station_data_min = {}
     canvas_instance.selected_station_data_max = {}
+    canvas_instance.selected_station_stddev_max = {}
 
     # iterate through networks / species  
     for networkspeci_ii, networkspeci in enumerate(networkspecies):
@@ -81,6 +84,10 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_data_max[networkspeci] = data_range_max[networkspeci]
         else:
             canvas_instance.selected_station_data_max[networkspeci] = 0.0
+        if stddev_max:
+            canvas_instance.selected_station_stddev_max[networkspeci] = stddev_max[networkspeci]
+        else:
+            canvas_instance.selected_station_stddev_max[networkspeci] = 0.0      
 
         print('getting data array')
         start = time.time()
@@ -169,6 +176,7 @@ def to_pandas_dataframe(read_instance, canvas_instance, networkspecies,
             #    current_max = np.nanpercentile(canvas_instance.selected_station_data[networkspeci][data_label]['flat'],q=95)
             canvas_instance.selected_station_data_min[networkspeci] = np.nanmin(canvas_instance.selected_station_data[networkspeci]['flat'])
             canvas_instance.selected_station_data_max[networkspeci] = np.nanmax(canvas_instance.selected_station_data[networkspeci]['flat'])
+            canvas_instance.selected_station_stddev_max[networkspeci] = np.nanmax(np.nanstd(canvas_instance.selected_station_data[networkspeci]['flat'], axis=-1))
 
             print(time.time()-start)
 
