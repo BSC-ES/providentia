@@ -25,7 +25,24 @@ class Stats(object):
             :return: mean value of data
             :rtype: numpy.float64
         """
-        return np.mean(data)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanmean(data, axis=-1)
+
+    @staticmethod
+    def calculate_median(data):
+        """ Calculate median in a dataset.
+
+            :param data: array of data
+            :type data: numpy.ndarray
+            :return: median value of data
+            :rtype: numpy.float64
+        """
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanmedian(data, axis=-1)
 
     @staticmethod
     def calculate_percentile(data, percentile=50.0):
@@ -38,7 +55,10 @@ class Stats(object):
             :return: percentile of data
             :rtype: numpy.float64
         """
-        return np.percentile(data, percentile)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanpercentile(data, percentile, axis=-1)
 
     @staticmethod
     def calculate_standard_deviation(data):
@@ -49,7 +69,10 @@ class Stats(object):
             :return: standard deviation value of data
             :rtype: numpy.float64
         """
-        return np.std(data)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanstd(data, axis=-1)
 
     @staticmethod
     def calculate_variance(data):
@@ -60,7 +83,10 @@ class Stats(object):
             :return: variance value of data
             :rtype: numpy.float64
         """
-        return np.var(data)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanvar(data, axis=-1)
 
     @staticmethod
     def calculate_minimum(data):
@@ -71,7 +97,10 @@ class Stats(object):
             :return: min value of data
             :rtype: numpy.float64
         """
-        return np.min(data)
+        if len(data) == 0:
+            return np.NaN
+        else:
+            return np.nanmin(data,axis=-1)
 
     @staticmethod
     def calculate_maximum(data):
@@ -82,7 +111,10 @@ class Stats(object):
             :return: max value of data
             :rtype: numpy.float64
         """
-        return np.max(data)
+        if len(data) == 0:
+            return np.NaN
+        else:
+            return np.nanmax(data,axis=-1)
 
     @staticmethod
     def calculate_data_avail_fraction(data):
@@ -94,40 +126,50 @@ class Stats(object):
             :return: data availability percent
             :rtype: numpy.float64
         """
-
-        return (100. / np.array(data).shape[0]) * \
-               (np.count_nonzero(~np.isnan(data), axis=0))
+        if data.size == 0:
+            return np.NaN
+        else:
+            return (100. / data.shape[0]) * \
+                   (np.count_nonzero(~np.isnan(data), axis=0))
 
     @staticmethod
     def calculate_data_avail_number(data):
         """ Calculate data availability absolute number
             (i.e. number of total data measurements not equal to NaN).
         """
-        return np.count_nonzero(~np.isnan(data), axis=-1)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.count_nonzero(~np.isnan(data), axis=-1)
 
     @staticmethod
     def max_repeated_nans_fraction(data):
         """ Get % of total period of the maximum run of consecutive NaNs in array. """
         
-        max_gap_pc = []
-        for station_ind in range(data.shape[1]):
-            mask = np.concatenate(([False],np.isnan(data[:,station_ind]),[False]))
-            if ~mask.any():
-                max_gap_pc.append(0)
-            else:
-                idx = np.nonzero(mask[1:] != mask[:-1])[0]
-                max_gap_pc.append((idx[1::2] - idx[::2]).max())
+        if data.size == 0:
+            return np.NaN
+        else:
+            max_gap_pc = []
+            for station_ind in range(data.shape[1]):
+                mask = np.concatenate(([False],np.isnan(data[:,station_ind]),[False]))
+                if ~mask.any():
+                    max_gap_pc.append(0)
+                else:
+                    idx = np.nonzero(mask[1:] != mask[:-1])[0]
+                    max_gap_pc.append((idx[1::2] - idx[::2]).max())
 
-        return np.array(max_gap_pc) * (100. / data.shape[0])
+            return np.array(max_gap_pc) * (100. / data.shape[0])
 
     @staticmethod
     def calculate_exceedances(data, threshold=0):
         """ Calculate number of data exceedances
             (i.e. number of measurements exceeding a set threshold).
         """
-        n_exceed = len(np.where(data > threshold)[0])
-        return n_exceed
-
+        if data.size == 0:
+            return np.NaN
+        else:
+            n_exceed = len(np.where(data > threshold)[0])
+            return n_exceed
 
 class ExpBias(object):
 
@@ -149,7 +191,10 @@ class ExpBias(object):
             Legates DR, McCabe GJ. (2012). A refined index of model performance: a rejoinder,
             International Journal of Climatology.
         """
-        return 1.0 - np.sum(np.abs(exp - obs)) / np.sum(np.abs(obs - np.mean(obs))) 
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            return 1.0 - np.sum(np.abs(exp - obs)) / np.sum(np.abs(obs - np.mean(obs))) 
 
     @staticmethod
     def calculate_ioa(obs, exp):
@@ -168,13 +213,15 @@ class ExpBias(object):
             Willmott, C.J., Robeson, S.M., Matsuura, K., 2011. A refined index of model performance. International
             Journal of Climatology.
         """
-
-        lhs = np.sum(np.abs(exp - obs))
-        rhs = 2.0 * np.sum(np.abs(obs - np.mean(obs)))
-        if lhs <= rhs: 
-            return 1.0 - lhs / rhs 
-        else: 
-            return rhs / lhs - 1.0
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            lhs = np.sum(np.abs(exp - obs))
+            rhs = 2.0 * np.sum(np.abs(obs - np.mean(obs)))
+            if lhs <= rhs: 
+                return 1.0 - lhs / rhs 
+            else: 
+                return rhs / lhs - 1.0
 
     @staticmethod
     def calculate_mb(obs, exp, normalisation_type='none'):
@@ -185,21 +232,24 @@ class ExpBias(object):
             This statistic is equivalent to the 'Mean_bias' when temporal_colocation is active.
         """
 
-        mb = np.mean(exp - obs)
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            mb = np.mean(exp - obs)
 
-        # handle normalisation if desired
-        if normalisation_type == 'max_min':
-            mb = (mb / (np.max(obs) - np.min(obs))) * 100.0
-        elif normalisation_type == 'mean':
-            mb = (mb / np.mean(obs)) * 100.0
-        elif normalisation_type == 'sum':
-            mb = (mb / np.sum(obs)) * 100.0
-        elif normalisation_type == 'iq':
-            mb = (mb / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0
-        elif normalisation_type == 'stdev':
-            mb = (mb / np.std(obs)) * 100.0
+            # handle normalisation if desired
+            if normalisation_type == 'max_min':
+                mb = (mb / (np.max(obs) - np.min(obs))) * 100.0
+            elif normalisation_type == 'mean':
+                mb = (mb / np.mean(obs)) * 100.0
+            elif normalisation_type == 'sum':
+                mb = (mb / np.sum(obs)) * 100.0
+            elif normalisation_type == 'iq':
+                mb = (mb / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0
+            elif normalisation_type == 'stdev':
+                mb = (mb / np.std(obs)) * 100.0
 
-        return mb
+            return mb
 
     @staticmethod
     def calculate_me(obs, exp, normalisation_type='none'):
@@ -213,21 +263,24 @@ class ExpBias(object):
             and normalised form as normalised mean gross error (NMGE) and normalised mean absolute error (NMAE).
         """
 
-        me = np.mean(np.abs(exp - obs))
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            me = np.mean(np.abs(exp - obs))
 
-        # handle normalisation if desired
-        if normalisation_type == 'max_min':
-            me = (me / (np.max(obs) - np.min(obs))) * 100.0 
-        elif normalisation_type == 'mean':
-            me = (me / np.mean(obs)) * 100.0
-        elif normalisation_type == 'sum':
-            me = (me / np.sum(obs)) * 100.0 
-        elif normalisation_type == 'iq':
-            me = (me / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0 
-        elif normalisation_type == 'stdev':
-            me = (me / np.std(obs)) * 100.0 
+            # handle normalisation if desired
+            if normalisation_type == 'max_min':
+                me = (me / (np.max(obs) - np.min(obs))) * 100.0 
+            elif normalisation_type == 'mean':
+                me = (me / np.mean(obs)) * 100.0
+            elif normalisation_type == 'sum':
+                me = (me / np.sum(obs)) * 100.0 
+            elif normalisation_type == 'iq':
+                me = (me / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0 
+            elif normalisation_type == 'stdev':
+                me = (me / np.std(obs)) * 100.0 
 
-        return me
+            return me
 
     @staticmethod
     def calculate_mnb(obs, exp):
@@ -237,9 +290,11 @@ class ExpBias(object):
             (i.e. the bias, 𝑀𝑖 − 𝑂𝑖) is normalised (divided) by the observed value (𝑂𝑖).
         """
 
-        mnb = np.mean((exp - obs) / obs) * 100.0
-
-        return mnb
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            mnb = np.mean((exp - obs) / obs) * 100.0
+            return mnb
 
     @staticmethod
     def calculate_mne(obs, exp):
@@ -250,9 +305,11 @@ class ExpBias(object):
             Otherwise known as mean normalised absolute error (MNAE).
         """
 
-        mne = np.mean((np.abs(exp - obs)) / obs) * 100.0
-
-        return mne
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            mne = np.mean((np.abs(exp - obs)) / obs) * 100.0
+            return mne
     
     @staticmethod
     def calculate_mfb(obs, exp):
@@ -269,9 +326,11 @@ class ExpBias(object):
             Otherwise known as fractional bias (FB).
         """
 
-        mfb = np.mean((exp - obs) / ((exp + obs) / 2.0)) * 100.0
-        
-        return mfb
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            mfb = np.mean((exp - obs) / ((exp + obs) / 2.0)) * 100.0
+            return mfb
 
     @staticmethod
     def calculate_mfe(obs, exp):
@@ -280,9 +339,11 @@ class ExpBias(object):
             or mean absolute fractional bias (MAFB).
         """
 
-        mfe = np.mean(np.abs(exp - obs) / ((exp + obs) / 2.0)) * 100.0
-
-        return mfe
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            mfe = np.mean(np.abs(exp - obs) / ((exp + obs) / 2.0)) * 100.0
+            return mfe
 
     @staticmethod
     def calculate_rmse(obs, exp, normalisation_type='none'):
@@ -291,21 +352,24 @@ class ExpBias(object):
             between observations and experiment.
         """
 
-        rmse = np.sqrt(np.mean((exp - obs) ** 2))
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            rmse = np.sqrt(np.mean((exp - obs) ** 2))
 
-        # handle normalisation if desired
-        if normalisation_type == 'max_min':
-            rmse = (rmse / (np.max(obs) - np.min(obs))) * 100.0 
-        elif normalisation_type == 'mean':
-            rmse = (rmse / np.mean(obs)) * 100.0 
-        elif normalisation_type == 'rmse':
-            rmse = (rmse / np.sum(obs)) * 100.0 
-        elif normalisation_type == 'iq':
-            rmse = (rmse / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0 
-        elif normalisation_type == 'stdev':
-            rmse = (rmse / np.std(obs)) * 100.0 
+            # handle normalisation if desired
+            if normalisation_type == 'max_min':
+                rmse = (rmse / (np.max(obs) - np.min(obs))) * 100.0 
+            elif normalisation_type == 'mean':
+                rmse = (rmse / np.mean(obs)) * 100.0 
+            elif normalisation_type == 'rmse':
+                rmse = (rmse / np.sum(obs)) * 100.0 
+            elif normalisation_type == 'iq':
+                rmse = (rmse / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0 
+            elif normalisation_type == 'stdev':
+                rmse = (rmse / np.std(obs)) * 100.0 
 
-        return rmse
+            return rmse
 
     @staticmethod
     def calculate_r(obs, exp):
@@ -317,7 +381,10 @@ class ExpBias(object):
             Positive correlations imply that as x increases, so does y.
             Negative correlations imply that as x increases, y decreases.
         """
-        return scipy.stats.pearsonr(obs, exp)[0]
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            return scipy.stats.pearsonr(obs, exp)[0]
 
     @staticmethod
     def calculate_r_squared(obs, exp):
@@ -327,7 +394,10 @@ class ExpBias(object):
             In linear least squares multiple regression with an estimated intercept term,
             the r squared equals the square of the Pearson correlation coefficient.
         """
-        return ExpBias.calculate_r(obs, exp) ** 2
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            return ExpBias.calculate_r(obs, exp) ** 2
 
     @staticmethod
     def calculate_fac2(obs, exp):
@@ -335,9 +405,11 @@ class ExpBias(object):
             a factor of two of observed values (FAC2)
         """
 
-        frac = exp / obs
-
-        return (100.0 / len(frac)) * len(frac[(frac >= 0.5) & (frac <= 2.0)])
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            frac = exp / obs
+            return (100.0 / len(frac)) * len(frac[(frac >= 0.5) & (frac <= 2.0)])
 
     @staticmethod
     def calculate_upa(obs, exp):
@@ -345,7 +417,9 @@ class ExpBias(object):
             See here: https://gitlab.com/polyphemus/atmopy/-/blob/master/stat/measure.py.
         """
         
-        obs_max = np.max(obs)
-        exp_max = np.max(exp)
-        
-        return (exp_max - obs_max) / obs_max
+        if len(obs) == 0:
+            return np.NaN
+        else:
+            obs_max = np.max(obs)
+            exp_max = np.max(exp)
+            return (exp_max - obs_max) / obs_max

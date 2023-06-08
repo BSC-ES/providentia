@@ -31,7 +31,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:J:q:m:V
-LONG=usage,cores:,jobname:,queue:,mem:,constraint:,help,version,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,offline,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
+LONG=usage,cores:,jobname:,queue:,mem:,constraint:,help,version,debug,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,offline,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -70,7 +70,7 @@ while [ $# -gt 0 ]; do
         -m|--mem) shift
                   mem=$OPTARG;;
         --constraint) shift 
-                      constraint=$OPTARG;;
+                      constraint=$OPTARG;;            
         -*) shift
             OTHEROPTS+="$OPT ";;
         * ) echo "ALL OPTIONS MUST BE PREFIXED WITH '-' or '--', AND ARGUMENTS MUST BE PREFIXED WITH '=', e.g. '--cores=10'" 
@@ -85,14 +85,27 @@ load_command="source load_modules.sh"
 python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $OTHEROPTS"
 
 # avoid x11 forwarding when creating offline reports
-if [[ $PARSED =~ "offline" ]]; then
+if [[ $PARSED =~ "--offline" ]]; then
     salloc_command="salloc -t 02:00:00 -c $cores -J $jobname"
 else
     salloc_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
 fi
 
-# load modules from load_modules.sh
-eval "${load_command}"
+# if using debug mode then just reserve allocation, do not execute providentia
+if [[ $PARSED =~ "--debug" ]]; then
+    debug=true
+else
+    debug=false
+fi
+
+# determine if need to just excecute python if have allocation made (i.e. are in debug mode)
+VALID_HOSTS="p9login1 login0 login1 login2 login3 login4"
+HOST=`hostname`
+if [[ " $VALID_HOSTS " =~ .*\ $HOST\ .* ]]; then
+    debugexec=false
+else
+    debugexec=true
+fi
 
 # load modules from conda environment
 # EXPORTPATH="/gpfs/home/bsc32/bsc32781/.conda/envs/myenv/lib/python3.9/site-packages"
@@ -101,28 +114,74 @@ eval "${load_command}"
 # execution
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
-    # get allocation of resources on CTE-POWER
-    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
-    eval "${salloc_command} ${queue_option} ${memory_option} srun ${python_command}"
+    
+    if [$debug]; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        echo "Entering debug mode"
+        eval "${load_command}"
+        eval "${salloc_command} ${queue_option} ${memory_option}"
+    else
+        if [$debugexec]; then
+            eval "srun ${python_command}"
+        else
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+            eval "${load_command}"
+            eval "${salloc_command} ${queue_option} ${memory_option} srun ${python_command}"
+        fi
+    fi
+    
 # Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     # avoid magnified graphics
     eval export QT_AUTO_SCREEN_SCALE_FACTOR=0
-    # get allocation of resources on MN4
-    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-    if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-        eval "${salloc_command} ${queue_option} srun ${python_command}"
+
+    if $debug; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+        echo "Entering debug mode"
+        eval "${load_command}"
+        if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+            eval "${salloc_command} ${queue_option}"
+        else
+            eval "${salloc_command} ${constraint_option} ${queue_option}"
+        fi
     else
-        eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+        if $debugexec; then
+            eval "srun ${python_command}"
+        else
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            eval "${load_command}"
+            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                eval "${salloc_command} ${queue_option} srun ${python_command}"
+            else
+                eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+            fi
+        fi
     fi
+
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
-    # get allocation of resources on Nord3v2
-    echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-    if [[ "${constraint}" == "lowmem" ]]; then
-        eval "${salloc_command} ${queue_option} srun ${python_command}"
+    
+    if $debug; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+        echo "Entering debug mode"
+        eval "${load_command}"
+        if [[ "${constraint}" == "lowmem" ]]; then
+            eval "${salloc_command} ${queue_option}"
+        else
+            eval "${salloc_command} ${constraint_option} ${queue_option}"
+        fi
     else
-        eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+        if $debugexec; then
+            eval "srun ${python_command}"
+        else
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            eval "${load_command}"
+            if [[ "${constraint}" == "lowmem" ]]; then
+                eval "${salloc_command} ${queue_option} srun ${python_command}"
+            else
+                eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+            fi
+        fi
     fi
 # Workstations
 else
