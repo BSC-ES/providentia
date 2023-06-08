@@ -116,6 +116,8 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--plot_characteristics_filename",
                                      dest="plot_characteristics_filename",
                                      help="set filename for plot characteristics")
+            self.parser.add_argument('--debug', 
+                                     help="runs Providentia in debug mode, just reserving allocation")
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
