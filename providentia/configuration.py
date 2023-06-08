@@ -73,7 +73,10 @@ class ProvConfiguration:
             'active_dashboard_plots': None,
             'resampling': False,
             'resampling_resolution': None,
-            'aggregation_statistic': None,
+            'statistic_mode': None,
+            'statistic_aggregation': None,
+            'periodic_statistic_mode': None,
+            'periodic_statistic_aggregation': None,
             'plot_characteristics_filename': '',
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline',
@@ -469,7 +472,8 @@ class ProvConfiguration:
         # check have network information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:
-            default = ['GHOST']
+            #default = ['GHOST']
+            default = ['EBAS']
             msg = 'Network (network) was not defined in the configuration file. Using {} as default.'.format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.network = default
@@ -516,7 +520,8 @@ class ProvConfiguration:
         # check have resolution information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.resolution:
-            default = 'monthly'
+            #default = 'monthly'
+            default = 'hourly'
             msg = 'Resolution (resolution) was not defined in the configuration file. Using {} as default.'.format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.resolution = default
@@ -537,13 +542,37 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.end_date = default
 
-        # check have aggregation_statistic information,
+        # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.aggregation_statistic:
-            default = 'Median'
-            msg = 'Aggregation statistic (aggregation_statistic) was not defined in the configuration file. Using {} as default.'.format(default)
+        if not self.read_instance.statistic_mode:
+            default = 'Flattened'
+            msg = 'Statistic mode (statistic_mode) was not defined in the configuration file. Using {} as default.'.format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-            self.read_instance.aggregation_statistic = default
+            self.read_instance.statistic_mode = default
+
+        # check have statistic_aggregation information,
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.statistic_aggregation:
+            default = ''
+            msg = 'Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using {} as default.'.format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            self.read_instance.statistic_aggregation = default
+
+        # check have periodic_statistic_mode information,
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.periodic_statistic_mode:
+            default = 'Cycle'
+            msg = 'Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using {} as default.'.format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            self.read_instance.periodic_statistic_mode = default
+
+        # check have periodic_statistic_aggregation information,
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.periodic_statistic_aggregation:
+            default = 'Median'
+            msg = 'Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using {} as default.'.format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            self.read_instance.periodic_statistic_aggregation = default
 
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
