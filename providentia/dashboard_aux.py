@@ -238,8 +238,8 @@ class StatsComboBox(ComboBox):
         
         # initialise stats
         self.parent.statsummary_stats = {}
-        for periodic_cycle in ['None', 'Diurnal', 'Weekly', 'Monthly']:
-            self.parent.statsummary_stats[periodic_cycle] = {}
+        self.parent.statsummary_stats['basic'] = self.parent.plot_characteristics['statsummary']['basic']
+        self.parent.statsummary_stats['expbias'] = self.parent.plot_characteristics['statsummary']['experiment_bias']
 
     def updateStats(self):
 
@@ -252,7 +252,8 @@ class StatsComboBox(ComboBox):
         periodic_cycle = self.lineEdit().text()
 
         # get items that have been selected in advance before clearing
-        checked_options = self.parent.statsummary_stats[periodic_cycle]
+        statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
+        checked_options = copy.deepcopy(self.parent.statsummary_stats[statistic_type])
 
         # update stats for the selected periodic cycle
         if 'bias' in plot_options:
@@ -263,9 +264,11 @@ class StatsComboBox(ComboBox):
             items = [stat + '_' + periodic_cycle.lower() for stat in items]
         self.parent.statsummary_stat.clear()
         self.parent.statsummary_stat.addItems(items)
-
-        # check items that have been selected in advance
-        for checked_option in checked_options:
+        self.parent.statsummary_stat.updateText()
+        
+        # check items that have been selected in advance and are in current cycle
+        checked_options_in_items = list(set(checked_options) & set(items))
+        for checked_option in checked_options_in_items:
             index = items.index(checked_option)
             self.parent.statsummary_stat.model().item(index).setCheckState(QtCore.Qt.Checked)
 
@@ -370,12 +373,12 @@ class CheckableComboBox(QtWidgets.QComboBox):
             if self.model().item(i).checkState() == QtCore.Qt.Checked:
                 texts.append(self.model().item(i).text())
         text = ", ".join(texts)
-        print('Updating text', text)
 
         # compute elided text (with "...")
-        metrics = QtGui.QFontMetrics(self.lineEdit().font())
-        elidedText = metrics.elidedText(text, QtCore.Qt.ElideRight, self.lineEdit().width())
-        self.lineEdit().setText(elidedText)
+        # metrics = QtGui.QFontMetrics(self.lineEdit().font())
+        # elidedText = metrics.elidedText(text, QtCore.Qt.ElideRight, self.lineEdit().width())
+
+        self.lineEdit().setText(text)
 
     def addItem(self, text, data=None):
 
@@ -398,13 +401,17 @@ class CheckableComboBox(QtWidgets.QComboBox):
                 data = None
             self.addItem(text, data)
 
-    def currentData(self):
+    def currentData(self, all=False):
         
         # return the list of selected items data
         res = []
         for i in range(self.model().rowCount()):
-            if self.model().item(i).checkState() == QtCore.Qt.Checked:
+            if not all:
+                if self.model().item(i).checkState() == QtCore.Qt.Checked:
+                    res.append(self.model().item(i).data())
+            else:
                 res.append(self.model().item(i).data())
+
         return res
 
 class QVLine(QtWidgets.QFrame):
