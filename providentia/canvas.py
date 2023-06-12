@@ -551,6 +551,7 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.flush_events()
 
     def update_periodic_statistic(self, zstat):
+        """ Function that updates the statistic on the periodic plot. """
 
         # update periodic plot/s if have some stations selected on map
         if len(self.relative_selected_station_inds) > 0:
@@ -614,6 +615,7 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.flush_events()
 
     def update_taylor_corr_statistic(self):
+        """ Function that updates the correlation statistic on the Taylor diagram. """
 
         # update periodic plot/s if have some stations selected on map
         if len(self.relative_selected_station_inds) > 0:
@@ -674,7 +676,7 @@ class MPLCanvas(FigureCanvas):
                 # create structure to store data for statsummary plot
                 elif plot_type == 'statsummary':
                     # get list of statistics to create lists for
-                    relevant_zstats = self.plot_characteristics[plot_type]['basic']
+                    relevant_zstats = self.statsummary_stats['basic']
                     stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
                     xlabel = ''
                     ylabel = ''
@@ -2501,7 +2503,8 @@ class MPLCanvas(FigureCanvas):
 
         # add statsummary periodic cycle combobox
         self.statsummary_cycle = set_formatting(StatsComboBox(self), formatting_dict['combobox_menu'])
-        self.statsummary_cycle.addItems(['None', 'Diurnal', 'Weekly', 'Monthly'])
+        # self.statsummary_cycle.addItems(['None', 'Diurnal', 'Weekly', 'Monthly'])
+        self.statsummary_cycle.addItems(['None'])
         self.statsummary_cycle.move(self.statsummary_menu_button.geometry().x()-220, 
                                     self.statsummary_menu_button.geometry().y()+75)
         self.statsummary_cycle.setFixedWidth(105)
@@ -2818,7 +2821,8 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_smooth_func(self):
-        
+        """ Function to handle the smooth of the timeseries line. """
+ 
         # get source
         event_source = self.sender()
         plot_type = event_source.objectName().split('_smooth')[0]
@@ -2849,10 +2853,9 @@ class MPLCanvas(FigureCanvas):
             # an option is selected or there are options in previous to undo?
             if event_source.currentData() or self.read_instance.previous_plot_options[plot_type]:
 
-                # get plot options (previous and currently selected)
                 self.read_instance.current_plot_options[plot_type] = copy.deepcopy(event_source.currentData())
-                all_plot_options = self.plot_characteristics[plot_type]['plot_options']
-                
+                all_plot_options = event_source.currentData(all=True)
+
                 for option in all_plot_options:
                     
                     # get index to raise errors and uncheck options
@@ -3042,7 +3045,7 @@ class MPLCanvas(FigureCanvas):
                             elif plot_type in ['statsummary']:
 
                                 # create structure to store data for statsummary plot
-                                relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
+                                relevant_zstats = self.statsummary_stats['expbias']
                                 stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
 
                             # get plotting function for specific plot
@@ -3178,11 +3181,83 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def update_statsummary_stats(self):
-        
-        # save stats before updating them
+        """ Function that updates the statistics on the statistics summary. """
+
+        # get source
+        event_source = self.sender()
         periodic_cycle = self.statsummary_cycle.lineEdit().text()
-        self.statsummary_stats[periodic_cycle] = self.statsummary_stat.currentData()
-        print(self.statsummary_stats)
+
+        # save stats before updating them
+        if event_source.currentData() or self.read_instance.previous_statsummary_stats:
+            
+            # get current
+            self.read_instance.current_statsummary_stats[periodic_cycle] = copy.deepcopy(event_source.currentData())
+
+            # get all possible stats
+            plot_options = self.read_instance.current_plot_options['statsummary']
+            statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
+            items = list(basic_stats.keys()) if statistic_type == 'basic' else list(expbias_stats.keys())
+            if periodic_cycle == 'None':
+                cycle_stats = [stat for stat in items]
+            else:
+                cycle_stats = [stat + '_' + periodic_cycle.lower() for stat in items]
+
+            for stat in cycle_stats:
+                
+                # remove stat that was selected before but not now
+                if ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                    and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                    add = False
+                # add stat that was not selected before
+                elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                    and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                    add = True
+                # do nothing if options were selected before and now
+                elif ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                    and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                    continue
+                # do nothing if options were never selected
+                elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                    and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                    continue
+
+                # add stat to list
+                if add:
+                    if stat not in self.statsummary_stats[statistic_type]:
+                        self.statsummary_stats[statistic_type].append(stat)
+                # remove stat from list
+                else:
+                    if stat in self.statsummary_stats[statistic_type]:
+                        self.statsummary_stats[statistic_type].remove(stat)
+
+            # update previous
+            self.read_instance.previous_statsummary_stats[periodic_cycle] = self.statsummary_stats[statistic_type]
+
+            # remove axis elements from statsummary
+            self.remove_axis_elements(self.plot_axes['statsummary'], 'statsummary')
+
+            # get list of statistics to create lists for
+            stats_df = {relevant_zstat:[] for relevant_zstat in self.statsummary_stats[statistic_type]}
+            for data_label in self.selected_station_data[self.read_instance.networkspeci]:
+                for relevant_zstat in self.statsummary_stats[statistic_type]:
+                    stat_val = self.selected_station_data[self.read_instance.networkspeci][data_label]['all'][relevant_zstat][0]
+                    stats_df[relevant_zstat].append(stat_val)
+            stats_df = pd.DataFrame(data=stats_df, 
+                                    index=self.selected_station_data[self.read_instance.networkspeci])
+
+            # make statsummary with updated stats
+            self.plot.make_table(self.plot_axes['statsummary'], stats_df, self.plot_characteristics['statsummary'], 
+                                 plot_options=plot_options, statsummary=True)
+
+            # activate statsumamry
+            self.activate_axis(self.plot_axes['statsummary'], 'statsummary')
+
+            # update plot options
+            self.update_plot_options(plot_types=['statsummary'])
+
+            # re-draw (needed to update plotted colours before update_map_station_selection)
+            self.figure.canvas.draw()
+            self.figure.canvas.flush_events()
 
         return None
 
