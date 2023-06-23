@@ -37,8 +37,6 @@ class DataReader:
         # changing time dimension ?
         if ('reset' in operations) or ('read_left' in operations) or ('read_right' in operations) or ('cut_left' in operations) or ('cut_right' in operations):
 
-            start = time.time()
-
             # turn off read from configuration
             if 'reset' not in operations:
                 self.read_instance.from_conf = False
@@ -57,8 +55,6 @@ class DataReader:
                                                                                 int(str(self.read_instance.end_date)[4:6]),
                                                                                 int(str(self.read_instance.end_date)[6:8])),
                                                           freq=self.read_instance.active_frequency_code)[:-1]
-
-            print('read setup 1', time.time()-start)
 
             # show warning when the data consists only of less than 2 timesteps
             if len(self.read_instance.time_array) < 2:
@@ -143,8 +139,6 @@ class DataReader:
                                                           len(self.read_instance.time_array)),
                                                           np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies}
 
-            print('read setup 2', time.time()-start)
-
             # filter data (if active)
             if self.read_instance.filter_species:
                 self.read_instance.filter_data_in_memory = {networkspeci: 
@@ -195,8 +189,6 @@ class DataReader:
                 self.read_instance.ghost_data_in_memory = {}
                 self.read_instance.ghost_data_vars_to_read = []
 
-            print('read setup 3', time.time()-start)
-
             # metadata 
             # non-GHOST
             if not self.read_instance.reading_ghost:
@@ -220,12 +212,8 @@ class DataReader:
             yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
                                                         self.read_instance.end_date, self.read_instance.resolution)
 
-            print('read setup 4', time.time()-start)
-
             # read data 
             self.read_data(yearmonths_to_read, self.read_instance.data_labels)
-
-            print('read setup 5', time.time()-start)
 
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
             # non-GHOST
@@ -563,8 +551,6 @@ class DataReader:
             to get matching stations across stations.
         """
 
-        start = time.time()
-
         # define dictionaries for storing basic metadata across all species to read
         self.read_instance.station_references = {}
         self.read_instance.station_names = {}
@@ -625,8 +611,6 @@ class DataReader:
                 speci_station_latitudes = []
                 speci_station_measurement_altitudes = []
 
-                print('basic meta 1', time.time()-start)
-
                 # read metadata in parallel
                 tuple_arguments = []
                 for fname in relevant_files:
@@ -644,16 +628,12 @@ class DataReader:
                     speci_station_latitudes = np.append(speci_station_latitudes, returned_data_per_month[3])
                     speci_station_measurement_altitudes = np.append(speci_station_measurement_altitudes, returned_data_per_month[4])
 
-                print('basic meta 2', time.time()-start)
-
                 speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
                 self.read_instance.station_references[networkspeci] = speci_station_references
                 self.read_instance.station_names[networkspeci] = speci_station_names[station_unique_indices]
                 self.read_instance.station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
                 self.read_instance.station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
                 self.read_instance.station_measurement_altitudes[networkspeci] = speci_station_measurement_altitudes[station_unique_indices]
-
-                print('basic meta 3', time.time()-start)
 
             # non-GHOST - take from first file (metadata will be same across time)
             else:
@@ -729,8 +709,6 @@ class DataReader:
                 if ns in station_names:
                     self.read_instance.station_names[ns] = self.read_instance.station_names[ns][ns_intersects]
 
-        print('basic meta 4', time.time()-start)
-
     def read_data(self, yearmonths_to_read, data_labels):
         """ Function that handles reading of observational/experiment data.
 
@@ -739,10 +717,6 @@ class DataReader:
             :param data_labels: data labels to read
             :type data_labels: list
         """
-
-        start = time.time()
-
-        print('read data 1', time.time()-start)
 
         # create arrays to share across processes (for parallel multiprocessing use)
         # this only works for numerical dtypes, i.e. not strings
@@ -755,8 +729,6 @@ class DataReader:
         timestamp_array_shared[:] = self.read_instance.timestamp_array
         if (self.read_instance.reading_ghost) & ('observations' in data_labels):
             flags_shared[:] = self.read_instance.flags
-
-        print('read data 2', time.time()-start)
 
         # create dictionary for saving files to read
         self.files_to_read = {}
@@ -857,14 +829,10 @@ class DataReader:
                 ghost_data_in_memory_shared_shape = None
                 ghost_data_in_memory_shared = None
 
-            print('read data 3', time.time()-start)
-
             # wrap data_in_memory_shared and ghost_data_in_memory_shared as numpy arrays so we can easily manipulate the data.
             data_in_memory_shared_np = np.frombuffer(data_in_memory_shared, dtype=np.float32).reshape(data_in_memory_shared_shape)
             if (self.read_instance.reading_ghost) & ('observations' in data_labels) & (not filter_read):
                 ghost_data_in_memory_shared_np = np.frombuffer(ghost_data_in_memory_shared, dtype=np.float32).reshape(ghost_data_in_memory_shared_shape)
-            
-            print('read data 4', time.time()-start)
 
             # fill arrays
             if not filter_read:
@@ -876,8 +844,6 @@ class DataReader:
                 qa_shared[:] = self.read_instance.qa_per_species[speci]
                 if not filter_read:
                     np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory[networkspeci])  
-
-            print('read data 5', time.time()-start)
 
             # iterate and read species data in all relevant netCDF files (either in serial/parallel)
 
@@ -952,5 +918,3 @@ class DataReader:
                     error = 'Error: All observation and experiment arrays for {} are void.'.format(networkspeci)
 
                 sys.exit(error)
-
-            print('read data 6', time.time()-start)

@@ -186,6 +186,27 @@ def get_relevant_temporal_resolutions(resolution):
         
     return relevant_temporal_resolutions
 
+def get_nonrelevant_temporal_resolutions(resolution):        
+    """ Get non-relevant temporal reolsutions for periodic plots, by selected temporal resolution.
+
+        :param resolution: name of selected temporal resolution
+        :type resolution: str
+        :return: non-relevant temporal resolutions
+        :rtype: list
+    """
+
+    if 'hourly' in resolution:
+        nonrelevant_temporal_resolutions = []
+    elif resolution == 'daily':
+        nonrelevant_temporal_resolutions = ['hour']
+    elif resolution == 'monthly':
+        nonrelevant_temporal_resolutions = ['hour', 'dayofweek']
+    else:
+        nonrelevant_temporal_resolutions = ['hour', 'dayofweek', 'month']
+        
+    return nonrelevant_temporal_resolutions
+
+
 def get_land_polygon_resolution(selection):
     """ Get resolution of land polygons to plot on map.
 

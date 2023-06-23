@@ -318,14 +318,14 @@ class DataFilter:
                             # max gap variable?
                             if 'max_gap' in var:
                                 max_gap_percent = Stats.max_repeated_nans_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds])
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds[0]:period_inds[-1]+1])
                                 inds_to_screen = np.where(max_gap_percent > data_availability_lower_bounds[var_ii])[0]
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
 
                             # data representativity variable?
                             else:
                                 data_availability_percent = Stats.calculate_data_avail_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds])
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds[0]:period_inds[-1]+1])
                                 inds_to_screen = np.where(data_availability_percent < data_availability_lower_bounds[var_ii])[0]
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
 

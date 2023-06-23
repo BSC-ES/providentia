@@ -191,7 +191,8 @@ class ComboBox(QtWidgets.QComboBox):
         # this creates a line edit that we need to overwrite
         self.setEditable(True)
         self.setMaxVisibleItems(15)
-        self.AdjustToContents
+        #self.AdjustToContents
+        self.setSizeAdjustPolicy(self.AdjustToMinimumContentsLengthWithIcon)
 
         # overwrite default line edit by an invisible one
         self.lineEdit().setFrame(False)
@@ -460,14 +461,14 @@ class InputDialog(QtWidgets.QWidget):
 class PopUpWindow(QtWidgets.QWidget):
     """ Class that generates generalised pop-up window. """
 
-    def __init__(self, read_instance, menu_root, menu_levels, main_window_geometry):
+    def __init__(self, read_instance, menu_root, menu_levels, full_window_geometry):
         super(PopUpWindow, self).__init__()
 
         # add input arguments to self
         self.read_instance = read_instance
         self.menu_root = menu_root
         self.menu_levels = menu_levels
-        self.main_window_geometry = main_window_geometry
+        self.full_window_geometry = full_window_geometry
         self.menu_current = menu_root
         for _, menu_level in enumerate(menu_levels):
             self.menu_current = self.menu_current[menu_level]
@@ -587,8 +588,8 @@ class PopUpWindow(QtWidgets.QWidget):
         # set finalised layout
         self.setLayout(parent_layout)
 
-        # set geometry to match that of main window
-        self.setGeometry(self.main_window_geometry)
+        # set geometry to match that of full window
+        self.setGeometry(self.full_window_geometry)
 
         # show pop-up window
         self.show()
@@ -749,7 +750,7 @@ class PopUpWindow(QtWidgets.QWidget):
             for label_ii, label in enumerate(menu_current_type['labels']):
                 
                 # evaluate if all available vertical space has been consumed
-                row_available_space = self.main_window_geometry.height() - currently_occupied_vertical_space
+                row_available_space = self.full_window_geometry.height() - currently_occupied_vertical_space
                 
                 # if available space <= than row height, force a new column to be started
                 if row_available_space <= (row_format_dict['height']):
@@ -779,7 +780,7 @@ class PopUpWindow(QtWidgets.QWidget):
                     if menu_type == 'rangeboxes':
                         if len(menu_current_type['tooltips']) > 0:
                             rangebox_label.setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], 
-                                                                        self.main_window_geometry.width()))
+                                                                        self.full_window_geometry.width()))
                     grid.addWidget(rangebox_label, start_row_n+row_n, column_n, QtCore.Qt.AlignLeft)
 
                 # create all elements in column, per row
@@ -834,7 +835,7 @@ class PopUpWindow(QtWidgets.QWidget):
                         # add tooltip
                         if len(menu_current_type['tooltips']) > 0:
                             self.page_memory[menu_type][element][label_ii].setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], 
-                                                                                                        self.main_window_geometry.width()))
+                                                                                                        self.full_window_geometry.width()))
                         
                         # add connectivity to buttons
                         self.page_memory[menu_type][element][label_ii].clicked.connect(self.open_new_page)
@@ -932,7 +933,7 @@ class PopUpWindow(QtWidgets.QWidget):
         self.menu_levels.append(selected_navigation_button)
         
         # create new pop-up page for selected navigation button
-        self.new_window = PopUpWindow(self.read_instance, self.menu_root, self.menu_levels, self.main_window_geometry)
+        self.new_window = PopUpWindow(self.read_instance, self.menu_root, self.menu_levels, self.full_window_geometry)
         
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
@@ -944,7 +945,7 @@ class PopUpWindow(QtWidgets.QWidget):
         """ Function that returns pop-up window to root menu level page. """
 
         # create new pop-up page for root menu level
-        self.new_window = PopUpWindow(self.read_instance, self.menu_root, [], self.main_window_geometry)
+        self.new_window = PopUpWindow(self.read_instance, self.menu_root, [], self.full_window_geometry)
         
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
@@ -957,7 +958,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # create new pop-up page for previous menu level
         self.new_window = PopUpWindow(self.read_instance, self.menu_root, self.menu_levels[:-1], 
-                                      self.main_window_geometry)
+                                      self.full_window_geometry)
         
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
