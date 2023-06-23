@@ -34,8 +34,6 @@ def read_netcdf_data(tuple_arguments):
         returns None.
     """
 
-    start = time.time()
-
     # assign arguments from tuple to variables
     relevant_file, station_references, station_names, speci,\
     data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\

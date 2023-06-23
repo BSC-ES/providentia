@@ -13,13 +13,14 @@ import copy
 import datetime
 import json
 import sys
-import matplotlib
-import mpl_toolkits.axisartist.floating_axes as fa
-from matplotlib.projections import PolarAxes
+import time
 from functools import partial
 from collections import OrderedDict
 from weakref import WeakKeyDictionary
 
+import matplotlib
+import mpl_toolkits.axisartist.floating_axes as fa
+from matplotlib.projections import PolarAxes
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
 import pandas as pd
@@ -115,7 +116,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             sys.exit(msg)
 
         # arguments are only local
-        self.main_window_geometry = None
+        self.full_window_geometry = None
 
         # create dictionary of all available observational GHOST data
         self.all_observation_data = aux.get_ghost_observational_tree(self)
@@ -154,54 +155,65 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def get_geometry(self):
         """ Update current geometry of main Providentia window and buttons. """
 
-        # get geometry of main window
-        self.main_window_geometry = copy.deepcopy(self.geometry())
+        # get geometry of full window
+        self.full_window_geometry = copy.deepcopy(self.geometry())
 
-        # update geometry of setting menus
-        self.update_buttons_geometry()
+        # update geometry of qt elements
+        self.update_qt_elements_geometry(resize=True)
 
-    def update_buttons_geometry(self):
-        """ Update current geometry of buttons. """
+    def update_qt_elements_geometry(self, plot_types='ALL', positions = [1,2,3,4,5], resize=False):
+        """ Update current geometry of canvas qt elements"""
+
+        # get dashboard and canvas pixels
+        full_window_width = self.full_window_geometry.width()
+        full_window_height = self.full_window_geometry.height()
+        canvas_width = self.mpl_canvas.frameGeometry().width()
+        canvas_height = self.mpl_canvas.frameGeometry().height()
+        header_height = full_window_height - canvas_height
         
-        for position_ii, position in enumerate([self.position_1, self.position_2, self.position_3, 
-                                                self.position_4, self.position_5]):
+        if plot_types == 'ALL':
+            plot_types = [self.position_1, self.position_2, self.position_3, self.position_4, self.position_5]
+            show_buttons = False
+        else:
+            show_buttons = True
+
+        #iterate through active dashboard plots
+        for position, plot_type in zip(positions, plot_types):
+
+            # gather menu, save buttons and elements for plot type 
             for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
                                                          self.mpl_canvas.save_buttons, 
                                                          self.mpl_canvas.elements):
 
-                # get plot type
-                plot_type = menu_button.objectName().split('_menu')[0]
-                if position == 'periodic-violin':
-                    position = 'periodic_violin'
+                menu_plot_type = menu_button.objectName().split('_menu')[0]
+                if plot_type == 'periodic-violin':
+                    plot_type = 'periodic_violin'
 
-                if position == plot_type or position == 'None':
+                # proceed once have objects for plot type
+                if plot_type == menu_plot_type:
                     
-                    # calculate proportional geometry of buttons respect main window
-                    x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
-                         + str(position_ii+1)]['x'] * self.main_window_geometry.width()) / 1848
-                    y = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_' 
-                         + str(position_ii+1)]['y'] * self.main_window_geometry.height()) / 1016
+                    # get position of menu button (set in 1848 x 1016 resolution)
+                    x = self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
+                        + str(position)]['x']
+                    y = self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
+                        + str(position)]['y']
+
+                    # calculate proportional position for different screen resolution
+                    x = (x * canvas_width) / 1848
+                    y = (y * canvas_height) / 1016
                     
-                    # get geometries
+                    # get geometries (old and new)
                     old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
                     new_button_geometry = QtCore.QRect(x, y, 18, 18)
                     
                     # apply new geometry to menu and save buttons
                     menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(menu_button.x()-25, menu_button.y(), 20, 20)
+                    save_button.setGeometry(menu_button.x() - ((30 * canvas_width) / 1848), menu_button.y(), 20, 20)
 
-                    # apply new geometry to layout buttons
-                    if position_ii > 0:
-                        cb_position = getattr(self, 'cb_position_{}'.format(position_ii+1))
-                        # layout selector at position 2 needs to be further from menu
-                        if (position_ii + 1) == 2:
-                            width_diff = 915
-                        else:
-                            width_diff = 570
-                        height_diff = 1
-                        width = (width_diff * self.main_window_geometry.width()) / 1848
-                        height = (height_diff * self.main_window_geometry.height()) / 1848
-                        cb_position.move(menu_button.x()-width, menu_button.y()+height)
+                    # show buttons if active
+                    if show_buttons:
+                        menu_button.show()
+                        save_button.show()
 
                     # apply new geometry to container elements
                     for sub_element in element:
@@ -216,8 +228,39 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                             sub_element.setGeometry(sub_element.x() - old_button_geometry.x() + new_button_geometry.x(), 
                                                     sub_element.y() - old_button_geometry.y() + new_button_geometry.y(),
                                                     sub_element.width(), sub_element.height())
-                    
-                    continue
+
+                    # apply new geometry to layout button and canvas covers (if are resizing)
+                    if resize:
+
+                        # apply new geometry to full canvas covers
+                        if position == 1:
+                            self.mpl_canvas.canvas_cover.setGeometry(0, 0, canvas_width, canvas_height)
+
+                        else:
+                            # apply new geometry to layout button
+                            cb_position = getattr(self, 'cb_position_{}'.format(position))
+                            # layout selector at position 2 needs to be further from menu
+                            if position == 2:
+                                width_diff = 870
+                            else:
+                                width_diff = 525
+                            height_diff = 1
+                            new_x = menu_button.x() - ((width_diff * canvas_width) / 1848)
+                            new_y = menu_button.y() + ((height_diff * canvas_height) / 1016)
+                            cb_position.move(new_x, new_y)
+
+                            # apply new geometry to partial canvas covers
+                            if position == 2:
+                                canvas_x = new_x - ((75 * canvas_width) / 1848) 
+                                self.mpl_canvas.top_right_canvas_cover.setGeometry(canvas_x, new_y,
+                                                                                   canvas_width-canvas_x, 
+                                                                                   canvas_height-new_y)
+                            elif position == 3:
+                                self.mpl_canvas.lower_canvas_cover.setGeometry(0, new_y, 
+                                                                               canvas_width, 
+                                                                               canvas_height-new_y)
+              
+                    break
 
     def init_ui(self, **kwargs):
         """ Initialise user interface. """
@@ -518,7 +561,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
         
-        self.pop_up_window = PopUpWindow(self, menu_root, [], self.main_window_geometry)
+        self.pop_up_window = PopUpWindow(self, menu_root, [], self.full_window_geometry)
 
     def update_configuration_bar_fields(self):
         """ Function that initialises/updates configuration bar fields. """
@@ -731,14 +774,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
-
-        # update layout field buttons
-        # clear fields
-        self.cb_position_2.clear()
-        self.cb_position_3.clear()
-        self.cb_position_4.clear()
-        self.cb_position_5.clear()
-
+    
         # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.7.2 is available
         # # remove plot types that need active temporal colocation and experiments data
         # for plot_type in ['scatter', 'taylor']:
@@ -753,6 +789,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # remove plot types that need active temporal colocation and experiments data
         if 'taylor' in canvas_instance.layout_options:
             canvas_instance.layout_options.remove('taylor')
+
         for plot_type in ['scatter']:
             if ((not self.temporal_colocation) 
                 or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
@@ -766,6 +803,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         layout_options = sorted(canvas_instance.layout_options)
 
         # update position 2 in layout
+        self.cb_position_2.clear()
         self.cb_position_2.addItems(layout_options)
         if self.position_2 in layout_options:
             self.cb_position_2.setCurrentText(self.position_2)
@@ -775,6 +813,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.block_config_bar_handling_updates = True
 
         # update position 3 in layout
+        self.cb_position_3.clear()
         self.cb_position_3.addItems(layout_options)
         if self.position_3 in layout_options:
             self.cb_position_3.setCurrentText(self.position_3)
@@ -784,6 +823,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.block_config_bar_handling_updates = True
 
         # update position 4 in layout
+        self.cb_position_4.clear()
         self.cb_position_4.addItems(layout_options)
         if self.position_4 in layout_options:
             self.cb_position_4.setCurrentText(self.position_4)
@@ -793,6 +833,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.block_config_bar_handling_updates = True
 
         # update position 5 in layout
+        self.cb_position_5.clear()
         self.cb_position_5.addItems(layout_options)
         if self.position_5 in layout_options:
             self.cb_position_5.setCurrentText(self.position_5)
@@ -850,30 +891,44 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update configuration bar fields
             self.update_configuration_bar_fields()
 
-    def handle_layout_update(self, changed_plot_type):
+    def handle_layout_update(self, changed_plot_type, sender=None):
         """ Function which handles update of layout. """
         
         if (changed_plot_type != '') & (not self.block_config_bar_handling_updates):
             
-            # get event origin source
-            event_source = self.sender()
+            # get event origin source if not given
+            if sender:
+                if sender == 2:
+                    event_source = self.cb_position_2
+                elif sender == 3:
+                    event_source = self.cb_position_3    
+                elif sender == 4:
+                    event_source = self.cb_position_4
+                elif sender == 5:
+                    event_source = self.cb_position_5
+            else:
+                event_source = self.sender()
 
             # update selected station plots, avoiding duplicates
             if event_source == self.cb_position_2:
                 previous_plot_type = copy.deepcopy(self.position_2)
                 self.position_2 = copy.deepcopy(changed_plot_type)
+                changed_position = 2
                 
             elif event_source == self.cb_position_3:
                 previous_plot_type = copy.deepcopy(self.position_3)
                 self.position_3 = copy.deepcopy(changed_plot_type)
+                changed_position = 3
 
             elif event_source == self.cb_position_4:
                 previous_plot_type = copy.deepcopy(self.position_4)
                 self.position_4 = copy.deepcopy(changed_plot_type)
+                changed_position = 4
 
             elif event_source == self.cb_position_5:
                 previous_plot_type = copy.deepcopy(self.position_5)
                 self.position_5 = copy.deepcopy(changed_plot_type)
+                changed_position = 5
 
             # if changed plot type is selected elsewhere, then set that field to None
             if (changed_plot_type == self.position_2) & (event_source != self.cb_position_2):
@@ -899,6 +954,26 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     ax.remove()
                 self.active_dashboard_plots.remove(previous_plot_type)
 
+                #hide qt elements for previous plot type
+                for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
+                                                             self.mpl_canvas.save_buttons, 
+                                                             self.mpl_canvas.elements):
+
+                    menu_plot_type = menu_button.objectName().split('_menu')[0]
+                    if menu_plot_type == 'periodic_violin':
+                        menu_plot_type = 'periodic-violin'
+
+                    if previous_plot_type == menu_plot_type:
+                        menu_button.hide()
+                        save_button.hide()
+                        for element in self.mpl_canvas.interactive_elements[previous_plot_type]['elements']:
+                            if isinstance(element, dict):
+                                for sub_element in element.values():
+                                    sub_element.hide()
+                            else:
+                                element.hide()
+                        break
+
             # if changed_plot_type already axis on another axis then remove those axis elements
             if (changed_plot_type in self.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
@@ -908,7 +983,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                         sub_ax.remove()
                 else:
                     ax.remove()
-
             # otherwise add plot_type to active_dashboard_plots
             elif changed_plot_type != 'None': 
                 self.active_dashboard_plots.append(changed_plot_type)
@@ -927,12 +1001,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 # make plot
                 self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
 
+                # update qt elements geometry for changed plot type
+                self.update_qt_elements_geometry(plot_types=[changed_plot_type], positions=[changed_position])
+
             # update layout fields
             self.update_layout_fields(self.mpl_canvas)
 
-            # update buttons geometry
-            self.update_buttons_geometry()
-            
             # draw changes
             self.mpl_canvas.figure.canvas.draw_idle()
 
@@ -1095,14 +1169,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int)
         self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int)
         self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int)
-        
-        # clear and then hide all axes 
-        for plot_type, ax in self.mpl_canvas.plot_axes.items():
-            self.mpl_canvas.remove_axis_elements(ax, plot_type)
-        
-        # update MPL canvas
-        self.mpl_canvas.figure.canvas.draw_idle()  
-        self.mpl_canvas.figure.canvas.flush_events()
 
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
@@ -1117,10 +1183,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
-        self.previous_filter_species = self.previous_filter_species
-        self.previous_plot_options = {}
-        for plot_type in self.mpl_canvas.all_plots:
-            self.previous_plot_options[plot_type] = []
+        self.previous_filter_species = self.filter_species
         
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
@@ -1136,9 +1199,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
-        self.current_plot_options = {}
-        for plot_type in self.mpl_canvas.all_plots:
-            self.current_plot_options[plot_type] = []
 
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
@@ -1219,6 +1279,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # has date range changed?
         if len(read_operations) > 0:
             
+            # if reading/cutting observations then cover canvas to do updates gracefully
+            if ('reset' in read_operations) or ('cut_left' in read_operations) or ('cut_right' in read_operations) or\
+               ('read_left' in read_operations) or ('read_right' in read_operations):
+                self.mpl_canvas.canvas_cover.show()
+            # otherwise, just cover plotting axes as are adding/removing experiments
+            else:
+                self.mpl_canvas.top_right_canvas_cover.show() 
+                self.mpl_canvas.lower_canvas_cover.show()
+            self.mpl_canvas.figure.canvas.draw_idle()  
+            self.mpl_canvas.figure.canvas.flush_events()
+
+            # clear all axes elements 
+            for plot_type, ax in self.mpl_canvas.plot_axes.items():
+                self.mpl_canvas.remove_axis_elements(ax, plot_type)
+
             # inactivate resampling
             self.resampling = False
 
@@ -1234,7 +1309,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # read data
             self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, 
                                        experiments_to_read=experiments_to_read)
-            
+
             # restore mouse cursor to normal if have no valid data after read
             if self.invalid_read:
                 QtWidgets.QApplication.restoreOverrideCursor()
@@ -1245,65 +1320,66 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             aux.update_period_fields(self)
             aux.update_metadata_fields(self)
             
-            # update relevant temporal resolutions 
+            # update relevant/nonrelevant temporal resolutions 
             self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
+            self.nonrelevant_temporal_resolutions = aux.get_nonrelevant_temporal_resolutions(self.resolution)
 
-        # if species has changed, or first read, update species specific lower/upper limits
-        if (self.first_read) or (self.species[0] != self.previous_species[0]):
-            # get default GHOST limits
-            self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
-            self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
-            self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
-            self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
+            # if species has changed, or first read, update species specific lower/upper limits
+            if (self.first_read) or (self.species[0] != self.previous_species[0]):
+                # get default GHOST limits
+                self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
+                self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
+                self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
+                self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
 
-        # run function to update filter
-        self.mpl_canvas.handle_data_filter_update()
+            # run function to update filter
+            self.mpl_canvas.handle_data_filter_update()
         
-        # update map z combobox fields based on data in memory
-        # generate lists of basic and basis+bias statistics for using in the z statistic combobox
-        if not hasattr(self, 'basic_z_stats'):
-            self.basic_z_stats = np.array(list(
-                OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
-        if not hasattr(self, 'basic_and_bias_z_stats'):
-            self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-                OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
+            # update map z combobox fields based on data in memory
+            # generate lists of basic and basis+bias statistics for using in the z statistic combobox
+            if not hasattr(self, 'basic_z_stats'):
+                self.basic_z_stats = np.array(list(
+                    OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
+            if not hasattr(self, 'basic_and_bias_z_stats'):
+                self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
+                    OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
 
-        # generate list of sorted z1/z2 data arrays names in memory, putting observations
-        # before experiments, and empty string item as first element in z2 array list
-        # (for changing from 'difference' statistics to 'absolute')
-        if len(self.data_labels) == 1:  
-            self.z1_arrays = np.array(['observations'])
-        else:
-            self.z1_arrays = np.array(self.data_labels)
-        self.z2_arrays = np.append([''], self.z1_arrays)
+            # generate list of sorted z1/z2 data arrays names in memory, putting observations
+            # before experiments, and empty string item as first element in z2 array list
+            # (for changing from 'difference' statistics to 'absolute')
+            if len(self.data_labels) == 1:  
+                self.z1_arrays = np.array(['observations'])
+            else:
+                self.z1_arrays = np.array(self.data_labels)
+            self.z2_arrays = np.append([''], self.z1_arrays)
 
-        # update map z statistic comboboxes
-        self.mpl_canvas.handle_map_z_statistic_update()
+            # update map z statistic comboboxes
+            self.mpl_canvas.handle_map_z_statistic_update()
 
-        # update periodic statistic combobox
-        self.mpl_canvas.handle_periodic_statistic_update()
+            # update periodic statistic combobox
+            self.mpl_canvas.handle_periodic_statistic_update()
 
-        # update taylor diagram statistic combobox
-        self.mpl_canvas.handle_taylor_correlation_statistic_update()
-        
-        # unselect all/intersect/extent checkboxes
-        self.mpl_canvas.unselect_map_checkboxes()
-        
-        # reset resampling
-        self.cb_resampling_resolution.setCurrentText('None')
+            # update taylor diagram statistic combobox
+            self.mpl_canvas.handle_taylor_correlation_statistic_update()
+            
+            # unselect all/intersect/extent checkboxes
+            self.mpl_canvas.unselect_map_checkboxes()
+            
+            # reset resampling
+            self.cb_resampling_resolution.setCurrentText('None')
 
-        # unset variable to allow updating of MPL canvas
-        self.block_MPL_canvas_updates = False
+            # unset variable to allow updating of MPL canvas
+            self.block_MPL_canvas_updates = False
 
-        # update MPL canvas
-        self.mpl_canvas.update_MPL_canvas()
+            # update MPL canvas
+            self.mpl_canvas.update_MPL_canvas()
 
-        # if first read, then set this now to be False
-        # also, if colocate checkbox is ticked, then apply temporal colocation
-        if self.first_read:
-            self.first_read = False
-            if self.ch_colocate.checkState() == QtCore.Qt.Checked:
-                self.mpl_canvas.handle_temporal_colocate_update()
+            # if first read, then set this now to be False
+            # also, if colocate checkbox is ticked, then apply temporal colocation
+            if self.first_read:
+                self.first_read = False
+                if self.ch_colocate.checkState() == QtCore.Qt.Checked:
+                    self.mpl_canvas.handle_temporal_colocate_update()
 
         # restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
