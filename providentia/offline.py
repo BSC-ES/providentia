@@ -16,10 +16,7 @@ from matplotlib.projections import PolarAxes
 from .read import DataReader
 from .filter import DataFilter
 from .plot import Plot
-from .statistics import to_pandas_dataframe
-from .statistics import calculate_statistic
-from .statistics import generate_colourbar
-from .statistics import get_z_statistic_info
+from .statistics import get_selected_station_data, calculate_statistic, generate_colourbar, get_z_statistic_info
 from .configuration import ProvConfiguration
 from providentia import aux
 
@@ -115,6 +112,7 @@ class ProvidentiaOffline:
 
             # set some key configuration variables
             self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
+            self.nonrelevant_temporal_resolutions = aux.get_nonrelevant_temporal_resolutions(self.resolution)
             self.data_labels = ['observations'] + list(self.experiments.keys())
             self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
 
@@ -371,16 +369,11 @@ class ProvidentiaOffline:
 
                         # harmonise xy limits for plot paradigm
                         if base_plot_type not in ['map', 'heatmap', 'table', 'taylor']: 
-                            if base_plot_type == 'periodic-violin':
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
-                                                                     self.plot_characteristics[plot_type], plot_options, 
-                                                                     ylim=[data_range_min, data_range_max],
-                                                                     relim=True, autoscale_x=True)
-                            elif base_plot_type == 'scatter':
+                            if base_plot_type == 'scatter':
                                 self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
                                                                      self.plot_characteristics[plot_type], plot_options, 
                                                                      relim=True)
-                            else:
+                            elif base_plot_type != 'taylor':
                                 self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
                                                                      self.plot_characteristics[plot_type], plot_options, 
                                                                      relim=True, autoscale=True)
@@ -767,9 +760,9 @@ class ProvidentiaOffline:
 
                     if not made_networkspeci_summary_plots:
                         
-                        # put selected data for each data array into pandas dataframe
-                        to_pandas_dataframe(read_instance=self, canvas_instance=self, 
-                                            networkspecies=self.networkspecies)
+                        # get selected station data
+                        get_selected_station_data(read_instance=self, canvas_instance=self, 
+                                                  networkspecies=self.networkspecies)
 
                         # update data range min/maxes for summary paradigm 
                         for ns in self.networkspecies:
@@ -944,13 +937,13 @@ class ProvidentiaOffline:
             self.current_station_name = self.station_names[networkspeci][relevant_station_ind]
             self.current_station_reference = self.station_references[networkspeci][relevant_station_ind]
 
-            # put selected data for each data array into pandas dataframe
-            to_pandas_dataframe(read_instance=self, canvas_instance=self, 
-                                networkspecies=[networkspeci], 
-                                station_index=relevant_station_ind, 
-                                data_range_min=self.data_range_min_station, 
-                                data_range_max=self.data_range_max_station,
-                                stddev_max=self.stddev_max_station)
+            # get selected station data 
+            get_selected_station_data(read_instance=self, canvas_instance=self, 
+                                      networkspecies=[networkspeci], 
+                                      station_index=relevant_station_ind, 
+                                      data_range_min=self.data_range_min_station, 
+                                      data_range_max=self.data_range_max_station,
+                                      stddev_max=self.stddev_max_station)
 
             # if have no valid data across data labels (no observations or experiments), then continue 
             if not self.selected_station_data[networkspeci]:
@@ -1018,12 +1011,12 @@ class ProvidentiaOffline:
                 if ('multispecies' in plot_options) and (not plot_type_df):
                     # do plot if we are in first instance and spatial colocation is active
                     if (not made_networkspeci_station_plots) & (self.spatial_colocation):
-                        to_pandas_dataframe(read_instance=self, canvas_instance=self, 
-                                            networkspecies=self.networkspecies, 
-                                            station_index=relevant_station_ind, 
-                                            data_range_min=self.data_range_min_station, 
-                                            data_range_max=self.data_range_max_station,
-                                            stddev_max=self.stddev_max_station)
+                        get_selected_station_data(read_instance=self, canvas_instance=self, 
+                                                  networkspecies=self.networkspecies, 
+                                                  station_index=relevant_station_ind, 
+                                                  data_range_min=self.data_range_min_station, 
+                                                  data_range_max=self.data_range_max_station,
+                                                  stddev_max=self.stddev_max_station)
 
                         # update data range min/maxes for station paradigm
                         for ns in self.networkspecies:
@@ -1064,7 +1057,7 @@ class ProvidentiaOffline:
         else:
             base_plot_type = plot_type.split('_')[0] 
             
-        for data_label in list(self.selected_station_data[networkspeci].keys()):
+        for data_label in self.data_labels:
            
             # set how experiment should be referred to in plot
             if data_label == 'observations':
@@ -1157,7 +1150,7 @@ class ProvidentiaOffline:
             _, idx = np.unique(all_data_labels, return_index=True)
             all_data_labels = np.array(all_data_labels)[np.sort(idx)]
         else:
-            all_data_labels = list(self.selected_station_data[networkspeci].keys())
+            all_data_labels = copy.deepcopy(self.data_labels)
 
         # if are making bias plot, and have no valid experiment data then cannot make plot type
         if ('bias' in plot_options) & (len(all_data_labels) < 2):
@@ -1232,7 +1225,8 @@ class ProvidentiaOffline:
                     continue
 
                 # calculate z statistic
-                self.z_statistic, self.active_map_valid_station_inds = calculate_statistic(self, self, zstat, z1, z2,
+                self.z_statistic, self.active_map_valid_station_inds = calculate_statistic(self, self, networkspeci,
+                                                                                           zstat, z1, z2,
                                                                                            map=True)
 
                 # make map plot
