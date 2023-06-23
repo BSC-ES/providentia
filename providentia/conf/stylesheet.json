@@ -75,5 +75,8 @@
 
     "settings_icon":             {"border": null},
     
-    "settings_label":            {"font": {"style": "SansSerif", "size": 9.5, "bold": true}}
+    "settings_label":            {"font": {"style": "SansSerif", "size": 9.5, "bold": true}},
+
+    "canvas_cover":             {"background-color": "white"}
+
 }
