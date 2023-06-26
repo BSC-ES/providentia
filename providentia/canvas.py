@@ -130,6 +130,7 @@ class MPLCanvas(FigureCanvas):
 
         # create rest of plot axes (default: timeseries, statsummary, distribution, periodic)
         # also show plot type buttons
+        self.annotation_elements = []
         for position, plot_type in enumerate(self.read_instance.active_dashboard_plots):
             self.read_instance.update_plot_axis(self, position + 2, plot_type)
 
@@ -212,7 +213,7 @@ class MPLCanvas(FigureCanvas):
             # update legend
             self.update_legend()
 
-        #uncover map, but hide plotting axes
+        # uncover map, but hide plotting axes
         self.canvas_cover.hide()
         self.top_right_canvas_cover.show() 
         self.lower_canvas_cover.show()
@@ -981,24 +982,28 @@ class MPLCanvas(FigureCanvas):
                     self.remove_axis_objects(objects)
 
             elif plot_type == 'timeseries':
-                self.remove_axis_objects(ax_to_remove.lines, elements_to_skip=[self.timeseries_vline])
-                self.remove_axis_objects(ax_to_remove.artists)
+                for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects, elements_to_skip=[self.timeseries_vline])
+
+            elif plot_type == 'periodic':
+                for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects, elements_to_skip=self.periodic_vline.values())
 
             elif plot_type == 'periodic-violin':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, ax_to_remove.collections]:
-                    self.remove_axis_objects(objects)
+                    self.remove_axis_objects(objects, elements_to_skip=self.periodic_violin_vline.values())
 
             elif plot_type == 'metadata':
                 self.remove_axis_objects(ax_to_remove.texts)
 
             elif plot_type == 'distribution':
-                self.remove_axis_objects(ax_to_remove.lines, elements_to_skip=[self.distribution_vline])
-                self.remove_axis_objects(ax_to_remove.artists)
+                for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects, elements_to_skip=[self.distribution_vline])
 
             elif plot_type == 'statsummary':
                 self.remove_axis_objects(ax_to_remove.tables)
 
-            elif plot_type in ['taylor', 'boxplot', 'scatter', 'periodic']:
+            elif plot_type in ['taylor', 'boxplot', 'scatter']:
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
                     self.remove_axis_objects(objects)
 
@@ -1007,6 +1012,14 @@ class MPLCanvas(FigureCanvas):
             self.plot_elements[plot_type]['absolute'] = {}
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias']
+
+        # hide annotation boxes and lines
+        for element in self.annotation_elements:
+            if isinstance(element, dict):
+                for val in element.values():
+                    val.set_visible(False)
+            else:
+                element.set_visible(False)
 
         return None
 
