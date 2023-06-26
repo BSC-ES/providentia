@@ -234,6 +234,8 @@ class StatsComboBox(ComboBox):
 
         # show basic statistics at start
         self.parent.statsummary_stat.addItems(list(basic_stats.keys()))
+
+        # set up update when changing the periodic cycle
         self.currentTextChanged.connect(self.updateStats)
         
         # initialise stats
@@ -242,11 +244,13 @@ class StatsComboBox(ComboBox):
         self.parent.statsummary_stats['expbias'] = self.parent.plot_characteristics['statsummary']['experiment_bias']
 
     def updateStats(self):
+        
+        self.parent.read_instance.block_MPL_canvas_updates = True
 
         # get plot options to know if we have bias
         plot_options = []
         if hasattr(self.parent.read_instance, 'current_plot_options'):
-            plot_options = self.parent.read_instance.current_plot_options['statsummary']
+            plot_options = copy.deepcopy(self.parent.read_instance.current_plot_options['statsummary'])
 
         # get current periodic cycle
         periodic_cycle = self.lineEdit().text()
@@ -255,9 +259,11 @@ class StatsComboBox(ComboBox):
         statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
         checked_options = copy.deepcopy(self.parent.statsummary_stats[statistic_type])
 
+        self.parent.read_instance.block_config_bar_handling_updates = True
+        
         # update stats for the selected periodic cycle
         if 'bias' in plot_options:
-            items = list(expbias_stats.keys())
+            items = ['Mean_bias', 'StdDev_bias'] + list(expbias_stats.keys())
         else:
             items = list(basic_stats.keys())
         if periodic_cycle != 'None':
@@ -265,12 +271,17 @@ class StatsComboBox(ComboBox):
         self.parent.statsummary_stat.clear()
         self.parent.statsummary_stat.addItems(items)
         self.parent.statsummary_stat.updateText()
-        
+
         # check items that have been selected in advance and are in current cycle
         checked_options_in_items = list(set(checked_options) & set(items))
+        print('Checking...', checked_options_in_items)
         for checked_option in checked_options_in_items:
             index = items.index(checked_option)
             self.parent.statsummary_stat.model().item(index).setCheckState(QtCore.Qt.Checked)
+
+        self.parent.read_instance.block_config_bar_handling_updates = False
+
+        self.parent.read_instance.block_MPL_canvas_updates = False
 
 class CheckableComboBox(QtWidgets.QComboBox):
     """ Create combobox with multiple selection options.
