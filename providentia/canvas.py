@@ -598,7 +598,7 @@ class MPLCanvas(FigureCanvas):
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
 
-                #clear all previously plotted artists for plot type
+                # clear all previously plotted artists for plot type
                 self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
 
                 # get relevant axis
@@ -689,6 +689,10 @@ class MPLCanvas(FigureCanvas):
                 # update plot options
                 self.update_plot_options(plot_types=[plot_type])
 
+                # redraw plot
+                self.figure.canvas.draw()
+                self.figure.canvas.flush_events()
+
     def update_associated_active_dashboard_plots(self):
         """ Function that updates all plots associated with selected stations on map. """
 
@@ -707,8 +711,6 @@ class MPLCanvas(FigureCanvas):
                 # get selected station data
                 get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
                                           networkspecies=[self.read_instance.networkspeci])
-
-                print('SELECTED STATION DATA:', time.time()-start)
 
                 # iterate through active_dashboard_plots
                 for plot_type_ii, plot_type in enumerate(self.read_instance.active_dashboard_plots):
