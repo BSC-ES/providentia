@@ -1276,6 +1276,8 @@ class Plot:
             :type statsummary: boolean
         """
 
+        print(stats_df)
+
         # turn off axis to make table
         relevant_axis.axis('off')
 
