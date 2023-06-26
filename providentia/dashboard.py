@@ -1100,7 +1100,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         for plot_type in self.mpl_canvas.all_plots:
             self.previous_plot_options[plot_type] = []
         self.previous_statsummary_stats = {}
-        for periodic_cycle in ['None', 'Diurnal', 'Weekly', 'Monthly']:
+        self.previous_statsummary_stats['None'] = self.mpl_canvas.plot_characteristics['statsummary']['basic']
+        for periodic_cycle in ['Diurnal', 'Weekly', 'Monthly']:
             self.previous_statsummary_stats[periodic_cycle] = []
 
         # set new active variables as selected variables from menu
