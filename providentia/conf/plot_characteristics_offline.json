@@ -308,7 +308,7 @@
                                            "handletextpad": 0, "ncol": 2, "borderaxespad": 1, "fontsize": 10.0}, 
                                   "handles": {"markersize": 10, "marker": "o", "color": "white", 
                                              "obs_label": "Observations"}}, 
-                       "basic": ["p5", "Mean", "StdDev", "p50", "p95"],
+                       "basic": ["Mean", "StdDev", "p5", "p50", "p95"],
                        "experiment_bias": ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
                        "round_decimal_places": 2,
                        "cell_height": 1.75,
