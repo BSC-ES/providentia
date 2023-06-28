@@ -674,12 +674,12 @@ class DataReader:
                 if "station_name" in ncdf_root.variables:
                     meta_shape = ncdf_root['station_name'].shape
                     self.read_instance.station_names[networkspeci] = ncdf_root['station_name'][non_nan_station_indices]
-                    meta_val_dtype = np.array([station_names[networkspeci][0]]).dtype
+                    meta_val_dtype = np.array([self.read_instance.station_names[networkspeci][0]]).dtype
                     if len(meta_shape) == 2:
                         if meta_val_dtype == np.dtype(object):
-                            self.read_instance.station_names[networkspeci] = np.array([''.join(val) for val in station_names[networkspeci]])
+                            self.read_instance.station_names[networkspeci] = np.array([''.join(val) for val in self.read_instance.station_names[networkspeci]])
                         else:
-                            self.read_instance.station_names[networkspeci] = chartostring(station_names[networkspeci])
+                            self.read_instance.station_names[networkspeci] = chartostring(self.read_instance.station_names[networkspeci])
 
                 # get non-GHOST measurement units
                 self.read_instance.nonghost_units[speci] = ncdf_root[speci].units
