@@ -1446,15 +1446,13 @@ class ProvidentiaOffline:
         # iterate number of plots made for current type of plot 
         current_plot_ind += 1     
 
-
-
         # then make plot heatmap / table / statsummary plot
         if base_plot_type in ['heatmap', 'table', 'statsummary']:
             
             # get relevant axis to plot on
             axis_networkspeci = networkspeci
             if plotting_paradigm == 'summary':
-                if base_plot_type in == 'statsummary':
+                if base_plot_type == 'statsummary':
                     axis_ind = self.subsection_ind
                 elif base_plot_type in ['heatmap', 'table']: 
                     axis_ind = 0
@@ -1575,11 +1573,8 @@ class ProvidentiaOffline:
                 else:
                     # make table/heatmap
                     func = getattr(self.plot, 'make_{}'.format(base_plot_type))
-
-                    # make table/heatmap
-                    else:
-                        func(relevant_axis, stats_df, self.plot_characteristics[plot_type], networkspeci, 
-                             self.subsection, plotting_paradigm, plot_options=plot_options)
+                    func(relevant_axis, stats_df, self.plot_characteristics[plot_type], networkspeci, 
+                         self.subsection, plotting_paradigm, plot_options=plot_options)
                 
                 # save plot information for later formatting
                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(data_labels)
