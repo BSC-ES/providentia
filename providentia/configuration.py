@@ -553,10 +553,24 @@ class ProvConfiguration:
         # check have statistic_aggregation information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.statistic_aggregation:
-            default = ''
-            msg = 'Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using {} as default.'.format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            if self.read_instance.statistic_mode == 'Flattened':
+                default = ''
+            else:    
+                default = 'Mean'
+                msg = 'Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using {} as default.'.format(default)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.statistic_aggregation = default
+        # if statistic_aggregation is defined ensure that it matches with the statistic_mode
+        else:
+            if (self.read_instance.statistic_mode == 'Flattened') & (self.read_instance.statistic_aggregation != ''):
+                msg = 'statistic_mode is set to be "Flattened", therefore statistic_aggregation must be empty, not {}. Setting to be empty.'.format(self.read_instance.statistic_aggregation)                
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                self.read_instance.statistic_aggregation = ''
+            elif (self.read_instance.statistic_mode != 'Flattened') & (self.read_instance.statistic_aggregation == ''):
+                default = 'Mean'
+                msg = 'statistic_mode is set to be "{}", therefore statistic_aggregation must not be empty. Setting to be {}.'.format(self.read_instance.statistic_mode, default)                
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
         # if offline, throw message, stating are using default instead
@@ -569,7 +583,7 @@ class ProvConfiguration:
         # check have periodic_statistic_aggregation information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_aggregation:
-            default = 'Median'
+            default = 'Mean'
             msg = 'Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using {} as default.'.format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.periodic_statistic_aggregation = default
