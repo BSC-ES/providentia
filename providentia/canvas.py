@@ -130,6 +130,7 @@ class MPLCanvas(FigureCanvas):
 
         # create rest of plot axes (default: timeseries, statsummary, distribution, periodic)
         # also show plot type buttons
+        self.annotation_elements = []
         for position, plot_type in enumerate(self.read_instance.active_dashboard_plots):
             self.read_instance.update_plot_axis(self, position + 2, plot_type)
 
@@ -212,7 +213,7 @@ class MPLCanvas(FigureCanvas):
             # update legend
             self.update_legend()
 
-        #uncover map, but hide plotting axes
+        # uncover map, but hide plotting axes
         self.canvas_cover.hide()
         self.top_right_canvas_cover.show() 
         self.lower_canvas_cover.show()
@@ -981,24 +982,28 @@ class MPLCanvas(FigureCanvas):
                     self.remove_axis_objects(objects)
 
             elif plot_type == 'timeseries':
-                self.remove_axis_objects(ax_to_remove.lines, elements_to_skip=[self.timeseries_vline])
-                self.remove_axis_objects(ax_to_remove.artists)
+                for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects, elements_to_skip=[self.timeseries_vline])
+
+            elif plot_type == 'periodic':
+                for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects, elements_to_skip=self.periodic_vline.values())
 
             elif plot_type == 'periodic-violin':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, ax_to_remove.collections]:
-                    self.remove_axis_objects(objects)
+                    self.remove_axis_objects(objects, elements_to_skip=self.periodic_violin_vline.values())
 
             elif plot_type == 'metadata':
                 self.remove_axis_objects(ax_to_remove.texts)
 
             elif plot_type == 'distribution':
-                self.remove_axis_objects(ax_to_remove.lines, elements_to_skip=[self.distribution_vline])
-                self.remove_axis_objects(ax_to_remove.artists)
+                for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects, elements_to_skip=[self.distribution_vline])
 
             elif plot_type == 'statsummary':
                 self.remove_axis_objects(ax_to_remove.tables)
 
-            elif plot_type in ['taylor', 'boxplot', 'scatter', 'periodic']:
+            elif plot_type in ['taylor', 'boxplot', 'scatter']:
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
                     self.remove_axis_objects(objects)
 
@@ -1007,6 +1012,14 @@ class MPLCanvas(FigureCanvas):
             self.plot_elements[plot_type]['absolute'] = {}
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias']
+
+        # hide annotation boxes and lines
+        for element in self.annotation_elements:
+            if isinstance(element, dict):
+                for val in element.values():
+                    val.set_visible(False)
+            else:
+                element.set_visible(False)
 
         return None
 
@@ -1685,7 +1698,7 @@ class MPLCanvas(FigureCanvas):
                                                    formatting_dict['settings_container'])
         self.timeseries_container.setGeometry(self.timeseries_menu_button.geometry().x()-230,
                                               self.timeseries_menu_button.geometry().y()+25, 
-                                              250, 180)
+                                              250, 230)
         self.timeseries_container.hide()
 
         # add settings label
@@ -1716,29 +1729,49 @@ class MPLCanvas(FigureCanvas):
                                                   230, 20)
         self.timeseries_markersize_sl.hide()
 
-        # add timeseries smooth slider name ('Smooth') to layout
-        self.timeseries_smooth_sl_label = QtWidgets.QLabel('Smooth', self)
-        self.timeseries_smooth_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                    self.timeseries_menu_button.geometry().y()+100, 
-                                                    230, 20)
-        self.timeseries_smooth_sl_label.hide()
+        # add timeseries smooth window slider name ('Smooth window') to layout
+        self.timeseries_smooth_window_sl_label = QtWidgets.QLabel('Smooth window', self)
+        self.timeseries_smooth_window_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
+                                                           self.timeseries_menu_button.geometry().y()+100, 
+                                                           230, 20)
+        self.timeseries_smooth_window_sl_label.hide()
 
-        # add timeseries smooth slider
-        self.timeseries_smooth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.timeseries_smooth_sl.setObjectName('timeseries_smooth_sl')
-        self.timeseries_smooth_sl.setMinimum(0)
-        self.timeseries_smooth_sl.setValue(0)
-        self.timeseries_smooth_sl.setTickInterval(2)
-        self.timeseries_smooth_sl.setTracking(False)
-        self.timeseries_smooth_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                              self.timeseries_menu_button.geometry().y()+125, 
-                                              230, 20)
-        self.timeseries_smooth_sl.hide()
+        # add timeseries smooth window slider
+        self.timeseries_smooth_window_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.timeseries_smooth_window_sl.setObjectName('timeseries_smooth_window_sl')
+        self.timeseries_smooth_window_sl.setMinimum(0)
+        self.timeseries_smooth_window_sl.setValue(0)
+        self.timeseries_smooth_window_sl.setTickInterval(2)
+        self.timeseries_smooth_window_sl.setTracking(False)
+        self.timeseries_smooth_window_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
+                                                     self.timeseries_menu_button.geometry().y()+125, 
+                                                     230, 20)
+        self.timeseries_smooth_window_sl.hide()
+
+        # add timeseries smooth line width slider name ('Smooth line width') to layout
+        self.timeseries_smooth_linewidth_sl_label = QtWidgets.QLabel('Smooth line width', self)
+        self.timeseries_smooth_linewidth_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
+                                                              self.timeseries_menu_button.geometry().y()+150, 
+                                                              230, 20)
+        self.timeseries_smooth_linewidth_sl_label.hide()
+
+        # add timeseries smooth line width slider
+        self.timeseries_smooth_linewidth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.timeseries_smooth_linewidth_sl.setObjectName('timeseries_smooth_linewidth_sl')
+        self.timeseries_smooth_linewidth_sl.setMinimum(0)
+        self.timeseries_smooth_linewidth_sl.setMaximum(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*100)
+        self.timeseries_smooth_linewidth_sl.setValue(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*10)
+        self.timeseries_smooth_linewidth_sl.setTickInterval(2)
+        self.timeseries_smooth_linewidth_sl.setTracking(False)
+        self.timeseries_smooth_linewidth_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
+                                                        self.timeseries_menu_button.geometry().y()+175, 
+                                                        230, 20)
+        self.timeseries_smooth_linewidth_sl.hide()
 
         # add timeseries plot options name ('Options') to layout
         self.timeseries_options_label = QtWidgets.QLabel("Options", self)
         self.timeseries_options_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                  self.timeseries_menu_button.geometry().y()+150, 
+                                                  self.timeseries_menu_button.geometry().y()+200, 
                                                   230, 20)
         self.timeseries_options_label.hide()
 
@@ -1747,7 +1780,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_options.setObjectName('timeseries_options')
         self.timeseries_options.addItems(self.plot_characteristics['timeseries']['plot_options'])        
         self.timeseries_options.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                            self.timeseries_menu_button.geometry().y()+175, 
+                                            self.timeseries_menu_button.geometry().y()+225, 
                                             230, 20)
         self.timeseries_options.currentTextChanged.connect(self.update_plot_option)
         self.timeseries_options.hide()
@@ -1763,19 +1796,21 @@ class MPLCanvas(FigureCanvas):
         # set show/hide actions
         self.timeseries_elements = [self.timeseries_container, self.timeseries_settings_label, 
                                     self.timeseries_markersize_sl_label, self.timeseries_markersize_sl,
-                                    self.timeseries_smooth_sl_label, self.timeseries_smooth_sl,
+                                    self.timeseries_smooth_window_sl_label, self.timeseries_smooth_window_sl,
+                                    self.timeseries_smooth_linewidth_sl_label, self.timeseries_smooth_linewidth_sl,
                                     self.timeseries_options_label, self.timeseries_options]
         self.interactive_elements['timeseries'] = {'button': self.timeseries_menu_button, 
                                                    'hidden': True,
                                                    'elements': self.timeseries_elements,
                                                    'markersize_sl': [self.timeseries_markersize_sl],
                                                    'opacity_sl': [],
-                                                   'linewidth_sl': [],
-                                                   'smooth_sl': [self.timeseries_smooth_sl]
+                                                   'linewidth_sl': [self.timeseries_smooth_linewidth_sl],
+                                                   'smooth_window_sl': [self.timeseries_smooth_window_sl]
                                                    }
         self.timeseries_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.timeseries_markersize_sl.valueChanged.connect(self.update_markersize_func)
-        self.timeseries_smooth_sl.valueChanged.connect(self.update_smooth_func)
+        self.timeseries_smooth_window_sl.valueChanged.connect(self.update_smooth_window_func)
+        self.timeseries_smooth_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
         self.timeseries_save_button.clicked.connect(self.save_axis_figure_func)
 
         # PERIODIC PLOT SETTINGS MENU #
@@ -2172,7 +2207,7 @@ class MPLCanvas(FigureCanvas):
                                                 formatting_dict['settings_container'])
         self.scatter_container.setGeometry(self.scatter_menu_button.geometry().x()-230,
                                            self.scatter_menu_button.geometry().y()+25, 
-                                           250, 130)
+                                           250, 180)
         self.scatter_container.hide()
 
         # add settings label
@@ -2186,8 +2221,8 @@ class MPLCanvas(FigureCanvas):
         # add scatter plot markersize slider name ('Size') to layout
         self.scatter_markersize_sl_label = QtWidgets.QLabel('Size', self)
         self.scatter_markersize_sl_label.setGeometry(self.scatter_menu_button.geometry().x()-220,
-                                                    self.scatter_menu_button.geometry().y()+50, 
-                                                    230, 20)
+                                                     self.scatter_menu_button.geometry().y()+50, 
+                                                     230, 20)
         self.scatter_markersize_sl_label.hide()
 
         # add scatter plot markersize slider
@@ -2199,14 +2234,34 @@ class MPLCanvas(FigureCanvas):
         self.scatter_markersize_sl.setTickInterval(2)
         self.scatter_markersize_sl.setTracking(False)
         self.scatter_markersize_sl.setGeometry(self.scatter_menu_button.geometry().x()-220, 
-                                              self.scatter_menu_button.geometry().y()+75, 
-                                              230, 20)
+                                               self.scatter_menu_button.geometry().y()+75, 
+                                               230, 20)
         self.scatter_markersize_sl.hide()
+
+        # add scatter regression line width slider name ('Regression line width') to layout
+        self.scatter_regression_linewidth_sl_label = QtWidgets.QLabel('Regression line width', self)
+        self.scatter_regression_linewidth_sl_label.setGeometry(self.scatter_menu_button.geometry().x()-220,
+                                                               self.scatter_menu_button.geometry().y()+100, 
+                                                               230, 20)
+        self.scatter_regression_linewidth_sl_label.hide()
+
+        # add scatter regression line width slider
+        self.scatter_regression_linewidth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
+        self.scatter_regression_linewidth_sl.setObjectName('scatter_regression_linewidth_sl')
+        self.scatter_regression_linewidth_sl.setMinimum(0)
+        self.scatter_regression_linewidth_sl.setMaximum(self.plot_characteristics['scatter']['regression']['linewidth']*100)
+        self.scatter_regression_linewidth_sl.setValue(self.plot_characteristics['scatter']['regression']['linewidth']*10)
+        self.scatter_regression_linewidth_sl.setTickInterval(2)
+        self.scatter_regression_linewidth_sl.setTracking(False)
+        self.scatter_regression_linewidth_sl.setGeometry(self.scatter_menu_button.geometry().x()-220, 
+                                                         self.scatter_menu_button.geometry().y()+125, 
+                                                         230, 20)
+        self.scatter_regression_linewidth_sl.hide()
 
         # add scatter plot options name ('Options') to layout
         self.scatter_options_label = QtWidgets.QLabel("Options", self)
         self.scatter_options_label.setGeometry(self.scatter_menu_button.geometry().x()-220,
-                                               self.scatter_menu_button.geometry().y()+100, 
+                                               self.scatter_menu_button.geometry().y()+150, 
                                                230, 20)
         self.scatter_options_label.hide()
 
@@ -2215,7 +2270,7 @@ class MPLCanvas(FigureCanvas):
         self.scatter_options.setObjectName('scatter_options')
         self.scatter_options.addItems(self.plot_characteristics['scatter']['plot_options'])        
         self.scatter_options.setGeometry(self.scatter_menu_button.geometry().x()-220, 
-                                         self.scatter_menu_button.geometry().y()+125, 
+                                         self.scatter_menu_button.geometry().y()+175, 
                                          230, 20)
         self.scatter_options.currentTextChanged.connect(self.update_plot_option)
         self.scatter_options.hide()
@@ -2230,16 +2285,18 @@ class MPLCanvas(FigureCanvas):
         # set show/hide actions
         self.scatter_elements = [self.scatter_container, self.scatter_settings_label, 
                                  self.scatter_markersize_sl_label, self.scatter_markersize_sl,
+                                 self.scatter_regression_linewidth_sl_label, self.scatter_regression_linewidth_sl,
                                  self.scatter_options_label, self.scatter_options]
         self.interactive_elements['scatter'] = {'button': self.scatter_menu_button, 
                                                 'hidden': True,
                                                 'elements': self.scatter_elements,
                                                 'markersize_sl': [self.scatter_markersize_sl],
                                                 'opacity_sl': [],
-                                                'linewidth_sl': []
+                                                'linewidth_sl': [self.scatter_regression_linewidth_sl]
                                                }
         self.scatter_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.scatter_markersize_sl.valueChanged.connect(self.update_markersize_func)
+        self.scatter_regression_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
         self.scatter_save_button.clicked.connect(self.save_axis_figure_func)
 
         # STATSUMMARY PLOT SETTINGS MENU #
@@ -2572,12 +2629,12 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    def update_smooth_func(self):
+    def update_smooth_window_func(self):
         
         # get source
         event_source = self.sender()
         plot_type = event_source.objectName().split('_smooth')[0]
-        for element in self.interactive_elements[plot_type]['smooth_sl']:
+        for element in self.interactive_elements[plot_type]['smooth_window_sl']:
             smooth_window = element.value()
             break
 
@@ -3117,14 +3174,22 @@ class MPLCanvas(FigureCanvas):
         if isinstance(ax, dict):
             for sub_ax in ax.values():
                 for line in sub_ax.lines:
-                    line.set_linewidth(linewidth)
+                    if line not in self.annotation_elements:
+                        line.set_linewidth(linewidth)
         else:
             for line in ax.lines:
-                line.set_linewidth(linewidth)
+                if ((line not in self.annotation_elements) and 
+                    ((plot_type == 'scatter') and (list(line.get_xdata()) != [0, 0.5])
+                     and (list(line.get_xdata()) != [0, 1]))):
+                    line.set_linewidth(linewidth)
 
         # update characteristics per plot type
         if plot_type == 'periodic-violin':
             self.plot_characteristics[plot_type]['plot']['p50']['linewidth'] = linewidth
+        elif plot_type == 'timeseries':
+            self.plot_characteristics[plot_type]['smooth']['format']['linewidth'] = linewidth
+        elif plot_type == 'regression':
+            self.plot_characteristics[plot_type]['regression']['linewidth'] = linewidth
         else:
             self.plot_characteristics[plot_type]['plot']['linewidth'] = linewidth
 
