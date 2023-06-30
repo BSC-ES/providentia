@@ -697,6 +697,8 @@ class MPLCanvas(FigureCanvas):
     def update_associated_active_dashboard_plots(self):
         """ Function that updates all plots associated with selected stations on map. """
 
+        start = time.time()
+
         # update dashboard plots
         if hasattr(self, 'relative_selected_station_inds'):
             # have no selected stations, so clear all previously plotted artists from selected station plots
@@ -715,6 +717,8 @@ class MPLCanvas(FigureCanvas):
 
                 # iterate through active_dashboard_plots
                 for plot_type_ii, plot_type in enumerate(self.read_instance.active_dashboard_plots):
+
+                    plot_start = time.time()
 
                     # if there are no temporal resolutions (only yearly), skip periodic plots
                     if ((plot_type in ['periodic', 'periodic-violin']) and 
@@ -739,12 +743,16 @@ class MPLCanvas(FigureCanvas):
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
 
+                    print('{}:'.format(plot_type), time.time()-plot_start)
+
                 # un-hide plotting axes
                 self.top_right_canvas_cover.hide() 
                 self.lower_canvas_cover.hide()
 
             # update map plot options
             self.update_plot_options(plot_types=['map'])
+
+            print('CANVAS UPDATE TIME:', time.time()-start)
 
     def update_experiment_domain_edges(self):
         """ Function that plots grid domain edges of experiments in memory. """

@@ -1271,7 +1271,7 @@ class ProvidentiaOffline:
             
             # get relevant axis
             relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, 
-                                                                                    plot_type, axis_ind)
+                                                                                 plot_type, axis_ind)
 
             # set axis title (only if not previously set)
             if isinstance(relevant_axis, dict):
