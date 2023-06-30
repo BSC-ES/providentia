@@ -836,7 +836,7 @@ class Plot:
             relevant_sub_ax.set_visible(True)
 
             # set xticks
-            xticks = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
+            xticks = self.canvas_instance.selected_station_data[networkspeci][relevant_temporal_resolution]['valid_xticks']
 
             # violin plot type?
             if not zstat:
@@ -957,7 +957,7 @@ class Plot:
                         self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), self.periodic_plots, bias=bias)
 
     def make_distribution(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[],
-                          data_range_min=False, data_range_max=False, violin_resolution=None):
+                          data_range_min=None, data_range_max=None, violin_resolution=None):
         """ Make distribution plot.
 
             :param relevant_axis: axis to plot on 
@@ -1776,7 +1776,8 @@ class Plot:
 
         return ghelper
 
-    def make_taylor(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
+    def make_taylor(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], 
+                    stddev_max=None):
         """ Make Taylor diagram plot.
             Reference: https://gist.github.com/ycopin/3342888.
 
@@ -1793,6 +1794,8 @@ class Plot:
             :type plot_characteristics: dict
             :param plot_options: list of options to configure plot  
             :type plot_options: list
+            :param stddev_max: maximum standard deviation
+            :type stddev_max: float
         """
 
         # get polar axis here
@@ -1825,8 +1828,9 @@ class Plot:
         stats_calc = np.insert(stats_calc, obs_index, np.NaN)
         stats_dict['StdDev'] = corr_stat 
 
-        # get maximum stddev in dataframe
-        stddev_max = np.nanmax(stats_dict["StdDev"])
+        # get maximum stddev in dataframe (if not defined)
+        if not stddev_max:
+            stddev_max = np.nanmax(stats_dict["StdDev"])
 
         # create stats dataframe
         stats_df = pd.DataFrame(data=stats_dict, 

@@ -546,7 +546,7 @@ class DataFilter:
 
             # get equivalent valid station indices for experimental arrays
             # subset observational valid station indices, with experimental array stations with > 1 valid measurements
-            # therefore number of observational valid indices will always be >= experimental valid indices
+            # therefore number of observational valid indices will always be > experimental valid indices
             for data_label in self.read_instance.data_labels:
 
                 # check if data array is not an observational data array
