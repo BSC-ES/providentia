@@ -104,10 +104,13 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             read_instance.station_inds = np.array([station_index])
         else:
             if read_instance.offline:
-                read_instance.station_inds = np.arange(data_array.shape[1])
+                if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
+                    read_instance.station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
+                else:
+                    read_instance.station_inds = read_instance.valid_station_inds[networkspeci]['observations'] 
             else:
                 read_instance.station_inds = canvas_instance.relative_selected_station_inds
-        
+
         # get data cut
         data_array = data_array[:,read_instance.station_inds,:]
                     
@@ -215,6 +218,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci, time_index):
         # create lists to store grouped data and valid ticks
         canvas_instance.selected_station_data[networkspeci][temporal_aggregation_resolution] = {}
         canvas_instance.selected_station_data[networkspeci][temporal_aggregation_resolution]['active_mode'] = []
+        canvas_instance.selected_station_data[networkspeci][temporal_aggregation_resolution]['valid_xticks'] = []
 
         # iterate through unique temporal periods and store associated data with each period, per data label
         for unique_period in unique_periods:
@@ -234,6 +238,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci, time_index):
             else:
                 period_data = []
             canvas_instance.selected_station_data[networkspeci][temporal_aggregation_resolution]['active_mode'].append(period_data)
+            canvas_instance.selected_station_data[networkspeci][temporal_aggregation_resolution]['valid_xticks'].append(unique_period)
 
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, data_labels_b, 
                         map=False, period=None):
