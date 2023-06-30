@@ -1083,6 +1083,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_timeseries_annotation = False
             canvas_instance.timeseries_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                     canvas_instance.hover_timeseries_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.timeseries_annotation,
+                                                        canvas_instance.timeseries_vline])
 
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'scatter':
@@ -1092,6 +1094,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_scatter_annotation = False
             canvas_instance.scatter_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                  canvas_instance.hover_scatter_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.scatter_annotation])
 
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'distribution':
@@ -1102,6 +1105,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_distribution_annotation = False
             canvas_instance.distribution_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                       canvas_instance.hover_distribution_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.distribution_annotation,
+                                                        canvas_instance.distribution_vline])
 
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'periodic':
@@ -1114,6 +1119,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.lock_periodic_annotation[resolution] = False
             canvas_instance.periodic_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                   canvas_instance.hover_periodic_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.periodic_annotation,
+                                                        canvas_instance.periodic_vline])
 
             # update periodic statistic combobox
             self.block_config_bar_handling_updates = False
@@ -1142,6 +1149,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.periodic_violin_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                          canvas_instance.hover_periodic_violin_annotation)
 
+            canvas_instance.annotation_elements.extend([canvas_instance.periodic_violin_annotation,
+                                                        canvas_instance.periodic_violin_vline])
+
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'taylor':
             
@@ -1152,6 +1162,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_taylor_annotation = False
             canvas_instance.taylor_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                 canvas_instance.hover_taylor_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.taylor_annotation])
 
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
