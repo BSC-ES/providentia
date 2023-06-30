@@ -117,7 +117,7 @@
                       "annotate_text": {"s": "", "loc": "upper right", "fontsize": 8, "n_stations": true, 
                                         "exp_labels": true, "color": "", "round_decimal_places": 2},
                       "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
-                      "smooth": {"window": 6, "min_points": 1, "format":{"linewidth": 1.0}},
+                      "smooth": {"window": 6, "min_points": 1, "format": {"linewidth": 1.0}},
                       "bias_line": {"y": 0.0, "linestyle": "--", "linewidth": 1.0, "color": "black", "zorder": 0},
                       "plot": {"marker": "o", "markeredgecolor": "None", "mew": 0, "linestyle": "None", "markersize": 2},
                       "plot_options": ["annotate", "bias", "logy", "smooth"],
