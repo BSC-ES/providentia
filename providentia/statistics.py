@@ -128,9 +128,6 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             # cut data array for valid data labels
             data_array = data_array[valid_data_labels_mask]
 
-            # apply calibration operation if required
-            data_array = apply_calibration_factor(data_array, read_instance, canvas_instance, networkspeci, networkspeci_ii)
-
             # temporally resample data array if required
             if read_instance.resampling:
                 # flatten networkspecies dimension for creation of pandas dataframe
@@ -855,53 +852,6 @@ def get_z_statistic_info(plot_type=None, zstat=None):
             z_statistic_period = None
 
     return zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period
-
-def apply_calibration_factor(data_array, read_instance, canvas_instance, networkspeci, networkspeci_ii):
-    """ Apply calibration factor to add or subtract a number to the experiments, 
-        multiply or divide the experiment data by a certain value.
-    
-        :param data_array: data array to perfrom calibration on
-        :type data_array: ndarray
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-        :type read_instance: object
-        :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-        :type canvas_instance: object
-        :param networkspeci: relevant networkspeci
-        :type networkspeci: str
-        :param networkspeci_ii: position of networkspeci str in networkspecies
-        :type networkspeci_ii: int
-    """
-
-    if hasattr(read_instance, 'calibration_factor'):
-                    
-        # get calibration factor per experiment
-        for data_label in read_instance.calibration_factor:
-            calibration_factor = read_instance.calibration_factor[data_label]
-
-            # get data label index
-            data_label_index = canvas_instance.selected_station_data_labels[networkspeci].index(data_label)
-
-            # get calibration factor per networkspeci
-            if (len(read_instance.networkspecies) > 1) and (',' in calibration_factor):
-                calibration_factor = calibration_factor.split(',')[networkspeci_ii]
-            
-            print('{0} in {1}'.format(calibration_factor, data_label))
-            
-            # apply calibration factor
-            if '*' in calibration_factor:
-                data_array[data_label_index,:,:] *= \
-                    float(calibration_factor.replace('*', ''))
-            elif '/' in calibration_factor:
-                data_array[data_label_index,:,:] /= \
-                    float(calibration_factor.replace('/', ''))
-            elif '-' in calibration_factor:
-                data_array[data_label_index,:,:] -= \
-                    float(calibration_factor.replace('-', ''))
-            else:
-                data_array[data_label_index,:,:] += \
-                    float(calibration_factor)
-
-    return data_array
     
 def aggregation(data_array, statistic_aggregation, axis=0):
     """ Aggregate data across a the specific axis using a given statistic
