@@ -380,7 +380,7 @@ class ExpBias(object):
             std_exp = np.expand_dims(np.nanstd(exp, axis=-1), axis=-1)
             standard_score_obs = ma.masked_invalid((obs - mean_obs) / std_obs)
             standard_score_exp = ma.masked_invalid((exp - mean_exp) / std_exp)
-            return np.nansum(standard_score_obs*standard_score_exp, axis=-1) / (n-1)
+            return np.nansum(standard_score_obs*standard_score_exp, axis=-1) / n
 
     @staticmethod
     def calculate_r_squared(obs, exp):
