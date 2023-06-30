@@ -704,9 +704,9 @@ class DataReader:
                 self.read_instance.station_references[ns] = self.read_instance.station_references[ns][ns_intersects]
                 self.read_instance.station_longitudes[ns] = self.read_instance.station_longitudes[ns][ns_intersects]
                 self.read_instance.station_latitudes[ns] = self.read_instance.station_latitudes[ns][ns_intersects]
-                if ns in station_measurement_altitudes:
+                if ns in self.read_instance.station_measurement_altitudes:
                     self.read_instance.station_measurement_altitudes[ns] = self.read_instance.station_measurement_altitudes[ns][ns_intersects]
-                if ns in station_names:
+                if ns in self.read_instance.station_names:
                     self.read_instance.station_names[ns] = self.read_instance.station_names[ns][ns_intersects]
 
     def read_data(self, yearmonths_to_read, data_labels):
