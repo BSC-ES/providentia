@@ -888,6 +888,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
                 aux.init_multispecies(self)
 
+            # if calibration factor has been applied from config, turn off if we update the data
+            self.calibration_factor = None
+
             # update configuration bar fields
             self.update_configuration_bar_fields()
 
