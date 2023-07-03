@@ -841,13 +841,22 @@ def get_z_statistic_info(plot_type=None, zstat=None):
     if zstat:
         # get base name name of zstat, dropping 'bias' suffix, and dropping period
         base_zstat = zstat.split('_bias')[0].split('-')[0]
+        
         # get zstat type (basic or expbias) 
         z_statistic_type = get_z_statistic_type(base_zstat)
+        
         # get zstat sign (absolute or bias)
         z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
+        
         # get zstat period (if any)
         if '-' in zstat:
             z_statistic_period = zstat.split('_bias')[0].split('-')[1]
+            if z_statistic_period == 'diurnal':
+                z_statistic_period = 'hour'
+            elif z_statistic_period == 'weekly':
+                z_statistic_period ='dayofweek'
+            elif z_statistic_period == 'monthly':
+                z_statistic_period = 'month'
         else:
             z_statistic_period = None
 
