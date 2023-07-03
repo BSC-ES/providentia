@@ -538,7 +538,7 @@ class MPLCanvas(FigureCanvas):
         # update plot options
         self.update_plot_options(plot_types=['map'])
 
-        # re-draw (needed to update plotted colours before update_map_station_selection)
+        # redraw plot (needed to update plotted colours before update_map_station_selection)
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
@@ -589,7 +589,7 @@ class MPLCanvas(FigureCanvas):
                     collection.set_sizes(markersizes)
                     collection.set_facecolor(rgba_tuples)
         
-        # redraw points
+        # redraw plot
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
@@ -654,7 +654,7 @@ class MPLCanvas(FigureCanvas):
                 # update plot options
                 self.update_plot_options(plot_types=['periodic'])
 
-                # draw changes
+                # redraw plot
                 self.figure.canvas.draw()
                 self.figure.canvas.flush_events()
 
@@ -676,7 +676,7 @@ class MPLCanvas(FigureCanvas):
             # update plot options
             self.update_plot_options(plot_types=['taylor'])
 
-            # draw changes
+            # redraw plot
             self.figure.canvas.draw()
             self.figure.canvas.flush_events()
 
@@ -1209,7 +1209,6 @@ class MPLCanvas(FigureCanvas):
 
             # draw changes
             self.figure.canvas.draw_idle()
-
 
         return None
 
@@ -3321,7 +3320,7 @@ class MPLCanvas(FigureCanvas):
                 # update characteristics per plot type
                 self.plot_characteristics['map']['marker_selected']['s'] = markersize
 
-        # redraw points
+        # draw changes
         self.figure.canvas.draw_idle()
 
         return None
@@ -3389,9 +3388,10 @@ class MPLCanvas(FigureCanvas):
                         line.set_linewidth(linewidth)
         else:
             for line in ax.lines:
-                if ((line not in self.annotation_elements) and 
-                    ((plot_type == 'scatter') and (list(line.get_xdata()) != [0, 0.5])
-                     and (list(line.get_xdata()) != [0, 1]))):
+                if (((plot_type == 'scatter') and (list(line.get_xdata()) != [0, 0.5])
+                     and (list(line.get_xdata()) != [0, 1])) or (line in self.annotation_elements)):
+                     continue
+                else:
                     line.set_linewidth(linewidth)
 
         # update characteristics per plot type
@@ -3404,7 +3404,7 @@ class MPLCanvas(FigureCanvas):
         else:
             self.plot_characteristics[plot_type]['plot']['linewidth'] = linewidth
 
-        # redraw points
+        # draw changes
         self.figure.canvas.draw_idle()
 
         return None
@@ -3427,7 +3427,7 @@ class MPLCanvas(FigureCanvas):
             # add smooth plot option
             self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Checked)
 
-        # redraw points
+        # draw changes
         self.figure.canvas.draw_idle()
 
         return None
@@ -3452,7 +3452,7 @@ class MPLCanvas(FigureCanvas):
         # update characteristics per plot type
         self.plot_characteristics[plot_type]['plot']['violin']['widths'] = widths
 
-        # redraw points
+        # draw changes
         self.figure.canvas.draw_idle()
 
         return None
@@ -3640,7 +3640,7 @@ class MPLCanvas(FigureCanvas):
                     if self.station_annotation.get_visible():
                         self.station_annotation.set_visible(False)
 
-                # redraw points
+                # draw changes
                 self.figure.canvas.draw_idle()
 
         return None
@@ -3770,7 +3770,7 @@ class MPLCanvas(FigureCanvas):
                             self.timeseries_annotation.set_visible(False)
                             self.timeseries_vline.set_visible(False)
 
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                         
                     # unlock annotation 
@@ -3865,7 +3865,7 @@ class MPLCanvas(FigureCanvas):
                         if self.scatter_annotation.get_visible():
                             self.scatter_annotation.set_visible(False)
                             
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                         
                     # unlock annotation 
@@ -3998,7 +3998,7 @@ class MPLCanvas(FigureCanvas):
                             self.distribution_annotation.set_visible(False)
                             self.distribution_vline.set_visible(False)
                             
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                         
                     # unlock annotation 
@@ -4148,7 +4148,7 @@ class MPLCanvas(FigureCanvas):
                                     self.periodic_annotation[resolution].set_visible(False)
                                     self.periodic_vline[resolution].set_visible(False)
                                     
-                            # redraw points
+                            # draw changes
                             self.figure.canvas.draw_idle()
                                 
                             # unlock annotation 
@@ -4298,7 +4298,7 @@ class MPLCanvas(FigureCanvas):
                                     self.periodic_violin_annotation[resolution].set_visible(False)
                                     self.periodic_violin_vline[resolution].set_visible(False)
                                     
-                            # redraw points
+                            # draw changes
                             self.figure.canvas.draw_idle()
                                 
                             # unlock annotation 
@@ -4396,7 +4396,7 @@ class MPLCanvas(FigureCanvas):
                         if self.taylor_annotation.get_visible():
                             self.taylor_annotation.set_visible(False)
 
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                         
                     # unlock annotation 
@@ -4444,7 +4444,7 @@ class MPLCanvas(FigureCanvas):
                     # save map extent (in data coords)
                     self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
                     
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                 
                     # update buttons (previous-forward) history
@@ -4543,7 +4543,7 @@ class MPLCanvas(FigureCanvas):
                 else:
                     legend_label.set_fontweight('regular')
 
-                # redraw points
+                # draw changes
                 self.figure.canvas.draw_idle()
                 
                 # unlock legend pick 
