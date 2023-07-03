@@ -926,7 +926,8 @@ class Plot:
                         bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
                     # track plot elements if using dashboard 
                     if not self.read_instance.offline:
-                        self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), bias_lines, bias=bias)
+                        self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), 
+                                                 bias_lines, bias=bias)
 
                 # calculate statistic in each of periodic groups per data label
                 if z_statistic_sign == 'bias':
@@ -1655,8 +1656,7 @@ class Plot:
                                     color = 'white'
                                 # experiments in legend colors
                                 else:
-                                    exp_label = list(self.read_instance.experiments.keys())[list(self.read_instance.experiments.values()).index(data_label)]
-                                    color = self.read_instance.plotting_params[exp_label]['colour']
+                                    color = self.read_instance.plotting_params[data_label]['colour']
                                 cell_colours[col].append(color)
                         # white for other cells
                         else:
@@ -1672,8 +1672,7 @@ class Plot:
                             color = 'white'
                         # experiments in legend colors
                         else:
-                            exp_label = list(self.read_instance.experiments.keys())[list(self.read_instance.experiments.values()).index(data_label)]
-                            color = self.read_instance.plotting_params[exp_label]['colour']
+                            color = self.read_instance.plotting_params[data_label]['colour']
                         col_colours.extend([color])
                     plot_characteristics['plot']['colColours'] = ['white']*empty_cells + col_colours
 
