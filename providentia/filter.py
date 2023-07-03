@@ -605,14 +605,14 @@ class DataFilter:
                     
                     # apply calibration factor
                     if '*' in calibration_factor:
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii,:,:] *= \
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] *= \
                             float(calibration_factor.replace('*', ''))
                     elif '/' in calibration_factor:
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii,:,:] /= \
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] /= \
                             float(calibration_factor.replace('/', ''))
                     elif '-' in calibration_factor:
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii,:,:] -= \
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] -= \
                             float(calibration_factor.replace('-', ''))
                     else:
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii,:,:] += \
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] += \
                             float(calibration_factor)
