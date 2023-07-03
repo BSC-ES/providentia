@@ -632,15 +632,15 @@ class MPLCanvas(FigureCanvas):
                         continue
                     self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, data_label, 
                                             self.plot_characteristics['periodic'], zstat=zstat, 
-                                            first_data_label=first_data_label)
+                                            first_data_label=first_data_label, plot_options=plot_options)
                     first_data_label = False
 
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
-                                                    self.plot_characteristics['periodic'], plot_options,
-                                                    ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                        self.selected_station_data_max[self.read_instance.networkspeci]],
-                                                    relim=True, autoscale_x=True)
+                                                     self.plot_characteristics['periodic'], plot_options,
+                                                     ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
+                                                           self.selected_station_data_max[self.read_instance.networkspeci]],
+                                                     relim=True, autoscale_x=True)
 
                 # set ylabel
                 self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
