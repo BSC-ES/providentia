@@ -467,7 +467,10 @@ class MPLCanvas(FigureCanvas):
 
         # get zstat name from combobox 
         base_zstat = self.map_z_stat.currentText()
-        zstat = get_z_statistic_comboboxes(base_zstat, second_data_label=self.map_z2.currentText())
+        if self.map_z2.currentText() == '':
+            zstat = get_z_statistic_comboboxes(base_zstat)
+        else:
+            zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
         # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
         self.z_statistic, self.active_map_valid_station_inds = calculate_statistic(self.read_instance, self, 
@@ -593,71 +596,6 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
-    def update_periodic_statistic(self, zstat):
-        """ Function that updates the statistic on the periodic plot. """
-
-        # update periodic plot/s if have some stations selected on map
-        if hasattr(self, 'relative_selected_station_inds'):
-            if len(self.relative_selected_station_inds) > 0:
-
-                # clear and turn off all relevant axes before updating
-                self.remove_axis_elements(self.plot_axes['periodic'], 'periodic')
-
-                # get zstat information 
-                zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
-                
-                # get options defined to configure plot 
-                plot_options = copy.deepcopy(self.current_plot_options['periodic'])
-
-                # format axis
-                self.plot.format_axis(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'])
-
-                # set new ylabel
-                if z_statistic_type == 'basic':
-                    ylabel = basic_stats[base_zstat]['label']
-                    ylabel_units = basic_stats[base_zstat]['units']
-                else:
-                    ylabel = expbias_stats[base_zstat]['label']
-                    ylabel_units = expbias_stats[base_zstat]['units']
-                if ylabel_units == 'measurement_units':
-                    ylabel_units = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]]) 
-                if ylabel_units != '':
-                    ylabel = copy.deepcopy(ylabel_units)
-
-                # update periodic plot
-                first_data_label = True
-                for data_label in self.selected_station_data[self.read_instance.networkspeci]:
-                    # skip observational array if bias stat
-                    if (z_statistic_sign == 'bias') & (data_label == 'observations'):
-                        continue
-                    self.plot.make_periodic(self.plot_axes['periodic'], self.read_instance.networkspeci, data_label, 
-                                            self.plot_characteristics['periodic'], zstat=zstat, 
-                                            first_data_label=first_data_label, plot_options=plot_options)
-                    first_data_label = False
-
-                # reset axes limits (harmonising across subplots for periodic plots) 
-                self.plot.harmonise_xy_lims_paradigm(self.plot_axes['periodic'], 'periodic', 
-                                                     self.plot_characteristics['periodic'], plot_options,
-                                                     ylim=[self.selected_station_data_min[self.read_instance.networkspeci], 
-                                                           self.selected_station_data_max[self.read_instance.networkspeci]],
-                                                     relim=True, autoscale_x=True)
-
-                # set ylabel
-                self.plot.set_axis_label(self.plot_axes['periodic'], 'y', ylabel, self.plot_characteristics['periodic'])
-
-                # activate axis
-                self.activate_axis(self.plot_axes['periodic'], 'periodic')
-
-                # reset navigation toolbar stack for plot
-                self.reset_ax_navigation_toolbar_stack(self.plot_axes['periodic'])
-
-                # update plot options
-                self.update_plot_options(plot_types=['periodic'])
-
-                # redraw plot
-                self.figure.canvas.draw()
-                self.figure.canvas.flush_events()
-
     def update_taylor_corr_statistic(self):
         """ Function that updates the correlation statistic on the Taylor diagram. """
 
@@ -704,9 +642,15 @@ class MPLCanvas(FigureCanvas):
                 # set ylabel for periodic plot
                 if plot_type == 'periodic':
                     # get currently selected periodic statistic name
-                    zstat = self.periodic_stat.currentText()
+                    base_zstat = self.periodic_stat.currentText()
+                    if 'bias' in plot_options:
+                        zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
+                    else:
+                        zstat = get_z_statistic_comboboxes(base_zstat)
+                    
                     # get zstat information 
                     zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
+                    
                     # set new ylabel
                     if z_statistic_type == 'basic':
                         ylabel = basic_stats[base_zstat]['label']
@@ -948,9 +892,7 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
-
-            # update periodic statistic comboboxes
-
+            
             # set variable that blocks configuration bar handling updates until all changes
             # to the periodic statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
@@ -2822,7 +2764,7 @@ class MPLCanvas(FigureCanvas):
                         undo = False
                     # do nothing if options were never selected
                     elif ((option not in self.previous_plot_options[plot_type]) 
-                        and (option not in self.current_plot_options[plot_type])):
+                        and (option not in self.current_plot_options[plot_type])): 
                         continue
 
                     # if plot type not in plot_elements, then return
@@ -2962,7 +2904,7 @@ class MPLCanvas(FigureCanvas):
 
                                 # get currently selected periodic statistic name
                                 base_zstat = self.periodic_stat.currentText()
-                                zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
+                                zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
                                 # get zstat information 
                                 zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
@@ -2973,6 +2915,7 @@ class MPLCanvas(FigureCanvas):
                                     event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                     self.read_instance.block_MPL_canvas_updates = False
                                     self.plot_elements[plot_type]['active'] = 'absolute'
+
                             # get plotting function for specific plot
                             if plot_type == 'statsummary':
                                 func = getattr(self.plot, 'make_table')
@@ -3075,7 +3018,7 @@ class MPLCanvas(FigureCanvas):
 
                         # if bias option is not enabled then hide bias plot elements and show absolute plots again
                         else:
-
+                            
                             # update active (absolute)
                             self.plot_elements[plot_type]['active'] = 'absolute' 
 

@@ -746,7 +746,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
                 collection.set_clim(vmin=z_vmin,vmax=z_vmax)
                 collection.set_cmap(cmap=cmap)
 
-def get_z_statistic_comboboxes(base_zstat, second_data_label=''):
+def get_z_statistic_comboboxes(base_zstat, bias=False):
     """ Function that gets appropriate zstat name for selected zstatistic comboboxes.
 
         :param base_zstat: name of statistic
@@ -758,8 +758,7 @@ def get_z_statistic_comboboxes(base_zstat, second_data_label=''):
     """
     
     # get zstat sign 
-    # this is bias, if second data label has been provided
-    if second_data_label == '':
+    if not bias:
         z_statistic_sign = 'absolute'
     else:
         z_statistic_sign = 'bias'
