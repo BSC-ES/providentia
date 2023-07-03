@@ -693,7 +693,7 @@ class MPLCanvas(FigureCanvas):
                 ax = self.plot_axes[plot_type]
 
                 # get options defined to configure plot 
-                plot_options = []
+                plot_options = copy.deepcopy(self.current_plot_options[plot_type])
 
                 # get plotting function for specific plot
                 if plot_type == 'statsummary':
@@ -764,7 +764,7 @@ class MPLCanvas(FigureCanvas):
                          self.plot_characteristics[plot_type], 
                          zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
                 # other plots
-                else: 
+                else:
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
                          self.plot_characteristics[plot_type], plot_options=plot_options)
 
