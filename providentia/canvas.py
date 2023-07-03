@@ -2443,8 +2443,7 @@ class MPLCanvas(FigureCanvas):
 
         # add statsummary periodic cycle combobox
         self.statsummary_cycle = set_formatting(StatsComboBox(self), formatting_dict['combobox_menu'])
-        # self.statsummary_cycle.addItems(['None', 'Diurnal', 'Weekly', 'Monthly'])
-        self.statsummary_cycle.addItems(['None'])
+        self.statsummary_cycle.addItems(['None', 'Diurnal', 'Weekly', 'Monthly'])
         self.statsummary_cycle.move(self.statsummary_menu_button.geometry().x()-220, 
                                     self.statsummary_menu_button.geometry().y()+75)
         self.statsummary_cycle.setFixedWidth(105)
@@ -3160,11 +3159,11 @@ class MPLCanvas(FigureCanvas):
                 if periodic_cycle == 'None':
                     cycle_stats = [stat for stat in items]
                 else:
-                    cycle_stats = [stat + '_' + periodic_cycle.lower() for stat in items]
+                    cycle_stats = [stat + '-' + periodic_cycle.lower() for stat in items]
 
-                # print('Old stats', self.statsummary_stats[statistic_type])
-                print('Previous', self.read_instance.previous_statsummary_stats[periodic_cycle])
-                print('Current', self.read_instance.current_statsummary_stats[periodic_cycle])
+                print('Old', self.statsummary_stats[statistic_type])
+                # print('Previous', self.read_instance.previous_statsummary_stats[periodic_cycle])
+                # print('Current', self.read_instance.current_statsummary_stats[periodic_cycle])
 
                 for stat in cycle_stats:
                     
@@ -3193,6 +3192,8 @@ class MPLCanvas(FigureCanvas):
                     else:
                         if stat in self.statsummary_stats[statistic_type]:
                             self.statsummary_stats[statistic_type].remove(stat)
+
+                print('New', self.statsummary_stats[statistic_type])
 
                 # update previous
                 self.read_instance.previous_statsummary_stats[periodic_cycle] = self.statsummary_stats[statistic_type]
