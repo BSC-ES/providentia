@@ -1523,6 +1523,8 @@ class Plot:
             :type plot_options: list
         """
 
+        print(stats_df)
+
         # turn off axis to make table
         relevant_axis.axis('off')
 
