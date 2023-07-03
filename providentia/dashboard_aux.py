@@ -276,7 +276,6 @@ class StatsComboBox(ComboBox):
 
         # check items that have been selected in advance and are in current cycle
         checked_options_in_items = list(set(checked_options) & set(items))
-        print('Checking...', checked_options_in_items)
         for checked_option in checked_options_in_items:
             index = items.index(checked_option)
             self.parent.statsummary_stat.model().item(index).setCheckState(QtCore.Qt.Checked)
