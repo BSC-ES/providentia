@@ -606,8 +606,8 @@ class MPLCanvas(FigureCanvas):
                 # get zstat information 
                 zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
                 
-                # set plot options as empty
-                plot_options = []
+                # get options defined to configure plot 
+                plot_options = copy.deepcopy(self.current_plot_options['periodic'])
 
                 # format axis
                 self.plot.format_axis(self.plot_axes['periodic'], 'periodic', self.plot_characteristics['periodic'])
