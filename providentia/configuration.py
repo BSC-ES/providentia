@@ -63,6 +63,7 @@ class ProvConfiguration:
             'spatial_colocation': True,
             'map_extent': None, 
             'filter_species': {},
+            'calibration_factor': None,
             'lower_bound': None,
             'upper_bound': None,
             'report_type': 'standard',
