@@ -269,7 +269,7 @@ class StatsComboBox(ComboBox):
         else:
             items = list(basic_stats.keys())
         if periodic_cycle != 'None':
-            items = [stat + '_' + periodic_cycle.lower() for stat in items]
+            items = [stat + '-' + periodic_cycle.lower() for stat in items]
         self.parent.statsummary_stat.clear()
         self.parent.statsummary_stat.addItems(items)
         self.parent.statsummary_stat.updateText()
