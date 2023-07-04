@@ -15,6 +15,8 @@ from .read_aux import get_default_qa
 from .aux import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
 
 def set_formatting(PyQt5_obj, format):
@@ -190,9 +192,10 @@ class ComboBox(QtWidgets.QComboBox):
         # setMaxVisibleItems only works if the box is editable
         # this creates a line edit that we need to overwrite
         self.setEditable(True)
-        self.setMaxVisibleItems(15)
         #self.AdjustToContents
         self.setSizeAdjustPolicy(self.AdjustToMinimumContentsLengthWithIcon)
+        self.setMaxVisibleItems(20)
+        self.AdjustToContents
 
         # overwrite default line edit by an invisible one
         self.lineEdit().setFrame(False)
@@ -224,6 +227,63 @@ class ComboBox(QtWidgets.QComboBox):
         # add vertical scroll bar
         self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
+class StatsComboBox(ComboBox):
+
+    def __init__(self, parent=None):
+
+        super().__init__(parent)
+        self.parent = parent
+
+        # show basic statistics at start
+        self.parent.statsummary_stat.addItems(list(basic_stats.keys()))
+
+        # set up update when changing the periodic cycle
+        self.currentTextChanged.connect(self.updateStats)
+        
+        # initialise stats
+        self.parent.statsummary_stats = {}
+        self.parent.statsummary_stats['basic'] = self.parent.plot_characteristics['statsummary']['basic']
+        self.parent.statsummary_stats['expbias'] = self.parent.plot_characteristics['statsummary']['experiment_bias']
+
+    def updateStats(self):
+        
+        self.parent.read_instance.block_MPL_canvas_updates = True
+
+        # get plot options to know if we have bias
+        plot_options = []
+        if hasattr(self.parent.read_instance, 'current_plot_options'):
+            plot_options = copy.deepcopy(self.parent.read_instance.current_plot_options['statsummary'])
+
+        # get current periodic cycle
+        periodic_cycle = self.lineEdit().text()
+
+        # get items that have been selected in advance before clearing
+        statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
+        checked_options = copy.deepcopy(self.parent.statsummary_stats[statistic_type])
+
+        self.parent.read_instance.block_config_bar_handling_updates = True
+        
+        # update stats for the selected periodic cycle
+        if 'bias' in plot_options:
+            items = ['Mean_bias', 'StdDev_bias'] + list(expbias_stats.keys())
+        else:
+            items = list(basic_stats.keys())
+        if periodic_cycle != 'None':
+            items = [stat + '-' + periodic_cycle.lower() for stat in items]
+        self.parent.statsummary_stat.clear()
+        self.parent.statsummary_stat.addItems(items)
+        self.parent.statsummary_stat.updateText()
+
+        # check items that have been selected in advance and are in current cycle
+        checked_options_in_items = list(set(checked_options) & set(items))
+        for checked_option in checked_options_in_items:
+            index = items.index(checked_option)
+            self.parent.statsummary_stat.model().item(index).setCheckState(QtCore.Qt.Checked)
+
+        self.parent.read_instance.block_config_bar_handling_updates = False
+
+        self.parent.read_instance.block_MPL_canvas_updates = False
+
 class CheckableComboBox(QtWidgets.QComboBox):
     """ Create combobox with multiple selection options.
         Reference: https://gis.stackexchange.com/questions/350148/qcombobox-multiple-selection-pyqt5. 
@@ -235,8 +295,10 @@ class CheckableComboBox(QtWidgets.QComboBox):
 
         # make the combo editable to set a custom text, but readonly
         self.setEditable(True)
+        self.setMaxVisibleItems(20)
         self.lineEdit().setPlaceholderText('Select option/s:')
         self.lineEdit().setReadOnly(True)
+        self.currentTextChanged.connect(self.fixCursorPosition)
 
         # make the lineedit the same color as QComboBox
         palette = QtWidgets.QApplication.palette()
@@ -253,6 +315,14 @@ class CheckableComboBox(QtWidgets.QComboBox):
         # prevent popup from closing when clicking on an item
         self.view().viewport().installEventFilter(self)
 
+    def fixCursorPosition(self):
+        """ Move (invisible) cursor to first position to avoid cutting off the start. """
+
+        # apply only to comboboxes with text lengths of more than 8 chars
+        if len(self.lineEdit().text()) >= 8:
+            self.lineEdit().setCursorPosition(0)
+            self.lineEdit().setFocus()
+    
     def resizeEvent(self, event):
 
         # recompute text to elide as needed
@@ -274,7 +344,6 @@ class CheckableComboBox(QtWidgets.QComboBox):
             if event.type() == QtCore.QEvent.MouseButtonRelease:
                 index = self.view().indexAt(event.pos())
                 item = self.model().item(index.row())
-
                 if item.checkState() == QtCore.Qt.Checked:
                     item.setCheckState(QtCore.Qt.Unchecked)
                 else:
@@ -286,6 +355,9 @@ class CheckableComboBox(QtWidgets.QComboBox):
     def showPopup(self):
 
         super().showPopup()
+
+        # increase the width of the elements on popup so they can be read
+        self.view().setMinimumWidth(self.view().sizeHintForColumn(0) + 10)
 
         # when the popup is displayed, a click on the lineedit should close it
         self.closeOnLineEditClick = True
@@ -315,9 +387,10 @@ class CheckableComboBox(QtWidgets.QComboBox):
         text = ", ".join(texts)
 
         # compute elided text (with "...")
-        metrics = QtGui.QFontMetrics(self.lineEdit().font())
-        elidedText = metrics.elidedText(text, QtCore.Qt.ElideRight, self.lineEdit().width())
-        self.lineEdit().setText(elidedText)
+        # metrics = QtGui.QFontMetrics(self.lineEdit().font())
+        # elidedText = metrics.elidedText(text, QtCore.Qt.ElideRight, self.lineEdit().width())
+
+        self.lineEdit().setText(text)
 
     def addItem(self, text, data=None):
 
@@ -340,13 +413,17 @@ class CheckableComboBox(QtWidgets.QComboBox):
                 data = None
             self.addItem(text, data)
 
-    def currentData(self):
+    def currentData(self, all=False):
         
         # return the list of selected items data
         res = []
         for i in range(self.model().rowCount()):
-            if self.model().item(i).checkState() == QtCore.Qt.Checked:
+            if not all:
+                if self.model().item(i).checkState() == QtCore.Qt.Checked:
+                    res.append(self.model().item(i).data())
+            else:
                 res.append(self.model().item(i).data())
+
         return res
 
 class QVLine(QtWidgets.QFrame):
