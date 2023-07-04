@@ -27,8 +27,8 @@ import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_aux import set_formatting, ComboBox, CheckableComboBox, LassoSelector
-from .aux import show_message
+from .dashboard_aux import set_formatting, ComboBox, StatsComboBox, CheckableComboBox, LassoSelector
+from .aux import get_relevant_temporal_resolutions, show_message
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
@@ -467,7 +467,10 @@ class MPLCanvas(FigureCanvas):
 
         # get zstat name from combobox 
         base_zstat = self.map_z_stat.currentText()
-        zstat = get_z_statistic_comboboxes(base_zstat, second_data_label=self.map_z2.currentText())
+        if self.map_z2.currentText() == '':
+            zstat = get_z_statistic_comboboxes(base_zstat)
+        else:
+            zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
         # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
         self.z_statistic, self.active_map_valid_station_inds = calculate_statistic(self.read_instance, self, 
@@ -538,7 +541,7 @@ class MPLCanvas(FigureCanvas):
         # update plot options
         self.update_plot_options(plot_types=['map'])
 
-        # re-draw (needed to update plotted colours before update_map_station_selection)
+        # redraw plot (needed to update plotted colours before update_map_station_selection)
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
@@ -589,7 +592,7 @@ class MPLCanvas(FigureCanvas):
                     collection.set_sizes(markersizes)
                     collection.set_facecolor(rgba_tuples)
         
-        # redraw points
+        # redraw plot
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
@@ -608,7 +611,7 @@ class MPLCanvas(FigureCanvas):
                 ax = self.plot_axes[plot_type]
 
                 # get options defined to configure plot 
-                plot_options = []
+                plot_options = copy.deepcopy(self.current_plot_options[plot_type])
 
                 # get plotting function for specific plot
                 if plot_type == 'statsummary':
@@ -619,9 +622,15 @@ class MPLCanvas(FigureCanvas):
                 # set ylabel for periodic plot
                 if plot_type == 'periodic':
                     # get currently selected periodic statistic name
-                    zstat = self.periodic_stat.currentText()
+                    base_zstat = self.periodic_stat.currentText()
+                    if 'bias' in plot_options:
+                        zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
+                    else:
+                        zstat = get_z_statistic_comboboxes(base_zstat)
+                    
                     # get zstat information 
                     zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
+                    
                     # set new ylabel
                     if z_statistic_type == 'basic':
                         ylabel = basic_stats[base_zstat]['label']
@@ -634,6 +643,18 @@ class MPLCanvas(FigureCanvas):
                     if ylabel_units != '':
                         ylabel = '[{}]'.format(ylabel_units)
                     xlabel = ''
+
+                # create structure to store data for statsummary plot
+                elif plot_type == 'statsummary':
+                    xlabel = ''
+                    ylabel = ''
+                
+                # create structure to store data for Taylor diagram
+                elif plot_type == 'taylor':
+                    # get r or r2 as correlation statistic
+                    corr_stat = self.plot_characteristics[plot_type]['corr_stat']
+                    relevant_zstats = [corr_stat, "StdDev"]
+                    stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
 
                 # setup xlabel / ylabel for other plot_types
                 else:    
@@ -662,12 +683,12 @@ class MPLCanvas(FigureCanvas):
                          self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options)
                 # make statsummary plot
                 elif plot_type == 'statsummary':
-                    relevant_zstats = self.plot_characteristics[plot_type]['basic']
+                    relevant_zstats = self.statsummary_stats['basic']
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
                          self.plot_characteristics[plot_type], 
                          zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
                 # other plots
-                else: 
+                else:
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
                          self.plot_characteristics[plot_type], plot_options=plot_options)
 
@@ -854,9 +875,7 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
-
-            # update periodic statistic comboboxes
-
+            
             # set variable that blocks configuration bar handling updates until all changes
             # to the periodic statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
@@ -1508,7 +1527,7 @@ class MPLCanvas(FigureCanvas):
         self.map_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z_stat.move(self.map_menu_button.geometry().x()-220, 
                              self.map_menu_button.geometry().y()+75)
-        self.map_z_stat.setFixedWidth(100)
+        self.map_z_stat.setFixedWidth(105)
         self.map_z_stat.hide()
 
         # add map dataset 1 label ('Dataset 1') to layout
@@ -1522,21 +1541,21 @@ class MPLCanvas(FigureCanvas):
         self.map_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.map_z1.move(self.map_menu_button.geometry().x()-220, 
                          self.map_menu_button.geometry().y()+125)
-        self.map_z1.setFixedWidth(100)
+        self.map_z1.setFixedWidth(105)
         self.map_z1.hide()
 
         # add map dataset 2 label ('Dataset 2') to layout
         self.map_z2_label = QtWidgets.QLabel('Dataset 2', self)
-        self.map_z2_label.setGeometry(self.map_menu_button.geometry().x()-90, 
+        self.map_z2_label.setGeometry(self.map_menu_button.geometry().x()-95, 
                                       self.map_menu_button.geometry().y()+100, 
                                       230, 20)
         self.map_z2_label.hide()
 
         # add map dataset 2 combobox
         self.map_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.map_z2.move(self.map_menu_button.geometry().x()-90, 
+        self.map_z2.move(self.map_menu_button.geometry().x()-95, 
                          self.map_menu_button.geometry().y()+125)
-        self.map_z2.setFixedWidth(100)
+        self.map_z2.setFixedWidth(105)
         self.map_z2.hide()
 
         # add map general text for unselected stations ('Unselected stations')
@@ -1645,7 +1664,7 @@ class MPLCanvas(FigureCanvas):
         self.map_options_label.hide()
 
         # add map options checkboxes
-        self.map_options = CheckableComboBox(self)
+        self.map_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.map_options.setObjectName('map_options')
         self.map_options.addItems(self.plot_characteristics['map']['plot_options'])        
         self.map_options.setGeometry(self.map_menu_button.geometry().x()-220, 
@@ -1786,7 +1805,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_options_label.hide()
 
         # add timeseries plot options checkboxes
-        self.timeseries_options = CheckableComboBox(self)
+        self.timeseries_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.timeseries_options.setObjectName('timeseries_options')
         self.timeseries_options.addItems(self.plot_characteristics['timeseries']['plot_options'])        
         self.timeseries_options.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
@@ -1849,7 +1868,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_settings_label.hide()
 
         # add periodic stat label ('Statistic') to layout
-        self.periodic_stat_label = QtWidgets.QLabel("Statistic", self)
+        self.periodic_stat_label = QtWidgets.QLabel('Statistic', self)
         self.periodic_stat_label.setGeometry(self.periodic_menu_button.geometry().x()-220, 
                                              self.periodic_menu_button.geometry().y()+50, 
                                              230, 20)
@@ -1859,7 +1878,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.periodic_stat.move(self.periodic_menu_button.geometry().x()-220, 
                                 self.periodic_menu_button.geometry().y()+75)
-        self.periodic_stat.setFixedWidth(100)
+        self.periodic_stat.setFixedWidth(105)
         self.periodic_stat.hide()
 
         # add periodic markersize slider name ('Size') to layout
@@ -1910,7 +1929,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_options_label.hide()
 
         # add periodic plot options checkboxes
-        self.periodic_options = CheckableComboBox(self)
+        self.periodic_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.periodic_options.setObjectName('periodic_options')
         self.periodic_options.addItems(self.plot_characteristics['periodic']['plot_options'])        
         self.periodic_options.setGeometry(self.periodic_menu_button.geometry().x()-220, 
@@ -1983,8 +2002,8 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.periodic_violin_markersize_sl.setObjectName('periodic_violin_markersize_sl')
         self.periodic_violin_markersize_sl.setMinimum(0)
-        self.periodic_violin_markersize_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['p50']['markersize']*10)
-        self.periodic_violin_markersize_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['p50']['markersize'])
+        self.periodic_violin_markersize_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['markersize']*10)
+        self.periodic_violin_markersize_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['markersize'])
         self.periodic_violin_markersize_sl.setTickInterval(2)
         self.periodic_violin_markersize_sl.setTracking(False)
         self.periodic_violin_markersize_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220,
@@ -2003,8 +2022,8 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_linewidth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.periodic_violin_linewidth_sl.setObjectName('periodic_violin_linewidth_sl')
         self.periodic_violin_linewidth_sl.setMinimum(0)
-        self.periodic_violin_linewidth_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['p50']['linewidth']*100)
-        self.periodic_violin_linewidth_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['p50']['linewidth']*10)
+        self.periodic_violin_linewidth_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*100)
+        self.periodic_violin_linewidth_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*10)
         self.periodic_violin_linewidth_sl.setTickInterval(2)
         self.periodic_violin_linewidth_sl.setTracking(False)
         self.periodic_violin_linewidth_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220, 
@@ -2020,7 +2039,7 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_options_label.hide()
 
         # add periodic violin plot options checkboxes
-        self.periodic_violin_options = CheckableComboBox(self)
+        self.periodic_violin_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.periodic_violin_options.setObjectName('periodic_violin_options')
         self.periodic_violin_options.addItems(self.plot_characteristics['periodic-violin']['plot_options'])        
         self.periodic_violin_options.setGeometry(self.periodic_violin_menu_button.geometry().x()-220, 
@@ -2088,7 +2107,7 @@ class MPLCanvas(FigureCanvas):
         self.metadata_options_label.hide()
 
         # add metadata plot options checkboxes
-        self.metadata_options = CheckableComboBox(self)
+        self.metadata_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.metadata_options.setObjectName('metadata_options')
         self.metadata_options.addItems(self.plot_characteristics['metadata']['plot_options'])        
         self.metadata_options.setGeometry(self.metadata_menu_button.geometry().x()-220, 
@@ -2171,7 +2190,7 @@ class MPLCanvas(FigureCanvas):
         self.distribution_options_label.hide()
 
         # add distribution plot options checkboxes
-        self.distribution_options = CheckableComboBox(self)
+        self.distribution_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.distribution_options.setObjectName('distribution_options')
         self.distribution_options.addItems(self.plot_characteristics['distribution']['plot_options'])        
         self.distribution_options.setGeometry(self.distribution_menu_button.geometry().x()-220, 
@@ -2276,7 +2295,7 @@ class MPLCanvas(FigureCanvas):
         self.scatter_options_label.hide()
 
         # add scatter plot options checkboxes
-        self.scatter_options = CheckableComboBox(self)
+        self.scatter_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.scatter_options.setObjectName('scatter_options')
         self.scatter_options.addItems(self.plot_characteristics['scatter']['plot_options'])        
         self.scatter_options.setGeometry(self.scatter_menu_button.geometry().x()-220, 
@@ -2321,7 +2340,7 @@ class MPLCanvas(FigureCanvas):
         self.statsummary_container = set_formatting(QtWidgets.QWidget(self), formatting_dict['settings_container'])
         self.statsummary_container.setGeometry(self.statsummary_menu_button.geometry().x()-230,
                                                self.statsummary_menu_button.geometry().y()+25, 
-                                               250, 80)
+                                               250, 130)
         self.statsummary_container.hide()
 
         # add settings label
@@ -2332,19 +2351,48 @@ class MPLCanvas(FigureCanvas):
                                                     230, 20)
         self.statsummary_settings_label.hide()
 
+        # add statsummary stat label ('Statistic') to layout
+        self.statsummary_stat_label = QtWidgets.QLabel('Statistic', self)
+        self.statsummary_stat_label.setGeometry(self.statsummary_menu_button.geometry().x()-95, 
+                                                self.statsummary_menu_button.geometry().y()+50, 
+                                                230, 20)
+        self.statsummary_stat_label.hide()
+
+        # add combobox stat combobox
+        self.statsummary_stat = set_formatting(set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu']), formatting_dict['combobox_menu'])
+        self.statsummary_stat.move(self.statsummary_menu_button.geometry().x()-95, 
+                                   self.statsummary_menu_button.geometry().y()+75)
+        self.statsummary_stat.setFixedWidth(105)
+        self.statsummary_stat.hide()
+
+        # add statsummary cycle label ('Periodic cycle') to layout
+        self.statsummary_cycle_label = QtWidgets.QLabel('Periodic cycle', self)
+        self.statsummary_cycle_label.setGeometry(self.statsummary_menu_button.geometry().x()-220, 
+                                                self.statsummary_menu_button.geometry().y()+50, 
+                                                230, 20)
+        self.statsummary_cycle_label.hide()
+
+        # add statsummary periodic cycle combobox
+        self.statsummary_cycle = set_formatting(StatsComboBox(self), formatting_dict['combobox_menu'])
+        self.statsummary_cycle.addItems(['None', 'Diurnal', 'Weekly', 'Monthly'])
+        self.statsummary_cycle.move(self.statsummary_menu_button.geometry().x()-220, 
+                                    self.statsummary_menu_button.geometry().y()+75)
+        self.statsummary_cycle.setFixedWidth(105)
+        self.statsummary_cycle.hide()
+
         # add statsummary plot options name ('Options') to layout
         self.statsummary_options_label = QtWidgets.QLabel("Options", self)
         self.statsummary_options_label.setGeometry(self.statsummary_menu_button.geometry().x()-220,
-                                                   self.statsummary_menu_button.geometry().y()+50, 
+                                                   self.statsummary_menu_button.geometry().y()+100, 
                                                    230, 20)
         self.statsummary_options_label.hide()
 
         # add statsummary plot options checkboxes
-        self.statsummary_options = CheckableComboBox(self)
+        self.statsummary_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.statsummary_options.setObjectName('statsummary_options')
         self.statsummary_options.addItems(self.plot_characteristics['statsummary']['plot_options'])        
         self.statsummary_options.setGeometry(self.statsummary_menu_button.geometry().x()-220, 
-                                             self.statsummary_menu_button.geometry().y()+75, 
+                                             self.statsummary_menu_button.geometry().y()+125, 
                                              230, 20)
         self.statsummary_options.currentTextChanged.connect(self.update_plot_option)
         self.statsummary_options.hide()
@@ -2358,6 +2406,8 @@ class MPLCanvas(FigureCanvas):
 
         # set show/hide actions
         self.statsummary_elements = [self.statsummary_container, self.statsummary_settings_label, 
+                                     self.statsummary_cycle_label, self.statsummary_cycle, 
+                                     self.statsummary_stat_label, self.statsummary_stat,
                                      self.statsummary_options_label, self.statsummary_options]
         self.interactive_elements['statsummary'] = {'button': self.statsummary_menu_button, 
                                                     'hidden': True,
@@ -2366,6 +2416,7 @@ class MPLCanvas(FigureCanvas):
                                                     'opacity_sl': [],
                                                     'linewidth_sl': []
                                                     }
+        self.statsummary_stat.currentTextChanged.connect(self.handle_statsummary_statistics_update)
         self.statsummary_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.statsummary_save_button.clicked.connect(self.save_axis_figure_func)
 
@@ -2400,7 +2451,7 @@ class MPLCanvas(FigureCanvas):
         self.boxplot_options_label.hide()
 
         # add boxplot options checkboxes
-        self.boxplot_options = CheckableComboBox(self)
+        self.boxplot_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.boxplot_options.setObjectName('boxplot_options')
         self.boxplot_options.addItems(self.plot_characteristics['boxplot']['plot_options'])        
         self.boxplot_options.setGeometry(self.boxplot_menu_button.geometry().x()-220, 
@@ -2496,7 +2547,7 @@ class MPLCanvas(FigureCanvas):
         self.taylor_options_label.hide()
 
         # add taylor diagram options checkboxes
-        self.taylor_options = CheckableComboBox(self)
+        self.taylor_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.taylor_options.setObjectName('taylor_options')
         self.taylor_options.addItems(self.plot_characteristics['taylor']['plot_options'])        
         self.taylor_options.setGeometry(self.taylor_menu_button.geometry().x()-220, 
@@ -2671,11 +2722,9 @@ class MPLCanvas(FigureCanvas):
             # an option is selected or there are options in previous to undo?
             if event_source.currentData() or self.previous_plot_options[plot_type]:
 
-                # get plot options (previous and currently selected)
                 self.current_plot_options[plot_type] = copy.deepcopy(event_source.currentData())
+                all_plot_options = event_source.currentData(all=True)
 
-                all_plot_options = self.plot_characteristics[plot_type]['plot_options']
-                
                 for option in all_plot_options:
                     
                     # get index to raise errors and uncheck options
@@ -2704,7 +2753,7 @@ class MPLCanvas(FigureCanvas):
                         undo = False
                     # do nothing if options were never selected
                     elif ((option not in self.previous_plot_options[plot_type]) 
-                        and (option not in self.current_plot_options[plot_type])):
+                        and (option not in self.current_plot_options[plot_type])): 
                         continue
 
                     # if plot type not in plot_elements, then return
@@ -2844,7 +2893,7 @@ class MPLCanvas(FigureCanvas):
 
                                 # get currently selected periodic statistic name
                                 base_zstat = self.periodic_stat.currentText()
-                                zstat = get_z_statistic_comboboxes(base_zstat, second_data_label='model')
+                                zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
                                 # get zstat information 
                                 zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
@@ -2905,7 +2954,7 @@ class MPLCanvas(FigureCanvas):
                                          plot_options=self.current_plot_options[plot_type])
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
-                                    relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
+                                    relevant_zstats = self.statsummary_stats['expbias']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
                                          zstats=relevant_zstats, statsummary=True, 
@@ -2958,7 +3007,7 @@ class MPLCanvas(FigureCanvas):
 
                         # if bias option is not enabled then hide bias plot elements and show absolute plots again
                         else:
-
+                            
                             # update active (absolute)
                             self.plot_elements[plot_type]['active'] = 'absolute' 
 
@@ -2983,6 +3032,10 @@ class MPLCanvas(FigureCanvas):
                             self.redraw_active_options(self.read_instance.data_labels, 
                                                        plot_type, 'absolute', self.current_plot_options[plot_type])
 
+                        # update statistic options in statsummary comboboxes
+                        if plot_type in ['statsummary']:
+                            self.statsummary_cycle.updateStats()
+
                     # reset axes limits (harmonising across subplots for periodic plots) 
                     if plot_type != 'map':
                         if plot_type == 'scatter':
@@ -3003,6 +3056,86 @@ class MPLCanvas(FigureCanvas):
                 self.figure.canvas.draw_idle()
 
         return None
+
+    def handle_statsummary_statistics_update(self):
+        """ Function that handles update of plotted statsummary statistics
+            upon interaction with statistic comboboxes.
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+
+            # update statsummary statistics comboboxes
+            # set variable that blocks configuration bar handling updates until all changes
+            # to the statsummary statistics combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # get source
+            event_source = self.sender()
+            
+            # save stats before updating them
+            if event_source.currentData() or self.read_instance.previous_statsummary_stats:
+                
+                print('Updating stats...')
+
+                # get current
+                periodic_cycle = self.statsummary_cycle.lineEdit().text()
+                self.read_instance.current_statsummary_stats[periodic_cycle] = copy.deepcopy(event_source.currentData())
+
+                # get all possible stats
+                plot_options = self.read_instance.current_plot_options['statsummary']
+                statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
+                if 'bias' in plot_options:
+                    items = ['Mean_bias', 'StdDev_bias'] + list(expbias_stats.keys())
+                else:
+                    items = list(basic_stats.keys())
+                if periodic_cycle == 'None':
+                    cycle_stats = [stat for stat in items]
+                else:
+                    cycle_stats = [stat + '-' + periodic_cycle.lower() for stat in items]
+
+                print('Old', self.statsummary_stats[statistic_type])
+                # print('Previous', self.read_instance.previous_statsummary_stats[periodic_cycle])
+                # print('Current', self.read_instance.current_statsummary_stats[periodic_cycle])
+
+                for stat in cycle_stats:
+                    
+                    # remove stat that was selected before but not now
+                    if ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                        and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                        add = False
+                    # add stat that was not selected before
+                    elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                        and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                        add = True
+                    # do nothing if options were selected before and now
+                    elif ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                        and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                        continue
+                    # do nothing if options were never selected
+                    elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                        and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                        continue
+
+                    # add stat to list
+                    if add:
+                        if stat not in self.statsummary_stats[statistic_type]:
+                            self.statsummary_stats[statistic_type].append(stat)
+                    # remove stat from list
+                    else:
+                        if stat in self.statsummary_stats[statistic_type]:
+                            self.statsummary_stats[statistic_type].remove(stat)
+
+                print('New', self.statsummary_stats[statistic_type])
+
+                # update previous
+                self.read_instance.previous_statsummary_stats[periodic_cycle] = self.statsummary_stats[statistic_type]
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update plotted statsummary statistic
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_associated_active_dashboard_plot('statsummary')
 
     def redraw_active_options(self, data_labels, plot_type, active, plot_options):
         """ Redraw active plot option elements when moving between absolute and bias plots,
@@ -3075,7 +3208,7 @@ class MPLCanvas(FigureCanvas):
             if plot_type in ['timeseries', 'periodic', 'scatter', 'taylor']:
                 self.plot_characteristics[plot_type]['plot']['markersize'] = markersize
             elif plot_type == 'periodic-violin':
-                self.plot_characteristics[plot_type]['plot']['p50']['markersize'] = markersize
+                self.plot_characteristics[plot_type]['plot']['median']['markersize'] = markersize
 
         elif plot_type == 'map':
 
@@ -3120,7 +3253,7 @@ class MPLCanvas(FigureCanvas):
                 # update characteristics per plot type
                 self.plot_characteristics['map']['marker_selected']['s'] = markersize
 
-        # redraw points
+        # draw changes
         self.figure.canvas.draw_idle()
 
         return None
@@ -3188,14 +3321,15 @@ class MPLCanvas(FigureCanvas):
                         line.set_linewidth(linewidth)
         else:
             for line in ax.lines:
-                if ((line not in self.annotation_elements) and 
-                    ((plot_type == 'scatter') and (list(line.get_xdata()) != [0, 0.5])
-                     and (list(line.get_xdata()) != [0, 1]))):
+                if (((plot_type == 'scatter') and (list(line.get_xdata()) != [0, 0.5])
+                     and (list(line.get_xdata()) != [0, 1])) or (line in self.annotation_elements)):
+                     continue
+                else:
                     line.set_linewidth(linewidth)
 
         # update characteristics per plot type
         if plot_type == 'periodic-violin':
-            self.plot_characteristics[plot_type]['plot']['p50']['linewidth'] = linewidth
+            self.plot_characteristics[plot_type]['plot']['median']['linewidth'] = linewidth
         elif plot_type == 'timeseries':
             self.plot_characteristics[plot_type]['smooth']['format']['linewidth'] = linewidth
         elif plot_type == 'regression':
@@ -3203,7 +3337,7 @@ class MPLCanvas(FigureCanvas):
         else:
             self.plot_characteristics[plot_type]['plot']['linewidth'] = linewidth
 
-        # redraw points
+        # draw changes
         self.figure.canvas.draw_idle()
 
         return None
@@ -3226,7 +3360,7 @@ class MPLCanvas(FigureCanvas):
             # add smooth plot option
             self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Checked)
 
-        # redraw points
+        # draw changes
         self.figure.canvas.draw_idle()
 
         return None
@@ -3251,7 +3385,7 @@ class MPLCanvas(FigureCanvas):
         # update characteristics per plot type
         self.plot_characteristics[plot_type]['plot']['violin']['widths'] = widths
 
-        # redraw points
+        # draw changes
         self.figure.canvas.draw_idle()
 
         return None
@@ -3439,7 +3573,7 @@ class MPLCanvas(FigureCanvas):
                     if self.station_annotation.get_visible():
                         self.station_annotation.set_visible(False)
 
-                # redraw points
+                # draw changes
                 self.figure.canvas.draw_idle()
 
         return None
@@ -3569,7 +3703,7 @@ class MPLCanvas(FigureCanvas):
                             self.timeseries_annotation.set_visible(False)
                             self.timeseries_vline.set_visible(False)
 
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                         
                     # unlock annotation 
@@ -3664,7 +3798,7 @@ class MPLCanvas(FigureCanvas):
                         if self.scatter_annotation.get_visible():
                             self.scatter_annotation.set_visible(False)
                             
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                         
                     # unlock annotation 
@@ -3797,7 +3931,7 @@ class MPLCanvas(FigureCanvas):
                             self.distribution_annotation.set_visible(False)
                             self.distribution_vline.set_visible(False)
                             
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                         
                     # unlock annotation 
@@ -3947,7 +4081,7 @@ class MPLCanvas(FigureCanvas):
                                     self.periodic_annotation[resolution].set_visible(False)
                                     self.periodic_vline[resolution].set_visible(False)
                                     
-                            # redraw points
+                            # draw changes
                             self.figure.canvas.draw_idle()
                                 
                             # unlock annotation 
@@ -3997,7 +4131,7 @@ class MPLCanvas(FigureCanvas):
                     continue
 
                 # retrieve time and concentration
-                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
                 time = line.get_xdata()[annotation_index['ind'][0]]
                 concentration = line.get_ydata()[annotation_index['ind'][0]]
 
@@ -4039,7 +4173,7 @@ class MPLCanvas(FigureCanvas):
                 continue
 
             # retrieve concentration
-            line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+            line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
             concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
             
             # for all labels if there is data
@@ -4080,7 +4214,7 @@ class MPLCanvas(FigureCanvas):
                                 if data_label not in self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']].keys():
                                     continue
                                 
-                                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+                                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
                                 is_contained, annotation_index = line.contains(event)
                                 if is_contained:
                                     self.periodic_violin_annotate_data_label = data_label
@@ -4097,7 +4231,7 @@ class MPLCanvas(FigureCanvas):
                                     self.periodic_violin_annotation[resolution].set_visible(False)
                                     self.periodic_violin_vline[resolution].set_visible(False)
                                     
-                            # redraw points
+                            # draw changes
                             self.figure.canvas.draw_idle()
                                 
                             # unlock annotation 
@@ -4195,7 +4329,7 @@ class MPLCanvas(FigureCanvas):
                         if self.taylor_annotation.get_visible():
                             self.taylor_annotation.set_visible(False)
 
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                         
                     # unlock annotation 
@@ -4243,7 +4377,7 @@ class MPLCanvas(FigureCanvas):
                     # save map extent (in data coords)
                     self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
                     
-                    # redraw points
+                    # draw changes
                     self.figure.canvas.draw_idle()
                 
                     # update buttons (previous-forward) history
@@ -4342,7 +4476,7 @@ class MPLCanvas(FigureCanvas):
                 else:
                     legend_label.set_fontweight('regular')
 
-                # redraw points
+                # draw changes
                 self.figure.canvas.draw_idle()
                 
                 # unlock legend pick 

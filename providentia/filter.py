@@ -582,13 +582,19 @@ class DataFilter:
             multiply or divide the experiment data by a certain value.
         """
 
-        if hasattr(self.read_instance, 'calibration_factor'):
+        if self.read_instance.calibration_factor is not None:
+            
+            print('Applying calibration factor...')
 
             # iterate through networkspecies  
             for networkspeci_ii, networkspeci in enumerate(self.read_instance.networkspecies):      
                 
+                # remove observations from data labels
+                relevant_data_labels = copy.deepcopy(self.read_instance.data_labels)
+                relevant_data_labels.remove('observations')
+
                 # get calibration factor per experiment
-                for data_label_ii, data_label in enumerate(self.read_instance.calibration_factor):
+                for data_label_ii, data_label in enumerate(relevant_data_labels):
 
                     # get calibration factor per networkspeci
                     calibration_factor = self.read_instance.calibration_factor[data_label]
@@ -599,14 +605,14 @@ class DataFilter:
                     
                     # apply calibration factor
                     if '*' in calibration_factor:
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii,:,:] *= \
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] *= \
                             float(calibration_factor.replace('*', ''))
                     elif '/' in calibration_factor:
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii,:,:] /= \
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] /= \
                             float(calibration_factor.replace('/', ''))
                     elif '-' in calibration_factor:
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii,:,:] -= \
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] -= \
                             float(calibration_factor.replace('-', ''))
                     else:
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii,:,:] += \
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] += \
                             float(calibration_factor)
