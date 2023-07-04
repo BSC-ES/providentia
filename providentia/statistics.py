@@ -882,7 +882,7 @@ def aggregation(data_array, statistic_aggregation, axis=0):
                                            axis=axis)
     else:
         error = 'Aggregation statistic {0} is not available. '.format(statistic_aggregation)
-        error += 'The options are: Median, Mean, p1, p5, p10, p25, p75, p90, p95 and p99'
+        error += 'The options are: Mean, Median, p1, p5, p10, p25, p75, p90, p95 and p99'
         sys.exit(error)
 
     return aggregated_data
