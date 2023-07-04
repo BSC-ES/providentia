@@ -1,7 +1,11 @@
 {
     "Mean":        {"function": "calculate_mean", "order": 0, "label": "Mean", "arguments": {}, "minimum_bias": [0.0],
                     "units": "measurement_units", "cmap_absolute": "viridis", "cmap_bias": "bwr"},
-    
+
+    "Median" :     {"function": "calculate_median", "order": 9, "label": "Median", "arguments": {}, 
+                    "minimum_bias": [0.0], "units": "measurement_units", "cmap_absolute": "viridis", 
+                    "cmap_bias": "bwr"},
+
     "StdDev":      {"function": "calculate_standard_deviation", "order": 1, "label": "StdDev", "arguments": {}, 
                     "minimum_bias":[0.0], "units": "measurement_units", "cmap_absolute": "viridis", "cmap_bias": "bwr"},
     
@@ -36,10 +40,6 @@
                     "cmap_bias": "bwr"},
 
     "p25" :        {"function": "calculate_percentile", "order": 8, "label": "p25", "arguments": {"percentile": 25.0}, 
-                    "minimum_bias": [0.0], "units": "measurement_units", "cmap_absolute": "viridis", 
-                    "cmap_bias": "bwr"},
-
-    "p50" :        {"function": "calculate_median", "order": 9, "label": "p50", "arguments": {}, 
                     "minimum_bias": [0.0], "units": "measurement_units", "cmap_absolute": "viridis", 
                     "cmap_bias": "bwr"},
 
