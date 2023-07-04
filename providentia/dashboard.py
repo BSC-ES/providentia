@@ -1131,8 +1131,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update map z combobox fields based on data in memory
             # generate lists of basic and basis+bias statistics for using in the z statistic combobox
             if not hasattr(self, 'basic_z_stats'):
-                self.basic_z_stats = np.array(list(
-                    OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
+                self.basic_z_stats = list(
+                    OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys())
+                # transform into np array and move Median from 11th position to 2nd position
+                self.basic_z_stats.insert(1, self.basic_z_stats.pop(11))
+                self.basic_z_stats = np.array(self.basic_z_stats)
             if not hasattr(self, 'basic_and_bias_z_stats'):
                 self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
                     OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))

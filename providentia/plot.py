@@ -841,8 +841,8 @@ class Plot:
             # violin plot type?
             if not zstat:
 
-                # calculate p50
-                medians = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 'p50', 
+                # calculate medians
+                medians = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 'Median', 
                                               data_labels, [], period=relevant_temporal_resolution)
 
                 # calculate PDFs
@@ -865,11 +865,11 @@ class Plot:
                     else:
                         alpha = plot_characteristics['patch']['alpha_exp']
 
-                    # make plot of p50
-                    p50_plots = relevant_sub_ax.plot(xticks, medians[:, data_label_ii], 
-                                                     color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                     zorder=median_zorder, 
-                                                     **plot_characteristics['plot']['p50'])
+                    # make plot of median
+                    median_plots = relevant_sub_ax.plot(xticks, medians[:, data_label_ii], 
+                                                        color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                        zorder=median_zorder, 
+                                                        **plot_characteristics['plot']['median'])
 
                     # make violin plot
                     for period_ii in range(len(xticks)):
@@ -909,7 +909,7 @@ class Plot:
                     # track plot elements if using dashboard 
                     if not self.read_instance.offline:
                         self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), violins, bias=False)
-                        self.track_plot_elements(data_label, 'periodic-violin', 'p50_plot_{}'.format(relevant_temporal_resolution), p50_plots, bias=False)
+                        self.track_plot_elements(data_label, 'periodic-violin', 'Median_plot_{}'.format(relevant_temporal_resolution), median_plots, bias=False)
 
             # periodic plot type
             else:
