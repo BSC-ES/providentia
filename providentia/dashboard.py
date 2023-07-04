@@ -888,6 +888,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
                 aux.init_multispecies(self)
 
+            # if calibration factor has been applied from config, turn off if we update the data
+            self.calibration_factor = None
+
             # update configuration bar fields
             self.update_configuration_bar_fields()
 
@@ -1128,8 +1131,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update map z combobox fields based on data in memory
             # generate lists of basic and basis+bias statistics for using in the z statistic combobox
             if not hasattr(self, 'basic_z_stats'):
-                self.basic_z_stats = np.array(list(
-                    OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
+                self.basic_z_stats = list(
+                    OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys())
+                # transform into np array and move Median from 11th position to 2nd position
+                self.basic_z_stats.insert(1, self.basic_z_stats.pop(11))
+                self.basic_z_stats = np.array(self.basic_z_stats)
             if not hasattr(self, 'basic_and_bias_z_stats'):
                 self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
                     OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
@@ -1195,7 +1201,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
         self.previous_filter_species = self.filter_species
-        
+        self.previous_plot_options = {}
+        for plot_type in self.mpl_canvas.all_plots:
+            self.previous_plot_options[plot_type] = []
+        self.previous_statsummary_stats = {}
+        self.previous_statsummary_stats['None'] = self.mpl_canvas.plot_characteristics['statsummary']['basic']
+        for periodic_cycle in ['Diurnal', 'Weekly', 'Monthly']:
+            self.previous_statsummary_stats[periodic_cycle] = []
+
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
         self.end_date = int(self.le_end_date.text())
@@ -1210,6 +1223,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
+        self.current_plot_options = {}
+        for plot_type in self.mpl_canvas.all_plots:
+            self.current_plot_options[plot_type] = []
+        self.current_statsummary_stats = {}
+        for periodic_cycle in ['None', 'Diurnal', 'Weekly', 'Monthly']:
+            self.current_statsummary_stats[periodic_cycle] = []
 
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this

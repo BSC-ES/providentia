@@ -746,7 +746,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
                 collection.set_clim(vmin=z_vmin,vmax=z_vmax)
                 collection.set_cmap(cmap=cmap)
 
-def get_z_statistic_comboboxes(base_zstat, second_data_label=''):
+def get_z_statistic_comboboxes(base_zstat, bias=False):
     """ Function that gets appropriate zstat name for selected zstatistic comboboxes.
 
         :param base_zstat: name of statistic
@@ -758,8 +758,7 @@ def get_z_statistic_comboboxes(base_zstat, second_data_label=''):
     """
     
     # get zstat sign 
-    # this is bias, if second data label has been provided
-    if second_data_label == '':
+    if not bias:
         z_statistic_sign = 'absolute'
     else:
         z_statistic_sign = 'bias'
@@ -841,13 +840,22 @@ def get_z_statistic_info(plot_type=None, zstat=None):
     if zstat:
         # get base name name of zstat, dropping 'bias' suffix, and dropping period
         base_zstat = zstat.split('_bias')[0].split('-')[0]
+        
         # get zstat type (basic or expbias) 
         z_statistic_type = get_z_statistic_type(base_zstat)
+        
         # get zstat sign (absolute or bias)
         z_statistic_sign = get_z_statistic_sign(zstat, z_statistic_type)
+        
         # get zstat period (if any)
         if '-' in zstat:
             z_statistic_period = zstat.split('_bias')[0].split('-')[1]
+            if z_statistic_period == 'diurnal':
+                z_statistic_period = 'hour'
+            elif z_statistic_period == 'weekly':
+                z_statistic_period ='dayofweek'
+            elif z_statistic_period == 'monthly':
+                z_statistic_period = 'month'
         else:
             z_statistic_period = None
 
@@ -874,7 +882,7 @@ def aggregation(data_array, statistic_aggregation, axis=0):
                                            axis=axis)
     else:
         error = 'Aggregation statistic {0} is not available. '.format(statistic_aggregation)
-        error += 'The options are: Median, Mean, p1, p5, p10, p25, p75, p90, p95 and p99'
+        error += 'The options are: Mean, Median, p1, p5, p10, p25, p75, p90, p95 and p99'
         sys.exit(error)
 
     return aggregated_data
