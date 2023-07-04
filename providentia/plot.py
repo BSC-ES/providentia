@@ -1305,8 +1305,7 @@ class Plot:
         relevant_axis.set_xticklabels(xtick_labels, **plot_characteristics['xticklabel_params'])
 
     def make_heatmap(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
-                     zstats=None, plot_options=[], subsection=None, 
-                     plotting_paradigm=None):
+                     zstats=None, plot_options=[], subsection=None, plotting_paradigm=None, stats_df=None):
         """ Make heatmap plot.
 
             :param relevant_axis: axis to plot on 
@@ -1321,6 +1320,12 @@ class Plot:
             :type zstats: list
             :param plot_options: list of options to configure plot  
             :type plot_options: list
+            :param subsection: str of currently active subsection
+            :type subsection: str
+            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+            :type plotting_paradigm: str
+            :param stats_df: dataframe of previously calculated statistics, default is None
+            :param stats_df: pandas dataframe
         """
 
         # determine if want to add annotations or not from plot_options
@@ -1511,16 +1516,18 @@ class Plot:
             :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
-            :param subsection: str of currently active subsection
-            :type subsection: str
-            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
-            :type plotting_paradigm: str
-            :param plot_options: list of options to configure plot  
-            :type plot_options: list
+            :param zstats: name of statistics
+            :type zstats: list
             :param statsummary: boolean indiciating if making alternative statistical summary table plot  
             :type statsummary: boolean
             :param plot_options: list of options to configure plot  
             :type plot_options: list
+            :param subsection: str of currently active subsection
+            :type subsection: str
+            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+            :type plotting_paradigm: str
+            :param stats_df: dataframe of previously calculated statistics, default is None
+            :param stats_df: pandas dataframe
         """
 
         # turn off axis to make table
@@ -1532,33 +1539,29 @@ class Plot:
         else:
             bias = False
 
-        # get valid data labels for networkspeci
-        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+        # if statistical dataframe is not provided then create it
+        if not stats_df:
 
-        # cut data_labels for those in valid data labels
-        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+            # get valid data labels for networkspeci
+            valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
 
-        # calculate statistics
-        if bias:
-            if 'observations' in cut_data_labels:
-                cut_data_labels.remove('observations')
-            stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
-                                            ['observations']*len(cut_data_labels), cut_data_labels)
-        else:
-           stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
-                                            cut_data_labels, [])
+            # cut data_labels for those in valid data labels
+            cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-        # create stats dataframe
-        stats_df = pd.DataFrame(data=stats_calc, 
-                                index=cut_data_labels,
-                                dtype=np.float)
+            # calculate statistics
+            if bias:
+                if 'observations' in cut_data_labels:
+                    cut_data_labels.remove('observations')
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                                                ['observations']*len(cut_data_labels), cut_data_labels)
+            else:
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                                                 cut_data_labels, [])
 
-        # get column and row labels
-        col_labels = stats_df.columns.tolist()
-        row_labels = stats_df.index.tolist()
-
-        # round dataframe
-        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+            # create stats dataframe
+            stats_df = pd.DataFrame(data=stats_calc, 
+                                    index=cut_data_labels,
+                                    dtype=np.float)
 
         # get observations label
         if 'legend' in plot_characteristics:
@@ -1567,6 +1570,13 @@ class Plot:
             obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
         else:
             obs_label = 'Observations'
+
+        # get column and row labels
+        col_labels = stats_df.columns.tolist()
+        row_labels = stats_df.index.tolist()
+
+        # round dataframe
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
 
         # offline reports
         if self.read_instance.offline:
@@ -1614,12 +1624,12 @@ class Plot:
                 empty_cells = len(stats_df.columns) - len(stats)
                 col_labels = ['']*empty_cells + stats
                 if 'observations' in cut_data_labels:
-                    stats_df['labels'] = [obs_label if item == 'observations' else item for item in stats_df['labels']]
+                    stats_df['labels'] = [obs_label if item == 'observations' else self.read_instance.experiments[item] for item in stats_df['labels']]
             else:
                 empty_cells = len(stats_df.columns) - len(cut_data_labels)
                 col_labels = ['']*empty_cells + cut_data_labels
                 if 'observations' in col_labels:
-                    col_labels = [obs_label if item == 'observations' else item for item in col_labels]
+                    col_labels = [obs_label if item == 'observations' else self.read_instance.experiments[item] for item in col_labels]
 
         # dashboard
         else:
@@ -1633,9 +1643,9 @@ class Plot:
                 # reset index
                 stats_df = stats_df.reset_index()
                 
-                # update observation label
+                # update observation and experiments labels
                 if 'observations' in cut_data_labels:
-                    stats_df['index'] = [obs_label if item == 'observations' else item for item in stats_df['index']]
+                    stats_df['index'] = [obs_label if item == 'observations' else self.read_instance.experiments[item] for item in stats_df['index']]
 
                 # get number of "empty" cells (without stats)
                 empty_cells = 1
