@@ -596,28 +596,6 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
-    def update_taylor_corr_statistic(self):
-        """ Function that updates the correlation statistic on the Taylor diagram. """
-
-        # update periodic plot/s if have some stations selected on map
-        if len(self.relative_selected_station_inds) > 0:
-
-            # clear and turn off all relevant axes before updating
-            self.remove_axis_elements(self.plot_axes['taylor'], 'taylor')
-
-            # do plot with updated correlation statistic
-            self.update_associated_active_dashboard_plot('taylor')
-
-            # reset navigation toolbar stack for plot
-            self.reset_ax_navigation_toolbar_stack(self.plot_axes['taylor'])
-
-            # update plot options
-            self.update_plot_options(plot_types=['taylor'])
-
-            # redraw plot
-            self.figure.canvas.draw()
-            self.figure.canvas.flush_events()
-
     def update_associated_active_dashboard_plot(self, plot_type):
         """ Function that updates a plot associated with selected stations on map. """
 
@@ -2013,8 +1991,8 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.periodic_violin_markersize_sl.setObjectName('periodic_violin_markersize_sl')
         self.periodic_violin_markersize_sl.setMinimum(0)
-        self.periodic_violin_markersize_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['p50']['markersize']*10)
-        self.periodic_violin_markersize_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['p50']['markersize'])
+        self.periodic_violin_markersize_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['markersize']*10)
+        self.periodic_violin_markersize_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['markersize'])
         self.periodic_violin_markersize_sl.setTickInterval(2)
         self.periodic_violin_markersize_sl.setTracking(False)
         self.periodic_violin_markersize_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220,
@@ -2033,8 +2011,8 @@ class MPLCanvas(FigureCanvas):
         self.periodic_violin_linewidth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.periodic_violin_linewidth_sl.setObjectName('periodic_violin_linewidth_sl')
         self.periodic_violin_linewidth_sl.setMinimum(0)
-        self.periodic_violin_linewidth_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['p50']['linewidth']*100)
-        self.periodic_violin_linewidth_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['p50']['linewidth']*10)
+        self.periodic_violin_linewidth_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*100)
+        self.periodic_violin_linewidth_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*10)
         self.periodic_violin_linewidth_sl.setTickInterval(2)
         self.periodic_violin_linewidth_sl.setTracking(False)
         self.periodic_violin_linewidth_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220, 
@@ -3219,7 +3197,7 @@ class MPLCanvas(FigureCanvas):
             if plot_type in ['timeseries', 'periodic', 'scatter', 'taylor']:
                 self.plot_characteristics[plot_type]['plot']['markersize'] = markersize
             elif plot_type == 'periodic-violin':
-                self.plot_characteristics[plot_type]['plot']['p50']['markersize'] = markersize
+                self.plot_characteristics[plot_type]['plot']['median']['markersize'] = markersize
 
         elif plot_type == 'map':
 
@@ -3340,7 +3318,7 @@ class MPLCanvas(FigureCanvas):
 
         # update characteristics per plot type
         if plot_type == 'periodic-violin':
-            self.plot_characteristics[plot_type]['plot']['p50']['linewidth'] = linewidth
+            self.plot_characteristics[plot_type]['plot']['median']['linewidth'] = linewidth
         elif plot_type == 'timeseries':
             self.plot_characteristics[plot_type]['smooth']['format']['linewidth'] = linewidth
         elif plot_type == 'regression':
@@ -4142,7 +4120,7 @@ class MPLCanvas(FigureCanvas):
                     continue
 
                 # retrieve time and concentration
-                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
                 time = line.get_xdata()[annotation_index['ind'][0]]
                 concentration = line.get_ydata()[annotation_index['ind'][0]]
 
@@ -4184,7 +4162,7 @@ class MPLCanvas(FigureCanvas):
                 continue
 
             # retrieve concentration
-            line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+            line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
             concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
             
             # for all labels if there is data
@@ -4225,7 +4203,7 @@ class MPLCanvas(FigureCanvas):
                                 if data_label not in self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']].keys():
                                     continue
                                 
-                                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['p50_plot_' + resolution][0]
+                                line = self.plot_elements['periodic-violin'][self.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
                                 is_contained, annotation_index = line.contains(event)
                                 if is_contained:
                                     self.periodic_violin_annotate_data_label = data_label
