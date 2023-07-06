@@ -87,6 +87,7 @@
                "annotate_text": {"s": "", "loc": "upper right", "fontsize": 6, "n_stations": false, "exp_labels": true, 
                                  "color": "", "round_decimal_places": 2},
                "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
+               "round_decimal_places": 2,
                "plot": {"s": "", "zorder": 3, "linewidth": 0.0, "alpha": null},
                "plot_options": ["bias", "obs", "annotate"]},
  
@@ -216,6 +217,7 @@
                    "annotate_text": {"s": "", "loc": "upper left", "fontsize": 6, "n_stations": false, 
                                      "exp_labels": true, "color": "", "round_decimal_places": 2},
                    "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
+                   "round_decimal_places": 2,
                    "regression": {"linewidth":1.0, "linestyle":"--"},
                    "1:1_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
                    "1:2_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},

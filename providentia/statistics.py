@@ -3,7 +3,6 @@ Contains functions for the processing/calculation of statistics and colourbars
 """
 from .calculate import Stats
 from .calculate import ExpBias
-from .read_aux import drop_nans
 from .aux import exceedance_lim, get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions
 
 import copy
