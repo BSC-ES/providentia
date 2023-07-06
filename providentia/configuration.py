@@ -475,7 +475,7 @@ class ProvConfiguration:
         if not self.read_instance.network:
             #default = ['GHOST']
             default = ['EBAS']
-            msg = 'Network (network) was not defined in the configuration file. Using {} as default.'.format(default)
+            msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.network = default
 
@@ -483,7 +483,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.species:
             default = ['sconco3']
-            msg = 'Species (species) was not defined in the configuration file. Using {} as default.'.format(default)
+            msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.species = default
 
@@ -523,7 +523,7 @@ class ProvConfiguration:
         if not self.read_instance.resolution:
             #default = 'monthly'
             default = 'hourly'
-            msg = 'Resolution (resolution) was not defined in the configuration file. Using {} as default.'.format(default)
+            msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.resolution = default
 
@@ -531,7 +531,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.start_date:
             default = '20180101'
-            msg = 'Start date (start_date) was not defined in the configuration file. Using {} as default.'.format(default)
+            msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.start_date = default
 
@@ -539,7 +539,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.end_date:
             default = '20190101'
-            msg = 'End date (end_date) was not defined in the configuration file. Using {} as default.'.format(default)
+            msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.end_date = default
 
@@ -547,7 +547,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.statistic_mode:
             default = 'Flattened'
-            msg = 'Statistic mode (statistic_mode) was not defined in the configuration file. Using {} as default.'.format(default)
+            msg = "Statistic mode (statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.statistic_mode = default
 
@@ -558,18 +558,18 @@ class ProvConfiguration:
                 default = ''
             else:    
                 default = 'Mean'
-                msg = 'Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using {} as default.'.format(default)
+                msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.statistic_aggregation = default
         # if statistic_aggregation is defined ensure that it matches with the statistic_mode
         else:
             if (self.read_instance.statistic_mode == 'Flattened') & (self.read_instance.statistic_aggregation != ''):
-                msg = 'statistic_mode is set to be "Flattened", therefore statistic_aggregation must be empty, not {}. Setting to be empty.'.format(self.read_instance.statistic_aggregation)                
+                msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                 self.read_instance.statistic_aggregation = ''
             elif (self.read_instance.statistic_mode != 'Flattened') & (self.read_instance.statistic_aggregation == ''):
                 default = 'Mean'
-                msg = 'statistic_mode is set to be "{}", therefore statistic_aggregation must not be empty. Setting to be {}.'.format(self.read_instance.statistic_mode, default)                
+                msg = "statistic_mode is set to be '{}', therefore statistic_aggregation must not be empty. Setting to be '{}'.".format(self.read_instance.statistic_mode, default)                
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                 self.read_instance.statistic_aggregation = default
 
@@ -577,7 +577,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_mode:
             default = 'Cycle'
-            msg = 'Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using {} as default.'.format(default)
+            msg = "Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.periodic_statistic_mode = default
 
@@ -585,7 +585,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_aggregation:
             default = 'Mean'
-            msg = 'Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using {} as default.'.format(default)
+            msg = "Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.periodic_statistic_aggregation = default
 
