@@ -2965,42 +2965,6 @@ class MPLCanvas(FigureCanvas):
                                          bias_labels_to_plot, self.plot_characteristics[plot_type], 
                                          plot_options=self.current_plot_options[plot_type])
 
-                            # make statsummary bias plot (if not previously made)
-                            #if (plot_type in ['statsummary']) & ('bias' not in self.plot_elements[plot_type]):
-
-                                # create structure to store data
-                                #stats_dict = {}
-
-                                # get relevant statistics
-                                #relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
-
-                                # calculate statistics
-                                #for relevant_zstat in relevant_zstats:
-
-                                    # remove observations from data labels
-                                #    relevant_data_labels = copy.deepcopy(self.read_instance.data_labels)
-                                #    relevant_data_labels.remove('observations')
-
-                                    # if relevant stat is expbias stat, then ensure temporal colocation is active
-                                    # if not, set values as NaN
-                                #    if (relevant_zstat in expbias_stats) & (not self.read_instance.temporal_colocation):
-                                #        stat_calc = np.array([np.NaN]*len(relevant_data_labels))
-                                #    else:
-                                #        stats_calc = calculate_statistic(self.read_instance, self, 
-                                #                                         self.read_instance.networkspeci, 
-                                #                                         relevant_zstat, 
-                                #                                         ['observations']*len(relevant_data_labels),
-                                #                                         relevant_data_labels)
-                                #    stats_dict[relevant_zstat] = stats_calc
-
-                                # create stats dataframe
-                                #stats_df = pd.DataFrame(data=stats_dict, index=index, dtype=np.float32)
-                                
-                                # make plot
-                                #func(self.plot_axes[plot_type], stats_df, self.plot_characteristics[plot_type], 
-                                #     plot_options=self.current_plot_options[plot_type], 
-                                #     statsummary=True)
-
                             # create other active plot option elements for bias plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, plot_type, 
                                                        'bias', self.current_plot_options[plot_type])
