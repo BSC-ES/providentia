@@ -150,7 +150,11 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             if len(read_instance.station_inds) == 1:
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = data_array[:,0,:]
             else:
-                aggregated_data = aggregation(data_array, read_instance.statistic_aggregation, axis=1)
+                if read_instance.offline:
+                    timeseries_stat = read_instance.statistic_aggregation
+                else:
+                    timeseries_stat = canvas_instance.timeseries_stat.currentText()
+                aggregated_data = aggregation(data_array, timeseries_stat, axis=1)
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregated_data
 
             # save data per station
