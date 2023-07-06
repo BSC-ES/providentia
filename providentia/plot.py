@@ -723,10 +723,6 @@ class Plot:
             :type plot_options: list
         """
 
-        # get marker size (for offline)
-        if self.read_instance.offline:
-            self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics)
-
         # if 'obs' in plot_options, set data labels to just 'observations'
         if 'obs' in plot_options:
             data_labels = ['observations']
@@ -765,6 +761,10 @@ class Plot:
             else:
                 bias = False
                 ts = self.canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label]
+
+            # get marker size (for offline)
+            if self.read_instance.offline:
+                self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics, data=ts)
 
             # make timeseries plot
             self.timeseries_plot = relevant_axis.plot(ts, 
@@ -1120,10 +1120,6 @@ class Plot:
             :type plot_options: list
         """
 
-        # get marker size (for offline)
-        if self.read_instance.offline:
-            self.get_markersize(relevant_axis, 'scatter', networkspeci, plot_characteristics)
-
         # if 'obs' in plot_options, set data labels to just 'observations'
         if 'obs' in plot_options:
             data_labels = ['observations']
@@ -1172,6 +1168,10 @@ class Plot:
             # subset data if neccessary
             if subset:
                 experiment_data = experiment_data[inds_subset]
+
+            # get marker size (for offline)
+            if self.read_instance.offline:
+                self.get_markersize(relevant_axis, 'scatter', networkspeci, plot_characteristics, data=observations_data)
 
             # create scatter plot
             self.scatter_plot = relevant_axis.plot(observations_data, experiment_data, 
@@ -1341,26 +1341,37 @@ class Plot:
         else:
             bias = False
 
-        # get valid data labels for networkspeci
-        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+        # if statistical dataframe is not provided then create it
+        if not isinstance(stats_df, pd.DataFrame):
 
-        # cut data_labels for those in valid data labels
-        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+            # get valid data labels for networkspeci
+            valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
 
-        # calculate statistics
-        if bias:
-            if 'observations' in cut_data_labels:
-                cut_data_labels.remove('observations')
-            stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
-                                            ['observations']*len(cut_data_labels), cut_data_labels)
+            # cut data_labels for those in valid data labels
+            cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+            # calculate statistics
+            if bias:
+                if 'observations' in cut_data_labels:
+                    cut_data_labels.remove('observations')
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                                                ['observations']*len(cut_data_labels), cut_data_labels)
+            else:
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                                                 cut_data_labels, [])
+
+            # create stats dataframe
+            stats_df = pd.DataFrame(data=stats_calc, 
+                                    index=cut_data_labels,
+                                    dtype=np.float)
+
+        # get observations label
+        if 'legend' in plot_characteristics:
+            obs_label = plot_characteristics['legend']['handles']['obs_label'] 
+        elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
+            obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
         else:
-           stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
-                                            cut_data_labels, [])
-
-        # create stats dataframe
-        stats_df = pd.DataFrame(data=stats_calc, 
-                                index=cut_data_labels,
-                                dtype=np.float)
+            obs_label = 'Observations'
 
         # round dataframe
         stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
@@ -1418,12 +1429,9 @@ class Plot:
                 yticklabels = stats_df.index.get_level_values(1)
         relevant_axis.set_yticklabels(yticklabels, **plot_characteristics['yticklabels'])
 
-        # set xticklabels
+        # update observation and experiments labels
         xticklabels = stats_df.columns
-        if 'observations' in xticklabels:
-            if plot_characteristics['obs_label']:
-                obs_label = plot_characteristics['obs_label']
-                xticklabels = [obs_label if item == 'observations' else item for item in xticklabels]
+        xticklabels = [obs_label if item == 'observations' else item if item == '' else self.read_instance.experiments[item] for item in xticklabels]
         relevant_axis.set_xticklabels(xticklabels, **plot_characteristics['xticklabels'])
 
         # format for multispecies
@@ -1506,7 +1514,7 @@ class Plot:
 
     def make_table(self, relevant_axis, networkspeci, data_labels, plot_characteristics,
                    zstats=None, statsummary=False, plot_options=[],
-                   subsection=None, plotting_paradigm=None):
+                   subsection=None, plotting_paradigm=None, stats_df=None):
         """ Make table plot.
 
             :param relevant_axis: axis to plot on 
@@ -1541,7 +1549,7 @@ class Plot:
             bias = False
 
         # if statistical dataframe is not provided then create it
-        if not stats_df:
+        if not isinstance(stats_df, pd.DataFrame):
 
             # get valid data labels for networkspeci
             valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
@@ -1571,10 +1579,6 @@ class Plot:
             obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
         else:
             obs_label = 'Observations'
-
-        # get column and row labels
-        col_labels = stats_df.columns.tolist()
-        row_labels = stats_df.index.tolist()
 
         # round dataframe
         stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
@@ -1624,13 +1628,11 @@ class Plot:
             if statsummary:
                 empty_cells = len(stats_df.columns) - len(stats)
                 col_labels = ['']*empty_cells + stats
-                if 'observations' in cut_data_labels:
-                    stats_df['labels'] = [obs_label if item == 'observations' else self.read_instance.experiments[item] for item in stats_df['labels']]
+                stats_df['labels'] = [obs_label if item == 'observations' else item if item == '' else self.read_instance.experiments[item] for item in stats_df['labels']]
             else:
-                empty_cells = len(stats_df.columns) - len(cut_data_labels)
-                col_labels = ['']*empty_cells + cut_data_labels
-                if 'observations' in col_labels:
-                    col_labels = [obs_label if item == 'observations' else self.read_instance.experiments[item] for item in col_labels]
+                empty_cells = len(stats_df.columns) - len(data_labels)
+                col_labels = ['']*empty_cells + data_labels
+                col_labels = [obs_label if item == 'observations' else item if item == '' else self.read_instance.experiments[item] for item in col_labels]
 
         # dashboard
         else:
@@ -1645,8 +1647,7 @@ class Plot:
                 stats_df = stats_df.reset_index()
                 
                 # update observation and experiments labels
-                if 'observations' in cut_data_labels:
-                    stats_df['index'] = [obs_label if item == 'observations' else self.read_instance.experiments[item] for item in stats_df['index']]
+                stats_df['index'] = [obs_label if item == 'observations' else item if item == '' else self.read_instance.experiments[item] for item in stats_df['index']]
 
                 # get number of "empty" cells (without stats)
                 empty_cells = 1
@@ -1660,7 +1661,7 @@ class Plot:
                     for col in range(stats_df.shape[1]):
                         # custom colors for data labels cells
                         if col == (empty_cells-1):
-                            for data_label in cut_data_labels:
+                            for data_label in data_labels:
                                 # observations in white
                                 if data_label == 'observations':
                                     color = 'white'
@@ -1676,7 +1677,7 @@ class Plot:
             if 'col_colours' in plot_characteristics:
                 if plot_characteristics['col_colours']:
                     col_colours = []
-                    for data_label in cut_data_labels:
+                    for data_label in data_labels:
                         # observations in white
                         if data_label == 'observations':
                             color = 'white'
@@ -1825,7 +1826,7 @@ class Plot:
         if 'observations' in data_labels_sans_obs:
             data_labels_sans_obs.remove('observations')
 
-        # standard deviation - absolute calculations of obsevations and models
+        # standard deviation - absolute calculations of observations and models
         stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 'StdDev', 
                                          data_labels, [])
         stats_dict['StdDev'] = stats_calc   
@@ -2711,7 +2712,7 @@ class Plot:
                 axis_label_characteristics['ylabel'] = label
                 relevant_axis.set_ylabel(**axis_label_characteristics)
 
-    def get_markersize(self, relevant_axis, base_plot_type, networkspeci, plot_characteristics):
+    def get_markersize(self, relevant_axis, base_plot_type, networkspeci, plot_characteristics, data=None):
         """ Set markersize for plot.
         
             :param base_plot_type: plot type, without statistical information
@@ -2720,14 +2721,19 @@ class Plot:
             :type networkspeci: str
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
+            :param data: data array to be plotted
+            :type data: numpy array
         """
 
         if base_plot_type in ['timeseries', 'scatter']:
             
             if plot_characteristics['plot']['markersize'] == '':
 
+                # get minimum number of non-NaN data points for plot type across data labels
+                min_points = np.count_nonzero(~np.isnan(data))
+
                 # configure size of plots if have very few points
-                if (min(self.canvas_instance.selected_station_data_number_non_nan[networkspeci]) < plot_characteristics['markersize_npoints_threshold']):
+                if min_points < plot_characteristics['markersize_npoints_threshold']:
                     markersize = plot_characteristics['markersize']['few_points'] 
                 else:
                     markersize = plot_characteristics['markersize']['standard'] 
