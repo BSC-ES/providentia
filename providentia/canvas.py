@@ -418,6 +418,7 @@ class MPLCanvas(FigureCanvas):
             # update map z statistic/ periodic statistic comboboxes (without updating canvas)
             self.read_instance.block_MPL_canvas_updates = True
             self.handle_map_z_statistic_update()
+            self.handle_timeseries_statistic_update()
             self.handle_periodic_statistic_update()
             self.handle_taylor_correlation_statistic_update()
             self.read_instance.block_MPL_canvas_updates = False
@@ -861,6 +862,55 @@ class MPLCanvas(FigureCanvas):
             # update plotted map z statistic
             if not self.read_instance.block_MPL_canvas_updates:
                 self.update_map_z_statistic()
+
+        return None
+
+    def handle_timeseries_statistic_update(self):
+        """ Function that handles update of plotted timeseries statistic
+            upon interaction with timeseries statistic combobox.
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            
+            # set variable that blocks configuration bar handling updates until all changes
+            # to the timeseries statistic combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # get currently selected statistic
+            zstat = self.timeseries_stat.currentText()
+
+            # update timeseries statistics
+            available_timeseries_stats = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+
+            # if base_zstat is empty string, it is because fields are being initialised for the first time
+            if zstat == '':
+                # set timeseries stat to be first available stat
+                zstat = available_timeseries_stats[0]
+
+            # update timeseries statistic combobox (clear, then add items)
+            self.timeseries_stat.clear()
+            self.timeseries_stat.addItems(available_timeseries_stats)
+
+            # maintain currently selected timeseries statistic (if exists in new item list)
+            if zstat in available_timeseries_stats:
+                self.timeseries_stat.setCurrentText(zstat)
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # TODO: connect comboboxes on menu
+            # if self.read_instance.statistic_mode in ['Spatial|Temporal', 'Temporal|Spatial']:
+
+            # update plotted timeseries statistic
+            if not self.read_instance.block_MPL_canvas_updates:
+                # update selected data on all active plots
+                if self.read_instance.statistic_mode == 'Spatial|Temporal':
+                    self.update_associated_active_dashboard_plots()
+                # update selected data and timeseries plot
+                elif self.read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
+                    get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
+                                              networkspecies=[self.read_instance.networkspeci])
+                    self.update_associated_active_dashboard_plot('timeseries')
 
         return None
 
@@ -1716,7 +1766,7 @@ class MPLCanvas(FigureCanvas):
                                                    formatting_dict['settings_container'])
         self.timeseries_container.setGeometry(self.timeseries_menu_button.geometry().x()-230,
                                               self.timeseries_menu_button.geometry().y()+25, 
-                                              250, 230)
+                                              250, 280)
         self.timeseries_container.hide()
 
         # add settings label
@@ -1727,10 +1777,24 @@ class MPLCanvas(FigureCanvas):
                                                    230, 20)
         self.timeseries_settings_label.hide()
 
+        # add timeseries stat label ('Statistic') to layout
+        self.timeseries_stat_label = QtWidgets.QLabel('Statistic', self)
+        self.timeseries_stat_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
+                                               self.timeseries_menu_button.geometry().y()+50, 
+                                               230, 20)
+        self.timeseries_stat_label.hide() 
+
+        # add timeseries stat combobox
+        self.timeseries_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.timeseries_stat.move(self.timeseries_menu_button.geometry().x()-220, 
+                                  self.timeseries_menu_button.geometry().y()+75)
+        self.timeseries_stat.setFixedWidth(105)
+        self.timeseries_stat.hide()
+
         # add timeseries markersize slider name ('Size') to layout
         self.timeseries_markersize_sl_label = QtWidgets.QLabel('Size', self)
         self.timeseries_markersize_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                        self.timeseries_menu_button.geometry().y()+50, 
+                                                        self.timeseries_menu_button.geometry().y()+100, 
                                                         230, 20)
         self.timeseries_markersize_sl_label.hide()
 
@@ -1743,14 +1807,14 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_markersize_sl.setTickInterval(2)
         self.timeseries_markersize_sl.setTracking(False)
         self.timeseries_markersize_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                                  self.timeseries_menu_button.geometry().y()+75, 
+                                                  self.timeseries_menu_button.geometry().y()+125, 
                                                   230, 20)
         self.timeseries_markersize_sl.hide()
 
         # add timeseries smooth window slider name ('Smooth window') to layout
         self.timeseries_smooth_window_sl_label = QtWidgets.QLabel('Smooth window', self)
         self.timeseries_smooth_window_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                           self.timeseries_menu_button.geometry().y()+100, 
+                                                           self.timeseries_menu_button.geometry().y()+150, 
                                                            230, 20)
         self.timeseries_smooth_window_sl_label.hide()
 
@@ -1762,14 +1826,14 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_smooth_window_sl.setTickInterval(2)
         self.timeseries_smooth_window_sl.setTracking(False)
         self.timeseries_smooth_window_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                                     self.timeseries_menu_button.geometry().y()+125, 
+                                                     self.timeseries_menu_button.geometry().y()+175, 
                                                      230, 20)
         self.timeseries_smooth_window_sl.hide()
 
         # add timeseries smooth line width slider name ('Smooth line width') to layout
         self.timeseries_smooth_linewidth_sl_label = QtWidgets.QLabel('Smooth line width', self)
         self.timeseries_smooth_linewidth_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                              self.timeseries_menu_button.geometry().y()+150, 
+                                                              self.timeseries_menu_button.geometry().y()+200, 
                                                               230, 20)
         self.timeseries_smooth_linewidth_sl_label.hide()
 
@@ -1782,14 +1846,14 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_smooth_linewidth_sl.setTickInterval(2)
         self.timeseries_smooth_linewidth_sl.setTracking(False)
         self.timeseries_smooth_linewidth_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                                        self.timeseries_menu_button.geometry().y()+175, 
+                                                        self.timeseries_menu_button.geometry().y()+225, 
                                                         230, 20)
         self.timeseries_smooth_linewidth_sl.hide()
 
         # add timeseries plot options name ('Options') to layout
         self.timeseries_options_label = QtWidgets.QLabel("Options", self)
         self.timeseries_options_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                  self.timeseries_menu_button.geometry().y()+200, 
+                                                  self.timeseries_menu_button.geometry().y()+250, 
                                                   230, 20)
         self.timeseries_options_label.hide()
 
@@ -1798,7 +1862,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_options.setObjectName('timeseries_options')
         self.timeseries_options.addItems(self.plot_characteristics['timeseries']['plot_options'])        
         self.timeseries_options.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                            self.timeseries_menu_button.geometry().y()+225, 
+                                            self.timeseries_menu_button.geometry().y()+275, 
                                             230, 20)
         self.timeseries_options.currentTextChanged.connect(self.update_plot_option)
         self.timeseries_options.hide()
@@ -1813,6 +1877,7 @@ class MPLCanvas(FigureCanvas):
 
         # set show/hide actions
         self.timeseries_elements = [self.timeseries_container, self.timeseries_settings_label, 
+                                    self.timeseries_stat_label, self.timeseries_stat,
                                     self.timeseries_markersize_sl_label, self.timeseries_markersize_sl,
                                     self.timeseries_smooth_window_sl_label, self.timeseries_smooth_window_sl,
                                     self.timeseries_smooth_linewidth_sl_label, self.timeseries_smooth_linewidth_sl,
@@ -1829,6 +1894,7 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_markersize_sl.valueChanged.connect(self.update_markersize_func)
         self.timeseries_smooth_window_sl.valueChanged.connect(self.update_smooth_window_func)
         self.timeseries_smooth_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
+        self.timeseries_stat.currentTextChanged.connect(self.handle_timeseries_statistic_update)
         self.timeseries_save_button.clicked.connect(self.save_axis_figure_func)
 
         # PERIODIC PLOT SETTINGS MENU #
