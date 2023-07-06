@@ -1572,6 +1572,26 @@ class Plot:
                                     index=cut_data_labels,
                                     dtype=np.float)
 
+        # rename columns to replace Diurnal, Weekly and Monthly by D, W, M
+        columns = {}
+        for column in stats_df.columns:
+            if 'diurnal' in column:
+                columns[column] = column.replace('diurnal', 'D')
+            elif 'weekly' in column:
+                columns[column] = column.replace('weekly', 'W')
+            elif 'monthly' in column:
+                columns[column] = column.replace('monthly', 'M')
+            else:
+                columns[column] = column
+        stats_df = stats_df.rename(columns=columns)
+
+        # get column and row labels
+        col_labels = stats_df.columns.tolist()
+        row_labels = stats_df.index.tolist()
+
+        # round dataframe
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+
         # get observations label
         if 'legend' in plot_characteristics:
             obs_label = plot_characteristics['legend']['handles']['obs_label'] 
