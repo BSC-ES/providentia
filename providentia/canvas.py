@@ -600,6 +600,8 @@ class MPLCanvas(FigureCanvas):
     def update_associated_active_dashboard_plot(self, plot_type):
         """ Function that updates a plot associated with selected stations on map. """
 
+        start = time.time()
+
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
 
@@ -712,12 +714,10 @@ class MPLCanvas(FigureCanvas):
                 # update plot options
                 self.update_plot_options(plot_types=[plot_type])
 
-                # redraw plot
-                self.figure.canvas.draw()
-                self.figure.canvas.flush_events()
-
     def update_associated_active_dashboard_plots(self):
         """ Function that updates all plots associated with selected stations on map. """
+
+        start = time.time()
 
         # update dashboard plots
         if hasattr(self, 'relative_selected_station_inds'):
@@ -737,6 +737,8 @@ class MPLCanvas(FigureCanvas):
 
                 # iterate through active_dashboard_plots
                 for plot_type_ii, plot_type in enumerate(self.read_instance.active_dashboard_plots):
+
+                    plot_start = time.time()
 
                     # if there are no temporal resolutions (only yearly), skip periodic plots
                     if ((plot_type in ['periodic', 'periodic-violin']) and 
@@ -760,6 +762,7 @@ class MPLCanvas(FigureCanvas):
 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
+                    print('{}:'.format(plot_type), time.time()-plot_start)
 
                 # un-hide plotting axes
                 self.top_right_canvas_cover.hide() 
@@ -767,6 +770,8 @@ class MPLCanvas(FigureCanvas):
 
             # update map plot options
             self.update_plot_options(plot_types=['map'])
+
+            print('CANVAS UPDATE TIME:', time.time()-start)
 
     def update_experiment_domain_edges(self):
         """ Function that plots grid domain edges of experiments in memory. """
@@ -955,6 +960,9 @@ class MPLCanvas(FigureCanvas):
             if not self.read_instance.block_MPL_canvas_updates:
                 self.update_associated_active_dashboard_plot('periodic')
 
+            # draw changes
+            self.figure.canvas.draw_idle()
+
         return None
 
     def handle_taylor_correlation_statistic_update(self):
@@ -993,6 +1001,9 @@ class MPLCanvas(FigureCanvas):
             # update plotted taylor diagram statistic
             if not self.read_instance.block_MPL_canvas_updates:
                 self.update_associated_active_dashboard_plot('taylor')
+
+            # draw changes
+            self.figure.canvas.draw_idle()
 
         return None
 
@@ -3019,42 +3030,6 @@ class MPLCanvas(FigureCanvas):
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          bias_labels_to_plot, self.plot_characteristics[plot_type], 
                                          plot_options=self.current_plot_options[plot_type])
-
-                            # make statsummary bias plot (if not previously made)
-                            if (plot_type in ['statsummary']) & ('bias' not in self.plot_elements[plot_type]):
-
-                                # create structure to store data
-                                stats_dict = {}
-
-                                # get relevant statistics
-                                relevant_zstats = self.plot_characteristics[plot_type]['experiment_bias']
-
-                                # calculate statistics
-                                for relevant_zstat in relevant_zstats:
-
-                                    # remove observations from data labels
-                                    relevant_data_labels = copy.deepcopy(self.read_instance.data_labels)
-                                    relevant_data_labels.remove('observations')
-
-                                    # if relevant stat is expbias stat, then ensure temporal colocation is active
-                                    # if not, set values as NaN
-                                    if (relevant_zstat in expbias_stats) & (not self.read_instance.temporal_colocation):
-                                        stat_calc = np.array([np.NaN]*len(relevant_data_labels))
-                                    else:
-                                        stats_calc = calculate_statistic(self.read_instance, self, 
-                                                                         self.read_instance.networkspeci, 
-                                                                         relevant_zstat, 
-                                                                         ['observations']*len(relevant_data_labels),
-                                                                         relevant_data_labels)
-                                    stats_dict[relevant_zstat] = stats_calc
-
-                                # create stats dataframe
-                                stats_df = pd.DataFrame(data=stats_dict, index=index, dtype=np.float32)
-                                
-                                # make plot
-                                func(self.plot_axes[plot_type], stats_df, self.plot_characteristics[plot_type], 
-                                     plot_options=self.current_plot_options[plot_type], 
-                                     statsummary=True)
 
                             # create other active plot option elements for bias plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, plot_type, 
