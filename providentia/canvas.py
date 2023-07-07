@@ -339,6 +339,13 @@ class MPLCanvas(FigureCanvas):
             # get statistic
             self.read_instance.selected_statistic_mode = self.read_instance.cb_statistic_mode.currentText()
             
+            # update timeseries statistic if it is different than the selected statistic aggregation
+            if ((self.read_instance.selected_statistic_mode in ['Spatial|Temporal', 'Temporal|Spatial'])
+                and (self.timeseries_stat.currentText() != self.read_instance.selected_statistic_aggregation)):
+                self.read_instance.block_MPL_canvas_updates = True
+                self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation)
+                self.read_instance.block_MPL_canvas_updates = False
+
             # update statistic in memory
             self.read_instance.statistic_mode = self.read_instance.selected_statistic_mode 
 
@@ -366,6 +373,13 @@ class MPLCanvas(FigureCanvas):
             # get statistic
             self.read_instance.selected_statistic_aggregation = self.read_instance.cb_statistic_aggregation.currentText()
             
+            # update timeseries statistic if it is different than the selected statistic aggregation
+            if ((self.read_instance.selected_statistic_mode in ['Spatial|Temporal', 'Temporal|Spatial'])
+                and (self.timeseries_stat.currentText() != self.read_instance.selected_statistic_aggregation)):
+                self.read_instance.block_MPL_canvas_updates = True
+                self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation)
+                self.read_instance.block_MPL_canvas_updates = False
+
             # update statistic in memory
             self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 
 
@@ -599,8 +613,6 @@ class MPLCanvas(FigureCanvas):
 
     def update_associated_active_dashboard_plot(self, plot_type):
         """ Function that updates a plot associated with selected stations on map. """
-
-        start = time.time()
 
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
@@ -873,7 +885,10 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
-            
+
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
             # set variable that blocks configuration bar handling updates until all changes
             # to the timeseries statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
@@ -897,22 +912,41 @@ class MPLCanvas(FigureCanvas):
             if zstat in available_timeseries_stats:
                 self.timeseries_stat.setCurrentText(zstat)
 
+            # update aggregation statistic if it is different than timeseries statistic
+            if ((self.read_instance.statistic_mode in ['Spatial|Temporal', 'Temporal|Spatial'])
+                and (zstat != self.read_instance.cb_statistic_aggregation.currentText())):
+                self.read_instance.block_MPL_canvas_updates = True
+                self.read_instance.cb_statistic_aggregation.setCurrentText(zstat)
+                self.read_instance.block_MPL_canvas_updates = False
+
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
-
-            # TODO: connect comboboxes on menu
-            # if self.read_instance.statistic_mode in ['Spatial|Temporal', 'Temporal|Spatial']:
 
             # update plotted timeseries statistic
             if not self.read_instance.block_MPL_canvas_updates:
                 # update selected data on all active plots
                 if self.read_instance.statistic_mode == 'Spatial|Temporal':
                     self.update_associated_active_dashboard_plots()
-                # update selected data and timeseries plot
+
+                # update selected data on timeseries plot
                 elif self.read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
-                    get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
-                                              networkspecies=[self.read_instance.networkspeci])
-                    self.update_associated_active_dashboard_plot('timeseries')
+                    if len(self.read_instance.station_inds) >= 1:
+                        # update timeseries data
+                        timeseries_stat = self.timeseries_stat.currentText()
+                        aggregated_data = aggregation(self.read_instance.data_array, timeseries_stat, axis=1)
+                        self.selected_station_data[self.read_instance.networkspeci]['timeseries'] = pd.DataFrame(
+                            aggregated_data.T, 
+                            columns=self.selected_station_data_labels[self.read_instance.networkspeci], 
+                            index=self.read_instance.time_index)
+
+                        # update plot                                                                         
+                        self.update_associated_active_dashboard_plot('timeseries')
+
+            # draw changes
+            self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -922,7 +956,10 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
-            
+
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
             # set variable that blocks configuration bar handling updates until all changes
             # to the periodic statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
@@ -960,12 +997,18 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.figure.canvas.draw_idle()
 
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
 
     def handle_taylor_correlation_statistic_update(self):
         
         if not self.read_instance.block_config_bar_handling_updates:
-            
+
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
             # update taylor diagram correlation statistic combobox
             # set variable that blocks configuration bar handling updates until all
             # changes to the statistic combobox are made
@@ -1001,6 +1044,9 @@ class MPLCanvas(FigureCanvas):
 
             # draw changes
             self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
