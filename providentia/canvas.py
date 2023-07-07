@@ -762,7 +762,6 @@ class MPLCanvas(FigureCanvas):
 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
-                    print('{}:'.format(plot_type), time.time()-plot_start)
 
                 # un-hide plotting axes
                 self.top_right_canvas_cover.hide() 
@@ -770,8 +769,6 @@ class MPLCanvas(FigureCanvas):
 
             # update map plot options
             self.update_plot_options(plot_types=['map'])
-
-            print('CANVAS UPDATE TIME:', time.time()-start)
 
     def update_experiment_domain_edges(self):
         """ Function that plots grid domain edges of experiments in memory. """
