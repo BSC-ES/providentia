@@ -1572,19 +1572,23 @@ class Plot:
                                     index=cut_data_labels,
                                     dtype=np.float)
 
-        # rename columns to replace Diurnal, Weekly and Monthly by D, W, M
+        # rename columns to save space
         columns = {}
         for column in stats_df.columns:
+            new_colum_name = copy.deepcopy(column)
+            # rename columns to replace Diurnal, Weekly and Monthly by D, W, M
             if 'diurnal' in column:
-                columns[column] = column.replace('diurnal', 'D')
+                new_colum_name = column.replace('diurnal', 'D')
             elif 'weekly' in column:
-                columns[column] = column.replace('weekly', 'W')
+                new_colum_name = column.replace('weekly', 'W')
             elif 'monthly' in column:
-                columns[column] = column.replace('monthly', 'M')
-            else:
-                columns[column] = column
+                new_colum_name = column.replace('monthly', 'M')
+            # remove _bias from columns
+            if '_bias' in new_colum_name:
+                new_colum_name = new_colum_name.replace('_bias', '')   
+            columns[column] = new_colum_name
         stats_df = stats_df.rename(columns=columns)
-
+  
         # get column and row labels
         col_labels = stats_df.columns.tolist()
         row_labels = stats_df.index.tolist()
