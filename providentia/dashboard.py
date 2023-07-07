@@ -1125,24 +1125,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.annotation_elements.extend([canvas_instance.periodic_annotation,
                                                         canvas_instance.periodic_vline])
 
-            # update periodic statistic combobox
-            self.block_config_bar_handling_updates = False
-            
-            # update map z combobox fields based on data in memory
-            # generate lists of basic and basis+bias statistics for using in the z statistic combobox
-            if not hasattr(self, 'basic_z_stats'):
-                self.basic_z_stats = list(
-                    OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys())
-                # transform into np array and move Median from 11th position to 2nd position
-                self.basic_z_stats.insert(1, self.basic_z_stats.pop(11))
-                self.basic_z_stats = np.array(self.basic_z_stats)
-            if not hasattr(self, 'basic_and_bias_z_stats'):
-                self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-                    OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
-
-            # update periodic statistic in dashboard
-            canvas_instance.handle_periodic_statistic_update()
-
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'periodic-violin':
             
@@ -1385,6 +1367,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # update map z statistic comboboxes
             self.mpl_canvas.handle_map_z_statistic_update()
+
+            # update timeseries statistic combobox
+            self.mpl_canvas.handle_timeseries_statistic_update()
 
             # update periodic statistic combobox
             self.mpl_canvas.handle_periodic_statistic_update()
