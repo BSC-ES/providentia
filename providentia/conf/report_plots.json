@@ -24,7 +24,9 @@
     "debug": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
               "station": ["timeseries", "scatter"]},
 
-    "test": ["timeseries","scatter","boxplot_multispecies","heatmap-Mean_annotate_multispecies", "table-Mean_multispecies", 
-             "statsummary_multispecies","statsummary_multispecies_bias"]
+    "multispecies": ["boxplot_multispecies", "heatmap-Mean_annotate_multispecies", "table-Mean_multispecies", 
+                     "statsummary_multispecies", "statsummary_multispecies_bias"],
+
+    "test": ["map-Mean", "timeseries"]
 
 }
