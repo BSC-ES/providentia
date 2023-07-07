@@ -710,7 +710,7 @@ class ProvidentiaOffline:
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
-            
+
             # filter dataset for current subsection
             print('\nFiltering data for {} subsection'.format(self.subsection))
             DataFilter(self)
@@ -902,8 +902,6 @@ class ProvidentiaOffline:
         # setup plotting geometry for station plots per networkspeci (for one subsection)
         if self.do_plot_geometry_setup:
             self.setup_plot_geometry('station', networkspeci, self.made_networkspeci_station_plots)
-            
-        print('setup geometry')
 
         # initialise station ind as -1
         self.station_ind = -1
@@ -1218,7 +1216,7 @@ class ProvidentiaOffline:
             if 'individual' in plot_options:
                 iter_data_labels = copy.deepcopy(data_labels)
             else:
-                iter_data_labels = [[data_labels]]
+                iter_data_labels = [data_labels]
             for data_labels in iter_data_labels:
 
                 if type(data_labels) != list:
