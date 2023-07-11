@@ -92,76 +92,74 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_stddev_max[networkspeci] = 0.0      
 
         # get data array for networkspeci
-        data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][:,:,:])
+        read_instance.data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][:,:,:])
 
         # temporally colocate data array
         if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-            data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+            read_instance.data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
         
         # get selected station indices
-        if station_index:
-            read_instance.station_inds = np.array([station_index])
-        else:
-            if read_instance.offline:
-                if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                    read_instance.station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
-                else:
-                    read_instance.station_inds = read_instance.valid_station_inds[networkspeci]['observations'] 
-            else:
-                read_instance.station_inds = canvas_instance.relative_selected_station_inds
+        read_instance.station_inds = get_station_inds(read_instance, canvas_instance, station_index)
 
         # get data cut
-        data_array = data_array[:,read_instance.station_inds,:]
+        read_instance.data_array = read_instance.data_array[:,read_instance.station_inds,:]
                     
         # get NaNs in data array
-        nan_data_array = np.isnan(data_array)
+        nan_data_array = np.isnan(read_instance.data_array)
 
         # if data array has no valid data for selected stations, do not cut data array
         # data array has valid data and is not all nan?
-        if data_array.size > 0 and not np.all(nan_data_array):
+        if read_instance.data_array.size > 0 and not np.all(nan_data_array):
 
             # get which data labels have some valid data
             valid_data_labels_mask = ~np.all(np.all(nan_data_array, axis=-1), axis=-1)
             canvas_instance.selected_station_data_labels[networkspeci] = list(np.array(read_instance.data_labels)[valid_data_labels_mask])
 
             # cut data array for valid data labels
-            data_array = data_array[valid_data_labels_mask]
+            read_instance.data_array = read_instance.data_array[valid_data_labels_mask]
 
             # temporally resample data array if required
             if read_instance.resampling:
                 # flatten networkspecies dimension for creation of pandas dataframe
-                data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
+                data_array_reduced = read_instance.data_array.reshape(read_instance.data_array.shape[0]*read_instance.data_array.shape[1], 
+                                                                      read_instance.data_array.shape[2])
                 
                 # create pandas dataframe of data array
                 data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_array, 
                                              columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
                 # resample data array
                 data_array_df_resampled = data_array_df.resample(temporal_resolution_to_output_code, axis=0).mean()
-                time_index = data_array_df_resampled.index
+                read_instance.time_index = data_array_df_resampled.index
 
                 # save back out as numpy array (reshaping to get back networkspecies dimension)
                 data_array_resampled = data_array_df_resampled.to_numpy().transpose()
-                data_array = data_array_resampled.reshape(data_array.shape[0],data_array.shape[1],data_array_resampled.shape[1])
+                read_instance.data_array = data_array_resampled.reshape(read_instance.data_array.shape[0], read_instance.data_array.shape[1],
+                                                                        data_array_resampled.shape[1])
             else:
-                time_index = read_instance.time_array
+                read_instance.time_index = read_instance.time_array
 
             # save timeseries array
             if len(read_instance.station_inds) == 1:
-                canvas_instance.selected_station_data[networkspeci]['timeseries'] = data_array[:,0,:]
+                canvas_instance.selected_station_data[networkspeci]['timeseries'] = read_instance.data_array[:,0,:]
             else:
-                aggregated_data = aggregation(data_array, read_instance.statistic_aggregation, axis=1)
+                if read_instance.offline:
+                    timeseries_stat = read_instance.statistic_aggregation
+                else:
+                    timeseries_stat = canvas_instance.timeseries_stat.currentText()
+                aggregated_data = aggregation(read_instance.data_array, timeseries_stat, axis=1)
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregated_data
 
             # save data per station
             if read_instance.statistic_mode == 'Spatial|Temporal':
                 canvas_instance.selected_station_data[networkspeci]['per_station'] = canvas_instance.selected_station_data[networkspeci]['timeseries'][:,np.newaxis,:]
             elif read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
-                canvas_instance.selected_station_data[networkspeci]['per_station'] = data_array
+                canvas_instance.selected_station_data[networkspeci]['per_station'] = read_instance.data_array
 
             # transform timeseries to pandas dataframe
             canvas_instance.selected_station_data[networkspeci]['timeseries'] = pd.DataFrame(canvas_instance.selected_station_data[networkspeci]['timeseries'].T, 
                                                                                              columns=canvas_instance.selected_station_data_labels[networkspeci], 
-                                                                                             index=time_index)
+                                                                                             index=read_instance.time_index)
+
 
             # flatten data across stations
             canvas_instance.selected_station_data[networkspeci]['flat'] = canvas_instance.selected_station_data[networkspeci]['per_station'].reshape(canvas_instance.selected_station_data[networkspeci]['per_station'].shape[0],
@@ -187,9 +185,25 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_stddev_max[networkspeci] = np.nanmax(np.nanstd(canvas_instance.selected_station_data[networkspeci]['flat'], axis=-1))
 
             # group data into periodic chunks
-            group_periodic(read_instance, canvas_instance, networkspeci, time_index)
+            group_periodic(read_instance, canvas_instance, networkspeci)
 
-def group_periodic(read_instance, canvas_instance, networkspeci, time_index):
+def get_station_inds(read_instance, canvas_instance, station_index):
+    """ Get selected station indices """
+        
+    if station_index:
+        station_inds = np.array([station_index])
+    else:
+        if read_instance.offline:
+            if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
+                station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
+            else:
+                station_inds = read_instance.valid_station_inds[networkspeci]['observations'] 
+        else:
+            station_inds = canvas_instance.relative_selected_station_inds
+
+    return station_inds
+
+def group_periodic(read_instance, canvas_instance, networkspeci):
     """ Function that groups data into periodic chunks
 
         :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
@@ -198,15 +212,13 @@ def group_periodic(read_instance, canvas_instance, networkspeci, time_index):
         :type canvas_instance: object
         :param networkspeci: name of networkspeci str
         :type networkspeci: str
-        :param time_index: time array
-        :type time_index: Pandas DateIndex
     """
 
     # iterate through all defined temporal aggregation resolutions
     for temporal_aggregation_resolution in read_instance.relevant_temporal_resolutions:
 
         # get all temporal periods for current resolution
-        all_periods = getattr(time_index, temporal_aggregation_resolution)
+        all_periods = getattr(read_instance.time_index, temporal_aggregation_resolution)
        
         # get all unique temporal periods for current resolution
         unique_periods = np.unique(all_periods)
