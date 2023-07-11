@@ -280,6 +280,16 @@ class Plot:
             if 'ygrid' in plot_characteristics_vars:
                 ax_to_format.yaxis.grid(**plot_characteristics['ygrid'])
 
+            # set x axis decimal places?
+            if 'round_decimal_places' in plot_characteristics_vars:
+                if 'x' in plot_characteristics['round_decimal_places']:
+                    ax_to_format.xaxis.set_major_formatter(FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['x'])))
+
+            # set y axis decimal places?
+            if 'round_decimal_places' in plot_characteristics_vars:
+                if 'y' in plot_characteristics['round_decimal_places']:
+                    ax_to_format.yaxis.set_major_formatter(FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['y'])))
+
             # remove spines?
             if 'remove_spines' in plot_characteristics_vars:
                 for side in plot_characteristics['remove_spines']:
@@ -601,7 +611,7 @@ class Plot:
     
         # iterate through defined variables and add them
         for ghost_var, ghost_var_dict in plot_characteristics[char_var].items():
-            
+
             # check var str name exists in ghost var dict, if not move to next var
             if var_str_name not in ghost_var_dict:
                 continue
@@ -1295,10 +1305,9 @@ class Plot:
                 else:
                     data_labels_to_plot[data_label_ii] = self.read_instance.experiments[data_label]
             if ('individual' in plot_options) or ('obs' in plot_options):
-                xticks = [0]
                 xtick_labels = [data_labels_to_plot[cut_data_labels.index(data_label)]]
             else:
-                xticks = np.arange(len(data_labels_to_plot))
+                xticks = positions
                 xtick_labels = data_labels_to_plot
 
         # set xticks / xticklabels
@@ -1374,7 +1383,7 @@ class Plot:
             obs_label = 'Observations'
 
         # round dataframe
-        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places']['table'])
 
         # get subsections
         subsections = list(np.unique(stats_df.index.get_level_values(1)))
@@ -1589,9 +1598,6 @@ class Plot:
         col_labels = stats_df.columns.tolist()
         row_labels = stats_df.index.tolist()
 
-        # round dataframe
-        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
-
         # get observations label
         if 'legend' in plot_characteristics:
             obs_label = plot_characteristics['legend']['handles']['obs_label'] 
@@ -1601,7 +1607,7 @@ class Plot:
             obs_label = 'Observations'
 
         # round dataframe
-        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places']['table'])
 
         # offline reports
         if self.read_instance.offline:
@@ -2548,12 +2554,8 @@ class Plot:
 
             # set xlim
             if xlim is not None:
-                if base_plot_type != 'timeseries':
+                if base_plot_type not in ['timeseries','boxplot']:
                     ax.set_xlim(xlim)
-                    if 'round_decimal_places' in plot_characteristics:
-                        xticklabels = ['{:.{}f}'.format(tick, plot_characteristics['round_decimal_places']) 
-                                       for tick in ax.get_xticks()]
-                        ax.set_xticklabels(xticklabels)
 
             # get ylim
             if ylim is None and ('ylim' not in plot_characteristics):
@@ -2574,10 +2576,6 @@ class Plot:
             # set ylim
             if ylim is not None:
                 ax.set_ylim(ylim)
-                if 'round_decimal_places' in plot_characteristics:
-                    ytickslabels = ['{:.{}f}'.format(tick, plot_characteristics['round_decimal_places']) 
-                                    for tick in ax.get_yticks()]
-                    ax.set_yticklabels(ytickslabels)
             
         # get minimum and maximum from all axes and set limits for periodic plots
         if base_plot_type in ['periodic', 'periodic-violin']:
