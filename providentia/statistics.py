@@ -825,12 +825,12 @@ def get_z_statistic_info(plot_type=None, zstat=None):
             if '_' in plot_type:
                 # bias plot or not (if so, add bias to zstat)
                 if '_bias' not in plot_type:
-                    zstat = '-'.join(plot_type.split('_')[0].split('-')[1:])
+                    zstat = '-'.join(plot_type.split('_')[0].split('-')[1])
                 else:
-                    zstat = '-'.join(plot_type.split('_')[0].split('-')[1:] + '_bias')
+                    zstat = '-'.join(plot_type.split('_')[0].split('-')[1] + '_bias')
             # no other options in plot_type
             else:
-                zstat = '-'.join(plot_type.split('-')[1:])
+                zstat = '-'.join(plot_type.split('-')[1])
         # otherwise return None for all vars
         else:
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = None, None, None, None, None

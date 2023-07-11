@@ -213,8 +213,11 @@ class ProvidentiaOffline:
         if '.pdf' not in reports_path:
             reports_path += '.pdf'
 
+        # create 'temp' reports path for first writing to before finalising (for compression) 
+        reports_path_temp = '{}_temp.pdf'.format(reports_path.split('.pdf')[0])
+
         # open new PDF file
-        with PdfPages(reports_path) as pdf:
+        with PdfPages(reports_path_temp) as pdf:
             
             self.pdf = pdf
 
@@ -394,13 +397,22 @@ class ProvidentiaOffline:
                     n_page_plotted_labels += len(ax_dict['data_labels'])
                 if n_page_plotted_labels > 0:
                     if not valid_page:
-                        print('\nWriting PDF\n')
+                        print('\nWriting PDF')
                         valid_page = True
                     fig = self.plot_dictionary[page]['fig']
                     self.pdf.savefig(fig, dpi=self.dpi)
                     plt.close(fig)
             if not valid_page:
-                print('\n0 plots remain to write to PDF\n')
+                print('\n0 plots remain to write to PDF')
+
+        # compress PDF using ghostscript if desired (at 300 DPI)
+        if self.compression:
+            print('\nCompressing PDF')
+            os.system("gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer -dNOPAUSE -dQUIET -dBATCH -sOutputFile={} {}".format(reports_path,reports_path_temp))
+            os.system("rm {}".format(reports_path_temp))
+        else:
+            os.system("mv {} {}".format(reports_path_temp, reports_path))
+                
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
         """ Setup plotting geometry for summary or station specific plots, per network/species. """
@@ -1167,11 +1179,13 @@ class ProvidentiaOffline:
 
                 # set axis title
                 if relevant_axis.get_title() == '':
-
-                    if z1_label == 'observations':
-                        label = copy.deepcopy(z1_label) 
+                    if z2_label != '':
+                        label = self.experiments[z2_label]
                     else:
-                        label = self.experiments[z1_label]
+                        if z1_label == 'observations':
+                            label = copy.deepcopy(z1_label) 
+                        else:
+                            label = self.experiments[z1_label]
                     axis_title_label = '{}\n{} '.format(label, self.subsection)
                     if self.n_stations == 1:
                         axis_title_label += '(1 station)'
@@ -1271,9 +1285,9 @@ class ProvidentiaOffline:
                             axis_title_label = '{}, {} ({:.{}f}, {:.{}f})'.format(self.current_station_reference,
                                                                                   self.current_station_name, 
                                                                                   self.current_lon,
-                                                                                  self.plot_characteristics[plot_type]['round_decimal_places'],
+                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'],
                                                                                   self.current_lat,
-                                                                                  self.plot_characteristics[plot_type]['round_decimal_places'])
+                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'])
                             
                     # set title
                     self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
@@ -1425,14 +1439,14 @@ class ProvidentiaOffline:
             else:
                 networkspecies = [networkspeci]
 
-            # get data labels (based on statistic type)
-            if z_statistic_sign == 'bias':
-                data_labels = list(self.experiments.keys())
-            else:
-                data_labels = ['observations'] + list(self.experiments.keys())
-
             if base_plot_type in ['heatmap', 'table']:
                 
+                # get data labels (based on statistic type)
+                if z_statistic_sign == 'bias':
+                    data_labels = list(self.experiments.keys())
+                else:
+                    data_labels = ['observations'] + list(self.experiments.keys())
+
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([networkspecies, self.subsections],
                                                     names=["networkspecies", "subsections"])
@@ -1464,8 +1478,10 @@ class ProvidentiaOffline:
                 # get stats
                 if 'bias' in plot_options:
                     stats = self.plot_characteristics[plot_type]['experiment_bias']
+                    data_labels = list(self.experiments.keys())
                 else:
                     stats = self.plot_characteristics[plot_type]['basic']
+                    data_labels = ['observations'] + list(self.experiments.keys())
 
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, data_labels],
@@ -1476,8 +1492,6 @@ class ProvidentiaOffline:
                 for subsection in subsections:
                     for networkspeci in networkspecies:
                         for data_label in data_labels:
-                            if ('bias' in plot_options) and (data_label == 'observations'):
-                                continue
                             stats_per_data_label = []
                             for stat in stats:
                                 # initialise stat as nan
@@ -1524,22 +1538,14 @@ class ProvidentiaOffline:
 
             # set axis title
             if relevant_axis.get_title() == '':
-                if plotting_paradigm == 'summary':
-                    if (base_plot_type == 'statsummary') & ('multispecies' not in plot_options):
-                        if self.n_stations == 1:
-                            axis_title_label = '{} ({} station)'.format(self.subsection, self.n_stations)
-                        else:
-                            axis_title_label = '{} ({} stations)'.format(self.subsection, self.n_stations)
-                    else:
-                        axis_title_label = ''
-                elif plotting_paradigm == 'station':
+                if plotting_paradigm == 'station':
                     axis_title_label = '{}, {} ({:.{}f}, {:.{}f})'.format(self.current_station_reference,
                                                                           self.current_station_name, 
                                                                           self.current_lon,
-                                                                          self.plot_characteristics[plot_type]['round_decimal_places'],
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places']['title'],
                                                                           self.current_lat,
-                                                                          self.plot_characteristics[plot_type]['round_decimal_places'])
-                self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+                                                                          self.plot_characteristics[plot_type]['round_decimal_places']['title'])
+                    self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
         return plot_indices
 
