@@ -7,7 +7,7 @@
                    "obs_zorder": 5, "obs_markerfacecolor": "black", 
                    "experiment_domain_polygon": {"linewidth": 1, "linestyle": "--", "fill": false, "zorder": 2},
                    "settings_menu": {"position_1": {"x": 750, "y": 5},
-                                     "position_2": {"x": 1800, "y": 100},
+                                     "position_2": {"x": 1800, "y": 105},
                                      "position_3": {"x": 580, "y": 530},
                                      "position_4": {"x": 1190, "y": 530},
                                      "position_5": {"x": 1800, "y": 530}}},
