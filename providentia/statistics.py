@@ -4,6 +4,7 @@ Contains functions for the processing/calculation of statistics and colourbars
 from .calculate import Stats
 from .calculate import ExpBias
 from .aux import exceedance_lim, get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions
+from .read_aux import drop_nans
 
 import copy
 import json
@@ -15,6 +16,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy.stats as st
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
@@ -99,7 +101,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             read_instance.data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
         
         # get selected station indices
-        read_instance.station_inds = get_station_inds(read_instance, canvas_instance, station_index)
+        read_instance.station_inds = get_station_inds(read_instance, canvas_instance, networkspeci, station_index)
 
         # get data cut
         read_instance.data_array = read_instance.data_array[:,read_instance.station_inds,:]
@@ -173,13 +175,15 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                 canvas_instance.selected_station_data[networkspeci]['active_mode'] = canvas_instance.selected_station_data[networkspeci]['flat']
                 
             # set lower/upper limits for specific plots
-            # for 'Temporal|Spatial' and 'Flattened' modes set this to be low/high percentiles, not max
+            # lower limit is always min of the data
+            # for 'Temporal|Spatial' and 'Flattened' modes for upper limit set this to be inner Tukey fence,
+            # so that limits are not distorted by outlying extreme values
+            current_min = np.nanmin(canvas_instance.selected_station_data[networkspeci]['flat'])
             if read_instance.statistic_mode == 'Spatial|Temporal':
-                current_min = np.nanmin(canvas_instance.selected_station_data[networkspeci]['flat'])
                 current_max = np.nanmax(canvas_instance.selected_station_data[networkspeci]['flat'])
             elif read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
-                current_min = np.nanpercentile(canvas_instance.selected_station_data[networkspeci]['flat'],q=0.01)
-                current_max = np.nanpercentile(canvas_instance.selected_station_data[networkspeci]['flat'],q=99.99)
+                lower_inner_fence, upper_inner_fence = boxplot_inner_fences(canvas_instance.selected_station_data[networkspeci]['flat'])
+                current_max = upper_inner_fence
             canvas_instance.selected_station_data_min[networkspeci] = current_min
             canvas_instance.selected_station_data_max[networkspeci] = current_max
             canvas_instance.selected_station_stddev_max[networkspeci] = np.nanmax(np.nanstd(canvas_instance.selected_station_data[networkspeci]['flat'], axis=-1))
@@ -187,7 +191,48 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             # group data into periodic chunks
             group_periodic(read_instance, canvas_instance, networkspeci)
 
-def get_station_inds(read_instance, canvas_instance, station_index):
+def boxplot_inner_fences(data):
+
+    ''' Using adjusted boxplot methodology, calaculate Tukey inner fences of data, which beyond these limits data are 
+        considered 'possible outliers'. 
+
+        check is only done when have >= 20 values to ensure have sufficient values to use methodology.
+        otherwise the minimum nax maximum of the data are returned
+
+        Tukey's boxplot is a very popular tool for detection of outliers. It reveals the location, spread and skewness of the data.
+        The definition of the inner fences is such that the expected percentage values which exceed is close to 0.7% for a normal distribution.
+        The method is only recommended to be used if a small number of outliers is presumed (at most 5%), and data is normally distributed.
+
+        See References here:
+        https://wis.kuleuven.be/stat/robust/papers/2008/adjboxplot-revision.pdf
+        https://www.researchgate.net/publication/277943905_A_Modified_Approach_for_Detection_of_Outliers
+        https://en.wikipedia.org/wiki/Medcouple
+        https://en.wikipedia.org/wiki/Box_plot#Variations
+
+    '''
+
+    #if have < 20 points then simply return min/max of data 
+    if data.size < 20:
+        return np.nanmin(data), np.nanmax(data)
+
+    #otherwise, calculated Tukey boxplot inner fences
+    else:    
+
+        #calculate the 25th percentile 
+        p25 = np.nanpercentile(data, 25)
+        #calculate the 75th percentile 
+        p75 = np.nanpercentile(data, 75)
+
+        #calculate the interquartile range
+        iqr = p75-p25
+
+        #calculate lower/upper inner fences and return values
+        lower_inner_fence = p25 - 1.5 * iqr 
+        upper_inner_fence = p75 + 1.5 * iqr
+
+        return lower_inner_fence, upper_inner_fence
+
+def get_station_inds(read_instance, canvas_instance, networkspeci, station_index):
     """ Get selected station indices """
         
     if station_index:
@@ -837,12 +882,12 @@ def get_z_statistic_info(plot_type=None, zstat=None):
             if '_' in plot_type:
                 # bias plot or not (if so, add bias to zstat)
                 if '_bias' not in plot_type:
-                    zstat = '-'.join(plot_type.split('_')[0].split('-')[1])
+                    zstat = plot_type.split('_')[0].split('-')[1]
                 else:
-                    zstat = '-'.join(plot_type.split('_')[0].split('-')[1] + '_bias')
+                    zstat = plot_type.split('_')[0].split('-')[1] + '_bias'
             # no other options in plot_type
             else:
-                zstat = '-'.join(plot_type.split('-')[1])
+                zstat = plot_type.split('-')[1]
         # otherwise return None for all vars
         else:
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = None, None, None, None, None
