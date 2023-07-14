@@ -3147,8 +3147,6 @@ class MPLCanvas(FigureCanvas):
             
             # save stats before updating them
             if event_source.currentData() or self.read_instance.previous_statsummary_stats:
-                
-                print('Updating stats...')
 
                 # get current
                 periodic_cycle = self.statsummary_cycle.lineEdit().text()
@@ -3165,10 +3163,6 @@ class MPLCanvas(FigureCanvas):
                     cycle_stats = [stat for stat in items]
                 else:
                     cycle_stats = [stat + '-' + periodic_cycle.lower() for stat in items]
-
-                print('Old', self.statsummary_stats[statistic_type])
-                # print('Previous', self.read_instance.previous_statsummary_stats[periodic_cycle])
-                # print('Current', self.read_instance.current_statsummary_stats[periodic_cycle])
 
                 for stat in cycle_stats:
                     
@@ -3197,8 +3191,6 @@ class MPLCanvas(FigureCanvas):
                     else:
                         if stat in self.statsummary_stats[statistic_type]:
                             self.statsummary_stats[statistic_type].remove(stat)
-
-                print('New', self.statsummary_stats[statistic_type])
 
                 # update previous
                 self.read_instance.previous_statsummary_stats[periodic_cycle] = self.statsummary_stats[statistic_type]

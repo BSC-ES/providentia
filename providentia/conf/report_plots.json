@@ -24,10 +24,17 @@
     "debug": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
               "station": ["timeseries", "scatter"]},
 
-    "all_plots": ["metadata","map-Median","map-MB","timeseries","periodic-Median","periodic-violin",
-                  "boxplot","boxplot_multispecies","boxplot_obs", "boxplot_individual", "scatter",
+    "all_plots": ["metadata",
+                  "map-Median", "map-Median_bias", "map-MB",
+                  "timeseries", "timeseries_bias",
+                  "periodic-Median", "periodic-Mean_bias",
+                  "periodic-violin",
+                  "boxplot","boxplot_multispecies", "boxplot_obs", "boxplot_individual", 
+                  "scatter", 
+                  "distribution", "distribution_bias",
                   "heatmap-Median_annotate_multispecies", "heatmap-Median_bias_annotate_multispecies", 
                   "heatmap-Mean_annotate_multispecies", 
                   "table-Median", "table-Median_bias", "table-Mean_multispecies", 
-                  "statsummary", "statsummary_multispecies","statsummary_multispecies_bias"]
+                  "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias"]
+
 }

@@ -9,6 +9,7 @@ import pyproj
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+from KDEpy import FFTKDE
 import matplotlib as mpl 
 from matplotlib.dates import num2date
 from matplotlib.lines import Line2D
@@ -25,9 +26,9 @@ import scipy.stats as st
 import seaborn as sns
 from itertools import groupby
 
-from .statistics import get_z_statistic_info, calculate_statistic
+from .statistics import get_z_statistic_info, calculate_statistic, boxplot_inner_fences
 from .aux import (get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels,
-                  get_multispecies_aliases, show_message, kde_fft)
+                  get_multispecies_aliases, show_message)
 from .read_aux import drop_nans
 
 # speed up transformations in cartopy
@@ -855,10 +856,10 @@ class Plot:
                 medians = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 'Median', 
                                               data_labels, [], period=relevant_temporal_resolution)
 
-                # calculate PDFs
-                x_grid, PDFs_sampled = self.make_distribution(relevant_axis, networkspeci, data_labels, 
-                                                              plot_characteristics, 
-                                                              violin_resolution=relevant_temporal_resolution)
+                # calculate PDF for data label
+                period_x_grid, PDFs_sampled = self.make_distribution(relevant_axis, networkspeci, data_labels, 
+                                                                     plot_characteristics, 
+                                                                     violin_resolution=relevant_temporal_resolution)
 
                 # iterate through data labels and plot violins
                 for data_label_ii, data_label in enumerate(cut_data_labels): 
@@ -883,12 +884,17 @@ class Plot:
 
                     # make violin plot
                     for period_ii in range(len(xticks)):
+
+                        # get x_grid for period
+                        x_grid = period_x_grid[period_ii]
+
                         if relevant_temporal_resolution == 'month':
                             period_pos = period_ii + 1
                         else:
                             period_pos = period_ii
                         PDF_sampled = PDFs_sampled[data_label_ii, period_ii, :]
                         if not np.all(np.isnan(PDF_sampled)):
+                            
                             PDF_sampled = 0.5 * plot_characteristics['plot']['violin']['widths'] * PDF_sampled / PDF_sampled.max()
                             self.violin_plot = relevant_sub_ax.fill_betweenx(x_grid, -PDF_sampled + period_pos, PDF_sampled + period_pos,
                                                                              facecolor=self.read_instance.plotting_params[data_label]['colour'], 
@@ -911,8 +917,7 @@ class Plot:
                     # add hidden poins for data limits per data label to allow for limit harmonisation
                     if len(violins) > 0:
                         limit_plot = relevant_sub_ax.plot([period_pos,period_pos], 
-                                                          [self.canvas_instance.selected_station_data_min[networkspeci], 
-                                                           self.canvas_instance.selected_station_data_max[networkspeci]], 
+                                                          [np.min(period_x_grid),np.max(period_x_grid)],
                                                            alpha=0.0)
                         violins.extend(limit_plot)
 
@@ -995,24 +1000,6 @@ class Plot:
         else:
             bias = False
 
-        # set data ranges for distribution plot grid if not set explicitely
-        if not data_range_min:
-            data_range_min = self.canvas_instance.selected_station_data_min[networkspeci]
-
-        if not data_range_max:
-            data_range_max = self.canvas_instance.selected_station_data_max[networkspeci]
-
-        # make distribution plot
-        minmax_diff = data_range_max - data_range_min
-        if pd.isnull(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']):
-            n_samples = plot_characteristics['pdf_min_samples']
-        else:
-            n_samples = int(np.around(minmax_diff/(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']/100.0),0))
-            if n_samples < plot_characteristics['pdf_min_samples']:
-                n_samples = plot_characteristics['pdf_min_samples']
-        # round n_samples to next next power of 2 (for fft optimisation)
-        n_samples = 2 ** np.ceil(np.log2(n_samples)) 
-    
         # if 'obs' in plot_options, set data labels to just 'observations'
         if 'obs' in plot_options:
             data_labels = ['observations']
@@ -1023,12 +1010,41 @@ class Plot:
         # cut data_labels for those in valid data labels
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
+        # set data ranges for distribution plot grid if not set explicitly
+        if not data_range_min:
+            data_range_min = self.canvas_instance.selected_station_data_min[networkspeci]
+
+        if not data_range_max:
+            data_range_max = self.canvas_instance.selected_station_data_max[networkspeci]
+
+        # set xgrid for calculating distribution
+        # if calculating for period n_samples is set to pdf_min_samples
+        # otherwise it is inferred from data (if above minimum value)
+        if violin_resolution:
+            n_samples = plot_characteristics['pdf_min_samples']
+        else:
+            minmax_diff = data_range_max - data_range_min
+            if pd.isnull(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']):
+                n_samples = plot_characteristics['pdf_min_samples']
+            else:
+                n_samples = int(np.around(minmax_diff/(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']/100.0),0))
+                if n_samples < plot_characteristics['pdf_min_samples']:
+                    n_samples = plot_characteristics['pdf_min_samples']
+
+        # round n_samples to next next power of 2 (for fft optimisation)
+        n_samples = 2 ** np.ceil(np.log2(n_samples)) 
+        # set x_grid
+        x_grid = np.linspace(data_range_min,data_range_max,int(n_samples))
+
         # plot horizontal line across x axis at 0 if bias plot
+        # also remove observations from cut_data_labels
         if bias:
             bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
             # track plot elements if using dashboard 
             if not self.read_instance.offline:
                 self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
+            if 'observations' in cut_data_labels:
+                cut_data_labels.remove('observations')
 
         # if violin plot setup arrays for saving data
         if violin_resolution:
@@ -1045,18 +1061,27 @@ class Plot:
                 # calculate obs PDF on first pass
                 if data_label_ii == 0:
                     kde_data_obs = drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index('observations'),0,:])
+                    
+                    #filter out data outside data range bounds
+                    kde_data_obs = kde_data_obs[(kde_data_obs > data_range_min) & (kde_data_obs < data_range_max)]
+                    
                     # check if all values are equal in the dataframe
                     if kde_data_obs.size == 0:
                         print('Warning: The kernel density cannot be calculated because there are no valid observational values.')
-                        continue
+                        return
                     elif np.all(kde_data_obs == kde_data_obs[0]):
                         print('Warning: The kernel density cannot be calculated because all observational values are equal.')
-                        continue
+                        return
                     else:
-                        x_grid, PDF_obs_sampled = kde_fft(kde_data_obs, gridsize=n_samples, extents=(data_range_min, data_range_max))
+                        PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_obs)
+                        PDF_obs_sampled = PDF_fit.evaluate(x_grid)
 
                 # calculate model PDF
                 kde_data_model = drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])
+                
+                #filter out data outside data range bounds
+                kde_data_model = kde_data_model[(kde_data_model > data_range_min) & (kde_data_model < data_range_max)]
+                
                 # check if all values are equal in the dataframe
                 if kde_data_model.size == 0:
                     print('Warning: The kernel density cannot be calculated because there are no valid values for {} experiment.'.format(data_label))
@@ -1065,14 +1090,30 @@ class Plot:
                     print('Warning: The kernel density cannot be calculated because all values for {} experiment are equal.'.format(data_label))
                     continue
                 # calculate PDF
-                x_grid, PDF_model_sampled = kde_fft(kde_data_model, gridsize=n_samples, extents=(data_range_min, data_range_max))
-                    
+                PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_model)
+                PDF_model_sampled = PDF_fit.evaluate(x_grid)
+
                 # calculate difference
                 PDF_sampled = PDF_model_sampled - PDF_obs_sampled
                 PDF_sampled_calculated = True
 
             # setup standard plot
             else:
+
+                # if first data label and calculating distributions for violin plot,
+                # calculate the x_grid / data ranges per period  
+                # use min for min data range and upper inner Tukey fence for max data range
+                if (violin_resolution != None) & (data_label_ii == 0):
+                    period_data_range_min = []
+                    period_data_range_max = []
+                    period_x_grid = []
+                    # iterate through periods
+                    for group in self.canvas_instance.selected_station_data[networkspeci][violin_resolution]['active_mode']:
+                        lower_inner_fence, upper_inner_fence = boxplot_inner_fences(group)
+                        min_data = np.nanmin(group)
+                        period_data_range_min.append(min_data)
+                        period_data_range_max.append(upper_inner_fence)
+                        period_x_grid.append(np.linspace(min_data,upper_inner_fence,int(n_samples)))
 
                 # get data (flattened and drop NaNs)
                 if violin_resolution:
@@ -1082,6 +1123,15 @@ class Plot:
 
                 # iterate through kde data groups
                 for period_ii, kde_data in enumerate(kde_data_grouped):
+
+                    # get relevant data ranges / x_grid, for violin period distribution calculation
+                    if violin_resolution:
+                        data_range_min = period_data_range_min[period_ii]
+                        data_range_max = period_data_range_max[period_ii]
+                        x_grid = period_x_grid[period_ii]
+
+                    #filter out data outside data range bounds
+                    kde_data = kde_data[(kde_data > data_range_min) & (kde_data < data_range_max)]
 
                     # check if all values are equal in the dataframe
                     if kde_data.size == 0:
@@ -1093,7 +1143,8 @@ class Plot:
                             print('Warning: The kernel density cannot be calculated because all {} values are equal.'.format(data_label))
                         continue
                     else:
-                        x_grid, PDF_sampled = kde_fft(kde_data, gridsize=n_samples, extents=(data_range_min, data_range_max))
+                        PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data)
+                        PDF_sampled = PDF_fit.evaluate(x_grid)
                         # save PDF for violin plot
                         if violin_resolution:
                             PDFs_sampled[data_label_ii, period_ii, :] = PDF_sampled
@@ -1113,7 +1164,7 @@ class Plot:
 
         # if have made PDFs for violin plot then return it
         if violin_resolution:
-            return x_grid, PDFs_sampled
+            return period_x_grid, PDFs_sampled
 
     def make_scatter(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
         """ Make scatter plot.
@@ -1275,6 +1326,8 @@ class Plot:
 
         # set xticklabels 
         # labels for multispecies plot
+        xtick_params = copy.deepcopy(plot_characteristics['xtick_params'])
+        xticklabel_params = copy.deepcopy(plot_characteristics['xticklabel_params'])
         if ('multispecies' in plot_options) & (len(self.read_instance.networkspecies) > 1):
             xticks = np.arange(len(self.read_instance.networkspecies))
             #if all networks or species are same, drop them from xtick label
@@ -1304,15 +1357,22 @@ class Plot:
                     data_labels_to_plot[data_label_ii] = obs_label
                 else:
                     data_labels_to_plot[data_label_ii] = self.read_instance.experiments[data_label]
+            xticks = positions
             if ('individual' in plot_options) or ('obs' in plot_options):
                 xtick_labels = [data_labels_to_plot[cut_data_labels.index(data_label)]]
+                relevant_axis.xaxis.set_tick_params()
             else:
-                xticks = positions
                 xtick_labels = data_labels_to_plot
+
+        #modify xticks to be horizontal as just have 1 label
+        if len(xtick_labels) == 1:
+            xtick_params['rotation'] = 0
+            xticklabel_params = {}
 
         # set xticks / xticklabels
         relevant_axis.set_xticks(xticks)
-        relevant_axis.set_xticklabels(xtick_labels, **plot_characteristics['xticklabel_params'])
+        relevant_axis.xaxis.set_tick_params(**xtick_params)
+        relevant_axis.set_xticklabels(xtick_labels, **xticklabel_params)
 
     def make_heatmap(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
                      zstats=None, plot_options=[], subsection=None, plotting_paradigm=None, stats_df=None):
