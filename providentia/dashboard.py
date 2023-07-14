@@ -241,9 +241,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                             cb_position = getattr(self, 'cb_position_{}'.format(position))
                             # layout selector at position 2 needs to be further from menu
                             if position == 2:
-                                width_diff = 870
+                                width_diff = 910
                             else:
-                                width_diff = 525
+                                width_diff = 560
                             height_diff = 1
                             new_x = menu_button.x() - ((width_diff * canvas_width) / 1848)
                             new_y = menu_button.y() + ((height_diff * canvas_height) / 1016)
@@ -1027,55 +1027,62 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
-            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+            if changed_plot_type in ['periodic', 'periodic-violin']:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=15, colspan=49))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 81), rowspan=15, colspan=18))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=30))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 52), rowspan=15, colspan=49))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((34, 82), rowspan=15, colspan=19))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((34, 52), rowspan=15, colspan=28))
             elif changed_plot_type == 'taylor':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((9, 65), rowspan=36, colspan=18),
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
+            elif changed_plot_type in ['statsummary', 'metadata']:
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 49), rowspan=36, colspan=50))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=49))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 52), rowspan=34, colspan=51))
             
         # position 3 (bottom left)
         if changed_position == self.cb_position_3 or changed_position == 3:
-            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+            if changed_plot_type in ['periodic', 'periodic-violin']:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=18, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 19), rowspan=18, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 0), rowspan=18, colspan=18))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=18, colspan=28))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 22), rowspan=18, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 4), rowspan=18, colspan=17))
             elif changed_plot_type == 'taylor':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 5), rowspan=38, colspan=18),
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
+            elif changed_plot_type in ['statsummary', 'metadata']:
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 1), rowspan=38, colspan=28))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=38, colspan=29))
-
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=38, colspan=28))
         # position 4 (bottom centre)
         if changed_position == self.cb_position_4 or changed_position == 4:
-            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+            if changed_plot_type in ['periodic', 'periodic-violin']:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=18, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 54), rowspan=18, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 35), rowspan=18, colspan=18))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=18, colspan=28))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 56), rowspan=18, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 38), rowspan=18, colspan=17))
             elif changed_plot_type == 'taylor':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 40), rowspan=38, colspan=18),
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
+            elif changed_plot_type in ['statsummary', 'metadata']:
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=28))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=38, colspan=28))
             
         # position 5 (bottom right)
         if changed_position == self.cb_position_5 or changed_position == 5:
-            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+            if changed_plot_type in ['periodic', 'periodic-violin']:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=18, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 89), rowspan=18, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 70), rowspan=18, colspan=18))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=18, colspan=28))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 90), rowspan=18, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 72), rowspan=18, colspan=17))
             elif changed_plot_type == 'taylor':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=18),
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=18),
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
+            elif changed_plot_type in ['statsummary', 'metadata']:
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 69), rowspan=38, colspan=28))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=28))
 
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         if changed_plot_type == 'timeseries':
