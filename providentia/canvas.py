@@ -121,7 +121,7 @@ class MPLCanvas(FigureCanvas):
         self.plot_axes = {}
         self.plot_axes['map'] = self.figure.add_subplot(self.gridspec.new_subplotspec((2, 0), 
                                                         rowspan=44, colspan=42), projection=self.plotcrs)
-        self.plot_axes['cb'] = self.figure.add_axes([0.0455, 0.536, 0.3794, 0.02])
+        self.plot_axes['cb'] = self.figure.add_axes([0.0255, 0.536, 0.3794, 0.02])
         self.plot_axes['legend'] = self.figure.add_subplot(self.gridspec.new_subplotspec((0, 47), 
                                                            rowspan=8, colspan=53))
 
@@ -3137,6 +3137,9 @@ class MPLCanvas(FigureCanvas):
 
         if not self.read_instance.block_config_bar_handling_updates:
 
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
             # update statsummary statistics comboboxes
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary statistics combobox are made
@@ -3201,6 +3204,12 @@ class MPLCanvas(FigureCanvas):
             # update plotted statsummary statistic
             if not self.read_instance.block_MPL_canvas_updates:
                 self.update_associated_active_dashboard_plot('statsummary')
+
+            # draw changes
+            self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
 
     def redraw_active_options(self, data_labels, plot_type, active, plot_options):
         """ Redraw active plot option elements when moving between absolute and bias plots,
