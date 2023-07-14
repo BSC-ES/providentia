@@ -247,7 +247,7 @@ class ProvidentiaOffline:
             self.stddev_max_summary = {networkspeci:0 for networkspeci in self.networkspecies}
             self.stddev_max_station = {networkspeci:0 for networkspeci in self.networkspecies}
 
-            # make all plots per subsection (for all plot types except distribution plot)
+            # make all plots per subsection (for all plot types except distribution/taylor plots)
             summary_plots_to_make = [plot_type for plot_type in self.summary_plots_to_make 
                                      if ('distribution' not in plot_type) and ('taylor' not in plot_type)]
             station_plots_to_make = [plot_type for plot_type in self.station_plots_to_make 
@@ -256,7 +256,8 @@ class ProvidentiaOffline:
                                            do_plot_geometry_setup=True)
 
             # make all plots per subsection
-            # for distribution plot types --> done so to calclulate data ranges across subsections first
+            # for distribution/taylor plot types --> done so to calclulate data ranges 
+            # across subsections first
             summary_plots_to_make = [plot_type for plot_type in self.summary_plots_to_make 
                                      if ('distribution' in plot_type) or ('taylor' in plot_type)]
             station_plots_to_make = [plot_type for plot_type in self.station_plots_to_make 
@@ -1361,17 +1362,14 @@ class ProvidentiaOffline:
                         func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                                 plot_options=plot_options, station_inds=station_inds)
                     elif base_plot_type == 'periodic':
-                        func(relevant_axis, networkspeci, data_labels, 
-                                self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options)
+                        func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                             zstat=zstat, plot_options=plot_options)    
                     elif base_plot_type == 'distribution':
                         func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                            plot_options=plot_options, 
-                            data_range_min=data_range_min, 
-                            data_range_max=data_range_max) 
+                            plot_options=plot_options, data_range_min=data_range_min, data_range_max=data_range_max) 
                     elif base_plot_type == 'taylor':
                         func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                            plot_options=plot_options, 
-                            stddev_max=stddev_max)
+                            plot_options=plot_options, stddev_max=stddev_max)
                     else:
                         func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                             plot_options=plot_options) 
