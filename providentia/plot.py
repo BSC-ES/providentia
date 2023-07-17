@@ -16,6 +16,7 @@ from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
@@ -284,12 +285,12 @@ class Plot:
             # set x axis decimal places?
             if 'round_decimal_places' in plot_characteristics_vars:
                 if 'x' in plot_characteristics['round_decimal_places']:
-                    ax_to_format.xaxis.set_major_formatter(FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['x'])))
+                    ax_to_format.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['x'])))
 
             # set y axis decimal places?
             if 'round_decimal_places' in plot_characteristics_vars:
                 if 'y' in plot_characteristics['round_decimal_places']:
-                    ax_to_format.yaxis.set_major_formatter(FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['y'])))
+                    ax_to_format.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['y'])))
 
             # remove spines?
             if 'remove_spines' in plot_characteristics_vars:
