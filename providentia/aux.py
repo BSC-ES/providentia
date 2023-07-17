@@ -1647,7 +1647,7 @@ def show_message(read_instance, msg, msg_offline=None, from_conf=None):
             from .dashboard_aux import MessageBox
             MessageBox(msg)
 
-def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott'):
+def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott', xgrid=None):
     """
     A fft-based Gaussian kernel density estimate (KDE)
     for computing the KDE on a regular grid
@@ -1699,6 +1699,9 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
             The method used to calculate the estimator bandwidth. 
             This can be 'scott' or 'silverman'(default: 'scott')
 
+        xgrid: ndarray(ndim=1)
+            The output grid (if this is provided gridsize and extents are ignored).
+
     OUTPUTS
     -------
         grid_points: ndarray[ndim=1]
@@ -1712,7 +1715,10 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     x = np.squeeze(np.asarray(xin))
 
     # Default extents are the extent of the data
-    if extents is None:
+    if xgrid is not None:
+        xmin, xmax = xgrid.min(), xgrid.max()
+        x = x[ (x <= xmax) & (x >= xmin) ]
+    elif extents is None:
         xmin, xmax = x.min(), x.max()
     else:
         xmin, xmax = map(float, extents)
@@ -1720,6 +1726,7 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
 
     n = x.size
 
+    # apply weights
     if weights is None:
         # Default: Weight all points equally
         weights = np.ones(n)
@@ -1731,11 +1738,14 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     # Optimize gridsize ------------------------------------------------------
     #Make grid and discretize the data and round it to the next power of 2
     # to optimize with the fft usage
-    if gridsize is None:
-        gridsize = np.max((len(x), 1024.))
-    gridsize = 2 ** np.ceil(np.log2(gridsize))  # round to next power of 2
-
-    nx = int(gridsize)
+    # ensure minimum gridsize of 1024 points
+    if xgrid is None:
+        if gridsize is None:
+            gridsize = np.max((len(x), 1024.))
+        gridsize = 2 ** np.ceil(np.log2(gridsize))  # round to next power of 2
+        nx = int(gridsize)
+    else:
+        nx = len(xgrid)
 
     # Make the sparse histogram -------------------------------------------
     dx = (xmax - xmin) / (nx - 1)
@@ -1785,4 +1795,7 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     grid /= norm_factor
 
     # return grid points and estimated densities 
-    return np.linspace(xmin,xmax,nx), np.squeeze(grid)
+    if xgrid is None:
+        return np.linspace(xmin,xmax,nx), np.squeeze(grid)
+    else:
+        return np.squeeze(grid)
