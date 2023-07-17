@@ -3018,12 +3018,6 @@ class MPLCanvas(FigureCanvas):
                                     self.read_instance.block_MPL_canvas_updates = False
                                     self.plot_elements[plot_type]['active'] = 'absolute'
 
-                            # get plotting function for specific plot
-                            if plot_type == 'statsummary':
-                                func = getattr(self.plot, 'make_table')
-                            else:
-                                func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
-
                             # iterate through valid data labels 
                             bias_labels_to_plot = []
                             for data_label in self.read_instance.data_labels + ['ALL']:
@@ -3059,6 +3053,12 @@ class MPLCanvas(FigureCanvas):
                             # if do not already have bias elements, then make them (tracking plot elements also) 
                             if bias_labels_to_plot:
 
+                                # get plotting function for specific plot
+                                if plot_type == 'statsummary':
+                                    func = getattr(self.plot, 'make_table')
+                                else:
+                                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+
                                 # call function to update plot
                                 # periodic plot
                                 if plot_type =='periodic':
@@ -3088,7 +3088,18 @@ class MPLCanvas(FigureCanvas):
                             # update active (absolute)
                             self.plot_elements[plot_type]['active'] = 'absolute' 
 
+                            # handle some special case for periodic plot
+                            if plot_type == 'periodic':
+
+                                # get currently selected periodic statistic name
+                                base_zstat = self.periodic_stat.currentText()
+                                zstat = get_z_statistic_comboboxes(base_zstat, bias=False)
+
+                                # get zstat information 
+                                zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
+
                             # iterate through valid data labels
+                            absolute_labels_to_plot = []
                             for data_label in list(self.read_instance.data_labels) + ['ALL']:
 
                                 # hide bias plot elements 
@@ -3104,6 +3115,36 @@ class MPLCanvas(FigureCanvas):
                                         for element_type in self.plot_elements[plot_type]['absolute'][data_label]:
                                             for element in self.plot_elements[plot_type]['absolute'][data_label][element_type]:
                                                 element.set_visible(True)
+                                elif data_label != 'ALL':
+                                    absolute_labels_to_plot.append(data_label) 
+
+                            # if do not already have absolute elements, then make them (tracking plot elements also) 
+                            if absolute_labels_to_plot:
+
+                                # get plotting function for specific plot
+                                if plot_type == 'statsummary':
+                                    func = getattr(self.plot, 'make_table')
+                                else:
+                                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+
+                                # call function to update plot
+                                # periodic plot
+                                if plot_type =='periodic':
+                                    func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
+                                         absolute_labels_to_plot, self.plot_characteristics[plot_type], zstat=zstat, 
+                                         plot_options=self.current_plot_options[plot_type])
+                                # make statsummary plot
+                                elif plot_type == 'statsummary':
+                                    relevant_zstats = self.statsummary_stats['basic']
+                                    func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
+                                         self.read_instance.data_labels, self.plot_characteristics[plot_type], 
+                                         zstats=relevant_zstats, statsummary=True, 
+                                         plot_options=self.current_plot_options[plot_type])                
+                                # other plots
+                                else: 
+                                    func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
+                                         absolute_labels_to_plot, self.plot_characteristics[plot_type], 
+                                         plot_options=self.current_plot_options[plot_type])
 
                             # create other active plot option elements for absolute plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, 

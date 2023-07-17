@@ -176,7 +176,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                 
             # set lower/upper limits for specific plots
             # lower limit is always min of the data
-            # for 'Temporal|Spatial' and 'Flattened' modes for upper limit set this to be inner Tukey fence,
+            # The upper limit is set to be the inner Tukey fence, 
             # so that limits are not distorted by outlying extreme values
             current_min = np.nanmin(canvas_instance.selected_station_data[networkspeci]['flat'])
             if read_instance.statistic_mode == 'Spatial|Temporal':
