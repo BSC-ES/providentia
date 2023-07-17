@@ -28,7 +28,7 @@ from itertools import groupby
 
 from .statistics import get_z_statistic_info, calculate_statistic, boxplot_inner_fences
 from .aux import (get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels,
-                  get_multispecies_aliases, show_message)
+                  get_multispecies_aliases, show_message, kde_fft)
 from .read_aux import drop_nans
 
 # speed up transformations in cartopy
@@ -1063,7 +1063,7 @@ class Plot:
                     kde_data_obs = drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index('observations'),0,:])
                     
                     #filter out data outside data range bounds
-                    kde_data_obs = kde_data_obs[(kde_data_obs > data_range_min) & (kde_data_obs < data_range_max)]
+                    #kde_data_obs = kde_data_obs[(kde_data_obs > data_range_min) & (kde_data_obs < data_range_max)]
                     
                     # check if all values are equal in the dataframe
                     if kde_data_obs.size == 0:
@@ -1073,14 +1073,16 @@ class Plot:
                         print('Warning: The kernel density cannot be calculated because all observational values are equal.')
                         return
                     else:
-                        PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_obs)
-                        PDF_obs_sampled = PDF_fit.evaluate(x_grid)
+                        PDF_obs_sampled = kde_fft(kde_data_obs, xgrid=x_grid)
+                        #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_obs)
+                        #PDF_obs_sampled = PDF_fit.evaluate(x_grid)
+
 
                 # calculate model PDF
                 kde_data_model = drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])
                 
                 #filter out data outside data range bounds
-                kde_data_model = kde_data_model[(kde_data_model > data_range_min) & (kde_data_model < data_range_max)]
+                #kde_data_model = kde_data_model[(kde_data_model > data_range_min) & (kde_data_model < data_range_max)]
                 
                 # check if all values are equal in the dataframe
                 if kde_data_model.size == 0:
@@ -1090,8 +1092,9 @@ class Plot:
                     print('Warning: The kernel density cannot be calculated because all values for {} experiment are equal.'.format(data_label))
                     continue
                 # calculate PDF
-                PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_model)
-                PDF_model_sampled = PDF_fit.evaluate(x_grid)
+                PDF_model_sampled = kde_fft(kde_data_model, xgrid=x_grid)
+                #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_model)
+                #PDF_model_sampled = PDF_fit.evaluate(x_grid)
 
                 # calculate difference
                 PDF_sampled = PDF_model_sampled - PDF_obs_sampled
@@ -1131,7 +1134,7 @@ class Plot:
                         x_grid = period_x_grid[period_ii]
 
                     #filter out data outside data range bounds
-                    kde_data = kde_data[(kde_data > data_range_min) & (kde_data < data_range_max)]
+                    #kde_data = kde_data[(kde_data > data_range_min) & (kde_data < data_range_max)]
 
                     # check if all values are equal in the dataframe
                     if kde_data.size == 0:
@@ -1143,8 +1146,9 @@ class Plot:
                             print('Warning: The kernel density cannot be calculated because all {} values are equal.'.format(data_label))
                         continue
                     else:
-                        PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data)
-                        PDF_sampled = PDF_fit.evaluate(x_grid)
+                        PDF_sampled = kde_fft(kde_data, xgrid=x_grid)
+                        #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data)
+                        #PDF_sampled = PDF_fit.evaluate(x_grid)
                         # save PDF for violin plot
                         if violin_resolution:
                             PDFs_sampled[data_label_ii, period_ii, :] = PDF_sampled
