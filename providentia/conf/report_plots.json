@@ -21,20 +21,25 @@
     "cams2_40": ["metadata", "timeseries_annotate", "timeseries_bias", "periodic-violin", "periodic-r", "periodic-r2", 
                  "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
 
-    "debug": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
-              "station": ["timeseries", "scatter"]},
+    "paradigm": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
+                 "station": ["timeseries", "scatter"]},
+
+    "icap": ["metadata", "map-r", "map-MB", "map-RMSE", "map-MFB", "timeseries_annotate", 
+             "timeseries_bias", "periodic-r", "periodic-r2",
+             "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
 
     "all_plots": ["metadata",
                   "map-Median", "map-Median_bias", "map-MB",
-                  "timeseries", "timeseries_bias",
+                  "timeseries", "timeseries_bias", "timeseries_smooth",
                   "periodic-Median", "periodic-Mean_bias",
                   "periodic-violin",
                   "boxplot","boxplot_multispecies", "boxplot_obs", "boxplot_individual", 
-                  "scatter", 
+                  "scatter", "scatter_logx", "scatter_logy", "scatter_regression",
                   "distribution", "distribution_bias",
                   "heatmap-Median_annotate_multispecies", "heatmap-Median_bias_annotate_multispecies", 
                   "heatmap-Mean_annotate_multispecies", 
                   "table-Median", "table-Median_bias", "table-Mean_multispecies", 
-                  "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias"]
-
+                  "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias"],
+    
+    "debug": ["scatter", "scatter_logx"]
 }

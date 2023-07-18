@@ -342,6 +342,7 @@ class ExpBias(object):
             normalised root mean squared error (NRMSE)
             between observations and experiment.
         """
+
         if obs.size == 0:
             return np.NaN
         else:
@@ -370,17 +371,20 @@ class ExpBias(object):
             Positive correlations imply that as x increases, so does y.
             Negative correlations imply that as x increases, y decreases.
         """
+
         if obs.size == 0:
             return np.NaN
         else:
-            n = obs.shape[-1]
             mean_obs = np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)
             std_obs = np.expand_dims(np.nanstd(obs, axis=-1), axis=-1)
             mean_exp = np.expand_dims(np.nanmean(exp, axis=-1), axis=-1)
             std_exp = np.expand_dims(np.nanstd(exp, axis=-1), axis=-1)
             standard_score_obs = ma.masked_invalid((obs - mean_obs) / std_obs)
             standard_score_exp = ma.masked_invalid((exp - mean_exp) / std_exp)
-            return np.nansum(standard_score_obs*standard_score_exp, axis=-1) / n
+            standard_score_mult = standard_score_obs*standard_score_exp
+            # get number of non masked values in the time dimension
+            n = standard_score_mult.count(axis=-1)
+            return np.nansum(standard_score_mult, axis=-1) / n
 
     @staticmethod
     def calculate_r_squared(obs, exp):
