@@ -265,9 +265,10 @@ class StatsComboBox(ComboBox):
         
         # update stats for the selected periodic cycle
         if 'bias' in plot_options:
-            items = ['Mean_bias', 'StdDev_bias'] + list(expbias_stats.keys())
+            items = list(copy.deepcopy(self.parent.read_instance.basic_and_bias_z_stats))
         else:
-            items = list(basic_stats.keys())
+            items = list(copy.deepcopy(self.parent.read_instance.basic_z_stats))
+
         if periodic_cycle != 'None':
             items = [stat + '-' + periodic_cycle.lower() for stat in items]
 
