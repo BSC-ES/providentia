@@ -696,7 +696,10 @@ class MPLCanvas(FigureCanvas):
                          self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options)
                 # make statsummary plot
                 elif plot_type == 'statsummary':
-                    relevant_zstats = self.statsummary_stats['basic']
+                    if 'bias' in plot_options:
+                        relevant_zstats = self.statsummary_stats['expbias']
+                    else:
+                        relevant_zstats = self.statsummary_stats['basic']
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
                          self.plot_characteristics[plot_type], 
                          zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
@@ -1053,6 +1056,87 @@ class MPLCanvas(FigureCanvas):
             QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
+
+    def handle_statsummary_statistics_update(self):
+        """ Function that handles update of plotted statsummary statistics
+            upon interaction with statistic comboboxes.
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # update statsummary statistics comboboxes
+            # set variable that blocks configuration bar handling updates until all changes
+            # to the statsummary statistics combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # get source
+            event_source = self.sender()
+            
+            # save stats before updating them
+            if event_source.currentData() or self.read_instance.previous_statsummary_stats:
+
+                # get current
+                periodic_cycle = self.statsummary_cycle.lineEdit().text()
+                self.read_instance.current_statsummary_stats[periodic_cycle] = copy.deepcopy(event_source.currentData())
+
+                # get all possible stats
+                plot_options = self.read_instance.current_plot_options['statsummary']
+                statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
+                if 'bias' in plot_options:
+                    items = ['Mean_bias', 'StdDev_bias'] + list(expbias_stats.keys())
+                else:
+                    items = list(basic_stats.keys())
+                if periodic_cycle == 'None':
+                    cycle_stats = [stat for stat in items]
+                else:
+                    cycle_stats = [stat + '-' + periodic_cycle.lower() for stat in items]
+
+                for stat in cycle_stats:
+                    
+                    # remove stat that was selected before but not now
+                    if ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                        and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                        add = False
+                    # add stat that was not selected before
+                    elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                        and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                        add = True
+                    # do nothing if options were selected before and now
+                    elif ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                        and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                        continue
+                    # do nothing if options were never selected
+                    elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
+                        and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
+                        continue
+
+                    # add stat to list
+                    if add:
+                        if stat not in self.statsummary_stats[statistic_type]:
+                            self.statsummary_stats[statistic_type].append(stat)
+                    # remove stat from list
+                    else:
+                        if stat in self.statsummary_stats[statistic_type]:
+                            self.statsummary_stats[statistic_type].remove(stat)
+
+                # update previous
+                self.read_instance.previous_statsummary_stats[periodic_cycle] = self.statsummary_stats[statistic_type]
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update plotted statsummary statistic
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_associated_active_dashboard_plot('statsummary')
+
+            # draw changes
+            self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
 
     def remove_axis_objects(self, ax_elements, elements_to_skip=[], types_to_remove=[]):
         """ Remove objects (artists, lines, collections, patches) from axis. """
@@ -3115,8 +3199,13 @@ class MPLCanvas(FigureCanvas):
                                         for element_type in self.plot_elements[plot_type]['absolute'][data_label]:
                                             for element in self.plot_elements[plot_type]['absolute'][data_label][element_type]:
                                                 element.set_visible(True)
-                                elif data_label != 'ALL':
-                                    absolute_labels_to_plot.append(data_label) 
+                                else:
+                                    if plot_type == 'statsummary':
+                                        if data_label == 'observations':
+                                            absolute_labels_to_plot.append(data_label) 
+                                    else:
+                                        if data_label != 'ALL':
+                                            absolute_labels_to_plot.append(data_label) 
 
                             # if do not already have absolute elements, then make them (tracking plot elements also) 
                             if absolute_labels_to_plot:
@@ -3174,87 +3263,6 @@ class MPLCanvas(FigureCanvas):
                 self.figure.canvas.draw_idle()
 
         return None
-
-    def handle_statsummary_statistics_update(self):
-        """ Function that handles update of plotted statsummary statistics
-            upon interaction with statistic comboboxes.
-        """
-
-        if not self.read_instance.block_config_bar_handling_updates:
-
-            # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-            # update statsummary statistics comboboxes
-            # set variable that blocks configuration bar handling updates until all changes
-            # to the statsummary statistics combobox are made
-            self.read_instance.block_config_bar_handling_updates = True
-
-            # get source
-            event_source = self.sender()
-            
-            # save stats before updating them
-            if event_source.currentData() or self.read_instance.previous_statsummary_stats:
-
-                # get current
-                periodic_cycle = self.statsummary_cycle.lineEdit().text()
-                self.read_instance.current_statsummary_stats[periodic_cycle] = copy.deepcopy(event_source.currentData())
-
-                # get all possible stats
-                plot_options = self.read_instance.current_plot_options['statsummary']
-                statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
-                if 'bias' in plot_options:
-                    items = ['Mean_bias', 'StdDev_bias'] + list(expbias_stats.keys())
-                else:
-                    items = list(basic_stats.keys())
-                if periodic_cycle == 'None':
-                    cycle_stats = [stat for stat in items]
-                else:
-                    cycle_stats = [stat + '-' + periodic_cycle.lower() for stat in items]
-
-                for stat in cycle_stats:
-                    
-                    # remove stat that was selected before but not now
-                    if ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
-                        and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
-                        add = False
-                    # add stat that was not selected before
-                    elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
-                        and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
-                        add = True
-                    # do nothing if options were selected before and now
-                    elif ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
-                        and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
-                        continue
-                    # do nothing if options were never selected
-                    elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
-                        and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
-                        continue
-
-                    # add stat to list
-                    if add:
-                        if stat not in self.statsummary_stats[statistic_type]:
-                            self.statsummary_stats[statistic_type].append(stat)
-                    # remove stat from list
-                    else:
-                        if stat in self.statsummary_stats[statistic_type]:
-                            self.statsummary_stats[statistic_type].remove(stat)
-
-                # update previous
-                self.read_instance.previous_statsummary_stats[periodic_cycle] = self.statsummary_stats[statistic_type]
-
-            # allow handling updates to the configuration bar again
-            self.read_instance.block_config_bar_handling_updates = False
-
-            # update plotted statsummary statistic
-            if not self.read_instance.block_MPL_canvas_updates:
-                self.update_associated_active_dashboard_plot('statsummary')
-
-            # draw changes
-            self.figure.canvas.draw_idle()
-
-            # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
 
     def redraw_active_options(self, data_labels, plot_type, active, plot_options):
         """ Redraw active plot option elements when moving between absolute and bias plots,
