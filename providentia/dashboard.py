@@ -131,6 +131,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # initialise DataReader
         self.datareader = DataReader(self)
 
+        # update map z combobox fields based on data in memory
+        # generate lists of basic and basis+bias statistics for using in the z statistic combobox
+        if not hasattr(self, 'basic_z_stats'):
+            self.basic_z_stats = np.array(list(
+                OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
+        if not hasattr(self, 'basic_and_bias_z_stats'):
+            self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
+                OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
+
         # initialise UI
         self.init_ui(**kwargs)
 
@@ -1353,15 +1362,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # run function to update filter
             self.mpl_canvas.handle_data_filter_update()
-        
-            # update map z combobox fields based on data in memory
-            # generate lists of basic and basis+bias statistics for using in the z statistic combobox
-            if not hasattr(self, 'basic_z_stats'):
-                self.basic_z_stats = np.array(list(
-                    OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
-            if not hasattr(self, 'basic_and_bias_z_stats'):
-                self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-                    OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
 
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
             # before experiments, and empty string item as first element in z2 array list
