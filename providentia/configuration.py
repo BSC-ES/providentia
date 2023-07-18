@@ -576,7 +576,8 @@ class ProvConfiguration:
         # check have periodic_statistic_mode information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_mode:
-            default = 'Cycle'
+            #default = 'Cycle'
+            default = 'Independent'
             msg = "Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.periodic_statistic_mode = default

@@ -401,9 +401,9 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 if read_instance.periodic_statistic_mode == 'Cycle':
                     # aggregation in each group, per station, by periodic statistic
                     z_statistic = np.array([aggregation(group, read_instance.periodic_statistic_aggregation, axis=-1)
-                                        for group in data_array_a]).transpose()
+                                            for group in data_array_a]).transpose()
                     # calculate statistic per station (removing period dimension)
-                    z_statistic = np.array(getattr(Stats, stats_dict['function'])(z_statistic, **function_arguments))
+                    z_statistic = np.array(getattr(Stats, stats_dict['function'])(z_statistic, **function_arguments)).transpose()
 
                 # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                 # and then aggregate 
@@ -412,7 +412,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     z_statistic = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments)
                                             for group in data_array_a]).transpose()
                     # aggregate data per station (removing period dimension)
-                    z_statistic = aggregation(z_statistic, read_instance.periodic_statistic_aggregation, axis=-1)
+                    z_statistic = aggregation(z_statistic, read_instance.periodic_statistic_aggregation, axis=-1).transpose()
 
             # calculate statistics per station 
             else:
@@ -474,8 +474,8 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                                             for group in data_array_b]).transpose()
                         
                         # calculate statistic per station (removing period dimension)
-                        statistic_a = np.array(getattr(Stats, stats_dict['function'])(statistic_a, **function_arguments_a))
-                        statistic_b = np.array(getattr(Stats, stats_dict['function'])(statistic_b, **function_arguments_b))
+                        statistic_a = np.array(getattr(Stats, stats_dict['function'])(statistic_a, **function_arguments_a)).transpose()
+                        statistic_b = np.array(getattr(Stats, stats_dict['function'])(statistic_b, **function_arguments_b)).transpose()
 
                     # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                     # and then aggregate 
@@ -487,8 +487,8 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                                                 for group in data_array_b]).transpose()
 
                         # aggregate data per station (removing period dimension)
-                        statistic_a = aggregation(statistic_a, read_instance.periodic_statistic_aggregation, axis=-1)
-                        statistic_b = aggregation(statistic_b, read_instance.periodic_statistic_aggregation, axis=-1)
+                        statistic_a = aggregation(statistic_a, read_instance.periodic_statistic_aggregation, axis=-1).transpose()
+                        statistic_b = aggregation(statistic_b, read_instance.periodic_statistic_aggregation, axis=-1).transpose()
 
                 # calculate statistics per station 
                 else:
@@ -535,7 +535,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                                             for group in data_array_b]).transpose()
                         
                         # calculate statistic per station (removing period dimension)
-                        z_statistic = np.array(getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':statistic_a,'exp':statistic_b}}))
+                        z_statistic = np.array(getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':statistic_a,'exp':statistic_b}})).transpose()
 
                     # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                     # and then aggregate 
@@ -545,7 +545,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                                                 for group_a, group_b in zip(data_array_a, data_array_b)]).transpose()
 
                         # aggregate data per station (removing period dimension)
-                        z_statistic = aggregation(z_statistic, read_instance.periodic_statistic_aggregation, axis=-1)
+                        z_statistic = aggregation(z_statistic, read_instance.periodic_statistic_aggregation, axis=-1).transpose()
 
                 # calculate statistics per station 
                 else:
