@@ -340,7 +340,7 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.selected_statistic_mode = self.read_instance.cb_statistic_mode.currentText()
             
             # update timeseries statistic if it is different than the selected statistic aggregation
-            if ((self.read_instance.selected_statistic_mode in ['Spatial|Temporal', 'Temporal|Spatial'])
+            if ((self.read_instance.selected_statistic_mode == 'Spatial|Temporal')
                 and (self.timeseries_stat.currentText() != self.read_instance.selected_statistic_aggregation)):
                 self.read_instance.block_MPL_canvas_updates = True
                 self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation)
@@ -374,7 +374,7 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.selected_statistic_aggregation = self.read_instance.cb_statistic_aggregation.currentText()
             
             # update timeseries statistic if it is different than the selected statistic aggregation
-            if ((self.read_instance.selected_statistic_mode in ['Spatial|Temporal', 'Temporal|Spatial'])
+            if ((self.read_instance.selected_statistic_mode == 'Spatial|Temporal')
                 and (self.timeseries_stat.currentText() != self.read_instance.selected_statistic_aggregation)):
                 self.read_instance.block_MPL_canvas_updates = True
                 self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation)
@@ -920,7 +920,7 @@ class MPLCanvas(FigureCanvas):
                 self.timeseries_stat.setCurrentText(zstat)
 
             # update aggregation statistic if it is different than timeseries statistic
-            if ((self.read_instance.statistic_mode in ['Spatial|Temporal', 'Temporal|Spatial'])
+            if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
                 and (zstat != self.read_instance.cb_statistic_aggregation.currentText())):
                 self.read_instance.block_MPL_canvas_updates = True
                 self.read_instance.cb_statistic_aggregation.setCurrentText(zstat)
