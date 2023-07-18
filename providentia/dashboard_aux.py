@@ -251,8 +251,8 @@ class StatsComboBox(ComboBox):
 
         # get plot options to know if we have bias
         plot_options = []
-        if hasattr(self.parent.read_instance, 'current_plot_options'):
-            plot_options = copy.deepcopy(self.parent.read_instance.current_plot_options['statsummary'])
+        if hasattr(self.parent, 'current_plot_options'):
+            plot_options = copy.deepcopy(self.parent.current_plot_options['statsummary'])
 
         # get current periodic cycle
         periodic_cycle = self.lineEdit().text()
@@ -270,6 +270,7 @@ class StatsComboBox(ComboBox):
             items = list(basic_stats.keys())
         if periodic_cycle != 'None':
             items = [stat + '-' + periodic_cycle.lower() for stat in items]
+
         self.parent.statsummary_stat.clear()
         self.parent.statsummary_stat.addItems(items)
         self.parent.statsummary_stat.updateText()
