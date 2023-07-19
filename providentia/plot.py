@@ -403,11 +403,15 @@ class Plot:
 
         return map_extent
 
-    def set_equal_axes(self, ax):
+    def set_equal_axes(self, ax, plot_options):
         """ Set equal aspect and limits (useful for scatter plots). """
 
-        # set aspect
-        ax.set_aspect('equal', adjustable='box')
+        # set equal aspect
+        # only if no axis is in log scale
+        if 'logy' in plot_options or 'logx' in plot_options:
+            ax.set_aspect(aspect='auto')
+        else:
+            ax.set_aspect(aspect='equal', adjustable='box')
 
         if len(ax.lines) == 0:
             return None
@@ -2437,7 +2441,6 @@ class Plot:
                             self.canvas_instance.plot_characteristics[plot_type], 
                             plot_options=plot_options)
 
-
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
             that will be removed/added when picking up legend elements on dashboard.
@@ -2581,7 +2584,7 @@ class Plot:
         # get lower and upper limits across all relevant axes
         for ax in relevant_axs_active:
             if 'equal_aspect' in plot_characteristics:
-                self.set_equal_axes(ax)
+                self.set_equal_axes(ax, plot_options)
             else:
                 ax.set_aspect('auto')
             if relim:
@@ -2623,7 +2626,7 @@ class Plot:
 
             # set xlim
             if xlim is not None:
-                if base_plot_type not in ['timeseries','boxplot']:
+                if (base_plot_type not in ['timeseries', 'boxplot']) and ('equal_aspect' not in plot_characteristics):
                     ax.set_xlim(xlim)
 
             # get ylim
@@ -2643,7 +2646,7 @@ class Plot:
                 ylim = plot_characteristics['ylim']
 
             # set ylim
-            if ylim is not None:
+            if (ylim is not None) and ('equal_aspect' not in plot_characteristics):
                 ax.set_ylim(ylim)
             
         # get minimum and maximum from all axes and set limits for periodic plots
