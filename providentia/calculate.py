@@ -382,7 +382,7 @@ class ExpBias(object):
             standard_score_obs = ma.masked_invalid((obs - mean_obs) / std_obs)
             standard_score_exp = ma.masked_invalid((exp - mean_exp) / std_exp)
             standard_score_mult = standard_score_obs*standard_score_exp
-            # get number of non masked values in the time dimension
+            # get number of non-masked values in the time dimension
             n = standard_score_mult.count(axis=-1)
             return np.nansum(standard_score_mult, axis=-1) / n
 
@@ -408,7 +408,8 @@ class ExpBias(object):
             return np.NaN
         else:
             frac = ma.masked_invalid(exp / obs)
-            return (100.0 / obs.shape[-1]) * np.nansum(((frac >= 0.5) & (frac <= 2.0)), axis=-1)
+            n = frac.count(axis=-1)
+            return (100.0 / n) * np.nansum(((frac >= 0.5) & (frac <= 2.0)), axis=-1)
 
     @staticmethod
     def calculate_upa(obs, exp):
