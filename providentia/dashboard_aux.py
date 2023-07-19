@@ -241,9 +241,14 @@ class StatsComboBox(ComboBox):
         self.currentTextChanged.connect(self.updateStats)
         
         # initialise stats
-        self.parent.statsummary_stats = {}
-        self.parent.statsummary_stats['basic'] = self.parent.plot_characteristics['statsummary']['basic']
-        self.parent.statsummary_stats['expbias'] = self.parent.plot_characteristics['statsummary']['experiment_bias']
+        self.parent.read_instance.current_statsummary_stats = {}
+        self.parent.read_instance.current_statsummary_stats['basic'] = {}
+        self.parent.read_instance.current_statsummary_stats['expbias'] = {}
+        self.parent.read_instance.current_statsummary_stats['basic']['None'] = self.parent.plot_characteristics['statsummary']['basic']
+        self.parent.read_instance.current_statsummary_stats['expbias']['None'] = self.parent.plot_characteristics['statsummary']['experiment_bias']
+        for periodic_cycle in ['Diurnal', 'Weekly', 'Monthly']:
+            self.parent.read_instance.current_statsummary_stats['basic'][periodic_cycle] = []
+            self.parent.read_instance.current_statsummary_stats['expbias'][periodic_cycle] = []
 
     def updateStats(self):
         
@@ -259,8 +264,8 @@ class StatsComboBox(ComboBox):
 
         # get items that have been selected in advance before clearing
         statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
-        checked_options = copy.deepcopy(self.parent.statsummary_stats[statistic_type])
-
+        checked_options = copy.deepcopy(self.parent.read_instance.current_statsummary_stats[statistic_type][periodic_cycle])
+        checked_options = [option.split('_bias')[0] if '_bias' in option else option for option in checked_options]
         self.parent.read_instance.block_config_bar_handling_updates = True
         
         # update stats for the selected periodic cycle
