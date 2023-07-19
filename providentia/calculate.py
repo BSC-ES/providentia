@@ -421,4 +421,4 @@ class ExpBias(object):
         else:
             obs_max = np.nanmax(obs, axis=-1)
             exp_max = np.nanmax(exp, axis=-1)
-            return (exp_max - obs_max) / obs_max
+            return ((exp_max - obs_max) / obs_max) * 100.0
