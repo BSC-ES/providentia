@@ -316,7 +316,7 @@ class ExpBias(object):
             negative bias estimates.
             It has also the advantage of not considering observations as the true value. The mean fractional bias can
             range in value from -200% to +200%.
-            Otherwise known as fractional bias (FB).
+            Otherwise known as fractional bias (FB) or modified normalized mean bias (MNMB).
         """
         if obs.size == 0:
             return np.NaN
