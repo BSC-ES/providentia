@@ -406,14 +406,12 @@ class Plot:
     def set_equal_axes(self, ax, plot_options):
         """ Set equal aspect and limits (useful for scatter plots). """
 
-        # set aspect
-        # only if both or none axes are in log scale
-        if (('logy' in plot_options and 'logx' in plot_options)
-            or ('logy' not in plot_options and 'logx' not in plot_options)):
-            print('set aspect')
-            ax.set_aspect(aspect='equal', adjustable='box')
-        else:
+        # set equal aspect
+        # only if no axis is in log scale
+        if 'logy' in plot_options or 'logx' in plot_options:
             ax.set_aspect(aspect='auto')
+        else:
+            ax.set_aspect(aspect='equal', adjustable='box')
 
         if len(ax.lines) == 0:
             return None
