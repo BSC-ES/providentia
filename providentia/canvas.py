@@ -697,9 +697,10 @@ class MPLCanvas(FigureCanvas):
                 # make statsummary plot
                 elif plot_type == 'statsummary':
                     if 'bias' in plot_options:
-                        relevant_zstats = self.statsummary_stats['expbias']
+                        relevant_zstats = self.read_instance.current_statsummary_stats['expbias']
                     else:
-                        relevant_zstats = self.statsummary_stats['basic']
+                        relevant_zstats = self.read_instance.current_statsummary_stats['basic']
+                    relevant_zstats = [stat for sublist in list(relevant_zstats.values()) for stat in sublist]
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
                          self.plot_characteristics[plot_type], 
                          zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
@@ -1075,55 +1076,16 @@ class MPLCanvas(FigureCanvas):
             # get source
             event_source = self.sender()
             
+            # get all possible stats
+            plot_options = self.current_plot_options['statsummary']
+            statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
+            
             # save stats before updating them
-            if event_source.currentData() or self.read_instance.previous_statsummary_stats:
+            if event_source.currentData():
 
                 # get current
                 periodic_cycle = self.statsummary_cycle.lineEdit().text()
-                self.read_instance.current_statsummary_stats[periodic_cycle] = copy.deepcopy(event_source.currentData())
-
-                # get all possible stats
-                plot_options = self.read_instance.current_plot_options['statsummary']
-                statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
-                if 'bias' in plot_options:
-                    items = list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
-                else:
-                    items = list(copy.deepcopy(self.read_instance.basic_z_stats))
-                if periodic_cycle == 'None':
-                    cycle_stats = [stat for stat in items]
-                else:
-                    cycle_stats = [stat + '-' + periodic_cycle.lower() for stat in items]
-
-                for stat in cycle_stats:
-                    
-                    # remove stat that was selected before but not now
-                    if ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
-                        and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
-                        add = False
-                    # add stat that was not selected before
-                    elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
-                        and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
-                        add = True
-                    # do nothing if options were selected before and now
-                    elif ((stat in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
-                        and (stat in self.read_instance.current_statsummary_stats[periodic_cycle])):
-                        continue
-                    # do nothing if options were never selected
-                    elif ((stat not in self.read_instance.previous_statsummary_stats[periodic_cycle]) 
-                        and (stat not in self.read_instance.current_statsummary_stats[periodic_cycle])):
-                        continue
-
-                    # add stat to list
-                    if add:
-                        if stat not in self.statsummary_stats[statistic_type]:
-                            self.statsummary_stats[statistic_type].append(stat)
-                    # remove stat from list
-                    else:
-                        if stat in self.statsummary_stats[statistic_type]:
-                            self.statsummary_stats[statistic_type].remove(stat)
-
-                # update previous
-                self.read_instance.previous_statsummary_stats[periodic_cycle] = self.statsummary_stats[statistic_type]
+                self.read_instance.current_statsummary_stats[statistic_type][periodic_cycle] = copy.deepcopy(event_source.currentData())
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -3151,7 +3113,8 @@ class MPLCanvas(FigureCanvas):
                                          plot_options=self.current_plot_options[plot_type])
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
-                                    relevant_zstats = self.statsummary_stats['expbias']
+                                    relevant_zstats = self.read_instance.current_statsummary_stats['expbias']
+                                    relevant_zstats = [stat for sublist in list(relevant_zstats.values()) for stat in sublist]
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
                                          zstats=relevant_zstats, statsummary=True, 
@@ -3224,7 +3187,8 @@ class MPLCanvas(FigureCanvas):
                                          plot_options=self.current_plot_options[plot_type])
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
-                                    relevant_zstats = self.statsummary_stats['basic']
+                                    relevant_zstats = self.read_instance.current_statsummary_stats['basic']
+                                    relevant_zstats = [stat for sublist in list(relevant_zstats.values()) for stat in sublist]
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
                                          zstats=relevant_zstats, statsummary=True, 
