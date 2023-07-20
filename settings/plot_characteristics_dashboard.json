@@ -306,7 +306,7 @@
                        "ytick_params": {"which": "both", "bottom": false, "top": false, "right": false, "left": false, 
                                         "labelbottom": false, "labeltop": false, "labelright": false, 
                                         "labelleft": false},
-                       "basic": ["Mean", "Median", "StdDev", "p5", "p95"],
+                       "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
                        "experiment_bias": ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
                        "round_decimal_places": {"title": 2, "table": 2},
                        "cell_height": 1.3,
