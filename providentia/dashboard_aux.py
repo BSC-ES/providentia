@@ -249,8 +249,6 @@ class StatsComboBox(ComboBox):
             self.parent.read_instance.current_statsummary_stats['expbias'][periodic_cycle] = []
 
     def updateStats(self):
-        
-        self.parent.read_instance.block_MPL_canvas_updates = True
 
         # get plot options to know if we have bias
         plot_options = []
@@ -264,8 +262,7 @@ class StatsComboBox(ComboBox):
         statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
         checked_options = copy.deepcopy(self.parent.read_instance.current_statsummary_stats[statistic_type][periodic_cycle])
         checked_options = [option.split('_bias')[0] if '_bias' in option else option for option in checked_options]
-        self.parent.read_instance.block_config_bar_handling_updates = True
-        
+
         # update stats for the selected periodic cycle
         if 'bias' in plot_options:
             items = list(copy.deepcopy(self.parent.read_instance.basic_and_bias_z_stats))
@@ -274,6 +271,8 @@ class StatsComboBox(ComboBox):
 
         if periodic_cycle != 'None':
             items = [stat + '-' + periodic_cycle.lower() for stat in items]
+
+        self.parent.read_instance.block_config_bar_handling_updates = True
 
         self.parent.statsummary_stat.clear()
         self.parent.statsummary_stat.addItems(items)
@@ -286,8 +285,6 @@ class StatsComboBox(ComboBox):
             self.parent.statsummary_stat.model().item(index).setCheckState(QtCore.Qt.Checked)
 
         self.parent.read_instance.block_config_bar_handling_updates = False
-
-        self.parent.read_instance.block_MPL_canvas_updates = False
 
 class CheckableComboBox(QtWidgets.QComboBox):
     """ Create combobox with multiple selection options.
