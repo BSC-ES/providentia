@@ -15,9 +15,9 @@ from .read_aux import get_default_qa
 from .aux import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
-formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
 
 def set_formatting(PyQt5_obj, format):
     """ Function that takes a PyQt5 object and applies some defined formatting. """

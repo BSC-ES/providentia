@@ -30,9 +30,9 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
-formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
 
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
@@ -106,7 +106,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
             self.plot_characteristics_filename = os.path.join(
-                CURRENT_PATH, 'conf/plot_characteristics_dashboard.json')
+                CURRENT_PATH, '../settings/plot_characteristics_dashboard.json')
         self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
 
         # error when using wrong custom plot characteristics path to launch dashboard
@@ -122,7 +122,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.all_observation_data = aux.get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, 'conf/nonghost_files.json')))
+        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
