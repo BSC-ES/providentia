@@ -21,8 +21,8 @@ from .configuration import ProvConfiguration
 from providentia import aux
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
 
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
@@ -52,13 +52,13 @@ class ProvidentiaOffline:
             sys.exit(error)
 
         # load report plot presets
-        self.report_plots = json.load(open(os.path.join(CURRENT_PATH, 'conf/report_plots.json')))
+        self.report_plots = json.load(open(os.path.join(CURRENT_PATH, '../settings/report_plots.json')))
 
         # create dictionary of all available observational GHOST data
         self.all_observation_data = aux.get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, 'conf/nonghost_files.json')))
+        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
@@ -90,7 +90,7 @@ class ProvidentiaOffline:
 
             # check for self defined plot characteristics file
             if self.plot_characteristics_filename == '':
-                self.plot_characteristics_filename = os.path.join(CURRENT_PATH, 'conf/plot_characteristics_offline.json')
+                self.plot_characteristics_filename = os.path.join(CURRENT_PATH, '../settings/plot_characteristics_offline.json')
             self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
             self.plot_characteristics = {}
 
@@ -138,7 +138,7 @@ class ProvidentiaOffline:
             
             # check if report type is valid
             if self.report_type not in self.report_plots.keys():
-                msg = 'Error: The report type {0} cannot be found in conf/report_plots.json. '.format(self.report_type)
+                msg = 'Error: The report type {0} cannot be found in settings/report_plots.json. '.format(self.report_type)
                 msg += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
                 sys.exit(msg)
 

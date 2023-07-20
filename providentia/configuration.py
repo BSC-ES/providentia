@@ -234,8 +234,8 @@ class ProvConfiguration:
             # parse qa
 
             # set default qa codes
-            standard_qa_names = json.load(open("providentia/conf/default_qa.json"))['standard']
-            met_qa_names = json.load(open("providentia/conf/default_qa.json"))['met']
+            standard_qa_names = json.load(open(os.path.join(CURRENT_PATH, '../settings/default_qa.json')))['standard']
+            met_qa_names = json.load(open(os.path.join(CURRENT_PATH, '../settings/default_qa.json')))['met']
             self.read_instance.default_qa_standard = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
                                                       for qa_name in standard_qa_names]
             self.read_instance.default_qa_met = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
