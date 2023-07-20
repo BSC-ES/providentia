@@ -244,9 +244,7 @@ class StatsComboBox(ComboBox):
         self.parent.read_instance.current_statsummary_stats = {}
         self.parent.read_instance.current_statsummary_stats['basic'] = {}
         self.parent.read_instance.current_statsummary_stats['expbias'] = {}
-        self.parent.read_instance.current_statsummary_stats['basic']['None'] = self.parent.plot_characteristics['statsummary']['basic']
-        self.parent.read_instance.current_statsummary_stats['expbias']['None'] = self.parent.plot_characteristics['statsummary']['experiment_bias']
-        for periodic_cycle in ['Diurnal', 'Weekly', 'Monthly']:
+        for periodic_cycle in ['None', 'Diurnal', 'Weekly', 'Monthly']:
             self.parent.read_instance.current_statsummary_stats['basic'][periodic_cycle] = []
             self.parent.read_instance.current_statsummary_stats['expbias'][periodic_cycle] = []
 
