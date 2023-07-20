@@ -434,6 +434,7 @@ class MPLCanvas(FigureCanvas):
             self.handle_map_z_statistic_update()
             self.handle_timeseries_statistic_update()
             self.handle_periodic_statistic_update()
+            self.handle_statsummary_statistics_update()
             self.handle_taylor_correlation_statistic_update()
             self.read_instance.block_MPL_canvas_updates = False
 
@@ -1080,13 +1081,16 @@ class MPLCanvas(FigureCanvas):
             plot_options = self.current_plot_options['statsummary']
             statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
             
-            # save stats before updating them
-            if event_source.currentData():
-
-                # get current
+            # initialise stats
+            if not hasattr(event_source, 'currentData'):
+                self.read_instance.current_statsummary_stats['basic']['None'] = self.plot_characteristics['statsummary']['basic']
+                self.read_instance.current_statsummary_stats['expbias']['None'] = self.plot_characteristics['statsummary']['experiment_bias']
+                self.statsummary_cycle.updateStats()
+            # get stats from selection
+            else:
                 periodic_cycle = self.statsummary_cycle.lineEdit().text()
                 self.read_instance.current_statsummary_stats[statistic_type][periodic_cycle] = copy.deepcopy(event_source.currentData())
-
+            
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
