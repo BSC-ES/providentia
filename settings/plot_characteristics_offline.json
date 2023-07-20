@@ -323,7 +323,7 @@
                                            "handletextpad": 0, "ncol": 2, "borderaxespad": 1, "fontsize": 10.0}, 
                                   "handles": {"markersize": 10, "marker": "o", "color": "white", 
                                               "obs_label": "Observations"}}, 
-                       "basic": ["Mean", "Median", "StdDev", "p5", "p95"],
+                       "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
                        "experiment_bias": ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
                        "round_decimal_places": {"title": 2, "table": 2},
                        "cell_height": 1.75,
