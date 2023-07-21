@@ -870,7 +870,7 @@ class ProvidentiaOffline:
 
             # do formatting
             relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(base_plot_type, 
-                                                                                                            plot_indices)
+                                                                                                           plot_indices)
             self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
                                     base_plot_type, plot_type, plot_options, 'summary')
 
@@ -1209,9 +1209,9 @@ class ProvidentiaOffline:
                 
                 # save plot information for later formatting 
                 if z2 == '':
-                    self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z1)
+                    self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z1_label)
                 else:
-                    self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z2)
+                    self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z2_label)
                 plot_index = [relevant_page, page_ind]
                 if plot_index not in plot_indices:
                     plot_indices.append(plot_index)
@@ -1386,8 +1386,9 @@ class ProvidentiaOffline:
                             relevant_axis[relevant_temporal_resolution].axis('on')
                             relevant_axis[relevant_temporal_resolution].set_visible(True)
 
-                            #get references to periodic label annotations made, and then show them
-                            annotations = [child for child in relevant_axis[relevant_temporal_resolution].get_children() if isinstance(child, matplotlib.text.Annotation)]
+                            # get references to periodic label annotations made, and then show them
+                            annotations = [child for child in relevant_axis[relevant_temporal_resolution].get_children() 
+                                           if isinstance(child, matplotlib.text.Annotation)]
                             # hide annotations
                             for annotation in annotations:
                                 annotation.set_visible(True)
