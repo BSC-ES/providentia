@@ -29,7 +29,7 @@ from itertools import groupby
 
 from .statistics import get_z_statistic_info, calculate_statistic, boxplot_inner_fences
 from .aux import (get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels,
-                  get_multispecies_aliases, show_message, kde_fft)
+                  get_multispecies_aliases, show_message, kde_fft, round_decimal_places)
 from .read_aux import drop_nans
 
 # speed up transformations in cartopy
@@ -1680,8 +1680,9 @@ class Plot:
             obs_label = 'Observations'
 
         # round dataframe
-        stats_df = stats_df.round(plot_characteristics['round_decimal_places']['table'])
-
+        decimal_places = plot_characteristics['round_decimal_places']['table']
+        stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
+        
         # offline reports
         if self.read_instance.offline:
             

@@ -1799,3 +1799,30 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
         return np.linspace(xmin,xmax,nx), np.squeeze(grid)
     else:
         return np.squeeze(grid)
+
+def round_decimal_places(x, decimal_places):
+    """ Round x to decimal places
+
+    Parameters
+    ----------
+    x : float
+        Value
+    decimal_places : int
+        Desired number of decimal places
+    """
+
+    # if cell value is not nan
+    if x == x:
+        # if number is zero, return int as str
+        if x == 0:
+            return '0'
+        # if number of zeros is more than decimal places set by user, use scientific notation
+        elif ((-math.floor(math.log10(abs(x))) - 1) > decimal_places):
+            return '{:0.{}e}'.format(x, decimal_places) 
+        # if not, use float
+        else:
+            return '{:0.{}f}'.format(x, decimal_places)
+    # if cell value is nan, do nothing
+    else:
+        return 'nan'
+    
