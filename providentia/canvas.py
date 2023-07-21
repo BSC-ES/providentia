@@ -939,7 +939,7 @@ class MPLCanvas(FigureCanvas):
 
                 # update selected data on timeseries plot
                 elif self.read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
-                    if len(self.read_instance.station_inds) >= 1:
+                    if len(self.station_inds[self.read_instance.networkspeci]) >= 1:
                         # update timeseries data
                         timeseries_stat = self.timeseries_stat.currentText()
                         aggregated_data = aggregation(self.read_instance.data_array, timeseries_stat, axis=1)

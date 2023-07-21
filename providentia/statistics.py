@@ -69,11 +69,13 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         read_instance.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(read_instance.resolution) 
 
     # create new dictionaries to store selected station data by network / species, per data label
+    # and station inds per networkspeci
     canvas_instance.selected_station_data = {}
     canvas_instance.selected_station_data_labels = {}
     canvas_instance.selected_station_data_min = {}
     canvas_instance.selected_station_data_max = {}
     canvas_instance.selected_station_stddev_max = {}
+    canvas_instance.station_inds = {}
 
     # iterate through networks / species  
     for networkspeci_ii, networkspeci in enumerate(networkspecies):
@@ -101,10 +103,10 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             read_instance.data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
         
         # get selected station indices
-        read_instance.station_inds = get_station_inds(read_instance, canvas_instance, networkspeci, station_index)
+        canvas_instance.station_inds[networkspeci] = get_station_inds(read_instance, canvas_instance, networkspeci, station_index)
 
         # get data cut
-        read_instance.data_array = read_instance.data_array[:,read_instance.station_inds,:]
+        read_instance.data_array = read_instance.data_array[:,canvas_instance.station_inds[networkspeci],:]
                     
         # get NaNs in data array
         nan_data_array = np.isnan(read_instance.data_array)
@@ -141,7 +143,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                 read_instance.time_index = read_instance.time_array
 
             # save timeseries array
-            if len(read_instance.station_inds) == 1:
+            if len(canvas_instance.station_inds[networkspeci]) == 1:
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = read_instance.data_array[:,0,:]
             else:
                 if read_instance.offline:

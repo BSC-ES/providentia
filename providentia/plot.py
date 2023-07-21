@@ -2264,9 +2264,9 @@ class Plot:
                 if plotting_paradigm == 'station':
                     str_to_annotate.append('Stations: 1')
                 else:
-                    str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_inds)))
+                    str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.station_inds[networkspeci])))
             else:
-                str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_inds)))
+                str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.station_inds[networkspeci])))
 
         # generate annotation line by line (one line per data label, for all stats)
         for data_label_ii, data_label in enumerate(cut_data_labels):
@@ -2282,9 +2282,13 @@ class Plot:
                 zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
 
                 # calculate stats
-                if (bias) or (z_statistic_sign == 'bias') :
-                    stat_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
-                                                    ['observations'], [data_label])
+                if (bias) or (z_statistic_sign == 'bias'):
+                    if data_label != 'observations':
+                        stat_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
+                                                        ['observations'], [data_label])
+                    # skip bias stats for observations
+                    else:
+                        continue
                 else:
                     stat_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
                                                     [data_label], [])
@@ -2308,24 +2312,28 @@ class Plot:
                 str_to_append = ', '.join(stats_annotate)
             str_to_annotate.append(str_to_append)
 
-        if plot_characteristics['annotate_text']['color'] != "":
-            colours = [plot_characteristics['annotate_text']['color']]*len(cut_data_labels)
+        if len(str_to_annotate) != 0:
+            if plot_characteristics['annotate_text']['color'] != "":
+                colours = [plot_characteristics['annotate_text']['color']]*len(cut_data_labels)
 
-        # add annotation to plot
-        # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
-        lines = [TextArea(line, textprops=dict(color=colour, 
-                                               size=plot_characteristics['annotate_text']['fontsize'])) 
-                    for line, colour in zip(str_to_annotate, colours)]
-        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align='left', pad=0, sep=1),
-                                 loc=plot_characteristics['annotate_text']['loc'],
-                                 bbox_transform=relevant_axis.transAxes)
-        bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
-        bbox.patch.set(**plot_characteristics['annotate_bbox'])
-        relevant_axis.add_artist(bbox)
+            # add annotation to plot
+            # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
+            lines = [TextArea(line, textprops=dict(color=colour, 
+                                                   size=plot_characteristics['annotate_text']['fontsize'])) 
+                        for line, colour in zip(str_to_annotate, colours)]
+            bbox = AnchoredOffsetbox(child=VPacker(children=lines, align='left', pad=0, sep=1),
+                                    loc=plot_characteristics['annotate_text']['loc'],
+                                    bbox_transform=relevant_axis.transAxes)
+            bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
+            bbox.patch.set(**plot_characteristics['annotate_bbox'])
+            relevant_axis.add_artist(bbox)
 
-        # track plot elements if using dashboard 
-        if not self.read_instance.offline:
-            self.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
+        else:
+            msg = '{} could not be annotated'.format(base_plot_type)
+            show_message(self.read_instance, msg)
 
     def get_no_margin_lim(self, ax, lim):
         """ Get true limits of plot area. """
