@@ -227,65 +227,6 @@ class ComboBox(QtWidgets.QComboBox):
         # add vertical scroll bar
         self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
-class StatsComboBox(ComboBox):
-
-    def __init__(self, parent=None):
-
-        super().__init__(parent)
-        self.parent = parent
-
-        # show basic statistics at start
-        self.parent.statsummary_stat.addItems(list(basic_stats.keys()))
-
-        # set up update when changing the periodic cycle
-        self.currentTextChanged.connect(self.updateStats)
-        
-        # initialise stats
-        self.parent.read_instance.current_statsummary_stats = {}
-        self.parent.read_instance.current_statsummary_stats['basic'] = {}
-        self.parent.read_instance.current_statsummary_stats['expbias'] = {}
-        for periodic_cycle in ['None', 'Diurnal', 'Weekly', 'Monthly']:
-            self.parent.read_instance.current_statsummary_stats['basic'][periodic_cycle] = []
-            self.parent.read_instance.current_statsummary_stats['expbias'][periodic_cycle] = []
-
-    def updateStats(self):
-
-        # get plot options to know if we have bias
-        plot_options = []
-        if hasattr(self.parent, 'current_plot_options'):
-            plot_options = copy.deepcopy(self.parent.current_plot_options['statsummary'])
-
-        # get current periodic cycle
-        periodic_cycle = self.lineEdit().text()
-
-        # get items that have been selected in advance before clearing
-        statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
-        checked_options = copy.deepcopy(self.parent.read_instance.current_statsummary_stats[statistic_type][periodic_cycle])
-        checked_options = [option.split('_bias')[0] if '_bias' in option else option for option in checked_options]
-
-        # update stats for the selected periodic cycle
-        if 'bias' in plot_options:
-            items = list(copy.deepcopy(self.parent.read_instance.basic_and_bias_z_stats))
-        else:
-            items = list(copy.deepcopy(self.parent.read_instance.basic_z_stats))
-
-        if periodic_cycle != 'None':
-            items = [stat + '-' + periodic_cycle.lower() for stat in items]
-
-        self.parent.read_instance.block_config_bar_handling_updates = True
-
-        self.parent.statsummary_stat.clear()
-        self.parent.statsummary_stat.addItems(items)
-        self.parent.statsummary_stat.updateText()
-
-        # check items that have been selected in advance and are in current cycle
-        checked_options_in_items = list(set(checked_options) & set(items))
-        for checked_option in checked_options_in_items:
-            index = items.index(checked_option)
-            self.parent.statsummary_stat.model().item(index).setCheckState(QtCore.Qt.Checked)
-
-        self.parent.read_instance.block_config_bar_handling_updates = False
-
 class CheckableComboBox(QtWidgets.QComboBox):
     """ Create combobox with multiple selection options.
         Reference: https://gis.stackexchange.com/questions/350148/qcombobox-multiple-selection-pyqt5. 
