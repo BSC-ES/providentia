@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_aux import set_formatting, ComboBox, StatsComboBox, CheckableComboBox, LassoSelector
+from .dashboard_aux import set_formatting, ComboBox, CheckableComboBox, LassoSelector
 from .aux import get_relevant_temporal_resolutions, show_message
 
 # make sure that we are using Qt5 backend with matplotlib
@@ -435,6 +435,7 @@ class MPLCanvas(FigureCanvas):
             self.handle_timeseries_statistic_update()
             self.handle_periodic_statistic_update()
             self.handle_statsummary_statistics_update()
+            self.handle_statsummary_cycle_update()
             # self.handle_taylor_correlation_statistic_update()
             self.read_instance.block_MPL_canvas_updates = False
 
@@ -699,9 +700,10 @@ class MPLCanvas(FigureCanvas):
                 elif plot_type == 'statsummary':
                     if 'bias' in plot_options:
                         relevant_zstats = copy.deepcopy(self.read_instance.current_statsummary_stats['expbias'])
+                        relevant_zstats = self.active_statsummary_stats['expbias']
                     else:
                         relevant_zstats = copy.deepcopy(self.read_instance.current_statsummary_stats['basic'])
-                    relevant_zstats = [stat for sublist in list(relevant_zstats.values()) for stat in sublist]
+                        relevant_zstats = self.active_statsummary_stats['basic']
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
                          self.plot_characteristics[plot_type], 
                          zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
@@ -1059,38 +1061,104 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def get_active_statsummary_stats(self, statistic_type):
+        """ Get active statistics from dictionary of statsummary statistics in list """
+        
+        active_statsummary_stats = copy.deepcopy(self.read_instance.current_statsummary_stats[statistic_type])
+        active_statsummary_stats = [stat for sublist in 
+                                    list(active_statsummary_stats.values()) 
+                                    for stat in sublist]
+
+        return active_statsummary_stats
+    
+    def check_statsummary_stats(self):
+        """ Function that checks the statistics in the statsummary statistic combobox. """
+
+        # get stats to check for the selected periodic cycle
+        periodic_cycle = self.statsummary_cycle.currentText()
+        if periodic_cycle == '':
+            periodic_cycle = 'None'
+        plot_options = self.current_plot_options['statsummary']
+        statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
+        if 'bias' in plot_options:
+            items = list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
+        else:
+            items = list(copy.deepcopy(self.read_instance.basic_z_stats))
+        if periodic_cycle != 'None':
+            items = [stat + '-' + periodic_cycle.lower() for stat in items]
+        self.statsummary_stat.clear()
+        self.statsummary_stat.addItems(items)
+        checked_options = copy.deepcopy(self.read_instance.current_statsummary_stats[statistic_type][periodic_cycle])
+        checked_options = [option.split('_bias')[0] if '_bias' in option else option 
+                            for option in checked_options]
+        checked_options_in_items = list(set(checked_options) & set(items))
+        
+        # check stats in combobox
+        if checked_options_in_items:
+            for checked_option in checked_options_in_items:
+                index = items.index(checked_option)
+                self.statsummary_stat.model().item(index).setCheckState(QtCore.Qt.Checked)
+        # leave empty
+        else:
+            self.statsummary_stat.lineEdit().setText('')
+
     def handle_statsummary_statistics_update(self):
         """ Function that handles update of plotted statsummary statistics
             upon interaction with statistic comboboxes.
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
-
+            
             # update mouse cursor to a waiting cursor
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # update statsummary statistics comboboxes
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary statistics combobox are made
             self.read_instance.block_config_bar_handling_updates = True
-
-            # get source
-            event_source = self.sender()
             
             # get all possible stats
             plot_options = self.current_plot_options['statsummary']
             statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
             
             # initialise stats
-            if not hasattr(event_source, 'currentData'):
+            if not hasattr(self, 'active_statsummary_stats'):
+                
+                # get initial stats from plot characteristics
+                periodic_cycle = 'None'
                 self.read_instance.current_statsummary_stats['basic']['None'] = self.plot_characteristics['statsummary']['basic']
                 self.read_instance.current_statsummary_stats['expbias']['None'] = self.plot_characteristics['statsummary']['experiment_bias']
-                self.statsummary_cycle.updateStats()
+                self.active_statsummary_stats = {'basic': self.get_active_statsummary_stats('basic'),
+                                                 'expbias': self.get_active_statsummary_stats('expbias')}
+
+                # check stats for the selected periodic cycle
+                self.check_statsummary_stats()
+
             # get stats from selection
             else:
-                periodic_cycle = self.statsummary_cycle.lineEdit().text()
-                self.read_instance.current_statsummary_stats[statistic_type][periodic_cycle] = copy.deepcopy(event_source.currentData())
-            
+                # save previous stats in list
+                previous_active_statsummary_stats = copy.deepcopy(self.active_statsummary_stats[statistic_type])
+
+                # update stats
+                periodic_cycle = self.statsummary_cycle.currentText()
+                self.read_instance.current_statsummary_stats[statistic_type][periodic_cycle] = copy.deepcopy(self.statsummary_stat.currentData())
+
+                # save current stats in list
+                current_active_statsummary_stats = copy.deepcopy(self.get_active_statsummary_stats(statistic_type))
+
+                # check stats for the selected periodic cycle
+                self.check_statsummary_stats()
+
+                # get active stats
+                current_not_previous = list(set(current_active_statsummary_stats).difference(previous_active_statsummary_stats))
+                previous_not_current = list(set(previous_active_statsummary_stats).difference(current_active_statsummary_stats))
+                self.active_statsummary_stats[statistic_type] = copy.deepcopy(previous_active_statsummary_stats)
+                if current_not_previous:
+                    for stat in current_not_previous:
+                        self.active_statsummary_stats[statistic_type].append(stat)
+                if previous_not_current:
+                    for stat in previous_not_current:
+                        self.active_statsummary_stats[statistic_type].remove(stat)
+
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
@@ -1104,6 +1172,53 @@ class MPLCanvas(FigureCanvas):
             # restore mouse cursor to normal
             QtWidgets.QApplication.restoreOverrideCursor()
 
+    def handle_statsummary_cycle_update(self):
+
+        if not self.read_instance.block_config_bar_handling_updates:
+            
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # set variable that blocks configuration bar handling updates until all changes
+            # to the statsummary periodic cycle combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # get currently selected cycle
+            periodic_cycle = self.statsummary_cycle.currentText()
+            
+            # update periodi cycles
+            available_cycles = ['None', 'Diurnal', 'Weekly', 'Monthly']
+
+            # if cycle is empty string, it is because fields are being initialised for the first time
+            if periodic_cycle == '':
+                # set statsummary cycle to be None
+                periodic_cycle = available_cycles[0]
+
+            # update statsummary cycle combobox (clear, then add items)
+            self.statsummary_cycle.clear()
+            self.statsummary_cycle.addItems(available_cycles)
+
+            # maintain currently selected periodic cycle (if exists in new item list)
+            if periodic_cycle in available_cycles:
+                self.statsummary_cycle.setCurrentText(periodic_cycle)
+
+            # check stats for the selected periodic cycle
+            self.check_statsummary_stats()
+
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update plotted statsummary statistic
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_associated_active_dashboard_plot('statsummary')
+
+            # draw changes
+            self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
+
+        return None
+    
     def remove_axis_objects(self, ax_elements, elements_to_skip=[], types_to_remove=[]):
         """ Remove objects (artists, lines, collections, patches) from axis. """
 
@@ -2522,7 +2637,7 @@ class MPLCanvas(FigureCanvas):
         self.statsummary_stat_label.hide()
 
         # add combobox stat combobox
-        self.statsummary_stat = set_formatting(set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu']), formatting_dict['combobox_menu'])
+        self.statsummary_stat = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.statsummary_stat.move(self.statsummary_menu_button.geometry().x()-95, 
                                    self.statsummary_menu_button.geometry().y()+75)
         self.statsummary_stat.setFixedWidth(105)
@@ -2536,8 +2651,7 @@ class MPLCanvas(FigureCanvas):
         self.statsummary_cycle_label.hide()
 
         # add statsummary periodic cycle combobox
-        self.statsummary_cycle = set_formatting(StatsComboBox(self), formatting_dict['combobox_menu'])
-        self.statsummary_cycle.addItems(['None', 'Diurnal', 'Weekly', 'Monthly'])
+        self.statsummary_cycle = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.statsummary_cycle.move(self.statsummary_menu_button.geometry().x()-220, 
                                     self.statsummary_menu_button.geometry().y()+75)
         self.statsummary_cycle.setFixedWidth(105)
@@ -2580,6 +2694,7 @@ class MPLCanvas(FigureCanvas):
                                                     'linewidth_sl': []
                                                     }
         self.statsummary_stat.currentTextChanged.connect(self.handle_statsummary_statistics_update)
+        self.statsummary_cycle.currentTextChanged.connect(self.handle_statsummary_cycle_update)
         self.statsummary_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.statsummary_save_button.clicked.connect(self.save_axis_figure_func)
 
@@ -3118,7 +3233,7 @@ class MPLCanvas(FigureCanvas):
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
                                     relevant_zstats = copy.deepcopy(self.read_instance.current_statsummary_stats['expbias'])
-                                    relevant_zstats = [stat for sublist in list(relevant_zstats.values()) for stat in sublist]
+                                    relevant_zstats = self.active_statsummary_stats['expbias']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
                                          zstats=relevant_zstats, statsummary=True, 
@@ -3192,7 +3307,7 @@ class MPLCanvas(FigureCanvas):
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
                                     relevant_zstats = copy.deepcopy(self.read_instance.current_statsummary_stats['basic'])
-                                    relevant_zstats = [stat for sublist in list(relevant_zstats.values()) for stat in sublist]
+                                    relevant_zstats = self.active_statsummary_stats['basic']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
                                          zstats=relevant_zstats, statsummary=True, 
@@ -3207,9 +3322,11 @@ class MPLCanvas(FigureCanvas):
                             self.redraw_active_options(self.read_instance.data_labels, 
                                                        plot_type, 'absolute', self.current_plot_options[plot_type])
 
-                        # update statistic options in statsummary comboboxes
-                        if plot_type in ['statsummary']:
-                            self.statsummary_cycle.updateStats()
+                    # check stats for the selected periodic cycle
+                    if plot_type in ['statsummary']:
+                        self.read_instance.block_config_bar_handling_updates = True
+                        self.check_statsummary_stats()
+                        self.read_instance.block_config_bar_handling_updates = False
 
                     # reset axes limits (harmonising across subplots for periodic plots) 
                     if plot_type != 'map':
