@@ -571,9 +571,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 z_statistic = np.squeeze(z_statistic, axis=-1)
             stats_calc[zstat] = z_statistic
 
-    #return statistics calculated (if just one statistic then remove dict)
+    # return statistics calculated (if just one statistic then remove dict)
     if len(zstats) == 1:
         stats_calc = stats_calc[zstats[0]]
+
     return stats_calc
 
 def get_axes_vminmax(axs):
