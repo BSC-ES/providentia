@@ -1776,10 +1776,10 @@ class Plot:
                         # white for other cells
                         else:
                             cell_colours[col] = ['white'] * stats_df.shape[0]
-                    if stats_df.shape[1] != 1:
-                        plot_characteristics['plot']['cellColours'] = np.array(cell_colours).T
-                    else:
+                    if stats_df.shape == (1, 1):
                         plot_characteristics['plot']['cellColours'] = np.array(cell_colours)
+                    else:
+                        plot_characteristics['plot']['cellColours'] = np.array(cell_colours).T
         else:
             if 'col_colours' in plot_characteristics:
                 if plot_characteristics['col_colours']:
