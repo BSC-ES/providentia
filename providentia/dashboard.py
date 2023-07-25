@@ -1220,13 +1220,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.current_plot_options = {}
         for plot_type in self.mpl_canvas.all_plots:
             self.current_plot_options[plot_type] = []
-        self.current_statsummary_stats = {}
-        self.current_statsummary_stats['basic'] = {}
-        self.current_statsummary_stats['expbias'] = {}
-        for periodic_cycle in ['None', 'Diurnal', 'Weekly', 'Monthly']:
-            self.current_statsummary_stats['basic'][periodic_cycle] = []
-            self.current_statsummary_stats['expbias'][periodic_cycle] = []
-
 
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this

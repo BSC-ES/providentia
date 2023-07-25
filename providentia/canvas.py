@@ -107,6 +107,14 @@ class MPLCanvas(FigureCanvas):
         self.current_plot_options = {}
         self.previous_plot_options = {}
 
+        # initialise statsummary dict
+        self.read_instance.current_statsummary_stats = {}
+        self.read_instance.current_statsummary_stats['basic'] = {}
+        self.read_instance.current_statsummary_stats['expbias'] = {}
+        for periodic_cycle in ['None', 'Diurnal', 'Weekly', 'Monthly']:
+            self.read_instance.current_statsummary_stats['basic'][periodic_cycle] = []
+            self.read_instance.current_statsummary_stats['expbias'][periodic_cycle] = []
+
         # update plot characteristics for all plots, and initialise plot options per plot type 
         for plot_type in self.all_plots:
             # for plot types with zstat, initialise with default zstat (Mean)
