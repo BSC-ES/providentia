@@ -599,7 +599,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.time_array = None
             self.yearmonths = None
             self.data_labels = None
-            
+
             # set initial station references to be empty dict
             self.station_references = {}
 
@@ -1199,9 +1199,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
         self.previous_filter_species = self.filter_species
-        self.previous_plot_options = {}
-        for plot_type in self.mpl_canvas.all_plots:
-            self.previous_plot_options[plot_type] = []
+        self.mpl_canvas.previous_plot_options = copy.deepcopy(self.mpl_canvas.current_plot_options) 
 
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
@@ -1217,9 +1215,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
-        self.current_plot_options = {}
-        for plot_type in self.mpl_canvas.all_plots:
-            self.current_plot_options[plot_type] = []
+        # remove bias plot options if have no experiments loaded
+        if len(self.data_labels) == 1:
+            for plot_type in self.mpl_canvas.all_plots:
+                if 'bias' in self.mpl_canvas.current_plot_options[plot_type]:
+                    self.mpl_canvas.current_plot_options[plot_type].remove('bias')
 
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
