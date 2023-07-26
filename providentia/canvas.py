@@ -707,11 +707,10 @@ class MPLCanvas(FigureCanvas):
                 # make statsummary plot
                 elif plot_type == 'statsummary':
                     if 'bias' in plot_options:
-                        relevant_zstats = copy.deepcopy(self.read_instance.current_statsummary_stats['expbias'])
                         relevant_zstats = self.active_statsummary_stats['expbias']
                     else:
-                        relevant_zstats = copy.deepcopy(self.read_instance.current_statsummary_stats['basic'])
                         relevant_zstats = self.active_statsummary_stats['basic']
+                    
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
                          self.plot_characteristics[plot_type], 
                          zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
@@ -3068,7 +3067,7 @@ class MPLCanvas(FigureCanvas):
                                         plot_element.remove()
                                     del self.plot_elements[plot_type][active_type][data_label][option]
 
-                    # if option is 'bias', then remove current option elements (both absolute and bias)
+                    # if option is 'bias', then remove all other current option elements (both absolute and bias)
                     if option == 'bias':
                         for active_type in self.plot_elements[plot_type]:
                             if active_type != 'active':
@@ -3240,7 +3239,6 @@ class MPLCanvas(FigureCanvas):
                                          plot_options=self.current_plot_options[plot_type])
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
-                                    relevant_zstats = copy.deepcopy(self.read_instance.current_statsummary_stats['expbias'])
                                     relevant_zstats = self.active_statsummary_stats['expbias']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
@@ -3314,7 +3312,6 @@ class MPLCanvas(FigureCanvas):
                                          plot_options=self.current_plot_options[plot_type])
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
-                                    relevant_zstats = copy.deepcopy(self.read_instance.current_statsummary_stats['basic'])
                                     relevant_zstats = self.active_statsummary_stats['basic']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
