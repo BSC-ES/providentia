@@ -1144,7 +1144,7 @@ class MPLCanvas(FigureCanvas):
             else:
                 # save previous stats in list
                 previous_active_statsummary_stats = copy.deepcopy(self.active_statsummary_stats[statistic_type])
-                
+
                 # remove bias from options to get correct active stats
                 if statistic_type == 'expbias':
                     previous_active_statsummary_stats = [option.split('_bias')[0] if '_bias' in option else option 
@@ -1333,19 +1333,26 @@ class MPLCanvas(FigureCanvas):
             or just one specific type.
         """
 
+        if not isinstance(plot_types, list):
+            plot_types = [plot_types]
+
         for plot_type in plot_types:
             all_plot_options = self.plot_characteristics[plot_type]['plot_options']
             checked_options = self.current_plot_options[plot_type]
             if plot_type == 'periodic-violin':
                 plot_type = 'periodic_violin'
             cb_options = getattr(self, plot_type + '_options')
-            for checked_option_ii, checked_option in enumerate(checked_options):
-                index = all_plot_options.index(checked_option)
-                
+
+            # uncheck all options
+            for option in all_plot_options:
+                index = all_plot_options.index(option)
                 self.read_instance.block_MPL_canvas_updates = True
                 cb_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.block_MPL_canvas_updates = False
-
+            
+            # check selected options
+            for checked_option_ii, checked_option in enumerate(checked_options):
+                index = all_plot_options.index(checked_option)
                 if checked_option_ii < (len(checked_options)-1):
                     self.read_instance.block_MPL_canvas_updates = True
                     cb_options.model().item(index).setCheckState(QtCore.Qt.Checked)
