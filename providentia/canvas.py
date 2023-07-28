@@ -1097,7 +1097,7 @@ class MPLCanvas(FigureCanvas):
         self.statsummary_stat.addItems(items)
         checked_options = copy.deepcopy(self.read_instance.current_statsummary_stats[statistic_type][periodic_cycle])
         checked_options = [option.split('_bias')[0] if '_bias' in option else option 
-                            for option in checked_options]
+                           for option in checked_options]
         checked_options_in_items = list(set(checked_options) & set(items))
         
         # check stats in combobox
@@ -1144,7 +1144,12 @@ class MPLCanvas(FigureCanvas):
             else:
                 # save previous stats in list
                 previous_active_statsummary_stats = copy.deepcopy(self.active_statsummary_stats[statistic_type])
-
+                
+                # remove bias from options to get correct active stats
+                if statistic_type == 'expbias':
+                    previous_active_statsummary_stats = [option.split('_bias')[0] if '_bias' in option else option 
+                                                         for option in previous_active_statsummary_stats]
+                
                 # update stats
                 periodic_cycle = self.statsummary_cycle.currentText()
                 self.read_instance.current_statsummary_stats[statistic_type][periodic_cycle] = copy.deepcopy(self.statsummary_stat.currentData())
