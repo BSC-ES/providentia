@@ -1220,6 +1220,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             for plot_type in self.mpl_canvas.all_plots:
                 if 'bias' in self.mpl_canvas.current_plot_options[plot_type]:
                     self.mpl_canvas.current_plot_options[plot_type].remove('bias')
+                    self.mpl_canvas.update_plot_options(plot_type)
+                    if plot_type == 'statsummary':
+                        self.block_config_bar_handling_updates = True
+                        self.mpl_canvas.check_statsummary_stats()
+                        self.block_config_bar_handling_updates = False
 
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
