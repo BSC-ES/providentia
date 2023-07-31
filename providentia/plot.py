@@ -1651,7 +1651,7 @@ class Plot:
                                     dtype=np.float)
 
         # when we have 1 stat, the column name is 0, we need to rename it to the stat name
-        if len(zstats) == 1:
+        if len(stats_df.columns) == 1:
             stats_df = stats_df.rename(columns={stats_df.columns[0]: zstats[0]})
 
         # rename columns to save space
