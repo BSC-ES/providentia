@@ -12,9 +12,12 @@ from matplotlib.lines import Line2D
 from PyQt5 import QtCore, QtWidgets, QtGui
 from functools import partial
 from .read_aux import get_default_qa
+from .aux import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
 
 def set_formatting(PyQt5_obj, format):
     """ Function that takes a PyQt5 object and applies some defined formatting. """
@@ -180,20 +183,50 @@ class LassoSelector(_SelectorWidget):
         self.update()
 
 class ComboBox(QtWidgets.QComboBox):
-    """ Modify default class of PyQT5 combobox to always dropdown from fixed
-        position box position, stopping truncation of data. """
+    """ Modify default class of PyQT5 combobox. """
 
     def __init__(self, parent=None):
-        
-        super(ComboBox, self).__init__(parent)
-        
-    def showPopup(self):
-        """ Shows popups. """
 
+        super(ComboBox, self).__init__(parent)
+
+        # setMaxVisibleItems only works if the box is editable
+        # this creates a line edit that we need to overwrite
+        self.setEditable(True)
+        #self.AdjustToContents
+        self.setSizeAdjustPolicy(self.AdjustToMinimumContentsLengthWithIcon)
+        self.setMaxVisibleItems(20)
+        self.AdjustToContents
+
+        # overwrite default line edit by an invisible one
+        self.lineEdit().setFrame(False)
+        self.lineEdit().setReadOnly(True)
+        self.currentTextChanged.connect(self.fixCursorPosition)
+
+    def fixCursorPosition(self):
+        """ Move (invisible) cursor to first position to avoid cutting off the start. """
+
+        # apply only to comboboxes with text lengths of more than 8 chars
+        if len(self.lineEdit().text()) >= 8:
+            self.lineEdit().setCursorPosition(0)
+            self.lineEdit().setFocus()
+    
+    def showPopup(self):
+        """ Show pop-up. """
+
+        # set index of selected choice to highlight it
+        text = self.lineEdit().text()
+        index = self.findText(text, QtCore.Qt.MatchFixedString)
+        self.setCurrentIndex(index)
+
+        # show pop-up
         super().showPopup()
-        #self.view().parent().move(self.mapToGlobal(QtCore.QPoint(0, 0)))
-        #self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        
+
+        # increase the width of the elements on popup so they can be read
+        self.view().setMinimumWidth(self.view().sizeHintForColumn(0) + 10)
+
+        # add vertical scroll bar
+        self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+
 class CheckableComboBox(QtWidgets.QComboBox):
     """ Create combobox with multiple selection options.
         Reference: https://gis.stackexchange.com/questions/350148/qcombobox-multiple-selection-pyqt5. 
@@ -205,10 +238,12 @@ class CheckableComboBox(QtWidgets.QComboBox):
 
         # make the combo editable to set a custom text, but readonly
         self.setEditable(True)
+        self.setMaxVisibleItems(20)
         self.lineEdit().setPlaceholderText('Select option/s:')
         self.lineEdit().setReadOnly(True)
+        self.currentTextChanged.connect(self.fixCursorPosition)
 
-        # make the lineedit the same color as QPushButton
+        # make the lineedit the same color as QComboBox
         palette = QtWidgets.QApplication.palette()
         palette.setBrush(QtGui.QPalette.Base, palette.button())
         self.lineEdit().setPalette(palette)
@@ -223,6 +258,14 @@ class CheckableComboBox(QtWidgets.QComboBox):
         # prevent popup from closing when clicking on an item
         self.view().viewport().installEventFilter(self)
 
+    def fixCursorPosition(self):
+        """ Move (invisible) cursor to first position to avoid cutting off the start. """
+
+        # apply only to comboboxes with text lengths of more than 8 chars
+        if len(self.lineEdit().text()) >= 8:
+            self.lineEdit().setCursorPosition(0)
+            self.lineEdit().setFocus()
+    
     def resizeEvent(self, event):
 
         # recompute text to elide as needed
@@ -244,7 +287,6 @@ class CheckableComboBox(QtWidgets.QComboBox):
             if event.type() == QtCore.QEvent.MouseButtonRelease:
                 index = self.view().indexAt(event.pos())
                 item = self.model().item(index.row())
-
                 if item.checkState() == QtCore.Qt.Checked:
                     item.setCheckState(QtCore.Qt.Unchecked)
                 else:
@@ -256,6 +298,9 @@ class CheckableComboBox(QtWidgets.QComboBox):
     def showPopup(self):
 
         super().showPopup()
+
+        # increase the width of the elements on popup so they can be read
+        self.view().setMinimumWidth(self.view().sizeHintForColumn(0) + 10)
 
         # when the popup is displayed, a click on the lineedit should close it
         self.closeOnLineEditClick = True
@@ -285,9 +330,10 @@ class CheckableComboBox(QtWidgets.QComboBox):
         text = ", ".join(texts)
 
         # compute elided text (with "...")
-        metrics = QtGui.QFontMetrics(self.lineEdit().font())
-        elidedText = metrics.elidedText(text, QtCore.Qt.ElideRight, self.lineEdit().width())
-        self.lineEdit().setText(elidedText)
+        # metrics = QtGui.QFontMetrics(self.lineEdit().font())
+        # elidedText = metrics.elidedText(text, QtCore.Qt.ElideRight, self.lineEdit().width())
+
+        self.lineEdit().setText(text)
 
     def addItem(self, text, data=None):
 
@@ -310,13 +356,17 @@ class CheckableComboBox(QtWidgets.QComboBox):
                 data = None
             self.addItem(text, data)
 
-    def currentData(self):
+    def currentData(self, all=False):
         
         # return the list of selected items data
         res = []
         for i in range(self.model().rowCount()):
-            if self.model().item(i).checkState() == QtCore.Qt.Checked:
+            if not all:
+                if self.model().item(i).checkState() == QtCore.Qt.Checked:
+                    res.append(self.model().item(i).data())
+            else:
                 res.append(self.model().item(i).data())
+
         return res
 
 class QVLine(QtWidgets.QFrame):
@@ -431,14 +481,14 @@ class InputDialog(QtWidgets.QWidget):
 class PopUpWindow(QtWidgets.QWidget):
     """ Class that generates generalised pop-up window. """
 
-    def __init__(self, read_instance, menu_root, menu_levels, main_window_geometry):
+    def __init__(self, read_instance, menu_root, menu_levels, full_window_geometry):
         super(PopUpWindow, self).__init__()
 
         # add input arguments to self
         self.read_instance = read_instance
         self.menu_root = menu_root
         self.menu_levels = menu_levels
-        self.main_window_geometry = main_window_geometry
+        self.full_window_geometry = full_window_geometry
         self.menu_current = menu_root
         for _, menu_level in enumerate(menu_levels):
             self.menu_current = self.menu_current[menu_level]
@@ -558,8 +608,8 @@ class PopUpWindow(QtWidgets.QWidget):
         # set finalised layout
         self.setLayout(parent_layout)
 
-        # set geometry to match that of main window
-        self.setGeometry(self.main_window_geometry)
+        # set geometry to match that of full window
+        self.setGeometry(self.full_window_geometry)
 
         # show pop-up window
         self.show()
@@ -720,7 +770,7 @@ class PopUpWindow(QtWidgets.QWidget):
             for label_ii, label in enumerate(menu_current_type['labels']):
                 
                 # evaluate if all available vertical space has been consumed
-                row_available_space = self.main_window_geometry.height() - currently_occupied_vertical_space
+                row_available_space = self.full_window_geometry.height() - currently_occupied_vertical_space
                 
                 # if available space <= than row height, force a new column to be started
                 if row_available_space <= (row_format_dict['height']):
@@ -750,7 +800,7 @@ class PopUpWindow(QtWidgets.QWidget):
                     if menu_type == 'rangeboxes':
                         if len(menu_current_type['tooltips']) > 0:
                             rangebox_label.setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], 
-                                                                        self.main_window_geometry.width()))
+                                                                        self.full_window_geometry.width()))
                     grid.addWidget(rangebox_label, start_row_n+row_n, column_n, QtCore.Qt.AlignLeft)
 
                 # create all elements in column, per row
@@ -805,7 +855,7 @@ class PopUpWindow(QtWidgets.QWidget):
                         # add tooltip
                         if len(menu_current_type['tooltips']) > 0:
                             self.page_memory[menu_type][element][label_ii].setToolTip(wrap_tooltip_text(menu_current_type['tooltips'][label_ii], 
-                                                                                                        self.main_window_geometry.width()))
+                                                                                                        self.full_window_geometry.width()))
                         
                         # add connectivity to buttons
                         self.page_memory[menu_type][element][label_ii].clicked.connect(self.open_new_page)
@@ -903,7 +953,7 @@ class PopUpWindow(QtWidgets.QWidget):
         self.menu_levels.append(selected_navigation_button)
         
         # create new pop-up page for selected navigation button
-        self.new_window = PopUpWindow(self.read_instance, self.menu_root, self.menu_levels, self.main_window_geometry)
+        self.new_window = PopUpWindow(self.read_instance, self.menu_root, self.menu_levels, self.full_window_geometry)
         
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
@@ -915,7 +965,7 @@ class PopUpWindow(QtWidgets.QWidget):
         """ Function that returns pop-up window to root menu level page. """
 
         # create new pop-up page for root menu level
-        self.new_window = PopUpWindow(self.read_instance, self.menu_root, [], self.main_window_geometry)
+        self.new_window = PopUpWindow(self.read_instance, self.menu_root, [], self.full_window_geometry)
         
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
@@ -928,7 +978,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # create new pop-up page for previous menu level
         self.new_window = PopUpWindow(self.read_instance, self.menu_root, self.menu_levels[:-1], 
-                                      self.main_window_geometry)
+                                      self.full_window_geometry)
         
         # sleep briefly to allow new page to be generated
         time.sleep(0.1)
@@ -1033,9 +1083,9 @@ class PopUpWindow(QtWidgets.QWidget):
         label_ii = int(event_source.objectName().split('_')[1])
         
         if event_source.isChecked():
-            update_filter_species(self.read_instance, label_ii)
+            self.update_filter_species(label_ii)
         else:
-            update_filter_species(self.read_instance, label_ii, add_filter_species=False)
+            self.update_filter_species(label_ii, add_filter_species=False)
 
     def update_multispecies_fields(self, label_ii):
         """ Update multispecies fields in tab.
@@ -1165,7 +1215,13 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # get line
             label_ii = int(event_source.objectName().split('_')[1])
-            
+
+            # reset bounds and apply values on widgets
+            self.read_instance.selected_widget_apply.update({label_ii: False})
+
+            # remove previous networkspeci from lists
+            self.update_filter_species(label_ii, add_filter_species=False)
+
             # if network, matrix or species have changed then respective
             # current selection for the changed param
             if event_source == self.page_memory['multispecies']['network'][label_ii]:
@@ -1185,11 +1241,6 @@ class PopUpWindow(QtWidgets.QWidget):
             elif event_source == self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii]:
                 self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: changed_param})
 
-            # reset bounds and apply values on widgets
-            self.read_instance.selected_widget_apply.update({label_ii: False})
-
-            # remove networkspeci from lists
-            update_filter_species(self.read_instance, label_ii, add_filter_species=False)
 
             # update multispecies filtering fields
             self.update_multispecies_fields(label_ii)
@@ -1262,96 +1313,108 @@ class PopUpWindow(QtWidgets.QWidget):
                             else:
                                 self.menu_current[menu_type]['previous_apply'].update({label_ii: False})
 
-def multispecies_conf(instance):
-    """ Function used when loading from a configuration file. 
-        Sets defined multispecies filtering variables, rest of variables are set to default. 
+    def update_filter_species(self, label_ii, add_filter_species=True):
+        """ Function to update filter species after launching the dashboard with a configuration file or 
+            by editing the fields in the multispecies filtering tab in the dashboard. 
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-        :type instance: object
-    """
+            :param instance: Instance of class ProvidentiaMainWindow
+            :type instance: object
+            :param label_ii: Corresponding widget line in dashboard
+            :type label_ii: int
+            :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
+            :type add_filter_species: boolean
+        """
 
-    if hasattr(instance, 'filter_species'):
-        for (networkspeci_ii, networkspeci), bounds in zip(enumerate(instance.filter_species.keys()),
-                                                                    instance.filter_species.values()):
+        # update previous filter species
+        self.read_instance.previous_filter_species = copy.deepcopy(self.read_instance.filter_species)
+
+        # get selected network, species and bounds
+        network = self.read_instance.selected_widget_network[label_ii]
+        speci = self.read_instance.selected_widget_species[label_ii]
+        networkspeci = network + '|' + speci
+        current_lower = self.read_instance.selected_widget_lower[label_ii]
+        current_upper = self.read_instance.selected_widget_upper[label_ii]
+        current_filter_species_fill_value = self.read_instance.selected_widget_filter_species_fill_value[label_ii]
+
+        # get filter species after changes
+        current_filter_species = [current_lower, current_upper, current_filter_species_fill_value]
+
+        # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
+        if add_filter_species:
             
-            # update menu_current
-            if ('networkspeci_' + str(networkspeci_ii)) not in instance.multispecies_menu['multispecies']['labels']:
-                instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
+            # do not add to filter_species if lower and upper bounds are nan
+            if current_lower == str(np.nan) or current_upper == str(np.nan):
+                msg = 'Data bounds cannot be empty.'
+                show_message(self.read_instance, msg)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
 
-            # add values
-            instance.multispecies_menu['multispecies']['current_lower'][networkspeci_ii] = bounds[0]
-            instance.multispecies_menu['multispecies']['current_upper'][networkspeci_ii] = bounds[1]
-            instance.multispecies_menu['multispecies']['current_filter_species_fill_value'][networkspeci_ii] = bounds[2]
-            instance.multispecies_menu['multispecies']['apply_selected'][networkspeci_ii] = True
+            # only add to filter_species when lower bound if it contains :, > or >=
+            if ('<' in current_lower):
+                msg = 'Lower bound ({}) for {} cannot contain < or <=. '.format(current_lower, networkspeci)
+                show_message(self.read_instance, msg)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
+            elif (':' not in current_lower) and ('>' not in current_lower):
+                msg = 'Lower bound ({}) for {} should contain > or >=. '.format(current_lower, networkspeci)
+                show_message(self.read_instance, msg)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
 
-            # set initial selected config variables as set .conf files or defaults
-            instance.selected_widget_network.update({networkspeci_ii: networkspeci.split('|')[0]})
-            instance.selected_widget_matrix.update({networkspeci_ii: instance.parameter_dictionary[networkspeci.split('|')[1]]['matrix']})
-            instance.selected_widget_species.update({networkspeci_ii: networkspeci.split('|')[1]})
-            instance.selected_widget_lower.update({networkspeci_ii: bounds[0]})
-            instance.selected_widget_upper.update({networkspeci_ii: bounds[1]})
-            instance.selected_widget_filter_species_fill_value.update({networkspeci_ii: bounds[2]})
-            instance.selected_widget_apply.update({networkspeci_ii: True})
+            # only add to filter_species when upper bound if it contains :, < or <=
+            if ('>' in current_upper):
+                msg = 'Upper bound ({}) for {} cannot contain > or >=. '.format(current_upper, networkspeci)
+                show_message(self.read_instance, msg)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
+            elif (':' not in current_upper) and ('<' not in current_upper):
+                msg = 'Upper bound ({}) for {} should contain < or <=. '.format(current_upper, networkspeci)
+                show_message(self.read_instance, msg)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
 
-            update_filter_species(instance, networkspeci_ii)
+            # add or update networkspeci
+            # check selected lower and upper bounds and fill value are numbers or nan
+            try:
+                if networkspeci in self.read_instance.filter_species.keys():
+                    if current_filter_species not in self.read_instance.filter_species[networkspeci]:
+                        self.read_instance.filter_species[networkspeci].append(current_filter_species)
+                else:
+                    self.read_instance.filter_species[networkspeci] = [current_filter_species]
 
-            # filtering tab is initialized from conf
-            instance.multispecies_initialisation = False
+            # if any of the fields are not numbers, return from function
+            except ValueError:
+                msg = 'Warning: Data limit fields must be numeric.'
+                show_message(self.read_instance, msg)
+                self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
+                return
 
-def update_filter_species(instance, label_ii, add_filter_species=True):
-    """ Function to update filter species after launching the dashboard with a configuration file or 
-        by editing the fields in the multispecies filtering tab in the dashboard. 
+            # get quality flags for species if the information is not available in qa_per_species
+            if speci not in self.read_instance.qa_per_species:
+                # get species in memory 
+                species = copy.deepcopy(self.read_instance.species)
+                filter_species = [val.split('|')[1] 
+                                  for val in list(copy.deepcopy(self.read_instance.filter_species).keys())]
+                qa_species = species + filter_species
+                
+                # add
+                qa_species.append(speci)
+                self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
+                                                     for speci in qa_species}
 
-        :param instance: Instance of class ProvidentiaMainWindow
-        :type instance: object
-        :param label_ii: Corresponding widget line in dashboard
-        :type label_ii: int
-        :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
-        :type add_filter_species: boolean
-    """
+        # if apply button is unchecked, remove networkspecies from filter_species
+        else:
+            # remove from filter_species
+            filter_species_aux = copy.deepcopy(self.read_instance.filter_species)
+            if networkspeci in filter_species_aux.keys():
+                for networkspeci in filter_species_aux:
+                    if current_filter_species in filter_species_aux[networkspeci]:
+                        sub_networkspeci_ii = self.read_instance.filter_species[networkspeci].index(current_filter_species)
+                        del self.read_instance.filter_species[networkspeci][sub_networkspeci_ii]
+                        if len(self.read_instance.filter_species[networkspeci]) == 0:
+                            del self.read_instance.filter_species[networkspeci]
 
-    # update previous filter species
-    instance.previous_filter_species = copy.deepcopy(instance.filter_species)
-
-    # get selected network, species and bounds
-    network = instance.selected_widget_network[label_ii]
-    speci = instance.selected_widget_species[label_ii]
-    networkspeci = network + '|' + speci
-    current_lower = instance.selected_widget_lower[label_ii]
-    current_upper = instance.selected_widget_upper[label_ii]
-    current_filter_species_fill_value = instance.selected_widget_filter_species_fill_value[label_ii]
-
-    # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
-    if add_filter_species:
-
-        # add or update networkspeci
-        # check selected lower and upper bounds and fill value are numbers or nan
-        try:
-            instance.filter_species[networkspeci] = [float(current_lower), float(current_upper),
-                                                     float(current_filter_species_fill_value)]
-            
-        # if any of the fields are not numbers, return from function
-        except ValueError:
-            print("Warning: Data limit fields must be numeric")
-            return
-
-        # get quality flags for species if the information is not available in qa_per_species
-        if speci not in instance.qa_per_species:
-            # get species in memory 
-            species = copy.deepcopy(instance.species)
-            filter_species = [val.split('|')[1] for val in list(copy.deepcopy(instance.filter_species).keys())]
-            qa_species = species + filter_species
-            
-            # add
-            qa_species.append(speci)
-            instance.qa_per_species = {speci:get_default_qa(instance, speci) for speci in qa_species}
-
-    # if apply button is unchecked, remove networkspecies from filter_species
-    else:
-        # remove from filter_species
-        if networkspeci in instance.filter_species.keys():
-            del instance.filter_species[networkspeci]
-
-        # remove from qa_per_species
-        if speci in instance.qa_per_species:
-            del instance.qa_per_species[speci]
+            # remove from qa_per_species
+            if ((speci in self.read_instance.qa_per_species) and 
+                (networkspeci not in self.read_instance.filter_species.keys())):
+                del self.read_instance.qa_per_species[speci]

@@ -8,9 +8,12 @@ import time
 from dateutil.relativedelta import relativedelta
 import numpy as np
 import pandas as pd
-from netCDF4 import Dataset
-from .read_aux import get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_data, get_default_qa
-from .aux import check_for_ghost, get_basic_metadata, update_plotting_parameters, show_message
+from netCDF4 import Dataset, chartostring
+
+from .read_aux import (get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_metadata, 
+                       read_netcdf_data, get_default_qa, get_frequency_code)
+from .aux import (check_for_ghost, spatial_colocation_nonghost, spatial_colocation_ghost,
+                  resolve_duplicate_spatial_colocation_matches, update_plotting_parameters, show_message)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -33,7 +36,7 @@ class DataReader:
 
         # changing time dimension ?
         if ('reset' in operations) or ('read_left' in operations) or ('read_right' in operations) or ('cut_left' in operations) or ('cut_right' in operations):
-            
+
             # turn off read from configuration
             if 'reset' not in operations:
                 self.read_instance.from_conf = False
@@ -41,17 +44,8 @@ class DataReader:
             # determine if reading GHOST or non-GHOST
             self.read_instance.reading_ghost = check_for_ghost(self.read_instance.network[0])
 
-            # set active frequency code
-            if (self.read_instance.resolution == 'hourly') or (self.read_instance.resolution == 'hourly_instantaneous'):
-                self.read_instance.active_frequency_code = 'H'
-            elif (self.read_instance.resolution == '3hourly') or (self.read_instance.resolution == '3hourly_instantaneous'):
-                self.read_instance.active_frequency_code = '3H'
-            elif (self.read_instance.resolution == '6hourly') or (self.read_instance.resolution == '6hourly_instantaneous'):
-                self.read_instance.active_frequency_code = '6H'
-            elif self.read_instance.resolution == 'daily':
-                self.read_instance.active_frequency_code = 'D'
-            elif self.read_instance.resolution == 'monthly':
-                self.read_instance.active_frequency_code = 'MS'
+            # get active frequency code
+            self.read_instance.active_frequency_code = get_frequency_code(self.read_instance.resolution)
 
             # get time array
             self.read_instance.time_array = pd.date_range(start=datetime.datetime(int(str(self.read_instance.start_date)[:4]),
@@ -67,7 +61,7 @@ class DataReader:
                 self.read_instance.invalid_read = True
                 msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
-                show_message(msg)
+                show_message(self.read_instance, msg)
                 if (self.read_instance.from_conf) and (not self.read_instance.offline):
                     sys.exit('Error: Providentia will not be launched.')
                 elif (self.read_instance.offline):
@@ -90,7 +84,7 @@ class DataReader:
                         if networkspeci in self.read_instance.networkspecies:
                             msg = 'The current network-species ({}) cannot be selected as a filter species. '.format(networkspeci)
                             msg += 'If you want to change its data bounds, use the lower and upper bounds parameters.'
-                            show_message(msg)
+                            show_message(self.read_instance, msg)
                             del self.read_instance.filter_species[networkspeci]
 
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)
@@ -110,11 +104,7 @@ class DataReader:
 
                 # get unique basic metadata across networkspecies
                 # for this step include filter networkspecies
-                self.read_instance.station_references, self.read_instance.station_names,\
-                self.read_instance.station_longitudes, self.read_instance.station_latitudes,\
-                self.read_instance.measurement_altitudes, self.read_instance.station_classifications,\
-                self.read_instance.area_classifications, self.read_instance.nonghost_units = \
-                    get_basic_metadata(self.read_instance) 
+                self.read_basic_metadata()
 
                 # iterate through station_references per networkspecies
                 # if have 0 valid stations then drop  
@@ -137,6 +127,10 @@ class DataReader:
 
         # need to reset all data structures 
         if 'reset' in operations:  
+
+            # uninitialise filter object
+            if not self.read_instance.offline:
+                self.read_instance.mpl_canvas.filter_data = None
 
             # data
             self.read_instance.data_in_memory = {networkspeci: 
@@ -548,6 +542,173 @@ class DataReader:
         if self.read_instance.filter_species:
             print('- Filter network-species', self.read_instance.filter_species)
 
+    def read_basic_metadata(self):     
+        """ Get basic unique metadata across networkspecies wanting to read
+            The basic fields are: station_reference, station_name, longitude, latitude, measurement_altitude, 
+            station_classification and area_classification
+
+            If have multiple species, then spatially colocate across species 
+            to get matching stations across stations.
+        """
+
+        # define dictionaries for storing basic metadata across all species to read
+        self.read_instance.station_references = {}
+        self.read_instance.station_names = {}
+        self.read_instance.station_longitudes = {}
+        self.read_instance.station_latitudes = {}
+        self.read_instance.station_measurement_altitudes = {}
+        self.read_instance.nonghost_units = {}
+
+        # iterate through network, speci pairs
+        for networkspeci in (self.read_instance.networkspecies + self.read_instance.filter_networkspecies):
+        
+            # get indivudual network and species strings
+            network = networkspeci.split('|')[0]
+            speci = networkspeci.split('|')[1]
+
+            # get species matrix
+            matrix = self.read_instance.parameter_dictionary[speci]['matrix']
+
+            # get file root
+            # GHOST
+            if self.read_instance.reading_ghost:
+                file_root = '%s/%s/%s/%s/%s/%s_' % (self.read_instance.ghost_root, network,
+                                                    self.read_instance.ghost_version, self.read_instance.resolution,
+                                                    speci, speci)
+            # non-GHOST
+            else:
+                file_root = '%s/%s/%s/%s/%s_' % (self.read_instance.nonghost_root, network,
+                                                 self.read_instance.resolution, speci, speci)
+
+            # get relevant files
+            relevant_files_before_filter = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in self.read_instance.yearmonths])
+            relevant_files = copy.deepcopy(relevant_files_before_filter)
+
+            # drop files if they don't exist
+            for file in relevant_files_before_filter:
+                if not os.path.exists(file):
+                    relevant_files.remove(file)
+
+            # if have 0 files to read for networkspeci, then drop networkspeci
+            if len(relevant_files) == 0:
+                if networkspeci in self.read_instance.networkspecies:
+                    self.read_instance.networkspecies.remove(networkspeci)
+                    print('Warning: There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci))
+                elif networkspeci in self.read_instance.filter_networkspecies:
+                    self.read_instance.filter_networkspecies.remove(networkspeci)
+                    del self.read_instance.filter_species[networkspeci]
+                    print('Warning: There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci))
+                continue
+                
+            # get basic metadata for speci
+            # GHOST - read in parallel
+            if self.read_instance.reading_ghost:
+                
+                # define arrays for storing speci metadata
+                speci_station_references = []
+                speci_station_names = []
+                speci_station_longitudes = []
+                speci_station_latitudes = []
+                speci_station_measurement_altitudes = []
+
+                # read metadata in parallel
+                tuple_arguments = []
+                for fname in relevant_files:
+                    tuple_arguments.append((fname, self.read_instance.reading_ghost))
+                pool = multiprocessing.Pool(self.read_instance.n_cpus)
+                returned_data = pool.map(read_netcdf_metadata, tuple_arguments)
+                pool.close()
+                pool.join()
+
+                # unzip returned data
+                for returned_data_per_month in returned_data:
+                    speci_station_references = np.append(speci_station_references, returned_data_per_month[0])
+                    speci_station_names = np.append(speci_station_names, returned_data_per_month[1])
+                    speci_station_longitudes = np.append(speci_station_longitudes, returned_data_per_month[2])
+                    speci_station_latitudes = np.append(speci_station_latitudes, returned_data_per_month[3])
+                    speci_station_measurement_altitudes = np.append(speci_station_measurement_altitudes, returned_data_per_month[4])
+
+                speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
+                self.read_instance.station_references[networkspeci] = speci_station_references
+                self.read_instance.station_names[networkspeci] = speci_station_names[station_unique_indices]
+                self.read_instance.station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
+                self.read_instance.station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
+                self.read_instance.station_measurement_altitudes[networkspeci] = speci_station_measurement_altitudes[station_unique_indices]
+
+            # non-GHOST - take from first file (metadata will be same across time)
+            else:
+            
+                ncdf_root = Dataset(relevant_files[0])
+                if 'station_reference' in ncdf_root.variables:
+                    station_reference_var = 'station_reference'
+                elif 'station_code' in ncdf_root.variables:
+                    station_reference_var = 'station_code'
+                elif 'station_name' in ncdf_root.variables:
+                    station_reference_var = 'station_name'
+                else: 
+                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+                    sys.exit(error)
+
+                meta_shape = ncdf_root[station_reference_var].shape
+                self.read_instance.station_references[networkspeci] = ncdf_root[station_reference_var][:]
+                meta_val_dtype = np.array([self.read_instance.station_references[networkspeci][0]]).dtype
+                if len(meta_shape) == 2:
+                    if meta_val_dtype == np.dtype(object):
+                        self.read_instance.station_references[networkspeci] = np.array([''.join(val) 
+                                                                    for val in self.read_instance.station_references[networkspeci]])
+                    else:
+                        self.read_instance.station_references[networkspeci] = chartostring(self.read_instance.station_references[networkspeci])
+
+                # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
+                non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(self.read_instance.station_references[networkspeci]) 
+                                                    if ref.lower() != 'nan'])
+                self.read_instance.station_references[networkspeci] = self.read_instance.station_references[networkspeci][non_nan_station_indices]
+
+                if "latitude" in ncdf_root.variables:
+                    self.read_instance.station_longitudes[networkspeci] = ncdf_root['longitude'][non_nan_station_indices]
+                    self.read_instance.station_latitudes[networkspeci] = ncdf_root['latitude'][non_nan_station_indices]
+                else:
+                    self.read_instance.station_longitudes[networkspeci] = ncdf_root['lon'][non_nan_station_indices]
+                    self.read_instance.station_latitudes[networkspeci] = ncdf_root['lat'][non_nan_station_indices]
+
+                if "station_name" in ncdf_root.variables:
+                    meta_shape = ncdf_root['station_name'].shape
+                    self.read_instance.station_names[networkspeci] = ncdf_root['station_name'][non_nan_station_indices]
+                    meta_val_dtype = np.array([self.read_instance.station_names[networkspeci][0]]).dtype
+                    if len(meta_shape) == 2:
+                        if meta_val_dtype == np.dtype(object):
+                            self.read_instance.station_names[networkspeci] = np.array([''.join(val) for val in self.read_instance.station_names[networkspeci]])
+                        else:
+                            self.read_instance.station_names[networkspeci] = chartostring(self.read_instance.station_names[networkspeci])
+
+                # get non-GHOST measurement units
+                self.read_instance.nonghost_units[speci] = ncdf_root[speci].units
+
+                ncdf_root.close()
+
+        # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
+        # then spatially colocate stations across species
+        if (len((self.read_instance.networkspecies + self.read_instance.filter_networkspecies)) > 1) & (self.read_instance.spatial_colocation):
+            # get intersecting station indices across species (handle both GHOST and non-GHOST cases)
+            if self.read_instance.reading_ghost:
+                intersecting_indices = spatial_colocation_ghost(self.read_instance.station_longitudes, 
+                                                                self.read_instance.station_latitudes, 
+                                                                self.read_instance.station_measurement_altitudes)
+            else:
+                intersecting_indices = spatial_colocation_nonghost(self.read_instance.station_references, 
+                                                                   self.read_instance.station_longitudes, 
+                                                                   self.read_instance.station_latitudes)
+            
+            # iterate through networkspecies specific intersecting indices, setting 
+            for ns, ns_intersects in intersecting_indices.items():
+                self.read_instance.station_references[ns] = self.read_instance.station_references[ns][ns_intersects]
+                self.read_instance.station_longitudes[ns] = self.read_instance.station_longitudes[ns][ns_intersects]
+                self.read_instance.station_latitudes[ns] = self.read_instance.station_latitudes[ns][ns_intersects]
+                if ns in self.read_instance.station_measurement_altitudes:
+                    self.read_instance.station_measurement_altitudes[ns] = self.read_instance.station_measurement_altitudes[ns][ns_intersects]
+                if ns in self.read_instance.station_names:
+                    self.read_instance.station_names[ns] = self.read_instance.station_names[ns][ns_intersects]
+
     def read_data(self, yearmonths_to_read, data_labels):
         """ Function that handles reading of observational/experiment data.
 
@@ -672,7 +833,7 @@ class DataReader:
             data_in_memory_shared_np = np.frombuffer(data_in_memory_shared, dtype=np.float32).reshape(data_in_memory_shared_shape)
             if (self.read_instance.reading_ghost) & ('observations' in data_labels) & (not filter_read):
                 ghost_data_in_memory_shared_np = np.frombuffer(ghost_data_in_memory_shared, dtype=np.float32).reshape(ghost_data_in_memory_shared_shape)
-            
+
             # fill arrays
             if not filter_read:
                 data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]

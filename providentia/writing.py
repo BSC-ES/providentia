@@ -15,8 +15,8 @@ def export_data_npz(canvas_instance, fname):
     # open dialog to choose if data is filtered or not
     title = 'Export data'
     msg = 'Select option'
-    options = ['Apply metadata filters to exported data', 
-               'Do not apply metadata filters to exported data']
+    options = ['Apply metadata filters and temporal colocation (if active) to exported data', 
+               'Do not apply metadata filters and temporal colocation to exported data']
     dialog = InputDialog(canvas_instance.read_instance, title, msg, options)
     selected_option, okpressed = dialog.selected_option, dialog.okpressed
     if selected_option == options[0]:
@@ -29,13 +29,22 @@ def export_data_npz(canvas_instance, fname):
 
     # save data / ghost data / metadata
     for networkspeci in canvas_instance.read_instance.networkspecies:
+
+        # get valid station indices (from observations because valid stations for the experiment is a 
+        # subset of the observations)
+        if canvas_instance.read_instance.temporal_colocation:
+            valid_station_inds = canvas_instance.read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
+        else:
+            valid_station_inds = canvas_instance.read_instance.valid_station_inds[networkspeci]['observations']
+
         if apply_filters:
             if canvas_instance.read_instance.reading_ghost:
-                save_data_dict['{}_ghost_data'.format(networkspeci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci][:, ~np.isnan(canvas_instance.read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))]
-            save_data_dict['{}_data'.format(networkspeci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci][:, ~np.isnan(canvas_instance.read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))]
-            stations_after_filter_inds = np.array(np.where(~np.isnan(canvas_instance.read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))))
-            stations_after_filter_inds = np.reshape(stations_after_filter_inds, stations_after_filter_inds.shape[1])
-            save_data_dict['{}_metadata'.format(networkspeci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci][stations_after_filter_inds, :]
+                save_data_dict['{}_ghost_data'.format(networkspeci)] = np.take(canvas_instance.read_instance.ghost_data_in_memory[networkspeci], 
+                    valid_station_inds, axis=1)
+            save_data_dict['{}_data'.format(networkspeci)] = np.take(canvas_instance.read_instance.data_in_memory_filtered[networkspeci], 
+                valid_station_inds, axis=1)
+            save_data_dict['{}_metadata'.format(networkspeci)] = np.take(canvas_instance.read_instance.metadata_in_memory[networkspeci], 
+                valid_station_inds, axis=0)
         else:
             if canvas_instance.read_instance.reading_ghost:
                 save_data_dict['{}_ghost_data'.format(networkspeci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci]
@@ -64,8 +73,8 @@ def export_netcdf(canvas_instance, fname):
     # open dialog to choose if data is filtered or not
     title = 'Export data'
     msg = 'Select option'
-    options = ['Apply metadata filters to exported data', 
-               'Do not apply metadata filters to exported data']
+    options = ['Apply metadata filters and temporal colocation (if active) to exported data', 
+               'Do not apply metadata filters and temporal colocation to exported data']
     dialog = InputDialog(canvas_instance.read_instance, title, msg, options)
     selected_option, okpressed = dialog.selected_option, dialog.okpressed
     if selected_option == options[0]:
@@ -171,6 +180,13 @@ def export_netcdf(canvas_instance, fname):
         var = fout.createVariable('{}_data'.format(var_prefix), current_data_type, 
                                   ('data_label', 'station', 'time',))
         
+        # get valid station indices (from observations because valid stations for the experiment is a 
+        # subset of the observations)
+        if canvas_instance.read_instance.temporal_colocation:
+            valid_station_inds = canvas_instance.read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
+        else:
+            valid_station_inds = canvas_instance.read_instance.valid_station_inds[networkspeci]['observations']
+
         # set attributes
         var.standard_name = data_format_dict[speci]['standard_name']
         var.long_name = data_format_dict[speci]['long_name']
@@ -185,7 +201,7 @@ def export_netcdf(canvas_instance, fname):
         if read_instance.reading_ghost:
             var.ghost_version = str(read_instance.ghost_version)
         if apply_filters:
-            var[:] = read_instance.data_in_memory_filtered[networkspeci][:, ~np.isnan(read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))]
+            var[:] = np.take(read_instance.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
         else:
             var[:] = read_instance.data_in_memory[networkspeci]
 
@@ -198,15 +214,13 @@ def export_netcdf(canvas_instance, fname):
             var.long_name = '{}_ghost_data'.format(networkspeci)
             var.description = 'GHOST data variables used for additional filtering.'
             if apply_filters:
-                var[:] = read_instance.ghost_data_in_memory[networkspeci][:, ~np.isnan(read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))]
+                var[:] = np.take(read_instance.ghost_data_in_memory[networkspeci], valid_station_inds, axis=1)
             else:
                 var[:] = read_instance.ghost_data_in_memory[networkspeci]
 
         # save metadata (as individual variables)
         if apply_filters:
-            stations_after_filter_inds = np.array(np.where(~np.isnan(read_instance.data_in_memory_filtered[networkspeci]).all(axis=(0, -1))))
-            stations_after_filter_inds = np.reshape(stations_after_filter_inds, stations_after_filter_inds.shape[1])
-            metadata_arr = read_instance.metadata_in_memory[networkspeci][stations_after_filter_inds, :]
+            metadata_arr = np.take(read_instance.metadata_in_memory[networkspeci], valid_station_inds, axis=0)
         else:
             metadata_arr = read_instance.metadata_in_memory[networkspeci]
         
@@ -267,6 +281,10 @@ def export_configuration(prv, cname, separator="||"):
                           'resolution': prv.resolution,
                           'start_date': prv.start_date,
                           'end_date': prv.end_date,
+                          'statistic_mode': prv.statistic_mode,
+                          'statistic_aggregation': prv.statistic_aggregation,
+                          'periodic_statistic_mode': prv.periodic_statistic_mode,
+                          'periodic_statistic_aggregation': prv.periodic_statistic_aggregation
                           }
 
     # experiments

@@ -2,9 +2,6 @@
 Provides functions for basic statistic
 calculations and experiment bias evaluation.
 
-Mean, Percentile, Standard Deviation
-Variance, Data Availability Fraction
-
 Function defintions mainly stem from: 
 https://www.tandfonline.com/doi/pdf/10.1080/10962247.2016.1265027 ,
 https://www.cmascenter.org/conference/2003/session_poster/yu_abstract3.pdf ,
@@ -12,6 +9,7 @@ and https://github.com/davidcarslaw/openair/blob/HEAD/R/modStats.R
 """
 
 import numpy as np
+import numpy.ma as ma
 import scipy
 
 class Stats(object):
@@ -25,7 +23,24 @@ class Stats(object):
             :return: mean value of data
             :rtype: numpy.float64
         """
-        return np.mean(data)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanmean(data, axis=-1)
+
+    @staticmethod
+    def calculate_median(data):
+        """ Calculate median in a dataset.
+
+            :param data: array of data
+            :type data: numpy.ndarray
+            :return: median value of data
+            :rtype: numpy.float64
+        """
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanmedian(data, axis=-1)
 
     @staticmethod
     def calculate_percentile(data, percentile=50.0):
@@ -38,7 +53,10 @@ class Stats(object):
             :return: percentile of data
             :rtype: numpy.float64
         """
-        return np.percentile(data, percentile)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanpercentile(data, percentile, axis=-1)
 
     @staticmethod
     def calculate_standard_deviation(data):
@@ -49,7 +67,10 @@ class Stats(object):
             :return: standard deviation value of data
             :rtype: numpy.float64
         """
-        return np.std(data)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanstd(data, axis=-1)
 
     @staticmethod
     def calculate_variance(data):
@@ -60,7 +81,10 @@ class Stats(object):
             :return: variance value of data
             :rtype: numpy.float64
         """
-        return np.var(data)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.nanvar(data, axis=-1)
 
     @staticmethod
     def calculate_minimum(data):
@@ -71,7 +95,10 @@ class Stats(object):
             :return: min value of data
             :rtype: numpy.float64
         """
-        return np.min(data)
+        if len(data) == 0:
+            return np.NaN
+        else:
+            return np.nanmin(data,axis=-1)
 
     @staticmethod
     def calculate_maximum(data):
@@ -82,7 +109,10 @@ class Stats(object):
             :return: max value of data
             :rtype: numpy.float64
         """
-        return np.max(data)
+        if len(data) == 0:
+            return np.NaN
+        else:
+            return np.nanmax(data,axis=-1)
 
     @staticmethod
     def calculate_data_avail_fraction(data):
@@ -94,40 +124,49 @@ class Stats(object):
             :return: data availability percent
             :rtype: numpy.float64
         """
-
-        return (100. / np.array(data).shape[0]) * \
-               (np.count_nonzero(~np.isnan(data), axis=0))
+        if data.size == 0:
+            return np.NaN
+        else:
+            return (100. / data.shape[-1]) * \
+                   (np.count_nonzero(~np.isnan(data), axis=-1))
 
     @staticmethod
     def calculate_data_avail_number(data):
         """ Calculate data availability absolute number
             (i.e. number of total data measurements not equal to NaN).
         """
-        return np.count_nonzero(~np.isnan(data), axis=-1)
+        if data.size == 0:
+            return np.NaN
+        else:
+            return np.count_nonzero(~np.isnan(data), axis=-1).astype('float32')
 
     @staticmethod
     def max_repeated_nans_fraction(data):
         """ Get % of total period of the maximum run of consecutive NaNs in array. """
-        
-        max_gap_pc = []
-        for station_ind in range(data.shape[1]):
-            mask = np.concatenate(([False],np.isnan(data[:,station_ind]),[False]))
-            if ~mask.any():
-                max_gap_pc.append(0)
-            else:
-                idx = np.nonzero(mask[1:] != mask[:-1])[0]
-                max_gap_pc.append((idx[1::2] - idx[::2]).max())
+        if data.size == 0:
+            return np.NaN
+        else:
+            max_gap_pc = []
+            for station_ind in range(data.shape[-2]):
+                mask = np.concatenate(([False],np.isnan(data[station_ind]),[False]))
+                if ~mask.any():
+                    max_gap_pc.append(0)
+                else:
+                    idx = np.nonzero(mask[1:] != mask[:-1])[0]
+                    max_gap_pc.append((idx[1::2] - idx[::2]).max())
 
-        return np.array(max_gap_pc) * (100. / data.shape[0])
+            return np.array(max_gap_pc) * (100. / data.shape[-1])
 
     @staticmethod
     def calculate_exceedances(data, threshold=0):
         """ Calculate number of data exceedances
             (i.e. number of measurements exceeding a set threshold).
         """
-        n_exceed = len(np.where(data > threshold)[0])
-        return n_exceed
-
+        if data.size == 0:
+            return np.NaN
+        else:
+            n_exceed = np.nansum(data > threshold, axis=-1).astype('float32')
+            return n_exceed
 
 class ExpBias(object):
 
@@ -149,7 +188,11 @@ class ExpBias(object):
             Legates DR, McCabe GJ. (2012). A refined index of model performance: a rejoinder,
             International Journal of Climatology.
         """
-        return 1.0 - np.sum(np.abs(exp - obs)) / np.sum(np.abs(obs - np.mean(obs))) 
+        if obs.size == 0:
+            return np.NaN
+        else:
+            return 1.0 - np.nansum(np.abs(exp - obs), axis=-1) / \
+                   np.nansum(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1) 
 
     @staticmethod
     def calculate_ioa(obs, exp):
@@ -168,13 +211,16 @@ class ExpBias(object):
             Willmott, C.J., Robeson, S.M., Matsuura, K., 2011. A refined index of model performance. International
             Journal of Climatology.
         """
-
-        lhs = np.sum(np.abs(exp - obs))
-        rhs = 2.0 * np.sum(np.abs(obs - np.mean(obs)))
-        if lhs <= rhs: 
-            return 1.0 - lhs / rhs 
-        else: 
-            return rhs / lhs - 1.0
+        if obs.size == 0:
+            return np.NaN
+        else:
+            lhs = np.nansum(np.abs(exp - obs), axis=-1)
+            rhs = 2.0 * np.nansum(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1)
+            output = np.copy(lhs)
+            lower_check = lhs <= rhs
+            output[lower_check] = 1.0 - lhs[lower_check] / rhs[lower_check] 
+            output[~lower_check] = rhs[~lower_check] / lhs[~lower_check] - 1.0
+            return output
 
     @staticmethod
     def calculate_mb(obs, exp, normalisation_type='none'):
@@ -184,22 +230,23 @@ class ExpBias(object):
             The mean bias is simply the average bias between the modelled and observed values.
             This statistic is equivalent to the 'Mean_bias' when temporal_colocation is active.
         """
+        if obs.size == 0:
+            return np.NaN
+        else:
+            mb = np.nanmean(exp - obs, axis=-1)
 
-        mb = np.mean(exp - obs)
-
-        # handle normalisation if desired
-        if normalisation_type == 'max_min':
-            mb = (mb / (np.max(obs) - np.min(obs))) * 100.0
-        elif normalisation_type == 'mean':
-            mb = (mb / np.mean(obs)) * 100.0
-        elif normalisation_type == 'sum':
-            mb = (mb / np.sum(obs)) * 100.0
-        elif normalisation_type == 'iq':
-            mb = (mb / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0
-        elif normalisation_type == 'stdev':
-            mb = (mb / np.std(obs)) * 100.0
-
-        return mb
+            # handle normalisation if desired
+            if normalisation_type == 'max_min':
+                mb = (mb / (np.nanmax(obs, axis=-1) - np.nanmin(obs, axis=-1))) * 100.0
+            elif normalisation_type == 'mean':
+                mb = (mb / np.nanmean(obs, axis=-1)) * 100.0
+            elif normalisation_type == 'sum':
+                mb = (mb / np.nansum(obs, axis=-1)) * 100.0
+            elif normalisation_type == 'iq':
+                mb = (mb / (np.nanpercentile(obs, 75, axis=-1) - np.nanpercentile(obs, 25, axis=-1))) * 100.0
+            elif normalisation_type == 'stdev':
+                mb = (mb / np.nanstd(obs, axis=-1)) * 100.0
+            return mb
 
     @staticmethod
     def calculate_me(obs, exp, normalisation_type='none'):
@@ -212,22 +259,23 @@ class ExpBias(object):
             and mean absolute gross error (MAGE); 
             and normalised form as normalised mean gross error (NMGE) and normalised mean absolute error (NMAE).
         """
+        if obs.size == 0:
+            return np.NaN
+        else:
+            me = np.nanmean(np.abs(exp - obs), axis=-1)
 
-        me = np.mean(np.abs(exp - obs))
-
-        # handle normalisation if desired
-        if normalisation_type == 'max_min':
-            me = (me / (np.max(obs) - np.min(obs))) * 100.0 
-        elif normalisation_type == 'mean':
-            me = (me / np.mean(obs)) * 100.0
-        elif normalisation_type == 'sum':
-            me = (me / np.sum(obs)) * 100.0 
-        elif normalisation_type == 'iq':
-            me = (me / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0 
-        elif normalisation_type == 'stdev':
-            me = (me / np.std(obs)) * 100.0 
-
-        return me
+            # handle normalisation if desired
+            if normalisation_type == 'max_min':
+                me = (me / (np.nanmax(obs, axis=-1) - np.nanmin(obs, axis=-1))) * 100.0 
+            elif normalisation_type == 'mean':
+                me = (me / np.nanmean(obs, axis=-1)) * 100.0
+            elif normalisation_type == 'sum':
+                me = (me / np.nansum(obs, axis=-1)) * 100.0 
+            elif normalisation_type == 'iq':
+                me = (me / (np.nanpercentile(obs, 75, axis=-1) - np.nanpercentile(obs, 25, axis=-1))) * 100.0 
+            elif normalisation_type == 'stdev':
+                me = (me / np.nanstd(obs, axis=-1)) * 100.0 
+            return me
 
     @staticmethod
     def calculate_mnb(obs, exp):
@@ -236,10 +284,11 @@ class ExpBias(object):
             The mean normalised bias is calculated from the difference between the modelled and observed values
             (i.e. the bias, 𝑀𝑖 − 𝑂𝑖) is normalised (divided) by the observed value (𝑂𝑖).
         """
-
-        mnb = np.mean((exp - obs) / obs) * 100.0
-
-        return mnb
+        if obs.size == 0:
+            return np.NaN
+        else:
+            mnb = np.nanmean(ma.masked_invalid((exp - obs) / obs), axis=-1) * 100.0
+            return mnb
 
     @staticmethod
     def calculate_mne(obs, exp):
@@ -249,10 +298,11 @@ class ExpBias(object):
             normalised by the observed value, 𝑂𝑖. Therefore the mean normalised error is always positive.
             Otherwise known as mean normalised absolute error (MNAE).
         """
-
-        mne = np.mean((np.abs(exp - obs)) / obs) * 100.0
-
-        return mne
+        if obs.size == 0:
+            return np.NaN
+        else:
+            mne = np.nanmean(ma.masked_invalid((np.abs(exp - obs)) / obs), axis=-1) * 100.0
+            return mne
     
     @staticmethod
     def calculate_mfb(obs, exp):
@@ -266,12 +316,13 @@ class ExpBias(object):
             negative bias estimates.
             It has also the advantage of not considering observations as the true value. The mean fractional bias can
             range in value from -200% to +200%.
-            Otherwise known as fractional bias (FB).
+            Otherwise known as fractional bias (FB) or modified normalized mean bias (MNMB).
         """
-
-        mfb = np.mean((exp - obs) / ((exp + obs) / 2.0)) * 100.0
-        
-        return mfb
+        if obs.size == 0:
+            return np.NaN
+        else:
+            mfb = np.nanmean((exp - obs) / ma.masked_invalid((exp + obs) / 2.0), axis=-1) * 100.0
+            return mfb
 
     @staticmethod
     def calculate_mfe(obs, exp):
@@ -279,10 +330,11 @@ class ExpBias(object):
             Otherwise known as fractional error (FE), fractional gross error (FGE), 
             or mean absolute fractional bias (MAFB).
         """
-
-        mfe = np.mean(np.abs(exp - obs) / ((exp + obs) / 2.0)) * 100.0
-
-        return mfe
+        if obs.size == 0:
+            return np.NaN
+        else:
+            mfe = np.nanmean(np.abs(exp - obs) / ma.masked_invalid((exp + obs) / 2.0), axis=-1) * 100.0
+            return mfe
 
     @staticmethod
     def calculate_rmse(obs, exp, normalisation_type='none'):
@@ -291,21 +343,23 @@ class ExpBias(object):
             between observations and experiment.
         """
 
-        rmse = np.sqrt(np.mean((exp - obs) ** 2))
+        if obs.size == 0:
+            return np.NaN
+        else:
+            rmse = np.sqrt(np.nanmean((exp - obs) ** 2, axis=-1))
 
-        # handle normalisation if desired
-        if normalisation_type == 'max_min':
-            rmse = (rmse / (np.max(obs) - np.min(obs))) * 100.0 
-        elif normalisation_type == 'mean':
-            rmse = (rmse / np.mean(obs)) * 100.0 
-        elif normalisation_type == 'rmse':
-            rmse = (rmse / np.sum(obs)) * 100.0 
-        elif normalisation_type == 'iq':
-            rmse = (rmse / (np.percentile(obs, 75) - np.percentile(obs, 25))) * 100.0 
-        elif normalisation_type == 'stdev':
-            rmse = (rmse / np.std(obs)) * 100.0 
-
-        return rmse
+            # handle normalisation if desired
+            if normalisation_type == 'max_min':
+                rmse = (rmse / (np.nanmax(obs, axis=-1) - np.nanmin(obs, axis=-1))) * 100.0 
+            elif normalisation_type == 'mean':
+                rmse = (rmse / np.nanmean(obs, axis=-1)) * 100.0 
+            elif normalisation_type == 'rmse':
+                rmse = (rmse / np.nansum(obs, axis=-1)) * 100.0 
+            elif normalisation_type == 'iq':
+                rmse = (rmse / (np.nanpercentile(obs, 75, axis=-1) - np.nanpercentile(obs, 25, axis=-1))) * 100.0 
+            elif normalisation_type == 'stdev':
+                rmse = (rmse / np.nanstd(obs, axis=-1)) * 100.0 
+            return rmse
 
     @staticmethod
     def calculate_r(obs, exp):
@@ -317,7 +371,20 @@ class ExpBias(object):
             Positive correlations imply that as x increases, so does y.
             Negative correlations imply that as x increases, y decreases.
         """
-        return scipy.stats.pearsonr(obs, exp)[0]
+
+        if obs.size == 0:
+            return np.NaN
+        else:
+            mean_obs = np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)
+            std_obs = np.expand_dims(np.nanstd(obs, axis=-1), axis=-1)
+            mean_exp = np.expand_dims(np.nanmean(exp, axis=-1), axis=-1)
+            std_exp = np.expand_dims(np.nanstd(exp, axis=-1), axis=-1)
+            standard_score_obs = ma.masked_invalid((obs - mean_obs) / std_obs)
+            standard_score_exp = ma.masked_invalid((exp - mean_exp) / std_exp)
+            standard_score_mult = standard_score_obs*standard_score_exp
+            # get number of non-masked values in the time dimension
+            n = standard_score_mult.count(axis=-1)
+            return np.nansum(standard_score_mult, axis=-1) / n
 
     @staticmethod
     def calculate_r_squared(obs, exp):
@@ -327,25 +394,31 @@ class ExpBias(object):
             In linear least squares multiple regression with an estimated intercept term,
             the r squared equals the square of the Pearson correlation coefficient.
         """
-        return ExpBias.calculate_r(obs, exp) ** 2
+        if obs.size == 0:
+            return np.NaN
+        else:
+            return ExpBias.calculate_r(obs, exp) ** 2
 
     @staticmethod
     def calculate_fac2(obs, exp):
         """ Calculate fraction of experiment values within
             a factor of two of observed values (FAC2)
         """
-
-        frac = exp / obs
-
-        return (100.0 / len(frac)) * len(frac[(frac >= 0.5) & (frac <= 2.0)])
+        if obs.size == 0:
+            return np.NaN
+        else:
+            frac = ma.masked_invalid(exp / obs)
+            n = frac.count(axis=-1)
+            return (100.0 / n) * np.nansum(((frac >= 0.5) & (frac <= 2.0)), axis=-1)
 
     @staticmethod
     def calculate_upa(obs, exp):
         """ Calculate unpaired peak accuracy (UPA).
             See here: https://gitlab.com/polyphemus/atmopy/-/blob/master/stat/measure.py.
         """
-        
-        obs_max = np.max(obs)
-        exp_max = np.max(exp)
-        
-        return (exp_max - obs_max) / obs_max
+        if obs.size == 0:
+            return np.NaN
+        else:
+            obs_max = np.nanmax(obs, axis=-1)
+            exp_max = np.nanmax(exp, axis=-1)
+            return ((exp_max - obs_max) / obs_max) * 100.0
