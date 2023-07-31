@@ -36,6 +36,7 @@ class DataFilter:
         self.filter_by_data_availability()
         self.filter_by_metadata()
         self.temporally_colocate_data()
+        self.apply_calibration_factor()
         self.get_valid_stations_after_filtering()
 
     def reset_data_filter(self):
@@ -57,35 +58,65 @@ class DataFilter:
         # filter all read species by set species ranges
         if (self.read_instance.filter_species) and (self.read_instance.spatial_colocation):
 
-            # initialise array to set where temporally to filter species
-            # initialse being all False, set as True where data is outside given bounds for species
-            inds_to_filter = np.full(self.read_instance.data_in_memory_filtered[self.read_instance.networkspecies[0]][self.obs_index,:,:].shape, False)    
-
             # iterate through all species to filter by
-            for filter_networkspeci, speci_limits in self.read_instance.filter_species.items():
-
-                # get lower and upper limits for species
-                lower_limit = speci_limits[0]
-                upper_limit = speci_limits[1]
-                filter_species_fill_value = speci_limits[2]
-
-                # get where data is outside bounds, or NaN
-                if filter_networkspeci in self.read_instance.networkspecies:
-                    invalid_inds_per_species = np.logical_or.reduce((self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] < lower_limit,
-                                                                     self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:] > upper_limit,
-                                                                     np.isnan(self.read_instance.data_in_memory_filtered[filter_networkspeci][self.obs_index, :,:])))
-                else:
-                    invalid_inds_per_species = np.logical_or.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < lower_limit,
-                                                                     self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > upper_limit,
-                                                                     np.isnan(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:])))
-
-                # update inds_to_filter array, making True all instances where have data outside bounds
-                inds_to_filter = np.any([inds_to_filter, invalid_inds_per_species], axis=0)
-
-                # set all inds to filter as NaN for all networkspecies in memory
-                for networkspeci in self.read_instance.networkspecies:
-                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
+            for filter_networkspeci, speci_all_limits in self.read_instance.filter_species.items():
                 
+                # get where data is inside bounds or NaN
+                for speci_limit in speci_all_limits:
+
+                    # initialise array to set where temporally to filter species
+                    # initialse being all False, set as True where data is inside given bounds for species
+                    inds_to_filter = np.full(self.read_instance.data_in_memory_filtered[self.read_instance.networkspecies[0]][self.obs_index,:,:].shape, False)    
+
+                    # get lower and upper limits for species
+                    lower_limit = speci_limit[0]
+                    upper_limit = speci_limit[1]
+                    filter_species_fill_value = speci_limit[2]
+
+                    # remove symbols from limits and transform into float
+                    if lower_limit != ':':
+                        lower_limit_val = float(lower_limit.replace('>', '').replace('=', ''))
+                    if upper_limit != ':':
+                        upper_limit_val = float(upper_limit.replace('<', '').replace('=', ''))
+
+                    # get filter conditions
+                    if ':' in upper_limit and ':' in lower_limit:
+                        print('Upper and lower bounds are :, no data filter will be applied for {0}'.format(filter_networkspeci))
+                        return
+                    if ':' in upper_limit:
+                        if '=' in lower_limit:
+                            valid_inds_per_species = (self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] >= lower_limit_val)
+                        else:
+                            valid_inds_per_species = (self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > lower_limit_val)
+                    elif ':' in lower_limit:
+                        if '=' in upper_limit:
+                            valid_inds_per_species = (self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] <= upper_limit_val)
+                        else:
+                            valid_inds_per_species = (self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < upper_limit_val)
+                    else:
+                        if '=' in upper_limit and '=' in lower_limit:
+                            valid_inds_per_species = np.logical_and.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] >= lower_limit_val,
+                                                                            self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] <= upper_limit_val))
+                        elif '=' in upper_limit and '=' not in lower_limit:
+                            valid_inds_per_species = np.logical_and.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > lower_limit_val,
+                                                                            self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] <= upper_limit_val))
+                        elif '=' not in upper_limit and '=' in lower_limit:
+                            valid_inds_per_species = np.logical_and.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] >= lower_limit_val,
+                                                                            self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < upper_limit_val))
+                        else:
+                            valid_inds_per_species = np.logical_and.reduce((self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] > lower_limit_val,
+                                                                            self.read_instance.filter_data_in_memory[filter_networkspeci][:,:] < upper_limit_val))
+
+                    valid_inds_per_species = np.logical_or.reduce((valid_inds_per_species, 
+                                                                   np.isnan(self.read_instance.filter_data_in_memory[filter_networkspeci][:,:])))
+                    
+                    # update inds_to_filter array, making True all instances where we have data inside of bounds
+                    inds_to_filter = np.any([inds_to_filter, valid_inds_per_species], axis=0)
+                    
+                    # set all inds to filter as fill value for all networkspecies in memory
+                    for networkspeci in self.read_instance.networkspecies:
+                        self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
+
     def filter_data_limits(self):
         """ Filter out (set to NaN) data which exceed the lower/upper limits. """
 
@@ -110,7 +141,7 @@ class DataFilter:
             # if any of the fields are not numbers, return from function
             except ValueError:
                 msg = 'Data limit fields must be numeric.'
-                show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                 return
 
             # filter all observational/experiment data out of bounds of lower/upper limits
@@ -224,7 +255,7 @@ class DataFilter:
         # if any of the fields are not numbers, return from function
         except ValueError:
             msg = 'Data availability fields must be numeric.'
-            show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             return
 
         # filter observations by native percentage data availability variables (only GHOST data)
@@ -288,14 +319,14 @@ class DataFilter:
                             # max gap variable?
                             if 'max_gap' in var:
                                 max_gap_percent = Stats.max_repeated_nans_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds])
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds[0]:period_inds[-1]+1])
                                 inds_to_screen = np.where(max_gap_percent > data_availability_lower_bounds[var_ii])[0]
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
 
                             # data representativity variable?
                             else:
                                 data_availability_percent = Stats.calculate_data_avail_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds])
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds[0]:period_inds[-1]+1])
                                 inds_to_screen = np.where(data_availability_percent < data_availability_lower_bounds[var_ii])[0]
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
 
@@ -401,7 +432,7 @@ class DataFilter:
                 return True
             except ValueError as e:
                 msg = "Error in metadata fields. The field of '{}' should be numeric.".format(meta_var)
-                show_message(msg, offline=self.read_instance.offline, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                 if not self.read_instance.offline:
                     self.read_instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
                 return False
@@ -502,6 +533,7 @@ class DataFilter:
                         np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
 
                     if len(self.read_instance.data_labels) > 1:
+
                         # get colocated obs data array (if have experiments)
                         obs_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
 
@@ -514,7 +546,7 @@ class DataFilter:
 
             # get equivalent valid station indices for experimental arrays
             # subset observational valid station indices, with experimental array stations with > 1 valid measurements
-            # therefore number of observational valid indices will always be >= experimental valid indices
+            # therefore number of observational valid indices will always be > experimental valid indices
             for data_label in self.read_instance.data_labels:
 
                 # check if data array is not an observational data array
@@ -544,3 +576,43 @@ class DataFilter:
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
                         valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
+
+    def apply_calibration_factor(self):
+        """ Apply calibration factor to add or subtract a number to the experiments, 
+            multiply or divide the experiment data by a certain value.
+        """
+
+        if self.read_instance.calibration_factor is not None:
+            
+            print('Applying calibration factor...')
+
+            # iterate through networkspecies  
+            for networkspeci_ii, networkspeci in enumerate(self.read_instance.networkspecies):      
+                
+                # remove observations from data labels
+                relevant_data_labels = copy.deepcopy(self.read_instance.data_labels)
+                relevant_data_labels.remove('observations')
+
+                # get calibration factor per experiment
+                for data_label_ii, data_label in enumerate(relevant_data_labels):
+
+                    # get calibration factor per networkspeci
+                    calibration_factor = self.read_instance.calibration_factor[data_label]
+                    if (len(self.read_instance.networkspecies) > 1) and (',' in calibration_factor):
+                        calibration_factor = calibration_factor.split(',')[networkspeci_ii]
+                    
+                    print('{0} in {1}'.format(calibration_factor, data_label))
+                    
+                    # apply calibration factor
+                    if '*' in calibration_factor:
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] *= \
+                            float(calibration_factor.replace('*', ''))
+                    elif '/' in calibration_factor:
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] /= \
+                            float(calibration_factor.replace('/', ''))
+                    elif '-' in calibration_factor:
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] -= \
+                            float(calibration_factor.replace('-', ''))
+                    else:
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] += \
+                            float(calibration_factor)

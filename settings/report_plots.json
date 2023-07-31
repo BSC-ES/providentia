@@ -1,0 +1,47 @@
+{       
+    "standard": ["map-Data%_obs", "map-MB", "map-StdDev_bias", "map-NMB", "map-NME", "map-RMSE", "map-r",
+                 "timeseries", 
+                 "statsummary", "statsummary_bias",
+                 "heatmap-MB_annotate", "heatmap-StdDev_bias_annotate", "heatmap-NMB_annotate", "heatmap-NME_annotate", 
+                 "heatmap-RMSE_annotate", "heatmap-r_annotate",
+                 "periodic-MB", "periodic-StdDev_bias", "periodic-NMB", "periodic-NME", "periodic-RMSE", "periodic-r",
+                 "distribution", "distribution_bias", "scatter"],
+    
+    "operational": ["statsummary_multispecies", "statsummary_multispecies_bias",
+                    "map-Mean", "map-MB", "map-RMSE", "map-r",
+                    "timeseries_annotate", "timeseries_bias_annotate", "distribution", "scatter_annotate",
+                    "periodic-Mean", "periodic-MB", "periodic-RMSE", "periodic-r"],
+
+    "dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "distribution", "distribution_bias",
+            "statsummary", "statsummary_bias", 
+            "heatmap-r_annotate", "heatmap-MB_annotate", "heatmap-RMSE_annotate", "heatmap-MFB_annotate", 
+            "scatter_annotate", "timeseries_annotate",
+            "timeseries_annotate_bias"],
+
+    "sizedist": ["boxplot_multispecies"],
+
+    "cams2_40": ["metadata", "timeseries_annotate", "timeseries_bias", "periodic-violin", "periodic-r", "periodic-r2", 
+                 "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
+
+    "paradigm": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
+                 "station": ["timeseries", "scatter"]},
+
+    "icap": ["metadata", "map-r", "map-MB", "map-RMSE", "map-MFB", "timeseries_annotate", 
+             "timeseries_bias", "periodic-r", "periodic-r2",
+             "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
+
+    "all_plots": ["metadata",
+                  "map-Median", "map-Median_bias", "map-MB",
+                  "timeseries", "timeseries_bias", "timeseries_smooth",
+                  "periodic-Median", "periodic-Mean_bias",
+                  "periodic-violin",
+                  "boxplot","boxplot_multispecies", "boxplot_obs", "boxplot_individual", 
+                  "scatter", "scatter_logx", "scatter_logy", "scatter_regression",
+                  "distribution", "distribution_bias",
+                  "heatmap-Median_annotate_multispecies", "heatmap-Median_bias_annotate_multispecies", 
+                  "heatmap-Mean_annotate_multispecies", 
+                  "table-Median", "table-Median_bias", "table-Mean_multispecies", 
+                  "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias"],
+    
+    "debug": ["statsummary_multispecies"]
+}
