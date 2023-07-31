@@ -2,33 +2,42 @@ import copy
 from datetime import datetime
 import json
 import os
+import time
 
 import math
 import pyproj
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-import matplotlib 
+from KDEpy import FFTKDE
+import matplotlib as mpl 
 from matplotlib.dates import num2date
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+from matplotlib.projections import PolarAxes
+import mpl_toolkits.axisartist.floating_axes as fa
+import mpl_toolkits.axisartist.grid_finder as gf
 import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
 import scipy.stats as st
 import seaborn as sns
+from itertools import groupby
 
-from .statistics import get_z_statistic_info
-from .aux import get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels, get_multispecies_aliases, show_message
+from .statistics import get_z_statistic_info, calculate_statistic, boxplot_inner_fences
+from .aux import (get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels,
+                  get_multispecies_aliases, show_message, kde_fft, round_decimal_places)
+from .read_aux import drop_nans
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
 
 class Plot:
     """ Class that makes plots and handles plot configuration options when defined. """
@@ -46,11 +55,6 @@ class Plot:
         proj_class = getattr(ccrs, self.canvas_instance.plot_characteristics_templates['map']['projection']) 
         self.canvas_instance.plotcrs = proj_class()
         
-        # setup land polygons on map
-        self.canvas_instance.feature = cfeature.NaturalEarthFeature('physical', 'land',
-            get_land_polygon_resolution(self.canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
-                **self.canvas_instance.plot_characteristics_templates['map']['land_polygon'])
-
         # set miscellaneous vars
         self.canvas_instance.temporal_axis_mapping_dict = temp_axis_dict()
         self.canvas_instance.periodic_xticks = periodic_xticks()
@@ -80,7 +84,7 @@ class Plot:
             plot_options = plot_type.split('_')[1:]
 
             # get zstat information from plot_type
-            zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(plot_type)
+            zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type)
             
             # remove plots where setting 'obs' and 'bias' options together
             if ('obs' in plot_options) & ('bias' in plot_options): 
@@ -278,6 +282,16 @@ class Plot:
             if 'ygrid' in plot_characteristics_vars:
                 ax_to_format.yaxis.grid(**plot_characteristics['ygrid'])
 
+            # set x axis decimal places?
+            if 'round_decimal_places' in plot_characteristics_vars:
+                if 'x' in plot_characteristics['round_decimal_places']:
+                    ax_to_format.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['x'])))
+
+            # set y axis decimal places?
+            if 'round_decimal_places' in plot_characteristics_vars:
+                if 'y' in plot_characteristics['round_decimal_places']:
+                    ax_to_format.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['y'])))
+
             # remove spines?
             if 'remove_spines' in plot_characteristics_vars:
                 for side in plot_characteristics['remove_spines']:
@@ -305,7 +319,10 @@ class Plot:
             elif base_plot_type == 'map':
 
                 # add land polygons
-                ax_to_format.add_feature(self.canvas_instance.feature)
+                feature = cfeature.NaturalEarthFeature(category='physical', name='land',
+                                                       scale=get_land_polygon_resolution(self.canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
+                                                       **self.canvas_instance.plot_characteristics_templates['map']['land_polygon'])
+                ax_to_format.add_feature(feature)
 
                 # add gridlines ?
                 if 'gridlines' in plot_characteristics_vars:
@@ -386,11 +403,15 @@ class Plot:
 
         return map_extent
 
-    def set_equal_axes(self, ax):
+    def set_equal_axes(self, ax, plot_options):
         """ Set equal aspect and limits (useful for scatter plots). """
 
-        # set aspect
-        ax.set_aspect('equal', adjustable='box')
+        # set equal aspect
+        # only if no axis is in log scale
+        if 'logy' in plot_options or 'logx' in plot_options:
+            ax.set_aspect(aspect='auto')
+        else:
+            ax.set_aspect(aspect='equal', adjustable='box')
 
         if len(ax.lines) == 0:
             return None
@@ -428,8 +449,8 @@ class Plot:
             tickmax = ytickmax
 
         # set equal ticks
-        ax.set_xlim(math.floor(tickmin), math.ceil(tickmax))
-        ax.set_ylim(math.floor(tickmin), math.ceil(tickmax))
+        ax.set_xlim(tickmin, tickmax)
+        ax.set_ylim(tickmin, tickmax)
 
         return None
 
@@ -552,22 +573,20 @@ class Plot:
         pdf.savefig(page, dpi=self.canvas_instance.dpi)
         plt.close(page)
 
-    def make_metadata(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
-                      first_data_label=False, station_inds=[]):
+    def make_metadata(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[],
+                      station_inds=[]):
         """ Make metadata summary plot.
 
             :param relevant_axis: axis to plot on 
             :type relevant_axis: object
             :param networkspeci: str of currently active network and species 
             :type networkspeci: str
-            :param data_label: name of data array to plot
-            :type data_label: str
+            :param data_labels: name of data arrays to plot
+            :type data_labels: str
             :param plot_characteristics: plot characteristics 
             :type plot_characteristics: dict
             :param plot_options: list of options to configure plot  
             :type plot_options: list
-            :param first_data_label: boolean informing if first plotted data_label on axis
-            :type first_data_label: boolean
             :param station_inds: list of relevant station indices
             :type station_inds: list
         """
@@ -582,7 +601,7 @@ class Plot:
         # setup some variables for handling if just one or multiple stations selected
         if len(station_inds) == 1:
             var_str_name = 'name_one' 
-            str_to_plot += ' Station: {}'.format(self.read_instance.station_references[networkspeci][station_inds][0])
+            str_to_plot += 'Station: {}'.format(self.read_instance.station_references[networkspeci][station_inds][0])
         else:
             var_str_name = 'name_multiple' 
             str_to_plot += '{} Stations'.format(len(station_inds))
@@ -590,133 +609,66 @@ class Plot:
         # iterate n vars per line and add spacing
         current_n_vars_per_line = 1
 
-        # non-GHOST (add longitude and latitude)
-        if not self.read_instance.reading_ghost:
-            if len(station_inds) == 1:
-                
-                # if are on limit of vars allowed per line then break to new line
-                if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
-                    str_to_plot += '\n'
-                    current_n_vars_per_line = 0
-
-                # spacing
-                str_to_plot += (' '*plot_characteristics['var_spacing'])
-
-                # lon
-                str_to_plot += '{}: {:.{}f}'.format(plot_characteristics['non-ghost_vars']['longitude']['name_one'],
-                                                    self.read_instance.station_longitudes[networkspeci][station_inds][0], 
-                                                    plot_characteristics['non-ghost_vars']['longitude']['dp'])
-                # iterate current_n_vars_per_line
-                current_n_vars_per_line += 1
-
-                # if are on limit of vars allowed per line then break to new line
-                if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
-                    str_to_plot += '\n'
-                    current_n_vars_per_line = 0
-
-                # spacing
-                str_to_plot += (' '*plot_characteristics['var_spacing'])
-
-                # lat
-                str_to_plot += '{}: {:.{}f}'.format(plot_characteristics['non-ghost_vars']['latitude']['name_one'],
-                                                    self.read_instance.station_latitudes[networkspeci][station_inds][0], 
-                                                    plot_characteristics['non-ghost_vars']['latitude']['dp'])
-
-                # iterate current_n_vars_per_line
-                current_n_vars_per_line += 1
-
-                # show area classification if it exists
-                if 'area_classification' in plot_characteristics['non-ghost_vars'].keys() and self.read_instance.area_classifications != {}:
-                    
-                    # if are on limit of vars allowed per line then break to new line
-                    if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
-                        str_to_plot += '\n'
-                        current_n_vars_per_line = 0
-
-                    # spacing
-                    str_to_plot += (' '*plot_characteristics['var_spacing'])
-                    
-                    # area classification
-                    str_to_plot += '{}: {}'.format(plot_characteristics['non-ghost_vars']['area_classification']['name_one'],
-                                                   self.read_instance.area_classifications[networkspeci][station_inds][0])
-
-                    # iterate current_n_vars_per_line
-                    current_n_vars_per_line += 1
-
-                # show station classification if it exists
-                if 'station_classification' in plot_characteristics['non-ghost_vars'].keys() and self.read_instance.station_classifications != {}:
-                    
-                    # if are on limit of vars allowed per line then break to new line
-                    if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
-                        str_to_plot += '\n'
-                        current_n_vars_per_line = 0
-
-                    # spacing
-                    str_to_plot += (' '*plot_characteristics['var_spacing'])
-                    
-                    # area classification
-                    str_to_plot += '{}: {}'.format(plot_characteristics['non-ghost_vars']['station_classification']['name_one'],
-                                                   self.read_instance.station_classifications[networkspeci][station_inds][0])
-
-                    # iterate current_n_vars_per_line
-                    current_n_vars_per_line += 1
-
-        # GHOST
+        # set up read for GHOST and non-GHOST data types 
+        if self.read_instance.reading_ghost:
+            char_var = 'ghost_vars'
         else:
-            # iterate through defined variables and add them
-            for ghost_var, ghost_var_dict in plot_characteristics['ghost_vars'].items():
-                
-                # if are on limit of vars allowed per line then break to new line
-                if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
-                    str_to_plot += '\n'
-                    current_n_vars_per_line = 0
-                # otherwise, add spacing between variables on line
+            char_var = 'non-ghost_vars'
+    
+        # iterate through defined variables and add them
+        for ghost_var, ghost_var_dict in plot_characteristics[char_var].items():
+
+            # check var str name exists in ghost var dict, if not move to next var
+            if var_str_name not in ghost_var_dict:
+                continue
+
+            # if are on limit of vars allowed per line then break to new line
+            if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
+                str_to_plot += '\n'
+                current_n_vars_per_line = 0
+            # otherwise, add spacing between variables on line
+            else:
+                str_to_plot += (' '*plot_characteristics['var_spacing'])
+
+            # round decimal places if float
+            if 'dp' in ghost_var_dict:
+                str_to_plot += '{}: {:.{}f}'.format(ghost_var_dict[var_str_name],
+                                                    np.nanmedian(self.read_instance.metadata_in_memory[networkspeci][ghost_var][
+                                                    station_inds].astype(np.float32)), 
+                                                    ghost_var_dict['dp'])
+
+            # if str then get unique elements or percentage dependent on n uniques
+            else:
+                # gather all selected station metadata for current meta variable
+                all_current_meta = self.read_instance.metadata_in_memory[networkspeci][ghost_var][
+                    station_inds].flatten().astype(np.str)
+
+                # get counts of all unique metadata elements across selected stations
+                unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
+                # get number of unique metadata elements across selected stations
+                n_unique_meta = len(unique_meta)
+
+                # 1 unique metadata element? then return it
+                if n_unique_meta == 1:
+                    str_to_plot += '{}: {}'.format(ghost_var_dict[var_str_name], unique_meta[0])
+                # if have > N unique metadata elements, just return count of the elements across the selected stations
+                elif n_unique_meta > plot_characteristics['max_uniques']:
+                    str_to_plot += '{}: {} uniques'.format(ghost_var_dict[var_str_name], n_unique_meta)
+                # otherwise, get percentage of unique metadata elements across selected stations
                 else:
-                    str_to_plot += (' '*plot_characteristics['var_spacing'])
+                    meta_pc = (100. / len(all_current_meta)) * meta_counts
+                    meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
+                    # create string for variable to plot
+                    str_to_plot += '{}: {}'.format(ghost_var_dict[var_str_name], ', '.join(
+                        [':'.join([str(var), pc]) for var, pc in zip(unique_meta, meta_pc)]))
 
-                # check var str name exists in ghost var dict, if not move to next var
-                if var_str_name not in ghost_var_dict:
-                    continue
+            # add units
+            if 'units' in ghost_var_dict:
+                if ghost_var_dict['units'] != '':
+                    str_to_plot += ' {}'.format(ghost_var_dict['units'])
 
-                # round decimal places if float
-                if 'dp' in ghost_var_dict:
-                    str_to_plot += '{}: {:.{}f}'.format(ghost_var_dict[var_str_name],
-                                                        np.nanmedian(self.read_instance.metadata_in_memory[networkspeci][ghost_var][
-                                                        station_inds].astype(np.float32)), 
-                                                        ghost_var_dict['dp'])
-
-                # if str then get unique elements or percentage dependent on n uniques
-                else:
-                    # gather all selected station metadata for current meta variable
-                    all_current_meta = self.read_instance.metadata_in_memory[networkspeci][ghost_var][
-                        station_inds].flatten().astype(np.str)
-
-                    # get counts of all unique metadata elements across selected stations
-                    unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
-                    # get number of unique metadata elements across selected stations
-                    n_unique_meta = len(unique_meta)
-
-                    # 1 unique metadata element? then return it
-                    if n_unique_meta == 1:
-                        str_to_plot += '{}: {}'.format(ghost_var_dict[var_str_name], unique_meta[0])
-                    # if have > N unique metadata elements, just return count of the elements across the selected stations
-                    elif n_unique_meta > plot_characteristics['max_uniques']:
-                        str_to_plot += '{}: {} uniques'.format(ghost_var_dict[var_str_name], n_unique_meta)
-                    # otherwise, get percentage of unique metadata elements across selected stations
-                    else:
-                        meta_pc = (100. / len(all_current_meta)) * meta_counts
-                        meta_pc = ['{:.1f}%'.format(meta) for meta in meta_pc]
-                        # create string for variable to plot
-                        str_to_plot += '{}: {}'.format(ghost_var_dict[var_str_name], ', '.join(
-                            [':'.join([str(var), pc]) for var, pc in zip(unique_meta, meta_pc)]))
-
-                # add units
-                if 'units' in ghost_var_dict:
-                    if ghost_var_dict['units'] != '':
-                        str_to_plot += ' {}'.format(ghost_var_dict['units'])
-
-                # iterate current_n_vars_per_line
-                current_n_vars_per_line += 1
+            # iterate current_n_vars_per_line
+            current_n_vars_per_line += 1
 
         # plot string to axis
         plot_txt = relevant_axis.text(0.0, 1.0, str_to_plot, transform=relevant_axis.transAxes, **plot_characteristics['plot'])
@@ -743,8 +695,7 @@ class Plot:
         if not self.read_instance.offline:
             self.track_plot_elements('observations', 'metadata', 'plot', plot_txt, bias=False)
 
-    def make_map(self, relevant_axis, networkspeci, z_statistic, plot_characteristics, plot_options=[],
-                 first_data_label=False):
+    def make_map(self, relevant_axis, networkspeci, z_statistic, plot_characteristics, plot_options=[]):
         """ Make map plot.
 
             :param relevant_axis: axis to plot on 
@@ -757,12 +708,10 @@ class Plot:
             :type plot_characteristics: dict
             :param plot_options: list of options to configure plot  
             :type plot_options: list
-            :param first_data_label: boolean informing if first plotted data_label on axis
-            :type first_data_label: boolean
         """
 
-        # get marker size
-        if (first_data_label) and (self.read_instance.offline):
+        # get marker size (for offline)
+        if self.read_instance.offline:
             self.get_markersize(relevant_axis, 'map', networkspeci, plot_characteristics)
 
         # plot new station points on map - coloured by currently active z statisitic
@@ -775,80 +724,122 @@ class Plot:
         if not self.read_instance.offline:
             self.track_plot_elements('observations', 'map', 'plot', [self.stations_scatter], bias=False)
 
-    def make_timeseries(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[], 
-                        first_data_label=False):
+    def make_timeseries(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
         """ Make timeseries plot.
 
             :param relevant_axis: axis to plot on 
             :type relevant_axis: object
             :param networkspeci: str of currently active network and species 
             :type networkspeci: str
-            :param data_label: name of data array to plot
-            :type data_label: str
+            :param data_labels: name of data arrays to plot
+            :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
             :param plot_options: list of options to configure plot  
             :type plot_options: list
-            :param first_data_label: boolean informing if first plotted data_label on axis
-            :type first_data_label: boolean
         """
 
-        # get marker size
-        if (first_data_label) and (self.read_instance.offline):
-            self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics)
+        # if 'obs' in plot_options, set data labels to just 'observations'
+        if 'obs' in plot_options:
+            data_labels = ['observations']
 
-        # bias plot?
+         # plot horizontal line across x axis at 0 if bias plot
         if 'bias' in plot_options:
-            bias = True
-            ts_obs = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']
-            ts_model = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] 
-            ts = ts_model - ts_obs
-            # plot horizontal line across x axis at 0 (if not already plotted)
-            if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
-                bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
-                # track plot elements if using dashboard 
-                if not self.read_instance.offline:
-                    self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
+            bias =  True
+            bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
         else:
             bias = False
-            ts = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']
 
-        # get ts with no NaNs
-        ts_nonan = ts.dropna()
-        
-        # make timeseries plot
-        self.timeseries_plot = relevant_axis.plot(ts_nonan, 
-                                                  color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                  **plot_characteristics['plot'])
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
 
-        # update maximum smooth value
-        if not self.read_instance.offline:
-            if self.canvas_instance.timeseries_smooth_sl.value() != (len(ts)*2 - 1):
-                self.canvas_instance.timeseries_smooth_sl.setMaximum(len(ts)*2 - 1)
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-        # track plot elements if using dashboard 
-        if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
-        
-    def make_periodic(self, relevant_axis, networkspeci, data_label, plot_characteristics, zstat=None, plot_options=[],
-                      first_data_label=False):
+        # iterate through data labels
+        for data_label in cut_data_labels:
+
+            # bias plot?
+            if bias:
+
+                # skip if 'observations' data label
+                if data_label == 'observations':
+                    continue
+
+                bias = True
+                ts_obs = self.canvas_instance.selected_station_data[networkspeci]['timeseries']['observations']
+                ts_model = self.canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label] 
+                ts = ts_model - ts_obs
+
+            else:
+                bias = False
+                ts = self.canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label]
+
+            # get marker size (for offline)
+            if self.read_instance.offline:
+                self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics, data=ts)
+
+            # make timeseries plot
+            self.timeseries_plot = relevant_axis.plot(ts, 
+                                                      color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                      **plot_characteristics['plot'])
+
+            # update maximum smooth value
+            if not self.read_instance.offline:
+                if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
+                    self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts)*2 - 1)
+
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
+
+    def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
+                      zstat=None, plot_options=[]):
         """ Make period or period-violin plot.
 
             :param relevant_axis: axis to plot on 
             :type relevant_axis: object
             :param networkspeci: str of currently active network and species 
             :type networkspeci: str
-            :param data_label: name of data array to plot
-            :type data_label: str
+            :param data_labels: name of data arrays to plot
+            :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
             :param zstat: name of statistic
             :type zstat: str
             :param plot_options: list of options to configure plot  
             :type plot_options: list
-            :param first_data_label: boolean informing if first plotted data_label on axis
-            :type first_data_label: boolean
         """
+
+        # if 'obs' in plot_options, set data labels to just 'observations'
+        if 'obs' in plot_options:
+            data_labels = ['observations']
+
+        # determine if 'bias' in plot_options
+        if 'bias' in plot_options:
+            bias = True
+        else:
+            bias = False
+
+        # get zstat information
+        if zstat:
+            zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
+
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+        # hide non-relevant resolution axes
+        for nonrelevant_temporal_resolution in self.read_instance.nonrelevant_temporal_resolutions:
+            # get subplot axis
+            relevant_sub_ax = relevant_axis[nonrelevant_temporal_resolution]
+            relevant_sub_ax.axis('off')
+            relevant_sub_ax.set_visible(False)
 
         # iterate through all relevant temporal aggregation resolutions
         for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
@@ -856,291 +847,480 @@ class Plot:
             # get subplot axis
             relevant_sub_ax = relevant_axis[relevant_temporal_resolution]
 
+            # un-hide relevant resolution axis
+            relevant_sub_ax.axis('on')
+            relevant_sub_ax.set_visible(True)
+
+            # set xticks
+            xticks = self.canvas_instance.selected_station_data[networkspeci][relevant_temporal_resolution]['valid_xticks']
+
             # violin plot type?
             if not zstat:
 
-                # get grouped data for current temporal aggregation resolution
-                grouped_data = self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['grouped_data']
-                # drop any groups which have no data
-                grouped_data = [group for group in grouped_data if len(group) > 0]
+                # calculate medians
+                medians = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 'Median', 
+                                              data_labels, [], period=relevant_temporal_resolution)
 
-                # make violin plot 
-                self.violin_plot = relevant_sub_ax.violinplot(grouped_data, 
-                                                              positions=self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['valid_xticks'], 
-                                                              **plot_characteristics['plot']['violin'])
+                # calculate PDF for data label
+                period_x_grid, PDFs_sampled = self.make_distribution(relevant_axis, networkspeci, data_labels, 
+                                                                     plot_characteristics, 
+                                                                     violin_resolution=relevant_temporal_resolution)
 
-                # plot p50
-                xticks = self.canvas_instance.periodic_xticks[relevant_temporal_resolution]
-                medians = self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution]['p50']
-                median_zorder = self.read_instance.plotting_params[data_label]['zorder']+len(self.read_instance.data_labels)
-                
-                # split arrays if there are any temporal gaps to avoid
-                # line drawn being interpolated across missing values
-                inds_to_split = np.where(np.diff(xticks) > 1)[0]
-                if len(inds_to_split) == 0:
-                    p50_plots = relevant_sub_ax.plot(xticks, medians, 
-                                                     color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                     zorder=median_zorder, 
-                                                     **plot_characteristics['plot']['p50'])
-                else:
-                    p50_plots = []
-                    inds_to_split += 1
-                    start_ind = 0
-                    for end_ind in inds_to_split:
-                        p50_plots += relevant_sub_ax.plot(xticks[start_ind:end_ind], medians[start_ind:end_ind], 
-                                                          color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                          zorder=median_zorder, 
-                                                          **plot_characteristics['plot']['p50'])
-                        start_ind = end_ind
-                    p50_plots += relevant_sub_ax.plot(xticks[start_ind:], medians[start_ind:], 
-                                                      color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                      zorder=median_zorder, 
-                                                      **plot_characteristics['plot']['p50'])
+                # iterate through data labels and plot violins
+                for data_label_ii, data_label in enumerate(cut_data_labels): 
 
-                # update plotted objects with necessary colour and alpha
-                for patch in self.violin_plot['bodies']:
-                    patch.set_facecolor(self.read_instance.plotting_params[data_label]['colour'])
+                    # list to save all violins per data label
+                    violins = []
+
+                    # get median zorder
+                    median_zorder = self.read_instance.plotting_params[data_label]['zorder']+len(cut_data_labels)
+                    
+                    # get alpha
                     if data_label == 'observations':
-                        patch.set_alpha(plot_characteristics['patch']['alpha_obs'])
+                        alpha = plot_characteristics['patch']['alpha_obs']
                     else:
-                        patch.set_alpha(plot_characteristics['patch']['alpha_exp'])
-                    # if have at least 1 valid experiment data array, split the violin plot across the horizontal
-                    # (observations on left, experiment violin_plots on right)
-                    if (len(self.canvas_instance.selected_station_data[networkspeci]) > 1) & ('individual' not in plot_options):
-                        m = np.mean(patch.get_paths()[0].vertices[:, 0])
-                        # observations on left
-                        if data_label == 'observations':
-                            patch.get_paths()[0].vertices[:, 0] = np.clip(patch.get_paths()[0].vertices[:, 0], -np.inf, m)
-                        # experiments on right
+                        alpha = plot_characteristics['patch']['alpha_exp']
+
+                    # make plot of median
+                    median_plots = relevant_sub_ax.plot(xticks, medians[:, data_label_ii], 
+                                                        color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                        zorder=median_zorder, 
+                                                        **plot_characteristics['plot']['median'])
+
+                    # make violin plot
+                    for period_ii in range(len(xticks)):
+
+                        # get x_grid for period
+                        x_grid = period_x_grid[period_ii]
+
+                        if relevant_temporal_resolution == 'month':
+                            period_pos = period_ii + 1
                         else:
-                            patch.get_paths()[0].vertices[:, 0] = np.clip(patch.get_paths()[0].vertices[:, 0], m, np.inf)
+                            period_pos = period_ii
+                        PDF_sampled = PDFs_sampled[data_label_ii, period_ii, :]
+                        if not np.all(np.isnan(PDF_sampled)):
+                            
+                            PDF_sampled = 0.5 * plot_characteristics['plot']['violin']['widths'] * PDF_sampled / PDF_sampled.max()
+                            self.violin_plot = relevant_sub_ax.fill_betweenx(x_grid, -PDF_sampled + period_pos, PDF_sampled + period_pos,
+                                                                             facecolor=self.read_instance.plotting_params[data_label]['colour'], 
+                                                                             alpha=alpha)
 
-                # track plot elements if using dashboard 
-                if not self.read_instance.offline:
-                    self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), self.violin_plot, bias=False)
-                    self.track_plot_elements(data_label, 'periodic-violin', 'p50_plot_{}'.format(relevant_temporal_resolution), p50_plots, bias=False)
+                            # if have at least 1 valid experiment data array, split the violin plot across the horizontal
+                            # (observations on left, experiment violin_plots on right)
+                            if (len(cut_data_labels) > 1) & ('individual' not in plot_options):
+                                m = np.mean(self.violin_plot.get_paths()[0].vertices[:, 0])
+                                # observations on left
+                                if data_label == 'observations':
+                                    self.violin_plot.get_paths()[0].vertices[:, 0] = np.clip(self.violin_plot.get_paths()[0].vertices[:, 0], -np.inf, m)
+                                # experiments on right
+                                else:
+                                    self.violin_plot.get_paths()[0].vertices[:, 0] = np.clip(self.violin_plot.get_paths()[0].vertices[:, 0], m, np.inf)
 
-            # standard periodic plot type
+                            # save violin
+                            violins.append(self.violin_plot)
+                    
+                    # add hidden poins for data limits per data label to allow for limit harmonisation
+                    if len(violins) > 0:
+                        limit_plot = relevant_sub_ax.plot([period_pos,period_pos], 
+                                                          [np.min(period_x_grid),np.max(period_x_grid)],
+                                                           alpha=0.0)
+                        violins.extend(limit_plot)
+
+                    # track plot elements if using dashboard 
+                    if not self.read_instance.offline:
+                        self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), violins, bias=False)
+                        self.track_plot_elements(data_label, 'periodic-violin', 'Median_plot_{}'.format(relevant_temporal_resolution), median_plots, bias=False)
+
+            # periodic plot type
             else:
-                # determine if 'bias' in plot_options
-                if 'bias' in plot_options:
-                    bias = True
-                else:
-                    bias = False
 
-                # get zstat information
-                zstat, base_zstat, z_statistic_type, z_statistic_sign = get_z_statistic_info(zstat=zstat)
-
-                # plot horizontal line/s across x axis at value/s of minimum experiment bias (if bias option is active, and not previously plotted)
+                # plot horizontal line/s across x axis at value/s of minimum experiment bias (if bias statistic)
                 if z_statistic_sign == 'bias':
-                    if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
-                        # get value/s of minimum bias for statistic
-                        if z_statistic_type == 'basic':
-                            minimum_bias = basic_stats[base_zstat]['minimum_bias']
-                        else:
-                            minimum_bias = expbias_stats[base_zstat]['minimum_bias']
-                        bias_lines = []
-                        for mb in minimum_bias:
-                            bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
-                        # track plot elements if using dashboard 
-                        if not self.read_instance.offline:
-                            self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), bias_lines, bias=bias)
+                    # get value/s of minimum bias for statistic
+                    if z_statistic_type == 'basic':
+                        minimum_bias = basic_stats[base_zstat]['minimum_bias']
+                    else:
+                        minimum_bias = expbias_stats[base_zstat]['minimum_bias']
+                    bias_lines = []
+                    for mb in minimum_bias:
+                        bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
+                    # track plot elements if using dashboard 
+                    if not self.read_instance.offline:
+                        self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), 
+                                                 bias_lines, bias=bias)
 
-                # make plot
-                self.periodic_plot = relevant_sub_ax.plot(self.canvas_instance.periodic_xticks[relevant_temporal_resolution],
-                                                          self.canvas_instance.selected_station_data[networkspeci][data_label][relevant_temporal_resolution][zstat],
-                                                          color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                          zorder=self.read_instance.plotting_params[data_label]['zorder'],
-                                                          **plot_characteristics['plot'])
-                                        
-                # track plot elements if using dashboard 
-                if not self.read_instance.offline:
-                    self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), self.periodic_plot, bias=bias)
+                # calculate statistic in each of periodic groups per data label
+                if z_statistic_sign == 'bias':
+                    if 'observations' in cut_data_labels:
+                        cut_data_labels.remove('observations')
+                    stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
+                                                    ['observations']*len(cut_data_labels), cut_data_labels, 
+                                                    period=relevant_temporal_resolution)
+                else:
+                    stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 
+                                                     zstat, data_labels, [], period=relevant_temporal_resolution)
 
-    def make_distribution(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
-                          first_data_label=False, data_range_min=False, data_range_max=False):
+                # iterate through data labels and plot violins
+                for data_label_ii, data_label in enumerate(cut_data_labels): 
+
+                    # skip observational array if bias stat
+                    if (z_statistic_sign == 'bias') & (data_label == 'observations'):
+                        continue
+
+                    # make plot
+                    self.periodic_plots = relevant_sub_ax.plot(xticks, stats_calc[:, data_label_ii], 
+                                                               color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                               zorder=self.read_instance.plotting_params[data_label]['zorder'], 
+                                                               **plot_characteristics['plot'])
+
+                    # track plot elements if using dashboard 
+                    if not self.read_instance.offline:
+                        self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), self.periodic_plots, bias=bias)
+
+    def make_distribution(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[],
+                          data_range_min=None, data_range_max=None, violin_resolution=None):
         """ Make distribution plot.
 
             :param relevant_axis: axis to plot on 
             :type relevant_axis: object
             :param networkspeci: str of currently active network and species 
             :type networkspeci: str
-            :param data_label: name of data array to plot
-            :type data_label: str
+            :param data_labels: name of data arrays to plot
+            :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
             :param plot_options: list of options to configure plot  
             :type plot_options: list
-            :param first_data_label: boolean informing if first plotted data_label on axis
-            :type first_data_label: boolean
             :param data_range_min: minimum data range of distribution plot grid 
             :type data_range_min: float
             :param data_range_max: maximum data range of distribution plot grid 
             :type data_range_max: float
+            :param violin_resolution: if are calculating distribution for violin plot, this is set to temporal resolution of groupings
+            :type violin_resolution: int
         """
 
-        # set data ranges for distribution plot grid if not set explicitely
+        # determine if 'bias' in plot_options
+        if 'bias' in plot_options:
+            bias = True
+        else:
+            bias = False
+
+        # if 'obs' in plot_options, set data labels to just 'observations'
+        if 'obs' in plot_options:
+            data_labels = ['observations']
+
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+        # set data ranges for distribution plot grid if not set explicitly
         if not data_range_min:
             data_range_min = self.canvas_instance.selected_station_data_min[networkspeci]
 
         if not data_range_max:
             data_range_max = self.canvas_instance.selected_station_data_max[networkspeci]
 
-        # make distribution plot
-        minmax_diff = data_range_max - data_range_min
-        if pd.isnull(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']):
+        # set xgrid for calculating distribution
+        # if calculating for period n_samples is set to pdf_min_samples
+        # otherwise it is inferred from data (if above minimum value)
+        if violin_resolution:
             n_samples = plot_characteristics['pdf_min_samples']
         else:
-            n_samples = int(np.around(minmax_diff/(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']/4.0),0))
-            if n_samples < plot_characteristics['pdf_min_samples']:
+            minmax_diff = data_range_max - data_range_min
+            if pd.isnull(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']):
                 n_samples = plot_characteristics['pdf_min_samples']
-        x_grid = np.linspace(data_range_min, data_range_max, n_samples, endpoint=True)
-
-        PDF_sampled_calculated = False
-
-        # setup bias plot
-        if 'bias' in plot_options:
-
-            bias = True
-            kde_data_obs = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']['data'].dropna()
-            kde_data_model = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna()
-            
-            # check if all values are equal in the dataframe
-            if kde_data_obs.eq(kde_data_obs[0]).all(axis=0) or kde_data_model.eq(kde_data_model[0]).all(axis=0):
-                print('Warning: The kernel density cannot be calculated for this station because all values are equal.')
             else:
-                PDF_obs = st.gaussian_kde(kde_data_obs)
-                PDF_model = st.gaussian_kde(kde_data_model)
-                PDF_sampled = PDF_model(x_grid) - PDF_obs(x_grid)
-                PDF_sampled_calculated = True
+                n_samples = int(np.around(minmax_diff/(self.read_instance.parameter_dictionary[networkspeci.split('|')[1]]['minimum_resolution']/100.0),0))
+                if n_samples < plot_characteristics['pdf_min_samples']:
+                    n_samples = plot_characteristics['pdf_min_samples']
 
-                # plot horizontal line across x axis at 0 (if not already plotted)
-                if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
-                    bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
-                    # track plot elements if using dashboard 
-                    if not self.read_instance.offline:
-                        self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
+        # round n_samples to next next power of 2 (for fft optimisation)
+        n_samples = 2 ** np.ceil(np.log2(n_samples)) 
+        # set x_grid
+        x_grid = np.linspace(data_range_min,data_range_max,int(n_samples))
 
-        # setup standard plot
-        else:
-
-            bias = False
-            kde_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna()
-
-            # check if all values are equal in the dataframe
-            if kde_data.eq(kde_data[0]).all(axis=0):
-                print('Warning: The kernel density cannot be calculated for this station because all values are equal.')
-            else:
-                PDF = st.gaussian_kde(kde_data)
-                PDF_sampled = PDF(x_grid)
-                PDF_sampled_calculated = True
-        
-        if PDF_sampled_calculated:
-            # make plot
-            self.distribution_plot = relevant_axis.plot(x_grid, PDF_sampled, 
-                                                        color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                        **plot_characteristics['plot'])
-
+        # plot horizontal line across x axis at 0 if bias plot
+        # also remove observations from cut_data_labels
+        if bias:
+            bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
             # track plot elements if using dashboard 
             if not self.read_instance.offline:
-                self.track_plot_elements(data_label, 'distribution', 'plot', self.distribution_plot, bias=bias)
+                self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
+            if 'observations' in cut_data_labels:
+                cut_data_labels.remove('observations')
 
-    def make_scatter(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
-                     first_data_label=False):
+        # if violin plot setup arrays for saving data
+        if violin_resolution:
+            PDFs_sampled = np.full((len(cut_data_labels), len(self.canvas_instance.periodic_xticks[violin_resolution]), int(n_samples)), np.NaN, dtype=np.float32)
+
+        # iterate through data labels
+        for data_label_ii, data_label in enumerate(cut_data_labels):
+        
+            PDF_sampled_calculated = False
+
+            # setup bias plot
+            if bias:
+
+                # calculate obs PDF on first pass
+                if data_label_ii == 0:
+                    kde_data_obs = drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index('observations'),0,:])
+                    
+                    #filter out data outside data range bounds
+                    #kde_data_obs = kde_data_obs[(kde_data_obs > data_range_min) & (kde_data_obs < data_range_max)]
+                    
+                    # check if all values are equal in the dataframe
+                    if kde_data_obs.size == 0:
+                        print('Warning: The kernel density cannot be calculated because there are no valid observational values.')
+                        return
+                    elif np.all(kde_data_obs == kde_data_obs[0]):
+                        print('Warning: The kernel density cannot be calculated because all observational values are equal.')
+                        return
+                    else:
+                        PDF_obs_sampled = kde_fft(kde_data_obs, xgrid=x_grid)
+                        #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_obs)
+                        #PDF_obs_sampled = PDF_fit.evaluate(x_grid)
+
+
+                # calculate model PDF
+                kde_data_model = drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])
+                
+                #filter out data outside data range bounds
+                #kde_data_model = kde_data_model[(kde_data_model > data_range_min) & (kde_data_model < data_range_max)]
+                
+                # check if all values are equal in the dataframe
+                if kde_data_model.size == 0:
+                    print('Warning: The kernel density cannot be calculated because there are no valid values for {} experiment.'.format(data_label))
+                    continue
+                elif np.all(kde_data_model == kde_data_model[0]):
+                    print('Warning: The kernel density cannot be calculated because all values for {} experiment are equal.'.format(data_label))
+                    continue
+                # calculate PDF
+                PDF_model_sampled = kde_fft(kde_data_model, xgrid=x_grid)
+                #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_model)
+                #PDF_model_sampled = PDF_fit.evaluate(x_grid)
+
+                # calculate difference
+                PDF_sampled = PDF_model_sampled - PDF_obs_sampled
+                PDF_sampled_calculated = True
+
+            # setup standard plot
+            else:
+
+                # if first data label and calculating distributions for violin plot,
+                # calculate the x_grid / data ranges per period  
+                # use min for min data range and upper inner Tukey fence for max data range
+                if (violin_resolution != None) & (data_label_ii == 0):
+                    period_data_range_min = []
+                    period_data_range_max = []
+                    period_x_grid = []
+                    # iterate through periods
+                    for group in self.canvas_instance.selected_station_data[networkspeci][violin_resolution]['active_mode']:
+                        lower_inner_fence, upper_inner_fence = boxplot_inner_fences(group)
+                        min_data = np.nanmin(group)
+                        period_data_range_min.append(min_data)
+                        period_data_range_max.append(upper_inner_fence)
+                        period_x_grid.append(np.linspace(min_data,upper_inner_fence,int(n_samples)))
+
+                # get data (flattened and drop NaNs)
+                if violin_resolution:
+                    kde_data_grouped = [drop_nans(group[valid_data_labels.index(data_label)].flatten()) for group in self.canvas_instance.selected_station_data[networkspeci][violin_resolution]['active_mode']]
+                else:    
+                    kde_data_grouped = [drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])]
+
+                # iterate through kde data groups
+                for period_ii, kde_data in enumerate(kde_data_grouped):
+
+                    # get relevant data ranges / x_grid, for violin period distribution calculation
+                    if violin_resolution:
+                        data_range_min = period_data_range_min[period_ii]
+                        data_range_max = period_data_range_max[period_ii]
+                        x_grid = period_x_grid[period_ii]
+
+                    #filter out data outside data range bounds
+                    #kde_data = kde_data[(kde_data > data_range_min) & (kde_data < data_range_max)]
+
+                    # check if all values are equal in the dataframe
+                    if kde_data.size == 0:
+                        if not violin_resolution:
+                            print('Warning: The kernel density cannot be calculated because there are no valid values for {}.'.format(data_label))
+                        continue
+                    elif np.all(kde_data == kde_data[0]):
+                        if not violin_resolution:
+                            print('Warning: The kernel density cannot be calculated because all {} values are equal.'.format(data_label))
+                        continue
+                    else:
+                        PDF_sampled = kde_fft(kde_data, xgrid=x_grid)
+                        #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data)
+                        #PDF_sampled = PDF_fit.evaluate(x_grid)
+                        # save PDF for violin plot
+                        if violin_resolution:
+                            PDFs_sampled[data_label_ii, period_ii, :] = PDF_sampled
+                        else:
+                            PDF_sampled_calculated = True
+
+            # make plot (if not making PDF for violin plot)
+            if PDF_sampled_calculated:
+                # make plot
+                self.distribution_plot = relevant_axis.plot(x_grid, PDF_sampled, 
+                                                            color=self.read_instance.plotting_params[data_label]['colour'], 
+                                                            **plot_characteristics['plot'])
+
+                # track plot elements if using dashboard 
+                if not self.read_instance.offline:
+                    self.track_plot_elements(data_label, 'distribution', 'plot', self.distribution_plot, bias=bias)
+
+        # if have made PDFs for violin plot then return it
+        if violin_resolution:
+            return period_x_grid, PDFs_sampled
+
+    def make_scatter(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
         """ Make scatter plot.
 
             :param relevant_axis: axis to plot on 
             :type relevant_axis: object
             :param networkspeci: str of currently active network and species 
             :type networkspeci: str
-            :param data_label: name of data array to plot
-            :type data_label: str
+            :param data_labels: name of data arrays to plot
+            :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
             :param plot_options: list of options to configure plot  
             :type plot_options: list
-            :param first_data_label: boolean informing if first plotted data_label on axis
-            :type first_data_label: boolean
         """
 
-        # get marker size
-        if (first_data_label) and (self.read_instance.offline):
-            self.get_markersize(relevant_axis, 'scatter', networkspeci, plot_characteristics)
+        # if 'obs' in plot_options, set data labels to just 'observations'
+        if 'obs' in plot_options:
+            data_labels = ['observations']
 
-        # get observations data
-        observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']['data']
+        # add 1:1 line (if in plot_characteristics)
+        if '1:1_line' in plot_characteristics:
+            relevant_axis.plot([0, 1], [0, 1], transform=relevant_axis.transAxes, 
+                            **plot_characteristics['1:1_line'])
+        # add 1:2 line (if in plot_characteristics)
+        if '1:2_line' in plot_characteristics:
+            relevant_axis.plot([0, 1], [0, 0.5], transform=relevant_axis.transAxes, 
+                            **plot_characteristics['1:2_line'])     
+        # add 2:1 line (if in plot_characteristics)
+        if '2:1_line' in plot_characteristics:
+            relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
+                            **plot_characteristics['2:1_line'])
 
-        # get experiment data
-        experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data']
-        
-        # add extra lines only once (if not already plotted)
-        if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
-            # add 1:1 line (if in plot_characteristics)
-            if '1:1_line' in plot_characteristics:
-                relevant_axis.plot([0, 1], [0, 1], transform=relevant_axis.transAxes, 
-                                   **plot_characteristics['1:1_line'])
-            # add 1:2 line (if in plot_characteristics)
-            if '1:2_line' in plot_characteristics:
-                relevant_axis.plot([0, 1], [0, 0.5], transform=relevant_axis.transAxes, 
-                                   **plot_characteristics['1:2_line'])     
-            # add 2:1 line (if in plot_characteristics)
-            if '2:1_line' in plot_characteristics:
-                relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
-                                   **plot_characteristics['2:1_line'])
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
 
-        # create scatter plot
-        self.scatter_plot = relevant_axis.plot(observations_data, experiment_data, 
-                                               color=self.read_instance.plotting_params[data_label]['colour'],
-                                               **plot_characteristics['plot'])
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-        # track plot elements if using dashboard 
-        if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'scatter', 'plot', self.scatter_plot, bias=False)
-          
-    def make_boxplot(self, relevant_axis, networkspeci, data_label, plot_characteristics, plot_options=[],
-                     first_data_label=False):
+        # get observations data (flattened)
+        observations_data = self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index('observations'),0,:]
+
+        # determine if number of points per data array exceeds max limit,
+        # if so subset arrays
+        subset = False
+        data_array_size = observations_data.size
+        if data_array_size > plot_characteristics['max_points']:
+            subset = True
+            inds_subset = np.random.choice(data_array_size, size=plot_characteristics['max_points'], replace=False)
+            observations_data = observations_data[inds_subset]
+
+        # iterate through data labels
+        for data_label in cut_data_labels:
+
+            # continue for observations data label
+            if data_label == 'observations':
+                continue
+
+            # get experiment data (flattened)
+            experiment_data = self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:]
+
+            # subset data if neccessary
+            if subset:
+                experiment_data = experiment_data[inds_subset]
+
+            # get marker size (for offline)
+            if self.read_instance.offline:
+                self.get_markersize(relevant_axis, 'scatter', networkspeci, plot_characteristics, data=observations_data)
+
+            # create scatter plot
+            self.scatter_plot = relevant_axis.plot(observations_data, experiment_data, 
+                                                   color=self.read_instance.plotting_params[data_label]['colour'],
+                                                   **plot_characteristics['plot'])
+
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements(data_label, 'scatter', 'plot', self.scatter_plot, bias=False)
+
+    def make_boxplot(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
         """ Make boxplot.
 
             :param relevant_axis: axis to plot on 
             :type relevant_axis: object
             :param networkspeci: str of currently active network and species 
             :type networkspeci: str
-            :param data_label: name of data array to plot
-            :type data_label: str
+            :param data_labels: name of data arrays to plot
+            :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
             :param plot_options: list of options to configure plot  
             :type plot_options: list
-            :param first_data_label: boolean informing if first plotted data_label on axis
-            :type first_data_label: boolean
         """
 
-        # make boxplot for data_label for multispecies
+        # if 'obs' in plot_options, set data labels to just 'observations'
+        if 'obs' in plot_options:
+            data_labels = ['observations']
+
+        # if multispecies in plot options then make plot for all networkspecies
         if 'multispecies' in plot_options:
+            networkspecies = self.read_instance.networkspecies
+        else:
+            networkspecies = [networkspeci]
 
-            if ('individual' in plot_options) or ('obs' in plot_options) or (len(self.read_instance.networkspecies) == 1):
-                widths = plot_characteristics['group_widths']['singlespecies']
-            else:
-                available_width = plot_characteristics['group_widths']['multispecies']
-                remainder_width = 1.0 - available_width
-                start_point = -0.5 + (remainder_width / 2.0)
-                widths = available_width / (len(self.read_instance.data_labels) + 0.15)
-                spacing = (available_width - (widths * len(self.read_instance.data_labels))) / (len(self.read_instance.data_labels) - 1)
+        # iterate through networkspecies
+        ns_current = 0
+        for ns in networkspecies:
 
-            for ns_ii, ns in enumerate(self.read_instance.networkspecies):
-                if ('individual' in plot_options) or ('obs' in plot_options):
-                    positions = [ns_ii]
-                elif (len(self.read_instance.networkspecies) == 1):
-                    positions = [self.read_instance.data_labels.index(data_label)]
+            # get valid data labels for networkspeci
+            valid_data_labels = self.canvas_instance.selected_station_data_labels[ns]
+
+            # cut data_labels for those in valid data labels
+            cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+            # only proceed if have some data labels to plot
+            if len(cut_data_labels) > 0:
+
+                # get data label width and spacing
+                if ('individual' in plot_options) or ('obs' in plot_options) or (len(self.read_instance.networkspecies) == 1):
+                    widths = plot_characteristics['group_widths']['singlespecies']
                 else:
-                    positions = [((start_point + (widths/2.0)) + (spacing * self.read_instance.data_labels.index(data_label)) + (widths * self.read_instance.data_labels.index(data_label))) + ns_ii]  
+                    available_width = plot_characteristics['group_widths']['multispecies']
+                    remainder_width = 1.0 - available_width
+                    start_point = -0.5 + (remainder_width / 2.0)
+                    widths = available_width / (len(cut_data_labels) + 0.15)
+                    spacing = (available_width - (widths * len(cut_data_labels))) / (len(cut_data_labels) - 1)
 
-                # check have data_label to plot for networkspecies?
-                if data_label in self.canvas_instance.selected_station_data[ns]: 
+                # get plot positions
+                if ('individual' in plot_options) or ('obs' in plot_options):
+                    positions = [ns_current]
+                elif (len(self.read_instance.networkspecies) == 1):
+                    positions = np.arange(len(cut_data_labels))
+                else:
+                    positions = [((start_point + (widths/2.0)) + (spacing * data_label_ii) + (widths * data_label_ii)) + ns_current 
+                                for data_label_ii in range(len(cut_data_labels))]  
                 
+                # iterate ns_current
+                ns_current += 1
+
+                # iterate through cut data labels making plot
+                for data_label_ii, data_label in enumerate(cut_data_labels):
+
+                    # get data (flattened and drop NaNs)
+                    data_array = drop_nans(self.canvas_instance.selected_station_data[ns]['flat'][valid_data_labels.index(data_label),0,:])
+
                     # make boxplot
-                    boxplot = relevant_axis.boxplot(self.canvas_instance.selected_station_data[ns][data_label]['pandas_df']['data'].dropna(), 
-                                                    positions=positions, widths=widths, **plot_characteristics['plot'])
+                    boxplot = relevant_axis.boxplot(x=data_array, positions=[positions[data_label_ii]], widths=widths, 
+                                                    **plot_characteristics['plot'])
 
                     # set box colour
                     for element in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']:
@@ -1149,81 +1329,82 @@ class Plot:
                     for patch in boxplot['boxes']:
                         patch.set(facecolor='white')
 
-        # make boxplot for datalabel for networkspeci
+                    # track plot elements if using dashboard 
+                    if not self.read_instance.offline:
+                        self.track_plot_elements(data_label, 'boxplot', 'plot', boxplot, bias=False)
+
+        # set xticklabels 
+        # labels for multispecies plot
+        xtick_params = copy.deepcopy(plot_characteristics['xtick_params'])
+        xticklabel_params = copy.deepcopy(plot_characteristics['xticklabel_params'])
+        if ('multispecies' in plot_options) & (len(self.read_instance.networkspecies) > 1):
+            xticks = np.arange(len(self.read_instance.networkspecies))
+            #if all networks or species are same, drop them from xtick label
+            if len(np.unique(self.read_instance.network)) == 1:
+                xtick_labels = copy.deepcopy(self.read_instance.species)
+            elif len(np.unique(self.read_instance.species)) == 1:
+                xtick_labels = copy.deepcopy(self.read_instance.network)
+            else:
+                xtick_labels = copy.deepcopy(self.read_instance.networkspecies)
+            # get aliases for multispecies (if have any)
+            xtick_labels, xlabel = get_multispecies_aliases(xtick_labels)
+            # set xlabel if xlabels have changed due to alias, and have one to set
+            if xlabel != '':
+                plot_characteristics['xlabel']['xlabel'] = xlabel
+                relevant_axis.set_xlabel(**plot_characteristics['xlabel'])
+        # labels for standard plot
         else:
-            if ('individual' in plot_options) or ('obs' in plot_options):
-                positions = [0]
-            else:
-                positions = [self.read_instance.data_labels.index(data_label)]
-            widths = plot_characteristics['group_widths']['singlespecies']
-
-            # make boxplot
-            boxplot = relevant_axis.boxplot(self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']['data'].dropna(), 
-                                            positions=positions, widths=widths, **plot_characteristics['plot'])
-        
-            # set box colour
-            for element in ['boxes', 'whiskers', 'fliers', 'medians', 'caps']:
-                plt.setp(boxplot[element], color=self.read_instance.plotting_params[data_label]['colour'])
-            # set fill colour to be white
-            for patch in boxplot['boxes']:
-                patch.set(facecolor='white')
-
-        # set xticklabels (if not already plotted)
-        if (first_data_label) or ('individual' in plot_options) or ('obs' in plot_options):
-            if ('multispecies' in plot_options) & (len(self.read_instance.networkspecies) > 1):
-                xticks = np.arange(len(self.read_instance.networkspecies))
-                #if all networks or species are same, drop them from xtick label
-                if len(np.unique(self.read_instance.network)) == 1:
-                    xtick_labels = copy.deepcopy(self.read_instance.species)
-                elif len(np.unique(self.read_instance.species)) == 1:
-                    xtick_labels = copy.deepcopy(self.read_instance.network)
-                else:
-                    xtick_labels = copy.deepcopy(self.read_instance.networkspecies)
-                # get aliases for multispecies (if have any)
-                xtick_labels, xlabel = get_multispecies_aliases(xtick_labels)
-                # set xlabel if xlabels have changed due to alias, and have one to set
-                if xlabel != '':
-                    plot_characteristics['xlabel']['xlabel'] = xlabel
-                    relevant_axis.set_xlabel(**plot_characteristics['xlabel'])
-            else:
-                data_labels_to_plot = copy.deepcopy(self.read_instance.data_labels)
-                for dl_ii, dl in enumerate(self.read_instance.data_labels):
-                    if dl == 'observations':
-                        if 'legend' in plot_characteristics:
-                            obs_label = plot_characteristics['legend']['handles']['obs_label']
-                        elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
-                            obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label']
-                        else:
-                            obs_label = 'Observations'
-                        data_labels_to_plot[dl_ii] = obs_label
+            data_labels_to_plot = copy.deepcopy(cut_data_labels)
+            for data_label_ii, data_label in enumerate(cut_data_labels):
+                if data_label == 'observations':
+                    if 'legend' in plot_characteristics:
+                        obs_label = plot_characteristics['legend']['handles']['obs_label']
+                    elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
+                        obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label']
                     else:
-                        data_labels_to_plot[dl_ii] = self.read_instance.experiments[dl]
-                if ('individual' in plot_options) or ('obs' in plot_options):
-                    xticks = [0]
-                    xtick_labels = [data_labels_to_plot[self.read_instance.data_labels.index(data_label)]]
+                        obs_label = 'Observations'
+                    data_labels_to_plot[data_label_ii] = obs_label
                 else:
-                    xticks = np.arange(len(data_labels_to_plot))
-                    xtick_labels = data_labels_to_plot
+                    data_labels_to_plot[data_label_ii] = self.read_instance.experiments[data_label]
+            xticks = positions
+            if ('individual' in plot_options) or ('obs' in plot_options):
+                xtick_labels = [data_labels_to_plot[cut_data_labels.index(data_label)]]
+                relevant_axis.xaxis.set_tick_params()
+            else:
+                xtick_labels = data_labels_to_plot
 
-            # set xticks / xticklabels
-            relevant_axis.set_xticks(xticks)
-            relevant_axis.set_xticklabels(xtick_labels, **plot_characteristics['xticklabel_params'])
+        #modify xticks to be horizontal as just have 1 label
+        if len(xtick_labels) == 1:
+            xtick_params['rotation'] = 0
+            xticklabel_params = {}
 
-        # track plot elements if using dashboard 
-        if not self.read_instance.offline:
-            self.track_plot_elements(data_label, 'boxplot', 'plot', boxplot, bias=False)
+        # set xticks / xticklabels
+        relevant_axis.set_xticks(xticks)
+        relevant_axis.xaxis.set_tick_params(**xtick_params)
+        relevant_axis.set_xticklabels(xtick_labels, **xticklabel_params)
 
-    def make_heatmap(self, relevant_axis, stats_df, plot_characteristics, plot_options=[]):
+    def make_heatmap(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
+                     zstats=None, plot_options=[], subsection=None, plotting_paradigm=None, stats_df=None):
         """ Make heatmap plot.
 
             :param relevant_axis: axis to plot on 
             :type relevant_axis: object
-            :param stats_df: dataframe of calculated statistical information
-            :type stats_df: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_labels: name of data arrays to plot
+            :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
+            :param zstats: name of statistics
+            :type zstats: list
             :param plot_options: list of options to configure plot  
             :type plot_options: list
+            :param subsection: str of currently active subsection
+            :type subsection: str
+            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+            :type plotting_paradigm: str
+            :param stats_df: dataframe of previously calculated statistics, default is None
+            :param stats_df: pandas dataframe
         """
 
         # determine if want to add annotations or not from plot_options
@@ -1238,8 +1419,53 @@ class Plot:
         else:
             bias = False
 
+        # if statistical dataframe is not provided then create it
+        if not isinstance(stats_df, pd.DataFrame):
+
+            # get valid data labels for networkspeci
+            valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+            # cut data_labels for those in valid data labels
+            cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+            # calculate statistics
+            if bias:
+                if 'observations' in cut_data_labels:
+                    cut_data_labels.remove('observations')
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                                                ['observations']*len(cut_data_labels), cut_data_labels)
+            else:
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                                                 cut_data_labels, [])
+
+            # create stats dataframe
+            stats_df = pd.DataFrame(data=stats_calc, 
+                                    index=cut_data_labels,
+                                    dtype=np.float)
+
+        # get observations label
+        if 'legend' in plot_characteristics:
+            obs_label = plot_characteristics['legend']['handles']['obs_label'] 
+        elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
+            obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
+        else:
+            obs_label = 'Observations'
+
         # round dataframe
-        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+        stats_df = stats_df.round(plot_characteristics['round_decimal_places']['table'])
+
+        # get subsections
+        subsections = list(np.unique(stats_df.index.get_level_values(1)))
+
+        # get relevant data
+        if plotting_paradigm == 'station':
+            stats_df = stats_df.iloc[stats_df.index.get_level_values('subsections') == subsection]
+        if 'multispecies' not in plot_options:
+            stats_df = stats_df.iloc[stats_df.index.get_level_values('networkspecies') == networkspeci]
+        else:
+            # replace subsection name by networkspecies if there is only one
+            if (len(subsections) == 1) or (plotting_paradigm == 'station'):
+                stats_df = stats_df.droplevel(level='subsections')
 
         # plot heatmap
         heatmap = sns.heatmap(stats_df, 
@@ -1247,40 +1473,152 @@ class Plot:
                               annot=annotate,
                               **plot_characteristics['plot'])
 
-        # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
-        if len(stats_df.index) > 1:
-            bottom, top = relevant_axis.get_ylim()
-            relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+        # remove networkspecies-subsections label from y-axis
+        relevant_axis.set_ylabel("")
 
-        # vertically align yticklabels due to bug again in matplotlib - hack fix. Remove in Future!
-        for tick in relevant_axis.get_yticklabels():
-            tick.set_verticalalignment("center")
+        # if there is only one subsection or station data
+        if (plotting_paradigm == 'station') or (len(subsections) == 1):
+            # for multispecies, remove network names from labels
+            if ('multispecies' in plot_options) and (not plot_characteristics['multispecies']['network_names']):
+                if not plot_characteristics['multispecies']['network_names']:
+                    yticklabels = [networkspeci.split('|')[1] if '|' in networkspeci else networkspeci 
+                                   for networkspeci in stats_df.index]
+            # for non multispecies, remove subsection names from labels
+            elif ('multispecies' not in plot_options) and (not plot_characteristics['parent_section_names']):
+                yticklabels = []
+                for subsection_label in stats_df.index.get_level_values(1):
+                    if "·" in subsection_label:
+                        subsection_label = subsection_label.split('·')[1]
+                    yticklabels.append(subsection_label)
+            # keep original labels
+            else:
+                yticklabels = stats_df.index
+        # if there is summary data for more than one subsection
+        elif (plotting_paradigm == 'summary') and (len(subsections) > 1):
+            # remove parent names from subsections
+            if not plot_characteristics['parent_section_names']:
+                yticklabels = []
+                for subsection_label in stats_df.index.get_level_values(1):
+                    if "·" in subsection_label:
+                        subsection_label = subsection_label.split('·')[1]
+                    yticklabels.append(subsection_label)
+            # keep original labels
+            else:
+                yticklabels = stats_df.index.get_level_values(1)
+        relevant_axis.set_yticklabels(yticklabels, **plot_characteristics['yticklabels'])
+
+        # update observation and experiments labels
+        xticklabels = stats_df.columns
+        xticklabels = [obs_label if item == 'observations' else item if item == '' else self.read_instance.experiments[item] for item in xticklabels]
+        relevant_axis.set_xticklabels(xticklabels, **plot_characteristics['xticklabels'])
+
+        # format for multispecies
+        if 'multispecies' in plot_options:
+            # if we have more than one subsection and we are plotting summaries
+            if (len(subsections) > 1) and (plotting_paradigm == 'summary'):
+                # add horizontal lines to separate networkspecies
+                networkspecies = list(stats_df.index.get_level_values(0)[::(len(subsections))])
+                y_separators = []
+                for networkspeci_ii in range(len(networkspecies)+1):
+                    y_separators.append(len(subsections)*networkspeci_ii)
+                relevant_axis.hlines(y=y_separators, xmin=plot_characteristics['multispecies']['xmin'], 
+                                     xmax=0, clip_on=False, **plot_characteristics['multispecies']['hlines'])
+
+                # annotate networkspecies names on the left
+                for networkspeci, y_separator in zip(networkspecies, y_separators[:-1]):
+                    y_position = (len(subsections)/2) + y_separator
+                    # remove network names from networkspecies
+                    if not plot_characteristics['multispecies']['network_names']:
+                        networkspeci_label = networkspeci.split('|')[1]
+                    else:
+                        networkspeci_label = networkspeci
+                    relevant_axis.annotate(s=networkspeci_label, annotation_clip=False,
+                                           xy=(plot_characteristics['multispecies']['xmin'], y_position), 
+                                           **plot_characteristics['multispecies']['yticklabels'])
+        
+        # format for non multispecies
+        else:
+            # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
+            # if len(stats_df.index) > 1:
+            #     bottom, top = relevant_axis.get_ylim()
+            #     relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+
+            # vertically align yticklabels due to bug again in matplotlib - hack fix. Remove in Future!
+            for tick in relevant_axis.get_yticklabels():
+                tick.set_verticalalignment("center")
 
         # track plot elements if using dashboard 
         if not self.read_instance.offline:
             self.track_plot_elements('observations', 'heatmap', 'plot', heatmap, bias=bias)
 
-    def make_table(self, relevant_axis, stats_df, plot_characteristics, plot_options=[], statsummary=False):
+    def merge_cells(self, table, cells):
+        """
+        Merge cells in matplotlib.Table. Reference: https://stackoverflow.com/a/53819765/12684122.
+
+        :param table: table
+        :type table: matplotlib.Table
+        :param cells: cells to merge in table coordinates, e.g. [(0,1), (0,0), (0,2)]
+        :type cells: list
+        """
+
+        cells_array = [np.asarray(c) for c in cells]
+        h = np.array([cells_array[i+1][0] - cells_array[i][0] for i in range(len(cells_array) - 1)])
+        v = np.array([cells_array[i+1][1] - cells_array[i][1] for i in range(len(cells_array) - 1)])
+
+        # if it's a horizontal merge, all values for `h` are 0
+        if not np.any(h):
+            # sort by horizontal coord
+            cells = np.array(sorted(list(cells), key=lambda v: v[1]))
+            edges = ['BTL'] + ['BT' for i in range(len(cells) - 2)] + ['BTR']
+        elif not np.any(v):
+            cells = np.array(sorted(list(cells), key=lambda h: h[0]))
+            edges = ['TRL'] + ['RL' for i in range(len(cells) - 2)] + ['BRL']
+        else:
+            raise ValueError("Only horizontal and vertical merges allowed")
+
+        for cell, e in zip(cells, edges):
+            table[cell[0], cell[1]].visible_edges = e
+            
+        txts = [table[cell[0], cell[1]].get_text() for cell in cells]
+        tpos = [np.array(t.get_position()) for t in txts]
+
+        # transpose the text of the left cell
+        trans = (tpos[-1] - tpos[0])/2
+
+        # didn't had to check for ha because I only want ha='center'
+        txts[0].set_transform(mpl.transforms.Affine2D().translate(*trans))
+        for txt in txts[1:]:
+            txt.set_visible(False)
+
+    def make_table(self, relevant_axis, networkspeci, data_labels, plot_characteristics,
+                   zstats=None, statsummary=False, plot_options=[],
+                   subsection=None, plotting_paradigm=None, stats_df=None):
         """ Make table plot.
 
             :param relevant_axis: axis to plot on 
             :type relevant_axis: object
-            :param stats_df: dataframe of calculated statistical information
-            :type stats_df: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_labels: name of data arrays to plot
+            :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
-            :type plot_options: list
+            :param zstats: name of statistics
+            :type zstats: list
             :param statsummary: boolean indiciating if making alternative statistical summary table plot  
             :type statsummary: boolean
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param subsection: str of currently active subsection
+            :type subsection: str
+            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+            :type plotting_paradigm: str
+            :param stats_df: dataframe of previously calculated statistics, default is None
+            :param stats_df: pandas dataframe
         """
 
         # turn off axis to make table
         relevant_axis.axis('off')
-
-        # get column and row labels
-        col_labels = stats_df.columns.tolist()
-        row_labels = stats_df.index.tolist()
 
         # bias plot?
         if 'bias' in plot_options:
@@ -1288,56 +1626,198 @@ class Plot:
         else:
             bias = False
 
-        # round dataframe
-        stats_df = stats_df.round(plot_characteristics['round_decimal_places'])
+        # if statistical dataframe is not provided then create it
+        if not isinstance(stats_df, pd.DataFrame):
 
-        # set row_colours and col_colours
+            # get valid data labels for networkspeci
+            valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+            # cut data_labels for those in valid data labels
+            cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+            # calculate statistics
+            if bias:
+                if 'observations' in cut_data_labels:
+                    cut_data_labels.remove('observations')
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                                                ['observations']*len(cut_data_labels), cut_data_labels)
+            else:
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                                                 cut_data_labels, [])
+
+            # create stats dataframe
+            stats_df = pd.DataFrame(data=stats_calc, 
+                                    index=cut_data_labels,
+                                    dtype=np.float)
+
+        # when we have 1 stat, the column name is 0, we need to rename it to the stat name
+        if len(stats_df.columns) == 1:
+            stats_df = stats_df.rename(columns={stats_df.columns[0]: zstats[0]})
+
+        # rename columns to save space
+        columns = {}
+        for column in stats_df.columns:
+            new_colum_name = copy.deepcopy(column)
+            # rename columns to replace Diurnal, Weekly and Monthly by D, W, M
+            if 'diurnal' in column:
+                new_colum_name = column.replace('diurnal', 'D')
+            elif 'weekly' in column:
+                new_colum_name = column.replace('weekly', 'W')
+            elif 'monthly' in column:
+                new_colum_name = column.replace('monthly', 'M')
+            # remove _bias from columns
+            if '_bias' in new_colum_name:
+                new_colum_name = new_colum_name.replace('_bias', '')   
+            columns[column] = new_colum_name
+        stats_df = stats_df.rename(columns=columns)
+  
+        # get column and row labels
+        col_labels = stats_df.columns.tolist()
+        row_labels = stats_df.index.tolist()
+
+        # get observations label
+        if 'legend' in plot_characteristics:
+            obs_label = plot_characteristics['legend']['handles']['obs_label'] 
+        elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
+            obs_label = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
+        else:
+            obs_label = 'Observations'
+
+        # round dataframe
+        decimal_places = plot_characteristics['round_decimal_places']['table']
+        stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
+        
+        # offline reports
+        if self.read_instance.offline:
+            
+            # get relevant data
+            if 'multispecies' not in plot_options:
+                stats_df = stats_df.iloc[stats_df.index.get_level_values('networkspecies') == networkspeci]
+            if plotting_paradigm == 'station':
+                stats_df = stats_df.iloc[stats_df.index.get_level_values('subsections') == subsection]
+
+            # get labels
+            networkspecies = list(stats_df.index.get_level_values('networkspecies'))
+            subsections = list(stats_df.index.get_level_values('subsections'))
+            if statsummary:
+                data_labels = list(stats_df.index.get_level_values('labels'))
+                stats = list(stats_df.columns)
+            else:
+                data_labels = list(stats_df.columns)
+
+            # reset index after filtering
+            stats_df = stats_df.reset_index()
+
+            # hide subsections from station plots or if there is only 1 section
+            if self.read_instance.offline:
+                if plotting_paradigm == 'station' or len(np.unique(subsections)) == 1:
+                    stats_df = stats_df.drop(columns='subsections')
+        
+            # hide networkspecies from plots that are not multispecies
+            if 'multispecies' not in plot_options:
+                stats_df = stats_df.drop(columns='networkspecies')
+        
+            # remove parent names from subsections
+            if ('subsections' in stats_df.columns) and (not plot_characteristics['parent_section_names']):
+                stats_df['subsections'] = [subsection_label.split('·')[1] if '·' in subsection_label 
+                                           else subsection_label for subsection_label in subsections]
+
+            # remove network names from networkspecies
+            if (('multispecies' in plot_options) and ('networkspecies' in stats_df.columns) and 
+                (not plot_characteristics['multispecies']['network_names'])):
+                stats_df['networkspecies'] = [networkspeci_label.split('|')[1] for networkspeci_label in networkspecies]
+            
+            # get number of "empty" cells (without stats) and 
+            # column labels (hide networkspecies, subsections and data labels)
+            if statsummary:
+                empty_cells = len(stats_df.columns) - len(stats)
+                col_labels = ['']*empty_cells + stats
+                stats_df['labels'] = [obs_label if item == 'observations' else item if item == '' else self.read_instance.experiments[item] for item in stats_df['labels']]
+            else:
+                empty_cells = len(stats_df.columns) - len(data_labels)
+                col_labels = ['']*empty_cells + data_labels
+                col_labels = [obs_label if item == 'observations' else item if item == '' else self.read_instance.experiments[item] for item in col_labels]
+
+        # dashboard
+        else:
+            # there is only statsummary
+            if statsummary:
+
+                # get labels
+                data_labels = list(stats_df.index)
+                stats = list(stats_df.columns)
+                
+                # reset index
+                stats_df = stats_df.reset_index()
+                
+                # update observation and experiments labels
+                stats_df['index'] = [obs_label if item == 'observations' else item if item == '' else self.read_instance.experiments[item] for item in stats_df['index']]
+
+                # get number of "empty" cells (without stats)
+                empty_cells = 1
+                col_labels = ['']*empty_cells + stats
+
+        # set cell colors
         if statsummary:
-            if 'row_colours' in plot_characteristics:
-                if plot_characteristics['row_colours']:
-                    plot_characteristics['plot']['rowColours'] = ['white' if data_label == 'observations' else 
-                                                                  self.read_instance.plotting_params[data_label]['colour'] 
-                                                                  for data_label in row_labels]
+            if 'cell_colours' in plot_characteristics:
+                if plot_characteristics['cell_colours']:
+                    cell_colours = [[]] * (stats_df.shape[1])
+                    for col in range(stats_df.shape[1]):
+                        # custom colors for data labels cells
+                        if col == (empty_cells-1):
+                            for data_label in data_labels:
+                                # observations in white
+                                if data_label == 'observations':
+                                    color = 'white'
+                                # experiments in legend colors
+                                else:
+                                    color = self.read_instance.plotting_params[data_label]['colour']
+                                cell_colours[col].append(color)
+                        # white for other cells
+                        else:
+                            cell_colours[col] = ['white'] * stats_df.shape[0]
+                    if stats_df.shape == (1, 1):
+                        plot_characteristics['plot']['cellColours'] = np.array(cell_colours)
+                    else:
+                        plot_characteristics['plot']['cellColours'] = np.array(cell_colours).T
         else:
             if 'col_colours' in plot_characteristics:
                 if plot_characteristics['col_colours']:
-                    plot_characteristics['plot']['colColours'] = []
-                    for data_label in col_labels:
+                    col_colours = []
+                    for data_label in data_labels:
+                        # observations in white
                         if data_label == 'observations':
-                            plot_characteristics['plot']['colColours'].extend(['white'])
+                            color = 'white'
+                        # experiments in legend colors
                         else:
-                            exp_label = list(self.read_instance.experiments.keys())[list(self.read_instance.experiments.values()).index(data_label)]
-                            plot_characteristics['plot']['colColours'].extend([self.read_instance.plotting_params[exp_label]['colour']])
-        
-        # if plot is statsummary, then remove bias from col_labels, and use alises for row_labels
-        if statsummary:
-            col_labels = [col_label.split('_bias')[0] if '_bias' in col_label else col_label for col_label in col_labels]
-            for row_label_ii, row_label in enumerate(row_labels):
-                if row_label == 'observations':
-                    if 'legend' in plot_characteristics:
-                        row_labels[row_label_ii] = plot_characteristics['legend']['handles']['obs_label'] 
-                    elif 'legend' in self.canvas_instance.plot_characteristics_templates.keys():
-                        row_labels[row_label_ii] = self.canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] 
-                    else:
-                        row_labels[row_label_ii] = 'Observations'
-                else:
-                    row_labels[row_label_ii] = self.read_instance.experiments[row_label]  
+                            color = self.read_instance.plotting_params[data_label]['colour']
+                        col_colours.extend([color])
+                    plot_characteristics['plot']['colColours'] = ['white']*empty_cells + col_colours
 
         # make table
         table = relevant_axis.table(cellText=stats_df.values, 
-                                    colLabels=col_labels, 
-                                    rowLabels=row_labels, 
+                                    colLabels=col_labels,
                                     **plot_characteristics['plot'])
+
+        # merge cells in networkspecies and subsections columns (if any)
+        if self.read_instance.offline:
+            column_ii = 0
+            for column, rows in zip(['networkspecies', 'subsections'], (networkspecies, subsections)):
+                if column in stats_df.columns:
+                    # count consecutive duplicates
+                    count_dups = [sum(1 for _ in group) for _, group in groupby(rows)]
+                    
+                    # merge cells that have consecutive duplicates
+                    current_row = 0
+                    for count_ii, count in enumerate(count_dups):
+                        cells_to_merge = [(current_row + i, column_ii) for i in range(1, count+1)]
+                        self.merge_cells(table, cells_to_merge)
+                        current_row += count
+                    column_ii += 1
 
         # adjust cell height
         if 'cell_height' in plot_characteristics:
             table.scale(1, plot_characteristics['cell_height'])
-
-        # adjust cell padding ()
-        if 'cell_pad_rowlabel' in plot_characteristics:
-            for key, cell in table.get_celld().items():    
-                if key[1] == -1:             
-                    cell.PAD = plot_characteristics['cell_pad_rowlabel']
 
         # adjust fontsize
         if 'fontsize' in plot_characteristics:
@@ -1351,7 +1831,251 @@ class Plot:
                 self.track_plot_elements('observations', 'statsummary', 'plot', [table], bias=bias)
             else:
                 self.track_plot_elements('observations', 'table', 'plot', [table], bias=bias)
+    
+    def get_taylor_diagram_ghelper_info(self, reference_stddev, plot_characteristics, extend=False):
+        """ Make Taylor diagram plot axis extremes and labels. 
+            
+            :param reference_stddev: reference standard deviation to set the limits
+            :type reference_stddev: float
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param extend: extend to negative correlations
+            :type undo: boolean
+        """
 
+        tmin = 0
+
+        # diagram extended to negative correlations
+        if extend:
+            tmax = np.pi
+        # diagram limited to positive correlations
+        else:
+            tmax = np.pi/2
+
+        # get standard deviation axis extent
+        srange = plot_characteristics['srange']
+        smin = srange[0] * reference_stddev
+        smax = srange[1] * reference_stddev
+
+        # correlation labels
+        if extend:
+            rlocs = np.array(plot_characteristics['rlocs']['all'])
+            rlocs = np.concatenate((-rlocs[:0:-1], rlocs))
+        else:
+            rlocs = np.array(plot_characteristics['rlocs']['positive'])
+
+        # convert correlation values into polar angles
+        tlocs = np.arccos(rlocs)
+        gl1 = gf.FixedLocator(tlocs)
+        tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
+
+        return tmin, tmax, smin, smax, gl1, tf1
+    
+    def get_taylor_diagram_ghelper(self, reference_stddev, plot_characteristics, extend=False):
+        """ Make Taylor diagram plot grid helper. 
+
+            :param reference_stddev: reference standard deviation to set the limits
+            :type reference_stddev: float
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param extend: extend to negative correlations
+            :type undo: boolean
+        """
+
+        # get axis extremes
+        tmin, tmax, smin, smax, gl1, tf1 = self.get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, 
+                                                                                extend)
+
+        # get grid helper
+        ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
+                                           extremes=(tmin, tmax, smin, smax),
+                                           grid_locator1=gl1, tick_formatter1=tf1)
+
+        return ghelper
+
+    def make_taylor(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], 
+                    stddev_max=None):
+        """ Make Taylor diagram plot.
+            Reference: https://gist.github.com/ycopin/3342888.
+
+            See explanation of calculations here:
+            https://waterprogramming.wordpress.com/2020/12/22/taylor-diagram/
+
+            :param relevant_axis: axis to plot on 
+            :type relevant_axis: object
+            :param networkspeci: str of currently active network and species 
+            :type networkspeci: str
+            :param data_labels: name of data arrays to plot
+            :type data_labels: list
+            :param plot_characteristics: plot characteristics  
+            :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
+            :param stddev_max: maximum standard deviation
+            :type stddev_max: float
+        """
+
+        # get polar axis here
+        self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
+
+        # calculate statistics
+        stats_dict = {}
+
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+        # get data labels without observations
+        obs_index = cut_data_labels.index('observations')
+        data_labels_sans_obs = copy.deepcopy(cut_data_labels)
+        if 'observations' in data_labels_sans_obs:
+            data_labels_sans_obs.remove('observations')
+
+        # standard deviation - absolute calculations of observations and models
+        stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 'StdDev', 
+                                         data_labels, [])
+        stats_dict['StdDev'] = stats_calc   
+
+        # correlation - between observations and model
+        corr_stat = plot_characteristics['taylor']['corr_stat']
+        stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, corr_stat, 
+                                         ['observations']*len(data_labels_sans_obs), data_labels_sans_obs)
+        stats_calc = np.insert(stats_calc, obs_index, np.NaN)
+        stats_dict['StdDev'] = corr_stat 
+
+        # get maximum stddev in dataframe (if not defined)
+        if not stddev_max:
+            stddev_max = np.nanmax(stats_dict["StdDev"])
+
+        # create stats dataframe
+        stats_df = pd.DataFrame(data=stats_dict, 
+                                index=data_labels,
+                                dtype=np.float)
+
+        # get labels 
+        rlabel = stats_df.columns[0]
+        xylabel = stats_df.columns[1]
+
+        # check if we need to extend the axis to negative correlations
+        extend = False
+        if np.nanmin(stats_df[rlabel]) < 0:
+            extend = True
+
+        # update axis extremes and labels
+        tmin, tmax, smin, smax, gl1, tf1 = self.get_taylor_diagram_ghelper_info(stddev_max, 
+                                                                                plot_characteristics,
+                                                                                extend)
+        relevant_axis.get_grid_helper().update_grid_finder(
+            extreme_finder=fa.ExtremeFinderFixed((tmin, tmax, smin, smax)),
+            grid_locator1=gl1, tick_formatter1=tf1)
+
+        # update axis position and size in dashboard
+        if not self.read_instance.offline:
+
+            # find Taylor plot position in layout
+            for plot_position in range(2, 6):
+                plot_type = getattr(self.read_instance, 'position_{}'.format(plot_position))
+                if plot_type == 'taylor':
+                    break
+            
+            # changing the extend reduces the size of the plot and changes its start position
+            if extend:
+                old_position = relevant_axis.get_position().bounds
+                if plot_position == 2:
+                    new_position = (0.60, 0.42, 0.288, 0.594)
+                elif plot_position == 3:
+                    new_position = (0.03, 0, 0.256, 0.56)
+                elif plot_position == 4:
+                    new_position = (0.37, 0, 0.256, 0.56)
+                elif plot_position == 5:
+                    new_position = (0.70, 0, 0.256, 0.56)
+            else:
+                if plot_position == 2:
+                    new_position = (0.64, 0.57, 0.16, 0.33)
+                elif plot_position == 3:
+                    new_position = (0.08, 0.08, 0.16, 0.35)
+                elif plot_position == 4:
+                    new_position = (0.41, 0.08, 0.16, 0.35)
+                elif plot_position == 5:
+                    new_position = (0.69, 0.08, 0.16, 0.35)
+            relevant_axis.set_position(new_position)
+
+        # clear axis, add grid and adjust limits 
+        # as suggested by the Matpotlib devs in https://github.com/matplotlib/matplotlib/issues/25426
+        relevant_axis.clear()
+        relevant_axis.grid(**plot_characteristics['grid'])
+        relevant_axis.adjust_axes_lim()
+
+        # create and hide annotation at (0, 0)
+        if not self.read_instance.offline:
+            self.canvas_instance.create_taylor_annotation()
+
+        # adjust top axis (curve)
+        relevant_axis.axis['top'].set_axis_direction('bottom')
+        relevant_axis.axis['top'].toggle(ticklabels=True, label=True)
+        relevant_axis.axis['top'].major_ticklabels.set_axis_direction('top')
+        relevant_axis.axis['top'].major_ticklabels.set(**plot_characteristics['rtick_params'])
+        relevant_axis.axis['top'].label.set_text(rlabel)
+        relevant_axis.axis['top'].label.set_fontsize(plot_characteristics['rlabel']['fontsize'])
+        relevant_axis.axis['top'].label.set_axis_direction('top')
+
+        # adjust right axis (y axis)
+        relevant_axis.axis['right'].set_axis_direction('top')
+        relevant_axis.axis['right'].toggle(ticklabels=True)
+        relevant_axis.axis['right'].major_ticklabels.set_axis_direction('bottom' if extend else 'left')
+        relevant_axis.axis['right'].major_ticklabels.set(**plot_characteristics['xytick_params'])
+
+        # adjust left axis (x axis)
+        relevant_axis.axis['left'].set_axis_direction('bottom')
+        relevant_axis.axis['left'].major_ticklabels.set(**plot_characteristics['xytick_params'])
+
+        # hide bottom axis ticks and tick labels
+        relevant_axis.axis['bottom'].major_ticklabels.set_visible(False)
+        relevant_axis.axis['bottom'].major_ticks.set_visible(False)
+
+        # show label
+        if extend:
+            relevant_axis.axis['bottom'].label.set_text(xylabel)
+            relevant_axis.axis['bottom'].label.set_pad(10)
+            relevant_axis.axis['bottom'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])
+        else:
+            relevant_axis.axis['left'].label.set_text(xylabel)
+            relevant_axis.axis['left'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])  
+
+        # add contours around observations standard deviation
+        reference_stddev = stats_df[xylabel][obs_index]
+        num_levels = plot_characteristics['contours']['levels']['number']
+        rs, ts = np.meshgrid(np.linspace(smin, smax), np.linspace(0, tmax))
+        rms = np.sqrt(reference_stddev**2 + rs**2 - 2*reference_stddev*rs*np.cos(ts))
+        contours = self.taylor_polar_relevant_axis.contour(ts, rs, rms, num_levels,
+            **plot_characteristics['contours']['style']['general'])
+
+        # add contour labels
+        self.taylor_polar_relevant_axis.clabel(contours, contours.levels, inline=True, fmt = '%r', fontsize=6)
+
+        # add reference contour of observational standard deviation
+        ref_x = np.linspace(0, tmax)
+        ref_y = np.zeros_like(ref_x) + reference_stddev
+        self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contours']['style']['obs'])
+
+        # add models
+        for data_label, stddev, corr_stat in zip(stats_df.index, 
+                                                 stats_df[xylabel], 
+                                                 stats_df[rlabel]):
+            if data_label == 'observations':
+                continue
+            self.taylor_plot = self.taylor_polar_relevant_axis.plot(np.arccos(corr_stat), stddev,
+                                                                    **plot_characteristics['plot'],
+                                                                    mfc=self.read_instance.plotting_params[data_label]['colour'], 
+                                                                    mec=self.read_instance.plotting_params[data_label]['colour'],
+                                                                    label=data_label) 
+
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
+          
     def log_axes(self, relevant_axis, log_ax, plot_characteristics, undo=False):
         """ Log plot axes.
 
@@ -1397,17 +2121,36 @@ class Plot:
             :type plot_options: list
         """
     
-        # get observations data
-        observations_data = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df'].dropna()['data']
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+        # get observations data (flattened and drop NaNs)
+        observations_data = drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index('observations'),0,:])
+
+        # determine if number of points per data array exceeds max limit,
+        # if so subset arrays
+        subset = False
+        data_array_size = observations_data.size
+        if data_array_size > plot_characteristics['max_points']:
+            subset = True
+            inds_subset = np.random.choice(data_array_size, size=plot_characteristics['max_points'], replace=False)
+            observations_data = observations_data[inds_subset]
 
         # iterate through experiment data, making regression line to observations
-        for data_label in data_labels:
+        for data_label in cut_data_labels:
             if data_label != 'observations':
-                experiment_data = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'].dropna()['data']
+                # get experiement data (flattened and drop NaNs)
+                experiment_data = drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])
+                # subset data if neccessary
+                if subset:
+                    experiment_data = experiment_data[inds_subset]
                 m, b = np.polyfit(observations_data, experiment_data, deg=1)
                 regression_line = relevant_axis.plot(observations_data, m*observations_data+b, 
                                                         color=self.read_instance.plotting_params[data_label]['colour'],
-                                                        zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
+                                                        zorder=self.read_instance.plotting_params[data_label]['zorder']+len(cut_data_labels),
                                                         **plot_characteristics['regression'])
                 
                 # track plot elements if using dashboard 
@@ -1431,21 +2174,27 @@ class Plot:
             :type plot_options: list
         """
 
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
         # iterate through plotted data arrays making smooth line
-        for data_label in data_labels:
+        for data_label in cut_data_labels:
 
             # bias plot?
             if 'bias' in plot_options:
                 # skip to next data label if making bias, and data label == 'observations'
                 if data_label == 'observations':
                     continue
-                ts_obs = self.canvas_instance.selected_station_data[networkspeci]['observations']['pandas_df']
-                ts_model = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df'] 
+                ts_obs = self.canvas_instance.selected_station_data[networkspeci]['timeseries']['observations']
+                ts_model = self.canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label] 
                 ts = ts_model - ts_obs
                 bias = True
             # normal plot?
             else:
-                ts = self.canvas_instance.selected_station_data[networkspeci][data_label]['pandas_df']
+                ts = self.canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label]
                 bias = False
 
             # make smooth line
@@ -1454,7 +2203,7 @@ class Plot:
                                      center=True).mean()
             smooth_line = relevant_axis.plot(smooth_line_data,
                                              color=self.read_instance.plotting_params[data_label]['colour'],
-                                             zorder=self.read_instance.plotting_params[data_label]['zorder']+len(data_labels),
+                                             zorder=self.read_instance.plotting_params[data_label]['zorder']+len(cut_data_labels),
                                              **plot_characteristics['smooth']['format'])
 
             # track plot elements if using dashboard 
@@ -1488,51 +2237,75 @@ class Plot:
         if len(stats) == 0:
             msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.json.'.format(base_plot_type)
             msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.json.'.format(base_plot_type)
-            show_message(msg=msg_dashboard, offline=self.read_instance.offline, msg_offline=msg_offline)
+            show_message(self.read_instance, msg=msg_dashboard, msg_offline=msg_offline)
             return
 
         # initialise list of strs to annotate, and colours of annotations
         str_to_annotate = []
         colours = []
 
-        # bias plot?
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+        # bias plot?  
         if 'bias' in plot_options:
             bias = True
+            if 'observations' in cut_data_labels:
+                cut_data_labels.remove('observations')
         else:
             bias = False
 
-        # iterate through plotted data labels
-        for data_label in data_labels:
-            
-            # avoid plotting stats for observations data for scatter plots
-            if base_plot_type == 'scatter':
-                if data_label == 'observations':
-                    continue
+        # avoid plotting stats for observations data for scatter plots
+        if base_plot_type == 'scatter':
+            if 'observations' in cut_data_labels:
+                cut_data_labels.remove('observations')
 
-            # get stats
-            stats_annotate = []
-            for zstat in stats:
-                if zstat in list(self.canvas_instance.selected_station_data[networkspeci][data_label]['all']):
-                    stats_annotate.append("{0}: {1:.{2}f}".format(zstat, 
-                        self.canvas_instance.selected_station_data[networkspeci][data_label]['all'][zstat][0],
-                        plot_characteristics['annotate_text']['round_decimal_places']))
+        # generate annotation str to plot
 
-            # show number of stations if defined
-            if plot_characteristics['annotate_text']['n_stations']:
-                if data_label == data_labels[0]:
-                    colours.append('black')
-                    if self.read_instance.offline:
-                        if plotting_paradigm == 'station':
-                            str_to_annotate.append('Stations: 1')
-                        else:
-                            str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_inds)))
-                    else:
-                        str_to_annotate.append('Stations: ' + str(len(self.read_instance.station_inds)))
+        # show number of stations if defined
+        if plot_characteristics['annotate_text']['n_stations']:
+            colours.append('black')
+            if self.read_instance.offline:
+                if plotting_paradigm == 'station':
+                    str_to_annotate.append('Stations: 1')
+                else:
+                    str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.station_inds[networkspeci])))
+            else:
+                str_to_annotate.append('Stations: ' + str(len(self.canvas_instance.station_inds[networkspeci])))
 
-            # get colors
+        # generate annotation line by line (one line per data label, for all stats)
+        for data_label_ii, data_label in enumerate(cut_data_labels):
+
+            # get colour for data label
             colours.append(self.read_instance.plotting_params[data_label]['colour'])
 
-            # generate annotation
+            # iterate through stats to calculate
+            stats_annotate = []
+            for zstat in stats:
+
+                # get zstat information
+                zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
+
+                # calculate stats
+                if (bias) or (z_statistic_sign == 'bias'):
+                    if data_label != 'observations':
+                        stat_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
+                                                        ['observations'], [data_label])
+                    # skip bias stats for observations
+                    else:
+                        continue
+                else:
+                    stat_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
+                                                    [data_label], [])
+
+                # format annotation line
+                stats_annotate.append("{0}: {1:.{2}f}".format(zstat, stat_calc[0],
+                                                              plot_characteristics['annotate_text']['round_decimal_places'])) 
+
+            # append annotation line
             if (plot_characteristics['annotate_text']['exp_labels']):
                 if data_label == 'observations':
                     if 'legend' in plot_characteristics:
@@ -1547,24 +2320,28 @@ class Plot:
                 str_to_append = ', '.join(stats_annotate)
             str_to_annotate.append(str_to_append)
 
-        if plot_characteristics['annotate_text']['color'] != "":
-            colours = [plot_characteristics['annotate_text']['color']]*len(data_labels)
+        if len(str_to_annotate) != 0:
+            if plot_characteristics['annotate_text']['color'] != "":
+                colours = [plot_characteristics['annotate_text']['color']]*len(cut_data_labels)
 
-        # add annotation to plot
-        # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
-        lines = [TextArea(line, textprops=dict(color=colour, 
-                                               size=plot_characteristics['annotate_text']['fontsize'])) 
-                    for line, colour in zip(str_to_annotate, colours)]
-        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align="left", pad=0, sep=1),
-                                 loc=plot_characteristics['annotate_text']['loc'],
-                                 bbox_transform=relevant_axis.transAxes)
-        bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
-        bbox.patch.set(**plot_characteristics['annotate_bbox'])
-        relevant_axis.add_artist(bbox)
+            # add annotation to plot
+            # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
+            lines = [TextArea(line, textprops=dict(color=colour, 
+                                                   size=plot_characteristics['annotate_text']['fontsize'])) 
+                        for line, colour in zip(str_to_annotate, colours)]
+            bbox = AnchoredOffsetbox(child=VPacker(children=lines, align='left', pad=0, sep=1),
+                                    loc=plot_characteristics['annotate_text']['loc'],
+                                    bbox_transform=relevant_axis.transAxes)
+            bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
+            bbox.patch.set(**plot_characteristics['annotate_bbox'])
+            relevant_axis.add_artist(bbox)
 
-        # track plot elements if using dashboard 
-        if not self.read_instance.offline:
-            self.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
+            # track plot elements if using dashboard 
+            if not self.read_instance.offline:
+                self.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
+        else:
+            msg = '{} could not be annotated'.format(base_plot_type)
+            show_message(self.read_instance, msg)
 
     def get_no_margin_lim(self, ax, lim):
         """ Get true limits of plot area. """
@@ -1680,7 +2457,6 @@ class Plot:
                             self.canvas_instance.plot_characteristics[plot_type], 
                             plot_options=plot_options)
 
-
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
             that will be removed/added when picking up legend elements on dashboard.
@@ -1788,7 +2564,7 @@ class Plot:
         all_ylim_lower = []
         all_ylim_upper = []
 
-        #initialise variables for setting axis limits
+        # initialise variables for setting axis limits
         xlim_min = None
         xlim_max = None
         ylim_min = None
@@ -1803,10 +2579,28 @@ class Plot:
                 relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
                                 relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions]
 
+        # get mapped resolution per axis for periodic plots
+        if base_plot_type in ['periodic', 'periodic-violin']:
+            mapped_resolutions = self.read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(self.read_instance.relevant_temporal_resolutions)))
+
+        # remove any axes from relevant_axs which are not active (only for offline)
+        if self.read_instance.offline:
+            relevant_axs_active = []
+            mapped_resolutions_active = []
+            for ax_ii, ax in enumerate(relevant_axs):
+                if ax.axison:
+                    relevant_axs_active.append(ax)
+                    if base_plot_type in ['periodic', 'periodic-violin']:
+                        mapped_resolutions_active.append(mapped_resolutions[ax_ii])
+        else:
+            relevant_axs_active = relevant_axs
+            if base_plot_type in ['periodic', 'periodic-violin']:
+                mapped_resolutions_active = mapped_resolutions
+
         # get lower and upper limits across all relevant axes
-        for ax in relevant_axs:
+        for ax in relevant_axs_active:
             if 'equal_aspect' in plot_characteristics:
-                self.set_equal_axes(ax)
+                self.set_equal_axes(ax, plot_options)
             else:
                 ax.set_aspect('auto')
             if relim:
@@ -1836,7 +2630,7 @@ class Plot:
                 all_ylim_upper.append(ylim_upper)
 
         # get minimum and maximum from all axes and set limits
-        for ax in relevant_axs:
+        for ax in relevant_axs_active:
             # get xlim
             if xlim is None and ('xlim' not in plot_characteristics):
                 if base_plot_type not in ['periodic', 'periodic-violin']:
@@ -1848,7 +2642,7 @@ class Plot:
 
             # set xlim
             if xlim is not None:
-                if base_plot_type not in ['timeseries']:
+                if (base_plot_type not in ['timeseries', 'boxplot']) and ('equal_aspect' not in plot_characteristics):
                     ax.set_xlim(xlim)
 
             # get ylim
@@ -1868,14 +2662,13 @@ class Plot:
                 ylim = plot_characteristics['ylim']
 
             # set ylim
-            if ylim is not None:
+            if (ylim is not None) and ('equal_aspect' not in plot_characteristics):
                 ax.set_ylim(ylim)
-
+            
         # get minimum and maximum from all axes and set limits for periodic plots
         if base_plot_type in ['periodic', 'periodic-violin']:
-            mapped_resolutions = self.read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(self.read_instance.relevant_temporal_resolutions)))
             if xlim is None and ('xlim' not in plot_characteristics):
-                for temporal_resolution, sub_ax in zip(mapped_resolutions, relevant_axs):
+                for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
                     # adjust plot x axis to have correct margin on edges
                     xlim_lower, xlim_upper = sub_ax.get_xlim()
                     first_valid_x = self.canvas_instance.periodic_xticks[temporal_resolution][(np.abs(self.canvas_instance.periodic_xticks[temporal_resolution] - xlim_lower)).argmin()]
@@ -1893,11 +2686,11 @@ class Plot:
                     sub_ax.set_xlim(xlim)
             elif 'xlim' in plot_characteristics:
                 xlim = plot_characteristics['xlim']
-                for temporal_resolution, sub_ax in zip(mapped_resolutions, relevant_axs):
+                for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
                     sub_ax.set_xlim(xlim)
 
         # get minimum and maximum from all axes and set limits for timeseries
-        if base_plot_type == 'timeseries':
+        elif base_plot_type == 'timeseries':
             if plot_characteristics['xtick_alteration']['define']:
             
                 # get steps for all data labels
@@ -1920,9 +2713,9 @@ class Plot:
 
                 # show hours if number of days is less than 7
                 if n_days < 7:
-                    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d %H:%M'))
+                    ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %H:%M'))
                 else:
-                    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
+                    ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d'))
 
                 # define time slices
                 if n_months >= 3:
@@ -1946,7 +2739,7 @@ class Plot:
                     xticks = np.append(xticks, xlim[1])
 
                 # set modified xticks
-                for ax in relevant_axs:
+                for ax in relevant_axs_active:
                     ax.xaxis.set_ticks(xticks)
 
     def set_axis_title(self, relevant_axis, title, plot_characteristics, 
@@ -2025,7 +2818,7 @@ class Plot:
                 axis_label_characteristics['ylabel'] = label
                 relevant_axis.set_ylabel(**axis_label_characteristics)
 
-    def get_markersize(self, relevant_axis, base_plot_type, networkspeci, plot_characteristics):
+    def get_markersize(self, relevant_axis, base_plot_type, networkspeci, plot_characteristics, data=None):
         """ Set markersize for plot.
         
             :param base_plot_type: plot type, without statistical information
@@ -2034,14 +2827,19 @@ class Plot:
             :type networkspeci: str
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
+            :param data: data array to be plotted
+            :type data: numpy array
         """
 
         if base_plot_type in ['timeseries', 'scatter']:
             
             if plot_characteristics['plot']['markersize'] == '':
 
+                # get minimum number of non-NaN data points for plot type across data labels
+                min_points = np.count_nonzero(~np.isnan(data))
+
                 # configure size of plots if have very few points
-                if (min(self.canvas_instance.selected_station_data_number_non_nan[networkspeci]) < plot_characteristics['markersize_npoints_threshold']):
+                if min_points < plot_characteristics['markersize_npoints_threshold']:
                     markersize = plot_characteristics['markersize']['few_points'] 
                 else:
                     markersize = plot_characteristics['markersize']['standard'] 

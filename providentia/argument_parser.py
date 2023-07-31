@@ -28,6 +28,8 @@ class ProvArgumentParser(object):
             self.parser.add_argument('-V', '--version', action='version',
                                      version=providentia.__version__,
                                      help="returns Providentia version number and exit")
+            self.parser.add_argument('--debug',
+                                     help="runs Providentia in debug mode, just reserving allocation")
             self.parser.add_argument('--conf', '--config', 
                                      dest="config",
                                      help='specifies the config file to read') 
