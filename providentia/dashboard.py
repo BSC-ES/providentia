@@ -2,12 +2,10 @@
 from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .toolbar import multispecies_conf
-from .dashboard_aux import ComboBox, QVLine, Switch, PopUpWindow, InputDialog
+from .dashboard_aux import ComboBox, QVLine, PopUpWindow, InputDialog
 from .dashboard_aux import set_formatting
-from .aux import show_message
 from .read import DataReader
-from .read_aux import get_default_qa
+from .read_aux import get_default_qa, get_frequency_code
 from providentia import aux
 
 import os
@@ -15,11 +13,14 @@ import copy
 import datetime
 import json
 import sys
-import matplotlib
+import time
 from functools import partial
 from collections import OrderedDict
 from weakref import WeakKeyDictionary
 
+import matplotlib
+import mpl_toolkits.axisartist.floating_axes as fa
+from matplotlib.projections import PolarAxes
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
 import pandas as pd
@@ -29,9 +30,9 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, 'conf/experiment_bias_stats.json')))
-formatting_dict = json.load(open(os.path.join(CURRENT_PATH, 'conf/stylesheet.json')))
+basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
 
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
@@ -105,17 +106,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
             self.plot_characteristics_filename = os.path.join(
-                CURRENT_PATH, 'conf/plot_characteristics_dashboard.json')
+                CURRENT_PATH, '../settings/plot_characteristics_dashboard.json')
         self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
 
+        # error when using wrong custom plot characteristics path to launch dashboard
+        if 'header' in self.plot_characteristics_templates.keys():
+            msg = 'It is not possible to use the offline plot characteristics path to launch the dashboard. Consider adding another path to plot_characteristics_filename, as in: '
+            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.json, offline:/path/plot_characteristics_offline.json.'
+            sys.exit(msg)
+
         # arguments are only local
-        self.main_window_geometry = None
+        self.full_window_geometry = None
 
         # create dictionary of all available observational GHOST data
         self.all_observation_data = aux.get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, 'conf/nonghost_files.json')))
+        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
@@ -123,6 +130,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # initialise DataReader
         self.datareader = DataReader(self)
+
+        # update map z combobox fields based on data in memory
+        # generate lists of basic and basis+bias statistics for using in the z statistic combobox
+        if not hasattr(self, 'basic_z_stats'):
+            self.basic_z_stats = np.array(list(
+                OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
+        if not hasattr(self, 'basic_and_bias_z_stats'):
+            self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
+                OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
 
         # initialise UI
         self.init_ui(**kwargs)
@@ -148,55 +164,65 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def get_geometry(self):
         """ Update current geometry of main Providentia window and buttons. """
 
-        # get geometry of main window
-        self.main_window_geometry = copy.deepcopy(self.geometry())
+        # get geometry of full window
+        self.full_window_geometry = copy.deepcopy(self.geometry())
 
-        # update geometry of setting menus
-        self.update_buttons_geometry()
+        # update geometry of qt elements
+        self.update_qt_elements_geometry(resize=True)
 
-    def update_buttons_geometry(self):
-        """ Update current geometry of buttons. """
+    def update_qt_elements_geometry(self, plot_types='ALL', positions = [1,2,3,4,5], resize=False):
+        """ Update current geometry of canvas qt elements"""
+
+        # get dashboard and canvas pixels
+        full_window_width = self.full_window_geometry.width()
+        full_window_height = self.full_window_geometry.height()
+        canvas_width = self.mpl_canvas.frameGeometry().width()
+        canvas_height = self.mpl_canvas.frameGeometry().height()
+        header_height = full_window_height - canvas_height
         
-        for position_ii, position in enumerate([self.position_1, self.position_2, self.position_3, 
-                                                self.position_4, self.position_5]):
+        if plot_types == 'ALL':
+            plot_types = [self.position_1, self.position_2, self.position_3, self.position_4, self.position_5]
+            show_buttons = False
+        else:
+            show_buttons = True
+
+        #iterate through active dashboard plots
+        for position, plot_type in zip(positions, plot_types):
+
+            # gather menu, save buttons and elements for plot type 
             for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
                                                          self.mpl_canvas.save_buttons, 
                                                          self.mpl_canvas.elements):
 
-                # get plot type
-                plot_type = menu_button.objectName().split('_menu')[0]
-                if position == 'periodic-violin':
-                    position = 'periodic_violin'
+                menu_plot_type = menu_button.objectName().split('_menu')[0]
+                if plot_type == 'periodic-violin':
+                    plot_type = 'periodic_violin'
 
-                if position == plot_type:
+                # proceed once have objects for plot type
+                if plot_type == menu_plot_type:
                     
-                    # calculate proportional geometry of buttons respect main window
-                    x = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
-                         + str(position_ii+1)]['x'] * self.main_window_geometry.width()) / 1848
-                    y = (self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_' 
-                         + str(position_ii+1)]['y'] * self.main_window_geometry.height()) / 1016
+                    # get position of menu button (set in 1848 x 1016 resolution)
+                    x = self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
+                        + str(position)]['x']
+                    y = self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
+                        + str(position)]['y']
+
+                    # calculate proportional position for different screen resolution
+                    x = (x * canvas_width) / 1848
+                    y = (y * canvas_height) / 1016
                     
-                    # get geometries
+                    # get geometries (old and new)
                     old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
                     new_button_geometry = QtCore.QRect(x, y, 18, 18)
                     
                     # apply new geometry to menu and save buttons
                     menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(menu_button.x()-25, menu_button.y(), 20, 20)
+                    save_button.setGeometry(menu_button.x() - ((30 * canvas_width) / 1848), menu_button.y(), 20, 20)
 
-                    # apply new geometry to layout buttons
-                    if position_ii > 0:
-                        cb_position = getattr(self, 'cb_position_{}'.format(position_ii+1))
-                        # layout selector at position 2 needs to be further from menu
-                        if (position_ii + 1) == 2:
-                            width_diff = 915
-                        else:
-                            width_diff = 570
-                        height_diff = 1
-                        width = (width_diff * self.main_window_geometry.width()) / 1848
-                        height = (height_diff * self.main_window_geometry.height()) / 1848
-                        cb_position.move(menu_button.x()-width, menu_button.y()+height)
-                        cb_position.resize(cb_position.x(), 20)
+                    # show buttons if active
+                    if show_buttons:
+                        menu_button.show()
+                        save_button.show()
 
                     # apply new geometry to container elements
                     for sub_element in element:
@@ -211,8 +237,39 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                             sub_element.setGeometry(sub_element.x() - old_button_geometry.x() + new_button_geometry.x(), 
                                                     sub_element.y() - old_button_geometry.y() + new_button_geometry.y(),
                                                     sub_element.width(), sub_element.height())
-                    
-                    continue
+
+                    # apply new geometry to layout button and canvas covers (if are resizing)
+                    if resize:
+
+                        # apply new geometry to full canvas covers
+                        if position == 1:
+                            self.mpl_canvas.canvas_cover.setGeometry(0, 0, canvas_width, canvas_height)
+
+                        else:
+                            # apply new geometry to layout button
+                            cb_position = getattr(self, 'cb_position_{}'.format(position))
+                            # layout selector at position 2 needs to be further from menu
+                            if position == 2:
+                                width_diff = 910
+                            else:
+                                width_diff = 560
+                            height_diff = 1
+                            new_x = menu_button.x() - ((width_diff * canvas_width) / 1848)
+                            new_y = menu_button.y() + ((height_diff * canvas_height) / 1016)
+                            cb_position.move(new_x, new_y)
+
+                            # apply new geometry to partial canvas covers
+                            if position == 2:
+                                canvas_x = new_x - ((75 * canvas_width) / 1848) 
+                                self.mpl_canvas.top_right_canvas_cover.setGeometry(canvas_x, new_y,
+                                                                                   canvas_width-canvas_x, 
+                                                                                   canvas_height-new_y)
+                            elif position == 3:
+                                self.mpl_canvas.lower_canvas_cover.setGeometry(0, new_y, 
+                                                                               canvas_width, 
+                                                                               canvas_height-new_y)
+              
+                    break
 
     def init_ui(self, **kwargs):
         """ Initialise user interface. """
@@ -253,85 +310,88 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"),
                                                 formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
-        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
-        self.bu_read.setFixedWidth(80)
-        self.bu_read.setStyleSheet("color: green;")
-        self.bu_read.setToolTip('Read selected configuration of data into memory')
-        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Colocate"), formatting_dict['checkbox_menu'])
-        self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
-        self.ch_colocate.setMaximumWidth(80)
         self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_network.setFixedWidth(100)
-        self.cb_network.AdjustToContents
         self.cb_network.setToolTip('Select providing observational data network. '
                                    'Names starting with * indicate non-GHOST datasets')
         self.cb_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_resolution.setFixedWidth(100)
-        self.cb_resolution.AdjustToContents
         self.cb_resolution.setToolTip('Select temporal resolution of data')
         self.cb_matrix = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_matrix.setFixedWidth(100)
-        self.cb_matrix.AdjustToContents
         self.cb_matrix.setToolTip('Select data matrix')
         self.cb_species = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_species.setFixedWidth(100)
-        self.cb_species.AdjustToContents
         self.cb_species.setToolTip('Select species')
-        self.cb_species.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
-        self.le_start_date.setFixedWidth(100)
         self.le_start_date.setToolTip('Set data start date: YYYYMMDD')
         self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
-        self.le_end_date.setFixedWidth(100)
         self.le_end_date.setToolTip('Set data end date: YYYYMMDD')
         self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), formatting_dict['button_menu'])
-        self.bu_QA.setFixedWidth(80)
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
         self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), formatting_dict['button_menu'])
-        self.bu_flags.setFixedWidth(80)
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
         self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), formatting_dict['button_menu'])
-        self.bu_experiments.setFixedWidth(80)
         self.bu_experiments.setToolTip('Select experiment/s data to read')
         self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), formatting_dict['button_menu'])
-        self.bu_multispecies.setFixedWidth(80)
         self.bu_multispecies.setToolTip('Select data to filter by')
+        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
+        self.bu_read.setStyleSheet("color: green;")
+        self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
 
         # filters section
         self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), formatting_dict['title_menu'])
-        self.lb_data_filter.setFixedWidth(65)
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
         self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), formatting_dict['button_menu'])
-        self.bu_rep.setFixedWidth(80)
         self.bu_rep.setToolTip('Select % desired representativity in data across '
                                'whole record and for specific temporal periods')
         self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), formatting_dict['button_menu'])
-        self.bu_meta.setFixedWidth(80)
         self.bu_meta.setToolTip('Select metadata to filter by')
         self.bu_reset = set_formatting(QtWidgets.QPushButton('RESET', self), formatting_dict['button_menu'])
-        self.bu_reset.setFixedWidth(80)
         self.bu_reset.setToolTip('Reset filter fields to initial values')
         self.bu_reset.setStyleSheet("color: red;")
         self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), formatting_dict['button_menu'])
-        self.bu_period.setFixedWidth(80)
         self.bu_period.setToolTip('Select data in specific periods')
-        self.bu_screen = set_formatting(QtWidgets.QPushButton('FILTER', self), formatting_dict['button_menu'])
-        self.bu_screen.setFixedWidth(80)
-        self.bu_screen.setStyleSheet("color: blue;")
-        self.bu_screen.setToolTip('Filter data')
+        self.bu_filter = set_formatting(QtWidgets.QPushButton('FILTER', self), formatting_dict['button_menu'])
+        self.bu_filter.setStyleSheet("color: blue;")
+        self.bu_filter.setToolTip('Filter data')
         self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text="Bounds"), formatting_dict['label_menu'])
-        self.lb_data_bounds.setFixedWidth(80)
         self.lb_data_bounds.setToolTip('Set lower/upper bounds of data')
         self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
-        self.le_minimum_value.setFixedWidth(80)
         self.le_minimum_value.setToolTip('Set lower bound of data')
         self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
-        self.le_maximum_value.setFixedWidth(80)
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
+
+        # statistical calculation section
+        self.lb_statistic = set_formatting(QtWidgets.QLabel(self, text="Statistics"),
+                                             formatting_dict['title_menu'])
+        self.lb_statistic.setToolTip('Select the type of statistical calculation')
+        self.lb_statistic_mode = set_formatting(QtWidgets.QLabel(self, text="Mode"), formatting_dict['label_menu'])
+        self.lb_statistic_mode.setToolTip('Select statistical calculation mode')
+        self.cb_statistic_mode = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_statistic_mode.setToolTip('Select statistical calculation mode')
+        self.lb_statistic_aggregation = set_formatting(QtWidgets.QLabel(self, text="Aggregation"), formatting_dict['label_menu'])
+        self.lb_statistic_aggregation.setToolTip('Select statistic for spatial aggregation')
+        self.cb_statistic_aggregation = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_statistic_aggregation.setToolTip('Select statistic for spatial aggregation')
+        self.vertical_splitter_3 = QVLine()
+        self.vertical_splitter_3.setMaximumWidth(20)
+        
+        # colocation section
+        self.lb_colocate = set_formatting(QtWidgets.QLabel(self, text="Colocation"), formatting_dict['title_menu'])
+        self.lb_colocate.setToolTip('Set colocation')
+        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Temporal"), formatting_dict['checkbox_menu'])
+        self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
+        self.vertical_splitter_4 = QVLine()
+        self.vertical_splitter_4.setMaximumWidth(20)
+
+        # resampling section
+        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
+        self.lb_resampling.setToolTip('Set resampling options')
+        self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
+        self.vertical_splitter_5 = QVLine()
+        self.vertical_splitter_5.setMaximumWidth(20)
 
         # station selection section
         self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
@@ -339,28 +399,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.lb_station_selection.setToolTip('Select stations')
         self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), formatting_dict['checkbox_menu'])
         self.ch_select_all.setToolTip('Select all stations')
-        self.ch_select_all.setFixedWidth(80)
         self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), formatting_dict['checkbox_menu'])
         self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
-        self.ch_intersect.setFixedWidth(80)
         self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), formatting_dict['checkbox_menu'])
         self.ch_extent.setToolTip('Select stations that are within the map extent')
-        self.ch_extent.setFixedWidth(80)
-        self.vertical_splitter_3 = QVLine()
-        self.vertical_splitter_3.setMaximumWidth(20)
-
-        # resampling section
-        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
-        self.lb_resampling.setToolTip('Set resampling options')
-        self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.cb_resampling_resolution.setFixedWidth(100)
-        self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
-        self.cb_resampling_switch = set_formatting(Switch(self), formatting_dict['switch_menu'])
-        self.cb_resampling_switch.setToolTip('Activate/Deactivate resampling')
 
         # position objects on gridded configuration bar
         # data selection section
-        config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_selection, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_network, 1, 0, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_resolution, 2, 0, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.cb_matrix, 1, 1, QtCore.Qt.AlignLeft)
@@ -372,41 +418,53 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         config_bar.addWidget(self.bu_experiments, 1, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_multispecies, 2, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_colocate, 1, 5, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_1, 0, 6, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_1, 0, 5, 4, 1, QtCore.Qt.AlignLeft)
 
         # filters section
-        config_bar.addWidget(self.lb_data_filter, 0, 7, 1, 2, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.lb_data_bounds, 1, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_minimum_value, 1, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.le_maximum_value, 1, 9, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_rep, 2, 7, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_period, 2, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_meta, 2, 9, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_reset, 3, 8, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_screen, 3, 9, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.vertical_splitter_2, 0, 10, 4, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_filter, 0, 6, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_data_bounds, 1, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_minimum_value, 1, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.le_maximum_value, 1, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_rep, 2, 6, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_period, 2, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_meta, 2, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_reset, 3, 7, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_filter, 3, 8, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_2, 0, 9, 4, 1, QtCore.Qt.AlignLeft)
 
-        # station selection section
-        config_bar.addWidget(self.lb_station_selection, 0, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_select_all, 1, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_intersect, 2, 11, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.ch_extent, 3, 11, QtCore.Qt.AlignLeft)
+        # station aggregation section
+        config_bar.addWidget(self.lb_statistic, 0, 10, 1, 2, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic_mode, 1, 10, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.lb_statistic_aggregation, 2, 10, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_statistic_mode, 1, 11, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_statistic_aggregation, 2, 11, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_3, 0, 12, 4, 1, QtCore.Qt.AlignLeft)
 
-        # resampling section
-        config_bar.addWidget(self.lb_resampling, 0, 13, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resampling_resolution, 1, 13, 1, 1, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.cb_resampling_switch, 1, 14, 1, 1, QtCore.Qt.AlignLeft)
+        # colocation section
+        config_bar.addWidget(self.lb_colocate, 0, 13, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_colocate, 1, 13, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_4, 0, 14, 4, 1, QtCore.Qt.AlignLeft)
 
-        # enable dynamic updating of configuration bar fields which filter data files
+        # resampling section
+        config_bar.addWidget(self.lb_resampling, 0, 15, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.cb_resampling_resolution, 1, 15, 1, 1, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.vertical_splitter_5, 0, 16, 4, 1, QtCore.Qt.AlignLeft)
+
+        # station selection section
+        config_bar.addWidget(self.lb_station_selection, 0, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_select_all, 1, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_intersect, 2, 17, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.ch_extent, 3, 17, QtCore.Qt.AlignLeft)
+
+        # enable dynamic updating of specific configuration bar fields 
         self.cb_network.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
-        self.cb_resampling_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_matrix.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.cb_species.currentTextChanged.connect(self.handle_config_bar_params_change)
         self.le_start_date.textChanged.connect(self.handle_config_bar_params_change)
         self.le_end_date.textChanged.connect(self.handle_config_bar_params_change)
+        self.cb_statistic_mode.currentTextChanged.connect(self.handle_config_bar_params_change)
+        self.cb_resampling_resolution.currentTextChanged.connect(self.handle_config_bar_params_change)
 
         # setup pop-up window menu tree for flags, qa, experiments, 
         # % data representativity, data periods and metadata
@@ -439,7 +497,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.handle_data_selection_update()
 
             # set filtered multispecies if any
-            multispecies_conf(self)
+            aux.multispecies_conf(self)
 
             # set fields available for filtering
             aux.representativity_conf(self)
@@ -463,14 +521,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # enable RESET button
         self.bu_reset.clicked.connect(self.reset_options)
 
+        # enable FILTER button
+        self.bu_filter.clicked.connect(self.mpl_canvas.handle_data_filter_update)
+
+        # enable statistical calculation mode changing
+        self.cb_statistic_mode.currentTextChanged.connect(self.mpl_canvas.handle_statistic_mode_update)
+
+        # enable statistical aggregation update 
+        self.cb_statistic_aggregation.currentTextChanged.connect(self.mpl_canvas.handle_statistic_aggregation_update)
+
         # enable interactivity of temporal colocation checkbox
         self.ch_colocate.stateChanged.connect(self.mpl_canvas.handle_temporal_colocate_update)
 
-        # enable FILTER button
-        self.bu_screen.clicked.connect(self.mpl_canvas.handle_data_filter_update)
-
-        # enable activating the resampling
-        self.cb_resampling_switch.clicked.connect(self.mpl_canvas.handle_resampling_update)
+        # enable resampling by changing the temporal resolution
+        self.cb_resampling_resolution.currentTextChanged.connect(self.mpl_canvas.handle_resampling_update)
 
         # enable interactivity of station selection checkboxes
         self.ch_select_all.stateChanged.connect(self.mpl_canvas.select_all_stations)
@@ -506,13 +570,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
         
-        self.pop_up_window = PopUpWindow(self, menu_root, [], self.main_window_geometry)
+        self.pop_up_window = PopUpWindow(self, menu_root, [], self.full_window_geometry)
 
     def update_configuration_bar_fields(self):
         """ Function that initialises/updates configuration bar fields. """
 
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
+
+        # set variable to avoid updating the canvas while updating config bar parameters
+        self.block_MPL_canvas_updates = True
 
         # set some default configuration values when initialising config bar
         if self.config_bar_initialisation:
@@ -532,7 +599,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.time_array = None
             self.yearmonths = None
             self.data_labels = None
-            
+
             # set initial station references to be empty dict
             self.station_references = {}
 
@@ -543,6 +610,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_species = copy.deepcopy(self.species[0])
             self.selected_resampling_resolution = copy.deepcopy(self.resampling_resolution)
             self.selected_resampling = copy.deepcopy(self.resampling)
+            self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
+            self.selected_statistic_aggregation = copy.deepcopy(self.statistic_aggregation)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -574,6 +643,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_matrix.clear()
         self.cb_species.clear()
         self.cb_resampling_resolution.clear()
+        self.cb_statistic_mode.clear()
+        self.cb_statistic_aggregation.clear()
 
         # if have no available observational data, return from function, updating variable informing that have no data
         if len(self.available_observation_data) == 0:
@@ -607,21 +678,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.cb_resolution.setCurrentText(self.selected_resolution)
         else:
             self.selected_resolution = self.cb_resolution.currentText()
-        
-        # update resampling resolution field
-        resampling_available_resolutions = copy.deepcopy(available_resolutions)[available_resolutions.index(self.selected_resolution)+1:]
-        resampling_available_resolutions.append('yearly')
-        self.cb_resampling_resolution.addItems(resampling_available_resolutions)
-        if self.selected_resampling_resolution in resampling_available_resolutions:
-            self.cb_resampling_resolution.setCurrentText(self.selected_resampling_resolution)
-        else:
-            self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
-
-        # update resampling switch
-        if self.selected_resampling:
-            self.cb_resampling_switch.setChecked(True)
-        else:
-            self.cb_resampling_switch.setChecked(False)
 
         # update matrix field
         available_matrices = sorted(self.available_observation_data[self.selected_network][self.selected_resolution])
@@ -638,6 +694,55 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.cb_species.setCurrentText(self.selected_species)
         else:
             self.selected_species = self.cb_species.currentText()
+
+        # update statistic mode field
+        available_statistic_modes = ['Flattened', 'Spatial|Temporal', 'Temporal|Spatial']
+        self.cb_statistic_mode.addItems(available_statistic_modes)
+        if self.selected_statistic_mode in available_statistic_modes:
+            self.cb_statistic_mode.setCurrentText(self.selected_statistic_mode)
+        else:
+            self.selected_statistic_mode = self.cb_statistic_mode.currentText()
+
+        # update statistic aggregation field
+        if self.selected_statistic_mode == 'Flattened':
+            available_aggregation_statistics = []
+        else:    
+            available_aggregation_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+        self.cb_statistic_aggregation.addItems(available_aggregation_statistics)
+        if self.selected_statistic_aggregation in available_aggregation_statistics:
+            self.cb_statistic_aggregation.setCurrentText(self.selected_statistic_aggregation)
+        else:
+            self.selected_statistic_aggregation = self.cb_statistic_aggregation.currentText()
+
+        # get available resampling resolutions
+        available_resampling_resolutions = copy.deepcopy(available_resolutions)[available_resolutions.index(self.selected_resolution)+1:]
+        available_resampling_resolutions.append('yearly')
+
+        # remove resolutions if resampled data would be less than 2 timesteps
+        resampling_resolutions = copy.deepcopy(available_resampling_resolutions)
+        for resampling_resolution in resampling_resolutions:
+            # get active frequency code
+            active_frequency_code = get_frequency_code(resampling_resolution)
+
+            # get time array
+            start_date = self.le_start_date.text()
+            end_date = self.le_end_date.text()
+            time_array = pd.date_range(start=datetime.datetime(int(start_date[:4]), int(start_date[4:6]),
+                                                               int(start_date[6:8])),
+                                       end=datetime.datetime(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:8])),
+                                       freq=active_frequency_code)[:-1]
+
+            # show warning when the data consists only of less than 2 timesteps
+            if len(time_array) < 2:
+                available_resampling_resolutions.remove(resampling_resolution)
+            
+        # update resampling resolution field
+        available_resampling_resolutions = ['None',] + available_resampling_resolutions
+        self.cb_resampling_resolution.addItems(available_resampling_resolutions)
+        if self.selected_resampling_resolution in available_resampling_resolutions:
+            self.cb_resampling_resolution.setCurrentText(self.selected_resampling_resolution)
+        else:
+            self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
 
         # update available experiments for selected fields
         aux.get_valid_experiments(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
@@ -665,34 +770,49 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.qa_menu['checkboxes']['remove_default'] = default_qa
 
         # update layout fields
-        self.update_layout_fields()
+        self.update_layout_fields(self.mpl_canvas)
 
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
 
-    def update_layout_fields(self):
+        # unset variable to allow updating the canvas
+        self.block_MPL_canvas_updates = False
+
+    def update_layout_fields(self, canvas_instance):
         """ Function which updates layout fields. """
 
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
+    
+        # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.7.2 is available
+        # # remove plot types that need active temporal colocation and experiments data
+        # for plot_type in ['scatter', 'taylor']:
+        #     if ((not self.temporal_colocation) 
+        #         or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+        #         if plot_type in canvas_instance.layout_options:
+        #             canvas_instance.layout_options.remove(plot_type)
+        #     else:
+        #         if plot_type not in canvas_instance.layout_options:
+        #             canvas_instance.layout_options.append(plot_type)          
 
-        # update layout field buttons
-        # clear fields
-        self.cb_position_2.clear()
-        self.cb_position_3.clear()
-        self.cb_position_4.clear()
-        self.cb_position_5.clear()
+        # remove plot types that need active temporal colocation and experiments data
+        if 'taylor' in canvas_instance.layout_options:
+            canvas_instance.layout_options.remove('taylor')
 
-        # update available layout options
-        layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
-                          'periodic-violin', 'scatter', 'statsummary', 'timeseries']
+        for plot_type in ['scatter']:
+            if ((not self.temporal_colocation) 
+                or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+                if plot_type in canvas_instance.layout_options:
+                    canvas_instance.layout_options.remove(plot_type)
+            else:
+                if plot_type not in canvas_instance.layout_options:
+                    canvas_instance.layout_options.append(plot_type)          
+ 
+        # order alphabetically
+        layout_options = sorted(canvas_instance.layout_options)
 
-        # remove scatter plots from list if the temporal colocation is not active
-        if not self.temporal_colocation:
-            if 'scatter' in layout_options:
-                layout_options.remove('scatter')
-        
         # update position 2 in layout
+        self.cb_position_2.clear()
         self.cb_position_2.addItems(layout_options)
         if self.position_2 in layout_options:
             self.cb_position_2.setCurrentText(self.position_2)
@@ -702,6 +822,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.block_config_bar_handling_updates = True
 
         # update position 3 in layout
+        self.cb_position_3.clear()
         self.cb_position_3.addItems(layout_options)
         if self.position_3 in layout_options:
             self.cb_position_3.setCurrentText(self.position_3)
@@ -711,6 +832,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.block_config_bar_handling_updates = True
 
         # update position 4 in layout
+        self.cb_position_4.clear()
         self.cb_position_4.addItems(layout_options)
         if self.position_4 in layout_options:
             self.cb_position_4.setCurrentText(self.position_4)
@@ -720,6 +842,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.block_config_bar_handling_updates = True
 
         # update position 5 in layout
+        self.cb_position_5.clear()
         self.cb_position_5.addItems(layout_options)
         if self.position_5 in layout_options:
             self.cb_position_5.setCurrentText(self.position_5)
@@ -739,8 +862,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # get event origin source
             event_source = self.sender()
 
-            # if network, resolution, matrix or species have changed then respective
-            # current selection for the changed param
+            # if network, resolution, matrix, species, aggregation mode or resampling resolution have changed 
+            # then alter respective current selection for the 
+            # changed param
             if event_source == self.cb_network:
                 self.selected_network = changed_param
 
@@ -755,12 +879,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
 
+            elif event_source == self.cb_statistic_mode:
+                self.selected_statistic_mode = changed_param
+
             elif event_source == self.cb_resampling_resolution:
                 self.selected_resampling_resolution = changed_param
                 self.selected_resampling = False
-
-            elif event_source == self.cb_resampling_switch:
-                self.selected_resampling = changed_param
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
@@ -773,33 +897,50 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
                 aux.init_multispecies(self)
 
+            # if calibration factor has been applied from config, turn off if we update the data
+            self.calibration_factor = None
+
             # update configuration bar fields
             self.update_configuration_bar_fields()
 
-    def handle_layout_update(self, changed_plot_type):
+    def handle_layout_update(self, changed_plot_type, sender=None):
         """ Function which handles update of layout. """
         
         if (changed_plot_type != '') & (not self.block_config_bar_handling_updates):
             
-            # get event origin source
-            event_source = self.sender()
+            # get event origin source if not given
+            if sender:
+                if sender == 2:
+                    event_source = self.cb_position_2
+                elif sender == 3:
+                    event_source = self.cb_position_3    
+                elif sender == 4:
+                    event_source = self.cb_position_4
+                elif sender == 5:
+                    event_source = self.cb_position_5
+            else:
+                event_source = self.sender()
 
             # update selected station plots, avoiding duplicates
             if event_source == self.cb_position_2:
                 previous_plot_type = copy.deepcopy(self.position_2)
                 self.position_2 = copy.deepcopy(changed_plot_type)
+                changed_position = 2
                 
             elif event_source == self.cb_position_3:
                 previous_plot_type = copy.deepcopy(self.position_3)
                 self.position_3 = copy.deepcopy(changed_plot_type)
+                changed_position = 3
 
             elif event_source == self.cb_position_4:
                 previous_plot_type = copy.deepcopy(self.position_4)
                 self.position_4 = copy.deepcopy(changed_plot_type)
+                changed_position = 4
 
             elif event_source == self.cb_position_5:
                 previous_plot_type = copy.deepcopy(self.position_5)
                 self.position_5 = copy.deepcopy(changed_plot_type)
+                changed_position = 5
 
             # if changed plot type is selected elsewhere, then set that field to None
             if (changed_plot_type == self.position_2) & (event_source != self.cb_position_2):
@@ -825,6 +966,26 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     ax.remove()
                 self.active_dashboard_plots.remove(previous_plot_type)
 
+                #hide qt elements for previous plot type
+                for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
+                                                             self.mpl_canvas.save_buttons, 
+                                                             self.mpl_canvas.elements):
+
+                    menu_plot_type = menu_button.objectName().split('_menu')[0]
+                    if menu_plot_type == 'periodic_violin':
+                        menu_plot_type = 'periodic-violin'
+
+                    if previous_plot_type == menu_plot_type:
+                        menu_button.hide()
+                        save_button.hide()
+                        for element in self.mpl_canvas.interactive_elements[previous_plot_type]['elements']:
+                            if isinstance(element, dict):
+                                for sub_element in element.values():
+                                    sub_element.hide()
+                            else:
+                                element.hide()
+                        break
+
             # if changed_plot_type already axis on another axis then remove those axis elements
             if (changed_plot_type in self.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
                 ax = self.mpl_canvas.plot_axes[changed_plot_type]
@@ -834,18 +995,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                         sub_ax.remove()
                 else:
                     ax.remove()
-
             # otherwise add plot_type to active_dashboard_plots
             elif changed_plot_type != 'None': 
                 self.active_dashboard_plots.append(changed_plot_type)
 
             # update plot axis for new plot type
             self.update_plot_axis(self.mpl_canvas, event_source, changed_plot_type)
-
-            # hide axis for new plot type before replot
-            if (changed_plot_type in self.active_dashboard_plots) & (changed_plot_type in self.mpl_canvas.plot_axes):
-                ax = self.mpl_canvas.plot_axes[changed_plot_type]
-                self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
 
             # update plot if changed_plot_type != None
             if changed_plot_type != 'None':
@@ -858,67 +1013,85 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 # make plot
                 self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
 
-            # update layout fields
-            self.update_layout_fields()
+                # update qt elements geometry for changed plot type
+                self.update_qt_elements_geometry(plot_types=[changed_plot_type], positions=[changed_position])
 
-            # update buttons geometry
-            self.update_buttons_geometry()
-            
+            # update layout fields
+            self.update_layout_fields(self.mpl_canvas)
+
             # draw changes
-            self.mpl_canvas.figure.canvas.draw()
+            self.mpl_canvas.figure.canvas.draw_idle()
 
         return None
 
     def update_plot_axis(self, canvas_instance, changed_position, changed_plot_type):
         """ Update plot axis position from layout options."""
 
+        # since we have no data, we need to use a random reference to initialize the polar axes
+        # the axis will be updated when we create the taylor diagram
+        if changed_plot_type == 'taylor':
+            reference_stddev = 7.5
+            plot_characteristics = canvas_instance.plot_characteristics['taylor']
+            ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
+
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
-            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+            if changed_plot_type in ['periodic', 'periodic-violin']:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=15, colspan=49))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 81), rowspan=15, colspan=18))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((31, 50), rowspan=15, colspan=30))
-            elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 65), rowspan=34, colspan=34))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 53), rowspan=15, colspan=49))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((34, 83), rowspan=15, colspan=19))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((34, 53), rowspan=15, colspan=28))
+            elif changed_plot_type == 'taylor':
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((9, 65), rowspan=36, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
+            elif changed_plot_type in ['statsummary', 'metadata']:
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 50), rowspan=36, colspan=50))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((12, 50), rowspan=34, colspan=49))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 53), rowspan=34, colspan=51))
             
         # position 3 (bottom left)
         if changed_position == self.cb_position_3 or changed_position == 3:
-            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+            if changed_plot_type in ['periodic', 'periodic-violin']:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=18, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 19), rowspan=18, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 0), rowspan=18, colspan=18))
-            elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 10), rowspan=38, colspan=19))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=18, colspan=28))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 22), rowspan=18, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 4), rowspan=18, colspan=17))
+            elif changed_plot_type == 'taylor':
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 5), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
+            elif changed_plot_type in ['statsummary', 'metadata']:
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 1), rowspan=38, colspan=28))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 0), rowspan=38, colspan=29))
-
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=38, colspan=28))
         # position 4 (bottom centre)
         if changed_position == self.cb_position_4 or changed_position == 4:
-            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+            if changed_plot_type in ['periodic', 'periodic-violin']:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=18, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 54), rowspan=18, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 35), rowspan=18, colspan=18))
-            elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 45), rowspan=38, colspan=19))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=18, colspan=28))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 56), rowspan=18, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 38), rowspan=18, colspan=17))
+            elif changed_plot_type == 'taylor':
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 40), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
+            elif changed_plot_type in ['statsummary', 'metadata']:
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=28))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=38, colspan=28))
             
         # position 5 (bottom right)
         if changed_position == self.cb_position_5 or changed_position == 5:
-            if (changed_plot_type == 'periodic') or (changed_plot_type == 'periodic-violin'):
+            if changed_plot_type in ['periodic', 'periodic-violin']:
                 canvas_instance.plot_axes[changed_plot_type] = {}
-                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=18, colspan=29))
-                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 89), rowspan=18, colspan=10))
-                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 70), rowspan=18, colspan=18))
-            elif changed_plot_type == 'statsummary':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 80), rowspan=38, colspan=19))
+                canvas_instance.plot_axes[changed_plot_type]['hour'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=18, colspan=28))
+                canvas_instance.plot_axes[changed_plot_type]['dayofweek'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 90), rowspan=18, colspan=10))
+                canvas_instance.plot_axes[changed_plot_type]['month'] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((82, 72), rowspan=18, colspan=17))
+            elif changed_plot_type == 'taylor':
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=18),
+                                                                                                  axes_class=fa.FloatingAxes, grid_helper=ghelper)
+            elif changed_plot_type in ['statsummary', 'metadata']:
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 69), rowspan=38, colspan=28))
             elif changed_plot_type != 'None':
-                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 70), rowspan=38, colspan=29))
+                canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=28))
 
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         if changed_plot_type == 'timeseries':
@@ -929,6 +1102,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_timeseries_annotation = False
             canvas_instance.timeseries_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                     canvas_instance.hover_timeseries_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.timeseries_annotation,
+                                                        canvas_instance.timeseries_vline])
 
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'scatter':
@@ -938,6 +1113,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_scatter_annotation = False
             canvas_instance.scatter_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                  canvas_instance.hover_scatter_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.scatter_annotation])
 
         # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'distribution':
@@ -948,7 +1124,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.lock_distribution_annotation = False
             canvas_instance.distribution_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                       canvas_instance.hover_distribution_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.distribution_annotation,
+                                                        canvas_instance.distribution_vline])
 
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'periodic':
             
             # setup periodic annotation
@@ -959,22 +1138,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.lock_periodic_annotation[resolution] = False
             canvas_instance.periodic_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                   canvas_instance.hover_periodic_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.periodic_annotation,
+                                                        canvas_instance.periodic_vline])
 
-            # update periodic statistic combobox
-            self.block_config_bar_handling_updates = False
-            
-            # update map z combobox fields based on data in memory
-            # generate lists of basic and basis+bias statistics for using in the z statistic combobox
-            if not hasattr(self, 'basic_z_stats'):
-                self.basic_z_stats = np.array(list(
-                    OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
-            if not hasattr(self, 'basic_and_bias_z_stats'):
-                self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-                    OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
-
-            # update periodic statistic in dashboard
-            canvas_instance.handle_periodic_statistic_update()
-
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
         elif changed_plot_type == 'periodic-violin':
             
             # setup periodic violin annotation
@@ -985,6 +1152,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.lock_periodic_violin_annotation[resolution] = False
             canvas_instance.periodic_violin_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                                                                                                          canvas_instance.hover_periodic_violin_annotation)
+
+            canvas_instance.annotation_elements.extend([canvas_instance.periodic_violin_annotation,
+                                                        canvas_instance.periodic_violin_vline])
+
+        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
+        elif changed_plot_type == 'taylor':
+            
+            # initialise polar axis
+            canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
+
+            # setup taylor annotation
+            canvas_instance.lock_taylor_annotation = False
+            canvas_instance.taylor_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                                                canvas_instance.hover_taylor_annotation)
+            canvas_instance.annotation_elements.extend([canvas_instance.taylor_annotation])
 
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
@@ -997,6 +1179,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # update mouse cursor to a waiting cursor
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+        # clear previously selected relative/absolute station indices
+        self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int)
+        self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int)
+        self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int)
 
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
@@ -1011,11 +1198,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
-        self.previous_filter_species = self.previous_filter_species
-        self.previous_plot_options = {}
-        for plot_type in self.mpl_canvas.all_plots:
-            self.previous_plot_options[plot_type] = []
-        
+        self.previous_filter_species = self.filter_species
+        self.mpl_canvas.previous_plot_options = copy.deepcopy(self.mpl_canvas.current_plot_options) 
+
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
         self.end_date = int(self.le_end_date.text())
@@ -1030,17 +1215,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.data_labels = ['observations'] + list(self.experiments.keys())
-        self.filter_species = self.filter_species
-        self.current_plot_options = {}
-        for plot_type in self.mpl_canvas.all_plots:
-            self.current_plot_options[plot_type] = []
+        # remove bias plot options if have no experiments loaded
+        if len(self.data_labels) == 1:
+            for plot_type in self.mpl_canvas.all_plots:
+                if 'bias' in self.mpl_canvas.current_plot_options[plot_type]:
+                    self.mpl_canvas.current_plot_options[plot_type].remove('bias')
+                    self.mpl_canvas.update_plot_options(plot_type)
+                    if plot_type == 'statsummary':
+                        self.block_config_bar_handling_updates = True
+                        self.mpl_canvas.check_statsummary_stats()
+                        self.block_config_bar_handling_updates = False
 
         # if spatial_colocation is not active, force filter_species to be empty dict if it is not already
         # inform user of this
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {} 
             msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
-            show_message(msg)
+            aux.show_message(self.read_instance, msg)
 
         # set read operations to be empty list initially
         read_operations = []
@@ -1057,7 +1248,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.species[0] != self.previous_species[0]) or (
                 np.array_equal(self.qa, self.previous_qa) == False) or (
                 np.array_equal(self.flags, self.previous_flags) == False) or (
-                list(self.filter_species.keys()) != list(self.previous_filter_species.keys())):
+                self.filter_species != self.previous_filter_species):
             read_operations = ['reset']
 
         # key variables have not changed, has start/end date?
@@ -1114,6 +1305,21 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # has date range changed?
         if len(read_operations) > 0:
             
+            # if reading/cutting observations then cover canvas to do updates gracefully
+            if ('reset' in read_operations) or ('cut_left' in read_operations) or ('cut_right' in read_operations) or\
+               ('read_left' in read_operations) or ('read_right' in read_operations):
+                self.mpl_canvas.canvas_cover.show()
+            # otherwise, just cover plotting axes as are adding/removing experiments
+            else:
+                self.mpl_canvas.top_right_canvas_cover.show() 
+                self.mpl_canvas.lower_canvas_cover.show()
+            self.mpl_canvas.figure.canvas.draw_idle()  
+            self.mpl_canvas.figure.canvas.flush_events()
+
+            # clear all axes elements 
+            for plot_type, ax in self.mpl_canvas.plot_axes.items():
+                self.mpl_canvas.remove_axis_elements(ax, plot_type)
+
             # inactivate resampling
             self.resampling = False
 
@@ -1129,16 +1335,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # read data
             self.datareader.read_setup(read_operations, experiments_to_remove=experiments_to_remove, 
                                        experiments_to_read=experiments_to_read)
-            
-            # clear canvas entirely if have no valid data after read
+
+            # restore mouse cursor to normal if have no valid data after read
             if self.invalid_read:
-                # clear axes
-                for plot_type, ax in self.mpl_canvas.plot_axes.items():
-                    self.mpl_canvas.remove_axis_elements(ax, plot_type)
-                # update MPL canvas
-                self.mpl_canvas.figure.canvas.draw()  
-                # restore mouse cursor to normal
-                QtWidgets.QApplication.restoreOverrideCursor()    
+                QtWidgets.QApplication.restoreOverrideCursor()
                 return
 
             # update fields available for filtering
@@ -1146,61 +1346,66 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             aux.update_period_fields(self)
             aux.update_metadata_fields(self)
             
-            # update relevant temporal resolutions 
+            # update relevant/nonrelevant temporal resolutions 
             self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
+            self.nonrelevant_temporal_resolutions = aux.get_nonrelevant_temporal_resolutions(self.resolution)
 
-        # if species has changed, or first read, update species specific lower/upper limits
-        if (self.first_read) or (self.species[0] != self.previous_species[0]):
-            # get default GHOST limits
-            self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
-            self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
-            self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
-            self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
+            # if species has changed, or first read, update species specific lower/upper limits
+            if (self.first_read) or (self.species[0] != self.previous_species[0]):
+                # get default GHOST limits
+                self.lower_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit']) 
+                self.upper_bound[self.species[0]] = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit']) 
+                self.le_minimum_value.setText(str(self.lower_bound[self.species[0]]))
+                self.le_maximum_value.setText(str(self.upper_bound[self.species[0]]))
 
-        # run function to update filter
-        self.mpl_canvas.handle_data_filter_update()
-        
-        # update map z combobox fields based on data in memory
-        # generate lists of basic and basis+bias statistics for using in the z statistic combobox
-        if not hasattr(self, 'basic_z_stats'):
-            self.basic_z_stats = np.array(list(
-                OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
-        if not hasattr(self, 'basic_and_bias_z_stats'):
-            self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-                OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
+            # run function to update filter
+            self.mpl_canvas.handle_data_filter_update()
 
-        # generate list of sorted z1/z2 data arrays names in memory, putting observations
-        # before experiments, and empty string item as first element in z2 array list
-        # (for changing from 'difference' statistics to 'absolute')
-        if len(self.data_labels) == 1:  
-            self.z1_arrays = np.array(['observations'])
-        else:
-            self.z1_arrays = np.array(self.data_labels)
-        self.z2_arrays = np.append([''], self.z1_arrays)
+            # generate list of sorted z1/z2 data arrays names in memory, putting observations
+            # before experiments, and empty string item as first element in z2 array list
+            # (for changing from 'difference' statistics to 'absolute')
+            if len(self.data_labels) == 1:  
+                self.z1_arrays = np.array(['observations'])
+            else:
+                self.z1_arrays = np.array(self.data_labels)
+            self.z2_arrays = np.append([''], self.z1_arrays)
 
-        # update map z statistic comboboxes
-        self.mpl_canvas.handle_map_z_statistic_update()
+            # update map z statistic comboboxes
+            self.mpl_canvas.handle_map_z_statistic_update()
 
-        # update periodic statistic combobox
-        self.mpl_canvas.handle_periodic_statistic_update()
-    
-        # reset station select checkboxes to be unchecked
-        self.ch_select_all.setCheckState(QtCore.Qt.Unchecked)
-        self.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
-        self.ch_extent.setCheckState(QtCore.Qt.Unchecked)
+            # update timeseries statistic combobox
+            self.mpl_canvas.handle_timeseries_statistic_update()
 
-        # unset variable to allow updating of MPL canvas
-        self.block_MPL_canvas_updates = False
+            # update periodic statistic combobox
+            self.mpl_canvas.handle_periodic_statistic_update()
 
-        # update MPL canvas
-        self.mpl_canvas.update_MPL_canvas()
+            # update taylor diagram statistic combobox
+            self.mpl_canvas.handle_taylor_correlation_statistic_update()
 
-        # if first read, then set this now to be False
-        # also, if colocate checkbox is ticked, then apply temporal colocation
-        if self.first_read:
-            self.first_read = False
-            if self.ch_colocate.checkState() == QtCore.Qt.Checked:
-                self.mpl_canvas.handle_temporal_colocate_update()
+            # update statsummary statistic comboboxes
+            self.mpl_canvas.handle_statsummary_statistics_update()
+            self.mpl_canvas.handle_statsummary_cycle_update()
+            self.mpl_canvas.handle_statsummary_periodic_aggregation_update()
+            self.mpl_canvas.handle_statsummary_periodic_mode_update()
+
+            # unselect all/intersect/extent checkboxes
+            self.mpl_canvas.unselect_map_checkboxes()
+            
+            # reset resampling
+            self.cb_resampling_resolution.setCurrentText('None')
+
+            # unset variable to allow updating of MPL canvas
+            self.block_MPL_canvas_updates = False
+
+            # update MPL canvas
+            self.mpl_canvas.update_MPL_canvas()
+
+            # if first read, then set this now to be False
+            # also, if colocate checkbox is ticked, then apply temporal colocation
+            if self.first_read:
+                self.first_read = False
+                if self.ch_colocate.checkState() == QtCore.Qt.Checked:
+                    self.mpl_canvas.handle_temporal_colocate_update()
 
         # restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
@@ -1226,9 +1431,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         aux.init_metadata(self)
         aux.update_metadata_fields(self)
 
-        # reset multispecies
-        aux.init_multispecies(self)
-        
         # reset bounds
         species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
         species_upper_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_upper_limit'])

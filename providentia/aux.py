@@ -10,14 +10,16 @@ import json
 import itertools
 import datetime
 import sys
-from netCDF4 import Dataset
+import time
+import math
+
 import numpy as np
 import pandas as pd
-import math
 import pyproj
 from scipy.spatial import cKDTree
+from scipy.sparse import coo_matrix
+from scipy.signal import convolve, gaussian
 import seaborn as sns
-
 
 def multispecies_mapping(species):
     """ Map species special case str to multiple species names. """
@@ -183,6 +185,27 @@ def get_relevant_temporal_resolutions(resolution):
         relevant_temporal_resolutions = []
         
     return relevant_temporal_resolutions
+
+def get_nonrelevant_temporal_resolutions(resolution):        
+    """ Get non-relevant temporal reolsutions for periodic plots, by selected temporal resolution.
+
+        :param resolution: name of selected temporal resolution
+        :type resolution: str
+        :return: non-relevant temporal resolutions
+        :rtype: list
+    """
+
+    if 'hourly' in resolution:
+        nonrelevant_temporal_resolutions = []
+    elif resolution == 'daily':
+        nonrelevant_temporal_resolutions = ['hour']
+    elif resolution == 'monthly':
+        nonrelevant_temporal_resolutions = ['hour', 'dayofweek']
+    else:
+        nonrelevant_temporal_resolutions = ['hour', 'dayofweek', 'month']
+        
+    return nonrelevant_temporal_resolutions
+
 
 def get_land_polygon_resolution(selection):
     """ Get resolution of land polygons to plot on map.
@@ -730,6 +753,44 @@ def update_metadata_fields(instance):
                 if meta_var in instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected']:
                     instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
 
+def multispecies_conf(instance):
+    """ Function used when loading from a configuration file. 
+        Sets defined multispecies filtering variables, rest of variables are set to default. 
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+    """
+
+    if hasattr(instance, 'filter_species'):
+        filter_species = copy.deepcopy(instance.filter_species)
+        for (networkspeci_ii, networkspeci), networkspeci_bounds in zip(enumerate(filter_species.keys()),
+                                                                        filter_species.values()):
+
+            for bounds in networkspeci_bounds:
+                # update menu_current
+                if ('networkspeci_' + str(networkspeci_ii)) not in instance.multispecies_menu['multispecies']['labels']:
+                    instance.multispecies_menu['multispecies']['labels'].append('networkspeci_' + str(networkspeci_ii))
+
+                # add values
+                instance.multispecies_menu['multispecies']['current_lower'][networkspeci_ii] = bounds[0]
+                instance.multispecies_menu['multispecies']['current_upper'][networkspeci_ii] = bounds[1]
+                instance.multispecies_menu['multispecies']['current_filter_species_fill_value'][networkspeci_ii] = bounds[2]
+                instance.multispecies_menu['multispecies']['apply_selected'][networkspeci_ii] = True
+
+                # set initial selected config variables as set .conf files or defaults
+                instance.selected_widget_network.update({networkspeci_ii: networkspeci.split('|')[0]})
+                instance.selected_widget_matrix.update({networkspeci_ii: instance.parameter_dictionary[networkspeci.split('|')[1]]['matrix']})
+                instance.selected_widget_species.update({networkspeci_ii: networkspeci.split('|')[1]})
+                instance.selected_widget_lower.update({networkspeci_ii: bounds[0]})
+                instance.selected_widget_upper.update({networkspeci_ii: bounds[1]})
+                instance.selected_widget_filter_species_fill_value.update({networkspeci_ii: bounds[2]})
+                instance.selected_widget_apply.update({networkspeci_ii: True})
+
+                networkspeci_ii += 1
+
+            # filtering tab is initialized from conf
+            instance.multispecies_initialisation = False
+
 def representativity_conf(instance):
     """ Function used when loading from a configuration file. 
         Sets defined representativity filter variables, rest of variables are set to default. 
@@ -1180,200 +1241,6 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
         instance.experiments_menu['checkboxes']['labels'] = experiments_to_add
         instance.experiments_menu['checkboxes']['map_vars'] = experiments_to_add
 
-def get_basic_metadata(instance):     
-    """ Get basic unique metadata across networkspecies wanting to read
-        The basic fields are: station_reference, station_name, longitude, latitude, measurement_altitude, station_classification and area_classification
-
-        If have multiple species, then spatially cocolocate across species 
-        to get matching stations across stations.
-
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-        :type instance: object
-        :return: station_references per networkspecies, station_name per networkspecies, longitudes per networkspecies, latitudes per networkspecies, measurement altitudes per networkspecies, station_classifications per networkspecies, area_classifications per networkspecies, nonghost_units 
-        :rtype: dict, dict, dict, dict, dict, dict, dict, dict
-    """
-
-    # define dictionaries for storing basic metadata across all species to read
-    station_references = {}
-    station_names = {}
-    station_longitudes = {}
-    station_latitudes = {}
-    station_measurement_altitudes = {}
-    station_classifications = {}
-    area_classifications = {}
-    nonghost_units = {}
-
-    # iterate through network, speci pairs
-    for networkspeci in (instance.networkspecies + instance.filter_networkspecies):
-    
-        # get indivudual network and species strings
-        network = networkspeci.split('|')[0]
-        speci = networkspeci.split('|')[1]
-
-        # get species matrix
-        matrix = instance.parameter_dictionary[speci]['matrix']
-
-        # get file root
-        # GHOST
-        if instance.reading_ghost:
-            file_root = '%s/%s/%s/%s/%s/%s_' % (instance.ghost_root, network,
-                                                instance.ghost_version, instance.resolution,
-                                                speci, speci)
-        # non-GHOST
-        else:
-            file_root = '%s/%s/%s/%s/%s_' % (instance.nonghost_root, network,
-                                             instance.resolution, speci, speci)
-
-        # get relevant files
-        relevant_files_before_filter = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in instance.yearmonths])
-        relevant_files = copy.deepcopy(relevant_files_before_filter)
-
-        # drop files if they don't exist
-        for file in relevant_files_before_filter:
-            if not os.path.exists(file):
-                relevant_files.remove(file)
-
-        # if have 0 files to read for networkspeci, then drop networkspeci
-        if len(relevant_files) == 0:
-            if networkspeci in instance.networkspecies:
-                instance.networkspecies.remove(networkspeci)
-                print('Warning: There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci))
-            elif networkspeci in instance.filter_networkspecies:
-                instance.filter_networkspecies.remove(networkspeci)
-                del instance.filter_species[networkspeci]
-                print('Warning: There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci))
-            continue
-            
-        # get station references, longitudes and latitudes for speci
-        # GHOST
-        if instance.reading_ghost:
-            
-            # define arrays for storing speci metadata
-            speci_station_references = []
-            speci_station_names = []
-            speci_station_longitudes = []
-            speci_station_latitudes = []
-            speci_station_measurement_altitudes = []
-            speci_station_classifications = []
-            speci_area_classifications = []
-
-            for relevant_file in relevant_files:
-                ncdf_root = Dataset(relevant_file)
-                speci_station_references = np.append(speci_station_references, ncdf_root['station_reference'][:])
-                speci_station_names = np.append(speci_station_names, ncdf_root['station_name'][:])
-                speci_station_longitudes = np.append(speci_station_longitudes, ncdf_root['longitude'][:])
-                speci_station_latitudes = np.append(speci_station_latitudes, ncdf_root['latitude'][:])
-                speci_station_measurement_altitudes = np.append(speci_station_measurement_altitudes, ncdf_root['measurement_altitude'][:])
-                speci_station_classifications = np.append(speci_station_classifications, ncdf_root['station_classification'][:])
-                speci_area_classifications = np.append(speci_area_classifications, ncdf_root['area_classification'][:])
-                ncdf_root.close()
-
-            speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
-            station_references[networkspeci] = speci_station_references
-            station_names[networkspeci] = speci_station_names[station_unique_indices]
-            station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
-            station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
-            station_measurement_altitudes[networkspeci] = speci_station_measurement_altitudes[station_unique_indices]
-            station_classifications[networkspeci] = speci_station_classifications[station_unique_indices]
-            area_classifications[networkspeci] = speci_area_classifications[station_unique_indices]
-        
-        # non-GHOST
-        else:
-        
-            ncdf_root = Dataset(relevant_files[0])
-            if 'station_reference' in ncdf_root.variables:
-                station_reference_var = 'station_reference'
-            elif 'station_code' in ncdf_root.variables:
-                station_reference_var = 'station_code'
-            elif 'station_name' in ncdf_root.variables:
-                station_reference_var = 'station_name'
-            else: 
-                print('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
-                sys.exit()
-            if ncdf_root[station_reference_var].dtype == np.str:
-                station_references[networkspeci] = ncdf_root[station_reference_var][:]
-            else:
-                if ncdf_root[station_reference_var].dtype == np.dtype(object):
-                    station_references[networkspeci] = np.array([''.join(val) for val in ncdf_root[station_reference_var][:]])
-                else:
-                    station_references[networkspeci] = np.array(
-                        [st_name.tostring().decode('ascii').replace('\x00', '')
-                        for st_name in ncdf_root[station_reference_var][:]], dtype=np.str)
-            
-            # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
-            non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(station_references[networkspeci]) if ref.lower() != 'nan'])
-            station_references[networkspeci] = station_references[networkspeci][non_nan_station_indices]
-
-            if "station_name" in ncdf_root.variables:
-                if ncdf_root['station_name'].dtype == np.str:
-                    station_names[networkspeci] = ncdf_root['station_name'][non_nan_station_indices]
-                else:
-                    if ncdf_root['station_name'].dtype == np.dtype(object):
-                        station_names[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_name'][non_nan_station_indices]])
-                    else:
-                        station_names[networkspeci] = np.array(
-                            [st_name.tostring().decode('ascii').replace('\x00', '')
-                            for st_name in ncdf_root['station_name'][non_nan_station_indices]], dtype=np.str)
-
-            if "latitude" in ncdf_root.variables:
-                station_longitudes[networkspeci] = ncdf_root['longitude'][non_nan_station_indices]
-                station_latitudes[networkspeci] = ncdf_root['latitude'][non_nan_station_indices]
-            else:
-                station_longitudes[networkspeci] = ncdf_root['lon'][non_nan_station_indices]
-                station_latitudes[networkspeci] = ncdf_root['lat'][non_nan_station_indices]
-
-            if "station_classification" in ncdf_root.variables:
-                if ncdf_root['station_classification'].dtype == np.str:
-                    station_classifications[networkspeci] = ncdf_root['station_classification'][non_nan_station_indices]
-                else:
-                    if ncdf_root['station_classification'].dtype == np.dtype(object):
-                        station_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['station_classification'][non_nan_station_indices]])
-                    else:
-                        station_classifications[networkspeci] = np.array(
-                            [st_classification.tostring().decode('ascii').replace('\x00', '')
-                            for st_classification in ncdf_root['station_classification'][non_nan_station_indices]], dtype=np.str)
-            
-            if "area_classification" in ncdf_root.variables:
-                if ncdf_root['area_classification'].dtype == np.str:
-                    area_classifications[networkspeci] = ncdf_root['area_classification'][non_nan_station_indices]
-                else:
-                    if ncdf_root['area_classification'].dtype == np.dtype(object):
-                        area_classifications[networkspeci] = np.array([''.join(val) for val in ncdf_root['area_classification'][non_nan_station_indices]]) 
-                    else:
-                        area_classifications[networkspeci] = np.array(
-                            [area_classification.tostring().decode('ascii').replace('\x00', '')
-                            for area_classification in ncdf_root['area_classification'][non_nan_station_indices]], dtype=np.str)
-            
-            # get non-GHOST measurement units
-            nonghost_units[speci] = ncdf_root[speci].units
-
-            ncdf_root.close()
-
-    # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
-    # then spatially colocate stations across species
-    if (len((instance.networkspecies + instance.filter_networkspecies)) > 1) & (instance.spatial_colocation):
-        # get intersecting station indices across species (handle both GHOST and non-GHOST cases)
-        if instance.reading_ghost:
-            intersecting_indices = spatial_colocation_ghost(station_longitudes, station_latitudes, station_measurement_altitudes)
-        else:
-            intersecting_indices = spatial_colocation_nonghost(station_references, station_longitudes, station_latitudes)
-        
-        # iterate through networkspecies specific intersecting indices, setting 
-        for ns, ns_intersects in intersecting_indices.items():
-            station_references[ns] = station_references[ns][ns_intersects]
-            station_longitudes[ns] = station_longitudes[ns][ns_intersects]
-            station_latitudes[ns] = station_latitudes[ns][ns_intersects]
-            if ns in station_measurement_altitudes:
-                station_measurement_altitudes[ns] = station_measurement_altitudes[ns][ns_intersects]
-            if ns in station_names:
-                station_names[ns] = station_names[ns][ns_intersects]
-            if ns in station_classifications:
-                station_classifications[ns] = station_classifications[ns][ns_intersects]
-            if ns in area_classifications:
-                area_classifications[ns] =  area_classifications[ns][ns_intersects] 
-
-    return station_references, station_names, station_longitudes, station_latitudes, station_measurement_altitudes, station_classifications, area_classifications, nonghost_units
-
 def spatial_colocation_nonghost(station_references, longitudes, latitudes):
     """ Given multiple species, return intersecting indices for matching stations across species (per network/species)
         for non-GHOST data.
@@ -1396,9 +1263,7 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
         :rtype: dict
     """
 
-    # get indices of intersection of station references across species
-    #for networkspecies in station_references:
-    #    station_references[networkspecies] = station_references[networkspecies].tolist()    
+    # get indices of intersection of station references across species  
     intersecting_station_references = list(set.intersection(*map(set,list(station_references.values()))))
     intersecting_indices = {}
     for networkspecies in station_references:
@@ -1767,9 +1632,9 @@ def resolve_duplicate_spatial_colocation_matches(idx, nondup_idx, dup_idx,
 
     return idx, unresolved_dup_idx, fs_wtol_inds, ns_wtol_inds 
 
-def show_message(msg, offline=False, msg_offline=None, from_conf=None):
+def show_message(read_instance, msg, msg_offline=None, from_conf=None):
 
-    if offline:
+    if read_instance.offline:
         if msg_offline is not None:
             print('Warning: ' + msg_offline)
         else:
@@ -1781,3 +1646,183 @@ def show_message(msg, offline=False, msg_offline=None, from_conf=None):
         if (from_conf is None) or (from_conf):
             from .dashboard_aux import MessageBox
             MessageBox(msg)
+
+def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott', xgrid=None):
+    """
+    A fft-based Gaussian kernel density estimate (KDE)
+    for computing the KDE on a regular grid
+
+    Note that this is a different use case than scipy's original
+    scipy.stats.kde.gaussian_kde
+
+    IMPLEMENTATION
+    --------------
+
+    Performs a gaussian kernel density estimate over a regular grid using a
+    convolution of the gaussian kernel with a histogram of the data.
+
+    It computes the sparse  histogram of the data samples where
+    *x* is a 1-D sequence of the same length. If *weights* is None
+    (default), this is a histogram of the number of occurences of the
+    observations at (x[i]).
+    histogram of the data is a faster implementation than numpy.histogram as it
+    avoids intermediate copies and excessive memory usage!
+
+    This function is typically *several orders of magnitude faster* than
+    scipy.stats.kde.gaussian_kde.  For large (>1e7) numbers of points, it
+    produces an essentially identical result.
+
+    Boundary conditions on the data is corrected by using a symmetric /
+    reflection condition. Hence the limits of the dataset does not affect the
+    pdf estimate.
+
+    INPUTS
+    ------
+
+        xin:  ndarray[ndim=1]
+            The 1D data samples
+
+        gridsize: int
+            A nx integer of the size of the output grid (default: 1024)
+
+        extents: (xmin, xmax) tuple
+            tuple of the extents of output grid (default: extent of input data)
+
+        weights: ndarray[ndim=1]
+            An array of the same shape as x that weights each sample x_i
+            by w_i.  Defaults to an array of ones the same size as x (default: None)
+
+        adjust : float
+            An adjustment factor for the bw. Bandwidth becomes bw * adjust.
+
+        bw: str
+            The method used to calculate the estimator bandwidth. 
+            This can be 'scott' or 'silverman'(default: 'scott')
+
+        xgrid: ndarray(ndim=1)
+            The output grid (if this is provided gridsize and extents are ignored).
+
+    OUTPUTS
+    -------
+        grid_points: ndarray[ndim=1]
+            Grid points to sample density estimates
+
+        kde: ndarray[ndim=1]
+            A gridded 1D kernel density estimate of input data samples at grid points
+
+    """
+    # Variable check
+    x = np.squeeze(np.asarray(xin))
+
+    # Default extents are the extent of the data
+    if xgrid is not None:
+        xmin, xmax = xgrid.min(), xgrid.max()
+        x = x[ (x <= xmax) & (x >= xmin) ]
+    elif extents is None:
+        xmin, xmax = x.min(), x.max()
+    else:
+        xmin, xmax = map(float, extents)
+        x = x[ (x <= xmax) & (x >= xmin) ]
+
+    n = x.size
+
+    # apply weights
+    if weights is None:
+        # Default: Weight all points equally
+        weights = np.ones(n)
+    else:
+        weights = np.squeeze(np.asarray(weights))
+        if weights.size != x.size:
+            raise ValueError('Input weights must be an array of the same size as xin!')
+
+    # Optimize gridsize ------------------------------------------------------
+    #Make grid and discretize the data and round it to the next power of 2
+    # to optimize with the fft usage
+    # ensure minimum gridsize of 1024 points
+    if xgrid is None:
+        if gridsize is None:
+            gridsize = np.max((len(x), 1024.))
+        gridsize = 2 ** np.ceil(np.log2(gridsize))  # round to next power of 2
+        nx = int(gridsize)
+    else:
+        nx = len(xgrid)
+
+    # Make the sparse histogram -------------------------------------------
+    dx = (xmax - xmin) / (nx - 1)
+
+    # Basically, this is just doing what np.digitize does with one less copy
+    xyi = x - xmin
+    xyi /= dx
+    xyi = np.floor(xyi, xyi)
+    xyi = np.vstack((xyi, np.zeros(n, dtype=int)))
+
+    # Next, make a histogram of x
+    # Exploit a sparse coo_matrix avoiding np.histogram due to excessive
+    # memory usage with many points
+    grid = coo_matrix((weights, xyi), shape=(nx, 1)).toarray()
+
+    # Kernel Preliminary Calculations ---------------------------------------
+    std_x = np.std(xyi[0])
+
+    # Scaling factor for bandwidth
+    if bw == 'scott': 
+        bw_factor = (n ** (-1. / 5.)) * adjust
+    elif bw == 'silverman':
+        bw_factor =  ((n * 3 / 4.)**(-1. / 5)) * adjust 
+
+    # Make the gaussian kernel ---------------------------------------------
+
+    # First, determine the bandwidth using defined bandwidth estimator rule
+    kern_nx = int(np.round(bw_factor * 2 * np.pi * std_x))
+
+    # Then evaluate the gaussian function on the kernel grid
+    kernel = np.reshape(gaussian(kern_nx, bw_factor * std_x), (kern_nx, 1))
+
+    #---- Produce the kernel density estimate --------------------------------
+
+    # Convolve the histogram with the gaussian kernel
+    # use symmetric padding to correct for data boundaries in the kde
+    npad = np.min((nx, 2 * kern_nx))
+    grid = np.vstack( [grid[npad: 0: -1], grid, grid[nx: nx - npad: -1]] )
+    grid = convolve(grid, kernel, mode='same')[npad: npad + nx]
+
+    # Normalization factor to divide result by so that units are in the same
+    # units as scipy.stats.kde.gaussian_kde's output.
+    norm_factor = 2 * np.pi * std_x * std_x * bw_factor ** 2
+    norm_factor = n * dx * np.sqrt(norm_factor)
+
+    # Normalize the result
+    grid /= norm_factor
+
+    # return grid points and estimated densities 
+    if xgrid is None:
+        return np.linspace(xmin,xmax,nx), np.squeeze(grid)
+    else:
+        return np.squeeze(grid)
+
+def round_decimal_places(x, decimal_places):
+    """ Round x to decimal places
+
+    Parameters
+    ----------
+    x : float
+        Value
+    decimal_places : int
+        Desired number of decimal places
+    """
+
+    # if cell value is not nan
+    if x == x:
+        # if number is zero, return int as str
+        if x == 0:
+            return '0'
+        # if number of zeros is more than decimal places set by user, use scientific notation
+        elif ((-math.floor(math.log10(abs(x))) - 1) > decimal_places):
+            return '{:0.{}e}'.format(x, decimal_places) 
+        # if not, use float
+        else:
+            return '{:0.{}f}'.format(x, decimal_places)
+    # if cell value is nan, do nothing
+    else:
+        return 'nan'
+    
