@@ -1231,6 +1231,104 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
+    def handle_statsummary_periodic_aggregation_update(self):
+        """ Function that handles update of plotted statsummary periodic aggregation statistic
+            upon interaction with combobox.
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # set variable that blocks configuration bar handling updates until all changes
+            # to the statsummary periodic aggregation combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # get currently selected statistic
+            stat = self.statsummary_periodic_aggregation.currentText()
+
+            # update periodic aggregation
+            available_stats = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+
+            # if stat is empty string, it is because fields are being initialised for the first time
+            if stat == '':
+                # set periodic stat to be first available stat
+                stat = available_stats[0]
+
+            # update periodic aggregation combobox (clear, then add items)
+            self.statsummary_periodic_aggregation.clear()
+            self.statsummary_periodic_aggregation.addItems(available_stats)
+
+            # maintain currently selected statistic (if exists in new item list)
+            if stat in available_stats:
+                self.statsummary_periodic_aggregation.setCurrentText(stat)
+                self.read_instance.periodic_statistic_aggregation = copy.deepcopy(stat)
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update plotted statsummary statistic
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_associated_active_dashboard_plot('statsummary')
+
+            # draw changes
+            self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
+
+        return None
+    
+    def handle_statsummary_periodic_mode_update(self):
+        """ Function that handles update of plotted statsummary periodic aggregation mode
+            upon interaction with combobox.
+        """
+
+        if not self.read_instance.block_config_bar_handling_updates:
+
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # set variable that blocks configuration bar handling updates until all changes
+            # to the statsummary periodic mode combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # get currently selected mode
+            mode = self.statsummary_periodic_mode.currentText()
+
+            # update periodic mode
+            available_modes = ['Independent', 'Cycle']
+
+            # if mode is empty string, it is because fields are being initialised for the first time
+            if mode == '':
+                # set mode to be first available stat
+                mode = available_modes[0]
+
+            # update periodic mode combobox (clear, then add items)
+            self.statsummary_periodic_mode.clear()
+            self.statsummary_periodic_mode.addItems(available_modes)
+
+            # maintain currently selected mode (if exists in new item list)
+            if mode in available_modes:
+                self.statsummary_periodic_mode.setCurrentText(mode)
+                self.read_instance.periodic_statistic_mode = copy.deepcopy(mode)
+
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update plotted statsummary statistic
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_associated_active_dashboard_plot('statsummary')
+
+            # draw changes
+            self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
+
+        return None
+    
     def remove_axis_objects(self, ax_elements, elements_to_skip=[], types_to_remove=[]):
         """ Remove objects (artists, lines, collections, patches) from axis. """
 
@@ -2635,51 +2733,80 @@ class MPLCanvas(FigureCanvas):
 
         # add white container
         self.statsummary_container = set_formatting(QtWidgets.QWidget(self), formatting_dict['settings_container'])
-        self.statsummary_container.setGeometry(self.statsummary_menu_button.geometry().x()-230,
+        self.statsummary_container.setGeometry(self.statsummary_menu_button.geometry().x()-250,
                                                self.statsummary_menu_button.geometry().y()+25, 
-                                               250, 130)
+                                               270, 180)
         self.statsummary_container.hide()
 
         # add settings label
         self.statsummary_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
                                                                           formatting_dict['settings_label'])
-        self.statsummary_settings_label.setGeometry(self.statsummary_menu_button.geometry().x()-220, 
+        self.statsummary_settings_label.setGeometry(self.statsummary_menu_button.geometry().x()-240, 
                                                     self.statsummary_menu_button.geometry().y()+30, 
                                                     230, 20)
         self.statsummary_settings_label.hide()
 
         # add statsummary stat label ('Statistic') to layout
         self.statsummary_stat_label = QtWidgets.QLabel('Statistic', self)
-        self.statsummary_stat_label.setGeometry(self.statsummary_menu_button.geometry().x()-95, 
+        self.statsummary_stat_label.setGeometry(self.statsummary_menu_button.geometry().x()-115, 
                                                 self.statsummary_menu_button.geometry().y()+50, 
                                                 230, 20)
         self.statsummary_stat_label.hide()
 
         # add combobox stat combobox
-        self.statsummary_stat = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.statsummary_stat.move(self.statsummary_menu_button.geometry().x()-95, 
+        self.statsummary_stat = set_formatting(set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu']), formatting_dict['combobox_menu'])
+        self.statsummary_stat.move(self.statsummary_menu_button.geometry().x()-115, 
                                    self.statsummary_menu_button.geometry().y()+75)
         self.statsummary_stat.setFixedWidth(105)
         self.statsummary_stat.hide()
 
         # add statsummary cycle label ('Periodic cycle') to layout
         self.statsummary_cycle_label = QtWidgets.QLabel('Periodic cycle', self)
-        self.statsummary_cycle_label.setGeometry(self.statsummary_menu_button.geometry().x()-220, 
+        self.statsummary_cycle_label.setGeometry(self.statsummary_menu_button.geometry().x()-240, 
                                                 self.statsummary_menu_button.geometry().y()+50, 
                                                 230, 20)
         self.statsummary_cycle_label.hide()
 
         # add statsummary periodic cycle combobox
         self.statsummary_cycle = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.statsummary_cycle.move(self.statsummary_menu_button.geometry().x()-220, 
+        self.statsummary_cycle.addItems(['None', 'Diurnal', 'Weekly', 'Monthly'])
+        self.statsummary_cycle.move(self.statsummary_menu_button.geometry().x()-240, 
                                     self.statsummary_menu_button.geometry().y()+75)
         self.statsummary_cycle.setFixedWidth(105)
         self.statsummary_cycle.hide()
 
+        # add statsummary periodic mode label ('Periodic mode') to layout
+        self.statsummary_periodic_mode_label = QtWidgets.QLabel('Periodic mode', self)
+        self.statsummary_periodic_mode_label.setGeometry(self.statsummary_menu_button.geometry().x()-240, 
+                                                              self.statsummary_menu_button.geometry().y()+100, 
+                                                              230, 20)
+        self.statsummary_periodic_mode_label.hide()
+
+        # add statsummary periodic mode combobox
+        self.statsummary_periodic_mode = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.statsummary_periodic_mode.move(self.periodic_menu_button.geometry().x()-240, 
+                                            self.periodic_menu_button.geometry().y()+125)
+        self.statsummary_periodic_mode.setFixedWidth(105)
+        self.statsummary_periodic_mode.hide()
+
+        # add statsummary periodic aggregation label ('Periodic aggregation') to layout
+        self.statsummary_periodic_aggregation_label = QtWidgets.QLabel('Periodic aggregation', self)
+        self.statsummary_periodic_aggregation_label.setGeometry(self.statsummary_menu_button.geometry().x()-115, 
+                                                                     self.statsummary_menu_button.geometry().y()+100, 
+                                                                     230, 20)
+        self.statsummary_periodic_aggregation_label.hide()
+
+        # add statsummary periodic aggregation combobox
+        self.statsummary_periodic_aggregation = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.statsummary_periodic_aggregation.move(self.periodic_menu_button.geometry().x()-115, 
+                                                   self.periodic_menu_button.geometry().y()+125)
+        self.statsummary_periodic_aggregation.setFixedWidth(105)
+        self.statsummary_periodic_aggregation.hide()
+
         # add statsummary plot options name ('Options') to layout
         self.statsummary_options_label = QtWidgets.QLabel("Options", self)
-        self.statsummary_options_label.setGeometry(self.statsummary_menu_button.geometry().x()-220,
-                                                   self.statsummary_menu_button.geometry().y()+100, 
+        self.statsummary_options_label.setGeometry(self.statsummary_menu_button.geometry().x()-240,
+                                                   self.statsummary_menu_button.geometry().y()+150, 
                                                    230, 20)
         self.statsummary_options_label.hide()
 
@@ -2688,7 +2815,7 @@ class MPLCanvas(FigureCanvas):
         self.statsummary_options.setObjectName('statsummary_options')
         self.statsummary_options.addItems(self.plot_characteristics['statsummary']['plot_options'])        
         self.statsummary_options.setGeometry(self.statsummary_menu_button.geometry().x()-220, 
-                                             self.statsummary_menu_button.geometry().y()+125, 
+                                             self.statsummary_menu_button.geometry().y()+175, 
                                              230, 20)
         self.statsummary_options.currentTextChanged.connect(self.update_plot_option)
         self.statsummary_options.hide()
@@ -2703,6 +2830,8 @@ class MPLCanvas(FigureCanvas):
         # set show/hide actions
         self.statsummary_elements = [self.statsummary_container, self.statsummary_settings_label, 
                                      self.statsummary_cycle_label, self.statsummary_cycle, 
+                                     self.statsummary_periodic_aggregation_label, self.statsummary_periodic_aggregation,
+                                     self.statsummary_periodic_mode_label, self.statsummary_periodic_mode,
                                      self.statsummary_stat_label, self.statsummary_stat,
                                      self.statsummary_options_label, self.statsummary_options]
         self.interactive_elements['statsummary'] = {'button': self.statsummary_menu_button, 
@@ -2714,6 +2843,8 @@ class MPLCanvas(FigureCanvas):
                                                     }
         self.statsummary_stat.currentTextChanged.connect(self.handle_statsummary_statistics_update)
         self.statsummary_cycle.currentTextChanged.connect(self.handle_statsummary_cycle_update)
+        self.statsummary_periodic_aggregation.currentTextChanged.connect(self.handle_statsummary_periodic_aggregation_update)
+        self.statsummary_periodic_mode.currentTextChanged.connect(self.handle_statsummary_periodic_mode_update)
         self.statsummary_menu_button.clicked.connect(self.interactive_elements_button_func)
         self.statsummary_save_button.clicked.connect(self.save_axis_figure_func)
 
