@@ -444,6 +444,9 @@ class MPLCanvas(FigureCanvas):
             self.handle_periodic_statistic_update()
             self.handle_statsummary_statistics_update()
             self.handle_statsummary_cycle_update()
+            self.handle_statsummary_periodic_aggregation_update()
+            self.handle_statsummary_periodic_mode_update()
+
             # self.handle_taylor_correlation_statistic_update()
             self.read_instance.block_MPL_canvas_updates = False
 
@@ -2814,7 +2817,7 @@ class MPLCanvas(FigureCanvas):
         self.statsummary_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
         self.statsummary_options.setObjectName('statsummary_options')
         self.statsummary_options.addItems(self.plot_characteristics['statsummary']['plot_options'])        
-        self.statsummary_options.setGeometry(self.statsummary_menu_button.geometry().x()-220, 
+        self.statsummary_options.setGeometry(self.statsummary_menu_button.geometry().x()-240, 
                                              self.statsummary_menu_button.geometry().y()+175, 
                                              230, 20)
         self.statsummary_options.currentTextChanged.connect(self.update_plot_option)

@@ -1382,9 +1382,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update taylor diagram statistic combobox
             self.mpl_canvas.handle_taylor_correlation_statistic_update()
 
-            # update statistics summary statistic comboboxes
+            # update statsummary statistic comboboxes
             self.mpl_canvas.handle_statsummary_statistics_update()
             self.mpl_canvas.handle_statsummary_cycle_update()
+            self.mpl_canvas.handle_statsummary_periodic_aggregation_update()
+            self.mpl_canvas.handle_statsummary_periodic_mode_update()
 
             # unselect all/intersect/extent checkboxes
             self.mpl_canvas.unselect_map_checkboxes()
