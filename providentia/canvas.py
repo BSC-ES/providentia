@@ -3684,9 +3684,12 @@ class MPLCanvas(FigureCanvas):
                         line.set_linewidth(linewidth)
         else:
             for line in ax.lines:
-                if (((plot_type == 'scatter') and (list(line.get_xdata()) != [0, 0.5])
-                     and (list(line.get_xdata()) != [0, 1])) or (line in self.annotation_elements)):
-                     continue
+                if line not in self.annotation_elements:
+                    if (((plot_type == 'scatter') and ((list(line.get_xdata()) == [0, 0.5])
+                        or (list(line.get_xdata()) == [0, 1])))):
+                        continue
+                    else:
+                        line.set_linewidth(linewidth)
                 else:
                     line.set_linewidth(linewidth)
 
