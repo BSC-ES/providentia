@@ -1631,7 +1631,7 @@ providentia_defaults = {
 "Systematic Inconsistent Monthly Distributions - 4/6 Months >= Zone 6",
 "Systematic Inconsistent Monthly Distributions - 8/12 Months >= Zone 6"],
 
-"qa_met": ["Missing Measurement", "Infinite Value", 
+"qa_non_negative": ["Missing Measurement", "Infinite Value", 
 "Invalid Data Provider Flags - GHOST Decreed", "No Valid Data to Average",
 "Erroneous Primary Sampling", "Erroneous Sample Preparation", "Erroneous Measurement Methodology",
 "Below Preferential Lower Limit of Detection", "Above Preferential Upper Limit of Detection",
