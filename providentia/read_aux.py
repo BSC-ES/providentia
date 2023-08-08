@@ -368,8 +368,8 @@ def get_default_qa(instance, speci):
         :rtype: list
     """
 
-    if speci in instance.met_parameters:
-        return sorted(instance.default_qa_met)
+    if instance.parameter_dictionary[speci]['extreme_lower_limit'] < 0.0:
+        return sorted(instance.default_qa_non_negative)
     else:
         return sorted(instance.default_qa_standard)
     
