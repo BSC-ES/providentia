@@ -767,7 +767,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # update default qa
         default_qa = get_default_qa(self, self.selected_species)
+        previous_default_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_default']) 
         self.qa_menu['checkboxes']['remove_default'] = default_qa
+
+        # update selected qa if previous selected qa was default (to new default)
+        if set(self.qa_menu['checkboxes']['remove_selected']) == set(previous_default_qa):
+            self.qa_menu['checkboxes']['remove_selected'] = default_qa
 
         # update layout fields
         self.update_layout_fields(self.mpl_canvas)

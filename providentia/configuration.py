@@ -183,8 +183,6 @@ class ProvConfiguration:
                                                        for key in self.read_instance.ghost_metadata_vars_to_read]
             self.read_instance.standard_data_flag_name_to_data_flag_code = standard_data_flag_name_to_data_flag_code
             self.read_instance.standard_QA_name_to_QA_code = standard_QA_name_to_QA_code
-            self.read_instance.met_parameters = ['dir10', 'spd10', 't2', 'rh2', 'sst', 'td2', 'pshltr',
-                                                 'slp', 'acprec', 'acsnow', 'si', 'cldbot', 'vdist', 'cfracmax']
 
             return str(value)
 
@@ -233,13 +231,12 @@ class ProvConfiguration:
         elif key == 'qa':
             # parse qa
 
-            # set default qa codes
-            standard_qa_names = json.load(open(os.path.join(CURRENT_PATH, '../settings/default_qa.json')))['standard']
-            met_qa_names = json.load(open(os.path.join(CURRENT_PATH, '../settings/default_qa.json')))['met']
+            # set default qa codes (can differ per GHOST version)
+            from GHOST_standards import providentia_defaults
             self.read_instance.default_qa_standard = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
-                                                      for qa_name in standard_qa_names]
-            self.read_instance.default_qa_met = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
-                                                 for qa_name in met_qa_names]
+                                                      for qa_name in providentia_defaults['qa_standard']]
+            self.read_instance.default_qa_non_negative = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
+                                                          for qa_name in providentia_defaults['qa_non_negative']]
 
             # if not None then set QA by that given
             if value is not None:
