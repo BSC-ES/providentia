@@ -29,6 +29,7 @@ from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
 from .dashboard_aux import set_formatting, ComboBox, CheckableComboBox, LassoSelector
 from .aux import get_relevant_temporal_resolutions, show_message
+from .settings_menu import SettingsMenu
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
@@ -41,6 +42,7 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
+settings_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/canvas_menus.json')))
 
 class MPLCanvas(FigureCanvas):
     """ Class that handles the creation and updates of
@@ -140,6 +142,8 @@ class MPLCanvas(FigureCanvas):
         # also show plot type buttons
         self.annotation_elements = []
         for position, plot_type in enumerate(self.read_instance.active_dashboard_plots):
+            
+            # update plot axis
             self.read_instance.update_plot_axis(self, position + 2, plot_type)
 
             # gather menu, save buttons and elements for plot type 
@@ -151,6 +155,10 @@ class MPLCanvas(FigureCanvas):
                 if plot_type == menu_plot_type:
                     menu_button.show()
                     save_button.show()
+
+        # show map buttons
+        self.map_menu.buttons['settings_button'].show()
+        self.map_menu.buttons['save_button'].show()
 
         # update layout fields
         self.read_instance.update_layout_fields(self)
@@ -1852,1183 +1860,225 @@ class MPLCanvas(FigureCanvas):
         self.read_instance.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.read_instance.cb_position_2.setToolTip('Select plot type in top right position')
         self.read_instance.cb_position_2.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        #self.read_instance.cb_position_2.hide()
+        # self.read_instance.cb_position_2.hide()
 
         # add position 3 plot selector
         self.read_instance.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.read_instance.cb_position_3.setToolTip('Select plot type in bottom left position')
         self.read_instance.cb_position_3.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        #self.read_instance.cb_position_3.hide()
+        # self.read_instance.cb_position_3.hide()
 
         # add position 4 plot selector
         self.read_instance.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.read_instance.cb_position_4.setToolTip('Select plot type in bottom centre position')
         self.read_instance.cb_position_4.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        #self.read_instance.cb_position_4.hide()
+        # self.read_instance.cb_position_4.hide()
 
         # add position 5 plot selector
         self.read_instance.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
         self.read_instance.cb_position_5.setToolTip('Select plot type in bottom right position')
         self.read_instance.cb_position_5.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        #self.read_instance.cb_position_5.hide()
+        # self.read_instance.cb_position_5.hide()
 
         # MAP SETTINGS MENU #
-        # add button to map to show and hide settings menu
-        self.map_menu_button = set_formatting(QtWidgets.QPushButton(self), 
-                                              formatting_dict['settings_icon'])
-        self.map_menu_button.setObjectName('map_menu_button')
-        self.map_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.map_menu_button.setIconSize(QtCore.QSize(31, 37))
-        #self.map_menu_button.hide()
+        # create map settings menu
+        self.map_menu = SettingsMenu(plot_type='map', canvas_instance=self)
+        self.map_options = self.map_menu.checkable_comboboxes['options']
+        self.map_elements = self.map_menu.get_elements()
 
-        # add white container
-        self.map_container = set_formatting(QtWidgets.QWidget(self), 
-                                            formatting_dict['settings_container'])
-        self.map_container.setGeometry(self.map_menu_button.geometry().x()-230,
-                                       self.map_menu_button.geometry().y()+25, 
-                                       250, 430)
-        self.map_container.raise_()
-        self.map_container.hide()
+        # get stats
+        self.map_z_stat = self.map_menu.comboboxes['z_stat']
+        self.map_z1 = self.map_menu.comboboxes['z1']
+        self.map_z2 = self.map_menu.comboboxes['z2']
 
-        # add settings label
-        self.map_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                 formatting_dict['settings_label'])
-        self.map_settings_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                            self.map_menu_button.geometry().y()+30, 
-                                            230, 20)
-        self.map_settings_label.hide()
-
-        # add map stat label ('Statistic') to layout
-        self.map_z_stat_label = QtWidgets.QLabel('Statistic', self)
-        self.map_z_stat_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                          self.map_menu_button.geometry().y()+50, 
-                                          230, 20)
-        self.map_z_stat_label.hide()
-
-        # add map stat combobox
-        self.map_z_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.map_z_stat.move(self.map_menu_button.geometry().x()-220, 
-                             self.map_menu_button.geometry().y()+75)
-        self.map_z_stat.setFixedWidth(105)
-        self.map_z_stat.hide()
-
-        # add map dataset 1 label ('Dataset 1') to layout
-        self.map_z1_label = QtWidgets.QLabel('Dataset 1', self)
-        self.map_z1_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                      self.map_menu_button.geometry().y()+100, 
-                                      230, 20)
-        self.map_z1_label.hide()
-
-        # add map dataset 1 combobox
-        self.map_z1 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.map_z1.move(self.map_menu_button.geometry().x()-220, 
-                         self.map_menu_button.geometry().y()+125)
-        self.map_z1.setFixedWidth(105)
-        self.map_z1.hide()
-
-        # add map dataset 2 label ('Dataset 2') to layout
-        self.map_z2_label = QtWidgets.QLabel('Dataset 2', self)
-        self.map_z2_label.setGeometry(self.map_menu_button.geometry().x()-95, 
-                                      self.map_menu_button.geometry().y()+100, 
-                                      230, 20)
-        self.map_z2_label.hide()
-
-        # add map dataset 2 combobox
-        self.map_z2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.map_z2.move(self.map_menu_button.geometry().x()-95, 
-                         self.map_menu_button.geometry().y()+125)
-        self.map_z2.setFixedWidth(105)
-        self.map_z2.hide()
-
-        # add map general text for unselected stations ('Unselected stations')
-        self.map_unsel_label = QtWidgets.QLabel("Unselected stations", self)
-        self.map_unsel_label.setGeometry(self.map_menu_button.geometry().x()-220,
-                                         self.map_menu_button.geometry().y()+150, 
-                                         230, 20)
-        self.map_unsel_label.hide()
-
-        # add map markersize slider name ('Size') to layout
-        self.map_markersize_unsel_sl_label = QtWidgets.QLabel('Size', self)
-        self.map_markersize_unsel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
-        self.map_markersize_unsel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220,
-                                                       self.map_menu_button.geometry().y()+175, 
-                                                       230, 20)
-        self.map_markersize_unsel_sl_label.hide()
-
-        # add map markersize unselected stations slider
-        self.map_markersize_unsel_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.map_markersize_unsel_sl.setObjectName('map_markersize_unsel_sl')
-        self.map_markersize_unsel_sl.setMinimum(0)
-        self.map_markersize_unsel_sl.setMaximum(80)
+        # get sliders and update values
+        self.map_markersize_unsel_sl = self.map_menu.sliders['markersize_unsel_sl']
         self.map_markersize_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['s'])
-        self.map_markersize_unsel_sl.setTickInterval(2)
-        self.map_markersize_unsel_sl.setTracking(False)
-        self.map_markersize_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                 self.map_menu_button.geometry().y()+200, 
-                                                 230, 20)
-        self.map_markersize_unsel_sl.hide()
-
-        # add map opacity slider name ('Opacity') to layout
-        self.map_opacity_unsel_sl_label = QtWidgets.QLabel('Opacity', self)
-        self.map_opacity_unsel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
-        self.map_opacity_unsel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                    self.map_menu_button.geometry().y()+225, 
-                                                    230, 20)
-        self.map_opacity_unsel_sl_label.hide()
-
-        # add map opacity unselected stations slider
-        self.map_opacity_unsel_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.map_opacity_unsel_sl.setObjectName('map_opacity_unsel_sl')
-        self.map_opacity_unsel_sl.setMinimum(0)
-        self.map_opacity_unsel_sl.setMaximum(10)
+        self.map_opacity_unsel_sl = self.map_menu.sliders['opacity_unsel_sl']
         self.map_opacity_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['alpha']*10)
-        self.map_opacity_unsel_sl.setTickInterval(1)
-        self.map_opacity_unsel_sl.setTracking(False)
-        self.map_opacity_unsel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                              self.map_menu_button.geometry().y()+250, 
-                                              230, 20)
-        self.map_opacity_unsel_sl.hide()
-
-        # add map general text for selected stations ('Selected stations')
-        self.map_sel_label = QtWidgets.QLabel("Selected stations", self)
-        self.map_sel_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                       self.map_menu_button.geometry().y()+275, 
-                                       230, 20)
-        self.map_sel_label.hide()
-
-        # add map markersize slider name ('Size') to layout
-        self.map_markersize_sel_sl_label = QtWidgets.QLabel('Size', self)
-        self.map_markersize_sel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
-        self.map_markersize_sel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                     self.map_menu_button.geometry().y()+300, 
-                                                     230, 20)
-        self.map_markersize_sel_sl_label.hide()
-
-        # add map markersize selected stations slider
-        self.map_markersize_sel_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.map_markersize_sel_sl.setObjectName('map_markersize_sel_sl')
-        self.map_markersize_sel_sl.setMinimum(0)
-        self.map_markersize_sel_sl.setMaximum(80)
+        self.map_markersize_sel_sl = self.map_menu.sliders['markersize_sel_sl']
         self.map_markersize_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['s'])
-        self.map_markersize_sel_sl.setTickInterval(2)
-        self.map_markersize_sel_sl.setTracking(False)
-        self.map_markersize_sel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                               self.map_menu_button.geometry().y()+325, 
-                                               230, 20)
-        self.map_markersize_sel_sl.hide()
-
-        # add map opacity slider name ('Opacity') to layout
-        self.map_opacity_sel_sl_label = QtWidgets.QLabel('Opacity', self)
-        self.map_opacity_sel_sl_label.setStyleSheet("QLabel { font-style: italic; }")
-        self.map_opacity_sel_sl_label.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                                  self.map_menu_button.geometry().y()+350, 
-                                                  230, 20)
-        self.map_opacity_sel_sl_label.hide()
-
-        # add map opacity selected stations slider
-        self.map_opacity_sel_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.map_opacity_sel_sl.setObjectName('map_opacity_sel_sl')
-        self.map_opacity_sel_sl.setMinimum(0)
-        self.map_opacity_sel_sl.setMaximum(10)
+        self.map_opacity_sel_sl = self.map_menu.sliders['opacity_sel_sl']
         self.map_opacity_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['alpha']*10)
-        self.map_opacity_sel_sl.setTickInterval(1)
-        self.map_opacity_sel_sl.setTracking(False)
-        self.map_opacity_sel_sl.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                            self.map_menu_button.geometry().y()+375, 
-                                            230, 20)
-        self.map_opacity_sel_sl.hide()
-
-        # add map options name ('Options') to layout
-        self.map_options_label = QtWidgets.QLabel("Options", self)
-        self.map_options_label.setGeometry(self.map_menu_button.geometry().x()-220,
-                                           self.map_menu_button.geometry().y()+400, 
-                                           230, 20)
-        self.map_options_label.hide()
-
-        # add map options checkboxes
-        self.map_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.map_options.setObjectName('map_options')
-        self.map_options.addItems(self.plot_characteristics['map']['plot_options'])        
-        self.map_options.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                     self.map_menu_button.geometry().y()+425, 
-                                     230, 20)
-        self.map_options.currentTextChanged.connect(self.update_plot_option)
-        self.map_options.hide()
-
-        # add map figure save button
-        self.map_save_button = set_formatting(QtWidgets.QPushButton(self), 
-                                              formatting_dict['settings_icon'])
-        self.map_save_button.setObjectName('map_save_button')
-        self.map_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.map_save_button.setIconSize(QtCore.QSize(20, 20))
-        #self.map_save_button.hide()
-
-        # set show/hide actions
-        self.map_elements = [self.map_container, self.map_settings_label, 
-                             self.map_z_stat_label, self.map_z_stat, 
-                             self.map_z1_label, self.map_z1, 
-                             self.map_z2_label, self.map_z2, 
-                             self.map_unsel_label, 
-                             self.map_markersize_unsel_sl_label, self.map_markersize_unsel_sl, 
-                             self.map_opacity_unsel_sl_label, self.map_opacity_unsel_sl, 
-                             self.map_sel_label, self.map_markersize_sel_sl, 
-                             self.map_markersize_sel_sl_label, self.map_opacity_sel_sl_label, 
-                             self.map_opacity_sel_sl, self.map_options_label, 
-                             self.map_options
-                             ]
-        self.interactive_elements['map'] = {'button': self.map_menu_button, 
-                                            'hidden': True,
-                                            'elements': self.map_elements,
+        
+        # get map interactive dictionary
+        self.interactive_elements['map'] = {'hidden': True,
                                             'markersize_sl': [self.map_markersize_unsel_sl, 
                                                               self.map_markersize_sel_sl],
                                             'opacity_sl': [self.map_opacity_unsel_sl, 
-                                                           self.map_opacity_sel_sl],
-                                            'linewidth_sl': []
+                                                           self.map_opacity_sel_sl]
                                             }
-        self.map_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.map_markersize_unsel_sl.valueChanged.connect(self.update_markersize_func)
-        self.map_markersize_sel_sl.valueChanged.connect(self.update_markersize_func)
-        self.map_opacity_unsel_sl.valueChanged.connect(self.update_opacity_func)
-        self.map_opacity_sel_sl.valueChanged.connect(self.update_opacity_func)
-        self.map_save_button.clicked.connect(self.save_axis_figure_func)
-        self.map_z_stat.currentTextChanged.connect(self.handle_map_z_statistic_update)
-        self.map_z1.currentTextChanged.connect(self.handle_map_z_statistic_update)
-        self.map_z2.currentTextChanged.connect(self.handle_map_z_statistic_update)
 
         # TIMESERIES PLOT SETTINGS MENU #
-        # add button to timeseries to show and hide settings menu
-        self.timeseries_menu_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                     formatting_dict['settings_icon'])
-        self.timeseries_menu_button.setObjectName('timeseries_menu_button')
-        self.timeseries_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.timeseries_menu_button.setIconSize(QtCore.QSize(31, 37))
-        self.timeseries_menu_button.hide()
+        # create timeseries settings menu
+        self.timeseries_menu = SettingsMenu(plot_type='timeseries', canvas_instance=self)
+        self.timeseries_options = self.timeseries_menu.checkable_comboboxes['options']
+        self.timeseries_elements = self.timeseries_menu.get_elements()
 
-        # add white container
-        self.timeseries_container = set_formatting(QtWidgets.QWidget(self), 
-                                                   formatting_dict['settings_container'])
-        self.timeseries_container.setGeometry(self.timeseries_menu_button.geometry().x()-230,
-                                              self.timeseries_menu_button.geometry().y()+25, 
-                                              250, 280)
-        self.timeseries_container.hide()
+        # get stats
+        self.timeseries_stat = self.timeseries_menu.comboboxes['stat']
 
-        # add settings label
-        self.timeseries_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                        formatting_dict['settings_label'])
-        self.timeseries_settings_label.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                                   self.timeseries_menu_button.geometry().y()+30, 
-                                                   230, 20)
-        self.timeseries_settings_label.hide()
-
-        # add timeseries stat label ('Statistic') to layout
-        self.timeseries_stat_label = QtWidgets.QLabel('Statistic', self)
-        self.timeseries_stat_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                               self.timeseries_menu_button.geometry().y()+50, 
-                                               230, 20)
-        self.timeseries_stat_label.hide() 
-
-        # add timeseries stat combobox
-        self.timeseries_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.timeseries_stat.move(self.timeseries_menu_button.geometry().x()-220, 
-                                  self.timeseries_menu_button.geometry().y()+75)
-        self.timeseries_stat.setFixedWidth(105)
-        self.timeseries_stat.hide()
-
-        # add timeseries markersize slider name ('Size') to layout
-        self.timeseries_markersize_sl_label = QtWidgets.QLabel('Size', self)
-        self.timeseries_markersize_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                        self.timeseries_menu_button.geometry().y()+100, 
-                                                        230, 20)
-        self.timeseries_markersize_sl_label.hide()
-
-        # add timeseries markersize slider
-        self.timeseries_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.timeseries_markersize_sl.setObjectName('timeseries_markersize_sl')
-        self.timeseries_markersize_sl.setMinimum(0)
+        # get sliders and update values
+        self.timeseries_markersize_sl = self.timeseries_menu.sliders['markersize_sl']
         self.timeseries_markersize_sl.setMaximum(self.plot_characteristics['timeseries']['plot']['markersize']*10)
         self.timeseries_markersize_sl.setValue(self.plot_characteristics['timeseries']['plot']['markersize'])
-        self.timeseries_markersize_sl.setTickInterval(2)
-        self.timeseries_markersize_sl.setTracking(False)
-        self.timeseries_markersize_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                                  self.timeseries_menu_button.geometry().y()+125, 
-                                                  230, 20)
-        self.timeseries_markersize_sl.hide()
-
-        # add timeseries smooth window slider name ('Smooth window') to layout
-        self.timeseries_smooth_window_sl_label = QtWidgets.QLabel('Smooth window', self)
-        self.timeseries_smooth_window_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                           self.timeseries_menu_button.geometry().y()+150, 
-                                                           230, 20)
-        self.timeseries_smooth_window_sl_label.hide()
-
-        # add timeseries smooth window slider
-        self.timeseries_smooth_window_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.timeseries_smooth_window_sl.setObjectName('timeseries_smooth_window_sl')
-        self.timeseries_smooth_window_sl.setMinimum(0)
-        self.timeseries_smooth_window_sl.setValue(0)
-        self.timeseries_smooth_window_sl.setTickInterval(2)
-        self.timeseries_smooth_window_sl.setTracking(False)
-        self.timeseries_smooth_window_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                                     self.timeseries_menu_button.geometry().y()+175, 
-                                                     230, 20)
-        self.timeseries_smooth_window_sl.hide()
-
-        # add timeseries smooth line width slider name ('Smooth line width') to layout
-        self.timeseries_smooth_linewidth_sl_label = QtWidgets.QLabel('Smooth line width', self)
-        self.timeseries_smooth_linewidth_sl_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                              self.timeseries_menu_button.geometry().y()+200, 
-                                                              230, 20)
-        self.timeseries_smooth_linewidth_sl_label.hide()
-
-        # add timeseries smooth line width slider
-        self.timeseries_smooth_linewidth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.timeseries_smooth_linewidth_sl.setObjectName('timeseries_smooth_linewidth_sl')
-        self.timeseries_smooth_linewidth_sl.setMinimum(0)
+        self.timeseries_smooth_linewidth_sl = self.timeseries_menu.sliders['smooth_linewidth_sl']
         self.timeseries_smooth_linewidth_sl.setMaximum(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*100)
         self.timeseries_smooth_linewidth_sl.setValue(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*10)
-        self.timeseries_smooth_linewidth_sl.setTickInterval(2)
-        self.timeseries_smooth_linewidth_sl.setTracking(False)
-        self.timeseries_smooth_linewidth_sl.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                                        self.timeseries_menu_button.geometry().y()+225, 
-                                                        230, 20)
-        self.timeseries_smooth_linewidth_sl.hide()
+        self.timeseries_smooth_window_sl = self.timeseries_menu.sliders['smooth_window_sl']
 
-        # add timeseries plot options name ('Options') to layout
-        self.timeseries_options_label = QtWidgets.QLabel("Options", self)
-        self.timeseries_options_label.setGeometry(self.timeseries_menu_button.geometry().x()-220,
-                                                  self.timeseries_menu_button.geometry().y()+250, 
-                                                  230, 20)
-        self.timeseries_options_label.hide()
-
-        # add timeseries plot options checkboxes
-        self.timeseries_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.timeseries_options.setObjectName('timeseries_options')
-        self.timeseries_options.addItems(self.plot_characteristics['timeseries']['plot_options'])        
-        self.timeseries_options.setGeometry(self.timeseries_menu_button.geometry().x()-220, 
-                                            self.timeseries_menu_button.geometry().y()+275, 
-                                            230, 20)
-        self.timeseries_options.currentTextChanged.connect(self.update_plot_option)
-        self.timeseries_options.hide()
-
-        # add timeseries figure save button
-        self.timeseries_save_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                     formatting_dict['settings_icon'])
-        self.timeseries_save_button.setObjectName('timeseries_save_button')
-        self.timeseries_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.timeseries_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.timeseries_save_button.hide()
-
-        # set show/hide actions
-        self.timeseries_elements = [self.timeseries_container, self.timeseries_settings_label, 
-                                    self.timeseries_stat_label, self.timeseries_stat,
-                                    self.timeseries_markersize_sl_label, self.timeseries_markersize_sl,
-                                    self.timeseries_smooth_window_sl_label, self.timeseries_smooth_window_sl,
-                                    self.timeseries_smooth_linewidth_sl_label, self.timeseries_smooth_linewidth_sl,
-                                    self.timeseries_options_label, self.timeseries_options]
-        self.interactive_elements['timeseries'] = {'button': self.timeseries_menu_button, 
-                                                   'hidden': True,
-                                                   'elements': self.timeseries_elements,
+        # get timeseries interactive dictionary
+        self.interactive_elements['timeseries'] = {'hidden': True,
                                                    'markersize_sl': [self.timeseries_markersize_sl],
-                                                   'opacity_sl': [],
                                                    'linewidth_sl': [self.timeseries_smooth_linewidth_sl],
                                                    'smooth_window_sl': [self.timeseries_smooth_window_sl]
                                                    }
-        self.timeseries_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.timeseries_markersize_sl.valueChanged.connect(self.update_markersize_func)
-        self.timeseries_smooth_window_sl.valueChanged.connect(self.update_smooth_window_func)
-        self.timeseries_smooth_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
-        self.timeseries_stat.currentTextChanged.connect(self.handle_timeseries_statistic_update)
-        self.timeseries_save_button.clicked.connect(self.save_axis_figure_func)
-
-        # PERIODIC PLOT SETTINGS MENU #
-        # add button to periodic plot to show and hide settings menu
-        self.periodic_menu_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                   formatting_dict['settings_icon'])
-        self.periodic_menu_button.setObjectName('periodic_menu_button')
-        self.periodic_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.periodic_menu_button.setIconSize(QtCore.QSize(31, 37))
-        self.periodic_menu_button.hide()
-
-        # add white container
-        self.periodic_container = set_formatting(QtWidgets.QWidget(self), 
-                                                 formatting_dict['settings_container'])
-        self.periodic_container.setGeometry(self.periodic_menu_button.geometry().x()-230, 
-                                            self.periodic_menu_button.geometry().y()+25, 
-                                            250, 230)
-        self.periodic_container.hide()
-
-        # add settings label
-        self.periodic_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                      formatting_dict['settings_label'])
-        self.periodic_settings_label.setGeometry(self.periodic_menu_button.geometry().x()-220, 
-                                                 self.periodic_menu_button.geometry().y()+30, 
-                                                 230, 20)
-        self.periodic_settings_label.hide()
-
-        # add periodic stat label ('Statistic') to layout
-        self.periodic_stat_label = QtWidgets.QLabel('Statistic', self)
-        self.periodic_stat_label.setGeometry(self.periodic_menu_button.geometry().x()-220, 
-                                             self.periodic_menu_button.geometry().y()+50, 
-                                             230, 20)
-        self.periodic_stat_label.hide()
         
-        # add periodic stat combobox
-        self.periodic_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.periodic_stat.move(self.periodic_menu_button.geometry().x()-220, 
-                                self.periodic_menu_button.geometry().y()+75)
-        self.periodic_stat.setFixedWidth(105)
-        self.periodic_stat.hide()
+        # PERIODIC PLOT SETTINGS MENU #
+        # create periodic settings menu
+        self.periodic_menu = SettingsMenu(plot_type='periodic', canvas_instance=self)
+        self.periodic_options = self.periodic_menu.checkable_comboboxes['options']
+        self.periodic_elements = self.periodic_menu.get_elements()
 
-        # add periodic markersize slider name ('Size') to layout
-        self.periodic_markersize_sl_label = QtWidgets.QLabel('Size', self)
-        self.periodic_markersize_sl_label.setGeometry(self.periodic_menu_button.geometry().x()-220, 
-                                                      self.periodic_menu_button.geometry().y()+100, 
-                                                      230, 20)
-        self.periodic_markersize_sl_label.hide()
-
-        # add periodic markersize slider
-        self.periodic_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.periodic_markersize_sl.setObjectName('periodic_markersize_sl')
-        self.periodic_markersize_sl.setMinimum(0)
+        # get stats
+        self.periodic_stat = self.periodic_menu.comboboxes['stat']
+        
+        # get sliders and update values
+        self.periodic_markersize_sl = self.periodic_menu.sliders['markersize_sl']
         self.periodic_markersize_sl.setMaximum(self.plot_characteristics['periodic']['plot']['markersize']*10)
         self.periodic_markersize_sl.setValue(self.plot_characteristics['periodic']['plot']['markersize'])
-        self.periodic_markersize_sl.setTickInterval(2)
-        self.periodic_markersize_sl.setTracking(False)
-        self.periodic_markersize_sl.setGeometry(self.periodic_menu_button.geometry().x()-220, 
-                                                self.periodic_menu_button.geometry().y()+125, 
-                                                230, 20)
-        self.periodic_markersize_sl.hide()
-
-        # add periodic line width slider name ('Line width') to layout
-        self.periodic_linewidth_sl_label = QtWidgets.QLabel("Line width", self)
-        self.periodic_linewidth_sl_label.setGeometry(self.periodic_menu_button.geometry().x()-220, 
-                                                     self.periodic_menu_button.geometry().y()+150, 
-                                                     230, 20)
-        self.periodic_linewidth_sl_label.hide()
-
-        # add periodic line width slider
-        self.periodic_linewidth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.periodic_linewidth_sl.setObjectName('periodic_linewidth_sl')
-        self.periodic_linewidth_sl.setMinimum(0)
+        self.periodic_linewidth_sl = self.periodic_menu.sliders['linewidth_sl']
         self.periodic_linewidth_sl.setMaximum(self.plot_characteristics['periodic']['plot']['linewidth']*100)
         self.periodic_linewidth_sl.setValue(self.plot_characteristics['periodic']['plot']['linewidth']*10)
-        self.periodic_linewidth_sl.setTickInterval(2)
-        self.periodic_linewidth_sl.setTracking(False)
-        self.periodic_linewidth_sl.setGeometry(self.periodic_menu_button.geometry().x()-220, 
-                                               self.periodic_menu_button.geometry().y()+175, 
-                                               230, 20)
-        self.periodic_linewidth_sl.hide()
 
-        # add periodic plot options name ('Options') to layout
-        self.periodic_options_label = QtWidgets.QLabel("Options", self)
-        self.periodic_options_label.setGeometry(self.periodic_menu_button.geometry().x()-220,
-                                                self.periodic_menu_button.geometry().y()+200, 
-                                                230, 20)
-        self.periodic_options_label.hide()
-
-        # add periodic plot options checkboxes
-        self.periodic_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.periodic_options.setObjectName('periodic_options')
-        self.periodic_options.addItems(self.plot_characteristics['periodic']['plot_options'])        
-        self.periodic_options.setGeometry(self.periodic_menu_button.geometry().x()-220, 
-                                          self.periodic_menu_button.geometry().y()+225, 
-                                          230, 20)
-        self.periodic_options.currentTextChanged.connect(self.update_plot_option)
-        self.periodic_options.hide()
-
-        # add periodic figure save button
-        self.periodic_save_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                   formatting_dict['settings_icon'])
-        self.periodic_save_button.setObjectName('periodic_save_button')
-        self.periodic_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.periodic_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.periodic_save_button.hide()
-
-        # set show/hide actions
-        self.periodic_elements = [self.periodic_container, self.periodic_settings_label, 
-                                  self.periodic_stat_label, self.periodic_stat, 
-                                  self.periodic_markersize_sl_label, self.periodic_markersize_sl,
-                                  self.periodic_linewidth_sl_label, self.periodic_linewidth_sl,
-                                  self.periodic_options_label, self.periodic_options
-                                 ]
-        self.interactive_elements['periodic'] = {'button': self.periodic_menu_button, 
-                                                 'hidden': True,
-                                                 'elements': self.periodic_elements,
+        # get periodic interactive dictionary
+        self.interactive_elements['periodic'] = {'hidden': True,
                                                  'markersize_sl': [self.periodic_markersize_sl],
-                                                 'opacity_sl': [],
                                                  'linewidth_sl': [self.periodic_linewidth_sl]
                                                  }
-        self.periodic_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.periodic_markersize_sl.valueChanged.connect(self.update_markersize_func)
-        self.periodic_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
-        self.periodic_stat.currentTextChanged.connect(self.handle_periodic_statistic_update)
-        self.periodic_save_button.clicked.connect(self.save_axis_figure_func)
 
         # PERIODIC VIOLIN PLOT SETTINGS MENU #
-        # add button to periodic violin plot to show and hide settings menu
-        self.periodic_violin_menu_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                          formatting_dict['settings_icon'])
-        self.periodic_violin_menu_button.setObjectName('periodic_violin_menu_button')
-        self.periodic_violin_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.periodic_violin_menu_button.setIconSize(QtCore.QSize(31, 37))
-        self.periodic_violin_menu_button.hide()
+        # create periodic violin settings menu
+        self.periodic_violin_menu = SettingsMenu(plot_type='periodic_violin', canvas_instance=self)
+        self.periodic_violin_options = self.periodic_violin_menu.checkable_comboboxes['options']
+        self.periodic_violin_elements = self.periodic_violin_menu.get_elements()
 
-        # add white container
-        self.periodic_violin_container = set_formatting(QtWidgets.QWidget(self), 
-                                                        formatting_dict['settings_container'])
-        self.periodic_violin_container.setGeometry(self.periodic_violin_menu_button.geometry().x()-230, 
-                                                   self.periodic_violin_menu_button.geometry().y()+25, 
-                                                   250, 180)
-        self.periodic_violin_container.hide()
-
-        # add settings label
-        self.periodic_violin_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                             formatting_dict['settings_label'])
-        self.periodic_violin_settings_label.setGeometry(self.periodic_violin_menu_button.geometry().x()-220,
-                                                        self.periodic_violin_menu_button.geometry().y()+30, 
-                                                        230, 20)
-        self.periodic_violin_settings_label.hide()
-
-        # add periodic violin markersize slider name ('Size') to layout
-        self.periodic_violin_markersize_sl_label = QtWidgets.QLabel('Size', self)
-        self.periodic_violin_markersize_sl_label.setGeometry(self.periodic_violin_menu_button.geometry().x()-220,
-                                                             self.periodic_violin_menu_button.geometry().y()+50, 
-                                                             230, 20)
-        self.periodic_violin_markersize_sl_label.hide()
-
-        # add periodic violin markersize slider
-        self.periodic_violin_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.periodic_violin_markersize_sl.setObjectName('periodic_violin_markersize_sl')
-        self.periodic_violin_markersize_sl.setMinimum(0)
+        # get sliders and update values
+        self.periodic_violin_markersize_sl = self.periodic_violin_menu.sliders['markersize_sl']
         self.periodic_violin_markersize_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['markersize']*10)
         self.periodic_violin_markersize_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['markersize'])
-        self.periodic_violin_markersize_sl.setTickInterval(2)
-        self.periodic_violin_markersize_sl.setTracking(False)
-        self.periodic_violin_markersize_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220,
-                                                       self.periodic_menu_button.geometry().y()+75, 
-                                                       230, 20)
-        self.periodic_violin_markersize_sl.hide()
-
-        # add periodic violin line width slider name ('Line width') to layout
-        self.periodic_violin_linewidth_sl_label = QtWidgets.QLabel("Line width", self)
-        self.periodic_violin_linewidth_sl_label.setGeometry(self.periodic_violin_menu_button.geometry().x()-220, 
-                                                            self.periodic_violin_menu_button.geometry().y()+100, 
-                                                            230, 20)
-        self.periodic_violin_linewidth_sl_label.hide()
-
-        # add periodic violin line width slider
-        self.periodic_violin_linewidth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.periodic_violin_linewidth_sl.setObjectName('periodic_violin_linewidth_sl')
-        self.periodic_violin_linewidth_sl.setMinimum(0)
+        self.periodic_violin_linewidth_sl = self.periodic_violin_menu.sliders['linewidth_sl']
         self.periodic_violin_linewidth_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*100)
         self.periodic_violin_linewidth_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*10)
-        self.periodic_violin_linewidth_sl.setTickInterval(2)
-        self.periodic_violin_linewidth_sl.setTracking(False)
-        self.periodic_violin_linewidth_sl.setGeometry(self.periodic_violin_menu_button.geometry().x()-220, 
-                                                      self.periodic_violin_menu_button.geometry().y()+125, 
-                                                      230, 20)
-        self.periodic_violin_linewidth_sl.hide()
 
-        # add periodic violin plot options name ('Options') to layout
-        self.periodic_violin_options_label = QtWidgets.QLabel("Options", self)
-        self.periodic_violin_options_label.setGeometry(self.periodic_violin_menu_button.geometry().x()-220,
-                                                       self.periodic_violin_menu_button.geometry().y()+150, 
-                                                       230, 20)
-        self.periodic_violin_options_label.hide()
-
-        # add periodic violin plot options checkboxes
-        self.periodic_violin_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.periodic_violin_options.setObjectName('periodic_violin_options')
-        self.periodic_violin_options.addItems(self.plot_characteristics['periodic-violin']['plot_options'])        
-        self.periodic_violin_options.setGeometry(self.periodic_violin_menu_button.geometry().x()-220, 
-                                                 self.periodic_violin_menu_button.geometry().y()+175, 
-                                                 230, 20)
-        self.periodic_violin_options.currentTextChanged.connect(self.update_plot_option)
-        self.periodic_violin_options.hide()
-
-        # add periodic violin figure save button
-        self.periodic_violin_save_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                          formatting_dict['settings_icon'])
-        self.periodic_violin_save_button.setObjectName('periodic_violin_save_button')
-        self.periodic_violin_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.periodic_violin_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.periodic_violin_save_button.hide()
-
-        # set show/hide actions
-        self.periodic_violin_elements = [self.periodic_violin_container, self.periodic_violin_settings_label, 
-                                         self.periodic_violin_markersize_sl_label, self.periodic_violin_markersize_sl,
-                                         self.periodic_violin_linewidth_sl_label, self.periodic_violin_linewidth_sl,
-                                         self.periodic_violin_options_label, self.periodic_violin_options
-                                        ]
-        self.interactive_elements['periodic-violin'] = {'button': self.periodic_violin_menu_button, 
-                                                        'hidden': True,
-                                                        'elements': self.periodic_violin_elements,
+        # get periodic violin interactive dictionary
+        self.interactive_elements['periodic_violin'] = {'hidden': True,
                                                         'markersize_sl': [self.periodic_violin_markersize_sl],
-                                                        'opacity_sl': [],
                                                         'linewidth_sl': [self.periodic_violin_linewidth_sl]
                                                         }
-        self.periodic_violin_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.periodic_violin_markersize_sl.valueChanged.connect(self.update_markersize_func)
-        self.periodic_violin_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
-        self.periodic_violin_save_button.clicked.connect(self.save_axis_figure_func)
 
         # METADATA PLOT SETTINGS MENU #
-        # add button to metadata plot to show and hide settings menu
-        self.metadata_menu_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                   formatting_dict['settings_icon'])
-        self.metadata_menu_button.setObjectName('metadata_menu_button')
-        self.metadata_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.metadata_menu_button.setIconSize(QtCore.QSize(31, 37))
-        self.metadata_menu_button.hide()
+        # create metadata settings menu
+        self.metadata_menu = SettingsMenu(plot_type='metadata', canvas_instance=self)
+        self.metadata_options = self.metadata_menu.checkable_comboboxes['options']
+        self.metadata_elements = self.metadata_menu.get_elements()
 
-        # add white container
-        self.metadata_container = set_formatting(QtWidgets.QWidget(self), 
-                                                 formatting_dict['settings_container'])
-        self.metadata_container.setGeometry(self.metadata_menu_button.geometry().x()-230,
-                                            self.metadata_menu_button.geometry().y()+25, 
-                                            250, 75)
-        self.metadata_container.hide()
-
-        # add settings label
-        self.metadata_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                      formatting_dict['settings_label'])
-        self.metadata_settings_label.setGeometry(self.metadata_menu_button.geometry().x()-220, 
-                                                 self.metadata_menu_button.geometry().y()+30, 
-                                                 230, 20)
-        self.metadata_settings_label.hide()
-
-        # add metadata plot options name ('Options') to layout
-        self.metadata_options_label = QtWidgets.QLabel("Options", self)
-        self.metadata_options_label.setGeometry(self.metadata_menu_button.geometry().x()-220,
-                                                self.metadata_menu_button.geometry().y()+50, 
-                                                230, 20)
-        self.metadata_options_label.hide()
-
-        # add metadata plot options checkboxes
-        self.metadata_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.metadata_options.setObjectName('metadata_options')
-        self.metadata_options.addItems(self.plot_characteristics['metadata']['plot_options'])        
-        self.metadata_options.setGeometry(self.metadata_menu_button.geometry().x()-220, 
-                                          self.metadata_menu_button.geometry().y()+75, 
-                                          230, 20)
-        self.metadata_options.currentTextChanged.connect(self.update_plot_option)
-        self.metadata_options.hide()
-
-        # add metadata figure save button
-        self.metadata_save_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                   formatting_dict['settings_icon'])
-        self.metadata_save_button.setObjectName('metadata_save_button')
-        self.metadata_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.metadata_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.metadata_save_button.hide()
-
-        # set show/hide actions
-        self.metadata_elements = [self.metadata_container, self.metadata_settings_label, 
-                                  self.metadata_options_label, self.metadata_options]
-        self.interactive_elements['metadata'] = {'button': self.metadata_menu_button, 
-                                                 'hidden': True,
-                                                 'elements': self.metadata_elements,
-                                                 'markersize_sl': [],
-                                                 'opacity_sl': [],
-                                                 'linewidth_sl': []
+        # get metadata interactive dictionary
+        self.interactive_elements['metadata'] = {'hidden': True
                                                  }
-        self.metadata_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.metadata_save_button.clicked.connect(self.save_axis_figure_func)
 
         # DISTRIBUTION PLOT SETTINGS MENU #
-        # add button to distribution plot to show and hide settings menu
-        self.distribution_menu_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                       formatting_dict['settings_icon'])
-        self.distribution_menu_button.setObjectName('distribution_menu_button')
-        self.distribution_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.distribution_menu_button.setIconSize(QtCore.QSize(31, 37))
-        self.distribution_menu_button.hide()
+        # create distribution settings menu
+        self.distribution_menu = SettingsMenu(plot_type='distribution', canvas_instance=self)
+        self.distribution_options = self.distribution_menu.checkable_comboboxes['options']
+        self.distribution_elements = self.distribution_menu.get_elements()
 
-        # add white container
-        self.distribution_container = set_formatting(QtWidgets.QWidget(self), 
-                                                     formatting_dict['settings_container'])
-        self.distribution_container.setGeometry(self.distribution_menu_button.geometry().x()-230,
-                                                self.distribution_menu_button.geometry().y()+25, 
-                                                250, 130)
-        self.distribution_container.hide()
-
-        # add settings label
-        self.distribution_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                          formatting_dict['settings_label'])
-        self.distribution_settings_label.setGeometry(self.distribution_menu_button.geometry().x()-220, 
-                                                     self.distribution_menu_button.geometry().y()+30, 
-                                                     230, 20)
-        self.distribution_settings_label.hide()
-
-        # add distribution plot line width slider name ('Line width') to layout
-        self.distribution_linewidth_sl_label = QtWidgets.QLabel("Line width", self)
-        self.distribution_linewidth_sl_label.setGeometry(self.distribution_menu_button.geometry().x()-220,
-                                                         self.distribution_menu_button.geometry().y()+50, 
-                                                         230, 20)
-        self.distribution_linewidth_sl_label.hide()
-
-        # add distribution plot line width slider
-        self.distribution_linewidth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.distribution_linewidth_sl.setObjectName('distribution_linewidth_sl')
-        self.distribution_linewidth_sl.setMinimum(0)
+        # get sliders and update values
+        self.distribution_linewidth_sl = self.distribution_menu.sliders['linewidth_sl']
         self.distribution_linewidth_sl.setMaximum(self.plot_characteristics['distribution']['plot']['linewidth']*100)
         self.distribution_linewidth_sl.setValue(self.plot_characteristics['distribution']['plot']['linewidth']*10)
-        self.distribution_linewidth_sl.setTickInterval(2)
-        self.distribution_linewidth_sl.setTracking(False)
-        self.distribution_linewidth_sl.setGeometry(self.distribution_menu_button.geometry().x()-220, 
-                                                   self.distribution_menu_button.geometry().y()+75, 
-                                                   230, 20)
-        self.distribution_linewidth_sl.hide()
 
-        # add distribution plot options name ('Options') to layout
-        self.distribution_options_label = QtWidgets.QLabel("Options", self)
-        self.distribution_options_label.setGeometry(self.distribution_menu_button.geometry().x()-220,
-                                                    self.distribution_menu_button.geometry().y()+100, 
-                                                    230, 20)
-        self.distribution_options_label.hide()
-
-        # add distribution plot options checkboxes
-        self.distribution_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.distribution_options.setObjectName('distribution_options')
-        self.distribution_options.addItems(self.plot_characteristics['distribution']['plot_options'])        
-        self.distribution_options.setGeometry(self.distribution_menu_button.geometry().x()-220, 
-                                              self.distribution_menu_button.geometry().y()+125, 
-                                              230, 20)
-        self.distribution_options.currentTextChanged.connect(self.update_plot_option)
-        self.distribution_options.hide()
-
-        # add distribution figure save button
-        self.distribution_save_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                       formatting_dict['settings_icon'])
-        self.distribution_save_button.setObjectName('distribution_save_button')
-        self.distribution_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.distribution_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.distribution_save_button.hide()
-
-        # set show/hide actions
-        self.distribution_elements = [self.distribution_container, self.distribution_settings_label, 
-                                      self.distribution_linewidth_sl_label, self.distribution_linewidth_sl,
-                                      self.distribution_options_label, self.distribution_options]
-        self.interactive_elements['distribution'] = {'button': self.distribution_menu_button, 
-                                                     'hidden': True,
-                                                     'elements': self.distribution_elements,
-                                                     'markersize_sl': [],
-                                                     'opacity_sl': [],
+        # get distribution interactive dictionary
+        self.interactive_elements['distribution'] = {'hidden': True,
                                                      'linewidth_sl': [self.distribution_linewidth_sl]
                                                     }
-        self.distribution_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.distribution_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
-        self.distribution_save_button.clicked.connect(self.save_axis_figure_func)
 
         # SCATTER PLOT SETTINGS MENU #
-        # add button to scatter plot to show and hide settings menu
-        self.scatter_menu_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                  formatting_dict['settings_icon'])
-        self.scatter_menu_button.setObjectName('scatter_menu_button')
-        self.scatter_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.scatter_menu_button.setIconSize(QtCore.QSize(31, 37))
-        self.scatter_menu_button.hide()
+        # create scatter settings menu
+        self.scatter_menu = SettingsMenu(plot_type='scatter', canvas_instance=self)
+        self.scatter_options = self.scatter_menu.checkable_comboboxes['options']
+        self.scatter_elements = self.scatter_menu.get_elements()
 
-        # add white container
-        self.scatter_container = set_formatting(QtWidgets.QWidget(self),
-                                                formatting_dict['settings_container'])
-        self.scatter_container.setGeometry(self.scatter_menu_button.geometry().x()-230,
-                                           self.scatter_menu_button.geometry().y()+25, 
-                                           250, 180)
-        self.scatter_container.hide()
-
-        # add settings label
-        self.scatter_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                     formatting_dict['settings_label'])
-        self.scatter_settings_label.setGeometry(self.scatter_menu_button.geometry().x()-220, 
-                                                self.scatter_menu_button.geometry().y()+30, 
-                                                230, 20)
-        self.scatter_settings_label.hide()
-
-        # add scatter plot markersize slider name ('Size') to layout
-        self.scatter_markersize_sl_label = QtWidgets.QLabel('Size', self)
-        self.scatter_markersize_sl_label.setGeometry(self.scatter_menu_button.geometry().x()-220,
-                                                     self.scatter_menu_button.geometry().y()+50, 
-                                                     230, 20)
-        self.scatter_markersize_sl_label.hide()
-
-        # add scatter plot markersize slider
-        self.scatter_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.scatter_markersize_sl.setObjectName('scatter_markersize_sl')
-        self.scatter_markersize_sl.setMinimum(0)
+        # get sliders and update values
+        self.scatter_markersize_sl = self.scatter_menu.sliders['markersize_sl']
         self.scatter_markersize_sl.setMaximum(self.plot_characteristics['scatter']['plot']['markersize']*10)
         self.scatter_markersize_sl.setValue(self.plot_characteristics['scatter']['plot']['markersize'])
-        self.scatter_markersize_sl.setTickInterval(2)
-        self.scatter_markersize_sl.setTracking(False)
-        self.scatter_markersize_sl.setGeometry(self.scatter_menu_button.geometry().x()-220, 
-                                               self.scatter_menu_button.geometry().y()+75, 
-                                               230, 20)
-        self.scatter_markersize_sl.hide()
-
-        # add scatter regression line width slider name ('Regression line width') to layout
-        self.scatter_regression_linewidth_sl_label = QtWidgets.QLabel('Regression line width', self)
-        self.scatter_regression_linewidth_sl_label.setGeometry(self.scatter_menu_button.geometry().x()-220,
-                                                               self.scatter_menu_button.geometry().y()+100, 
-                                                               230, 20)
-        self.scatter_regression_linewidth_sl_label.hide()
-
-        # add scatter regression line width slider
-        self.scatter_regression_linewidth_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.scatter_regression_linewidth_sl.setObjectName('scatter_regression_linewidth_sl')
-        self.scatter_regression_linewidth_sl.setMinimum(0)
+        self.scatter_regression_linewidth_sl = self.scatter_menu.sliders['regression_linewidth_sl']
         self.scatter_regression_linewidth_sl.setMaximum(self.plot_characteristics['scatter']['regression']['linewidth']*100)
         self.scatter_regression_linewidth_sl.setValue(self.plot_characteristics['scatter']['regression']['linewidth']*10)
-        self.scatter_regression_linewidth_sl.setTickInterval(2)
-        self.scatter_regression_linewidth_sl.setTracking(False)
-        self.scatter_regression_linewidth_sl.setGeometry(self.scatter_menu_button.geometry().x()-220, 
-                                                         self.scatter_menu_button.geometry().y()+125, 
-                                                         230, 20)
-        self.scatter_regression_linewidth_sl.hide()
 
-        # add scatter plot options name ('Options') to layout
-        self.scatter_options_label = QtWidgets.QLabel("Options", self)
-        self.scatter_options_label.setGeometry(self.scatter_menu_button.geometry().x()-220,
-                                               self.scatter_menu_button.geometry().y()+150, 
-                                               230, 20)
-        self.scatter_options_label.hide()
-
-        # add scatter plot options checkboxes
-        self.scatter_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.scatter_options.setObjectName('scatter_options')
-        self.scatter_options.addItems(self.plot_characteristics['scatter']['plot_options'])        
-        self.scatter_options.setGeometry(self.scatter_menu_button.geometry().x()-220, 
-                                         self.scatter_menu_button.geometry().y()+175, 
-                                         230, 20)
-        self.scatter_options.currentTextChanged.connect(self.update_plot_option)
-        self.scatter_options.hide()
-
-        # add scatter figure save button
-        self.scatter_save_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
-        self.scatter_save_button.setObjectName('scatter_save_button')
-        self.scatter_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.scatter_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.scatter_save_button.hide()
-
-        # set show/hide actions
-        self.scatter_elements = [self.scatter_container, self.scatter_settings_label, 
-                                 self.scatter_markersize_sl_label, self.scatter_markersize_sl,
-                                 self.scatter_regression_linewidth_sl_label, self.scatter_regression_linewidth_sl,
-                                 self.scatter_options_label, self.scatter_options]
-        self.interactive_elements['scatter'] = {'button': self.scatter_menu_button, 
-                                                'hidden': True,
-                                                'elements': self.scatter_elements,
+        # get scatter interactive dictionary
+        self.interactive_elements['scatter'] = {'hidden': True,
                                                 'markersize_sl': [self.scatter_markersize_sl],
-                                                'opacity_sl': [],
                                                 'linewidth_sl': [self.scatter_regression_linewidth_sl]
                                                }
-        self.scatter_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.scatter_markersize_sl.valueChanged.connect(self.update_markersize_func)
-        self.scatter_regression_linewidth_sl.valueChanged.connect(self.update_linewidth_func)
-        self.scatter_save_button.clicked.connect(self.save_axis_figure_func)
 
         # STATSUMMARY PLOT SETTINGS MENU #
-        # add button to statsummary plot to show and hide settings menu
-        self.statsummary_menu_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
-        self.statsummary_menu_button.setObjectName('statsummary_menu_button')
-        self.statsummary_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.statsummary_menu_button.setIconSize(QtCore.QSize(31, 37))
-        self.statsummary_menu_button.hide()
+        # create statsummary settings menu
+        self.statsummary_menu = SettingsMenu(plot_type='statsummary', canvas_instance=self)
+        self.statsummary_options = self.statsummary_menu.checkable_comboboxes['options']
+        self.statsummary_elements = self.statsummary_menu.get_elements()
 
-        # add white container
-        self.statsummary_container = set_formatting(QtWidgets.QWidget(self), formatting_dict['settings_container'])
-        self.statsummary_container.setGeometry(self.statsummary_menu_button.geometry().x()-250,
-                                               self.statsummary_menu_button.geometry().y()+25, 
-                                               270, 180)
-        self.statsummary_container.hide()
-
-        # add settings label
-        self.statsummary_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                                          formatting_dict['settings_label'])
-        self.statsummary_settings_label.setGeometry(self.statsummary_menu_button.geometry().x()-240, 
-                                                    self.statsummary_menu_button.geometry().y()+30, 
-                                                    230, 20)
-        self.statsummary_settings_label.hide()
-
-        # add statsummary stat label ('Statistic') to layout
-        self.statsummary_stat_label = QtWidgets.QLabel('Statistic', self)
-        self.statsummary_stat_label.setGeometry(self.statsummary_menu_button.geometry().x()-115, 
-                                                self.statsummary_menu_button.geometry().y()+50, 
-                                                230, 20)
-        self.statsummary_stat_label.hide()
-
-        # add combobox stat combobox
-        self.statsummary_stat = set_formatting(set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu']), formatting_dict['combobox_menu'])
-        self.statsummary_stat.move(self.statsummary_menu_button.geometry().x()-115, 
-                                   self.statsummary_menu_button.geometry().y()+75)
-        self.statsummary_stat.setFixedWidth(105)
-        self.statsummary_stat.hide()
-
-        # add statsummary cycle label ('Periodic cycle') to layout
-        self.statsummary_cycle_label = QtWidgets.QLabel('Periodic cycle', self)
-        self.statsummary_cycle_label.setGeometry(self.statsummary_menu_button.geometry().x()-240, 
-                                                self.statsummary_menu_button.geometry().y()+50, 
-                                                230, 20)
-        self.statsummary_cycle_label.hide()
-
-        # add statsummary periodic cycle combobox
-        self.statsummary_cycle = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        # get stats and add items to cycle
+        self.statsummary_stat = self.statsummary_menu.checkable_comboboxes['stat']
+        self.statsummary_cycle = self.statsummary_menu.comboboxes['cycle']
         self.statsummary_cycle.addItems(['None', 'Diurnal', 'Weekly', 'Monthly'])
-        self.statsummary_cycle.move(self.statsummary_menu_button.geometry().x()-240, 
-                                    self.statsummary_menu_button.geometry().y()+75)
-        self.statsummary_cycle.setFixedWidth(105)
-        self.statsummary_cycle.hide()
+        self.statsummary_periodic_mode = self.statsummary_menu.comboboxes['periodic_mode']
+        self.statsummary_periodic_aggregation = self.statsummary_menu.comboboxes['periodic_aggregation']
 
-        # add statsummary periodic mode label ('Periodic mode') to layout
-        self.statsummary_periodic_mode_label = QtWidgets.QLabel('Periodic mode', self)
-        self.statsummary_periodic_mode_label.setGeometry(self.statsummary_menu_button.geometry().x()-240, 
-                                                              self.statsummary_menu_button.geometry().y()+100, 
-                                                              230, 20)
-        self.statsummary_periodic_mode_label.hide()
-
-        # add statsummary periodic mode combobox
-        self.statsummary_periodic_mode = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.statsummary_periodic_mode.move(self.periodic_menu_button.geometry().x()-240, 
-                                            self.periodic_menu_button.geometry().y()+125)
-        self.statsummary_periodic_mode.setFixedWidth(105)
-        self.statsummary_periodic_mode.hide()
-
-        # add statsummary periodic aggregation label ('Periodic aggregation') to layout
-        self.statsummary_periodic_aggregation_label = QtWidgets.QLabel('Periodic aggregation', self)
-        self.statsummary_periodic_aggregation_label.setGeometry(self.statsummary_menu_button.geometry().x()-115, 
-                                                                     self.statsummary_menu_button.geometry().y()+100, 
-                                                                     230, 20)
-        self.statsummary_periodic_aggregation_label.hide()
-
-        # add statsummary periodic aggregation combobox
-        self.statsummary_periodic_aggregation = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.statsummary_periodic_aggregation.move(self.periodic_menu_button.geometry().x()-115, 
-                                                   self.periodic_menu_button.geometry().y()+125)
-        self.statsummary_periodic_aggregation.setFixedWidth(105)
-        self.statsummary_periodic_aggregation.hide()
-
-        # add statsummary plot options name ('Options') to layout
-        self.statsummary_options_label = QtWidgets.QLabel("Options", self)
-        self.statsummary_options_label.setGeometry(self.statsummary_menu_button.geometry().x()-240,
-                                                   self.statsummary_menu_button.geometry().y()+150, 
-                                                   230, 20)
-        self.statsummary_options_label.hide()
-
-        # add statsummary plot options checkboxes
-        self.statsummary_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.statsummary_options.setObjectName('statsummary_options')
-        self.statsummary_options.addItems(self.plot_characteristics['statsummary']['plot_options'])        
-        self.statsummary_options.setGeometry(self.statsummary_menu_button.geometry().x()-240, 
-                                             self.statsummary_menu_button.geometry().y()+175, 
-                                             230, 20)
-        self.statsummary_options.currentTextChanged.connect(self.update_plot_option)
-        self.statsummary_options.hide()
-
-        # add statsummary figure save button
-        self.statsummary_save_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
-        self.statsummary_save_button.setObjectName('statsummary_save_button')
-        self.statsummary_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.statsummary_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.statsummary_save_button.hide()
-
-        # set show/hide actions
-        self.statsummary_elements = [self.statsummary_container, self.statsummary_settings_label, 
-                                     self.statsummary_cycle_label, self.statsummary_cycle, 
-                                     self.statsummary_periodic_aggregation_label, self.statsummary_periodic_aggregation,
-                                     self.statsummary_periodic_mode_label, self.statsummary_periodic_mode,
-                                     self.statsummary_stat_label, self.statsummary_stat,
-                                     self.statsummary_options_label, self.statsummary_options]
-        self.interactive_elements['statsummary'] = {'button': self.statsummary_menu_button, 
-                                                    'hidden': True,
-                                                    'elements': self.statsummary_elements,
-                                                    'markersize_sl': [],
-                                                    'opacity_sl': [],
-                                                    'linewidth_sl': []
+        # get statsummary interactive dictionary
+        self.interactive_elements['statsummary'] = {'hidden': True
                                                     }
-        self.statsummary_stat.currentTextChanged.connect(self.handle_statsummary_statistics_update)
-        self.statsummary_cycle.currentTextChanged.connect(self.handle_statsummary_cycle_update)
-        self.statsummary_periodic_aggregation.currentTextChanged.connect(self.handle_statsummary_periodic_aggregation_update)
-        self.statsummary_periodic_mode.currentTextChanged.connect(self.handle_statsummary_periodic_mode_update)
-        self.statsummary_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.statsummary_save_button.clicked.connect(self.save_axis_figure_func)
 
         # BOXPLOT PLOT SETTINGS MENU #
-        # add button to boxplot to show and hide settings menu
-        self.boxplot_menu_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
-        self.boxplot_menu_button.setObjectName('boxplot_menu_button')
-        self.boxplot_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.boxplot_menu_button.setIconSize(QtCore.QSize(31, 37))
-        self.boxplot_menu_button.hide()
+        # create boxplot settings menu
+        self.boxplot_menu = SettingsMenu(plot_type='boxplot', canvas_instance=self)
+        self.boxplot_options = self.boxplot_menu.checkable_comboboxes['options']
+        self.boxplot_elements = self.boxplot_menu.get_elements()
 
-        # add white container
-        self.boxplot_container = set_formatting(QtWidgets.QWidget(self), formatting_dict['settings_container'])
-        self.boxplot_container.setGeometry(self.boxplot_menu_button.geometry().x()-230,
-                                           self.boxplot_menu_button.geometry().y()+25, 
-                                           250, 80)
-        self.boxplot_container.hide()
-
-        # add settings label
-        self.boxplot_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                     formatting_dict['settings_label'])
-        self.boxplot_settings_label.setGeometry(self.boxplot_menu_button.geometry().x()-220, 
-                                                self.boxplot_menu_button.geometry().y()+30, 
-                                                230, 20)
-        self.boxplot_settings_label.hide()
-
-        # add boxplot options name ('Options') to layout
-        self.boxplot_options_label = QtWidgets.QLabel("Options", self)
-        self.boxplot_options_label.setGeometry(self.boxplot_menu_button.geometry().x()-220,
-                                               self.boxplot_menu_button.geometry().y()+50, 
-                                               230, 20)
-        self.boxplot_options_label.hide()
-
-        # add boxplot options checkboxes
-        self.boxplot_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.boxplot_options.setObjectName('boxplot_options')
-        self.boxplot_options.addItems(self.plot_characteristics['boxplot']['plot_options'])        
-        self.boxplot_options.setGeometry(self.boxplot_menu_button.geometry().x()-220, 
-                                         self.boxplot_menu_button.geometry().y()+75, 
-                                         230, 20)
-        self.boxplot_options.currentTextChanged.connect(self.update_plot_option)
-        self.boxplot_options.hide()
-
-        # add boxplot figure save button
-        self.boxplot_save_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
-        self.boxplot_save_button.setObjectName('boxplot_save_button')
-        self.boxplot_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.boxplot_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.boxplot_save_button.hide()
-
-        # set show/hide actions
-        self.boxplot_elements = [self.boxplot_container, self.boxplot_settings_label, 
-                                 self.boxplot_options_label, self.boxplot_options]
-        self.interactive_elements['boxplot'] = {'button': self.boxplot_menu_button, 
-                                                'hidden': True,
-                                                'elements': self.boxplot_elements,
-                                                'markersize_sl': [],
-                                                'opacity_sl': [],
-                                                'linewidth_sl': []
+        # get boxplot interactive dictionary
+        self.interactive_elements['boxplot'] = {'hidden': True
                                                }
-        self.boxplot_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.boxplot_save_button.clicked.connect(self.save_axis_figure_func)
 
         # TAYLOR DIAGRAM SETTINGS MENU #
-        # add button to taylor diagram to show and hide settings menu
-        self.taylor_menu_button = set_formatting(QtWidgets.QPushButton(self), 
-                                                 formatting_dict['settings_icon'])
-        self.taylor_menu_button.setObjectName('taylor_menu_button')
-        self.taylor_menu_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/menu_icon.png")))
-        self.taylor_menu_button.setIconSize(QtCore.QSize(31, 37))
-        self.taylor_menu_button.hide()
+        # create taylor diagram settings menu
+        self.taylor_menu = SettingsMenu(plot_type='taylor', canvas_instance=self)
+        self.taylor_options = self.taylor_menu.checkable_comboboxes['options']
+        self.taylor_elements = self.taylor_menu.get_elements()
 
-        # add white container
-        self.taylor_container = set_formatting(QtWidgets.QWidget(self),
-                                               formatting_dict['settings_container'])
-        self.taylor_container.setGeometry(self.taylor_menu_button.geometry().x()-230,
-                                          self.taylor_menu_button.geometry().y()+25, 
-                                          250, 180)
-        self.taylor_container.hide()
+        # get stat
+        self.taylor_corr_stat = self.taylor_menu.comboboxes['corr_stat']
 
-        # add settings label
-        self.taylor_settings_label = set_formatting(QtWidgets.QLabel('SETTINGS', self), 
-                                                    formatting_dict['settings_label'])
-        self.taylor_settings_label.setGeometry(self.taylor_menu_button.geometry().x()-220, 
-                                               self.taylor_menu_button.geometry().y()+30, 
-                                               230, 20)
-        self.taylor_settings_label.hide()
-
-        # add map stat label ('Correlation statistic') to layout
-        self.taylor_corr_stat_label = QtWidgets.QLabel('Correlation statistic', self)
-        self.taylor_corr_stat_label.setGeometry(self.taylor_menu_button.geometry().x()-220, 
-                                               self.taylor_menu_button.geometry().y()+50, 
-                                               230, 20)
-        self.taylor_corr_stat_label.hide()
-
-        # add map stat combobox
-        self.taylor_corr_stat = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
-        self.taylor_corr_stat.setGeometry(self.map_menu_button.geometry().x()-220, 
-                                         self.map_menu_button.geometry().y()+75, 
-                                         110, 20)
-        self.taylor_corr_stat.hide()
-
-        # add taylor diagram markersize slider name ('Size') to layout
-        self.taylor_markersize_sl_label = QtWidgets.QLabel('Size', self)
-        self.taylor_markersize_sl_label.setGeometry(self.taylor_menu_button.geometry().x()-220,
-                                                    self.taylor_menu_button.geometry().y()+100, 
-                                                    230, 20)
-        self.taylor_markersize_sl_label.hide()
-
-        # add taylor diagram markersize slider
-        self.taylor_markersize_sl = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
-        self.taylor_markersize_sl.setObjectName('taylor_markersize_sl')
-        self.taylor_markersize_sl.setMinimum(0)
+        # get sliders and update values
+        self.taylor_markersize_sl = self.taylor_menu.sliders['markersize_sl']
         self.taylor_markersize_sl.setMaximum(self.plot_characteristics['taylor']['plot']['markersize']*10)
         self.taylor_markersize_sl.setValue(self.plot_characteristics['taylor']['plot']['markersize'])
-        self.taylor_markersize_sl.setTickInterval(2)
-        self.taylor_markersize_sl.setTracking(False)
-        self.taylor_markersize_sl.setGeometry(self.taylor_menu_button.geometry().x()-220, 
-                                              self.taylor_menu_button.geometry().y()+125, 
-                                              230, 20)
-        self.taylor_markersize_sl.hide()
 
-        # add taylor diagram options name ('Options') to layout
-        self.taylor_options_label = QtWidgets.QLabel("Options", self)
-        self.taylor_options_label.setGeometry(self.taylor_menu_button.geometry().x()-220,
-                                              self.taylor_menu_button.geometry().y()+150, 
-                                              230, 20)
-        self.taylor_options_label.hide()
-
-        # add taylor diagram options checkboxes
-        self.taylor_options = set_formatting(CheckableComboBox(self), formatting_dict['checkable_combobox_menu'])
-        self.taylor_options.setObjectName('taylor_options')
-        self.taylor_options.addItems(self.plot_characteristics['taylor']['plot_options'])        
-        self.taylor_options.setGeometry(self.taylor_menu_button.geometry().x()-220, 
-                                        self.taylor_menu_button.geometry().y()+175, 
-                                        230, 20)
-        self.taylor_options.currentTextChanged.connect(self.update_plot_option)
-        self.taylor_options.hide()
-
-        # add taylor figure save button
-        self.taylor_save_button = set_formatting(QtWidgets.QPushButton(self), formatting_dict['settings_icon'])
-        self.taylor_save_button.setObjectName('taylor_save_button')
-        self.taylor_save_button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
-        self.taylor_save_button.setIconSize(QtCore.QSize(20, 20))
-        self.taylor_save_button.hide()
-
-        # set show/hide actions
-        self.taylor_elements = [self.taylor_container, self.taylor_settings_label, 
-                                self.taylor_corr_stat_label,self.taylor_corr_stat,
-                                self.taylor_markersize_sl_label, self.taylor_markersize_sl,
-                                self.taylor_options_label, self.taylor_options]
-        self.interactive_elements['taylor'] = {'button': self.taylor_menu_button, 
-                                               'hidden': True,
-                                               'elements': self.taylor_elements,
-                                               'markersize_sl': [self.taylor_markersize_sl],
-                                               'opacity_sl': [],
-                                               'linewidth_sl': []
+        # get statsummary interactive dictionary
+        self.interactive_elements['taylor'] = {'hidden': True,
+                                               'markersize_sl': [self.taylor_markersize_sl]
                                                }
-        self.taylor_menu_button.clicked.connect(self.interactive_elements_button_func)
-        self.taylor_markersize_sl.valueChanged.connect(self.update_markersize_func)
-        self.taylor_save_button.clicked.connect(self.save_axis_figure_func)
-        self.taylor_corr_stat.currentTextChanged.connect(self.handle_taylor_correlation_statistic_update)
 
         # create array with buttons and elements to edit when the canvas is resized or the plots are changed
-        self.menu_buttons = [self.map_menu_button, self.timeseries_menu_button,
-                             self.periodic_menu_button, self.periodic_violin_menu_button,
-                             self.metadata_menu_button, self.distribution_menu_button, 
-                             self.scatter_menu_button, self.statsummary_menu_button, 
-                             self.boxplot_menu_button, self.taylor_menu_button]
-
-        self.save_buttons = [self.map_save_button, self.timeseries_save_button,
-                             self.periodic_save_button, self.periodic_violin_save_button,
-                             self.metadata_save_button, self.distribution_save_button, 
-                             self.scatter_save_button, self.statsummary_save_button,
-                             self.boxplot_save_button, self.taylor_save_button]
-
-        self.elements = [self.map_elements, self.timeseries_elements, 
-                         self.periodic_elements, self.periodic_violin_elements,
-                         self.metadata_elements, self.distribution_elements, 
-                         self.scatter_elements, self.statsummary_elements, 
-                         self.boxplot_elements, self.taylor_elements]
+        self.menu_buttons = []
+        self.save_buttons = []
+        self.elements = []
+        for plot_type in settings_dict.keys():
+            if plot_type == 'periodic-violin':
+                plot_type = 'periodic_violin'
+            self.menu_buttons.append(getattr(self, plot_type + '_menu').buttons['settings_button'])
+            self.save_buttons.append(getattr(self, plot_type + '_menu').buttons['save_button'])
+            self.elements.append(getattr(self, plot_type + '_elements'))
 
         # make sure white containers are above buttons
         for element in self.elements:
@@ -3046,11 +2096,11 @@ class MPLCanvas(FigureCanvas):
 
         event_source = self.sender()
         for key, val in self.interactive_elements.items():
-            if event_source == self.interactive_elements[key]['button']:
+            if event_source == getattr(self, key + '_menu').buttons['settings_button']:
                 hidden = self.interactive_elements[key]['hidden']
-                elements = self.interactive_elements[key]['elements']
+                elements = getattr(self, key + '_elements')
                 break
-
+        
         if hidden:
             for element in elements: 
                 if isinstance(element, dict):
@@ -3082,10 +2132,12 @@ class MPLCanvas(FigureCanvas):
             loc = 1
         else:
             loc = 0
+
         for key, val in self.interactive_elements.items():
-            if event_source in self.interactive_elements[key]['markersize_sl']:
-                markersize = self.interactive_elements[key]['markersize_sl'][loc].value()
-                break
+            if 'markersize_sl' in self.interactive_elements[key]:
+                if event_source in self.interactive_elements[key]['markersize_sl']:
+                    markersize = self.interactive_elements[key]['markersize_sl'][loc].value()
+                    break
         self.update_markersize(self.plot_axes[key], key, markersize, event_source)
 
         return None
@@ -3102,9 +2154,10 @@ class MPLCanvas(FigureCanvas):
         else:
             loc = 0
         for key, val in self.interactive_elements.items():
-            if event_source in self.interactive_elements[key]['opacity_sl']:
-                opacity = self.interactive_elements[key]['opacity_sl'][loc].value()/10
-                break
+            if 'opacity_sl' in self.interactive_elements[key]:
+                if event_source in self.interactive_elements[key]['opacity_sl']:
+                    opacity = self.interactive_elements[key]['opacity_sl'][loc].value()/10
+                    break
         self.update_opacity(self.plot_axes[key], key, opacity, event_source)
 
         return None
@@ -3114,9 +2167,10 @@ class MPLCanvas(FigureCanvas):
 
         event_source = self.sender()
         for key, val in self.interactive_elements.items():
-            if event_source in self.interactive_elements[key]['linewidth_sl']:
-                linewidth = self.interactive_elements[key]['linewidth_sl'][0].value()/10
-                break
+            if 'linewidth_sl' in self.interactive_elements[key]:
+                if event_source in self.interactive_elements[key]['linewidth_sl']:
+                    linewidth = self.interactive_elements[key]['linewidth_sl'][0].value()/10
+                    break
         self.update_linewidth(self.plot_axes[key], key, linewidth)
 
         return None

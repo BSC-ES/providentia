@@ -983,7 +983,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
                         save_button.hide()
-                        for element in self.mpl_canvas.interactive_elements[previous_plot_type]['elements']:
+                        if previous_plot_type == 'periodic-violin':
+                            previous_plot_type = 'periodic_violin'
+                        for element in getattr(self.mpl_canvas, previous_plot_type + '_elements'):
                             if isinstance(element, dict):
                                 for sub_element in element.values():
                                     sub_element.hide()
