@@ -2,8 +2,9 @@
 from .configuration import ProvConfiguration
 from .canvas import MPLCanvas
 from .toolbar import NavigationToolbar
-from .dashboard_aux import ComboBox, QVLine, PopUpWindow, InputDialog
+from .dashboard_aux import ComboBox, QVLine, InputDialog
 from .dashboard_aux import set_formatting
+from .pop_up_window import PopUpWindow
 from .read import DataReader
 from .read_aux import get_default_qa, get_frequency_code
 from providentia import aux
