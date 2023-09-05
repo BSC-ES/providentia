@@ -10,10 +10,12 @@ import numpy as np
 import pandas as pd
 from netCDF4 import Dataset, chartostring
 
+from .spatial_colocation import (spatial_colocation_nonghost, spatial_colocation_ghost, 
+                                 resolve_duplicate_spatial_colocation_matches)
 from .read_aux import (get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_metadata, 
-                       read_netcdf_data, get_default_qa, get_frequency_code)
-from .aux import (check_for_ghost, spatial_colocation_nonghost, spatial_colocation_ghost,
-                  resolve_duplicate_spatial_colocation_matches, update_plotting_parameters, show_message)
+                       read_netcdf_data, get_default_qa, get_frequency_code, check_for_ghost)
+from .aux import show_message
+from .plot_aux import update_plotting_parameters
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 

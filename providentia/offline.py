@@ -18,7 +18,13 @@ from .filter import DataFilter
 from .plot import Plot
 from .statistics import get_selected_station_data, calculate_statistic, generate_colourbar, get_z_statistic_info
 from .configuration import ProvConfiguration
-from providentia import aux
+from .configuration import load_conf
+from .fields_menus import (init_representativity, init_period, init_metadata, 
+                           update_representativity_fields, update_period_fields, update_metadata_fields,
+                           representativity_conf, period_conf, metadata_conf)
+from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_tree, 
+                       get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions,
+                       get_valid_obs_files_in_date_range, get_valid_experiments)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
@@ -42,7 +48,7 @@ class ProvidentiaOffline:
 
         # update variables from config file
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
-            aux.load_conf(self, kwargs['config'])
+            load_conf(self, kwargs['config'])
             self.from_conf = True
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
@@ -55,13 +61,13 @@ class ProvidentiaOffline:
         self.report_plots = json.load(open(os.path.join(CURRENT_PATH, '../settings/report_plots.json')))
 
         # create dictionary of all available observational GHOST data
-        self.all_observation_data = aux.get_ghost_observational_tree(self)
+        self.all_observation_data = get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
         nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
-            nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
+            nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
             self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
 
         # initialise DataReader class
@@ -111,17 +117,17 @@ class ProvidentiaOffline:
             provconf.check_validity()
 
             # set some key configuration variables
-            self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
-            self.nonrelevant_temporal_resolutions = aux.get_nonrelevant_temporal_resolutions(self.resolution)
+            self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
+            self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
             self.data_labels = ['observations'] + list(self.experiments.keys())
             self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
 
             # get valid observations in date range
-            aux.get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
+            get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
 
             # update available experiments for selected fields
-            aux.get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
-                                      self.network, self.species)
+            get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
+                                  self.network, self.species)
 
             # read data
             self.datareader.read_setup(['reset'])
@@ -167,6 +173,8 @@ class ProvidentiaOffline:
                             # there can be no station specific plots for map plot type
                             if plot_type[:4] != 'map-':
                                 self.station_plots_to_make.append(plot_type)
+            print(self.station_plots_to_make)
+            print(self.summary_plots_to_make)
 
             # TODO: For Taylor diagrams, remove this piece of code until Matplotlib 3.7.2 is available
             for diagram_name in ['taylor', 'taylor-r', 'taylor-r2']:
@@ -709,15 +717,15 @@ class ProvidentiaOffline:
                 self.datareader.read_setup(['reset'])
 
             # update fields available for filtering
-            aux.init_representativity(self)
-            aux.update_representativity_fields(self)
-            aux.representativity_conf(self)
-            aux.init_period(self)
-            aux.update_period_fields(self)
-            aux.period_conf(self)
-            aux.init_metadata(self)
-            aux.update_metadata_fields(self)
-            aux.metadata_conf(self)
+            init_representativity(self)
+            update_representativity_fields(self)
+            representativity_conf(self)
+            init_period(self)
+            update_period_fields(self)
+            period_conf(self)
+            init_metadata(self)
+            update_metadata_fields(self)
+            metadata_conf(self)
 
             # set previous QA, flags and filter species as subsection
             self.previous_qa = copy.deepcopy(self.qa)
@@ -748,7 +756,7 @@ class ProvidentiaOffline:
                     self.summary_plot_geometry_setup = True
 
             # make station specific plots?
-            if self.report_stations:      
+            if self.report_stations and self.station_plots_to_make:      
 
                # set variable to inform when have made 1 set of networkspecies plots for stations
                self.made_networkspeci_station_plots = False        
@@ -1554,9 +1562,10 @@ class ProvidentiaOffline:
         # get axes associated with plot type
         if plotting_paradigm == 'summary':
             relevant_pages = self.summary_pages[plot_type][networkspeci]
+            print(self.summary_pages)
         elif plotting_paradigm == 'station':
             relevant_pages = self.station_pages[plot_type][networkspeci][self.subsection]
-
+            print(self.station_pages)
         all_relevant_pages = []
         relevant_axes = []     
         page_inds = []
