@@ -27,9 +27,11 @@ import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_aux import set_formatting, ComboBox, CheckableComboBox, LassoSelector
-from .aux import get_relevant_temporal_resolutions, show_message
-from .settings_menu import SettingsMenu
+from .dashboard_elements import set_formatting
+from .dashboard_elements import ComboBox, CheckableComboBox
+from .dashboard_interactivity import LassoSelector
+from .aux import show_message
+from .canvas_menus import SettingsMenu
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')

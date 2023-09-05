@@ -10,8 +10,8 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from .aux import check_for_ghost, multispecies_mapping, show_message
-from .read_aux import get_default_qa
+from .aux import show_message
+from .read_aux import get_default_qa, check_for_ghost
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -615,7 +615,7 @@ class ProvConfiguration:
         new_species = copy.deepcopy(self.read_instance.species)
         for speci_ii, speci in enumerate(self.read_instance.species): 
             if '*' in speci:
-                mapped_species = multispecies_mapping(speci)
+                mapped_species = self.multispecies_mapping(speci)
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
                 network_to_duplicate = self.read_instance.network[speci_ii]
@@ -750,6 +750,18 @@ class ProvConfiguration:
                     # update symbols next to values
                     self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
                                                                                               filter_species_fill_value]
+
+    def multispecies_mapping(self, species):
+        """ Map species special case str to multiple species names. """
+
+        multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4',
+                            'vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9',
+                            'vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14',
+                            'vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19',
+                            'vconcaerobin20','vconcaerobin21','vconcaerobin22']}
+
+        return multi_species_map[species]
+
 
 def read_conf(fpath=None):
     """ Read configuration files. """
@@ -915,6 +927,7 @@ def read_conf(fpath=None):
 
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
    
+
 def write_conf(section, subsection, fpath, opts):
     """ Write configurations on file. """
 
@@ -931,6 +944,26 @@ def write_conf(section, subsection, fpath, opts):
     # write configuration
     with open(fpath, 'w') as configfile:
         config.write(configfile)
+
+
+def load_conf(self, fpath=None):
+    """ Load existing configurations from file
+        for running offline Providentia.
+    """
+
+    from .configuration import read_conf
+
+    if fpath is None:
+        print("No configuration file found")
+        sys.exit(1)
+
+    # if DEFAULT is not present, then return
+    if not os.path.isfile(fpath):
+        print(("Error %s" % fpath))
+        return
+
+    self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(fpath)
+
 
 def split_options(read_instance, conf_string, separator="||"):
     """ For the options in the configuration that define the keep and remove

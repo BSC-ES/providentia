@@ -4,8 +4,6 @@ from .configuration import split_options
 import copy
 import numpy as np
 import pandas as pd
-
-from providentia import aux
 from .aux import show_message
 
 class DataFilter:

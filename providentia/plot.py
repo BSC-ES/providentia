@@ -28,9 +28,10 @@ import seaborn as sns
 from itertools import groupby
 
 from .statistics import get_z_statistic_info, calculate_statistic, boxplot_inner_fences
-from .aux import (get_land_polygon_resolution, temp_axis_dict, periodic_xticks, periodic_labels,
-                  get_multispecies_aliases, show_message, kde_fft, round_decimal_places)
+from .aux import show_message
 from .read_aux import drop_nans
+from .plot_aux import (get_land_polygon_resolution, get_multispecies_aliases, round_decimal_places, kde_fft,
+                       temp_axis_dict, periodic_xticks, periodic_labels)
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
