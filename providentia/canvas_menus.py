@@ -4,7 +4,8 @@ import os
 import json
 from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_aux import set_formatting, ComboBox, CheckableComboBox
+from .dashboard_elements import set_formatting
+from .dashboard_elements import ComboBox, CheckableComboBox
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 settings_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/canvas_menus.json')))

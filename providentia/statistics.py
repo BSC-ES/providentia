@@ -3,8 +3,7 @@ Contains functions for the processing/calculation of statistics and colourbars
 """
 from .calculate import Stats
 from .calculate import ExpBias
-from .aux import exceedance_lim, get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions
-from .read_aux import drop_nans
+from .read_aux import get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions, drop_nans
 
 import copy
 import json
@@ -945,3 +944,20 @@ def aggregation(data_array, statistic_aggregation, axis=0):
         sys.exit(error)
 
     return aggregated_data
+
+
+def exceedance_lim(species):
+    """ Return the exceedance limit depending on the species input. 
+        If species doesn't have a reported limit, returns np.NaN.
+
+        :param species: name of species currently selected (e.g. sconco3)
+        :type species: str
+        :return: value of exceedance limit
+        :rtype: int
+    """
+
+    exceedance_limits = {'sconco3': 90.21, 'sconcno2': 106.38}
+    if species in exceedance_limits:
+        return exceedance_limits[species]
+    else:
+        return np.NaN
