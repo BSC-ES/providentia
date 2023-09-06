@@ -2743,8 +2743,7 @@ class Plot:
                 for ax in relevant_axs_active:
                     ax.xaxis.set_ticks(xticks)
 
-    def set_axis_title(self, relevant_axis, title, plot_characteristics, 
-                       relevant_temporal_resolutions=['hour']):
+    def set_axis_title(self, relevant_axis, title, plot_characteristics):
         """ Set title of plot axis.
 
             :param relevant_axis: axis to plot on 
@@ -2753,8 +2752,6 @@ class Plot:
             :type title: str
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
-            :param relevant_temporal_resolutions: relevant temporal resolutions to plot title on   
-            :type relevant_temporal_resolutions: list
         """    
 
         # return if title is empty str
@@ -2764,8 +2761,10 @@ class Plot:
         # get appropriate axis for plotting label for plots with multiple sub-axes
         axs_to_set_title = []
         if isinstance(relevant_axis, dict):
-            for relevant_temporal_resolution, sub_ax in relevant_axis.items():
-                if relevant_temporal_resolution in relevant_temporal_resolutions:
+            # reorder dict to show axis title in monthly plot and not in DoW for daily plots
+            relevant_dict = {key : relevant_axis[key] for key in ['hour', 'month', 'dayofweek']}
+            for relevant_temporal_resolution, sub_ax in relevant_dict.items():
+                if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
                     axs_to_set_title.append(sub_ax)
                     break
         else:
