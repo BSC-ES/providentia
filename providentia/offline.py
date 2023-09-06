@@ -1174,11 +1174,14 @@ class ProvidentiaOffline:
             if z_statistic_sign == 'bias':
                 z1 = ['observations'] * len(data_labels_sans_obs)
                 z2 = data_labels_sans_obs
+            elif 'obs' in plot_options:
+                z1 = ['observations']
+                z2 = ['']
             else:
                 z1 = data_labels
                 z2 = ['']*len(data_labels)
 
-            #iterate through relevant data labels making plots
+            # iterate through relevant data labels making plots
             for z1_label, z2_label in zip(z1, z2):
                 
                 # get relevant page/axis to plot on
