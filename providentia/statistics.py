@@ -78,6 +78,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
     # iterate through networks / species  
     for networkspeci_ii, networkspeci in enumerate(networkspecies):
+        
+        # initialise data labels
+        canvas_instance.selected_station_data_labels[networkspeci] = []
 
         # add nested dictionary for networkspeci in selected station data dictionary
         canvas_instance.selected_station_data[networkspeci] = {}
