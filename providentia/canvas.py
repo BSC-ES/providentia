@@ -1,3 +1,5 @@
+""" Class to generate canvas """
+
 from .filter import DataFilter
 from .statistics import *
 from .plot import Plot
@@ -30,7 +32,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from .dashboard_elements import set_formatting
 from .dashboard_elements import ComboBox, CheckableComboBox
 from .dashboard_interactivity import LassoSelector
+from .dashboard_interactivity import zoom_map_func, picker_block_func, legend_picker_func
+from .plot_formatting import harmonise_xy_lims_paradigm, set_axis_title, set_axis_label, format_axis
+from .plot_options import log_axes, linear_regression, smooth, log_validity, annotation
 from .aux import show_message
+from .plot_aux import get_map_extent
 from .canvas_menus import SettingsMenu
 
 # make sure that we are using Qt5 backend with matplotlib
@@ -169,10 +175,10 @@ class MPLCanvas(FigureCanvas):
         self.active_map_valid_station_inds = np.array([], dtype=np.int)
 
         # setup blocker for picker events
-        self.figure.canvas.mpl_connect('axes_enter_event', self.picker_block_func)
+        self.figure.canvas.mpl_connect('axes_enter_event', lambda event: picker_block_func(self, event))
 
         # setup legend line selection
-        self.figure.canvas.mpl_connect('pick_event', self.legend_picker_func)
+        self.figure.canvas.mpl_connect('pick_event', lambda event: legend_picker_func(self, event))
 
         # setup interactive lasso on map
         self.lasso_left = LassoSelector(self, self.plot_axes['map'], onselect=self.onlassoselect_left,
@@ -187,11 +193,11 @@ class MPLCanvas(FigureCanvas):
 
         # setup zoom on scroll wheel on map
         self.lock_zoom = False
-        self.figure.canvas.mpl_connect('scroll_event', self.zoom_map_func)
+        self.figure.canvas.mpl_connect('scroll_event', zoom_map_func)
 
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
-            self.plot.format_axis(self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type])
+            format_axis(self, self.read_instance, self.plot_axes[plot_type], plot_type, self.plot_characteristics[plot_type])
 
         # create covers to hide parts of canvas when updating / plotting
         self.canvas_cover = set_formatting(QtWidgets.QWidget(self), formatting_dict['canvas_cover'])
@@ -598,7 +604,7 @@ class MPLCanvas(FigureCanvas):
         else:
             axis_title_label = '{} Selected Stations of {} Available'.format(
                 len(self.relative_selected_station_inds), len(self.active_map_valid_station_inds))
-        self.plot.set_axis_title(self.plot_axes['map'], axis_title_label, self.plot_characteristics['map'])
+        set_axis_title(self.read_instance, self.plot_axes['map'], axis_title_label, self.plot_characteristics['map'])
         self.plot_characteristics['map']['axis_title']['label'] = axis_title_label
 
         # reset alphas and marker sizes of stations (if have some stations on map)
@@ -734,18 +740,18 @@ class MPLCanvas(FigureCanvas):
 
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 if plot_type == 'scatter':
-                        self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                             plot_options, relim=True)
+                    harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
+                                               self.plot_characteristics[plot_type], plot_options, relim=True)
                 elif plot_type != 'taylor':
-                    self.plot.harmonise_xy_lims_paradigm(ax, plot_type, self.plot_characteristics[plot_type], 
-                                                         plot_options, relim=True, autoscale=True)
+                    harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
+                                               self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
 
                 # skip setting axes labels for Taylor diagram
                 if plot_type != 'taylor':
                     # set xlabel
-                    self.plot.set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
+                    set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
                     # set ylabel
-                    self.plot.set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
+                    set_axis_label(ax, 'y', ylabel, self.plot_characteristics[plot_type])
 
                 # reset navigation toolbar stack for plot
                 self.reset_ax_navigation_toolbar_stack(ax)
@@ -1646,7 +1652,7 @@ class MPLCanvas(FigureCanvas):
                     return
                 
             # get map extent (in data coords)
-            self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
+            self.read_instance.map_extent = get_map_extent(self)
 
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1740,7 +1746,7 @@ class MPLCanvas(FigureCanvas):
         # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
         if len(self.absolute_selected_station_inds) == 0:
             # take first selected point coordinates and get matches of stations within tolerance 
-            self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
+            self.read_instance.map_extent = get_map_extent(self)
             tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
                                     self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
@@ -1803,7 +1809,7 @@ class MPLCanvas(FigureCanvas):
         # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
         if len(absolute_selected_station_inds) == 0:
             # take first selected point coordinates and get matches of stations within tolerance
-            self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
+            self.read_instance.map_extent = get_map_extent(self)
             tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
@@ -2285,9 +2291,9 @@ class MPLCanvas(FigureCanvas):
                     if (option == 'logy') or (option == 'logx'):
                         if isinstance(self.plot_axes[plot_type], dict):
                             for temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                                log_validity = self.plot.log_validity(sub_ax, option)
-                                if log_validity:
-                                    self.plot.log_axes(sub_ax, option, self.plot_characteristics[plot_type], undo=undo)
+                                log_valid = log_validity(sub_ax, option)
+                                if log_valid:
+                                    log_axes(sub_ax, option, self.plot_characteristics[plot_type], undo=undo)
                                 else:
                                     msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                     msg += "in {0} with negative values.".format(plot_type)
@@ -2297,10 +2303,9 @@ class MPLCanvas(FigureCanvas):
                                     self.read_instance.block_MPL_canvas_updates = False
                                     return None
                         else:
-                            log_validity = self.plot.log_validity(self.plot_axes[plot_type], option)
-                            if log_validity:
-                                self.plot.log_axes(self.plot_axes[plot_type], option, self.plot_characteristics[plot_type], 
-                                                undo=undo)
+                            log_valid = log_validity(self.plot_axes[plot_type], option)
+                            if log_valid:
+                                log_axes(self.plot_axes[plot_type], option, self.plot_characteristics[plot_type], undo=undo)
                             else:
                                 msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                 msg += "in {0} with negative values.".format(plot_type)
@@ -2317,40 +2322,48 @@ class MPLCanvas(FigureCanvas):
                             if isinstance(self.plot_axes[plot_type], dict):
                                 for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                                     if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                                        self.plot.annotation(sub_ax,
-                                                            self.read_instance.networkspeci,
-                                                            self.read_instance.data_labels, 
-                                                            plot_type,
-                                                            self.plot_characteristics[plot_type], 
-                                                            plot_options=self.current_plot_options[plot_type])
+                                        annotation(self, 
+                                                   self.read_instance, 
+                                                   sub_ax,
+                                                   self.read_instance.networkspeci,
+                                                   self.read_instance.data_labels, 
+                                                   plot_type,
+                                                   self.plot_characteristics[plot_type], 
+                                                   plot_options=self.current_plot_options[plot_type])
                                         break
                             else:
-                                self.plot.annotation(self.plot_axes[plot_type], 
-                                                    self.read_instance.networkspeci,
-                                                    self.read_instance.data_labels, 
-                                                    plot_type,
-                                                    self.plot_characteristics[plot_type], 
-                                                    plot_options=self.current_plot_options[plot_type])
+                                annotation(self, 
+                                           self.read_instance, 
+                                           self.plot_axes[plot_type], 
+                                           self.read_instance.networkspeci,
+                                           self.read_instance.data_labels, 
+                                           plot_type,
+                                           self.plot_characteristics[plot_type], 
+                                           plot_options=self.current_plot_options[plot_type])
 
                     # option 'smooth'
                     elif option == 'smooth':
                         if not undo:
-                            self.plot.smooth(self.plot_axes[plot_type], 
-                                             self.read_instance.networkspeci,
-                                             self.read_instance.data_labels, 
-                                             plot_type,
-                                             self.plot_characteristics[plot_type], 
-                                             plot_options=self.current_plot_options[plot_type])
+                            smooth(self, 
+                                   self.read_instance, 
+                                   self.plot_axes[plot_type], 
+                                   self.read_instance.networkspeci,
+                                   self.read_instance.data_labels, 
+                                   plot_type,
+                                   self.plot_characteristics[plot_type], 
+                                   plot_options=self.current_plot_options[plot_type])
                           
                     # option 'regression'
                     elif option == 'regression':
                         if not undo:
-                            self.plot.linear_regression(self.plot_axes[plot_type], 
-                                                        self.read_instance.networkspeci,
-                                                        self.read_instance.data_labels, 
-                                                        plot_type,
-                                                        self.plot_characteristics[plot_type],  
-                                                        plot_options=self.current_plot_options[plot_type])
+                            linear_regression(self, 
+                                              self.read_instance, 
+                                              self.plot_axes[plot_type], 
+                                              self.read_instance.networkspeci,
+                                              self.read_instance.data_labels, 
+                                              plot_type,
+                                              self.plot_characteristics[plot_type],  
+                                              plot_options=self.current_plot_options[plot_type])
 
                     # option 'bias'
                     elif option == 'bias':
@@ -2538,15 +2551,13 @@ class MPLCanvas(FigureCanvas):
                     # reset axes limits (harmonising across subplots for periodic plots) 
                     if plot_type != 'map':
                         if plot_type == 'scatter':
-                            self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                 self.plot_characteristics[plot_type], 
-                                                                 self.current_plot_options[plot_type], 
-                                                                 relim=True)
+                            harmonise_xy_lims_paradigm(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
+                                                       self.plot_characteristics[plot_type], 
+                                                       self.current_plot_options[plot_type], relim=True)
                         elif plot_type != 'taylor':
-                            self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                 self.plot_characteristics[plot_type], 
-                                                                 self.current_plot_options[plot_type], 
-                                                                 relim=True, autoscale=True)                       
+                            harmonise_xy_lims_paradigm(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
+                                                       self.plot_characteristics[plot_type], 
+                                                       self.current_plot_options[plot_type], relim=True, autoscale=True)                       
 
                 # save current plot options as previous
                 self.previous_plot_options[plot_type] = self.current_plot_options[plot_type]
@@ -2573,36 +2584,21 @@ class MPLCanvas(FigureCanvas):
                 if isinstance(self.plot_axes[plot_type], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                            self.plot.annotation(sub_ax,
-                                                 self.read_instance.networkspeci,
-                                                 data_labels, 
-                                                 plot_type,
-                                                 self.plot_characteristics[plot_type], 
-                                                 plot_options=plot_options)
+                            annotation(self, self.read_instance, sub_ax, self.read_instance.networkspeci, data_labels, 
+                                       plot_type, self.plot_characteristics[plot_type], plot_options=plot_options)
                             break
                 else:
-                    self.plot.annotation(self.plot_axes[plot_type], 
-                                         self.read_instance.networkspeci,
-                                         data_labels, 
-                                         plot_type,
-                                         self.plot_characteristics[plot_type],
-                                         plot_options=plot_options)
+                    annotation(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
+                               data_labels, plot_type, self.plot_characteristics[plot_type], plot_options=plot_options)
 
             elif plot_option == 'smooth':
-                self.plot.smooth(self.plot_axes[plot_type], 
-                                 self.read_instance.networkspeci,
-                                 data_labels_alt,
-                                 plot_type,
-                                 self.plot_characteristics[plot_type], 
-                                 plot_options=plot_options)
+                smooth(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
+                       data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options=plot_options)
             
             elif plot_option == 'regression':
-                self.plot.linear_regression(self.plot_axes[plot_type], 
-                                            self.read_instance.networkspeci,
-                                            data_labels_alt, 
-                                            plot_type,
-                                            self.plot_characteristics[plot_type],  
-                                            plot_options=plot_options)
+                linear_regression(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
+                                  data_labels_alt, plot_type, self.plot_characteristics[plot_type],  
+                                  plot_options=plot_options)
 
     def update_markersize(self, ax, plot_type, markersize, event_source):
         """ Update markers size for each plot type. """
@@ -2927,6 +2923,8 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+
+
     def create_station_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
@@ -2956,7 +2954,7 @@ class MPLCanvas(FigureCanvas):
         self.station_annotation.xy = station_location
 
         # update bbox position
-        self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
+        self.read_instance.map_extent = get_map_extent(self)
         lat_min = self.read_instance.map_extent[2]
         lat_max = self.read_instance.map_extent[3]
         if station_location[1] > ((lat_max + lat_min) / 2):
@@ -3757,151 +3755,4 @@ class MPLCanvas(FigureCanvas):
                     # unlock annotation 
                     self.lock_taylor_annotation = False
 
-        return None
-
-    def zoom_map_func(self, event):
-        """ Function to handle zoom on map using scroll wheel. """
-
-        if event.inaxes == self.plot_axes['map']:
-            
-            if self.lock_zoom == False:
-
-                # lock zoom
-                self.lock_zoom = True
-
-                # get the current x and y limits
-                current_xlim = self.plot_axes['map'].get_xlim()
-                current_ylim = self.plot_axes['map'].get_ylim()
-
-                # get position of cursor
-                xdata = event.xdata
-                ydata = event.ydata
-                base_scale = self.plot_characteristics['map']['base_scale']
-
-                if event.button == 'up':
-                    # deal with zoom in
-                    scale_factor = base_scale
-                elif event.button == 'down':
-                    # deal with zoom out
-                    scale_factor = 1/base_scale
-                else:
-                    # exceptions
-                    scale_factor = 1
-                
-                if event.button == 'up' or event.button == 'down':
-                    
-                    # set new limits
-                    self.plot_axes['map'].set_xlim([xdata - (xdata - current_xlim[0]) / scale_factor, 
-                                                    xdata + (current_xlim[1] - xdata) / scale_factor])
-                    self.plot_axes['map'].set_ylim([ydata - (ydata - current_ylim[0]) / scale_factor, 
-                                                    ydata + (current_ylim[1] - ydata) / scale_factor])
-                    
-                    # save map extent (in data coords)
-                    self.read_instance.map_extent = self.plot.get_map_extent(self.plot_axes['map'])
-                    
-                    # draw changes
-                    self.figure.canvas.draw_idle()
-                
-                    # update buttons (previous-forward) history
-                    self.read_instance.navi_toolbar.push_current()
-                    self.read_instance.navi_toolbar.set_history_buttons()
-
-                    # unlock zoom
-                    self.lock_zoom = False
-
-        return None
-
-    def picker_block_func(self, event):
-        """ Block or unblock the station and legend pick functions
-            to avoid interferences.
-        """
-
-        if event.inaxes == self.plot_axes['legend']:
-            # unblock legend picker in legend
-            self.lock_legend_pick = False
-        
-        else:
-            # block legend picker
-            self.lock_legend_pick = True
-
-        return None
-
-    def legend_picker_func(self, event):
-        """ Function to handle legend picker. """
-
-        if self.lock_legend_pick == False:
-            if self.plot_elements:
-                # lock legend pick
-                self.lock_legend_pick = True
-            
-                # get legend label information
-                legend_label = event.artist
-                data_label = legend_label.get_text()
-
-                # transform legend label into data labels
-                for exp_label, exp_alias in self.read_instance.experiments.items():
-                    if data_label == exp_alias:
-                        data_label = exp_label
-                        continue
-                if data_label == self.plot_characteristics['legend']['handles']['obs_label']:
-                    data_label = 'observations'
-
-                if data_label not in self.plot_elements['data_labels_active']:
-                    visible = True
-                    # put observations label always first in pop-ups on hover
-                    if data_label == 'observations':
-                        self.plot_elements['data_labels_active'].insert(0, data_label)
-                    # put experiment labels in the same order as in the legend
-                    else:
-                        self.plot_elements['data_labels_active'].insert(list(self.read_instance.experiments.keys()).index(data_label)+1, 
-                                                                        data_label)
-                else:
-                    visible = False
-                    self.plot_elements['data_labels_active'].remove(data_label)
-
-                # iterate through plot types stored in plot_elements (if have selected stations)
-                if len(self.relative_selected_station_inds) > 0:
-                    for plot_type in self.plot_elements:  
-
-                        if plot_type not in ['data_labels_active', 'metadata', 'map', 'heatmap', 
-                                             'table', 'statsummary']:
-
-                            # get currently selected options for plot
-                            plot_options = self.current_plot_options[plot_type]
-                        
-                            # get active (absolute / bias)
-                            active = self.plot_elements[plot_type]['active']
-
-                            # change visibility of plot elements (if data label in plot elements dictionary)
-                            if data_label in self.plot_elements[plot_type][active]:
-                                for element_type in self.plot_elements[plot_type][active][data_label]:
-                                    for plot_element in self.plot_elements[plot_type][active][data_label][element_type]:
-                                        if visible:
-                                            plot_element.set_visible(True)
-                                        else:
-                                            plot_element.set_visible(False)
-
-                            # reset axes limits (harmonising across subplots for periodic plots) 
-                            if plot_type == 'scatter':
-                                self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                     self.plot_characteristics[plot_type], 
-                                                                     plot_options, relim=True)
-                            elif plot_type != 'taylor':
-                                self.plot.harmonise_xy_lims_paradigm(self.plot_axes[plot_type], plot_type, 
-                                                                     self.plot_characteristics[plot_type], 
-                                                                     plot_options, relim=True, autoscale=True)
-
-                # change font weight of label
-                legend_label._fontproperties = self.legend.get_texts()[0]._fontproperties.copy()
-                if visible:
-                    legend_label.set_fontweight('bold')
-                else:
-                    legend_label.set_fontweight('regular')
-
-                # draw changes
-                self.figure.canvas.draw_idle()
-                
-                # unlock legend pick 
-                self.lock_legend_pick = False
-    
         return None

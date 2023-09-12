@@ -1,4 +1,22 @@
 """ Module which provides main window """
+
+import os
+import copy
+import datetime
+import json
+import sys
+import time
+from functools import partial
+from collections import OrderedDict
+from weakref import WeakKeyDictionary
+import matplotlib
+import mpl_toolkits.axisartist.floating_axes as fa
+from matplotlib.projections import PolarAxes
+from PyQt5 import QtCore, QtWidgets, QtGui
+import numpy as np
+import pandas as pd
+from pandas.plotting import register_matplotlib_converters
+
 from .configuration import ProvConfiguration
 from .configuration import load_conf
 from .canvas import MPLCanvas
@@ -16,25 +34,10 @@ from .read_aux import (get_default_qa, get_frequency_code, get_ghost_observation
                        get_nonghost_observational_tree, get_valid_obs_files_in_date_range,
                        check_for_ghost, temporal_resolution_order_dict, get_valid_experiments,
                        get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions)
+from .plot_aux import get_taylor_diagram_ghelper
+from .plot_formatting import format_axis
 from .aux import show_message
 
-import os
-import copy
-import datetime
-import json
-import sys
-import time
-from functools import partial
-from collections import OrderedDict
-from weakref import WeakKeyDictionary
-
-import matplotlib
-import mpl_toolkits.axisartist.floating_axes as fa
-from matplotlib.projections import PolarAxes
-from PyQt5 import QtCore, QtWidgets, QtGui
-import numpy as np
-import pandas as pd
-from pandas.plotting import register_matplotlib_converters
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -1023,9 +1026,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if changed_plot_type != 'None':
 
                 # format axis                
-                self.mpl_canvas.plot.format_axis(self.mpl_canvas.plot_axes[changed_plot_type], 
-                                                 changed_plot_type, 
-                                                 self.mpl_canvas.plot_characteristics[changed_plot_type])
+                format_axis(self.mpl_canvas, self.mpl_canvas.read_instance, 
+                            self.mpl_canvas.plot_axes[changed_plot_type], 
+                            changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type])
                 
                 # make plot
                 self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
@@ -1049,7 +1052,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if changed_plot_type == 'taylor':
             reference_stddev = 7.5
             plot_characteristics = canvas_instance.plot_characteristics['taylor']
-            ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
+            ghelper = get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
