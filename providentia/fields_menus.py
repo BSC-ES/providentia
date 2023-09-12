@@ -1,4 +1,3 @@
-
 """ Functions to initialise and update fields (flags, period, metadata, etc.) """
 
 import copy
