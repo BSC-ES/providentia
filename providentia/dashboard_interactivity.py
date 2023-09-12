@@ -1,8 +1,9 @@
 """ Objects and functions to interact with the axes """
 
-from matplotlib.widgets import _SelectorWidget
 from matplotlib.lines import Line2D
+from matplotlib.widgets import _SelectorWidget
 from PyQt5 import QtWidgets
+
 from .plot_aux import get_map_extent
 from .plot_formatting import harmonise_xy_lims_paradigm
 

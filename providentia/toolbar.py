@@ -1,21 +1,23 @@
 """ Navigation toolbar and buttons/options functions"""
-import os
+
 import configparser
+import os
 import traceback
 
-from PyQt5 import QtCore, QtWidgets, QtGui
 import matplotlib
 from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
+from PyQt5 import QtCore, QtGui, QtWidgets
 
+from .aux import show_message
 from .configuration import ProvConfiguration
 from .configuration import load_conf
-from .writing import export_data_npz, export_netcdf, export_configuration
-from .aux import show_message
-from .fields_menus import (multispecies_conf, representativity_conf, period_conf, metadata_conf)
 from .dashboard_elements import InputDialog
+from .fields_menus import metadata_conf, multispecies_conf, period_conf, representativity_conf
+from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+
 
 class NavigationToolbar(NavigationToolbar2QT):
     """ Class that updates available buttons on matplotlib toolbar. """

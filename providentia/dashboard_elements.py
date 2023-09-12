@@ -1,9 +1,12 @@
+""" Functions to create and format PyQT elements"""
+
 import os
 import json
-from textwrap import wrap
+
+from functools import partial
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
-from functools import partial
+from textwrap import wrap
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))

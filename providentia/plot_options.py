@@ -1,10 +1,11 @@
 """ Functions to use plot options (annotate, log, etc.) """
 
-import numpy as np
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
+import numpy as np
 
 from .read_aux import drop_nans
-from .statistics import get_z_statistic_info, calculate_statistic
+from .statistics import calculate_statistic, get_z_statistic_info
+
 
 def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
     """ Log plot axes.
