@@ -1,26 +1,30 @@
-import sys
-import os
+""" Class that reads observational/experiment data into memory """
+
 import copy
 import ctypes
 import datetime
 import multiprocessing
+import os
+import sys
 import time
+
 from dateutil.relativedelta import relativedelta
+from netCDF4 import Dataset, chartostring
 import numpy as np
 import pandas as pd
-from netCDF4 import Dataset, chartostring
 
-from .spatial_colocation import (spatial_colocation_nonghost, spatial_colocation_ghost, 
-                                 resolve_duplicate_spatial_colocation_matches)
-from .read_aux import (get_yearmonths_to_read, init_shared_vars_read_netcdf_data, read_netcdf_metadata, 
-                       read_netcdf_data, get_default_qa, get_frequency_code, check_for_ghost)
 from .aux import show_message
 from .plot_aux import update_plotting_parameters
+from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
+                       init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata)
+from .spatial_colocation import (resolve_duplicate_spatial_colocation_matches, spatial_colocation_ghost, 
+                                 spatial_colocation_nonghost)
+
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
+
 class DataReader:
-    """ Class that reads observational/experiment data into memory. """
 
     def __init__(self, read_instance):
         self.read_instance = read_instance

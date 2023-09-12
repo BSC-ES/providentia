@@ -1,15 +1,18 @@
 """ Settings menus """
 
-import os
 import json
+import os
+
 from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets 
+
+from .dashboard_elements import CheckableComboBox, ComboBox
 from .dashboard_elements import set_formatting
-from .dashboard_elements import ComboBox, CheckableComboBox
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 settings_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/canvas_menus.json')))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
+
 
 class SettingsMenu():
 

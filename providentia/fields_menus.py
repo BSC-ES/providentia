@@ -1,6 +1,7 @@
 """ Functions to initialise and update fields (flags, period, metadata, etc.) """
 
 import copy
+
 import numpy as np
 import pandas as pd
 

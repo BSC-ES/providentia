@@ -1,11 +1,13 @@
 """ Auxiliar functions to create plots """
 
 import math
-import numpy as np
+
 import matplotlib as mpl
-from scipy.sparse import coo_matrix
+import numpy as np
 from scipy.signal import convolve, gaussian
+from scipy.sparse import coo_matrix
 import seaborn as sns
+
 
 def get_multispecies_aliases(networkspecies):
     """ Map networkspecies to networkspecies aliases.

@@ -1,13 +1,15 @@
 """ Module storing static reading functions """
-import os
+
+import datetime
 from glob import glob
+import os
+import sys
+import time
+
+import bisect
 from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
 import pandas as pd
-import bisect
-import time
-import sys
-import datetime
 
 # initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}

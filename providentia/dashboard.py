@@ -1,43 +1,41 @@
 """ Module which provides main window """
 
-import os
 import copy
 import datetime
 import json
+import os
 import sys
 import time
-from functools import partial
+
 from collections import OrderedDict
-from weakref import WeakKeyDictionary
+from functools import partial
 import matplotlib
-import mpl_toolkits.axisartist.floating_axes as fa
 from matplotlib.projections import PolarAxes
-from PyQt5 import QtCore, QtWidgets, QtGui
+import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
+from PyQt5 import QtCore, QtGui, QtWidgets
+from weakref import WeakKeyDictionary
 
-from .configuration import ProvConfiguration
-from .configuration import load_conf
+from .aux import show_message
 from .canvas import MPLCanvas
-from .toolbar import NavigationToolbar
+from .configuration import load_conf
+from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog
 from .dashboard_elements import set_formatting
-from .pop_up_window import PopUpWindow
-from .fields_menus import (init_flags, init_qa, init_experiments, init_multispecies,
-                           init_representativity, init_period, init_metadata,
-                           update_representativity_fields, update_period_fields, 
-                           update_metadata_fields, multispecies_conf, representativity_conf, 
-                           period_conf, metadata_conf)
-from .read import DataReader
-from .read_aux import (get_default_qa, get_frequency_code, get_ghost_observational_tree, 
-                       get_nonghost_observational_tree, get_valid_obs_files_in_date_range,
-                       check_for_ghost, temporal_resolution_order_dict, get_valid_experiments,
-                       get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions)
+from .fields_menus import (init_experiments, init_flags, init_qa, init_metadata, init_multispecies, init_period, 
+                           init_representativity, metadata_conf, multispecies_conf, representativity_conf, period_conf, 
+                           update_metadata_fields, update_period_fields, update_representativity_fields)
 from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import format_axis
-from .aux import show_message
-
+from .pop_up_window import PopUpWindow
+from .read import DataReader
+from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_ghost_observational_tree, 
+                       get_nonghost_observational_tree, get_valid_experiments, get_valid_obs_files_in_date_range,
+                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions,
+                       temporal_resolution_order_dict)
+from .toolbar import NavigationToolbar
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)

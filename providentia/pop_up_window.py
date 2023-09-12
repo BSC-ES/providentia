@@ -1,11 +1,13 @@
 """ Pop-up window class for Dashboard """
 
-import os
-import json
 import copy
+import json
+import os
 import time
+
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
+
 from .aux import show_message
 from .read_aux import get_default_qa
 from .dashboard_elements import set_formatting, wrap_tooltip_text

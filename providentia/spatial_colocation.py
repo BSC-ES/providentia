@@ -1,8 +1,8 @@
 """ Functions for the spatial colocation """
 
+import itertools
 import numpy as np
 import pyproj
-import itertools
 from scipy.spatial import cKDTree
 
 

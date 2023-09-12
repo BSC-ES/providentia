@@ -1,39 +1,39 @@
 """ Class to generate offline reports """
 
+import copy
+import datetime
+import json
 import os
 import sys
-import json
-import copy
 
-import datetime
+import matplotlib
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.gridspec as gridspec
+from matplotlib.projections import PolarAxes
+import matplotlib.pyplot as plt
+import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from matplotlib.backends.backend_pdf import PdfPages
-import mpl_toolkits.axisartist.floating_axes as fa
-from matplotlib.projections import PolarAxes
 
-from .read import DataReader
+from .configuration import load_conf
+from .configuration import ProvConfiguration
+from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf
+                           update_metadata_fields, update_period_fields, update_representativity_fields,
+                           period_conf, representativity_conf)
 from .filter import DataFilter
 from .plot import Plot
-from .statistics import get_selected_station_data, calculate_statistic, generate_colourbar, get_z_statistic_info
-from .configuration import ProvConfiguration
-from .configuration import load_conf
-from .fields_menus import (init_representativity, init_period, init_metadata, 
-                           update_representativity_fields, update_period_fields, update_metadata_fields,
-                           representativity_conf, period_conf, metadata_conf)
-from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_tree, 
-                       get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions,
-                       get_valid_obs_files_in_date_range, get_valid_experiments)
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent
-from .plot_formatting import harmonise_xy_lims_paradigm, set_axis_title, set_axis_label, do_formatting, format_axis
-
+from .plot_formatting import do_formatting, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
+from .read import DataReader
+from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_tree, 
+                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
+                       get_valid_experiments, get_valid_obs_files_in_date_range)
+from .statistics import calculate_statistic, generate_colourbar, get_selected_station_data, get_z_statistic_info
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+
 
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
