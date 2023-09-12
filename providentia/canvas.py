@@ -1,43 +1,42 @@
 """ Class to generate canvas """
 
-from .filter import DataFilter
-from .statistics import *
-from .plot import Plot
-
-import os
 import copy
-import json
-import sys
-import time
 import datetime
+import json
 import math
-from weakref import WeakKeyDictionary
+import os
+import sys
 import time
 
 import matplotlib
-from matplotlib.offsetbox import AnchoredOffsetbox
+from matplotlib.backend_bases import FigureCanvasBase
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
         as FigureCanvas
-from matplotlib.backend_bases import FigureCanvasBase
-import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from matplotlib.path import Path
-from matplotlib.widgets import Slider
 import matplotlib.gridspec as gridspec
+from matplotlib.offsetbox import AnchoredOffsetbox
+from matplotlib.path import Path
+import matplotlib.pyplot as plt
 import matplotlib.style as mplstyle
+from matplotlib.widgets import Slider
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtGui, QtWidgets 
-from .dashboard_elements import set_formatting
-from .dashboard_elements import ComboBox, CheckableComboBox
-from .dashboard_interactivity import LassoSelector
-from .dashboard_interactivity import zoom_map_func, picker_block_func, legend_picker_func
-from .plot_formatting import harmonise_xy_lims_paradigm, set_axis_title, set_axis_label, format_axis
-from .plot_options import log_axes, linear_regression, smooth, log_validity, annotation
+from weakref import WeakKeyDictionary
+
 from .aux import show_message
-from .plot_aux import get_map_extent
 from .canvas_menus import SettingsMenu
+from .dashboard_elements import ComboBox
+from .dashboard_elements import set_formatting
+from .dashboard_interactivity import LassoSelector
+from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom_map_func
+from .filter import DataFilter
+from .plot import Plot
+from .plot_aux import get_map_extent
+from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
+from .plot_options import annotation, linear_regression, log_axes, log_validity, smooth
+from .statistics import *
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
@@ -51,6 +50,7 @@ basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
 settings_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/canvas_menus.json')))
+
 
 class MPLCanvas(FigureCanvas):
     """ Class that handles the creation and updates of

@@ -1,14 +1,15 @@
 """ Functions to format the axes """
 
 import copy
-import numpy as np
-import pandas as pd
+
 import cartopy.feature as cfeature
 import matplotlib as mpl 
 from matplotlib.dates import num2date
+import numpy as np
+import pandas as pd
 
-from .plot_aux import set_map_extent, get_land_polygon_resolution
-from .plot_options import log_axes, annotation, smooth, linear_regression, get_no_margin_lim, log_validity
+from .plot_aux import get_land_polygon_resolution, set_map_extent
+from .plot_options import annotation, get_no_margin_lim, linear_regression, log_axes, log_validity, smooth
 
 
 def set_equal_axes(ax, plot_options):

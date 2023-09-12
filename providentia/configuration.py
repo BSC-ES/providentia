@@ -4,17 +4,19 @@ import configparser
 import copy
 import json
 import os
-import sys
 import re
 import subprocess
+import sys
+
 import numpy as np
 import pandas as pd
 
 from .aux import show_message
-from .read_aux import get_default_qa, check_for_ghost
+from .read_aux import check_for_ghost, get_default_qa
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+
 
 def parse_path(dir, f):
     if os.path.isabs(f):

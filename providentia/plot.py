@@ -3,35 +3,34 @@
 import copy
 from datetime import datetime
 import json
+import math
 import os
 import time
 
-import math
-import pyproj
 import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from KDEpy import FFTKDE
+from itertools import groupby
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 from matplotlib.projections import PolarAxes
+import matplotlib.pyplot as plt
+import matplotlib.style as mplstyle
+import matplotlib.ticker as ticker
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
-import matplotlib.style as mplstyle
 import numpy as np
 import pandas as pd
+import pyproj
 import scipy.stats as st
 import seaborn as sns
-from itertools import groupby
 
-from .statistics import get_z_statistic_info, calculate_statistic, boxplot_inner_fences
 from .aux import show_message
+from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info
 from .read_aux import drop_nans
-from .plot_aux import (get_multispecies_aliases, round_decimal_places, 
-                       kde_fft, temp_axis_dict, periodic_xticks, periodic_labels, merge_cells, 
-                       get_taylor_diagram_ghelper_info)
+from .plot_aux import (get_multispecies_aliases, get_taylor_diagram_ghelper_info, kde_fft, merge_cells, 
+                       periodic_labels, periodic_xticks, round_decimal_places, temp_axis_dict)
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
@@ -39,6 +38,7 @@ pyproj.set_use_global_context()
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+
 
 class Plot:
     """ Class that makes plots and handles plot configuration options when defined. """

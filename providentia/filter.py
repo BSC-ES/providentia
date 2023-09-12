@@ -1,13 +1,16 @@
+""" Class that filters observational/experiment data into memory as required """
+
+import copy
+
+import numpy as np
+import pandas as pd
+
+from .aux import show_message
 from .calculate import Stats
 from .configuration import split_options
 
-import copy
-import numpy as np
-import pandas as pd
-from .aux import show_message
 
 class DataFilter:
-    """ Class that filters observational/experiment data into memory as required. """
 
     def __init__(self, read_instance):
         self.read_instance = read_instance
