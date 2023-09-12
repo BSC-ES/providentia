@@ -1,5 +1,8 @@
+""" Auxiliar functions to create plots """
+
 import math
 import numpy as np
+import matplotlib as mpl
 from scipy.sparse import coo_matrix
 from scipy.signal import convolve, gaussian
 import seaborn as sns
@@ -244,7 +247,7 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
             raise ValueError('Input weights must be an array of the same size as xin!')
 
     # Optimize gridsize ------------------------------------------------------
-    #Make grid and discretize the data and round it to the next power of 2
+    # Make grid and discretize the data and round it to the next power of 2
     # to optimize with the fft usage
     # ensure minimum gridsize of 1024 points
     if xgrid is None:
@@ -334,4 +337,180 @@ def round_decimal_places(x, decimal_places):
     # if cell value is nan, do nothing
     else:
         return 'nan'
-    
+
+
+def merge_cells(table, cells):
+    """
+    Merge cells in matplotlib.Table. Reference: https://stackoverflow.com/a/53819765/12684122.
+
+    :param table: table
+    :type table: matplotlib.Table
+    :param cells: cells to merge in table coordinates, e.g. [(0,1), (0,0), (0,2)]
+    :type cells: list
+    """
+
+    cells_array = [np.asarray(c) for c in cells]
+    h = np.array([cells_array[i+1][0] - cells_array[i][0] for i in range(len(cells_array) - 1)])
+    v = np.array([cells_array[i+1][1] - cells_array[i][1] for i in range(len(cells_array) - 1)])
+
+    # if it's a horizontal merge, all values for `h` are 0
+    if not np.any(h):
+        # sort by horizontal coord
+        cells = np.array(sorted(list(cells), key=lambda v: v[1]))
+        edges = ['BTL'] + ['BT' for i in range(len(cells) - 2)] + ['BTR']
+    elif not np.any(v):
+        cells = np.array(sorted(list(cells), key=lambda h: h[0]))
+        edges = ['TRL'] + ['RL' for i in range(len(cells) - 2)] + ['BRL']
+    else:
+        raise ValueError("Only horizontal and vertical merges allowed")
+
+    for cell, e in zip(cells, edges):
+        table[cell[0], cell[1]].visible_edges = e
+        
+    txts = [table[cell[0], cell[1]].get_text() for cell in cells]
+    tpos = [np.array(t.get_position()) for t in txts]
+
+    # transpose the text of the left cell
+    trans = (tpos[-1] - tpos[0])/2
+
+    # didn't had to check for ha because I only want ha='center'
+    txts[0].set_transform(mpl.transforms.Affine2D().translate(*trans))
+    for txt in txts[1:]:
+        txt.set_visible(False)
+
+
+def get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, extend=False):
+    """ Make Taylor diagram plot axis extremes and labels. 
+        
+        :param reference_stddev: reference standard deviation to set the limits
+        :type reference_stddev: float
+        :param plot_characteristics: plot characteristics  
+        :type plot_characteristics: dict
+        :param extend: extend to negative correlations
+        :type undo: boolean
+    """
+
+    tmin = 0
+
+    # diagram extended to negative correlations
+    if extend:
+        tmax = np.pi
+    # diagram limited to positive correlations
+    else:
+        tmax = np.pi/2
+
+    # get standard deviation axis extent
+    srange = plot_characteristics['srange']
+    smin = srange[0] * reference_stddev
+    smax = srange[1] * reference_stddev
+
+    # correlation labels
+    if extend:
+        rlocs = np.array(plot_characteristics['rlocs']['all'])
+        rlocs = np.concatenate((-rlocs[:0:-1], rlocs))
+    else:
+        rlocs = np.array(plot_characteristics['rlocs']['positive'])
+
+    # convert correlation values into polar angles
+    tlocs = np.arccos(rlocs)
+    gl1 = gf.FixedLocator(tlocs)
+    tf1 = gf.DictFormatter(dict(zip(tlocs, map(str, rlocs))))
+
+    return tmin, tmax, smin, smax, gl1, tf1
+
+
+def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=False):
+    """ Make Taylor diagram plot grid helper. 
+
+        :param reference_stddev: reference standard deviation to set the limits
+        :type reference_stddev: float
+        :param plot_characteristics: plot characteristics  
+        :type plot_characteristics: dict
+        :param extend: extend to negative correlations
+        :type undo: boolean
+    """
+
+    # get axis extremes
+    tmin, tmax, smin, smax, gl1, tf1 = get_taylor_diagram_ghelper_info(reference_stddev, 
+                                                                       plot_characteristics, 
+                                                                       extend)
+
+    # get grid helper
+    ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
+                                       extremes=(tmin, tmax, smin, smax),
+                                       grid_locator1=gl1, tick_formatter1=tf1)
+
+    return ghelper
+
+
+def set_map_extent(canvas_instance, read_instance, ax):
+    """ Set map extent, done set_xlim and set_ylim rather than set_extent 
+        to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697).
+    """
+
+    mlon = np.mean(read_instance.map_extent[:2])
+    mlat = np.mean(read_instance.map_extent[2:])
+    xtrm_data = np.array([[read_instance.map_extent[0], mlat], [mlon, read_instance.map_extent[2]], 
+                          [read_instance.map_extent[1], mlat], [mlon, read_instance.map_extent[3]]])
+    proj_to_data = canvas_instance.datacrs._as_mpl_transform(ax) - ax.transData
+    xtrm = proj_to_data.transform(xtrm_data)
+    ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
+    ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
+
+
+def get_map_extent(canvas_instance):
+    """ Get map extent from xlim and ylim. """ 
+
+    # get plot extent
+    ax = canvas_instance.plot_axes['map']
+    coords = np.array(ax.get_extent())
+    current_xlim = coords[0:2]
+    current_ylim = coords[2:4]
+
+    # calculate means
+    mlon = np.mean(current_xlim)
+    mlat = np.mean(current_ylim)
+
+    # get coordinates
+    xcoords = np.array([current_xlim[0], mlon, current_xlim[1], mlon])
+    ycoords = np.array([mlat, current_ylim[0], mlat, current_ylim[1]])
+
+    # transform coordinates to projected data
+    transformed_coords = canvas_instance.datacrs.transform_points(canvas_instance.plotcrs, 
+                                                                  xcoords, ycoords)[:, :2]
+
+    # keep longitudes between -180 and 180
+    lon_change = False
+    if (np.isnan(transformed_coords[0, 0])) or (transformed_coords[0, 0] == -179.99999999999932):
+        transformed_coords[0, 0] = -180
+        lon_change = True
+    if (np.isnan(transformed_coords[2, 0])) or (transformed_coords[2, 0] == 179.99999999999932):
+        transformed_coords[2, 0] = 180  
+        lon_change = True 
+
+    # keep latitudes between -90 and 90
+    lat_change = False
+    if (np.isnan(transformed_coords[1, 1])) or (transformed_coords[1, 1] == -89.99999999999966):
+        transformed_coords[1, 1] = -90
+        lat_change = True  
+    if (np.isnan(transformed_coords[3, 1])) or (transformed_coords[3, 1] == 89.99999999999966):
+        transformed_coords[3, 1] = 90
+        lat_change = True  
+
+    # recalculate means
+    if lon_change or lat_change:
+        # recalculate longitude means
+        mlon = np.mean(np.array([transformed_coords[0, 0], transformed_coords[2, 0]]))
+        transformed_coords[1, 0] = mlon
+        transformed_coords[3, 0] = mlon
+
+        # recalculate latitude means
+        mlat = np.mean(np.array([transformed_coords[1, 1], transformed_coords[3, 1]]))
+        transformed_coords[0, 1] = mlat
+        transformed_coords[2, 1] = mlat
+
+    # get map extent
+    map_extent = [transformed_coords[:,0].min(), transformed_coords[:,0].max(),
+                  transformed_coords[:,1].min(), transformed_coords[:,1].max()]
+
+    return map_extent
