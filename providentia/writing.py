@@ -1,10 +1,12 @@
 """ Module storing writing functions """
 
-import sys
 import copy
 import numpy as np
 import pandas as pd
+import sys
+
 from netCDF4 import Dataset, num2date
+
 from .configuration import write_conf
 from .dashboard_elements import InputDialog
 

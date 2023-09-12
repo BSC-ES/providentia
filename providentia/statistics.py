@@ -1,9 +1,4 @@
-"""
-Contains functions for the processing/calculation of statistics and colourbars
-"""
-from .calculate import Stats
-from .calculate import ExpBias
-from .read_aux import get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions, drop_nans
+""" Functions for the processing/calculation of statistics and colourbars """
 
 import copy
 import json
@@ -16,6 +11,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.stats as st
+
+from .calculate import Stats, ExpBias
+from .read_aux import drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
