@@ -136,7 +136,7 @@ class Stats(object):
             (i.e. number of total data measurements not equal to NaN).
         """
         if data.size == 0:
-            return np.NaN
+            return np.array([])
         else:
             return np.count_nonzero(~np.isnan(data), axis=-1).astype('float32')
 
