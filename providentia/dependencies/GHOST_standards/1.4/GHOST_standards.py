@@ -1211,7 +1211,7 @@ standard_data_flag_name_to_data_flag_code = {
 
 'AERONET: fm500frac Outside Valid Bounds': 240,
 
-'AERONET: Insufficent Valid Data to Calc od550aero': 241,
+'AERONET: Insufficient Valid Data to Calc od550aero': 241,
 
 'AERONET: AOD L2': 242,
 
@@ -1391,9 +1391,9 @@ standard_QA_name_to_QA_code = {
 #Data is a product that has been calculated from multiple components
 'Data Product': 45,
 
-#Insufficent Data to Calculate Data Product
+#Insufficient Data to Calculate Data Product
 #There is insufficient valid data required to calculate data product
-'Insufficent Data to Calculate Data Product': 46,
+'Insufficient Data to Calculate Data Product': 46,
 #-----------------------------------------------------
 
 

@@ -582,6 +582,7 @@ def get_standard_metadata(parameter_details):
     'station_reference':{'value':[], 'standard_name':'station reference', 'long_name':'station reference identifier', 'units':'unitless', 'data_type':np.object, 'string_format':'short', 'metadata_type':'STATION MISCELLANEOUS', 'identifiers':{'WIGOS_name':''}, 'description':'reference ID for station.'}, 
 
     #NETWORK PROVIDED STATION INFORMATION
+    'WIGOS_station_identifier':         {'value':[], 'standard_name':'WIGOS station identifier',          'long_name':'WIGOS station identifier',                        'units':'unitless',                   'data_type':np.object,  'string_format':'short',        'metadata_type':'STATION MISCELLANEOUS',   'identifiers':{'WIGOS_name':''}, 'description':'WIGOS station identifier (WSI).'},
     'station_timezone':                 {'value':[], 'standard_name':'station timezone',                  'long_name':'station timezone',                                'units':'unitless',                   'data_type':np.object,  'string_format':'short',        'metadata_type':'STATION MISCELLANEOUS',   'identifiers':{'WIGOS_name':''}, 'description':'Name of the local timezone that the measuring station is located in. This is automatically generated using Timezone Finder Python package (taking longitude and latitude as inputs).'},
     'latitude':                         {'value':[], 'standard_name':'latitude',                          'long_name':'latitude',                                        'units':'decimal degrees North',      'data_type':np.float64, 'string_format':np.NaN,         'metadata_type':'STATION POSITION',        'identifiers':{'WIGOS_name':''}, 'description':'Geodetic latitude of measuring instrument, in decimal degrees North, following the stated horizontal datum.'},
     'longitude':                        {'value':[], 'standard_name':'longitude',                         'long_name':'longitude',                                       'units':'decimal degrees East',       'data_type':np.float64, 'string_format':np.NaN,         'metadata_type':'STATION POSITION',        'identifiers':{'WIGOS_name':''}, 'description':'Geodetic longitude of measuring instrument, in decimal degrees East, following the stated horizontal datum.'},
@@ -1199,20 +1200,9 @@ standard_data_flag_name_to_data_flag_code = {
 
 'Visibility Distance Unlimited': 230,
 
-'Ceiling Height Unlimited': 231,
+'Ceiling Height Unlimited': 231
 #-----------------------------------------------------
 
-#AERONET Specific Data Flags - DEPRECIATED, TO BE REMOVED
-#-----------------------------------------------------
-
-'AERONET: fm500frac Outside Valid Bounds': 240,
-
-'AERONET: Insufficent Valid Data to Calc od550aero': 241,
-
-'AERONET: AOD L2': 242,
-
-'AERONET: Retrieval L2 (No od440aero Threshold)': 243
-#-----------------------------------------------------
 }
 
 #Define dictionary associating standardised simplified data reporter provided data flag names with unique data flag codes
@@ -1387,9 +1377,9 @@ standard_QA_name_to_QA_code = {
 #Data is a product that has been calculated from multiple components
 'Data Product': 45,
 
-#Insufficent Data to Calculate Data Product
+#Insufficient Data to Calculate Data Product
 #There is insufficient valid data required to calculate data product
-'Insufficent Data to Calculate Data Product': 46,
+'Insufficient Data to Calculate Data Product': 46,
 #-----------------------------------------------------
 
 
