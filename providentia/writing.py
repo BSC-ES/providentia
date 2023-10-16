@@ -282,10 +282,13 @@ def export_configuration(prv, cname, separator="||"):
                           'start_date': prv.start_date,
                           'end_date': prv.end_date,
                           'statistic_mode': prv.statistic_mode,
-                          'statistic_aggregation': prv.statistic_aggregation,
                           'periodic_statistic_mode': prv.periodic_statistic_mode,
                           'periodic_statistic_aggregation': prv.periodic_statistic_aggregation
                           }
+
+    # statistic aggregation
+    if len(prv.statistic_aggregation) > 0:
+        options['section']['statistic_aggregation'] = prv.statistic_aggregation
 
     # experiments
     if prv.experiments_menu['checkboxes']['keep_selected']:
@@ -304,6 +307,8 @@ def export_configuration(prv, cname, separator="||"):
         filter_species = filter_species.replace("'", "")
         filter_species = filter_species.replace(":", "")
         filter_species = filter_species.replace("|", ":")
+        filter_species = filter_species.replace("((", "(")
+        filter_species = filter_species.replace("))", ")")
         options['section'].update({'filter_species': filter_species
                                   })
 
