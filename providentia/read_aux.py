@@ -386,7 +386,7 @@ def get_frequency_code(resolution):
         active_frequency_code = 'D'
     elif resolution == 'monthly':
         active_frequency_code = 'MS'
-    elif resolution == 'yearly':
+    elif resolution == 'annual':
         active_frequency_code = 'AS'
 
     return active_frequency_code
@@ -396,12 +396,12 @@ def get_resampling_resolutions(resolution):
 
     if resolution in ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
                       '6hourly', '6hourly_instantaneous']:
-        resolutions = ['daily', 'monthly', 'yearly']
+        resolutions = ['daily', 'monthly', 'annual']
     elif resolution == 'daily':
-        resolutions = ['monthly', 'yearly']
+        resolutions = ['monthly', 'annual']
     elif resolution == 'monthly':
-        resolutions = ['yearly']
-    elif resolution == 'yearly':
+        resolutions = ['annual']
+    elif resolution == 'annual':
         resolutions = []
 
     return resolutions
