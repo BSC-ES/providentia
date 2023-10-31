@@ -397,7 +397,7 @@ def get_frequency_code(resolution):
         active_frequency_code = 'D'
     elif resolution == 'monthly':
         active_frequency_code = 'MS'
-    elif resolution == 'yearly':
+    elif resolution == 'annual':
         active_frequency_code = 'AS'
 
     return active_frequency_code
@@ -807,3 +807,19 @@ def valid_date(date_text):
         return True
     except Exception as e:
         return False
+
+
+def get_resampling_resolutions(resolution):
+    """ Get available resampling resolutions. """
+
+    if resolution in ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
+                      '6hourly', '6hourly_instantaneous']:
+        resolutions = ['daily', 'monthly', 'annual']
+    elif resolution == 'daily':
+        resolutions = ['monthly', 'annual']
+    elif resolution == 'monthly':
+        resolutions = ['annual']
+    elif resolution == 'annual':
+        resolutions = []
+
+    return resolutions

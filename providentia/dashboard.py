@@ -34,7 +34,7 @@ from .read import DataReader
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_ghost_observational_tree, 
                        get_nonghost_observational_tree, get_valid_experiments, get_valid_obs_files_in_date_range,
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions,
-                       temporal_resolution_order_dict)
+                       temporal_resolution_order_dict, get_resampling_resolutions)
 from .toolbar import NavigationToolbar
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -726,8 +726,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_statistic_aggregation = self.cb_statistic_aggregation.currentText()
 
         # get available resampling resolutions
-        available_resampling_resolutions = copy.deepcopy(available_resolutions)[available_resolutions.index(self.selected_resolution)+1:]
-        available_resampling_resolutions.append('yearly')
+        available_resampling_resolutions = get_resampling_resolutions(self.selected_resolution)
 
         # remove resolutions if resampled data would be less than 2 timesteps
         resampling_resolutions = copy.deepcopy(available_resampling_resolutions)
