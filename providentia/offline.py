@@ -793,9 +793,9 @@ class ProvidentiaOffline:
         self.n_stations = len(self.relevant_station_inds)
 
         # check if we have multispecies plots
-        have_multispecies = [True if 'multispecies' in plot_type else False 
-                                for plot_type in summary_plots_to_make]
-
+        have_multispecies = np.any([True if 'multispecies' in plot_type else False 
+                                    for plot_type in summary_plots_to_make])
+        
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
             print('No valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
@@ -827,12 +827,14 @@ class ProvidentiaOffline:
                 if self.selected_station_stddev_max[ns] > self.stddev_max_summary[ns]:
                     self.stddev_max_summary[ns] = copy.deepcopy(self.selected_station_stddev_max[ns])
 
+        multispecies_pass = False
+
         # if have no valid data across data labels (no observations or experiments), then continue to next networkspeci
         if not self.selected_station_data[networkspeci]: 
             # do not stop if there is any multispecies plot and we are in last subsection
             # if last subsection has data for 0 stations, it would not create them
             if (have_multispecies) and (self.subsection == self.subsections[-1]):
-                pass 
+                multispecies_pass = True
             else:
                 return
         
@@ -855,6 +857,10 @@ class ProvidentiaOffline:
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
 
+            # do not make plot if there is no data and it is not multispecies
+            if (multispecies_pass) and ('multispecies' not in plot_options):
+                continue
+
             # set variable to know if we need to create plot in last subsection
             plot_type_df = self.get_plot_type_df(base_plot_type)
 
@@ -872,7 +878,7 @@ class ProvidentiaOffline:
                     continue
                 # until last subsection (table, heatmap, statsummary)
                 elif (plot_type_df) and ((self.subsection != self.subsections[-1]) 
-                                            or (networkspeci != self.networkspecies[-1])):
+                                          or (networkspeci != self.networkspecies[-1])):
                     continue
 
             # make plot
@@ -904,8 +910,8 @@ class ProvidentiaOffline:
         self.n_stations = len(self.relevant_station_inds)
 
         # check if we have multispecies plots
-        have_multispecies = [True if 'multispecies' in plot_type else False 
-                                for plot_type in station_plots_to_make][0]
+        have_multispecies = np.any([True if 'multispecies' in plot_type else False 
+                                    for plot_type in station_plots_to_make])
 
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
@@ -947,12 +953,14 @@ class ProvidentiaOffline:
                                       data_range_max=self.data_range_max_station,
                                       stddev_max=self.stddev_max_station)
 
+            multispecies_pass = False
+
             # if have no valid data across data labels (no observations or experiments), then continue to next station
             if not self.selected_station_data[networkspeci]:
                 # do not stop if there is any multispecies plot and we are in last subsection
                 # if last subsection has data for 0 stations, it would not create them
                 if (have_multispecies) and (networkspeci == self.networkspecies[-1]):
-                    pass 
+                    multispecies_pass = True
                 else:
                     continue
             
@@ -978,6 +986,10 @@ class ProvidentiaOffline:
 
                 # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                 plot_options = plot_type.split('_')[1:]
+
+                # do not make plot if there is no data and it is not multispecies
+                if (multispecies_pass) and ('multispecies' not in plot_options):
+                    continue
 
                 # set variable to know if we need to create plot in last subsection
                 plot_type_df = self.get_plot_type_df(base_plot_type)
