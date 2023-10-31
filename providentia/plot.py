@@ -1032,7 +1032,8 @@ class Plot:
             if len(cut_data_labels) > 0:
 
                 # get data label width and spacing
-                if ('individual' in plot_options) or ('obs' in plot_options) or (len(self.read_instance.networkspecies) == 1) or len(cut_data_labels) == 1:
+                if (('individual' in plot_options) or ('obs' in plot_options) 
+                    or (len(self.read_instance.networkspecies) == 1) or (len(cut_data_labels) == 1)):
                     widths = plot_characteristics['group_widths']['singlespecies']
                 else:
                     available_width = plot_characteristics['group_widths']['multispecies']
@@ -1042,7 +1043,7 @@ class Plot:
                     spacing = (available_width - (widths * len(cut_data_labels))) / (len(cut_data_labels) - 1)
 
                 # get plot positions
-                if ('individual' in plot_options) or ('obs' in plot_options) or len(cut_data_labels) == 1:
+                if ('individual' in plot_options) or ('obs' in plot_options) or (len(cut_data_labels) == 1):
                     positions = [ns_current]
                 elif (len(self.read_instance.networkspecies) == 1):
                     positions = np.arange(len(cut_data_labels))
