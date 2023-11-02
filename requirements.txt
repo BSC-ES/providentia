@@ -1,13 +1,15 @@
-matplotlib>3.7.1 
-# TODO: Install matplotlib using pip install git+https://github.com/matplotlib/matplotlib.git@main
-# to create Taylor diagrams
-netCDF4>=1.5.1.2
-numpy==1.23.1
-pandas>=2.0.0
-pyproj>=3.5.0
+# Tested using a conda environment with Python=3.9
+# Before using pip install -r requirements.txt, we need to install cartopy:
+# conda install -c conda-forge cartopy
+
+matplotlib==3.8
+netCDF4==1.6.5
+numpy==1.25.0
+pandas==2.0.0
+pyproj==3.6.1
 PyQt5==5.13.0
-seaborn>=0.9.0
-scipy>=1.10.1
-Shapely>=1.6.4.post2
-ConfigArgParse>=1.5.3
+seaborn==0.13.0
+scipy==1.11.3
+ConfigArgParse==0.14.0
 cftime==1.0.3.4
+KDEpy==1.1.8
