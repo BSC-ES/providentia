@@ -103,9 +103,9 @@ def periodic_xticks():
         :rtype dict
     """
 
-    return {'hour': np.arange(24, dtype=np.int), 
-            'dayofweek': np.arange(7, dtype=np.int), 
-            'month': np.arange(1, 13, dtype=np.int)}
+    return {'hour': np.arange(24, dtype=np.int64), 
+            'dayofweek': np.arange(7, dtype=np.int64), 
+            'month': np.arange(1, 13, dtype=np.int64)}
 
 
 def periodic_labels():
