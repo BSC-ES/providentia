@@ -172,7 +172,7 @@ class MPLCanvas(FigureCanvas):
         self.read_instance.update_layout_fields(self)
 
         # initialise variable of valid station indices plotted on map as empty list
-        self.active_map_valid_station_inds = np.array([], dtype=np.int)
+        self.active_map_valid_station_inds = np.array([], dtype=np.int64)
 
         # setup blocker for picker events
         self.figure.canvas.mpl_connect('axes_enter_event', lambda event: picker_block_func(self, event))
@@ -215,9 +215,9 @@ class MPLCanvas(FigureCanvas):
         """
 
         # reset relative index lists of selected station on map as empty lists
-        self.previous_relative_selected_station_inds = np.array([], dtype=np.int)
-        self.relative_selected_station_inds = np.array([], dtype=np.int)
-        self.absolute_selected_station_inds = np.array([], dtype=np.int)
+        self.previous_relative_selected_station_inds = np.array([], dtype=np.int64)
+        self.relative_selected_station_inds = np.array([], dtype=np.int64)
+        self.absolute_selected_station_inds = np.array([], dtype=np.int64)
 
         # reset plot_elements
         self.plot_elements = {}
@@ -528,7 +528,7 @@ class MPLCanvas(FigureCanvas):
         self.absolute_selected_station_inds = np.array(
             [np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind in
              self.relative_selected_station_inds if selected_ind in self.active_map_valid_station_inds],
-            dtype=np.int)
+            dtype=np.int64)
 
         # if have no valid active map indices, reset absolute/relative
         # selected station indices to be empty lists
@@ -544,9 +544,9 @@ class MPLCanvas(FigureCanvas):
 
             # clear previously selected relative/absolute station indices
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-            self.relative_selected_station_inds = np.array([], dtype=np.int)
-            self.absolute_selected_station_inds = np.array([], dtype=np.int)
-            self.absolute_non_selected_station_inds = np.array([], dtype=np.int)
+            self.relative_selected_station_inds = np.array([], dtype=np.int64)
+            self.absolute_selected_station_inds = np.array([], dtype=np.int64)
+            self.absolute_non_selected_station_inds = np.array([], dtype=np.int64)
 
             # plot map with 0 stations
             self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, 
@@ -564,8 +564,8 @@ class MPLCanvas(FigureCanvas):
                 
                 # reset relative/absolute selected station indices to be empty lists
                 self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-                self.relative_selected_station_inds = np.array([], dtype=np.int)
-                self.absolute_selected_station_inds = np.array([], dtype=np.int)
+                self.relative_selected_station_inds = np.array([], dtype=np.int64)
+                self.absolute_selected_station_inds = np.array([], dtype=np.int64)
 
             # get absolute non-selected station inds
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -1520,10 +1520,10 @@ class MPLCanvas(FigureCanvas):
 
             # if checkbox is unchecked then unselect all plotted stations
             elif check_state == QtCore.Qt.Unchecked:
-                self.relative_selected_station_inds = np.array([], dtype=np.int)
+                self.relative_selected_station_inds = np.array([], dtype=np.int64)
 
             # update absolute selected station indices (indices relative to plotted stations on map)
-            self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds), dtype=np.int)
+            self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds), dtype=np.int64)
 
             # get absolute non-selected station inds
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -1567,10 +1567,10 @@ class MPLCanvas(FigureCanvas):
 
             # if checkbox is unchecked then unselect all plotted stations
             if check_state == QtCore.Qt.Unchecked:
-                self.relative_selected_station_inds = np.array([], dtype=np.int)
-                self.absolute_selected_station_inds = np.array([], dtype=np.int)
+                self.relative_selected_station_inds = np.array([], dtype=np.int64)
+                self.absolute_selected_station_inds = np.array([], dtype=np.int64)
                 self.absolute_non_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
-                                                                    dtype=np.int)
+                                                                    dtype=np.int64)
 
             # else, if checkbox is checked then select all stations which intersect with all loaded experiment domains
             elif check_state == QtCore.Qt.Checked:
@@ -1579,8 +1579,8 @@ class MPLCanvas(FigureCanvas):
                 if len(self.read_instance.data_labels) == 1:
                     self.relative_selected_station_inds = copy.deepcopy(self.active_map_valid_station_inds)
                     self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
-                                                                    dtype=np.int)
-                    self.absolute_non_selected_station_inds = np.array([], dtype=np.int)
+                                                                    dtype=np.int64)
+                    self.absolute_non_selected_station_inds = np.array([], dtype=np.int64)
                 # else, define list of lists to get intersection between (active_map_valid_station_inds, 
                 # and valid station indices associated with each loaded experiment array)
                 else:
@@ -1600,7 +1600,7 @@ class MPLCanvas(FigureCanvas):
                     # get absolute selected station indices (indices relative to plotted stations on map)
                     self.absolute_selected_station_inds = \
                         np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind
-                                  in self.relative_selected_station_inds], dtype=np.int)
+                                  in self.relative_selected_station_inds], dtype=np.int64)
                     
                     #get absolute non-selected station inds
                     self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -1689,12 +1689,12 @@ class MPLCanvas(FigureCanvas):
 
             # if checkbox is unchecked then unselect all plotted stations
             elif check_state == QtCore.Qt.Unchecked:
-                self.relative_selected_station_inds = np.array([], dtype=np.int)
+                self.relative_selected_station_inds = np.array([], dtype=np.int64)
 
             # get absolute selected station indices (indices relative to plotted stations on map)
             self.absolute_selected_station_inds = \
                 np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind
-                            in self.relative_selected_station_inds], dtype=np.int)
+                            in self.relative_selected_station_inds], dtype=np.int64)
 
             # get absolute unselected station indices
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -1755,7 +1755,7 @@ class MPLCanvas(FigureCanvas):
             
             # if more than 1 point selected, limit this to be just nearest point
             if len(self.absolute_selected_station_inds) > 1:
-                self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int)
+                self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int64)
 
         # get absolute non-selected station inds
         self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -1816,7 +1816,7 @@ class MPLCanvas(FigureCanvas):
             absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
             # if more than 1 point selected, limit this to be just nearest point
             if len(absolute_selected_station_inds) > 1:
-                absolute_selected_station_inds = np.array([absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,absolute_selected_station_inds,:],axis=1))]], dtype=np.int)
+                absolute_selected_station_inds = np.array([absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,absolute_selected_station_inds,:],axis=1))]], dtype=np.int64)
 
         # if have zero stations selected then return, doing nothing to selection
         if len(absolute_selected_station_inds) == 0:
@@ -2931,12 +2931,20 @@ class MPLCanvas(FigureCanvas):
         # get axes transformation
         transform = self.datacrs._as_mpl_transform(self.plot_axes['map'])
 
-        # TODO: using the newest version of matplotlib, s corresponds to text
-        self.station_annotation = self.plot_axes['map'].annotate(s='', xy=(0, 0), xycoords=transform,
-                                                                 **self.plot_characteristics['map']['stations_annotate'],
-                                                                 bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
-                                                                 arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
-
+        # Using matplotlib < 3.3.0, text corresponds to s
+        if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+            annotation = self.plot_axes['map'].annotate(
+                text='', xy=(0, 0), xycoords=transform,
+                **self.plot_characteristics['map']['stations_annotate'],
+                bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
+        else:
+            annotation = self.plot_axes['map'].annotate(
+                s='', xy=(0, 0), xycoords=transform,
+                **self.plot_characteristics['map']['stations_annotate'],
+                bbox={**self.plot_characteristics['map']['stations_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['map']['stations_annotate_arrowprops']})
+        self.station_annotation = annotation
         self.station_annotation.set_visible(False)
 
         return None
@@ -3001,11 +3009,20 @@ class MPLCanvas(FigureCanvas):
     def create_timeseries_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # TODO: using the newest version of matplotlib, s corresponds to text
-        self.timeseries_annotation = self.plot_axes['timeseries'].annotate(s='', xy=(0, 0), xycoords='data',
-                                                                           **self.plot_characteristics['timeseries']['marker_annotate'],
-                                                                           bbox={**self.plot_characteristics['timeseries']['marker_annotate_bbox']},
-                                                                           arrowprops={**self.plot_characteristics['timeseries']['marker_annotate_arrowprops']})
+        # Using matplotlib < 3.3.0, text corresponds to s
+        if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+            annotation = self.plot_axes['timeseries'].annotate(
+                text='', xy=(0, 0), xycoords='data',
+                **self.plot_characteristics['timeseries']['marker_annotate'],
+                bbox={**self.plot_characteristics['timeseries']['marker_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['timeseries']['marker_annotate_arrowprops']})
+        else:
+            annotation = self.plot_axes['timeseries'].annotate(
+                s='', xy=(0, 0), xycoords='data',
+                **self.plot_characteristics['timeseries']['marker_annotate'],
+                bbox={**self.plot_characteristics['timeseries']['marker_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['timeseries']['marker_annotate_arrowprops']})
+        self.timeseries_annotation = annotation
         self.timeseries_annotation.set_visible(False)
 
         return None
@@ -3134,11 +3151,20 @@ class MPLCanvas(FigureCanvas):
     def create_scatter_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # TODO: using the newest version of matplotlib, s corresponds to text
-        self.scatter_annotation = self.plot_axes['scatter'].annotate(s='', xy=(0, 0), xycoords='data',
-                                                                     **self.plot_characteristics['scatter']['marker_annotate'],
-                                                                     bbox={**self.plot_characteristics['scatter']['marker_annotate_bbox']},
-                                                                     arrowprops={**self.plot_characteristics['scatter']['marker_annotate_arrowprops']})
+        # Using matplotlib < 3.3.0, text corresponds to s
+        if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+            annotation = self.plot_axes['scatter'].annotate(
+                text='', xy=(0, 0), xycoords='data',
+                **self.plot_characteristics['scatter']['marker_annotate'],
+                bbox={**self.plot_characteristics['scatter']['marker_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['scatter']['marker_annotate_arrowprops']})
+        else:
+            annotation = self.plot_axes['scatter'].annotate(
+                s='', xy=(0, 0), xycoords='data',
+                **self.plot_characteristics['scatter']['marker_annotate'],
+                bbox={**self.plot_characteristics['scatter']['marker_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['scatter']['marker_annotate_arrowprops']})
+        self.scatter_annotation = annotation
         self.scatter_annotation.set_visible(False)
 
         return None
@@ -3229,11 +3255,20 @@ class MPLCanvas(FigureCanvas):
     def create_distribution_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # TODO: using the newest version of matplotlib, s corresponds to text
-        self.distribution_annotation = self.plot_axes['distribution'].annotate(s='', xy=(0, 0), xycoords='data',
-                                                                               **self.plot_characteristics['distribution']['marker_annotate'],
-                                                                               bbox={**self.plot_characteristics['distribution']['marker_annotate_bbox']},
-                                                                               arrowprops={**self.plot_characteristics['distribution']['marker_annotate_arrowprops']})
+        # Using matplotlib < 3.3.0, text corresponds to s
+        if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+            annotation = self.plot_axes['distribution'].annotate(
+                text='', xy=(0, 0), xycoords='data',
+                **self.plot_characteristics['distribution']['marker_annotate'],
+                bbox={**self.plot_characteristics['distribution']['marker_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['distribution']['marker_annotate_arrowprops']})
+        else:
+            annotation = self.plot_axes['distribution'].annotate(
+                s='', xy=(0, 0), xycoords='data',
+                **self.plot_characteristics['distribution']['marker_annotate'],
+                bbox={**self.plot_characteristics['distribution']['marker_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['distribution']['marker_annotate_arrowprops']})
+        self.distribution_annotation = annotation
         self.distribution_annotation.set_visible(False)
 
         return None
@@ -3362,13 +3397,22 @@ class MPLCanvas(FigureCanvas):
     def create_periodic_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # TODO: using the newest version of matplotlib, s corresponds to text
         self.periodic_annotation = dict()
         for resolution in self.plot_axes['periodic'].keys():
-            self.periodic_annotation[resolution] = self.plot_axes['periodic'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
-                                                                                                   **self.plot_characteristics['periodic']['marker_annotate'],
-                                                                                                   bbox={**self.plot_characteristics['periodic']['marker_annotate_bbox']},
-                                                                                                   arrowprops={**self.plot_characteristics['periodic']['marker_annotate_arrowprops']})
+            # Using matplotlib < 3.3.0, text corresponds to s
+            if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+                annotation = self.plot_axes['periodic'][resolution].annotate(
+                    text='', xy=(0, 0), xycoords='data',
+                    **self.plot_characteristics['periodic']['marker_annotate'],
+                    bbox={**self.plot_characteristics['periodic']['marker_annotate_bbox']}, 
+                    arrowprops={**self.plot_characteristics['periodic']['marker_annotate_arrowprops']})
+            else:
+                annotation = self.plot_axes['periodic'][resolution].annotate(
+                    s='', xy=(0, 0), xycoords='data',
+                    **self.plot_characteristics['periodic']['marker_annotate'],
+                    bbox={**self.plot_characteristics['periodic']['marker_annotate_bbox']}, 
+                    arrowprops={**self.plot_characteristics['periodic']['marker_annotate_arrowprops']})          
+            self.periodic_annotation[resolution] = annotation
             self.periodic_annotation[resolution].set_visible(False)
 
         return None
@@ -3512,13 +3556,22 @@ class MPLCanvas(FigureCanvas):
     def create_periodic_violin_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # TODO: using the newest version of matplotlib, s corresponds to text
         self.periodic_violin_annotation = dict()
         for resolution in self.plot_axes['periodic-violin'].keys():
-            self.periodic_violin_annotation[resolution] = self.plot_axes['periodic-violin'][resolution].annotate(s='', xy=(0, 0), xycoords='data',
-                                                                                                                 **self.plot_characteristics['periodic-violin']['marker_annotate'],
-                                                                                                                 bbox={**self.plot_characteristics['periodic-violin']['marker_annotate_bbox']},
-                                                                                                                 arrowprops={**self.plot_characteristics['periodic-violin']['marker_annotate_arrowprops']})
+            # Using matplotlib < 3.3.0, text corresponds to s
+            if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+                annotation = self.plot_axes['periodic-violin'][resolution].annotate(
+                    text='', xy=(0, 0), xycoords='data',
+                    **self.plot_characteristics['periodic-violin']['marker_annotate'],
+                    bbox={**self.plot_characteristics['periodic-violin']['marker_annotate_bbox']},
+                    arrowprops={**self.plot_characteristics['periodic-violin']['marker_annotate_arrowprops']})
+            else:
+                annotation = self.plot_axes['periodic-violin'][resolution].annotate(
+                    s='', xy=(0, 0), xycoords='data',
+                    **self.plot_characteristics['periodic-violin']['marker_annotate'],
+                    bbox={**self.plot_characteristics['periodic-violin']['marker_annotate_bbox']},
+                    arrowprops={**self.plot_characteristics['periodic-violin']['marker_annotate_arrowprops']})
+            self.periodic_violin_annotation[resolution] = annotation
             self.periodic_violin_annotation[resolution].set_visible(False)
 
         return None
@@ -3662,11 +3715,20 @@ class MPLCanvas(FigureCanvas):
     def create_taylor_annotation(self):
         """ Create annotation at (0, 0) that will be updated later. """
 
-        # TODO: using the newest version of matplotlib, s corresponds to text
-        self.taylor_annotation = self.plot.taylor_polar_relevant_axis.annotate(s='', xy=(0, 0), xycoords='data',
-                                                                               **self.plot_characteristics['taylor']['marker_annotate'],
-                                                                               bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
-                                                                               arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})
+        # Using matplotlib < 3.3.0, text corresponds to s
+        if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+            annotation = self.plot.taylor_polar_relevant_axis.annotate(
+                text='', xy=(0, 0), xycoords='data',
+                **self.plot_characteristics['taylor']['marker_annotate'],
+                bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})
+        else:
+            annotation = self.plot.taylor_polar_relevant_axis.annotate(
+                s='', xy=(0, 0), xycoords='data',
+                **self.plot_characteristics['taylor']['marker_annotate'],
+                bbox={**self.plot_characteristics['taylor']['marker_annotate_bbox']},
+                arrowprops={**self.plot_characteristics['taylor']['marker_annotate_arrowprops']})     
+        self.taylor_annotation = annotation
         self.taylor_annotation.set_visible(False)
 
         return None
