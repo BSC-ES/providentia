@@ -350,7 +350,7 @@ class DataFilter:
             metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
 
             # handle non-numeric metadata
-            if metadata_data_type == np.object:
+            if metadata_data_type == object:
 
                 # iterate through networkspecies  
                 for networkspeci in self.read_instance.networkspecies:
@@ -421,7 +421,7 @@ class DataFilter:
         metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
         metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
         
-        if metadata_data_type != np.object:
+        if metadata_data_type != object:
             meta_var_index = self.read_instance.metadata_menu[metadata_type][
                 'rangeboxes']['labels'].index(meta_var)
             try:
@@ -530,7 +530,7 @@ class DataFilter:
 
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
-                        np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
+                        np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
 
                     if len(self.read_instance.data_labels) > 1:
 
@@ -542,7 +542,7 @@ class DataFilter:
                         
                         # get indices of stations with > 1 available measurements
                         self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
-                            np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]
+                            np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
 
             # get equivalent valid station indices for experimental arrays
             # subset observational valid station indices, with experimental array stations with > 1 valid measurements
@@ -563,7 +563,7 @@ class DataFilter:
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
-                        valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
+                        valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]]
                     
                     # get colocated experimental data array (first subset by valid observational stations)
                     exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
@@ -575,7 +575,7 @@ class DataFilter:
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
-                        valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int)[station_data_availability_number > 1]]
+                        valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]]
 
     def apply_calibration_factor(self):
         """ Apply calibration factor to add or subtract a number to the experiments, 
