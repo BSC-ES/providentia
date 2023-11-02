@@ -1185,9 +1185,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # clear previously selected relative/absolute station indices
-        self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int)
-        self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int)
-        self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int)
+        self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int64)
+        self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int64)
+        self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int64)
 
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
