@@ -1464,7 +1464,7 @@ class ProvidentiaOffline:
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([networkspecies, self.subsections],
                                                     names=["networkspecies", "subsections"])
-                stats_df = pd.DataFrame(np.nan, index=index, columns=data_labels, dtype=np.float)
+                stats_df = pd.DataFrame(np.nan, index=index, columns=data_labels, dtype=np.float64)
                 
                 # convert stats_summary and stats_station dicts to dataframes
                 for subsection in subsections:
@@ -1500,7 +1500,7 @@ class ProvidentiaOffline:
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, data_labels],
                                                     names=["networkspecies", "subsections", "labels"])
-                stats_df = pd.DataFrame(np.nan, index=index, columns=stats, dtype=np.float)
+                stats_df = pd.DataFrame(np.nan, index=index, columns=stats, dtype=np.float64)
 
                 # convert stats_summary and stats_station dicts to dataframes
                 for subsection in subsections:

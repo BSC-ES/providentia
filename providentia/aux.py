@@ -153,9 +153,9 @@ def periodic_xticks():
         :rtype dict
     """
 
-    return {'hour':np.arange(24, dtype=np.int), 
-            'dayofweek':np.arange(7, dtype=np.int), 
-            'month':np.arange(1, 13, dtype=np.int)}
+    return {'hour':np.arange(24, dtype=np.int64), 
+            'dayofweek':np.arange(7, dtype=np.int64), 
+            'month':np.arange(1, 13, dtype=np.int64)}
 
 def periodic_labels():
     """ Return axes labels for periodic subplots.
@@ -390,7 +390,7 @@ def init_metadata(instance):
         instance.metadata_menu[metadata_type]['rangeboxes']['labels'] = \
             [metadata_var for metadata_var in instance.metadata_vars_to_read
             if (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type)
-            & (instance.standard_metadata[metadata_var]['data_type'] != np.object)]
+            & (instance.standard_metadata[metadata_var]['data_type'] != object)]
 
         # reset rangebox tooltips
         instance.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = \
@@ -412,7 +412,7 @@ def init_metadata(instance):
         instance.metadata_menu[metadata_type]['navigation_buttons']['labels'] = \
             [metadata_var for metadata_var in instance.metadata_vars_to_read if
             (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type) &
-            (instance.standard_metadata[metadata_var]['data_type'] == np.object)]
+            (instance.standard_metadata[metadata_var]['data_type'] == object)]
         
         # reset checkbox tooltips
         instance.metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = \
@@ -654,7 +654,7 @@ def update_metadata_fields(instance):
     for metadata_type_ii, metadata_type in enumerate(instance.metadata_menu['navigation_buttons']['labels']):
         required_vars = [metadata_var for metadata_var in instance.metadata_vars_to_read
             if (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type)
-                 & (instance.standard_metadata[metadata_var]['data_type'] != np.object)]
+                 & (instance.standard_metadata[metadata_var]['data_type'] != object)]
         if len(required_vars) != len(instance.metadata_menu[metadata_type]['rangeboxes']['labels']):
             reset_meta = True
             break
@@ -690,7 +690,7 @@ def update_metadata_fields(instance):
         # update pop-up metadata menu object with read metadata values
         # for non-numeric metadata gets all the unique fields per metadata variable
         # and sets the available fields as such
-        if metadata_data_type == np.object:
+        if metadata_data_type == object:
             # get previous fields in menu 
             previous_fields = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'])
             previous_keep = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'])
@@ -964,7 +964,7 @@ def get_ghost_observational_tree(instance):
                 # coninue if have no files
                 if len(available_files) == 0:
                     continue
-
+                
                 # get monthly start date (YYYYMM) of all files
                 file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files if f != 'temporary'])
                 
@@ -1178,7 +1178,7 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
 
     # get all different experiment names (from providentia-interpolation output dir)
     available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
-
+    
     # create dictionary to store available experiment data
     instance.available_experiment_data = {}
 
@@ -1202,7 +1202,7 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
                 files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
                                                           experiment, resolution, speci,
                                                           network.replace('/', '-'))
-                
+
             # test if interpolated directory exists for experiment
             # if it does not exit, continue
             if not os.path.exists(files_directory):
@@ -1268,7 +1268,7 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
     intersecting_indices = {}
     for networkspecies in station_references:
         intersecting_indices[networkspecies] = np.array([list(station_references[networkspecies]).index(ref) 
-                                                        for ref in intersecting_station_references], dtype=np.int)
+                                                        for ref in intersecting_station_references], dtype=np.int64)
 
     # set variable for first networkspecies
     firstnetworkspecies = list(intersecting_indices.keys())[0]
@@ -1385,8 +1385,8 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
                 # get indices where next species differences are within tolerance, i.e. intersecting 
                 pairwise_intersect_inds[networkspecies] = non_intersecting_indices[networkspecies][np.array(ns_wtol_inds)]
             else:
-                pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int)
-                pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int)
+                pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int64)
+                pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int64)
 
         # get indices (for first networkspecies) where longitude and latitudes intersect across all species
         pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds[firstnetworkspecies], return_counts=True)
@@ -1402,7 +1402,7 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
 
             # append newly found intersecting indices to previously found intersect inds
             for networkspecies in non_intersecting_longitudes:
-                intersecting_indices[networkspecies] = np.array(np.append(intersecting_indices[networkspecies], pairwise_intersect_inds[networkspecies]), dtype=np.int)
+                intersecting_indices[networkspecies] = np.array(np.append(intersecting_indices[networkspecies], pairwise_intersect_inds[networkspecies]), dtype=np.int64)
 
     return intersecting_indices
 
@@ -1534,8 +1534,8 @@ def spatial_colocation_ghost(longitudes, latitudes, measurement_altitudes):
             # get indices where next species differences are within tolerance, i.e. intersecting 
             pairwise_intersect_inds[networkspecies] = np.array(ns_wtol_inds)
         else:
-            pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int)
-            pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int)
+            pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int64)
+            pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int64)
 
     # get indices (for first networkspecies) where longitude, latitudes and measurement_altitudes intersect across all species
     pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds[firstnetworkspecies], return_counts=True)
@@ -1545,10 +1545,10 @@ def spatial_colocation_ghost(longitudes, latitudes, measurement_altitudes):
     intersecting_indices = {}
     for networkspecies in longitudes:
         if networkspecies == firstnetworkspecies:
-            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies], dtype=np.int)
+            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies], dtype=np.int64)
         else:
             _, species_intersect_inds, _ = np.intersect1d(pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)], pairwise_intersect_inds[firstnetworkspecies], return_indices=True)
-            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies][species_intersect_inds], dtype=np.int)
+            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies][species_intersect_inds], dtype=np.int64)
 
     return intersecting_indices
 
