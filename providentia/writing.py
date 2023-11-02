@@ -92,7 +92,7 @@ def export_netcdf(canvas_instance, fname):
         parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
     
     # dictionary to map python types to netcdf types
-    type_map = {np.uint8: 'u1', np.uint32: 'u4', np.object: str,
+    type_map = {np.uint8: 'u1', np.uint32: 'u4', object: str,
                 np.float32: 'f4', np.float64: 'f8'}
 
     # start file

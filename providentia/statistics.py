@@ -335,7 +335,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 n_valid_stations = len(read_instance.valid_station_inds[networkspeci]['observations'])
             if n_valid_stations == 0:             
                 z_statistic = np.array([], dtype=np.float32)
-                active_map_valid_station_inds = np.array([], dtype=np.int)
+                active_map_valid_station_inds = np.array([], dtype=np.int64)
                 return z_statistic, active_map_valid_station_inds 
 
             # get active map valid station indices (i.e. the indices of the stations data to plot on the map)
@@ -510,7 +510,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 if not read_instance.temporal_colocation:
                     if map:
                         z_statistic = np.array([], dtype=np.float32)
-                        active_map_valid_station_inds = np.array([], dtype=np.int)
+                        active_map_valid_station_inds = np.array([], dtype=np.int64)
                         return z_statistic, active_map_valid_station_inds 
                     else: 
                         if period: 
