@@ -1183,7 +1183,7 @@ class Plot:
             # create stats dataframe
             stats_df = pd.DataFrame(data=stats_calc, 
                                     index=cut_data_labels,
-                                    dtype=np.float)
+                                    dtype=np.float64)
 
         # get observations label
         if 'legend' in plot_characteristics:
@@ -1351,7 +1351,7 @@ class Plot:
             # create stats dataframe
             stats_df = pd.DataFrame(data=stats_calc, 
                                     index=cut_data_labels,
-                                    dtype=np.float)
+                                    dtype=np.float64)
 
         # when we have 1 stat, the column name is 0, we need to rename it to the stat name
         if len(stats_df.columns) == 1:
@@ -1480,9 +1480,9 @@ class Plot:
                         else:
                             cell_colours[col] = ['white'] * stats_df.shape[0]
                     if stats_df.shape == (1, 1):
-                        plot_characteristics['plot']['cellColours'] = np.array(cell_colours)
+                        plot_characteristics['plot']['cellColours'] = np.array(cell_colours, dtype=object)
                     else:
-                        plot_characteristics['plot']['cellColours'] = np.array(cell_colours).T
+                        plot_characteristics['plot']['cellColours'] = np.array(cell_colours, dtype=object).T
         else:
             if 'col_colours' in plot_characteristics:
                 if plot_characteristics['col_colours']:
@@ -1594,7 +1594,7 @@ class Plot:
         # create stats dataframe
         stats_df = pd.DataFrame(data=stats_dict, 
                                 index=data_labels,
-                                dtype=np.float)
+                                dtype=np.float64)
 
         # get labels 
         rlabel = stats_df.columns[0]
