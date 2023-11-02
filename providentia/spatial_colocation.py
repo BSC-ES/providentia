@@ -33,7 +33,7 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
     intersecting_indices = {}
     for networkspecies in station_references:
         intersecting_indices[networkspecies] = np.array([list(station_references[networkspecies]).index(ref) 
-                                                        for ref in intersecting_station_references], dtype=np.int)
+                                                        for ref in intersecting_station_references], dtype=np.int64)
 
     # set variable for first networkspecies
     firstnetworkspecies = list(intersecting_indices.keys())[0]
@@ -150,8 +150,8 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
                 # get indices where next species differences are within tolerance, i.e. intersecting 
                 pairwise_intersect_inds[networkspecies] = non_intersecting_indices[networkspecies][np.array(ns_wtol_inds)]
             else:
-                pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int)
-                pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int)
+                pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int64)
+                pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int64)
 
         # get indices (for first networkspecies) where longitude and latitudes intersect across all species
         pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds[firstnetworkspecies], return_counts=True)
@@ -167,7 +167,7 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
 
             # append newly found intersecting indices to previously found intersect inds
             for networkspecies in non_intersecting_longitudes:
-                intersecting_indices[networkspecies] = np.array(np.append(intersecting_indices[networkspecies], pairwise_intersect_inds[networkspecies]), dtype=np.int)
+                intersecting_indices[networkspecies] = np.array(np.append(intersecting_indices[networkspecies], pairwise_intersect_inds[networkspecies]), dtype=np.int64)
 
     return intersecting_indices
 
@@ -300,8 +300,8 @@ def spatial_colocation_ghost(longitudes, latitudes, measurement_altitudes):
             # get indices where next species differences are within tolerance, i.e. intersecting 
             pairwise_intersect_inds[networkspecies] = np.array(ns_wtol_inds)
         else:
-            pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int)
-            pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int)
+            pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)] = np.array([], dtype=np.int64)
+            pairwise_intersect_inds[networkspecies] = np.array([], dtype=np.int64)
 
     # get indices (for first networkspecies) where longitude, latitudes and measurement_altitudes intersect across all species
     pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds[firstnetworkspecies], return_counts=True)
@@ -311,7 +311,7 @@ def spatial_colocation_ghost(longitudes, latitudes, measurement_altitudes):
     intersecting_indices = {}
     for networkspecies in longitudes:
         if networkspecies == firstnetworkspecies:
-            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies], dtype=np.int)
+            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies], dtype=np.int64)
         else:
             _, species_intersect_inds, _ = np.intersect1d(pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)], pairwise_intersect_inds[firstnetworkspecies], return_indices=True)
             intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies][species_intersect_inds], dtype=np.int)
