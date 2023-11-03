@@ -382,7 +382,7 @@ class Plot:
             else:
                 # gather all selected station metadata for current meta variable
                 all_current_meta = self.read_instance.metadata_in_memory[networkspeci][ghost_var][
-                    station_inds].flatten().astype(np.str)
+                    station_inds].flatten().astype(str)
 
                 # get counts of all unique metadata elements across selected stations
                 unique_meta, meta_counts = np.unique(all_current_meta, return_counts=True)
