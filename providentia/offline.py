@@ -17,7 +17,7 @@ import pandas as pd
 
 from .configuration import load_conf
 from .configuration import ProvConfiguration
-from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf
+from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf,
                            update_metadata_fields, update_period_fields, update_representativity_fields,
                            period_conf, representativity_conf)
 from .filter import DataFilter
@@ -1121,7 +1121,7 @@ class ProvidentiaOffline:
                             data_to_add = calculate_statistic(self, self, networkspeci, zstat, [data_label], [])
                 else:
                     data_to_add = np.NaN
-
+                
                 # add data to dicts
                 if plotting_paradigm == 'summary':
                     self.stats_summary[self.subsection][networkspeci][stat][data_label] = data_to_add
@@ -1496,6 +1496,9 @@ class ProvidentiaOffline:
                                             if data_label in stats_to_plot[subsection][networkspeci][self.current_station_reference][zstat]:
                                                 stat_to_append = stats_to_plot[subsection][networkspeci][self.current_station_reference][zstat][data_label]
                             stats_per_data_label.append(stat_to_append)
+
+                        # get floats instead of arrays with 1 element each and save
+                        stats_per_data_label = [stat_per_data_label[0] for stat_per_data_label in stats_per_data_label]
                         stats_df.loc[(networkspeci, subsection)] = stats_per_data_label
                 
             elif base_plot_type == 'statsummary':
@@ -1512,7 +1515,7 @@ class ProvidentiaOffline:
                 index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, data_labels],
                                                     names=["networkspecies", "subsections", "labels"])
                 stats_df = pd.DataFrame(np.nan, index=index, columns=stats, dtype=np.float64)
-
+                
                 # convert stats_summary and stats_station dicts to dataframes
                 for subsection in subsections:
                     for networkspeci in networkspecies:
@@ -1533,6 +1536,9 @@ class ProvidentiaOffline:
                                                 if data_label in stats_to_plot[subsection][networkspeci][self.current_station_reference][stat]:
                                                     stat_to_append = stats_to_plot[subsection][networkspeci][self.current_station_reference][stat][data_label]
                                 stats_per_data_label.append(stat_to_append)
+
+                            # get floats instead of arrays with 1 element each and save
+                            stats_per_data_label = [stat_per_data_label[0] for stat_per_data_label in stats_per_data_label]
                             stats_df.loc[(networkspeci, subsection, data_label)] = stats_per_data_label
 
             # turn on relevant axis if dataframe has values or not all NaN
