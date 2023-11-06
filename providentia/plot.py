@@ -12,6 +12,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from KDEpy import FFTKDE
 from itertools import groupby
+import matplotlib
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
 from matplotlib.projections import PolarAxes
@@ -1274,9 +1275,14 @@ class Plot:
                         networkspeci_label = networkspeci.split('|')[1]
                     else:
                         networkspeci_label = networkspeci
-                    relevant_axis.annotate(s=networkspeci_label, annotation_clip=False,
-                                           xy=(plot_characteristics['multispecies']['xmin'], y_position), 
-                                           **plot_characteristics['multispecies']['yticklabels'])
+                    if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+                        relevant_axis.annotate(text=networkspeci_label, annotation_clip=False,
+                                               xy=(plot_characteristics['multispecies']['xmin'], y_position), 
+                                               **plot_characteristics['multispecies']['yticklabels'])
+                    else:
+                        relevant_axis.annotate(s=networkspeci_label, annotation_clip=False,
+                                               xy=(plot_characteristics['multispecies']['xmin'], y_position), 
+                                               **plot_characteristics['multispecies']['yticklabels'])        
         
         # format for non multispecies
         else:
@@ -1352,11 +1358,12 @@ class Plot:
             stats_df = pd.DataFrame(data=stats_calc, 
                                     index=cut_data_labels,
                                     dtype=np.float64)
-
-        # when we have 1 stat, the column name is 0, we need to rename it to the stat name
-        if len(stats_df.columns) == 1:
+        
+        # when we have 1 stat in the statsummary, the column name is 0
+        # we need to rename it to the stat name
+        if (len(stats_df.columns) == 1) and (stats_df.columns[0] == 0):
             stats_df = stats_df.rename(columns={stats_df.columns[0]: zstats[0]})
-
+        
         # rename columns to save space
         columns = {}
         for column in stats_df.columns:
