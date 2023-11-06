@@ -1,3 +1,6 @@
+""" Warning functions """
+
+
 def show_message(read_instance, msg, msg_offline=None, from_conf=None):
 
     if read_instance.offline:
