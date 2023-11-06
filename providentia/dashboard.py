@@ -1,30 +1,41 @@
 """ Module which provides main window """
-from .configuration import ProvConfiguration
-from .canvas import MPLCanvas
-from .toolbar import NavigationToolbar
-from .dashboard_aux import ComboBox, QVLine, PopUpWindow, InputDialog
-from .dashboard_aux import set_formatting
-from .read import DataReader
-from .read_aux import get_default_qa, get_frequency_code, get_resampling_resolutions
-from providentia import aux
 
-import os
 import copy
 import datetime
 import json
+import os
 import sys
 import time
-from functools import partial
-from collections import OrderedDict
-from weakref import WeakKeyDictionary
 
+from collections import OrderedDict
+from functools import partial
 import matplotlib
-import mpl_toolkits.axisartist.floating_axes as fa
 from matplotlib.projections import PolarAxes
-from PyQt5 import QtCore, QtWidgets, QtGui
+import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
+from PyQt5 import QtCore, QtGui, QtWidgets
+from weakref import WeakKeyDictionary
+
+from .aux import show_message
+from .canvas import MPLCanvas
+from .configuration import load_conf
+from .configuration import ProvConfiguration
+from .dashboard_elements import ComboBox, QVLine, InputDialog
+from .dashboard_elements import set_formatting
+from .fields_menus import (init_experiments, init_flags, init_qa, init_metadata, init_multispecies, init_period, 
+                           init_representativity, metadata_conf, multispecies_conf, representativity_conf, period_conf, 
+                           update_metadata_fields, update_period_fields, update_representativity_fields)
+from .plot_aux import get_taylor_diagram_ghelper
+from .plot_formatting import format_axis
+from .pop_up_window import PopUpWindow
+from .read import DataReader
+from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_ghost_observational_tree, 
+                       get_nonghost_observational_tree, get_valid_experiments, get_valid_obs_files_in_date_range,
+                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions,
+                       temporal_resolution_order_dict, get_resampling_resolutions)
+from .toolbar import NavigationToolbar
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -58,7 +69,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
             if 'section' in kwargs:
                 # config and section defined 
-                aux.load_conf(self, fpath=kwargs['config'])
+                load_conf(self, fpath=kwargs['config'])
                 if kwargs['section'] in self.all_sections:
                     self.from_conf = True
                     self.current_config = self.sub_opts[kwargs['section']]
@@ -70,7 +81,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             elif 'section' not in kwargs:
                 # config defined, section undefined
-                aux.load_conf(self, fpath=kwargs['config'])    
+                load_conf(self, fpath=kwargs['config'])    
                 all_sections = self.sub_opts.keys()
                 
                 if len(all_sections) == 1:
@@ -119,13 +130,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.full_window_geometry = None
 
         # create dictionary of all available observational GHOST data
-        self.all_observation_data = aux.get_ghost_observational_tree(self)
+        self.all_observation_data = get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
         nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
-            nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
+            nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
             self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
 
         # initialise DataReader
@@ -468,14 +479,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # setup pop-up window menu tree for flags, qa, experiments, 
         # % data representativity, data periods and metadata
-        aux.init_flags(self)
-        aux.init_qa(self)
-        aux.init_experiments(self)
-        aux.init_multispecies(self)
-        aux.init_representativity(self)
-        aux.init_period(self)
+        init_flags(self)
+        init_qa(self)
+        init_experiments(self)
+        init_multispecies(self)
+        init_representativity(self)
+        init_period(self)
         self.metadata_vars_to_read = []
-        aux.init_metadata(self)
+        init_metadata(self)
 
         # Setup MPL canvas of plots
         # set variable that blocks updating of MPL canvas until some data has been read
@@ -497,12 +508,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.handle_data_selection_update()
 
             # set filtered multispecies if any
-            aux.multispecies_conf(self)
+            multispecies_conf(self)
 
             # set fields available for filtering
-            aux.representativity_conf(self)
-            aux.period_conf(self)
-            aux.metadata_conf(self)
+            representativity_conf(self)
+            period_conf(self)
+            metadata_conf(self)
             self.mpl_canvas.handle_data_filter_update()
 
         # enable pop up configuration windows
@@ -626,7 +637,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.first_read = True
 
             # create dictionary of available observational data inside date range
-            aux.get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
+            get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
 
             # update qa / flags checkboxes 
             self.flag_menu['checkboxes']['remove_selected'] = copy.deepcopy(self.flags)
@@ -634,7 +645,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
              
         # if date range has changed then update available observational data dictionary
         if self.date_range_has_changed:
-            aux.get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
+            get_valid_obs_files_in_date_range(self, self.le_start_date.text(), self.le_end_date.text())
 
         # initialise/update fields - maintain previously selected values wherever possible
         # clear fields
@@ -664,7 +675,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_network = self.cb_network.currentText()
 
         # turn off some features if using non-GHOST data
-        if aux.check_for_ghost(self.selected_network):
+        if check_for_ghost(self.selected_network):
             self.enable_ghost_buttons()
         else:
             self.disable_ghost_buttons()
@@ -672,7 +683,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.selected_network].keys())
         # set order of available resolutions
-        available_resolutions = sorted(available_resolutions, key=aux.temporal_resolution_order_dict().__getitem__)
+        available_resolutions = sorted(available_resolutions, key=temporal_resolution_order_dict().__getitem__)
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
             self.cb_resolution.setCurrentText(self.selected_resolution)
@@ -744,8 +755,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_resampling_resolution = self.cb_resampling_resolution.currentText()
 
         # update available experiments for selected fields
-        aux.get_valid_experiments(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
-                                  [self.selected_network], [self.selected_species])
+        get_valid_experiments(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
+                              [self.selected_network], [self.selected_species])
         
         # update experiments -- keeping previously selected experiments if available
         if self.config_bar_initialisation:   
@@ -899,7 +910,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # initalise multispecies tab if network, resolution, matrix or species change
             if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
-                aux.init_multispecies(self)
+                init_multispecies(self)
 
             # if calibration factor has been applied from config, turn off if we update the data
             self.calibration_factor = None
@@ -982,7 +993,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
                         save_button.hide()
-                        for element in self.mpl_canvas.interactive_elements[previous_plot_type]['elements']:
+                        if previous_plot_type == 'periodic-violin':
+                            previous_plot_type = 'periodic_violin'
+                        for element in getattr(self.mpl_canvas, previous_plot_type + '_elements'):
                             if isinstance(element, dict):
                                 for sub_element in element.values():
                                     sub_element.hide()
@@ -1010,9 +1023,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if changed_plot_type != 'None':
 
                 # format axis                
-                self.mpl_canvas.plot.format_axis(self.mpl_canvas.plot_axes[changed_plot_type], 
-                                                 changed_plot_type, 
-                                                 self.mpl_canvas.plot_characteristics[changed_plot_type])
+                format_axis(self.mpl_canvas, self.mpl_canvas.read_instance, 
+                            self.mpl_canvas.plot_axes[changed_plot_type], 
+                            changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type])
                 
                 # make plot
                 self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
@@ -1036,7 +1049,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if changed_plot_type == 'taylor':
             reference_stddev = 7.5
             plot_characteristics = canvas_instance.plot_characteristics['taylor']
-            ghelper = canvas_instance.plot.get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
+            ghelper = get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
@@ -1235,7 +1248,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if (self.filter_species) and (not self.spatial_colocation):
             self.filter_species = {} 
             msg = '"spatial_colocation" must be set to True if wanting to use "filter_species" option.'
-            aux.show_message(self.read_instance, msg)
+            show_message(self.read_instance, msg)
 
         # set read operations to be empty list initially
         read_operations = []
@@ -1346,13 +1359,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 return
 
             # update fields available for filtering
-            aux.update_representativity_fields(self)
-            aux.update_period_fields(self)
-            aux.update_metadata_fields(self)
+            update_representativity_fields(self)
+            update_period_fields(self)
+            update_metadata_fields(self)
             
             # update relevant/nonrelevant temporal resolutions 
-            self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
-            self.nonrelevant_temporal_resolutions = aux.get_nonrelevant_temporal_resolutions(self.resolution)
+            self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
+            self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
 
             # if species has changed, or first read, update species specific lower/upper limits
             if (self.first_read) or (self.species[0] != self.previous_species[0]):
@@ -1424,16 +1437,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # reset representativity fields        
-        aux.init_representativity(self)
-        aux.update_representativity_fields(self)
+        init_representativity(self)
+        update_representativity_fields(self)
 
         # reset period fields 
-        aux.init_period(self)
-        aux.update_period_fields(self)
+        init_period(self)
+        update_period_fields(self)
 
         # reset metadata
-        aux.init_metadata(self)
-        aux.update_metadata_fields(self)
+        init_metadata(self)
+        update_metadata_fields(self)
 
         # reset bounds
         species_lower_limit = np.float32(self.parameter_dictionary[self.species[0]]['extreme_lower_limit'])
@@ -1462,6 +1475,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_QA.setEnabled(False)
         self.bu_period.setEnabled(False)
         
+
     def enable_ghost_buttons(self):
         """ Enable button related only to ghost data. """
 

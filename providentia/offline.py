@@ -1,28 +1,39 @@
+""" Class to generate offline reports """
+
+import copy
+import datetime
+import json
 import os
 import sys
-import json
-import copy
 
-import datetime
+import matplotlib
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.gridspec as gridspec
+from matplotlib.projections import PolarAxes
+import matplotlib.pyplot as plt
+import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from matplotlib.backends.backend_pdf import PdfPages
-import mpl_toolkits.axisartist.floating_axes as fa
-from matplotlib.projections import PolarAxes
 
-from .read import DataReader
+from .configuration import load_conf
+from .configuration import ProvConfiguration
+from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf
+                           update_metadata_fields, update_period_fields, update_representativity_fields,
+                           period_conf, representativity_conf)
 from .filter import DataFilter
 from .plot import Plot
-from .statistics import get_selected_station_data, calculate_statistic, generate_colourbar, get_z_statistic_info
-from .configuration import ProvConfiguration
-from providentia import aux
+from .plot_aux import get_taylor_diagram_ghelper, set_map_extent
+from .plot_formatting import do_formatting, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
+from .read import DataReader
+from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_tree, 
+                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
+                       get_valid_experiments, get_valid_obs_files_in_date_range)
+from .statistics import calculate_statistic, generate_colourbar, get_selected_station_data, get_z_statistic_info
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+
 
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
@@ -42,7 +53,7 @@ class ProvidentiaOffline:
 
         # update variables from config file
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
-            aux.load_conf(self, kwargs['config'])
+            load_conf(self, kwargs['config'])
             self.from_conf = True
         elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
             error = 'Error: The path to the configuration file specified in the command line does not exist.'
@@ -55,13 +66,13 @@ class ProvidentiaOffline:
         self.report_plots = json.load(open(os.path.join(CURRENT_PATH, '../settings/report_plots.json')))
 
         # create dictionary of all available observational GHOST data
-        self.all_observation_data = aux.get_ghost_observational_tree(self)
+        self.all_observation_data = get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
         nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
-            nonghost_observation_data = aux.get_nonghost_observational_tree(self, nonghost_observation_data_json)
+            nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
             self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
 
         # initialise DataReader class
@@ -111,17 +122,17 @@ class ProvidentiaOffline:
             provconf.check_validity()
 
             # set some key configuration variables
-            self.relevant_temporal_resolutions = aux.get_relevant_temporal_resolutions(self.resolution)
-            self.nonrelevant_temporal_resolutions = aux.get_nonrelevant_temporal_resolutions(self.resolution)
+            self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
+            self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
             self.data_labels = ['observations'] + list(self.experiments.keys())
             self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
 
             # get valid observations in date range
-            aux.get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
+            get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
 
             # update available experiments for selected fields
-            aux.get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
-                                      self.network, self.species)
+            get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
+                                  self.network, self.species)
 
             # read data
             self.datareader.read_setup(['reset'])
@@ -374,13 +385,13 @@ class ProvidentiaOffline:
                         # harmonise xy limits for plot paradigm
                         if base_plot_type not in ['map', 'heatmap', 'table', 'taylor']: 
                             if base_plot_type == 'scatter':
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type, 
-                                                                     self.plot_characteristics[plot_type], plot_options, 
-                                                                     relim=True)
+                                harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type, 
+                                                           self.plot_characteristics[plot_type], plot_options, 
+                                                           relim=True)
                             elif base_plot_type != 'taylor':
-                                self.plot.harmonise_xy_lims_paradigm(relevant_axs, base_plot_type,
-                                                                     self.plot_characteristics[plot_type], plot_options, 
-                                                                     relim=True, autoscale=True)
+                                harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type,
+                                                           self.plot_characteristics[plot_type], plot_options, 
+                                                           relim=True, autoscale=True)
                         
                         # update variable to reflect some formatting was performed
                         did_formatting = True
@@ -536,7 +547,7 @@ class ProvidentiaOffline:
                     plot_characteristics['figure']['subplot_kw'] = {'projection': self.plotcrs}
                 elif base_plot_type == 'taylor':
                     reference_stddev = 7.5
-                    ghelper = self.plot.get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
+                    ghelper = get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
                     plot_characteristics['figure']['subplot_kw'] = {'axes_class': fa.FloatingAxes,
                                                                     'grid_helper': ghelper}
                 fig, axs = plt.subplots(**plot_characteristics['figure'])
@@ -598,8 +609,8 @@ class ProvidentiaOffline:
                             grid_dict['month'].axis('off')
                             
                             # format axis
-                            self.plot.format_axis(grid_dict, base_plot_type, plot_characteristics, set_extent=False, 
-                                                  relevant_temporal_resolutions=self.relevant_temporal_resolutions)
+                            format_axis(self, self, grid_dict, base_plot_type, plot_characteristics, set_extent=False, 
+                                        relevant_temporal_resolutions=self.relevant_temporal_resolutions)
 
                             # get references to periodic label annotations made, and then hide them
                             for relevant_temporal_resolution in self.relevant_temporal_resolutions:
@@ -616,7 +627,7 @@ class ProvidentiaOffline:
                             self.plot_dictionary[page_n]['axs'].append({'handle':ax, 'data_labels':[]})
                             
                             # format axis 
-                            self.plot.format_axis(ax, base_plot_type, plot_characteristics, set_extent=False)
+                            format_axis(self, self, ax, base_plot_type, plot_characteristics, set_extent=False)
 
                     # turn off axes until some data is plottted
                     ax.axis('off')
@@ -709,15 +720,15 @@ class ProvidentiaOffline:
                 self.datareader.read_setup(['reset'])
 
             # update fields available for filtering
-            aux.init_representativity(self)
-            aux.update_representativity_fields(self)
-            aux.representativity_conf(self)
-            aux.init_period(self)
-            aux.update_period_fields(self)
-            aux.period_conf(self)
-            aux.init_metadata(self)
-            aux.update_metadata_fields(self)
-            aux.metadata_conf(self)
+            init_representativity(self)
+            update_representativity_fields(self)
+            representativity_conf(self)
+            init_period(self)
+            update_period_fields(self)
+            period_conf(self)
+            init_metadata(self)
+            update_metadata_fields(self)
+            metadata_conf(self)
 
             # set previous QA, flags and filter species as subsection
             self.previous_qa = copy.deepcopy(self.qa)
@@ -748,7 +759,7 @@ class ProvidentiaOffline:
                     self.summary_plot_geometry_setup = True
 
             # make station specific plots?
-            if self.report_stations:      
+            if self.report_stations and self.station_plots_to_make:      
 
                # set variable to inform when have made 1 set of networkspecies plots for stations
                self.made_networkspeci_station_plots = False        
@@ -875,10 +886,10 @@ class ProvidentiaOffline:
             plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
 
             # do formatting
-            relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(base_plot_type, 
-                                                                                                           plot_indices)
-            self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
-                                    base_plot_type, plot_type, plot_options, 'summary')
+            relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
+                base_plot_type, plot_indices)
+            do_formatting(self, self, relevant_axs, relevant_data_labels, networkspeci, 
+                          base_plot_type, plot_type, plot_options, 'summary')
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
@@ -1039,10 +1050,10 @@ class ProvidentiaOffline:
                         continue
 
                 # do formatting
-                relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(base_plot_type, 
-                                                                                                               plot_indices)
-                self.plot.do_formatting(relevant_axs, relevant_data_labels, networkspeci,
-                                        base_plot_type, plot_type, plot_options, 'station')
+                relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
+                    base_plot_type, plot_indices)
+                do_formatting(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, plot_type, 
+                              plot_options, 'station')
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
@@ -1207,11 +1218,11 @@ class ProvidentiaOffline:
                         axis_title_label += '(1 station)'
                     else:
                         axis_title_label += '({} stations)'.format(self.n_stations)
-                    self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+                    set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
                 # set map extent ? 
                 if self.map_extent:
-                    self.plot.set_map_extent(relevant_axis)
+                    set_map_extent(self, self, relevant_axis)
 
                 # calculate z statistic
                 z_statistic, self.active_map_valid_station_inds = calculate_statistic(self, self, networkspeci,
@@ -1306,7 +1317,7 @@ class ProvidentiaOffline:
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places']['title'])
                             
                     # set title
-                    self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+                    set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
                 # set xlabel and ylabel (only if not previously set)
                 if isinstance(relevant_axis, dict):
@@ -1330,7 +1341,7 @@ class ProvidentiaOffline:
                         xlabel = ''
                     # set xlabel
                     if xlabel != '':
-                        self.plot.set_axis_label(relevant_axis, 'x', xlabel, self.plot_characteristics[plot_type])
+                        set_axis_label(relevant_axis, 'x', xlabel, self.plot_characteristics[plot_type])
 
                 # axis ylabel is empty?
                 if (axis_ylabel == '') or (axis_ylabel == 'measurement_units'):
@@ -1355,7 +1366,7 @@ class ProvidentiaOffline:
                             ylabel = ''
                     # set ylabel
                     if ylabel != '':
-                        self.plot.set_axis_label(relevant_axis, 'y', ylabel, self.plot_characteristics[plot_type])
+                        set_axis_label(relevant_axis, 'y', ylabel, self.plot_characteristics[plot_type])
 
                 # get plotting function                
                 func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
@@ -1559,7 +1570,7 @@ class ProvidentiaOffline:
                                                                           self.plot_characteristics[plot_type]['round_decimal_places']['title'],
                                                                           self.current_lat,
                                                                           self.plot_characteristics[plot_type]['round_decimal_places']['title'])
-                    self.plot.set_axis_title(relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+                    set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
         return plot_indices
 
@@ -1571,7 +1582,7 @@ class ProvidentiaOffline:
             relevant_pages = self.summary_pages[plot_type][networkspeci]
         elif plotting_paradigm == 'station':
             relevant_pages = self.station_pages[plot_type][networkspeci][self.subsection]
-
+            
         all_relevant_pages = []
         relevant_axes = []     
         page_inds = []

@@ -1,15 +1,16 @@
-from .calculate import Stats
-from .configuration import split_options
+""" Class that filters observational/experiment data into memory as required """
 
 import copy
+
 import numpy as np
 import pandas as pd
 
-from providentia import aux
 from .aux import show_message
+from .calculate import Stats
+from .configuration import split_options
+
 
 class DataFilter:
-    """ Class that filters observational/experiment data into memory as required. """
 
     def __init__(self, read_instance):
         self.read_instance = read_instance
