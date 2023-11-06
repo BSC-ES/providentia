@@ -182,7 +182,7 @@ def init_metadata(instance):
         instance.metadata_menu[metadata_type]['rangeboxes']['labels'] = \
             [metadata_var for metadata_var in instance.metadata_vars_to_read
             if (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type)
-            & (instance.standard_metadata[metadata_var]['data_type'] != np.object)]
+            & (instance.standard_metadata[metadata_var]['data_type'] != object)]
 
         # reset rangebox tooltips
         instance.metadata_menu[metadata_type]['rangeboxes']['tooltips'] = \
@@ -204,7 +204,7 @@ def init_metadata(instance):
         instance.metadata_menu[metadata_type]['navigation_buttons']['labels'] = \
             [metadata_var for metadata_var in instance.metadata_vars_to_read if
             (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type) &
-            (instance.standard_metadata[metadata_var]['data_type'] == np.object)]
+            (instance.standard_metadata[metadata_var]['data_type'] == object)]
         
         # reset checkbox tooltips
         instance.metadata_menu[metadata_type]['navigation_buttons']['tooltips'] = \
@@ -449,7 +449,7 @@ def update_metadata_fields(instance):
     for metadata_type_ii, metadata_type in enumerate(instance.metadata_menu['navigation_buttons']['labels']):
         required_vars = [metadata_var for metadata_var in instance.metadata_vars_to_read
             if (instance.standard_metadata[metadata_var]['metadata_type'] == metadata_type)
-                 & (instance.standard_metadata[metadata_var]['data_type'] != np.object)]
+                 & (instance.standard_metadata[metadata_var]['data_type'] != object)]
         if len(required_vars) != len(instance.metadata_menu[metadata_type]['rangeboxes']['labels']):
             reset_meta = True
             break
@@ -485,7 +485,7 @@ def update_metadata_fields(instance):
         # update pop-up metadata menu object with read metadata values
         # for non-numeric metadata gets all the unique fields per metadata variable
         # and sets the available fields as such
-        if metadata_data_type == np.object:
+        if metadata_data_type == object:
             # get previous fields in menu 
             previous_fields = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['labels'])
             previous_keep = copy.deepcopy(instance.metadata_menu[metadata_type][meta_var]['checkboxes']['keep_selected'])
