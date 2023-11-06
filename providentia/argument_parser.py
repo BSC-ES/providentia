@@ -5,17 +5,19 @@
 # @license: https://www.gnu.org/licenses/gpl-3.0.html
 # @author: see AUTHORS file
 
-import os
 import logging
+import os
 import sys
 
 from configargparse import ArgumentParser
+
 import providentia
 
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+
 
 class ProvArgumentParser(object):
     """ Class that handles the argument parser. """

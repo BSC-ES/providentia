@@ -1,17 +1,24 @@
 """ Module storing static reading functions """
+
+import datetime
+from glob import glob
+import os
+import sys
+import time
+
+import bisect
 from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
 import pandas as pd
-import bisect
-import time
-import sys
 
 # initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
 
+
 def drop_nans(data):
     """ Function that return 1D numpy array with NaNs removed. """
     return data[~pd.isnull(data)]
+
 
 def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghost_data_in_memory, 
                                       ghost_data_in_memory_shape, timestamp_array, qa, flags):
@@ -26,6 +33,7 @@ def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghos
     shared_memory_vars['timestamp_array'] = timestamp_array
     shared_memory_vars['qa'] = qa
     shared_memory_vars['flag'] = flags
+
 
 def read_netcdf_data(tuple_arguments):
     """ Function that handles reading of observational/experiment
@@ -333,6 +341,7 @@ def read_netcdf_metadata(tuple_arguments):
     # return read metadata
     return metadata_read
 
+
 def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to_read, resolution):
     """ Function that returns the yearmonths of the files to be read.
         Filters out yearmonths outside given date range.
@@ -359,6 +368,7 @@ def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to
     else:
         return available_yearmonths[first_valid_file_ind:last_valid_file_ind]
 
+
 def get_default_qa(instance, speci):
     """ Return the default values according to GHOST standards. 
 
@@ -373,6 +383,7 @@ def get_default_qa(instance, speci):
     else:
         return sorted(instance.default_qa_standard)
     
+
 def get_frequency_code(resolution):
     """ Get frequency code. """
     
@@ -390,6 +401,413 @@ def get_frequency_code(resolution):
         active_frequency_code = 'AS'
 
     return active_frequency_code
+
+
+def check_for_ghost(network_name):
+    """ Check whether the selected network comes from GHOST or not.
+        All non-GHOST networks start with an asterisk at their name.
+    """
+
+    if '/' in network_name:
+        return False
+    else:
+        return True
+
+
+def get_ghost_observational_tree(instance):
+    """ Create GHOST observational data tree as a nested dictionary,
+        storing a list of start YYYYMM yearmonths per:
+        network / resolution / matrix / speci
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :return: GHOST observational tree dictionary
+        :rtype: dict
+    """
+
+    ghost_observation_data = {}
+
+    # iterate through available networks
+    for network in instance.available_networks:
+
+        # check if directory for network exists
+        # if not, continue
+        if not os.path.exists('%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version)):
+            continue
+
+        # write empty dictionary for network
+        ghost_observation_data[network] = {}
+
+        # iterate through available resolutions
+        for resolution in instance.available_resolutions:
+
+            # check if directory for resolution exists
+            # if not, continue
+            if not os.path.exists('%s/%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version, resolution)):
+                continue
+
+            # write nested empty dictionary for resolution
+            ghost_observation_data[network][resolution] = {}
+
+            # get available species for network/resolution
+            available_species = os.listdir('%s/%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version, resolution))
+
+            # iterate through available files per species
+            for speci in available_species:
+
+                # get all available netCDF files
+                available_files = os.listdir(
+                    '%s/%s/%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version, resolution, speci))
+                
+                # coninue if have no files
+                if len(available_files) == 0:
+                    continue
+
+                # get monthly start date (YYYYMM) of all files
+                file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files if f != 'temporary'])
+                
+                # get matrix for current species
+                matrix = instance.parameter_dictionary[speci]['matrix']
+                if matrix not in ghost_observation_data[network][resolution]:
+                    # write nested empty dictionary for matrix
+                    ghost_observation_data[network][resolution][matrix] = {}
+
+                # write nested dictionary for species, with associated file yearmonths
+                ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
+
+    return ghost_observation_data
+
+
+def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
+    """ Fill non-GHOST observational data tree,
+        storing a list of start YYYYMM yearmonths per:
+        network / resolution / matrix / speci
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :param nonghost_observation_data_json: non-GHOST observational tree json
+        :type nonghost_observation_data_json: json
+        :return: non-GHOST observational tree dictionary
+        :rtype: dict
+    """
+
+    nonghost_observation_data = {}
+
+    # iterate through networks
+    for network in nonghost_observation_data_json:
+
+        # check if directory for network exists
+        # if not, continue
+        if not os.path.exists('%s/%s' % (instance.nonghost_root, network)):
+            continue
+
+        # write empty dictionary for network
+        nonghost_observation_data[network] = {}
+
+        # iterate through resolutions
+        for resolution in nonghost_observation_data_json[network]:
+
+            # check if directory for resolution exists
+            # if not, continue
+            if not os.path.exists('%s/%s/%s' % (instance.nonghost_root, network, resolution)):
+                continue
+
+            # write nested empty dictionary for resolution
+            nonghost_observation_data[network][resolution] = {}
+
+            # iterate through species
+            for speci in nonghost_observation_data_json[network][resolution]:
+
+                # get all available netCDF files 
+                available_files = glob('%s/%s/%s/%s/%s_??????.nc' % (instance.nonghost_root, network, resolution, speci, speci))
+
+                # coninue if have no files
+                if len(available_files) == 0:
+                    continue
+
+                # get monthly start date (YYYYMM) of all files
+                file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
+
+                # get matrix for current species
+                matrix = instance.parameter_dictionary[speci]['matrix']
+                if matrix not in nonghost_observation_data[network][resolution]:
+                    # write nested empty dictionary for matrix
+                    nonghost_observation_data[network][resolution][matrix] = {}
+
+                # write nested dictionary for species, with associated file yearmonths
+                nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
+    
+    return nonghost_observation_data
+
+
+def get_experiment_tree(instance):
+    """ Fill experiment data tree,
+        storing a list of start YYYYMM yearmonths per:
+        network / resolution / matrix / speci
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :return: experiment tree dictionary
+        :rtype: dict
+    """
+
+    experiment_data = {}
+
+    # get all different experiment names (from providentia-interpolation output dir)
+    available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
+
+    # iterate through all observation data dict, and attempt to get recriprocal experiment files
+    for network in instance.all_observation_data:
+        for resolution in instance.all_observation_data[network]:
+            for matrix in instance.all_observation_data[network][resolution]:
+                for species in instance.all_observation_data[network][resolution][matrix]:
+                    # iterate through available experiments
+                    for experiment in available_experiments:
+                        
+                        # get folder where interpolated experiments are saved
+                        if '/' not in network:
+                            files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
+                                                                     experiment, resolution, species, network)
+                        else:
+                            files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
+                                                                      experiment, resolution, species,
+                                                                      network.replace('/', '-'))
+                        
+                        # test if interpolated directory exists for experiment
+                        # if it does not exit, continue
+                        if not os.path.exists(files_directory):
+                            continue
+                        else:
+                            # get all available netCDF files
+                            available_files = os.listdir(files_directory)
+
+                            # get monthly start date (YYYYMM) of all files
+                            file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
+
+                            # write nested dictionary for experiment, with associated file yearmonths
+                            if len(file_yearmonths) > 0:
+                                # if network/resolution/matrix/species/experiment not in dictionary yet, add it
+                                if network not in experiment_data:
+                                    experiment_data[network] = {}
+                                if resolution not in experiment_data[network]:
+                                    experiment_data[network][resolution] = {}
+                                if matrix not in experiment_data[network][resolution]:
+                                    experiment_data[network][resolution][matrix] = {}
+                                if species not in experiment_data[network][resolution][matrix]:
+                                    experiment_data[network][resolution][matrix][species] = {}
+                                experiment_data[network][resolution][matrix][species][experiment] = file_yearmonths
+
+    return experiment_data
+
+
+def get_valid_obs_files_in_date_range(instance, start_date, end_date):
+    """ Iterate through observational dictionary tree and return 
+        a dictionary of available data in the selected daterange
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201101")
+        :type end_date: str
+        :return: available observational tree dictionary
+        :rtype: dict
+    """
+
+    # create dictionary to store available observational data
+    instance.available_observation_data = {}
+
+    # check if start/end date are valid values, if not, return with no valid obs. files
+    if (not valid_date(start_date)) or (not valid_date(end_date)):
+        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
+        return
+
+    # check end date is > start date, if not, return with no valid obs. files
+    if int(start_date) >= int(end_date):
+        print(f'Warning: Start date ({start_date}) exceeds end date ({end_date}).')
+        return
+
+    # check start date and end date are both within if valid date range (19000101 - 20500101),
+    # if not, return with no valid obs. files
+    if (int(start_date) < 19000101) or (int(end_date) < 19000101) or (int(start_date) >= 20500101) or (int(end_date) >= 20500101):
+        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
+        return 
+
+    # get start date on first of month
+    start_date_firstdayofmonth = int(str(start_date)[:6] + '01')
+
+    # iterate through observational dictionary
+    for network in instance.all_observation_data:
+        for resolution in instance.all_observation_data[network]:
+            for matrix in instance.all_observation_data[network][resolution]:
+                for speci in instance.all_observation_data[network][resolution][matrix]:
+                    
+                    # get file yearmonths
+                    file_yearmonths = instance.all_observation_data[network][resolution][matrix][speci]
+
+                    # get file yearmonths within date range
+                    valid_file_yearmonths = sorted([ym for ym in file_yearmonths if
+                                                    (int('{}01'.format(ym)) >= start_date_firstdayofmonth) & (int('{}01'.format(ym)) < int(end_date))])
+                    
+                    # add yearmonths to available observation data dict 
+                    if len(valid_file_yearmonths) > 0:
+                        if network not in instance.available_observation_data:
+                            instance.available_observation_data[network] = {}
+                        if resolution not in instance.available_observation_data[network]:
+                            instance.available_observation_data[network][resolution] = {}
+                        if matrix not in instance.available_observation_data[network][resolution]:
+                            instance.available_observation_data[network][resolution][matrix] = {}
+                        instance.available_observation_data[network][resolution][matrix][speci] = valid_file_yearmonths
+
+
+def get_valid_experiments(instance, start_date, end_date, resolution, networks, species):
+    """ Get valid experiments for daterange, and selected parameters.
+        Update experiment pop-up with valid experiments.
+
+        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :type instance: object
+        :param start_date: start date (e.g. "20201101")
+        :type start_date: str
+        :param end_date: end date (e.g. "20201231")
+        :type end_date: str
+        :param resolution: resolution (e.g. "hourly")
+        :type resolution: str
+        :param networks: list of networks
+        :type networks: list
+        :param species: list of species
+        :type species: list 
+    """
+
+    # get all different experiment names (from providentia-interpolation output dir)
+    available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
+
+    # create dictionary to store available experiment data
+    instance.available_experiment_data = {}
+
+    #list for saving experiments to add to experiments pop-up 
+    experiments_to_add = []
+
+    # get start date on first of month
+    start_date_firstdayofmonth = int(str(start_date)[:6] + '01')
+
+    # iterate through networks and species
+    for network, speci in zip(networks, species):
+
+        # iterate through available experiments
+        for experiment in available_experiments:
+
+            # get folder where interpolated experiments are saved
+            if '/' not in network:           
+                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
+                                                         experiment, resolution, speci, network)
+            else:
+                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
+                                                          experiment, resolution, speci,
+                                                          network.replace('/', '-'))
+                
+            # test if interpolated directory exists for experiment
+            # if it does not exit, continue
+            if not os.path.exists(files_directory):
+                continue
+            else:
+                # get all available netCDF files
+                available_files = os.listdir(files_directory)
+
+            # get monthly start date (YYYYMM) of all files
+            file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
+
+            # write nested dictionary for experiment, with associated file yearmonths
+            if len(file_yearmonths) > 0:
+
+                # get file yearmonths within date range
+                valid_file_yearmonths = sorted([ym for ym in file_yearmonths if 
+                                                (int('{}01'.format(ym)) >= start_date_firstdayofmonth) & (int('{}01'.format(ym)) < int(end_date))])
+
+                #if have valid files, then add experiment to pop-up menu, 
+                # and add yearmonths to available experiment data
+                if len(valid_file_yearmonths) > 0:
+                    experiments_to_add.append(experiment)
+
+                    if network not in instance.available_experiment_data:
+                        instance.available_experiment_data[network] = {}
+                    if resolution not in instance.available_experiment_data[network]:
+                        instance.available_experiment_data[network][resolution] = {}
+                    if speci not in instance.available_experiment_data[network][resolution]:
+                        instance.available_experiment_data[network][resolution][speci] = {}
+                    if experiment not in instance.available_experiment_data[network][resolution][speci]:
+                        instance.available_experiment_data[network][resolution][speci][experiment] = valid_file_yearmonths
+
+    # set list of experiment names to add on experiments pop-up
+    if not instance.offline:
+        experiments_to_add = np.array(sorted(experiments_to_add))
+        instance.experiments_menu['checkboxes']['labels'] = experiments_to_add
+        instance.experiments_menu['checkboxes']['map_vars'] = experiments_to_add
+
+
+def temporal_resolution_order_dict():
+    """ Return temporal resolution order for menus as a dictionary.
+
+        :return: temporal resolution order
+        :rtype: dict
+    """
+
+    resolution_order_dict = {'hourly': 1, '3hourly': 2, '6hourly': 3, 'hourly_instantaneous': 4,
+                             '3hourly_instantaneous': 5, '6hourly_instantaneous': 6,
+                             'daily': 7, 'monthly': 8}
+
+    return resolution_order_dict
+
+
+def get_relevant_temporal_resolutions(resolution):        
+    """ Get relevant temporal reolsutions for periodic plots, by selected temporal resolution.
+
+        :param resolution: name of selected temporal resolution
+        :type resolution: str
+        :return: relevant temporal resolutions
+        :rtype: list
+    """
+
+    if 'hourly' in resolution:
+        relevant_temporal_resolutions = ['hour', 'dayofweek', 'month']
+    elif resolution == 'daily':
+        relevant_temporal_resolutions = ['dayofweek', 'month']
+    elif resolution == 'monthly':
+        relevant_temporal_resolutions = ['month']
+    else:
+        relevant_temporal_resolutions = []
+        
+    return relevant_temporal_resolutions
+
+def get_nonrelevant_temporal_resolutions(resolution):        
+    """ Get non-relevant temporal reolsutions for periodic plots, by selected temporal resolution.
+
+        :param resolution: name of selected temporal resolution
+        :type resolution: str
+        :return: non-relevant temporal resolutions
+        :rtype: list
+    """
+
+    if 'hourly' in resolution:
+        nonrelevant_temporal_resolutions = []
+    elif resolution == 'daily':
+        nonrelevant_temporal_resolutions = ['hour']
+    elif resolution == 'monthly':
+        nonrelevant_temporal_resolutions = ['hour', 'dayofweek']
+    else:
+        nonrelevant_temporal_resolutions = ['hour', 'dayofweek', 'month']
+        
+    return nonrelevant_temporal_resolutions
+
+
+def valid_date(date_text):
+    """ Determine if a date string is in the correct format. """
+
+    try:
+        datetime.datetime.strptime(str(date_text), '%Y%m%d')
+        return True
+    except Exception as e:
+        return False
+
 
 def get_resampling_resolutions(resolution):
     """ Get available resampling resolutions. """

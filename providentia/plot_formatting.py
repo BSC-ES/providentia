@@ -1,0 +1,564 @@
+""" Functions to format the axes """
+
+import copy
+
+import cartopy.feature as cfeature
+import matplotlib as mpl 
+from matplotlib.dates import num2date
+import numpy as np
+import pandas as pd
+
+from .plot_aux import get_land_polygon_resolution, set_map_extent
+from .plot_options import annotation, get_no_margin_lim, linear_regression, log_axes, log_validity, smooth
+
+
+def set_equal_axes(ax, plot_options):
+    """ Set equal aspect and limits (useful for scatter plots). """
+
+    # set equal aspect
+    # only if no axis is in log scale
+    if 'logy' in plot_options or 'logx' in plot_options:
+        ax.set_aspect(aspect='auto')
+    else:
+        ax.set_aspect(aspect='equal', adjustable='box')
+
+    if len(ax.lines) == 0:
+        return None
+
+    # get min and max values for ticks
+    for i, line in enumerate(ax.lines):
+        line_xdata = line.get_xdata()
+        line_ydata = line.get_ydata()
+        if list(line_xdata) != [0, 1] and list(line_xdata) != [0, 0.5]:
+            break
+        
+    xtickmin = np.nanmin(line_xdata)
+    xtickmax = np.nanmax(line_xdata)
+    ytickmin = np.nanmin(line_ydata)
+    ytickmax = np.nanmax(line_ydata)
+
+    for line in ax.lines[i:]:
+        if np.nanmin(line.get_xdata()) < xtickmin:
+            xtickmin = np.nanmin(line.get_xdata())
+        if np.nanmax(line.get_xdata()) > xtickmax:
+            xtickmax = np.nanmax(line.get_xdata())
+        if np.nanmin(line.get_ydata()) < ytickmin:
+            ytickmin = np.nanmin(line.get_ydata())
+        if np.nanmax(line.get_ydata()) > ytickmax:
+            ytickmax = np.nanmax(line.get_ydata())
+
+    # compare min and max across axes
+    if xtickmin < ytickmin:
+        tickmin = xtickmin
+    else:
+        tickmin = ytickmin
+    if xtickmax > ytickmax:
+        tickmax = xtickmax
+    else:
+        tickmax = ytickmax
+
+    # set equal ticks
+    ax.set_xlim(tickmin, tickmax)
+    ax.set_ylim(tickmin, tickmax)
+
+    return None
+
+
+def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, base_plot_type, plot_characteristics, 
+                               plot_options, xlim=None, ylim=None, relim=False, autoscale=False, autoscale_x=False, 
+                               autoscale_y=False, bias_centre=False):
+    """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
+    
+        :param relevant_axs: relevant axes
+        :type relevant_axs: list
+        :param base_plot_type: plot type, without statistical information
+        :type base_plot_type: str
+        :param plot_characteristics: plot characteristics  
+        :type plot_characteristics: dict
+        :param plot_options: list of options to configure plots
+        :type plot_options: list
+        :param xlim: xlimits to set
+        :type xlim: list
+        :param ylim: ylimits to set
+        :type ylim: list
+        :param relim: turn on relimiting of axes limits (when updating plotted data on axis)
+        :type relim: boolean
+        :param autoscale: Autoscale the axis view to the data (both x and y axes)
+        :type autoscale: boolean
+        :param autoscale_x: Autoscale the x axis view to the data
+        :type autoscale_x: boolean
+        :param autoscale_y: Autoscale the x axis view to the data
+        :type autoscale_y: boolean
+        :param bias_centre: centre bias plots at 0 on the y axis
+        :type bias_centre: boolean   
+    """
+    
+    # initialise arrays to save lower and upper limits in all axes
+    all_xlim_lower = []
+    all_xlim_upper = []
+    all_ylim_lower = []
+    all_ylim_upper = []
+
+    # initialise variables for setting axis limits
+    xlim_min = None
+    xlim_max = None
+    ylim_min = None
+    ylim_max = None
+    
+    if not isinstance(relevant_axs, list):
+        # if changes only apply to one axis, put it in list
+        if not isinstance(relevant_axs, dict):
+            relevant_axs = [relevant_axs]
+        # transform dictionaries into lists
+        else:
+            relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
+                            relevant_temporal_resolution in read_instance.relevant_temporal_resolutions]
+
+    # get mapped resolution per axis for periodic plots
+    if base_plot_type in ['periodic', 'periodic-violin']:
+        mapped_resolutions = read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(
+            read_instance.relevant_temporal_resolutions)))
+
+    # remove any axes from relevant_axs which are not active (only for offline)
+    if read_instance.offline:
+        relevant_axs_active = []
+        mapped_resolutions_active = []
+        for ax_ii, ax in enumerate(relevant_axs):
+            if ax.axison:
+                relevant_axs_active.append(ax)
+                if base_plot_type in ['periodic', 'periodic-violin']:
+                    mapped_resolutions_active.append(mapped_resolutions[ax_ii])
+    else:
+        relevant_axs_active = relevant_axs
+        if base_plot_type in ['periodic', 'periodic-violin']:
+            mapped_resolutions_active = mapped_resolutions
+
+    # get lower and upper limits across all relevant axes
+    for ax in relevant_axs_active:
+        if 'equal_aspect' in plot_characteristics:
+            set_equal_axes(ax, plot_options)
+        else:
+            ax.set_aspect('auto')
+        if relim:
+            ax.relim(visible_only=True)
+        if autoscale:
+            ax.autoscale(tight=False)
+        if autoscale_x:
+            ax.autoscale(axis='x', tight=False)
+        if autoscale_y:
+            ax.autoscale(axis='y', tight=False)
+        if xlim is None and ('xlim' not in plot_characteristics):
+            if base_plot_type not in ['periodic', 'periodic-violin', 'timeseries']:
+                xlim_lower, xlim_upper = ax.get_xlim()
+            elif base_plot_type == 'timeseries':
+                xlim_lower, xlim_upper = get_no_margin_lim(ax, 'xlim')
+                try:
+                    xlim_lower = num2date(xlim_lower)
+                    xlim_upper = num2date(xlim_upper)
+                except ValueError:
+                    continue
+            if base_plot_type not in ['periodic', 'periodic-violin']:
+                all_xlim_lower.append(xlim_lower)
+                all_xlim_upper.append(xlim_upper)
+        if ylim is None and ('ylim' not in plot_characteristics):
+            ylim_lower, ylim_upper = ax.get_ylim()
+            all_ylim_lower.append(ylim_lower)
+            all_ylim_upper.append(ylim_upper)
+
+    # get minimum and maximum from all axes and set limits
+    for ax in relevant_axs_active:
+        # get xlim
+        if xlim is None and ('xlim' not in plot_characteristics):
+            if base_plot_type not in ['periodic', 'periodic-violin']:
+                xlim_min = np.min(all_xlim_lower)
+                xlim_max = np.max(all_xlim_upper)
+                xlim = xlim_min, xlim_max
+        elif 'xlim' in plot_characteristics:
+            xlim = plot_characteristics['xlim']
+
+        # set xlim
+        if xlim is not None:
+            if (base_plot_type not in ['timeseries', 'boxplot']) and ('equal_aspect' not in plot_characteristics):
+                ax.set_xlim(xlim)
+
+        # get ylim
+        if ylim is None and ('ylim' not in plot_characteristics):
+            ylim_min = np.min(all_ylim_lower) 
+            ylim_max = np.max(all_ylim_upper)
+            # if have bias_centre option, centre around zero
+            if ('bias' in plot_options) & (bias_centre):                    
+                if np.abs(np.max(all_ylim_upper)) >= np.abs(np.min(all_ylim_lower)):
+                    ylim_min = -np.abs(np.max(all_ylim_upper))
+                    ylim_max = np.abs(np.max(all_ylim_upper))
+                elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
+                    ylim_min = -np.abs(np.min(all_ylim_lower))
+                    ylim_max = np.abs(np.min(all_ylim_lower))
+            ylim = ylim_min, ylim_max
+        elif 'ylim' in plot_characteristics:
+            ylim = plot_characteristics['ylim']
+
+        # set ylim
+        if (ylim is not None) and ('equal_aspect' not in plot_characteristics):
+            ax.set_ylim(ylim)
+        
+    # get minimum and maximum from all axes and set limits for periodic plots
+    if base_plot_type in ['periodic', 'periodic-violin']:
+        if xlim is None and ('xlim' not in plot_characteristics):
+            for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
+                # adjust plot x axis to have correct margin on edges
+                xlim_lower, xlim_upper = sub_ax.get_xlim()
+                first_valid_x = canvas_instance.periodic_xticks[temporal_resolution][(np.abs(
+                    canvas_instance.periodic_xticks[temporal_resolution] - xlim_lower)).argmin()]
+                last_valid_x = canvas_instance.periodic_xticks[temporal_resolution][(np.abs(
+                    canvas_instance.periodic_xticks[temporal_resolution] - xlim_upper)).argmin()]
+                if temporal_resolution == 'hour':
+                    xlim_lower = first_valid_x - 0.65
+                    xlim_upper = last_valid_x + 0.65
+                elif temporal_resolution == 'dayofweek':
+                    xlim_lower = first_valid_x - 0.55
+                    xlim_upper = last_valid_x + 0.55
+                elif temporal_resolution == 'month':
+                    xlim_lower = first_valid_x - 0.55
+                    xlim_upper = last_valid_x + 0.55
+                xlim = xlim_lower, xlim_upper
+                sub_ax.set_xlim(xlim)
+        elif 'xlim' in plot_characteristics:
+            xlim = plot_characteristics['xlim']
+            for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
+                sub_ax.set_xlim(xlim)
+
+    # get minimum and maximum from all axes and set limits for timeseries
+    elif base_plot_type == 'timeseries':
+        if plot_characteristics['xtick_alteration']['define']:
+        
+            # get steps for all data labels
+            steps = pd.date_range(xlim[0], xlim[1], freq=read_instance.active_frequency_code)
+
+            # get number of months and days
+            n_months = (12*(xlim[1].year - xlim[0].year) + (xlim[1].month - xlim[0].month))
+            n_days = (xlim[1] - xlim[0]).days
+
+            # get months that are complete
+            months_start = pd.date_range(xlim[0], xlim[1], freq='MS')
+            months_end = pd.date_range(xlim[0], xlim[1], freq='M')
+            if months_start.size > 1:
+                if (xlim[1] - months_end[-1]).days >= 1:
+                    months = months_start[:-1]
+                else:
+                    months = months_start
+            else:
+                months = months_start
+
+            # show hours if number of days is less than 7
+            if n_days < 7:
+                ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %H:%M'))
+            else:
+                ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d'))
+
+            # define time slices
+            if n_months >= 3:
+                steps = months
+            slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
+
+            # use default axes if the number of timesteps is lower than the number of slices
+            if slices >= 1:
+                xticks = steps[0::slices]
+            else:
+                xticks = ax.xaxis.get_ticks()
+
+            # transform to numpy.datetime64
+            if not isinstance(xticks[0], np.datetime64):
+                xticks = [x.to_datetime64() for x in xticks]
+            if not isinstance(xlim[1], np.datetime64):
+                xlim = xlim[0], np.datetime64(xlim[1])
+
+            # add last step to xticks
+            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != xlim[1]):
+                xticks = np.append(xticks, xlim[1])
+
+            # set modified xticks
+            for ax in relevant_axs_active:
+                ax.xaxis.set_ticks(xticks)
+
+
+def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
+    """ Set title of plot axis.
+
+        :param relevant_axis: axis to plot on 
+        :type relevant_axis: object
+        :param title: axis title
+        :type title: str
+        :param plot_characteristics: plot characteristics  
+        :type plot_characteristics: dict
+    """    
+
+    # return if title is empty str
+    if title == '':
+        return
+
+    # get appropriate axis for plotting label for plots with multiple sub-axes
+    axs_to_set_title = []
+    if isinstance(relevant_axis, dict):
+        # reorder dict to show axis title in monthly plot and not in DoW for daily plots
+        relevant_dict = {key : relevant_axis[key] for key in ['hour', 'month', 'dayofweek']}
+        for relevant_temporal_resolution, sub_ax in relevant_dict.items():
+            if relevant_temporal_resolution in read_instance.relevant_temporal_resolutions:
+                axs_to_set_title.append(sub_ax)
+                break
+    else:
+        axs_to_set_title.append(relevant_axis)
+
+    # set title for appropriate axes
+    axis_title_characteristics = copy.deepcopy(plot_characteristics['axis_title'])
+    axis_title_characteristics['label'] = title
+    for relevant_axis in axs_to_set_title:
+        relevant_axis.set_title(**axis_title_characteristics)
+
+
+def set_axis_label(relevant_axis, label_ax, label, plot_characteristics, 
+                   relevant_temporal_resolutions=['hour', 'month']):
+    """ Set label of plot axis.
+
+        :param relevant_axis: axis to plot on 
+        :type relevant_axis: object
+        :param label_ax: which axis to set label of
+        :type label_ax: str
+        :param label: axis label
+        :type label: str
+        :param plot_characteristics: plot characteristics  
+        :type plot_characteristics: dict
+    """
+
+    # return if label is empty str
+    if label == '':
+        return
+
+    # get appropriate axis for plotting label for plots with multiple sub-axes (hour and month axes)
+    axs_to_set_label = []
+    if isinstance(relevant_axis, dict):
+        for relevant_temporal_resolution, sub_ax in relevant_axis.items():
+            if relevant_temporal_resolution in relevant_temporal_resolutions:
+                axs_to_set_label.append(sub_ax)
+            # remove day of week axis label if setting ylabel
+            if (relevant_temporal_resolution == 'dayofweek') & (label_ax == 'y'):                           
+                sub_ax.yaxis.set_tick_params(which='both', labelleft=False)
+                sub_ax.set_ylabel('')
+    else:
+        axs_to_set_label.append(relevant_axis)
+
+    # set label for appropriate axes
+    for relevant_axis in axs_to_set_label:
+        if label_ax == 'x':
+            axis_label_characteristics = copy.deepcopy(plot_characteristics['xlabel'])
+            axis_label_characteristics['xlabel'] = label
+            relevant_axis.set_xlabel(**axis_label_characteristics)
+        elif label_ax == 'y':
+            axis_label_characteristics = copy.deepcopy(plot_characteristics['ylabel'])
+            axis_label_characteristics['ylabel'] = label
+            relevant_axis.set_ylabel(**axis_label_characteristics)
+
+
+def do_formatting(canvas_instance, read_instance, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, plot_type, 
+                  plot_options, plotting_paradigm):
+    """ Function that handles formatting of a plot axis,
+        based on given plot options.
+
+        :param relevant_axs: relevant axes
+        :type relevant_axs: list
+        :param relevant_data_labels: names of plotted data arrays 
+        :type relevant_data_labels: list
+        :param networkspeci: str of currently active network and species 
+        :type networkspeci: str
+        :param base_plot_type: plot type, without statistical information
+        :type base_plot_type: str
+        :param plot_type: plot type
+        :type plot_type: str
+        :param plot_options: list of options to configure plots
+        :type plot_options: list
+        :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+        :type plotting_paradigm: str
+    """
+
+    for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
+
+        # log axes?
+        if 'logx' in plot_options:            
+            log_valid = log_validity(relevant_ax, 'logx')
+            if log_valid:
+                log_axes(relevant_ax, 'logx', canvas_instance.plot_characteristics[plot_type])
+            else:
+                msg = "Warning: It is not possible to log the x-axis "
+                msg += "in {0} with negative values.".format(plot_type)
+                print(msg)
+
+        if 'logy' in plot_options:
+            log_valid = log_validity(relevant_ax, 'logy')
+            if log_valid:
+                log_axes(relevant_ax, 'logy', canvas_instance.plot_characteristics[plot_type])
+            else:
+                msg = "Warning: It is not possible to log the y-axis "
+                msg += "in {0} with negative values.".format(plot_type)
+                print(msg)
+
+        # annotation
+        if 'annotate' in plot_options:
+            if base_plot_type not in ['heatmap']:
+                annotation(canvas_instance, read_instance, relevant_ax, networkspeci, 
+                           relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                           canvas_instance.plot_characteristics[plot_type],
+                           plot_options=plot_options, plotting_paradigm=plotting_paradigm)
+                # annotate on first axis
+                if base_plot_type in ['periodic', 'periodic-violin']:
+                    break
+        
+        # regression line
+        if 'regression' in plot_options:
+            linear_regression(canvas_instance, read_instance, relevant_ax, networkspeci, 
+                              relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                              canvas_instance.plot_characteristics[plot_type], plot_options=plot_options)
+
+        # smooth line
+        if 'smooth' in plot_options:
+            smooth(canvas_instance, read_instance, relevant_ax, networkspeci,
+                   relevant_data_labels[relevant_ax_ii], base_plot_type, 
+                   canvas_instance.plot_characteristics[plot_type], plot_options=plot_options)
+
+
+def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_characteristics, col_ii=0, last_valid_row=True, 
+                last_row_on_page=True, set_extent=True, relevant_temporal_resolutions=['hour','dayofweek','month']):
+    """ Format a plotting axis.
+    
+        :param ax: axis object
+        :type ax: object
+        :param base_plot_type: plot to make, without statistical information
+        :type base_plot_type: str  
+        :param plot_characteristics: plot characteristics
+        :type plot_characteristics: dict
+        :param col_ii: column index (for offline report)
+        :type col_ii: int
+        :param last_valid_row: boolean informing if last valid row to plot on (for offline report)
+        :type last_valid_row: boolean
+        :param last_row_on_page: boolean informing if last valid row on page (for offline report)
+        :type last_row_on_page: boolean
+        :param map_extent: boolean informing if wanting to set map_extent or not
+        :type map_extent: boolean
+        :param relevant_temporal_resolutions: list of relevant temporal resolutions
+        :type relevant_temporal_resolutions: list
+    """
+
+    # get plot characteristics vars
+    plot_characteristics_vars = list(plot_characteristics.keys())
+
+    # get appropriate axes for nested axes
+    axs_to_format = []
+    temporal_resolutions_per_ax = []
+    if isinstance(ax, dict):
+        for relevant_temporal_resolution, sub_ax in ax.items():
+            if relevant_temporal_resolution in relevant_temporal_resolutions:
+                axs_to_format.append(sub_ax)
+                temporal_resolutions_per_ax.append(relevant_temporal_resolution)
+    else:
+        axs_to_format.append(ax)
+        temporal_resolutions_per_ax.append('')
+
+    # iterate though relevant axes (and relevant temporal resolutions for periodic plots)
+    for ax_to_format, relevant_temporal_resolution in zip(axs_to_format, temporal_resolutions_per_ax): 
+
+        # set axis ticks and gridlines below all artists
+        ax_to_format.set_axisbelow(True)
+
+        # make axis xlabel?
+        if 'xlabel' in plot_characteristics_vars:
+            ax_to_format.set_xlabel(**plot_characteristics['xlabel'])
+
+        # make axis ylabel (only on leftmost column of visible axes)?
+        if 'ylabel' in plot_characteristics_vars:
+            ax_to_format.set_ylabel(**plot_characteristics['ylabel'])
+
+        # set xtick params ?
+        if 'xtick_params' in plot_characteristics_vars:
+            ax_to_format.xaxis.set_tick_params(**plot_characteristics['xtick_params'])
+
+        # set ytick params ?
+        if 'ytick_params' in plot_characteristics_vars:
+            ax_to_format.yaxis.set_tick_params(**plot_characteristics['ytick_params'])
+
+        # if are sharing xticks, and not on last row on page/last
+        # valid row, then ensure current axis xticks are hidden
+        if ('xtick_share' in plot_characteristics_vars) and (not last_valid_row) and (not last_row_on_page):
+            plt.setp(ax_to_format.get_xticklabels(), visible=False)
+
+        # if are sharing yticks, and not on left column, then ensure current axis yticks are hidden
+        if ('ytick_share' in plot_characteristics_vars) and (col_ii != 0):
+            plt.setp(ax_to_format.get_yticklabels(), visible=False)
+
+        # set xlim?
+        if 'xlim' in plot_characteristics_vars:
+            ax_to_format.set_xlim(**plot_characteristics_vars['xlim'])
+
+        # set ylim? 
+        if 'ylim' in plot_characteristics_vars:
+            ax_to_format.set_ylim(**plot_characteristics_vars['ylim'])
+
+        # add gridlines (x and y)?
+        if 'grid' in plot_characteristics_vars:
+            ax_to_format.grid(**plot_characteristics['grid'])
+
+        # add x gridlines?
+        if 'xgrid' in plot_characteristics_vars:
+            ax_to_format.xaxis.grid(**plot_characteristics['xgrid'])
+
+        # add y gridlines?
+        if 'ygrid' in plot_characteristics_vars:
+            ax_to_format.yaxis.grid(**plot_characteristics['ygrid'])
+
+        # set x axis decimal places?
+        if 'round_decimal_places' in plot_characteristics_vars:
+            if 'x' in plot_characteristics['round_decimal_places']:
+                ax_to_format.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['x'])))
+
+        # set y axis decimal places?
+        if 'round_decimal_places' in plot_characteristics_vars:
+            if 'y' in plot_characteristics['round_decimal_places']:
+                ax_to_format.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.{}f'.format(plot_characteristics['round_decimal_places']['y'])))
+
+        # remove spines?
+        if 'remove_spines' in plot_characteristics_vars:
+            for side in plot_characteristics['remove_spines']:
+                ax_to_format.spines[side].set_visible(False)
+
+            for side in list(set(['top', 'bottom', 'right', 'left']).symmetric_difference(plot_characteristics['remove_spines'])):
+                ax_to_format.spines[side].set_visible(True)
+
+        # handle formatting specific to plot types
+        if base_plot_type in ['periodic','periodic-violin']:
+
+            # add axis resolution label 
+            ax_to_format.annotate(canvas_instance.periodic_labels[relevant_temporal_resolution], **plot_characteristics['label'])
+
+            # set plotted x axis ticks/labels (if 'hour' aggregation --> a numeric tick every 3 hours)
+            if relevant_temporal_resolution == 'hour':
+                plot_characteristics['xticks'] = canvas_instance.periodic_xticks[relevant_temporal_resolution][::3]
+                ax_to_format.set_xticks(plot_characteristics['xticks'])
+            else:
+                plot_characteristics['xticks'] = canvas_instance.periodic_xticks[relevant_temporal_resolution]
+                ax_to_format.set_xticks(plot_characteristics['xticks'])
+                ax_to_format.set_xticklabels([canvas_instance.temporal_axis_mapping_dict['short'][relevant_temporal_resolution][xtick] for xtick
+                                              in canvas_instance.periodic_xticks[relevant_temporal_resolution]])
+        # map specific formatting
+        elif base_plot_type == 'map':
+
+            # add land polygons
+            feature = cfeature.NaturalEarthFeature(category='physical', name='land',
+                                                   scale=get_land_polygon_resolution(canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
+                                                   **canvas_instance.plot_characteristics_templates['map']['land_polygon'])
+            ax_to_format.add_feature(feature)
+
+            # add gridlines ?
+            if 'gridlines' in plot_characteristics_vars:
+                ax_to_format.gridlines(crs=canvas_instance.datacrs, 
+                                       **plot_characteristics['gridlines'])
+
+            # set map extent (if wanted)
+            if set_extent:
+                set_map_extent(canvas_instance, read_instance, ax_to_format)
