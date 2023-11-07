@@ -5,7 +5,6 @@ import os
 import traceback
 
 import matplotlib
-from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -69,7 +68,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         filter_ext = ';;'.join(filter_ext)
         
         # prompt with file name and extension
-        fname, fext = qt_compat._getSaveFileName(None, "Choose a filename to save to", start, filter_ext)
+        fname, fext = QtWidgets.QFileDialog.getSaveFileName(None, "Choose a filename to save to", start, filter_ext)
         chose_npz = "npz" in fext
         chose_conf = "conf" in fext
         if fname:
