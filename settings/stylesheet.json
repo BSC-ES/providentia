@@ -80,6 +80,8 @@
                                   "border-radius": 5, "padding": 5},
 
     "settings_icon":             {"border": null},
+
+    "save_icon":                 {"border": null},
     
     "settings_label":            {"font": {"style": "SansSerif", "size": 9.5, "bold": true}},
 

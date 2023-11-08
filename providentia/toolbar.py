@@ -1,19 +1,22 @@
 """ Navigation toolbar and buttons/options functions"""
-import os
+
 import configparser
+import os
 import traceback
 
-from PyQt5 import QtCore, QtWidgets, QtGui
 import matplotlib
-from matplotlib.backends import qt_compat
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
+from PyQt5 import QtCore, QtGui, QtWidgets
 
+from .aux import show_message
 from .configuration import ProvConfiguration
-from .writing import export_data_npz, export_netcdf, export_configuration
-from providentia import aux
-from .dashboard_aux import InputDialog
+from .configuration import load_conf
+from .dashboard_elements import InputDialog
+from .fields_menus import metadata_conf, multispecies_conf, period_conf, representativity_conf
+from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+
 
 class NavigationToolbar(NavigationToolbar2QT):
     """ Class that updates available buttons on matplotlib toolbar. """
@@ -65,7 +68,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         filter_ext = ';;'.join(filter_ext)
         
         # prompt with file name and extension
-        fname, fext = qt_compat._getSaveFileName(None, "Choose a filename to save to", start, filter_ext)
+        fname, fext = QtWidgets.QFileDialog.getSaveFileName(None, "Choose a filename to save to", start, filter_ext)
         chose_npz = "npz" in fext
         chose_conf = "conf" in fext
         if fname:
@@ -82,11 +85,11 @@ class NavigationToolbar(NavigationToolbar2QT):
                         export_netcdf(self.canvas_instance, fname)
                     QtWidgets.QApplication.restoreOverrideCursor()
                     msg = 'The data was successfully saved in {}.'.format(fname)
-                    aux.show_message(self.read_instance, msg)
+                    show_message(self.read_instance, msg)
                 except Exception as e:
                     msg = 'There was an error saving the file.'
                     print(e)
-                    aux.show_message(self.read_instance, msg)
+                    show_message(self.read_instance, msg)
 
     def conf_dialogs(self):
         """ Pop window for selecting configuration file. If file selcted, pops an
@@ -101,7 +104,7 @@ class NavigationToolbar(NavigationToolbar2QT):
             return
 
         try:
-            aux.load_conf(self.read_instance, fpath=conf_to_load)
+            load_conf(self.read_instance, fpath=conf_to_load)
             all_sections = self.read_instance.sub_opts.keys()
             
             if len(all_sections) == 1:
@@ -118,7 +121,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         
         except Exception as e:
             msg = 'There was an error loading the configuration file.'
-            aux.show_message(self.read_instance, msg)
+            show_message(self.read_instance, msg)
 
     def filename_dialog(self):
         """" Open dialog to choose configuration file. """
@@ -169,10 +172,10 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.reset_options()
 
         # set fields available for filtering
-        aux.multispecies_conf(self.read_instance)
-        aux.representativity_conf(self.read_instance)
-        aux.period_conf(self.read_instance)
-        aux.metadata_conf(self.read_instance)
+        multispecies_conf(self.read_instance)
+        representativity_conf(self.read_instance)
+        period_conf(self.read_instance)
+        metadata_conf(self.read_instance)
         
         # filter
         self.read_instance.mpl_canvas.handle_data_filter_update()
