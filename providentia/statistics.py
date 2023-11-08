@@ -1,10 +1,4 @@
-"""
-Contains functions for the processing/calculation of statistics and colourbars
-"""
-from .calculate import Stats
-from .calculate import ExpBias
-from .aux import exceedance_lim, get_relevant_temporal_resolutions, get_nonrelevant_temporal_resolutions
-from .read_aux import drop_nans
+""" Functions for the processing/calculation of statistics and colourbars """
 
 import copy
 import json
@@ -17,6 +11,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.stats as st
+
+from .calculate import Stats, ExpBias
+from .read_aux import drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
@@ -60,7 +57,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             temporal_resolution_to_output_code = 'D'
         elif read_instance.resampling_resolution == 'monthly':
             temporal_resolution_to_output_code = 'MS'
-        elif read_instance.resampling_resolution == 'yearly':
+        elif read_instance.resampling_resolution == 'annual':
             temporal_resolution_to_output_code = 'AS'
     
     else:
@@ -335,7 +332,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 n_valid_stations = len(read_instance.valid_station_inds[networkspeci]['observations'])
             if n_valid_stations == 0:             
                 z_statistic = np.array([], dtype=np.float32)
-                active_map_valid_station_inds = np.array([], dtype=np.int)
+                active_map_valid_station_inds = np.array([], dtype=np.int64)
                 return z_statistic, active_map_valid_station_inds 
 
             # get active map valid station indices (i.e. the indices of the stations data to plot on the map)
@@ -510,7 +507,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 if not read_instance.temporal_colocation:
                     if map:
                         z_statistic = np.array([], dtype=np.float32)
-                        active_map_valid_station_inds = np.array([], dtype=np.int)
+                        active_map_valid_station_inds = np.array([], dtype=np.int64)
                         return z_statistic, active_map_valid_station_inds 
                     else: 
                         if period: 
@@ -948,3 +945,20 @@ def aggregation(data_array, statistic_aggregation, axis=0):
         sys.exit(error)
 
     return aggregated_data
+
+
+def exceedance_lim(species):
+    """ Return the exceedance limit depending on the species input. 
+        If species doesn't have a reported limit, returns np.NaN.
+
+        :param species: name of species currently selected (e.g. sconco3)
+        :type species: str
+        :return: value of exceedance limit
+        :rtype: int
+    """
+
+    exceedance_limits = {'sconco3': 90.21, 'sconcno2': 106.38}
+    if species in exceedance_limits:
+        return exceedance_limits[species]
+    else:
+        return np.NaN

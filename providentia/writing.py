@@ -1,12 +1,14 @@
 """ Module storing writing functions """
 
-import sys
 import copy
 import numpy as np
 import pandas as pd
+import sys
+
 from netCDF4 import Dataset, num2date
+
 from .configuration import write_conf
-from .dashboard_aux import InputDialog
+from .dashboard_elements import InputDialog
 
 
 def export_data_npz(canvas_instance, fname):
@@ -92,7 +94,7 @@ def export_netcdf(canvas_instance, fname):
         parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
     
     # dictionary to map python types to netcdf types
-    type_map = {np.uint8: 'u1', np.uint32: 'u4', np.object: str,
+    type_map = {np.uint8: 'u1', np.uint32: 'u4', object: str,
                 np.float32: 'f4', np.float64: 'f8'}
 
     # start file
