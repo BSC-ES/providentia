@@ -13,10 +13,12 @@
 # along with Providentia. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
+
+import logging
+import sys
+
 from .argument_parser import ProvArgumentParser
 
-import sys
-import logging
 logging.basicConfig(level=logging.WARNING)
 LOG = logging.getLogger(__name__)
 
