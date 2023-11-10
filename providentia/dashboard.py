@@ -1215,7 +1215,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
-        self.previous_filter_species = self.filter_species
         self.mpl_canvas.previous_plot_options = copy.deepcopy(self.mpl_canvas.current_plot_options) 
 
         # set new active variables as selected variables from menu
@@ -1252,6 +1251,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # set read operations to be empty list initially
         read_operations = []
+
+        print('Current', self.filter_species)
+        print('Previous', self.previous_filter_species)
 
         # if first read then need to read all data
         if self.first_read:
