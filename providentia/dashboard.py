@@ -1252,8 +1252,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set read operations to be empty list initially
         read_operations = []
 
-        print('Current', self.filter_species)
-        print('Previous', self.previous_filter_species)
 
         # if first read then need to read all data
         if self.first_read:
