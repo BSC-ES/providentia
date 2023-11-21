@@ -8,11 +8,11 @@ import matplotlib
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .aux import show_message
 from .configuration import ProvConfiguration
 from .configuration import load_conf
 from .dashboard_elements import InputDialog
 from .fields_menus import metadata_conf, multispecies_conf, period_conf, representativity_conf
+from .warnings import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))

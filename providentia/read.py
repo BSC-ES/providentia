@@ -13,13 +13,12 @@ from netCDF4 import Dataset, chartostring
 import numpy as np
 import pandas as pd
 
-from .aux import show_message
 from .plot_aux import update_plotting_parameters
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
                        init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata)
 from .spatial_colocation import (resolve_duplicate_spatial_colocation_matches, spatial_colocation_ghost, 
                                  spatial_colocation_nonghost)
-
+from .warnings import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 

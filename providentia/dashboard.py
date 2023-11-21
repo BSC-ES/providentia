@@ -15,7 +15,6 @@ import pandas as pd
 from PyQt5 import QtCore, QtWidgets
 from weakref import WeakKeyDictionary
 
-from .aux import show_message
 from .canvas import MPLCanvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
@@ -34,6 +33,7 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions,
                        temporal_resolution_order_dict, get_resampling_resolutions)
 from .toolbar import NavigationToolbar
+from .warnings import show_message
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)

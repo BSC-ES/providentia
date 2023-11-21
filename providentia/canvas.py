@@ -19,7 +19,6 @@ from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtWidgets 
 from weakref import WeakKeyDictionary
 
-from .aux import show_message
 from .canvas_menus import SettingsMenu
 from .dashboard_elements import ComboBox
 from .dashboard_elements import set_formatting
@@ -31,6 +30,7 @@ from .plot_aux import get_map_extent
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .plot_options import annotation, linear_regression, log_axes, log_validity, smooth
 from .statistics import *
+from .warnings import show_message
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
