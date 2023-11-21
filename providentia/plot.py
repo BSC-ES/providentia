@@ -1,15 +1,11 @@
 """ Functions to generate plots """
 
 import copy
-from datetime import datetime
 import json
-import math
 import os
-import time
 
 import cartopy
 import cartopy.crs as ccrs
-import cartopy.feature as cfeature
 from KDEpy import FFTKDE
 from itertools import groupby
 import matplotlib
@@ -17,17 +13,13 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
 from matplotlib.projections import PolarAxes
 import matplotlib.pyplot as plt
-import matplotlib.style as mplstyle
-import matplotlib.ticker as ticker
 import mpl_toolkits.axisartist.floating_axes as fa
-import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
 import pyproj
-import scipy.stats as st
 import seaborn as sns
 
-from .aux import show_message
+from .dashboard_interactivity import HoverAnnotation
 from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info
 from .read_aux import drop_nans
 from .plot_aux import (get_multispecies_aliases, get_taylor_diagram_ghelper_info, kde_fft, merge_cells, 
@@ -194,7 +186,6 @@ class Plot:
                     self.canvas_instance.plot_characteristics[plot_type]['figure']['figsize'] = self.canvas_instance.landscape_figsize
                 elif self.canvas_instance.plot_characteristics[plot_type]['orientation'] == 'portrait':
                     self.canvas_instance.plot_characteristics[plot_type]['figure']['figsize'] = self.canvas_instance.portrait_figsize
-
 
     def make_legend_handles(self, plot_characteristics_legend, plot_options=[]):
         """ Make legend element handles.
@@ -1659,7 +1650,13 @@ class Plot:
 
         # create and hide annotation at (0, 0)
         if not self.read_instance.offline:
-            self.canvas_instance.create_taylor_annotation()
+            annotation = HoverAnnotation(self.canvas_instance, 
+                                         'taylor', 
+                                         relevant_axis,
+                                         plot_characteristics, 
+                                         add_vline=False)
+            self.canvas_instance.annotations['taylor'] = annotation.annotation
+            self.canvas_instance.annotations_lock['taylor'] = False
 
         # adjust top axis (curve)
         relevant_axis.axis['top'].set_axis_direction('bottom')
