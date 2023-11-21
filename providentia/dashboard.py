@@ -1127,9 +1127,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.annotations_vline[changed_plot_type][resolution] = annotation.vline
             
             # connect axis to hover function
-            plot_type = 'periodic_violin' if changed_plot_type == 'periodic-violin' else 'periodic'
-            func = getattr(annotation, 'hover_' + plot_type + '_annotation')
-            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', lambda event: func(event))
+            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
             
         elif changed_plot_type in ['timeseries', 'scatter', 'distribution', 'taylor']:
             # create annotation on hover
@@ -1149,9 +1148,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.annotations_vline[changed_plot_type] = annotation.vline
             
             # connect axis to hover function
-            func = getattr(annotation, 'hover_' + changed_plot_type + '_annotation')
-            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', lambda event: func(event))
-        
+            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                lambda event: annotation.hover_annotation(event, changed_plot_type))
+
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
             and MPL canvas upon pressing of READ button.
