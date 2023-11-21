@@ -56,6 +56,10 @@ class Providentia(object):
             if args.offline:
                 from . import offline as offline
                 offline.main(**res)
+            elif args.interactive:
+                print('YEP')
+                from . import interactive as interactive
+                interactive.main(**res)
             else:
                 from . import dashboard as dashboard
                 dashboard.main(**res)
@@ -67,12 +71,17 @@ class Providentia(object):
 def main():
     """ Main function. """
     
+    print('WHEN')
     if Providentia(ProvArgumentParser()).main() is False:
+        print('IN')
         sys.exit(1)
-    sys.exit(0)
+    print('ROME')
+    #sys.exit(0)
 
 
 if __name__ == "__main__":
     if Providentia(ProvArgumentParser()).main() is False:
+        print('TESTING')
         sys.exit(1)
+    print('123')
     sys.exit(0)
