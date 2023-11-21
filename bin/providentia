@@ -30,7 +30,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:J:q:m:V
-LONG=usage,cores:,jobname:,queue:,mem:,constraint:,help,version,debug,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,offline,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
+LONG=usage,cores:,jobname:,queue:,mem:,constraint:,help,version,debug,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,offline,interactive,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -41,6 +41,9 @@ PARSED=$(getopt --options ${SHORT} \
 if [[ $? -ne 0 ]]; then
     exit 2
 fi
+
+# reset SLURM_EXPORT_ENV so that things like srun & sbatch work out of the box
+    export SLURM_EXPORT_ENV=ALL
 
 # update key arguments for job submission
 OTHEROPTS=""
@@ -170,7 +173,9 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
         fi
     else
         if $debugexec; then
-            eval "srun ${python_command}"
+            echo "HIYA"
+            #eval "srun ${python_command}"
+            eval "${python_command}"
         else
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
             eval "${load_command}"
