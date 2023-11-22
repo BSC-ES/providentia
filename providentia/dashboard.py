@@ -5,25 +5,22 @@ import datetime
 import json
 import os
 import sys
-import time
 
 from collections import OrderedDict
 from functools import partial
-import matplotlib
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
-from pandas.plotting import register_matplotlib_converters
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from weakref import WeakKeyDictionary
 
-from .aux import show_message
 from .canvas import MPLCanvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog
 from .dashboard_elements import set_formatting
+from .dashboard_interactivity import HoverAnnotation
 from .fields_menus import (init_experiments, init_flags, init_qa, init_metadata, init_multispecies, init_period, 
                            init_representativity, metadata_conf, multispecies_conf, representativity_conf, period_conf, 
                            update_metadata_fields, update_period_fields, update_representativity_fields)
@@ -36,6 +33,7 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions,
                        temporal_resolution_order_dict, get_resampling_resolutions)
 from .toolbar import NavigationToolbar
+from .warnings import show_message
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -799,7 +797,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
     
-        # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.7.2 is available
+        # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.8 is available
         # # remove plot types that need active temporal colocation and experiments data
         # for plot_type in ['scatter', 'taylor']:
         #     if ((not self.temporal_colocation) 
@@ -1110,80 +1108,50 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=28))
 
-        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
-        if changed_plot_type == 'timeseries':
-
-            # setup timeseries annotation
-            canvas_instance.create_timeseries_annotation()
-            canvas_instance.create_timeseries_annotation_vline()
-            canvas_instance.lock_timeseries_annotation = False
-            canvas_instance.timeseries_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                                                                                                    canvas_instance.hover_timeseries_annotation)
-            canvas_instance.annotation_elements.extend([canvas_instance.timeseries_annotation,
-                                                        canvas_instance.timeseries_vline])
-
-        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
-        elif changed_plot_type == 'scatter':
-
-            # setup scatter annotation
-            canvas_instance.create_scatter_annotation()
-            canvas_instance.lock_scatter_annotation = False
-            canvas_instance.scatter_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                                                                                                 canvas_instance.hover_scatter_annotation)
-            canvas_instance.annotation_elements.extend([canvas_instance.scatter_annotation])
-
-        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
-        elif changed_plot_type == 'distribution':
-
-            # setup distribution annotation
-            canvas_instance.create_distribution_annotation()
-            canvas_instance.create_distribution_annotation_vline()
-            canvas_instance.lock_distribution_annotation = False
-            canvas_instance.distribution_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                                                                                                      canvas_instance.hover_distribution_annotation)
-            canvas_instance.annotation_elements.extend([canvas_instance.distribution_annotation,
-                                                        canvas_instance.distribution_vline])
-
-        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
-        elif changed_plot_type == 'periodic':
-            
-            # setup periodic annotation
-            canvas_instance.create_periodic_annotation()
-            canvas_instance.create_periodic_annotation_vline()
-            canvas_instance.lock_periodic_annotation = dict()
-            for resolution in canvas_instance.plot_axes['periodic'].keys():
-                canvas_instance.lock_periodic_annotation[resolution] = False
-            canvas_instance.periodic_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                                                                                                  canvas_instance.hover_periodic_annotation)
-            canvas_instance.annotation_elements.extend([canvas_instance.periodic_annotation,
-                                                        canvas_instance.periodic_vline])
-
-        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
-        elif changed_plot_type == 'periodic-violin':
-            
-            # setup periodic violin annotation
-            canvas_instance.create_periodic_violin_annotation()
-            canvas_instance.create_periodic_violin_annotation_vline()
-            canvas_instance.lock_periodic_violin_annotation = dict()
-            for resolution in canvas_instance.plot_axes['periodic-violin'].keys():
-                canvas_instance.lock_periodic_violin_annotation[resolution] = False
-            canvas_instance.periodic_violin_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                                                                                                         canvas_instance.hover_periodic_violin_annotation)
-
-            canvas_instance.annotation_elements.extend([canvas_instance.periodic_violin_annotation,
-                                                        canvas_instance.periodic_violin_vline])
-
-        # additional changes needed when defining the layout in the configuration changing active_dashboard_plots
-        elif changed_plot_type == 'taylor':
-            
-            # initialise polar axis
+        # initialise polar axis for Taylor plots
+        if changed_plot_type == 'taylor':
             canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
 
-            # setup taylor annotation
-            canvas_instance.lock_taylor_annotation = False
-            canvas_instance.taylor_annotation_event = canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                                                                                                canvas_instance.hover_taylor_annotation)
-            canvas_instance.annotation_elements.extend([canvas_instance.taylor_annotation])
+        # setup annotations
+        if changed_plot_type in ['periodic', 'periodic-violin']:
+            # create annotation on hover
+            for resolution in canvas_instance.plot_axes[changed_plot_type].keys():
+                annotation = HoverAnnotation(canvas_instance, 
+                                             changed_plot_type, 
+                                             canvas_instance.plot_axes[changed_plot_type][resolution],
+                                             canvas_instance.plot_characteristics[changed_plot_type], 
+                                             add_vline=True,
+                                             resolution=resolution)
+                canvas_instance.annotations[changed_plot_type][resolution] = annotation.annotation
+                canvas_instance.annotations_lock[changed_plot_type][resolution] = False
+                canvas_instance.annotations_vline[changed_plot_type][resolution] = annotation.vline
+            
+            # connect axis to hover function
+            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
+            
+        elif changed_plot_type in ['timeseries', 'scatter', 'distribution']:
+
+            # add vertical line to timeseries and distribution plots
+            if changed_plot_type in ['timeseries', 'distribution']:
+                add_vline = True
+            else:
+                add_vline = False
+
+            # create annotation on hover
+            annotation = HoverAnnotation(canvas_instance, 
+                                         changed_plot_type, 
+                                         canvas_instance.plot_axes[changed_plot_type],
+                                         canvas_instance.plot_characteristics[changed_plot_type], 
+                                         add_vline=add_vline)
+            canvas_instance.annotations[changed_plot_type] = annotation.annotation
+            canvas_instance.annotations_lock[changed_plot_type] = False
+            if add_vline:
+                canvas_instance.annotations_vline[changed_plot_type] = annotation.vline
+
+            # connect axis to hover function
+            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                lambda event: annotation.hover_annotation(event, changed_plot_type))
 
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
@@ -1251,7 +1219,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # set read operations to be empty list initially
         read_operations = []
-
 
         # if first read then need to read all data
         if self.first_read:

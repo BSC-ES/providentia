@@ -5,9 +5,9 @@ import copy
 import numpy as np
 import pandas as pd
 
-from .aux import show_message
 from .calculate import Stats
 from .configuration import split_options
+from .warnings import show_message
 
 
 class DataFilter:
@@ -531,7 +531,7 @@ class DataFilter:
                         station_data_availability_number = np.array([])
                     else:
                         station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
-                    
+                        
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
                         np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
