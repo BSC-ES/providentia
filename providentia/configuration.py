@@ -164,8 +164,12 @@ class ProvConfiguration:
         elif key == 'ghost_version':
             # parse GHOST version
 
-            # import GHOST standards
+            print('setting ghost version',value)
+            # import GHOST standards 
+            sys.path = [path for path in sys.path if 'dependencies/GHOST_standards/' not in path]            
             sys.path.insert(1, os.path.join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(value)))
+            if 'GHOST_standards' in sys.modules:
+                del sys.modules['GHOST_standards']
             from GHOST_standards import standard_parameters
             from GHOST_standards import get_standard_metadata
             from GHOST_standards import standard_data_flag_name_to_data_flag_code
