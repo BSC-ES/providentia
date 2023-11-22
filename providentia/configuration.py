@@ -163,6 +163,7 @@ class ProvConfiguration:
         elif key == 'ghost_version':
             # parse GHOST version
 
+            print('entering ghost version', value)
             # import GHOST standards
             sys.path.insert(1, os.path.join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(value)))
             from GHOST_standards import standard_parameters
