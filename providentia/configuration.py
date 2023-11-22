@@ -11,8 +11,8 @@ import sys
 import numpy as np
 import pandas as pd
 
-from .aux import show_message
 from .read_aux import check_for_ghost, get_default_qa
+from .warnings import show_message
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))

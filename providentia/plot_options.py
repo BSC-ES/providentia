@@ -5,6 +5,7 @@ import numpy as np
 
 from .read_aux import drop_nans
 from .statistics import calculate_statistic, get_z_statistic_info
+from .warnings import show_message
 
 
 def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
