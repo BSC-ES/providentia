@@ -22,6 +22,9 @@
                     "minimum_bias": [0.0], "units": "measurement_units", "cmap_absolute": "viridis", 
                     "cmap_bias": "RdYlBu_r"},
 
+    "NData":       {"function": "calculate_data_avail_number", "order": 3, "label": "N Data Points", "arguments": {}, 
+                    "minimum_bias": [0.0], "units": "", "cmap_absolute": "viridis", "cmap_bias": "RdYlBu_r"},
+
     "Data%":       {"function": "calculate_data_avail_fraction", "order": 3, "label": "Data Availability", 
                     "arguments": {}, "minimum_bias": [0.0], "vmin_absolute": 0.0, "vmax_absolute": 100.0, "units": "%",
                     "cmap_absolute": "viridis", "cmap_bias": "RdYlBu_r"},
