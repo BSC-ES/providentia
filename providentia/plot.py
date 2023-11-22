@@ -1555,9 +1555,6 @@ class Plot:
             :type stddev_max: float
         """
 
-        # get polar axis here
-        self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
-
         # calculate statistics
         stats_dict = {}
 
@@ -1579,12 +1576,12 @@ class Plot:
         stats_dict['StdDev'] = stats_calc   
 
         # correlation - between observations and model
-        corr_stat = plot_characteristics['taylor']['corr_stat']
+        corr_stat = plot_characteristics['corr_stat']
         stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, corr_stat, 
                                          ['observations']*len(data_labels_sans_obs), data_labels_sans_obs)
         stats_calc = np.insert(stats_calc, obs_index, np.NaN)
-        stats_dict['StdDev'] = corr_stat 
-
+        stats_dict[corr_stat] = stats_calc
+        
         # get maximum stddev in dataframe (if not defined)
         if not stddev_max:
             stddev_max = np.nanmax(stats_dict["StdDev"])
@@ -1594,9 +1591,9 @@ class Plot:
                                 index=data_labels,
                                 dtype=np.float64)
 
-        # get labels 
-        rlabel = stats_df.columns[0]
-        xylabel = stats_df.columns[1]
+        # get labels
+        rlabel = stats_df.columns[1]
+        xylabel = stats_df.columns[0]
 
         # check if we need to extend the axis to negative correlations
         extend = False
@@ -1648,16 +1645,6 @@ class Plot:
         relevant_axis.grid(**plot_characteristics['grid'])
         relevant_axis.adjust_axes_lim()
 
-        # create and hide annotation at (0, 0)
-        if not self.read_instance.offline:
-            annotation = HoverAnnotation(self.canvas_instance, 
-                                         'taylor', 
-                                         relevant_axis,
-                                         plot_characteristics, 
-                                         add_vline=False)
-            self.canvas_instance.annotations['taylor'] = annotation.annotation
-            self.canvas_instance.annotations_lock['taylor'] = False
-
         # adjust top axis (curve)
         relevant_axis.axis['top'].set_axis_direction('bottom')
         relevant_axis.axis['top'].toggle(ticklabels=True, label=True)
@@ -1705,6 +1692,19 @@ class Plot:
         ref_x = np.linspace(0, tmax)
         ref_y = np.zeros_like(ref_x) + reference_stddev
         self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contours']['style']['obs'])
+
+        # create annotation on hover
+        annotation = HoverAnnotation(self.canvas_instance, 
+                                     'taylor', 
+                                     self.taylor_polar_relevant_axis,
+                                     plot_characteristics, 
+                                     add_vline=False)
+        self.canvas_instance.annotations['taylor'] = annotation.annotation
+        self.canvas_instance.annotations_lock['taylor'] = False
+
+        # connect axis to hover function
+        self.canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+            lambda event: annotation.hover_annotation(event, 'taylor'))
 
         # add models
         for data_label, stddev, corr_stat in zip(stats_df.index, 
