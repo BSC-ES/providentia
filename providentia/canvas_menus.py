@@ -14,7 +14,7 @@ settings_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/canvas_me
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
 
 
-class SettingsMenu():
+class SettingsMenu(object):
 
     def __init__(self, plot_type, canvas_instance):
         
