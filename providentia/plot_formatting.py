@@ -172,14 +172,14 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             if base_plot_type not in ['periodic', 'periodic-violin']:
                 xlim_min = np.min(all_xlim_lower)
                 xlim_max = np.max(all_xlim_upper)
-                xlim = xlim_min, xlim_max
+                xlim = {'left':xlim_min, 'right':xlim_max}
         elif 'xlim' in plot_characteristics:
             xlim = plot_characteristics['xlim']
 
         # set xlim
         if xlim is not None:
             if (base_plot_type not in ['timeseries', 'boxplot']) and ('equal_aspect' not in plot_characteristics):
-                ax.set_xlim(xlim)
+                ax.set_xlim(**xlim)
 
         # get ylim
         if ylim is None and ('ylim' not in plot_characteristics):
@@ -193,13 +193,13 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
                     ylim_min = -np.abs(np.min(all_ylim_lower))
                     ylim_max = np.abs(np.min(all_ylim_lower))
-            ylim = ylim_min, ylim_max
+            ylim = {'bottom':ylim_min, 'top':ylim_max}
         elif 'ylim' in plot_characteristics:
             ylim = plot_characteristics['ylim']
 
         # set ylim
         if (ylim is not None) and ('equal_aspect' not in plot_characteristics):
-            ax.set_ylim(ylim)
+            ax.set_ylim(**ylim)
         
     # get minimum and maximum from all axes and set limits for periodic plots
     if base_plot_type in ['periodic', 'periodic-violin']:
@@ -220,29 +220,29 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 elif temporal_resolution == 'month':
                     xlim_lower = first_valid_x - 0.55
                     xlim_upper = last_valid_x + 0.55
-                xlim = xlim_lower, xlim_upper
-                sub_ax.set_xlim(xlim)
+                xlim = {'left':xlim_lower, 'right':xlim_upper}
+                sub_ax.set_xlim(**xlim)
         elif 'xlim' in plot_characteristics:
             xlim = plot_characteristics['xlim']
             for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
-                sub_ax.set_xlim(xlim)
+                sub_ax.set_xlim(**xlim)
 
     # get minimum and maximum from all axes and set limits for timeseries
     elif base_plot_type == 'timeseries':
         if plot_characteristics['xtick_alteration']['define']:
         
             # get steps for all data labels
-            steps = pd.date_range(xlim[0], xlim[1], freq=read_instance.active_frequency_code)
+            steps = pd.date_range(xlim['left'], xlim['right'], freq=read_instance.active_frequency_code)
 
             # get number of months and days
-            n_months = (12*(xlim[1].year - xlim[0].year) + (xlim[1].month - xlim[0].month))
-            n_days = (xlim[1] - xlim[0]).days
+            n_months = (12*(xlim['right'].year - xlim['left'].year) + (xlim['right'].month - xlim['left'].month))
+            n_days = (xlim['right'] - xlim['left']).days
 
             # get months that are complete
-            months_start = pd.date_range(xlim[0], xlim[1], freq='MS')
-            months_end = pd.date_range(xlim[0], xlim[1], freq='M')
+            months_start = pd.date_range(xlim['left'], xlim['right'], freq='MS')
+            months_end = pd.date_range(xlim['left'], xlim['right'], freq='M')
             if months_start.size > 1:
-                if (xlim[1] - months_end[-1]).days >= 1:
+                if (xlim['right'] - months_end[-1]).days >= 1:
                     months = months_start[:-1]
                 else:
                     months = months_start
@@ -269,12 +269,12 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             # transform to numpy.datetime64
             if not isinstance(xticks[0], np.datetime64):
                 xticks = [x.to_datetime64() for x in xticks]
-            if not isinstance(xlim[1], np.datetime64):
-                xlim = xlim[0], np.datetime64(xlim[1])
+            if not isinstance(xlim['right'], np.datetime64):
+                xlim = {'left':xlim['left'], 'right':np.datetime64(xlim['right'])}
 
             # add last step to xticks
-            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != xlim[1]):
-                xticks = np.append(xticks, xlim[1])
+            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != xlim['right']):
+                xticks = np.append(xticks, xlim['right'])
 
             # set modified xticks
             for ax in relevant_axs_active:
@@ -494,11 +494,11 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
 
         # set xlim?
         if 'xlim' in plot_characteristics_vars:
-            ax_to_format.set_xlim(**plot_characteristics_vars['xlim'])
+            ax_to_format.set_xlim(**plot_characteristics['xlim'])
 
         # set ylim? 
         if 'ylim' in plot_characteristics_vars:
-            ax_to_format.set_ylim(**plot_characteristics_vars['ylim'])
+            ax_to_format.set_ylim(**plot_characteristics['ylim'])
 
         # add gridlines (x and y)?
         if 'grid' in plot_characteristics_vars:
