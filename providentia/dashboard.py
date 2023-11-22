@@ -797,7 +797,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
     
-        # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.7.2 is available
+        # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.8 is available
         # # remove plot types that need active temporal colocation and experiments data
         # for plot_type in ['scatter', 'taylor']:
         #     if ((not self.temporal_colocation) 
@@ -1130,13 +1130,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
             
-        elif changed_plot_type in ['timeseries', 'scatter', 'distribution', 'taylor']:
-            # create annotation on hover
+        elif changed_plot_type in ['timeseries', 'scatter', 'distribution']:
+
             # add vertical line to timeseries and distribution plots
             if changed_plot_type in ['timeseries', 'distribution']:
                 add_vline = True
             else:
                 add_vline = False
+
+            # create annotation on hover
             annotation = HoverAnnotation(canvas_instance, 
                                          changed_plot_type, 
                                          canvas_instance.plot_axes[changed_plot_type],
@@ -1146,7 +1148,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.annotations_lock[changed_plot_type] = False
             if add_vline:
                 canvas_instance.annotations_vline[changed_plot_type] = annotation.vline
-            
+
             # connect axis to hover function
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_annotation(event, changed_plot_type))
@@ -1217,7 +1219,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # set read operations to be empty list initially
         read_operations = []
-
 
         # if first read then need to read all data
         if self.first_read:

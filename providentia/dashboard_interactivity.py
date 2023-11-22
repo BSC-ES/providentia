@@ -255,37 +255,34 @@ def legend_picker_func(canvas_instance, event):
 class HoverAnnotation(object):
 
     def __init__(self, canvas_instance, plot_type, ax, plot_characteristics, add_vline=False, resolution=None):
-
-        self.canvas_instance = canvas_instance
-        self.ax = ax
         
-        # Get reference coordinates
+        self.canvas_instance = canvas_instance
+        
+        # get reference coordinates
         if plot_type == 'map':
             xycoords = canvas_instance.datacrs._as_mpl_transform(ax)
         else:
             xycoords = 'data'
 
-        # Using matplotlib < 3.3.0, text corresponds to s
+        # create annotation
+        # using matplotlib < 3.3.0, text corresponds to s
+        annotation_dict = {"xy": [0, 0], 
+                           "xycoords": xycoords, 
+                           "bbox": {**plot_characteristics['marker_annotate_bbox']},
+                           "arrowprops": {**plot_characteristics['marker_annotate_arrowprops']}}
         if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
-            self.annotation = ax.annotate(
-                text='', xy=(0, 0), xycoords=xycoords,
-                **plot_characteristics['marker_annotate'],
-                bbox={**plot_characteristics['marker_annotate_bbox']},
-                arrowprops={**plot_characteristics['marker_annotate_arrowprops']})
+            annotation_dict["text"] = ""
         else:
-            self.annotation = ax.annotate(
-                s='', xy=(0, 0), xycoords=xycoords,
-                **plot_characteristics['marker_annotate'],
-                bbox={**plot_characteristics['marker_annotate_bbox']},
-                arrowprops={**plot_characteristics['marker_annotate_arrowprops']})
+            annotation_dict["s"] = ""
+        self.annotation = ax.annotate(**{**annotation_dict, **plot_characteristics['marker_annotate']})
         
-        # Hide when it is initialised
+        # hide when it is initialised
         self.annotation.set_visible(False)
 
-        # Add to elements for legend picking
+        # add to elements for legend picking
         canvas_instance.annotation_elements.extend([self.annotation])
 
-        # Add vertical line
+        # add vertical line
         if add_vline:
             self.vline = ax.axvline(0, 
                 **plot_characteristics['marker_annotate_vline'])
@@ -300,7 +297,7 @@ class HoverAnnotation(object):
         
         # activate hover over plot
         if (plot_type in self.canvas_instance.read_instance.active_dashboard_plots):
-            if event.inaxes == self.ax:
+            if event.inaxes == self.canvas_instance.plot_axes[plot_type]:
                 if ((hasattr(self.canvas_instance.plot, plot_type + '_plot')) 
                     and (plot_type in self.canvas_instance.plot_elements)
                     and (self.canvas_instance.annotations_lock[plot_type] == False)):
@@ -519,7 +516,7 @@ class HoverAnnotation(object):
         return None
 
     def update_taylor_annotation(self, annotation_index):
-
+        
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
             # for annotate data label
@@ -536,7 +533,7 @@ class HoverAnnotation(object):
 
                 # update location
                 self.annotation.xy = (corr_stat, stddev)
-                
+
                 # update bbox position
                 corr_stat_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
                 if corr_stat > corr_stat_middle:
@@ -769,7 +766,7 @@ class HoverAnnotation(object):
         """ Function that annotates on hover in map.
         """
 
-        if (not self.canvas_instance.lock_zoom) & (event.inaxes == self.ax):
+        if (not self.canvas_instance.lock_zoom) & (event.inaxes == self.canvas_instance.plot_axes['map']):
 
             # activate hover over map
             if (hasattr(self.canvas_instance.plot, 'stations_scatter')):
