@@ -34,18 +34,11 @@ expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experimen
 class ProvidentiaInteractive:
     """ Class to create interactive Providentia session."""
 
-    # make sure that we are not using Qt5 backend with matplotlib
-    matplotlib.use('Agg')
-
     def __init__(self, **kwargs):
-        print("Starting Providentia interactive...")
 
         # initialise default configuration variables
-        # modified by commandline arguments, if given
+        # modified by passed arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
-
-        # update self with command line arguments
-        self.commandline_arguments = copy.deepcopy(kwargs)
 
         # update variables from config file
         if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
@@ -56,11 +49,7 @@ class ProvidentiaInteractive:
             sys.exit(error)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
-            #sys.exit(error)
-            return
-
-        # load report plot presets
-        self.report_plots = json.load(open(os.path.join(CURRENT_PATH, '../settings/report_plots.json')))
+            sys.exit(error)
 
         # create dictionary of all available observational GHOST data
         self.all_observation_data = get_ghost_observational_tree(self)
@@ -85,35 +74,6 @@ class ProvidentiaInteractive:
         for k, val in self.section_opts.items():
             setattr(self, k, provconf.parse_parameter(k, val))
 
-        # now all variables have been parsed, check validity of those, throwing errors where necessary
-        provconf.check_validity()
-
-        # set some key configuration variables
-        self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
-        self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
-        self.data_labels = ['observations'] + list(self.experiments.keys())
-        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
-
-        # get valid observations in date range
-        get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
-
-        # update available experiments for selected fields
-        get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
-                                self.network, self.species)
-
-        # read data
-        self.datareader.read_setup(['reset'])
-        
-        # initialise previous QA, flags and filter species as section values
-        self.previous_qa = copy.deepcopy(self.qa)
-        self.previous_flags = copy.deepcopy(self.flags)
-        self.previous_filter_species = copy.deepcopy(self.filter_species)
-
-        # if no valid data has been found be to be read, then proceed no further
-        if self.invalid_read:
-            print('No valid data for {} section'.format(section))
-            return
-
         # get subsection names
         self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
                                         if self.section == subsection_name.split('·')[0]]
@@ -130,26 +90,44 @@ class ProvidentiaInteractive:
             self.subsection_opts = {k: (self.section_opts[k] if k in self.fixed_section_vars else val) 
                                     for (k, val) in self.subsection_opts.items()}
 
-            # reinitialise default configuration variables
-            # modified by commandline arguments, if given
-            provconf = ProvConfiguration(self, **self.commandline_arguments)
-
             # update subsection variables
             for k, val in self.subsection_opts.items():
                 setattr(self, k, provconf.parse_parameter(k, val))
-
-            # now all variables have been parsed, check validity of those, throwing errors where necessary
-            provconf.check_validity()
-
         else:
             self.subsection = [self.section]
+
+        # now all variables have been parsed, check validity of those, throwing errors where necessary
+        provconf.check_validity()
+
+        # check for self defined plot characteristics file
+        if self.plot_characteristics_filename == '':
+            self.plot_characteristics_filename = os.path.join(CURRENT_PATH, '../settings/plot_characteristics_offline.json')
+        self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
+
+        # set some key configuration variables
+        self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
+        self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
+        self.data_labels = ['observations'] + list(self.experiments.keys())
+        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
+
+        # get valid observations in date range
+        get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
+
+        # update available experiments for selected fields
+        get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
+                                self.network, self.species)
 
         # if have no experiments, force temporal colocation to be False
         if len(self.experiments) == 0:
             self.temporal_colocation = False    
 
         # read data
+        print("Reading data\n")
         self.datareader.read_setup(['reset'])
+
+        if self.invalid_read:
+            print('No valid data to read')
+            return
 
         # update fields available for filtering
         init_representativity(self)
@@ -168,13 +146,15 @@ class ProvidentiaInteractive:
         #self.previous_filter_species = copy.deepcopy(self.filter_species)
 
         # filter dataset for current subsection
-        print('\nFiltering data')
+        print('Filtering data\n')
         DataFilter(self)
 
-def main(**kwargs):
-    """ Main function when running interactive mode"""
-    print('XX')
-    ProvidentiaInteractive(**kwargs)
+def read(**kwargs):
 
-def read():
-    print('hi')
+    kwargs['offline'] = True
+
+    # initialise interactive class 
+    ProvInt = ProvidentiaInteractive(**kwargs)
+
+    return ProvInt
+

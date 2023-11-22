@@ -527,8 +527,11 @@ class DataFilter:
                     obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
 
                     # get absolute data availability number per station in observational data array
-                    station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
-
+                    if obs_data.size == 0:
+                        station_data_availability_number = np.array([])
+                    else:
+                        station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
+                    
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
                         np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
@@ -539,7 +542,10 @@ class DataFilter:
                         obs_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
 
                         # get absolute data availability number per station in observational data array
-                        station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
+                        if obs_data.size == 0:
+                            station_data_availability_number = np.array([])
+                        else:
+                            station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
                         
                         # get indices of stations with > 1 available measurements
                         self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
@@ -560,7 +566,10 @@ class DataFilter:
                     exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),valid_station_inds,:])
 
                     # get absolute data availability number per station in experiment data array
-                    station_data_availability_number = Stats.calculate_data_avail_number(exp_data)
+                    if exp_data.size == 0:
+                        station_data_availability_number = np.array([])
+                    else:
+                        station_data_availability_number = Stats.calculate_data_avail_number(exp_data)
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
@@ -572,7 +581,10 @@ class DataFilter:
                     exp_data = exp_data[valid_station_inds,:]
 
                     # get absolute data availability number per station in experiment data array
-                    station_data_availability_number = Stats.calculate_data_avail_number(exp_data)
+                    if exp_data.size == 0:
+                        station_data_availability_number = np.array([])
+                    else:
+                        station_data_availability_number = Stats.calculate_data_avail_number(exp_data)
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
