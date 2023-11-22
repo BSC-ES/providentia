@@ -86,8 +86,6 @@ def export_netcdf(canvas_instance, fname):
         
     # set up some structural variables
     read_instance = canvas_instance.read_instance
-    sys.path.append('/gpfs/projects/bsc32/AC_cache/obs/ghost/GHOST_standards/{}'
-                    .format(read_instance.ghost_version))
     from GHOST_standards import standard_parameters, get_standard_data, get_standard_metadata
     parameter_dictionary = {}
     for _, param_dict in standard_parameters.items():
