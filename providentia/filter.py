@@ -5,9 +5,9 @@ import copy
 import numpy as np
 import pandas as pd
 
-from .aux import show_message
 from .calculate import Stats
 from .configuration import split_options
+from .warnings import show_message
 
 
 class DataFilter:
