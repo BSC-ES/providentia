@@ -3,6 +3,9 @@
 import math
 
 import matplotlib as mpl
+from matplotlib.projections import PolarAxes
+import mpl_toolkits.axisartist.floating_axes as fa
+import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 from scipy.signal import convolve, gaussian
 from scipy.sparse import coo_matrix
