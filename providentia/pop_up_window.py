@@ -8,9 +8,9 @@ import time
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
-from .aux import show_message
 from .read_aux import get_default_qa
 from .dashboard_elements import set_formatting, wrap_tooltip_text
+from .warnings import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
