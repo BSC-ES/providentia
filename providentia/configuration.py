@@ -11,8 +11,8 @@ import sys
 import numpy as np
 import pandas as pd
 
-from .aux import show_message
 from .read_aux import check_for_ghost, get_default_qa
+from .warnings import show_message
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -164,7 +164,6 @@ class ProvConfiguration:
         elif key == 'ghost_version':
             # parse GHOST version
 
-            print('setting ghost version',value)
             # import GHOST standards 
             sys.path = [path for path in sys.path if 'dependencies/GHOST_standards/' not in path]            
             sys.path.insert(1, os.path.join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(value)))

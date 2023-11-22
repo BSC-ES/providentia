@@ -12,7 +12,7 @@ process_type = 'VRA'
 # please indicate the year of station files to process (YYYY)
 station_year = '2019'
 # please indicate the GHOST version
-ghost_version = '1.4'
+ghost_version = '1.5'
 # please indicate the species to process (as a list)
 species = ['O3', 'NO2', 'CO', 'SO2', 'PM10', 'PM25']
 # please indicate the GHOST network to use
