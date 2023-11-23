@@ -43,5 +43,5 @@
                   "table-Median", "table-Median_bias", "table-Mean_multispecies", 
                   "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias"],
     
-    "debug": ["statsummary_multispecies"]
+    "debug": ["statsummary_multispecies", "timeseries"]
 }
