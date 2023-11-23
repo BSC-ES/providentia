@@ -1141,12 +1141,6 @@ class Plot:
             :param stats_df: pandas dataframe
         """
 
-        # determine if want to add annotations or not from plot_options
-        if 'annotate' in plot_options:
-            annotate = True
-        else:
-            annotate = False
-
         # bias plot?
         if 'bias' in plot_options:
             bias = True
@@ -1185,9 +1179,6 @@ class Plot:
         else:
             obs_label = 'Observations'
 
-        # round dataframe
-        stats_df = stats_df.round(plot_characteristics['round_decimal_places']['table'])
-
         # get subsections
         subsections = list(np.unique(stats_df.index.get_level_values(1)))
 
@@ -1201,12 +1192,21 @@ class Plot:
             if (len(subsections) == 1) or (plotting_paradigm == 'station'):
                 stats_df = stats_df.droplevel(level='subsections')
 
+        # determine if want to add annotations or not from plot_options
+        if 'annotate' in plot_options:
+            # get rounded labels
+            decimal_places = plot_characteristics['round_decimal_places']['table']
+            annotate = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
+        else:
+            annotate = False
+
         # plot heatmap
         heatmap = sns.heatmap(stats_df, 
                               ax=relevant_axis, 
                               annot=annotate,
+                              fmt='',
                               **plot_characteristics['plot'])
-
+        
         # remove networkspecies-subsections label from y-axis
         relevant_axis.set_ylabel("")
 
