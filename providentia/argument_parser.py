@@ -120,10 +120,10 @@ class ProvArgumentParser(object):
                                      help="set filename for plot characteristics")
             self.parser.add_argument("--harmonise_stations",
                                      dest="harmonise_stations",
-                                     help="harmonise axis limits across stations for stations report")                     
+                                     help="harmonise axes limits across stations for stations report")                     
             self.parser.add_argument("--harmonise_summary",
                                      dest="harmonise_summary",
-                                     help="harmonise axis limits across subsections for summary report")
+                                     help="harmonise axes limits across subsections for summary report")
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
