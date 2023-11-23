@@ -594,12 +594,16 @@ def get_axes_vminmax(axs):
             if ((isinstance(collection, matplotlib.collections.PathCollection)) or 
                 (isinstance(collection, matplotlib.collections.QuadMesh))):
                 col_array = collection.get_array()
-                ax_min.append(np.nanmin(col_array))
-                ax_max.append(np.nanmax(col_array))
-    plotted_min = np.nanmin(ax_min)
-    plotted_max = np.nanmax(ax_max)
-
-    return plotted_min, plotted_max
+                if (len(col_array) > 0):
+                    ax_min.append(np.nanmin(col_array))
+                    ax_max.append(np.nanmax(col_array))
+        
+    if (len(ax_min) > 0) and (len(ax_max) > 0):
+        plotted_min = np.nanmin(ax_min)
+        plotted_max = np.nanmax(ax_max)
+        return plotted_min, plotted_max
+    else:
+        return np.NaN, np.NaN
 
 def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci):
     """ Function that generates neccessary detail to crate colourbar.
@@ -748,6 +752,11 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
 
     # get plotted vmin and vmax over relevant axes
     plotted_min, plotted_max = get_axes_vminmax(axs)
+    if np.isnan(plotted_min) or np.isnan(plotted_max):
+        for cb_ax in cb_axs:
+            cb_ax.axis('off')
+            cb_ax.set_visible(False)
+        return
 
     # get colourbar limits/label
     z_vmin, z_vmax, z_label, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, 

@@ -563,10 +563,10 @@ class Plot:
 
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
-
+        
         # cut data_labels for those in valid data labels
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
-
+        
         # hide non-relevant resolution axes
         for nonrelevant_temporal_resolution in self.read_instance.nonrelevant_temporal_resolutions:
             # get subplot axis
@@ -592,7 +592,7 @@ class Plot:
 
                 # calculate medians
                 medians = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 'Median', 
-                                              data_labels, [], period=relevant_temporal_resolution)
+                                              cut_data_labels, [], period=relevant_temporal_resolution)
 
                 # calculate PDF for data label
                 period_x_grid, PDFs_sampled = self.make_distribution(relevant_axis, networkspeci, data_labels, 
@@ -691,7 +691,7 @@ class Plot:
                                                     period=relevant_temporal_resolution)
                 else:
                     stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 
-                                                     zstat, data_labels, [], period=relevant_temporal_resolution)
+                                                     zstat, cut_data_labels, [], period=relevant_temporal_resolution)
 
                 # iterate through data labels and plot violins
                 for data_label_ii, data_label in enumerate(cut_data_labels): 
