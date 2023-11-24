@@ -329,7 +329,7 @@ def round_decimal_places(x, decimal_places):
     """
 
     # if cell value is not nan
-    if x == x:
+    if not np.isnan(x):
         # if number is zero, return int as str
         if x == 0:
             return '0'
