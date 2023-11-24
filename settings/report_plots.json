@@ -30,6 +30,10 @@
              "timeseries_bias", "periodic-r", "periodic-r2",
              "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
 
+    "bdrc": ["metadata", "map-r", "map-MB", "map-RMSE", "map-MFB", "map-MFE", "timeseries_smooth",
+             "timeseries_bias_smooth","periodic-r", "periodic-MB", "periodic-RMSE", "periodic-MFB", "periodic-MFE",
+             "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
+
     "all_plots": ["metadata",
                   "map-Median", "map-Median_bias", "map-MB",
                   "timeseries", "timeseries_bias", "timeseries_smooth",
