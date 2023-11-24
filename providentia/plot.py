@@ -82,20 +82,20 @@ class Plot:
             
             # remove plots where setting 'obs' and 'bias' options together
             if ('obs' in plot_options) & ('bias' in plot_options): 
-                if self.read_instance.offline:
+                if (self.read_instance.offline) or (self.read_instance.interactive):
                     print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together.")
                     valid_plot_type = False
 
             # if no experiments are defined, remove all bias plots 
             if ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                 if len(self.read_instance.data_labels) == 1:
-                    if self.read_instance.offline:
+                    if (self.read_instance.offline) or (self.read_instance.interactive):
                         print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created.')
                         valid_plot_type = False
 
             # if are making an experiment bias plot, and temporal_colocation is off, then remove plot
             if (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
-                if self.read_instance.offline:
+                if (self.read_instance.offline) or (self.read_instance.interactive):
                     print(f'Warning: To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.')
                     valid_plot_type = False
 
@@ -109,17 +109,17 @@ class Plot:
                 
                 # check all defined plot options are allowed for current plot type
                 if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
-                    if self.read_instance.offline:
+                    if (self.read_instance.offline) or (self.read_instance.interactive):
                         print(f'Warning: {plot_type} cannot be created as some plot options are not valid.')
                         valid_plot_type = False
                 # check desired statistic is defined in stats dict
                 if base_zstat not in stats_dict:
-                    if self.read_instance.offline:
+                    if (self.read_instance.offline) or (self.read_instance.interactive):
                         print(f"Warning: {plot_type} cannot be created as {base_zstat} not defined in Providentia's statistical library.")
                         valid_plot_type = False
                 # remove plots where setting 'obs', but z_statistic_sign is 'bias'
                 elif ('obs' in plot_options) & (z_statistic_sign == 'bias'):
-                    if self.read_instance.offline:
+                    if (self.read_instance.offline) or (self.read_instance.interactive):
                         print(f"Warning: {plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set.")
                         valid_plot_type = False
 
@@ -130,8 +130,12 @@ class Plot:
                         self.read_instance.station_plots_to_make.remove(plot_type)
                     continue
 
-                # add information for plot type from base plot type template 
-                self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
+                # add information for plot type 
+                # first try get it from custom plot charcteristics, and then from base plot type template 
+                if plot_type in self.canvas_instance.plot_characteristics_templates:
+                    self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[plot_type])
+                else:
+                    self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
 
                 # set page title 
                 if 'page_title' in self.canvas_instance.plot_characteristics[plot_type]:
@@ -150,17 +154,17 @@ class Plot:
 
                 # check all defined plot options are allowed for current plot type
                 if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
-                    if self.read_instance.offline:
+                    if (self.read_instance.offline) or (self.read_instance.interactive):
                         print(f'Warning: {plot_type} cannot be created as some plot options are not valid.')
                         valid_plot_type = False
                 # warning for scatter plot if the temporal colocation is not active
                 elif ('scatter' == base_plot_type) & (not self.read_instance.temporal_colocation):
-                    if self.read_instance.offline:
+                    if (self.read_instance.offline) or (self.read_instance.interactive):
                         print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
                         valid_plot_type = False
                 # warning for timeseries bias plot if the temporal colocation is not active
                 elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
-                    if self.read_instance.offline:
+                    if (self.read_instance.offline) or (self.read_instance.interactive):
                         print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
                         valid_plot_type = False
 
@@ -173,7 +177,10 @@ class Plot:
                     continue
 
                 # add information for plot type for base plot type 
-                self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
+                if plot_type in self.canvas_instance.plot_characteristics_templates:
+                    self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[plot_type])
+                else:
+                    self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
 
                 # change page title if have 'bias' option
                 if 'page_title' in self.canvas_instance.plot_characteristics[plot_type]:
@@ -328,7 +335,7 @@ class Plot:
         str_to_plot = ''
         
         # get relevant station indices
-        if not self.read_instance.offline:
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
             station_inds = self.canvas_instance.relative_selected_station_inds
 
         # setup some variables for handling if just one or multiple stations selected
@@ -407,7 +414,7 @@ class Plot:
         plot_txt = relevant_axis.text(0.0, 1.0, str_to_plot, transform=relevant_axis.transAxes, **plot_characteristics['plot'])
 
         # modify limit to wrap text as axis width in pixels
-        if not self.read_instance.offline:
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
             # get axis bounding box
             ax_bbox = relevant_axis.get_window_extent().transformed(self.canvas_instance.figure.dpi_scale_trans.inverted())
             
@@ -425,7 +432,7 @@ class Plot:
         plot_txt._get_wrap_line_width = lambda: ax_width_px
 
         # track plot elements if using dashboard 
-        if not self.read_instance.offline:
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
             self.track_plot_elements('observations', 'metadata', 'plot', plot_txt, bias=False)
 
     def make_map(self, relevant_axis, networkspeci, z_statistic, plot_characteristics, plot_options=[]):
@@ -444,7 +451,7 @@ class Plot:
         """
 
         # get marker size (for offline)
-        if self.read_instance.offline:
+        if (self.read_instance.offline) or (self.read_instance.interactive):
             self.get_markersize(relevant_axis, 'map', networkspeci, plot_characteristics)
 
         # plot new station points on map - coloured by currently active z statisitic
@@ -454,7 +461,7 @@ class Plot:
                                                       **plot_characteristics['plot'])
         
         # track plot elements if using dashboard 
-        if not self.read_instance.offline:
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
             self.track_plot_elements('observations', 'map', 'plot', [self.stations_scatter], bias=False)
 
     def make_timeseries(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
@@ -481,7 +488,7 @@ class Plot:
             bias =  True
             bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
             # track plot elements if using dashboard 
-            if not self.read_instance.offline:
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
         else:
             bias = False
@@ -512,7 +519,7 @@ class Plot:
                 ts = self.canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label]
 
             # get marker size (for offline)
-            if self.read_instance.offline:
+            if (self.read_instance.offline) or (self.read_instance.interactive):
                 self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics, data=ts)
 
             # make timeseries plot
@@ -521,12 +528,12 @@ class Plot:
                                                       **plot_characteristics['plot'])
 
             # update maximum smooth value
-            if not self.read_instance.offline:
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
                     self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts)*2 - 1)
 
             # track plot elements if using dashboard 
-            if not self.read_instance.offline:
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
 
     def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
@@ -660,7 +667,7 @@ class Plot:
                         violins.extend(limit_plot)
 
                     # track plot elements if using dashboard 
-                    if not self.read_instance.offline:
+                    if (not self.read_instance.offline) and (not self.read_instance.interactive):
                         self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), violins, bias=False)
                         self.track_plot_elements(data_label, 'periodic-violin', 'Median_plot_{}'.format(relevant_temporal_resolution), median_plots, bias=False)
 
@@ -678,7 +685,7 @@ class Plot:
                     for mb in minimum_bias:
                         bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
                     # track plot elements if using dashboard 
-                    if not self.read_instance.offline:
+                    if (not self.read_instance.offline) and (not self.read_instance.interactive):
                         self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), 
                                                  bias_lines, bias=bias)
 
@@ -707,7 +714,7 @@ class Plot:
                                                                **plot_characteristics['plot'])
 
                     # track plot elements if using dashboard 
-                    if not self.read_instance.offline:
+                    if (not self.read_instance.offline) and (not self.read_instance.interactive):
                         self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), self.periodic_plots, bias=bias)
 
     def make_distribution(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[],
@@ -779,7 +786,7 @@ class Plot:
         if bias:
             bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
             # track plot elements if using dashboard 
-            if not self.read_instance.offline:
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
             if 'observations' in cut_data_labels:
                 cut_data_labels.remove('observations')
@@ -901,7 +908,7 @@ class Plot:
                                                             **plot_characteristics['plot'])
 
                 # track plot elements if using dashboard 
-                if not self.read_instance.offline:
+                if (not self.read_instance.offline) and (not self.read_instance.interactive):
                     self.track_plot_elements(data_label, 'distribution', 'plot', self.distribution_plot, bias=bias)
 
         # if have made PDFs for violin plot then return it
@@ -973,7 +980,7 @@ class Plot:
                 experiment_data = experiment_data[inds_subset]
 
             # get marker size (for offline)
-            if self.read_instance.offline:
+            if (self.read_instance.offline) or (self.read_instance.interactive):
                 self.get_markersize(relevant_axis, 'scatter', networkspeci, plot_characteristics, data=observations_data)
 
             # create scatter plot
@@ -982,7 +989,7 @@ class Plot:
                                                    **plot_characteristics['plot'])
 
             # track plot elements if using dashboard 
-            if not self.read_instance.offline:
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'scatter', 'plot', self.scatter_plot, bias=False)
 
     def make_boxplot(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
@@ -1064,7 +1071,7 @@ class Plot:
                         patch.set(facecolor='white')
 
                     # track plot elements if using dashboard 
-                    if not self.read_instance.offline:
+                    if (not self.read_instance.offline) and (not self.read_instance.interactive):
                         self.track_plot_elements(data_label, 'boxplot', 'plot', boxplot, bias=False)
 
         # set xticklabels 
@@ -1287,7 +1294,7 @@ class Plot:
                 tick.set_verticalalignment("center")
 
         # track plot elements if using dashboard 
-        if not self.read_instance.offline:
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
             self.track_plot_elements('observations', 'heatmap', 'plot', heatmap, bias=bias)
 
     def make_table(self, relevant_axis, networkspeci, data_labels, plot_characteristics,
@@ -1389,7 +1396,7 @@ class Plot:
         stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
         
         # offline reports
-        if self.read_instance.offline:
+        if (self.read_instance.offline) or (self.read_instance.interactive):
             
             # get relevant data
             if 'multispecies' not in plot_options:
@@ -1410,7 +1417,7 @@ class Plot:
             stats_df = stats_df.reset_index()
 
             # hide subsections from station plots or if there is only 1 section
-            if self.read_instance.offline:
+            if (self.read_instance.offline) or (self.read_instance.interactive):
                 if plotting_paradigm == 'station' or len(np.unique(subsections)) == 1:
                     stats_df = stats_df.drop(columns='subsections')
         
@@ -1501,7 +1508,7 @@ class Plot:
                                     **plot_characteristics['plot'])
 
         # merge cells in networkspecies and subsections columns (if any)
-        if self.read_instance.offline:
+        if (self.read_instance.offline) or (self.read_instance.interactive):
             column_ii = 0
             for column, rows in zip(['networkspecies', 'subsections'], (networkspecies, subsections)):
                 if column in stats_df.columns:
@@ -1527,7 +1534,7 @@ class Plot:
             table.auto_set_column_width(np.arange(-1, len(col_labels)+1))
 
         # track plot elements if using dashboard 
-        if not self.read_instance.offline:
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
             if statsummary:
                 self.track_plot_elements('observations', 'statsummary', 'plot', [table], bias=bias)
             else:
@@ -1609,7 +1616,7 @@ class Plot:
             grid_locator1=gl1, tick_formatter1=tf1)
 
         # update axis position and size in dashboard
-        if not self.read_instance.offline:
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
 
             # find Taylor plot position in layout
             for plot_position in range(2, 6):
@@ -1719,7 +1726,7 @@ class Plot:
                                                                     label=data_label) 
 
             # track plot elements if using dashboard 
-            if not self.read_instance.offline:
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):

@@ -738,7 +738,7 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
                         instance.available_experiment_data[network][resolution][speci][experiment] = valid_file_yearmonths
 
     # set list of experiment names to add on experiments pop-up
-    if not instance.offline:
+    if (not instance.offline) and (not instance.interactive):
         experiments_to_add = np.array(sorted(experiments_to_add))
         instance.experiments_menu['checkboxes']['labels'] = experiments_to_add
         instance.experiments_menu['checkboxes']['map_vars'] = experiments_to_add
