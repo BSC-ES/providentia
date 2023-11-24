@@ -200,7 +200,7 @@ class DataReader:
                 self.read_instance.metadata_dtype = [('station_reference', object), ('latitude', np.float32),
                                                      ('longitude', np.float32), ('altitude', np.float32),
                                                      ('station_name', object), ('station_classification', object),
-                                                     ('area_classification', object)]
+                                                     ('area_classification', object), ('country', object)]
                 self.read_instance.metadata_vars_to_read = [meta_dtype[0] for meta_dtype in self.read_instance.metadata_dtype]
             # GHOST
             else:
@@ -256,12 +256,10 @@ class DataReader:
                     # iterate through networkspecies until find one which has valid files to read
                     for valid_networkspeci in self.read_instance.networkspecies:
                         if data_label in self.files_to_read[valid_networkspeci]:
-
                             exp_nc_root = Dataset(self.files_to_read[valid_networkspeci][data_label][0])
                             self.read_instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
                             self.read_instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
                             exp_nc_root.close()
-
                             break
             
             # update plotting parameters colours and zorder
@@ -787,7 +785,7 @@ class DataReader:
 
                 # experiments 
                 else:
-                    #if are reading filter species continue to next data_label
+                    # if are reading filter species continue to next data_label
                     if filter_read:
                         continue 
 

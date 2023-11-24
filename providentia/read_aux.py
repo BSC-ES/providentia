@@ -232,7 +232,7 @@ def read_netcdf_data(tuple_arguments):
 
                     # some extra str formatting
                     if meta_var in ['station_reference', 'station_name', 'station_classification', 
-                                    'area_classification']:
+                                    'area_classification', 'country']:
 
                         if len(meta_shape) == 2:
                             if meta_val_dtype == np.dtype(object):
@@ -278,7 +278,8 @@ def read_netcdf_metadata(tuple_arguments):
     ncdf_root = Dataset(relevant_file)
 
     # set metadata variables to read
-    metadata_vars_to_read = ['station_reference', 'station_name', 'longitude', 'latitude', 'measurement_altitude']
+    metadata_vars_to_read = ['station_reference', 'station_name', 'longitude', 'latitude', 
+                             'measurement_altitude']
     metadata_read = []
 
     # iterate though metadata variables to read
@@ -319,8 +320,7 @@ def read_netcdf_metadata(tuple_arguments):
             meta_val_dtype = np.array([meta_val[0]]).dtype
 
             # some extra str formatting
-            if meta_var in ['station_reference', 'station_name', 'station_classification', 
-                            'area_classification']:
+            if meta_var in ['station_reference', 'station_name']:
 
                 if len(meta_shape) == 2:
                     if meta_val_dtype == np.dtype(object):
