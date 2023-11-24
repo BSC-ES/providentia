@@ -82,13 +82,15 @@ class ProvConfiguration:
             'periodic_statistic_mode': None,
             'periodic_statistic_aggregation': None,
             'plot_characteristics_filename': '',
+            'harmonise_summary': True,
+            'harmonise_stations': True,
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
                                     'available_resolutions', 'available_networks',
                                     'network', 'species', 'resolution', 'start_date', 'end_date', 'experiments', 
                                     'temporal_colocation', 'spatial_colocation', 'report_type', 'report_summary', 
                                     'report_stations', 'report_title', 'report_filename', 
-                                    'plot_characteristics_filename']
+                                    'plot_characteristics_filename', 'harmonise_summary', 'harmonise_stations']
         }
 
         # if variable is given by command line, set that value, otherwise set as default value 
@@ -113,7 +115,7 @@ class ProvConfiguration:
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
             # internet connection)
 
-            if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3v2'):
+            if MACHINE in ['power', 'mn4', 'nord3v2']:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all other machines pull from internet
 
@@ -132,10 +134,10 @@ class ProvConfiguration:
             # set default if left undefined
             if value == '':
                 # running on CTE-POWER/MN4/N3?
-                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3v2'):
+                if MACHINE in ['power', 'mn4', 'nord3v2']:
                     return '/gpfs/projects/bsc32/AC_cache/obs/ghost'
                 else:
-                    # running on workstation?
+                    # running on workstation or hub?
                     return '/esarchive/obs/ghost'
 
         elif key == 'nonghost_root':
@@ -155,10 +157,10 @@ class ProvConfiguration:
             # set experiment root data directory if left undefined
             if value == '':
                 # not running on workstation?
-                if (MACHINE == 'power') or (MACHINE == 'mn4') or (MACHINE == 'nord3v2'):
+                if MACHINE in ['power', 'mn4', 'nord3v2']:
                     return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
                 else:
-                    # running on workstation?
+                    # running on workstation or hub?
                     return '/esarchive/recon/prov_interp'
 
         elif key == 'ghost_version':

@@ -563,10 +563,10 @@ class Plot:
 
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
-
+        
         # cut data_labels for those in valid data labels
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
-
+        
         # hide non-relevant resolution axes
         for nonrelevant_temporal_resolution in self.read_instance.nonrelevant_temporal_resolutions:
             # get subplot axis
@@ -592,7 +592,7 @@ class Plot:
 
                 # calculate medians
                 medians = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 'Median', 
-                                              data_labels, [], period=relevant_temporal_resolution)
+                                              cut_data_labels, [], period=relevant_temporal_resolution)
 
                 # calculate PDF for data label
                 period_x_grid, PDFs_sampled = self.make_distribution(relevant_axis, networkspeci, data_labels, 
@@ -691,7 +691,7 @@ class Plot:
                                                     period=relevant_temporal_resolution)
                 else:
                     stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 
-                                                     zstat, data_labels, [], period=relevant_temporal_resolution)
+                                                     zstat, cut_data_labels, [], period=relevant_temporal_resolution)
 
                 # iterate through data labels and plot violins
                 for data_label_ii, data_label in enumerate(cut_data_labels): 
@@ -1141,12 +1141,6 @@ class Plot:
             :param stats_df: pandas dataframe
         """
 
-        # determine if want to add annotations or not from plot_options
-        if 'annotate' in plot_options:
-            annotate = True
-        else:
-            annotate = False
-
         # bias plot?
         if 'bias' in plot_options:
             bias = True
@@ -1185,9 +1179,6 @@ class Plot:
         else:
             obs_label = 'Observations'
 
-        # round dataframe
-        stats_df = stats_df.round(plot_characteristics['round_decimal_places']['table'])
-
         # get subsections
         subsections = list(np.unique(stats_df.index.get_level_values(1)))
 
@@ -1201,12 +1192,21 @@ class Plot:
             if (len(subsections) == 1) or (plotting_paradigm == 'station'):
                 stats_df = stats_df.droplevel(level='subsections')
 
+        # determine if want to add annotations or not from plot_options
+        if 'annotate' in plot_options:
+            # get rounded labels
+            decimal_places = plot_characteristics['round_decimal_places']['table']
+            annotate = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
+        else:
+            annotate = False
+
         # plot heatmap
         heatmap = sns.heatmap(stats_df, 
                               ax=relevant_axis, 
                               annot=annotate,
+                              fmt='',
                               **plot_characteristics['plot'])
-
+        
         # remove networkspecies-subsections label from y-axis
         relevant_axis.set_ylabel("")
 
