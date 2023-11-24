@@ -256,11 +256,13 @@ class DataReader:
                     # iterate through networkspecies until find one which has valid files to read
                     for valid_networkspeci in self.read_instance.networkspecies:
                         if data_label in self.files_to_read[valid_networkspeci]:
+
+                            exp_nc_root = Dataset(self.files_to_read[valid_networkspeci][data_label][0])
+                            self.read_instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
+                            self.read_instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
+                            exp_nc_root.close()
+
                             break
-                    exp_nc_root = Dataset(self.files_to_read[valid_networkspeci][data_label][0])
-                    self.read_instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
-                    self.read_instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
-                    exp_nc_root.close()
             
             # update plotting parameters colours and zorder
             update_plotting_parameters(self.read_instance) 
