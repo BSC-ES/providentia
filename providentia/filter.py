@@ -128,7 +128,7 @@ class DataFilter:
             speci = networkspeci.split('|')[1]
 
             # get lower/upper data bounds
-            if self.read_instance.offline:
+            if (self.read_instance.offline) or (self.read_instance.interactive):
                 lower_bound = self.read_instance.lower_bound[speci]
                 upper_bound = self.read_instance.upper_bound[speci]
             else:
@@ -154,7 +154,7 @@ class DataFilter:
         """ Filter data for selected periods (keeping or removing data, as defined). """
 
         keeps, removes = [], []
-        if self.read_instance.offline:
+        if (self.read_instance.offline) or (self.read_instance.interactive):
             if hasattr(self.read_instance, 'period'):
                 keeps, removes = split_options(self.read_instance, self.read_instance.period)
         else:
@@ -434,7 +434,7 @@ class DataFilter:
             except ValueError as e:
                 msg = "Error in metadata fields. The field of '{}' should be numeric.".format(meta_var)
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-                if not self.read_instance.offline:
+                if (not self.read_instance.offline) and (not self.read_instance.interactive):
                     self.read_instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
                 return False
         else:
