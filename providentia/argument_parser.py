@@ -60,12 +60,12 @@ class ProvArgumentParser(object):
                                      dest="offline",
                                      default=False,
                                      action='store_true',
-                                     help="run Providentia offline")
+                                     help="run Providentia offline mode")
             self.parser.add_argument("--interactive",
                                      dest="interactive",
                                      default=False,
                                      action='store_true',
-                                     help="run interactive Providentia session")
+                                     help="run Providentia interactive mode")
             self.parser.add_argument("--network",
                                      dest="network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
