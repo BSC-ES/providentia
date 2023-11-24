@@ -87,7 +87,7 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
                                                  **plot_characteristics['regression'])
             
             # track plot elements if using dashboard 
-            if not read_instance.offline:
+            if (not read_instance.offline) and (not read_instance.interactive) :
                 canvas_instance.plot.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
 
@@ -142,7 +142,7 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
                                          **plot_characteristics['smooth']['format'])
 
         # track plot elements if using dashboard 
-        if not read_instance.offline:
+        if (not read_instance.offline) and (not read_instance.interactive):
             canvas_instance.plot.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
 
@@ -204,7 +204,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     # show number of stations if defined
     if plot_characteristics['annotate_text']['n_stations']:
         colours.append('black')
-        if read_instance.offline:
+        if (read_instance.offline) or (read_instance.interactive):
             if plotting_paradigm == 'station':
                 str_to_annotate.append('Stations: 1')
             else:
@@ -273,7 +273,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         relevant_axis.add_artist(bbox)
 
         # track plot elements if using dashboard 
-        if not read_instance.offline:
+        if (not read_instance.offline) and (not read_instance.interactive):
             canvas_instance.plot.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
     else:
         msg = '{} could not be annotated'.format(base_plot_type)

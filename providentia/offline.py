@@ -383,19 +383,19 @@ class ProvidentiaOffline:
                                                networkspeci.split('|')[-1])
 
                         # harmonise xy limits for plot paradigm
-                        do_harmonise = False
+                        harmonise = False
                         if (((plotting_paradigm == 'summary') and (self.harmonise_summary))
                             or ((plotting_paradigm == 'station') and (self.harmonise_stations))):
-                            do_harmonise = True 
-                        if base_plot_type not in ['map', 'heatmap', 'table', 'taylor'] and do_harmonise: 
+                            harmonise = True 
+                        if (base_plot_type not in ['map', 'heatmap', 'table', 'taylor']): 
                             if base_plot_type == 'scatter':
                                 harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type, 
                                                            self.plot_characteristics[plot_type], plot_options, 
-                                                           relim=True)
+                                                           relim=True, harmonise=harmonise)
                             elif base_plot_type != 'taylor':
                                 harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type,
                                                            self.plot_characteristics[plot_type], plot_options, 
-                                                           relim=True, autoscale=True)
+                                                           relim=True, autoscale=True, harmonise=harmonise)
                         
                         # update variable to reflect some formatting was performed
                         did_formatting = True
