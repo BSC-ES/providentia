@@ -1373,6 +1373,7 @@ class ProvidentiaOffline:
 
                 # determine if have some data to plot
                 plot_validity = False
+                
                 if 'multispecies' in plot_options:
                     for ns in self.selected_station_data:
                         for data_label in data_labels:
