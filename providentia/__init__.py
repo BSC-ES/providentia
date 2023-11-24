@@ -4,4 +4,4 @@
 
 __version__ = "2.2"
 
-from .interactive import read
+from .interactive import Interactive
