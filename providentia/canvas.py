@@ -688,7 +688,7 @@ class MPLCanvas(FigureCanvas):
                     if ylabel_units == 'measurement_units':
                         ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
                     if ylabel_units != '':
-                        ylabel = '[{}]'.format(ylabel_units)
+                        ylabel += ' [{}]'.format(ylabel_units)
                     xlabel = ''
 
                 # create structure to store data for statsummary plot
