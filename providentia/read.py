@@ -67,10 +67,12 @@ class DataReader:
                 msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
                 show_message(self.read_instance, msg)
-                if (self.read_instance.from_conf) and (not self.read_instance.offline):
+                if (self.read_instance.from_conf) and (not self.read_instance.offline) and (not self.read_instance.interactive):
                     sys.exit('Error: Providentia will not be launched.')
                 elif (self.read_instance.offline):
                     sys.exit('Error: Offline report will not be created.')
+                elif (self.read_instance.interactive):
+                    sys.exit('Error: Data cannot be read')
                 else:
                     self.read_instance.first_read = True
                     return
@@ -134,7 +136,7 @@ class DataReader:
         if 'reset' in operations:  
 
             # uninitialise filter object
-            if not self.read_instance.offline:
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.read_instance.mpl_canvas.filter_data = None
 
             # data
