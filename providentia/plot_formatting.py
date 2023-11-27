@@ -66,7 +66,7 @@ def set_equal_axes(ax, plot_options):
 
 def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, base_plot_type, plot_characteristics, 
                                plot_options, xlim=None, ylim=None, relim=False, autoscale=False, autoscale_x=False, 
-                               autoscale_y=False, bias_centre=False):
+                               autoscale_y=False, bias_centre=False, harmonise=True):
     """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
     
         :param relevant_axs: relevant axes
@@ -78,9 +78,9 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         :param plot_options: list of options to configure plots
         :type plot_options: list
         :param xlim: xlimits to set
-        :type xlim: list
+        :type xlim: dict
         :param ylim: ylimits to set
-        :type ylim: list
+        :type ylim: dict
         :param relim: turn on relimiting of axes limits (when updating plotted data on axis)
         :type relim: boolean
         :param autoscale: Autoscale the axis view to the data (both x and y axes)
@@ -90,7 +90,9 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         :param autoscale_y: Autoscale the x axis view to the data
         :type autoscale_y: boolean
         :param bias_centre: centre bias plots at 0 on the y axis
-        :type bias_centre: boolean   
+        :type bias_centre: boolean
+        :param harmonise: harmonise axes switch
+        :type harmonise: boolean
     """
     
     # initialise arrays to save lower and upper limits in all axes
@@ -120,7 +122,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             read_instance.relevant_temporal_resolutions)))
 
     # remove any axes from relevant_axs which are not active (only for offline)
-    if read_instance.offline:
+    if (read_instance.offline) or (read_instance.interactive):
         relevant_axs_active = []
         mapped_resolutions_active = []
         for ax_ii, ax in enumerate(relevant_axs):
@@ -135,10 +137,12 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 
     # get lower and upper limits across all relevant axes
     for ax in relevant_axs_active:
+
         if 'equal_aspect' in plot_characteristics:
             set_equal_axes(ax, plot_options)
         else:
             ax.set_aspect('auto')
+
         if relim:
             ax.relim(visible_only=True)
         if autoscale:
@@ -147,8 +151,9 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             ax.autoscale(axis='x', tight=False)
         if autoscale_y:
             ax.autoscale(axis='y', tight=False)
-        if xlim is None and ('xlim' not in plot_characteristics):
-            if base_plot_type not in ['periodic', 'periodic-violin', 'timeseries']:
+
+        if (xlim is None) and ('xlim' not in plot_characteristics):
+            if base_plot_type not in ['timeseries', 'boxplot', 'periodic', 'periodic-violin']:
                 xlim_lower, xlim_upper = ax.get_xlim()
             elif base_plot_type == 'timeseries':
                 xlim_lower, xlim_upper = get_no_margin_lim(ax, 'xlim')
@@ -157,9 +162,11 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                     xlim_upper = num2date(xlim_upper)
                 except ValueError:
                     continue
-            if base_plot_type not in ['periodic', 'periodic-violin']:
+
+            if base_plot_type not in ['boxplot', 'periodic', 'periodic-violin']:
                 all_xlim_lower.append(xlim_lower)
                 all_xlim_upper.append(xlim_upper)
+
         if ylim is None and ('ylim' not in plot_characteristics):
             ylim_lower, ylim_upper = ax.get_ylim()
             all_ylim_lower.append(ylim_lower)
@@ -167,22 +174,28 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 
     # get minimum and maximum from all axes and set limits
     for ax in relevant_axs_active:
+
         # get xlim
-        if xlim is None and ('xlim' not in plot_characteristics):
-            if base_plot_type not in ['periodic', 'periodic-violin']:
+        set_xlim = False
+        if (xlim is None) and ('xlim' not in plot_characteristics):
+            if base_plot_type not in ['boxplot', 'periodic', 'periodic-violin']:
                 xlim_min = np.min(all_xlim_lower)
                 xlim_max = np.max(all_xlim_upper)
                 xlim = {'left':xlim_min, 'right':xlim_max}
+                if harmonise:
+                    set_xlim = True
         elif 'xlim' in plot_characteristics:
             xlim = plot_characteristics['xlim']
+            set_xlim = True
 
         # set xlim
-        if xlim is not None:
-            if (base_plot_type not in ['timeseries', 'boxplot']) and ('equal_aspect' not in plot_characteristics):
-                ax.set_xlim(**xlim)
+        if ((set_xlim) and ('equal_aspect' not in plot_characteristics) and
+           (base_plot_type not in ['timeseries', 'boxplot', 'periodic', 'periodic-violin'])):
+            ax.set_xlim(**xlim)
 
         # get ylim
-        if ylim is None and ('ylim' not in plot_characteristics):
+        set_ylim = False
+        if (ylim is None) and ('ylim' not in plot_characteristics):
             ylim_min = np.min(all_ylim_lower) 
             ylim_max = np.max(all_ylim_upper)
             # if have bias_centre option, centre around zero
@@ -194,16 +207,19 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                     ylim_min = -np.abs(np.min(all_ylim_lower))
                     ylim_max = np.abs(np.min(all_ylim_lower))
             ylim = {'bottom':ylim_min, 'top':ylim_max}
+            if harmonise:
+                set_ylim = True
         elif 'ylim' in plot_characteristics:
             ylim = plot_characteristics['ylim']
+            set_ylim = True
 
         # set ylim
-        if (ylim is not None) and ('equal_aspect' not in plot_characteristics):
+        if (set_ylim) and ('equal_aspect' not in plot_characteristics):
             ax.set_ylim(**ylim)
         
     # get minimum and maximum from all axes and set limits for periodic plots
     if base_plot_type in ['periodic', 'periodic-violin']:
-        if xlim is None and ('xlim' not in plot_characteristics):
+        if (xlim is None) and ('xlim' not in plot_characteristics):
             for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
                 # adjust plot x axis to have correct margin on edges
                 xlim_lower, xlim_upper = sub_ax.get_xlim()
@@ -493,12 +509,12 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             plt.setp(ax_to_format.get_yticklabels(), visible=False)
 
         # set xlim?
-        if 'xlim' in plot_characteristics_vars:
-            ax_to_format.set_xlim(**plot_characteristics['xlim'])
+        #if 'xlim' in plot_characteristics_vars:
+        #    ax_to_format.set_xlim(**plot_characteristics['xlim'])
 
         # set ylim? 
-        if 'ylim' in plot_characteristics_vars:
-            ax_to_format.set_ylim(**plot_characteristics['ylim'])
+        #if 'ylim' in plot_characteristics_vars:
+        #    ax_to_format.set_ylim(**plot_characteristics['ylim'])
 
         # add gridlines (x and y)?
         if 'grid' in plot_characteristics_vars:
