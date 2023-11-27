@@ -109,6 +109,9 @@ fi
 # EXPORTPATH="/gpfs/home/bsc32/bsc32781/.conda/envs/myenv/lib/python3.9/site-packages"
 # export PYTHONPATH=${EXPORTPATH}:${PYTHONPATH}
 
+# get IP
+ip=$(hostname --ip-address)
+
 # execution
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
@@ -181,6 +184,13 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
             fi
         fi
     fi
+
+# Hub
+elif [ "${ip}" == "84.88.185.48" ]; then
+    echo "Warning: running in the hub may make Providentia slower ..."
+    eval "${load_command}"
+    eval "${python_command}"
+
 # Workstations
 else
     echo "Warning: running in your workstation/laptop may make Providentia slower ..."
