@@ -146,7 +146,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             if len(canvas_instance.station_inds[networkspeci]) == 1:
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = read_instance.data_array[:,0,:]
             else:
-                if read_instance.offline:
+                if (read_instance.offline) or (read_instance.interactive):
                     timeseries_stat = read_instance.statistic_aggregation
                 else:
                     timeseries_stat = canvas_instance.timeseries_stat.currentText()
@@ -240,7 +240,7 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
     if station_index:
         station_inds = np.array([station_index])
     else:
-        if read_instance.offline:
+        if (read_instance.offline) or (read_instance.interactive):
             if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
                 station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
             else:
