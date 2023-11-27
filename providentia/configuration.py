@@ -42,6 +42,7 @@ class ProvConfiguration:
             'nonghost_root': '',
             'exp_root': '',
             'offline': False,
+            'interactive': False,
             'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                       '3hourly_instantaneous', '6hourly_instantaneous',
                                       'daily', 'monthly'],
@@ -84,7 +85,7 @@ class ProvConfiguration:
             'harmonise_summary': True,
             'harmonise_stations': True,
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
-                                    'ghost_root', 'nonghost_root', 'exp_root', 'offline',
+                                    'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
                                     'available_resolutions', 'available_networks',
                                     'network', 'species', 'resolution', 'start_date', 'end_date', 'experiments', 
                                     'temporal_colocation', 'spatial_colocation', 'report_type', 'report_summary', 
@@ -311,7 +312,7 @@ class ProvConfiguration:
             # map_extent empty?
             if not value:
                 # if dashboard, if map extent not defined then fix to global default extent
-                if not self.read_instance.offline:
+                if (not self.read_instance.offline) and (not self.read_instance.interactive):
                     return [-180, 180, -90, 90]
             # otherwise parse it
             else:
@@ -427,17 +428,16 @@ class ProvConfiguration:
     
             if isinstance(value, str):
                 if value != "":
-                    # two paths were provided
+                    # various paths were provided
                     if "," in value:
-                        if "dashboard:" in value and "offline:" in value:
-                            plot_characteristics_filename_dashboard = value.split("dashboard:")[1].split(',')[0]
-                            plot_characteristics_filename_offline = value.split("offline:")[1].split(',')[0]
-                            if self.read_instance.offline:
-                                return plot_characteristics_filename_offline
-                            else:
-                                return plot_characteristics_filename_dashboard
+                        if ("dashboard:" in value) and ((not self.read_instance.offline) and (not self.read_instance.interactive)):
+                            return value.split("dashboard:")[1].split(',')[0]
+                        elif ("offline:" in value) and (self.read_instance.offline):
+                            return value.split("offline:")[1].split(',')[0]
+                        elif ("interactive:" in value) and (self.read_instance.interactive):
+                            return value.split("interactive:")[1].split(',')[0]
                         else:
-                            msg = 'It is necessary to include the words dashboard and offline to set two plot characteristics filenames, as in: '
+                            msg = 'It is necessary to include the words dashboard, offline or interactive to set different plot characteristics filenames, as in: '
                             msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.json, offline:/path/plot_characteristics_offline.json.'
                             sys.exit(msg)
                     # one path was provided
@@ -605,7 +605,7 @@ class ProvConfiguration:
                 error = 'It is not possible to create Taylor diagrams yet, please remove.'
                 sys.exit(error)
 
-        if (len(self.read_instance.active_dashboard_plots) != 4) & (not self.read_instance.offline):
+        if (len(self.read_instance.active_dashboard_plots) != 4) and (not self.read_instance.offline) & (not self.read_instance.interactive):
             error = 'Error: there must be 4 "active_dashboard_plots"'
             sys.exit(error)
         
@@ -704,8 +704,8 @@ class ProvConfiguration:
             self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
-        if ((len(self.read_instance.network) > 1) & (len(self.read_instance.species) > 1) & 
-            (not self.read_instance.offline)):
+        if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
+            (not self.read_instance.offline) and (not self.read_instance.interactive)):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
@@ -992,7 +992,7 @@ def split_options(read_instance, conf_string, separator="||"):
             removes = [r.strip() for r in removes]
         elif ("keep:" in conf_string) and ("remove:" in conf_string):
             msg = 'In order to define the keep and remove options, these must be separated by ||.'
-            show_message(msg, offline=read_instance.offline, from_conf=read_instance.from_conf)
+            show_message(msg, from_conf=read_instance.from_conf)
     else:
         if "keep:" in conf_string:
             keep_start, keep_end = conf_string.find("keep:"), conf_string.find(separator)
