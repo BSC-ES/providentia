@@ -7,3 +7,4 @@ providentia.egg-info
 __pycache__
 reports/*
 figures/*
+saved_data/*

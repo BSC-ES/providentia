@@ -16,6 +16,7 @@ from .warnings import show_message
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 
 def parse_path(dir, f):
@@ -34,7 +35,9 @@ class ProvConfiguration:
         # set variable defaults
         var_defaults = {
             'ghost_version': '1.5',
-            'config_dir': os.path.join(os.environ['HOME'], '.providentia'),
+            'conf': '',
+            'config': '',
+            'config_dir': os.path.join(PROVIDENTIA_ROOT, 'configurations/'),
             'cartopy_data_dir': '',
             'available_cpus': '',
             'n_cpus': '',
@@ -101,8 +104,23 @@ class ProvConfiguration:
     def parse_parameter(self, key, value):
         """ Parse a parameter. """
 
+        #parse config file name
+        if key == 'conf':
+            if value != '':
+                self.read_instance.config = value
+            return ''
+
+        elif key == 'config':
+            if hasattr(self.read_instance, 'config'):
+                if self.read_instance.config != '':
+                    return self.read_instance.config
+                else:
+                    return value
+            else:
+                return value
+                
         # get available N CPUs
-        if key == 'available_cpus':
+        elif key == 'available_cpus':
             if (MACHINE == 'power') or (MACHINE == 'mn4'):
                 bash_command = 'squeue -h -o "%C"'
                 process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
