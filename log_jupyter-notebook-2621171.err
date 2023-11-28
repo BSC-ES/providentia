@@ -31,3 +31,12 @@ The following have been reloaded with a version change:
 [I 2023-11-28 11:19:46.876 ServerApp] Saving file at /notebooks/test_interactive.ipynb
 [W 2023-11-28 11:19:50.053 ServerApp] Nudge: attempt 20 on kernel f2104a90-6c44-4132-a2fe-97d80242339d
 [I 2023-11-28 11:21:47.018 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 11:51:42.020 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 11:51:45.385 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 11:51:50.287 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:00:35.398 ServerApp] Kernel restarted: f2104a90-6c44-4132-a2fe-97d80242339d
+[W 2023-11-28 12:00:40.164 ServerApp] Nudge: attempt 10 on kernel f2104a90-6c44-4132-a2fe-97d80242339d
+[I 2023-11-28 12:01:21.922 ServerApp] Kernel restarted: f2104a90-6c44-4132-a2fe-97d80242339d
+[I 2023-11-28 12:01:54.820 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:02:40.590 ServerApp] Kernel restarted: f2104a90-6c44-4132-a2fe-97d80242339d
+[W 2023-11-28 12:02:45.166 ServerApp] Nudge: attempt 10 on kernel f2104a90-6c44-4132-a2fe-97d80242339d

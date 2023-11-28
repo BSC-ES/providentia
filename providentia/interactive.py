@@ -241,15 +241,15 @@ class Interactive:
         # show plot
         plt.show()
 
-    def make_legend(plot_type, format={}):
+    def make_legend(self, plot_type, format={}):
         """wrapper method to make legend"""
         
-            if 'legend' in self.plot_characteristics[plot_type]:
-                legend_handles = self.plot.make_legend_handles(self.plot_characteristics[plot_type]['legend'])
-            else:
-                print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json, or passed via 'format argument")
+        if 'legend' in self.plot_characteristics[plot_type]:
+            legend_handles = self.plot.make_legend_handles(self.plot_characteristics[plot_type]['legend'])
+        else:
+            print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json, or passed via 'format argument")
 
-            return legend_handles
+        return legend_handles
 
 
     def calculate_statistic(self, statistic='', labela='', labelb='', per_station=False):
