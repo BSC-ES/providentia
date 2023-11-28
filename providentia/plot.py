@@ -29,8 +29,9 @@ from .plot_aux import (get_multispecies_aliases, get_taylor_diagram_ghelper_info
 pyproj.set_use_global_context()
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
 
 class Plot:
@@ -54,7 +55,7 @@ class Plot:
         self.canvas_instance.periodic_xticks = periodic_xticks()
         self.canvas_instance.periodic_labels = periodic_labels()
 
-    def set_plot_characteristics(self, plot_types, zstat=False):
+    def set_plot_characteristics(self, plot_types, zstat=False, format={}):
         """ Iterate through all plots to make, and determine if they can and cannot be made.
             Update plot characteristics associated with specific plot types due to plot options. 
 
@@ -62,6 +63,8 @@ class Plot:
             :type plot_types: list  
             :param zstat: z statistic str 
             :type zstat: str
+            :param format: format dict to overwrite default formatting 
+            :type format: dict
         """
 
         # add all valid defined plots to plot_characteristics
@@ -137,6 +140,10 @@ class Plot:
                 else:
                     self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
 
+                # overwrite default plot characteristics with custom formatting
+                for format_var in format:
+                    self.canvas_instance.plot_characteristics[plot_type][format_var] = format[format_var]
+
                 # set page title 
                 if 'page_title' in self.canvas_instance.plot_characteristics[plot_type]:
                     if 't' in self.canvas_instance.plot_characteristics[plot_type]['page_title'].keys():
@@ -181,6 +188,10 @@ class Plot:
                     self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[plot_type])
                 else:
                     self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
+
+                # overwrite default plot characteristics with custom formatting
+                for format_var in format:
+                    self.canvas_instance.plot_characteristics[plot_type][format_var] = format[format_var]
 
                 # change page title if have 'bias' option
                 if 'page_title' in self.canvas_instance.plot_characteristics[plot_type]:

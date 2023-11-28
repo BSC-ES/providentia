@@ -39,9 +39,10 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
-formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
+formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
 
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
@@ -63,41 +64,51 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update variables from config file (if available)
         self.from_conf = False
         self.current_config = {}
-        
-        if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
-            if 'section' in kwargs:
-                # config and section defined 
-                load_conf(self, fpath=kwargs['config'])
-                if kwargs['section'] in self.all_sections:
-                    self.from_conf = True
-                    self.current_config = self.sub_opts[kwargs['section']]
+
+        if self.config != '': 
+            read_conf = False
+            if os.path.exists(self.config):
+                read_conf = True
+            else:
+                if os.path.exists(os.path.join(self.config_dir, self.config)):
+                    self.config = os.path.join(self.config_dir, self.config)
+                    read_conf = True
+
+            if read_conf:
+                if hasattr(self, 'section'):
+                    # config and section defined 
+                    load_conf(self, fpath=self.config)
+                    if self.section in self.all_sections:
+                        self.from_conf = True
+                        self.current_config = self.sub_opts[self.section]
+                    else:
+                        error = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.section)
+                        tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                        tip += 'before the subsection name (e.g. SECTIONA·Spain).'
+                        sys.exit(error + '\n' + tip)
+
                 else:
-                    error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
-                    tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
-                    tip += 'before the subsection name (e.g. SECTIONA·Spain).'
-                    sys.exit(error + '\n' + tip)
+                    # config defined, section undefined
+                    load_conf(self, fpath=self.config)    
+                    all_sections = self.sub_opts.keys()
+                    
+                    if len(all_sections) == 1:
+                        okpressed = False
+                        selected_section = list(all_sections)[0]
+                    else:
+                        title = 'Sections'
+                        msg = 'Select section to load'
+                        dialog = InputDialog(self, title, msg, all_sections)
+                        selected_section, okpressed = dialog.selected_option, dialog.okpressed
 
-            elif 'section' not in kwargs:
-                # config defined, section undefined
-                load_conf(self, fpath=kwargs['config'])    
-                all_sections = self.sub_opts.keys()
-                
-                if len(all_sections) == 1:
-                    okpressed = False
-                    selected_section = list(all_sections)[0]
-                else:
-                    title = 'Sections'
-                    msg = 'Select section to load'
-                    dialog = InputDialog(self, title, msg, all_sections)
-                    selected_section, okpressed = dialog.selected_option, dialog.okpressed
-
-                if okpressed or (len(all_sections) == 1):
-                    self.from_conf = True
-                    self.current_config = self.sub_opts[selected_section]
-
-        elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-            error = 'Error: The path to the configuration file specified in the command line does not exist.'
-            sys.exit(error)
+                    if okpressed or (len(all_sections) == 1):
+                        self.from_conf = True
+                        self.current_config = self.sub_opts[selected_section]
+            
+            else:
+                # have config, but path does not exist
+                error = 'Error: The path to the configuration file specified in the command line does not exist.'
+                sys.exit(error)
         
         # set initial filter species
         self.previous_filter_species = {}
@@ -115,7 +126,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
             self.plot_characteristics_filename = os.path.join(
-                CURRENT_PATH, '../settings/plot_characteristics_dashboard.json')
+                PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.json')
         self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
 
         # error when using wrong custom plot characteristics path to launch dashboard
@@ -131,7 +142,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.all_observation_data = get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
+        nonghost_observation_data_json = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
