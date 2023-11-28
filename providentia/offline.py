@@ -31,8 +31,9 @@ from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_
 from .statistics import calculate_statistic, generate_colourbar, get_selected_station_data, get_z_statistic_info
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
 
 class ProvidentiaOffline:
@@ -52,24 +53,32 @@ class ProvidentiaOffline:
         self.commandline_arguments = copy.deepcopy(kwargs)
 
         # update variables from config file
-        if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
-            load_conf(self, kwargs['config'])
-            self.from_conf = True
-        elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-            error = 'Error: The path to the configuration file specified in the command line does not exist.'
-            sys.exit(error)
+        if self.config != '':  
+            read_conf = False
+            if os.path.exists(self.config):
+                read_conf = True
+            else: 
+                if os.path.exists(os.path.join(self.config_dir, self.config)):
+                    self.config = os.path.join(self.config_dir, self.config)
+                    read_conf = True
+            if read_conf:
+                load_conf(self, self.config)
+                self.from_conf = True
+            else:
+                error = 'Error: The path to the configuration file specified in the command line does not exist.'
+                sys.exit(error)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
 
         # load report plot presets
-        self.report_plots = json.load(open(os.path.join(CURRENT_PATH, '../settings/report_plots.json')))
+        self.report_plots = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/report_plots.json')))
 
         # create dictionary of all available observational GHOST data
         self.all_observation_data = get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
+        nonghost_observation_data_json = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
@@ -101,7 +110,7 @@ class ProvidentiaOffline:
 
             # check for self defined plot characteristics file
             if self.plot_characteristics_filename == '':
-                self.plot_characteristics_filename = os.path.join(CURRENT_PATH, '../settings/plot_characteristics_offline.json')
+                self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_offline.json')
             self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
             self.plot_characteristics = {}
 
@@ -212,7 +221,7 @@ class ProvidentiaOffline:
             if os.path.isdir(os.path.dirname(self.report_filename)):
                 reports_path = self.report_filename
         else:
-            reports_path = (os.path.join(CURRENT_PATH, '../reports/')) + self.report_filename
+            reports_path = (os.path.join(PROVIDENTIA_ROOT, 'reports/')) + self.report_filename
 
         # create reports folder
         if not os.path.exists(os.path.dirname(reports_path)):

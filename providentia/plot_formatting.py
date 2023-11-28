@@ -483,6 +483,10 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         # set axis ticks and gridlines below all artists
         ax_to_format.set_axisbelow(True)
 
+        # make axis ylabel (only on leftmost column of visible axes)?
+        if 'axis_title' in plot_characteristics_vars:
+            ax_to_format.set_title(**plot_characteristics['axis_title'])
+
         # make axis xlabel?
         if 'xlabel' in plot_characteristics_vars:
             ax_to_format.set_xlabel(**plot_characteristics['xlabel'])
@@ -509,12 +513,12 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             plt.setp(ax_to_format.get_yticklabels(), visible=False)
 
         # set xlim?
-        #if 'xlim' in plot_characteristics_vars:
-        #    ax_to_format.set_xlim(**plot_characteristics['xlim'])
+        if 'xlim' in plot_characteristics_vars:
+            ax_to_format.set_xlim(**plot_characteristics['xlim'])
 
         # set ylim? 
-        #if 'ylim' in plot_characteristics_vars:
-        #    ax_to_format.set_ylim(**plot_characteristics['ylim'])
+        if 'ylim' in plot_characteristics_vars:
+            ax_to_format.set_ylim(**plot_characteristics['ylim'])
 
         # add gridlines (x and y)?
         if 'grid' in plot_characteristics_vars:

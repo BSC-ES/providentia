@@ -78,11 +78,11 @@ class NavigationToolbar(NavigationToolbar2QT):
                 try:
                     QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
                     if chose_npz:
-                        export_data_npz(self.canvas_instance, fname)
+                        export_data_npz(self.read_instance, fname, input_dialogue=True)
                     elif chose_conf:
                         export_configuration(self.read_instance, fname)
                     else:
-                        export_netcdf(self.canvas_instance, fname)
+                        export_netcdf(self.read_instance, fname, input_dialogue=True)
                     QtWidgets.QApplication.restoreOverrideCursor()
                     msg = 'The data was successfully saved in {}.'.format(fname)
                     show_message(self.read_instance, msg)

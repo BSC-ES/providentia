@@ -16,9 +16,6 @@ import providentia
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-
-
 class ProvArgumentParser(object):
     """ Class that handles the argument parser. """
 

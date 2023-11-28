@@ -26,6 +26,7 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then 
     module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
     module load Python/3.7.4-GCCcore-8.3.0 \
+     xarray/0.19.0-foss-2019b-Python-3.7.4 \
      matplotlib/3.1.1-foss-2019b-Python-3.7.4 \
      seaborn/0.9.0-foss-2019b-Python-3.7.4 \
      Cartopy/0.20.3-foss-2019b-Python-3.7.4 \
