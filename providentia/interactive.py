@@ -7,12 +7,15 @@ import os
 import sys
 
 import matplotlib
+matplotlib.use('QT5Agg')
+import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.projections import PolarAxes
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
+from PyQt5.QtWidgets import QApplication, QWidget
 
 from .configuration import load_conf
 from .configuration import ProvConfiguration
@@ -21,33 +24,48 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
                            period_conf, representativity_conf)
 from .filter import DataFilter
 from .plot import Plot
+from .plot_formatting import do_formatting, format_axis, set_axis_label, set_axis_title
 from .read import DataReader
 from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_tree, 
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import calculate_statistic, generate_colourbar, get_selected_station_data, get_z_statistic_info
+from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
+import warnings
+warnings.filterwarnings("ignore")
+
+# determine if using jupyter notebook or not
+try:
+    __IPYTHON__
+    jupyter_session = True
+except NameError:
+    jupyter_session = False
 
 class Interactive:
     """ Class to create interactive Providentia session."""
 
     def __init__(self, **kwargs):
 
-        #set mode as offline
-        kwargs['offline'] = True
+        #set mode as interactive
+        kwargs['interactive'] = True
 
         #set configuration variables, as well as any other defined variables
-        self.set_config(**kwargs)
+        valid_config = self.set_config(**kwargs)
+        # if configuration read was not valid then return here
+        if not valid_config:
+            return
 
         # create dictionary of all available observational GHOST data
         self.all_observation_data = get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
+        nonghost_observation_data_json = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
@@ -56,13 +74,13 @@ class Interactive:
         # initialise DataReader class
         self.datareader = DataReader(self)
 
-        # initialise Plot class
-        self.plot = Plot(read_instance=self, canvas_instance=self)
-
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = os.path.join(CURRENT_PATH, '../settings/plot_characteristics_interactive.json')
+            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_interactive.json')
         self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
+
+        # initialise Plot class
+        self.plot = Plot(read_instance=self, canvas_instance=self)
 
         # set some key configuration variables
         self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
@@ -84,141 +102,308 @@ class Interactive:
         # read data
         self.read()  
 
-        # update fields available for filtering
+        # filter
+        self.reset_filter()
+
+        # get selected station data (i.e. data for all remaining stations)
+        get_selected_station_data(read_instance=self, canvas_instance=self, networkspecies=self.networkspecies)
+
+    def read(self):
+        """wrapper method to read data"""
+
+        print('Reading data')
+
+        # read data
+        self.datareader.read_setup(['reset'])
+
+        if self.invalid_read:
+            print('No valid data to read')
+            return
+
+    def filter(self):
+        """wrapper method to filter data"""
+
+        print('Filtering data')
+
+        DataFilter(self)
+
+    def reset_filter(self):
+        """wrapper method to reset filter data"""
+
+        # reset representativity fields        
         init_representativity(self)
         update_representativity_fields(self)
         representativity_conf(self)
+
+        # reset period fields 
         init_period(self)
         update_period_fields(self)
         period_conf(self)
+
+        # reset metadata
         init_metadata(self)
         update_metadata_fields(self)
         metadata_conf(self)
 
-        # filter data
+        #re-filter 
         self.filter()
 
-        def read(self):
-            """wrapper method to read data"""
+    def make_plot(self, plot, data_labels=[], title='', xlabel='', ylabel='', legend=True, plot_options=[], format={}):
+        """wrapper method to make a Providentia plot"""
 
-            self.datareader.read_setup(['reset'])
+        # get base plot type (no plot options), and plot type (with plot options)
+        base_plot_type = copy.deepcopy(plot)
+        if len(plot_options) > 0:
+            plot_type = '{}_{}'.format(base_plot_type, '_'.join(plot_options))
+        else:
+            plot_type = copy.deepcopy(plot)
+        # get zstat for required plots
+        base_plot_type_split = base_plot_type.split('-')
+        if (len(base_plot_type_split) > 1) & (base_plot_type != 'periodic-violin'):
+            base_plot_type = base_plot_type_split[0]
+            zstat = base_plot_type_split[1]
+        
+        # set plot characteristics
+        self.plot_characteristics = dict()
+        self.plot.set_plot_characteristics([plot_type], format=format)
+        
+        if jupyter_session:
+            fig = plt.figure(figsize=self.plot_characteristics[plot_type]['figsize'])
+        else:
+            app = QApplication(sys.argv)
+            desktop = app.desktop()
+            screenRect = desktop.screenGeometry()
+            width = screenRect.width()
+            height = screenRect.height()
 
-            if self.invalid_read:
-                print('No valid data to read')
-                return
+            dpi = plt.rcParams['figure.dpi']
+            px = 1.0/dpi
+            fig = plt.figure(figsize=(width*px,height*px))
+        
+        ax = fig.add_subplot(111)
 
-        def filter(self):
-            """wrapper method to filter data"""
+        if base_plot_type in ['periodic', 'periodic-violin']:
+            gs = gridspec.GridSpecFromSubplotSpec(100, 100, subplot_spec=ax)
+            grid_dict = dict()
+            grid_dict['hour'] = fig.add_subplot(gs[:46, :])
+            grid_dict['dayofweek'] = fig.add_subplot(gs[54:, 64:])
+            grid_dict['month'] = fig.add_subplot(gs[54:, :61])
+            self.plot_dictionary[page_n]['axs'].append({'handle':grid_dict, 'data_labels':[]})
+            ax.spines['top'].set_color('none')
+            ax.spines['bottom'].set_color('none')
+            ax.spines['left'].set_color('none')
+            ax.spines['right'].set_color('none')
+            ax.tick_params(labelcolor='w', top=False, bottom=False, left=False, right=False)
+            relevant_ax = grid_dict
+        else:
+            relevant_ax = ax
 
-            DataFilter(self)
+        # get plotting function
+        if plot_type == 'statsummary':
+            func = getattr(self.plot, 'make_table')
+        else:
+            func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
 
-        def reset_filter(self):
-            """wrapper method to reset filter data"""
+        # get data labels for plot
+        if len(data_labels) == 0:
+            data_labels = copy.deepcopy(self.data_labels)
 
-        def plot(self, plot=''):
-            """wrapper method to make a Providentia plot"""
+        # get networkspeci to plot
+        networkspeci = self.networkspecies[0]
+        if len(self.networkspecies) > 1:
+            print('Warning: More than 1 network or species defined, can only plot for 1 pair. Taking {}'.format(networkspeci))
 
-            self.plot.set_plot_characteristics(plot)
+        # periodic plot
+        if base_plot_type == 'periodic':
+            func(grid_dict, networkspeci, data_labels, self.plot_characteristics[plot_type], zstat=zstat, 
+                 plot_options=plot_options)
+        # make statsummary plot
+        elif base_plot_type == 'statsummary':
+            relevant_zstats = self.active_statsummary_stats['basic']
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
+        # other plots
+        else: 
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 plot_options=plot_options)
 
-            func = getattr(self.plot, 'make_{}'.format(plot))
+        # format plot
+        format_axis(self, self, relevant_ax, base_plot_type, self.plot_characteristics[plot_type])
 
-            if base_plot_type == 'metadata':
-                func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                        plot_options=plot_options, station_inds=station_inds)
-            elif base_plot_type == 'periodic':
-                func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                        zstat=zstat, plot_options=plot_options)    
-            elif base_plot_type == 'distribution':
-                func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                    plot_options=plot_options, data_range_min=data_range_min, data_range_max=data_range_max) 
-            elif base_plot_type == 'taylor':
-                func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                    plot_options=plot_options, stddev_max=stddev_max)
+        # make legend 
+        if legend:
+            legend_handles = self.make_legend(plot_type)
+            relevant_ax.legend(**legend_handles['plot'])
+
+        # set tight layout
+        plt.tight_layout()
+
+        # show plot
+        plt.show()
+
+    def make_legend(plot_type, format={}):
+        """wrapper method to make legend"""
+        
+            if 'legend' in self.plot_characteristics[plot_type]:
+                legend_handles = self.plot.make_legend_handles(self.plot_characteristics[plot_type]['legend'])
             else:
-                func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                    plot_options=plot_options) 
+                print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json, or passed via 'format argument")
 
-            self.set_plot_title()
+            return legend_handles
 
-        def set_plot_title(self):
-            """wrapper method to set plot title"""
 
-        def calculate_statistic(self, statistic=''):
-            """wrapper method to calculate statistic/s"""
+    def calculate_statistic(self, statistic='', labela='', labelb='', per_station=False):
+        """wrapper method to calculate statistic/s"""
 
-            return statistic
+        if per_station:
+            stat, active_map_valid_station_inds = calculate_statistic(self, self, networkspeci, statistic, labela, labelb, map=True)
+        else:
+            stat = calculate_statistic(self, self, networkspeci, statistic, labela, labelb)
+        return stat
 
-        def set_config(self, config='', section='', subsection='', **kwargs):
-            """wrapper method to set configuration variables"""
+    def set_config(self, **kwargs):
+        """wrapper method to set configuration variables"""
 
-            # initialise default configuration variables
-            # modified by passed arguments, if given
-            provconf = ProvConfiguration(self, **kwargs)
+        # initialise default configuration variables
+        # modified by passed arguments, if given
+        provconf = ProvConfiguration(self, **kwargs)
 
-            # update variables from config file
-            if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
-                load_conf(self, kwargs['config'])
+        # update variables from config file
+        if self.config != '':
+            read_conf = False 
+            if os.path.exists(self.config):
+                read_conf = True
+            else:
+                if os.path.exists(os.path.join(self.config_dir, self.config)):
+                    self.config = os.path.join(self.config_dir, self.config)
+                    read_conf = True
+            if read_conf:
+                load_conf(self, self.config)
                 self.from_conf = True
-            elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-                error = 'Error: The path to the configuration file specified in the command line does not exist.'
-                sys.exit(error)
             else:
-                error = "Error: No configuration file found. The path to the config file must be added as an argument."
-                sys.exit(error)
+                error = 'Error: The path to the configuration file passed as an argument does not exist.'
+                return False
+        else:
+            error = "Error: The configuration file must be given as an argument: e.g. 'config=...'"
+            return False
 
-            # parse first available configuration section
-            if len(self.parent_section_names) > 1:
-                print('Warning: In interactive mode, only the first defined section will be read.')
+        # parse section
+        # if section name provided, try and use that
+        # otherwise take first defined section name
+        have_section = False
+        if hasattr(self, 'section'): 
+            # check that section actually exists
+            if self.section in self.parent_section_names:
+                have_section = True
+            else:
+                print('Warning: Defined section {} does not exist in configuration file.'.format(self.section))
+        if not have_section:
             self.section = self.parent_section_names[0]
+            if len(self.parent_section_names) > 1:
+                print('Warning: Taking first defined section ({}) to be read.'.format(self.section))
 
-            # update self with section variables
-            self.section_opts = self.sub_opts[self.section]
-            for k, val in self.section_opts.items():
+        # update self with section variables
+        self.section_opts = self.sub_opts[self.section]
+        for k, val in self.section_opts.items():
+            setattr(self, k, provconf.parse_parameter(k, val))
+
+        # parse subsection
+        # if subsection name is provided, try and use that
+        # otherwise take first defined subsection name
+        # if have no subsections, section is set as subsection name
+        have_subsection = False
+        # get subsection names
+        self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
+                                        if self.section == subsection_name.split('·')[0]]
+        if hasattr(self, 'subsection'): 
+            # check that subsection actually exists
+            if self.subsection in self.child_subsection_names:
+                have_subsection = True
+            else:
+                print('Warning: Defined subsection {} does not exist in configuration file.'.format(self.subsection))
+
+        if len(self.child_subsection_names) > 0:
+            if not have_subsection:
+                self.subsection = self.child_subsection_names[0]
+                have_subsection = True
+                if len(self.child_subsection_names) > 1:
+                    print('Warning: Taking first defined subsection ({}) to be read.'.format(self.subsection))
+        else:
+            self.subsection = [self.section]
+
+        # update self with subsection variables (if have subsection) 
+        if have_subsection:   
+            # get subsection variables
+            self.subsection_opts = self.sub_opts[self.subsection]
+            # ensure all fixed section variables defined in subsection have same value as current section variables
+            self.subsection_opts = {k: (self.section_opts[k] if k in self.fixed_section_vars else val) 
+                                    for (k, val) in self.subsection_opts.items()}
+            # update subsection variables
+            for k, val in self.subsection_opts.items():
                 setattr(self, k, provconf.parse_parameter(k, val))
 
-            # get subsection names
-            self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
-                                            if self.section == subsection_name.split('·')[0]]
-            if len(self.child_subsection_names) > 0:
-                if len(self.child_subsection_names) > 1:
-                    print('Warning: In interactive mode, only the first defined subsection will be read.')
+        # now all variables have been parsed, check validity of those, throwing errors where necessary
+        provconf.check_validity()
 
-                    self.subsection = self.child_subsection_names[0]
+        return True
 
-                # get subsection variables
-                self.subsection_opts = self.sub_opts[self.subsection]
+    #def select_station(self, station=''):
+    #    """wrapper method to select specific station/s"""
+        
+    #    if type(station) == 'str':
 
-                # ensure all fixed section variables defined in subsection have same value as current section variables
-                self.subsection_opts = {k: (self.section_opts[k] if k in self.fixed_section_vars else val) 
-                                        for (k, val) in self.subsection_opts.items()}
+    #    else:
 
-                # update subsection variables
-                for k, val in self.subsection_opts.items():
-                    setattr(self, k, provconf.parse_parameter(k, val))
-            else:
-                self.subsection = [self.section]
+        #filter for station/s    
+    #    self.filter()
 
-            # now all variables have been parsed, check validity of those, throwing errors where necessary
-            provconf.check_validity()
+    def save(self, fname='', format='nc'):
+        """wrapper method to save current data/ metadata in memory"""
 
-        def select_station(self, stations=''):
-            """wrapper method to select specific station/s"""
+        # set fname if not provided
+        if fname == '':
+            date_str = datetime.datetime.today().strftime('%Y%m%d_%H%M')
+            fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/PRV_{}'.format(date_str))
 
-        def save(self, fname='', format='nc'):
-            """wrapper method to save current data/ metadata in memory"""
+        if format in ['conf','config','.conf']:
+            fname = '{}.conf'.format(fname)
+            export_configuration(self, fname)
 
+        elif format in ['netCDF', 'netcdf', 'netCDF4', 'netcdf4', 'nc', '.nc']:
+            fname = '{}.nc'.format(fname)
+            export_netcdf(self, fname)
 
-        def get_data(self, format='nc'):
-            """wrapper method return data / metadata in specific format"""
+        elif format in ['npz','.npz','np','.np','npy','.npy','numpy']:
+            fname = '{}.npz'.format(fname)
+            export_data_npz(self, fname)
 
-            return data
+        print('Data saved to {}'.format(fname))
 
-        def get_var(self, var=''):
-            """wrapper method to return specific data / metadata variable"""
+    def get_data(self, format='nc'):
+        """wrapper method return data / metadata in specific format"""
 
+        # set temporary fname for writing
+        temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp')
+
+        if format in ['netCDF', 'netcdf', 'netCDF4', 'netcdf4', 'nc', '.nc']:
+            data = export_netcdf(self, temporary_fname, set_in_memory=True)
+
+        elif format in ['xr', '.xr', 'xarr', 'xarray','Xarray']:
+            data = export_netcdf(self, temporary_fname, set_in_memory=True, xarray=True)
+
+        elif format in ['npz','.npz','np','.np','npy','.npy','numpy']:
+            data = export_data_npz(self, temporary_fname, set_in_memory=True)
+
+        return data
+
+    def get_var(self, var=''):
+        """wrapper method to return specific data / metadata variable"""
+
+        # if variable is undefined then print warning
+        if var == '':
+            print('Warning: Variable to read is undefined')
+            return 
+        else:
+            data = self.get_data(format='npz')
+            var_data = data[var]
             return var_data
-
-
-
-
-
