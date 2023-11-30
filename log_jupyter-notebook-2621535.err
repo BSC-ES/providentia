@@ -1,8 +1,0 @@
-
-The following have been reloaded with a version change:
-  1) matplotlib/3.4.3-foss-2019b-Python-3.7.4 => matplotlib/3.1.1-foss-2019b-Python-3.7.4
-
-Traceback (most recent call last):
-  File "/gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/bin/jupyter-lab", line 5, in <module>
-    from jupyterlab.labapp import main
-ModuleNotFoundError: No module named 'jupyterlab'
