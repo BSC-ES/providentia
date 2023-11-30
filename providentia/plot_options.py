@@ -61,7 +61,7 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
     cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
     # get observations data (flattened and drop NaNs)
-    observations_data = drop_nans(canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index('observations'),0,:])
+    observations_data = drop_nans(canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(read_instance.observations_data_label),0,:])
 
     # determine if number of points per data array exceeds max limit,
     # if so subset arrays
@@ -74,7 +74,7 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
 
     # iterate through experiment data, making regression line to observations
     for data_label in cut_data_labels:
-        if data_label != 'observations':
+        if data_label != read_instance.observations_data_label:
             # get experiement data (flattened and drop NaNs)
             experiment_data = drop_nans(canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])
             # subset data if neccessary
@@ -120,10 +120,10 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
 
         # bias plot?
         if 'bias' in plot_options:
-            # skip to next data label if making bias, and data label == 'observations'
-            if data_label == 'observations':
+            # skip to next data label if making bias, and data label == observations
+            if data_label == read_instance.observations_data_label:
                 continue
-            ts_obs = canvas_instance.selected_station_data[networkspeci]['timeseries']['observations']
+            ts_obs = canvas_instance.selected_station_data[networkspeci]['timeseries'][read_instance.observations_data_label]
             ts_model = canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label] 
             ts = ts_model - ts_obs
             bias = True
@@ -189,15 +189,15 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     # bias plot?  
     if 'bias' in plot_options:
         bias = True
-        if 'observations' in cut_data_labels:
-            cut_data_labels.remove('observations')
+        if read_instance.observations_data_label in cut_data_labels:
+            cut_data_labels.remove(read_instance.observations_data_label)
     else:
         bias = False
 
     # avoid plotting stats for observations data for scatter plots
     if base_plot_type == 'scatter':
-        if 'observations' in cut_data_labels:
-            cut_data_labels.remove('observations')
+        if read_instance.observations_data_label in cut_data_labels:
+            cut_data_labels.remove(read_instance.observations_data_label)
 
     # generate annotation str to plot
 
@@ -227,9 +227,9 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
 
             # calculate stats
             if (bias) or (z_statistic_sign == 'bias'):
-                if data_label != 'observations':
+                if data_label != read_instance.observations_data_label:
                     stat_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, zstat, 
-                                                    ['observations'], [data_label])
+                                                    [read_instance.observations_data_label], [data_label])
                 # skip bias stats for observations
                 else:
                     continue
@@ -243,15 +243,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
 
         # append annotation line
         if (plot_characteristics['annotate_text']['exp_labels']):
-            if data_label == 'observations':
-                if 'legend' in plot_characteristics:
-                    str_to_append = plot_characteristics['legend']['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate)
-                elif 'legend' in canvas_instance.plot_characteristics_templates.keys():
-                    str_to_append = canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate)
-                else:
-                    str_to_append = 'Observations | ' + ', '.join(stats_annotate)
-            else:
-                str_to_append = read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate)
+            str_to_append = data_label + ' | ' + ', '.join(stats_annotate)
         else:
             str_to_append = ', '.join(stats_annotate)
         str_to_annotate.append(str_to_append)

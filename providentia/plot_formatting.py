@@ -441,7 +441,7 @@ def do_formatting(canvas_instance, read_instance, relevant_axs, relevant_data_la
 
 
 def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_characteristics, col_ii=0, last_valid_row=True, 
-                last_row_on_page=True, set_extent=True, relevant_temporal_resolutions=['hour','dayofweek','month']):
+                last_row_on_page=True, set_extent=False, relevant_temporal_resolutions=['hour','dayofweek','month']):
     """ Format a plotting axis.
     
         :param ax: axis object
