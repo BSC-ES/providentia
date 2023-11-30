@@ -19,7 +19,7 @@
                                    "labelbottom": false, "labeltop": false, "labelright": false, "labelleft": false},
                   "plot": {"loc": "upper center", "columnspacing": 1, "frameon": false, "handletextpad": 0, "ncol": 3, 
                            "borderaxespad": 0, "fontsize": 7.5}, 
-                  "handles": {"markersize": 7.5, "marker": "o", "color": "white", "obs_label": "Observations"}, 
+                  "handles": {"markersize": 7.5, "marker": "o", "color": "white"}, 
                   "prop": {"weight": "bold"}},
 
        "metadata": {"non-ghost_vars": {"longitude": {"name_one": "Longitude", 
@@ -277,7 +277,6 @@
                                    "yticklabels": {"fontsize": 10, "fontweight": 600},
                                    "hlines": {"color": "grey", "linewidth": 0.5}},
                   "round_decimal_places": {"title": 2, "table": 2},
-                  "obs_label": "Observations",
                   "plot": {"xticklabels": "auto", "yticklabels": "auto", "square": true, "cbar": false, "linewidths": 1, 
                            "linecolor": "black", "clip_on": false},
                   "plot_options": ["annotate", "bias"]},

@@ -1,0 +1,6 @@
+
+MacOS or linux terminal command to create your ssh tunnel
+ssh -N -L 9362:s05r1b15:9362 bsc32025@nord4.bsc.es
+Use a Browser on your local machine to go to:
+localhost:9362  (prefix w/ https:// if using password)
+

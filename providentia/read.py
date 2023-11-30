@@ -220,7 +220,7 @@ class DataReader:
                                                         self.read_instance.end_date, self.read_instance.resolution)
 
             # read data 
-            self.read_data(yearmonths_to_read, self.read_instance.data_labels)
+            self.read_data(yearmonths_to_read, self.read_instance.data_labels_raw)
 
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
             # non-GHOST
@@ -254,7 +254,7 @@ class DataReader:
                 self.read_instance.plotting_params[data_label] = {}
 
                 # get experiment specific grid edges for exp, from first relevant file
-                if data_label != 'observations':
+                if data_label != self.read_instance.observations_data_label:
                     # iterate through networkspecies until find one which has valid files to read
                     for valid_networkspeci in self.read_instance.networkspecies:
                         if data_label in self.files_to_read[valid_networkspeci]:
@@ -491,13 +491,13 @@ class DataReader:
                         all_yearmonths_to_read.extend(yearmonths_to_read)
 
                 # read data 
-                self.read_data(all_yearmonths_to_read, self.read_instance.previous_data_labels) 
+                self.read_data(all_yearmonths_to_read, self.read_instance.data_labels_raw) 
 
         # need to remove experiment/s ?
         if 'remove_exp' in operations: 
 
             # get indices of experiments to remove
-            experiments_to_remove_inds = [self.read_instance.previous_data_labels.index(experiment) for experiment in experiments_to_remove]
+            experiments_to_remove_inds = [self.read_instance.previous_data_labels_raw.index(experiment) for experiment in experiments_to_remove]
             
             # remove experiment data
             self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
@@ -512,7 +512,7 @@ class DataReader:
 
             # insert space for new experiments in data array
             for experiment in experiments_to_read:
-                experiments_to_read_ind = self.read_instance.data_labels.index(experiment) 
+                experiments_to_read_ind = self.read_instance.data_labels_raw.index(experiment) 
                 
                 self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
                     np.insert(self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], 
@@ -728,13 +728,13 @@ class DataReader:
         # create arrays to share across processes (for parallel multiprocessing use)
         # this only works for numerical dtypes, i.e. not strings
         timestamp_array_shared = multiprocessing.RawArray(ctypes.c_int64, len(self.read_instance.timestamp_array))
-        if (self.read_instance.reading_ghost) & ('observations' in data_labels):
+        if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
             flags_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.flags))
         else:
             flags_shared = None
         # fill arrays
         timestamp_array_shared[:] = self.read_instance.timestamp_array
-        if (self.read_instance.reading_ghost) & ('observations' in data_labels):
+        if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
             flags_shared[:] = self.read_instance.flags
 
         # create dictionary for saving files to read
@@ -764,7 +764,7 @@ class DataReader:
 
                 # get relevant file start dates
                 # observations
-                if data_label == 'observations':
+                if data_label == self.read_instance.observations_data_label:
                     
                     # GHOST
                     if self.read_instance.reading_ghost:
@@ -823,7 +823,7 @@ class DataReader:
             else:
                 data_in_memory_shared_shape = (1, len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
             data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, data_in_memory_shared_shape[0] * data_in_memory_shared_shape[1] * data_in_memory_shared_shape[2])  
-            if (self.read_instance.reading_ghost) & ('observations' in data_labels):
+            if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
                 qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.qa_per_species[speci]))
                 if not filter_read:
                     ghost_data_in_memory_shared_shape = (len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
@@ -838,16 +838,16 @@ class DataReader:
 
             # wrap data_in_memory_shared and ghost_data_in_memory_shared as numpy arrays so we can easily manipulate the data.
             data_in_memory_shared_np = np.frombuffer(data_in_memory_shared, dtype=np.float32).reshape(data_in_memory_shared_shape)
-            if (self.read_instance.reading_ghost) & ('observations' in data_labels) & (not filter_read):
+            if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels) & (not filter_read):
                 ghost_data_in_memory_shared_np = np.frombuffer(ghost_data_in_memory_shared, dtype=np.float32).reshape(ghost_data_in_memory_shared_shape)
 
             # fill arrays
             if not filter_read:
-                data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]
+                data_label_indices = [self.read_instance.data_labels_raw.index(data_label) for data_label in data_labels]
                 np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :])
             else:
                 np.copyto(data_in_memory_shared_np, self.read_instance.filter_data_in_memory[networkspeci][:, :])
-            if (self.read_instance.reading_ghost) & ('observations' in data_labels):      
+            if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):      
                 qa_shared[:] = self.read_instance.qa_per_species[speci]
                 if not filter_read:
                     np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory[networkspeci])  
@@ -862,15 +862,17 @@ class DataReader:
                                                   timestamp_array_shared, qa_shared, flags_shared))
             # read netCDF files in parallel
             tuple_argument_fields = ['filename', 'station_references', 'station_names', 'speci', 
-                                     'data_label', 'data_labels', 'reading_ghost', 'ghost_data_vars_to_read', 
+                                     'observations_data_label', 'data_label', 'data_labels', 
+                                     'reading_ghost', 'ghost_data_vars_to_read', 
                                      'metadata_dtype', 'metadata_vars_to_read', 'default_qa_active', 'filter_read']
             tuple_arguments = []
 
             for data_label in self.files_to_read[networkspeci]:
                 for fname in self.files_to_read[networkspeci][data_label]:
                     tuple_arguments.append((fname, self.read_instance.station_references[networkspeci], 
-                                            self.read_instance.station_names[networkspeci],
-                                            speci, data_label, data_labels, self.read_instance.reading_ghost, 
+                                            self.read_instance.station_names[networkspeci], speci, 
+                                            self.read_instance.observations_data_label, data_label, data_labels, 
+                                            self.read_instance.reading_ghost, 
                                             self.read_instance.ghost_data_vars_to_read, 
                                             self.read_instance.metadata_dtype, 
                                             self.read_instance.metadata_vars_to_read,
@@ -893,14 +895,14 @@ class DataReader:
                     returned_filename = tuple_arguments[returned_data_ii][tuple_argument_fields.index('filename')]
                     returned_data_label = tuple_arguments[returned_data_ii][tuple_argument_fields.index('data_label')]
                     returned_yearmonth = returned_filename.split('_')[-1][:6]
-                    if returned_data_label == 'observations':
+                    if returned_data_label == self.read_instance.observations_data_label:
                         # if returned_data_per_month is empty list, do not add
                         if len(returned_data_per_month) > 0:
                             self.read_instance.metadata_in_memory[networkspeci][:, self.read_instance.yearmonths.index(returned_yearmonth)] = returned_data_per_month[:, 0]
 
                 # save to data in memory
                 self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :] = data_in_memory_shared_np
-                if (self.read_instance.reading_ghost) & ('observations' in data_labels):
+                if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
                     self.read_instance.ghost_data_in_memory[networkspeci] = ghost_data_in_memory_shared_np
 
                 # set data array for final validation checks

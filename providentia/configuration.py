@@ -62,6 +62,7 @@ class ProvConfiguration:
             'resolution': None,
             'start_date': None,
             'end_date': None,
+            'observations_data_label': 'observations',
             'experiments': {},
             'qa': None,
             'flags': None,
@@ -90,10 +91,11 @@ class ProvConfiguration:
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
                                     'available_resolutions', 'available_networks',
-                                    'network', 'species', 'resolution', 'start_date', 'end_date', 'experiments', 
-                                    'temporal_colocation', 'spatial_colocation', 'report_type', 'report_summary', 
-                                    'report_stations', 'report_title', 'report_filename', 
-                                    'plot_characteristics_filename', 'harmonise_summary', 'harmonise_stations']
+                                    'network', 'species', 'resolution', 'start_date', 'end_date', 
+                                    'observations_data_label', 'experiments', 'temporal_colocation', 'spatial_colocation', 
+                                    'report_type', 'report_summary', 'report_stations', 'report_title', 
+                                    'report_filename', 'plot_characteristics_filename', 
+                                    'harmonise_summary', 'harmonise_stations']
         }
 
         # if variable is given by command line, set that value, otherwise set as default value 
@@ -471,14 +473,14 @@ class ProvConfiguration:
                 value_strip = "".join(value.split())
 
                 calibration_by_experiment = False
-                for experiment in self.read_instance.experiments.keys():
+                for experiment in self.read_instance.experiments.values():
                     if experiment in value_strip:
                         calibration_by_experiment = True
                         break
                 
                 if calibration_by_experiment:
                     calibration_factor_dict = {}
-                    for i, experiment in enumerate(self.read_instance.experiments.keys()):
+                    for i, experiment in enumerate(self.read_instance.experiments.values()):
                         calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
                         calibration_factor_dict[experiment] = calibration_factor_exp
                     return calibration_factor_dict

@@ -1,0 +1,110 @@
+remove mkl/2021.4 (LD_LIBRARY_PATH)
+remove impi/2021.4 (PATH, MANPATH, LD_LIBRARY_PATH)
+
+The following have been reloaded with a version change:
+  1) matplotlib/3.4.3-foss-2019b-Python-3.7.4 => matplotlib/3.1.1-foss-2019b-Python-3.7.4
+
+[I 2023-11-29 15:18:14.248 ServerApp] jupyterlab | extension was successfully linked.
+[I 2023-11-29 15:18:14.543 LabApp] JupyterLab extension loaded from /gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/lib/python3.7/site-packages/jupyterlab
+[I 2023-11-29 15:18:14.543 LabApp] JupyterLab application directory is /.statelite/tmpfs/gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/share/jupyter/lab
+[I 2023-11-29 15:18:14.548 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2023-11-29 15:18:14.549 ServerApp] Serving notebooks from local directory: /.statelite/tmpfs/gpfs/archive/bsc32/esarchive/obs/ghost/scripts/Providentia-interactive
+[I 2023-11-29 15:18:14.549 ServerApp] Jupyter Server 1.4.1 is running at:
+[I 2023-11-29 15:18:14.549 ServerApp] http://s05r1b15:9362/lab?token=ada6cbcaf7c171bd657b31dabaa0f735095d3de93eadb2e1
+[I 2023-11-29 15:18:14.549 ServerApp]  or http://127.0.0.1:9362/lab?token=ada6cbcaf7c171bd657b31dabaa0f735095d3de93eadb2e1
+[I 2023-11-29 15:18:14.549 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2023-11-29 15:18:14.558 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-1266144-open.html
+    Or copy and paste one of these URLs:
+        http://s05r1b15:9362/lab?token=ada6cbcaf7c171bd657b31dabaa0f735095d3de93eadb2e1
+     or http://127.0.0.1:9362/lab?token=ada6cbcaf7c171bd657b31dabaa0f735095d3de93eadb2e1
+[I 2023-11-29 15:20:04.347 LabApp] Build is up to date
+[I 2023-11-29 15:20:06.391 ServerApp] Kernel started: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 17:53:49.835 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[W 2023-11-29 17:53:54.377 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 17:54:37.983 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 17:54:39.873 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-29 17:56:39.965 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-29 18:00:48.372 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[W 2023-11-29 18:00:52.912 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 18:02:40.555 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[W 2023-11-29 18:13:09.540 ServerApp] WebSocket ping timeout after 119994 ms.
+[W 2023-11-29 18:13:18.402 ServerApp] WebSocket ping timeout after 119976 ms.
+[I 2023-11-29 18:13:23.405 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:fab9756c-3fd4-46a8-b40a-e0129ea4f5e6
+[I 2023-11-29 19:51:41.465 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:fab9756c-3fd4-46a8-b40a-e0129ea4f5e6
+[I 2023-11-29 19:51:41.883 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:fab9756c-3fd4-46a8-b40a-e0129ea4f5e6
+[I 2023-11-29 19:51:47.931 LabApp] Build is up to date
+[I 2023-11-29 20:03:55.020 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 20:03:55.075 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:5cb8b9e0-c050-487f-9450-734f38db0b34
+[I 2023-11-29 20:03:55.122 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:5cb8b9e0-c050-487f-9450-734f38db0b34
+[W 2023-11-29 20:03:59.632 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 20:05:50.416 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-29 20:15:33.035 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 20:15:33.138 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:5cb8b9e0-c050-487f-9450-734f38db0b34
+[I 2023-11-29 20:15:33.187 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:5cb8b9e0-c050-487f-9450-734f38db0b34
+[W 2023-11-29 20:15:37.699 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 20:15:51.007 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-29 20:17:51.150 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[W 2023-11-29 20:40:03.188 ServerApp] WebSocket ping timeout after 119969 ms.
+[I 2023-11-29 20:40:08.193 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:5cb8b9e0-c050-487f-9450-734f38db0b34
+[I 2023-11-29 21:15:22.300 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:5cb8b9e0-c050-487f-9450-734f38db0b34
+[I 2023-11-29 21:15:23.768 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:5cb8b9e0-c050-487f-9450-734f38db0b34
+[I 2023-11-29 21:15:30.715 LabApp] Build is up to date
+[I 2023-11-29 21:17:09.729 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 21:17:09.803 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:9d33da7e-65a7-485b-b56d-af7193ce1385
+[I 2023-11-29 21:17:09.852 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:9d33da7e-65a7-485b-b56d-af7193ce1385
+[W 2023-11-29 21:17:14.363 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-29 21:17:31.793 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-29 21:19:32.026 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-29 21:21:32.280 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[W 2023-11-29 21:32:09.853 ServerApp] WebSocket ping timeout after 119965 ms.
+[I 2023-11-29 21:32:14.856 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:9d33da7e-65a7-485b-b56d-af7193ce1385
+[I 2023-11-30 09:08:46.998 LabApp] Build is up to date
+[W 2023-11-30 09:23:18.427 ServerApp] WebSocket ping timeout after 119910 ms.
+[I 2023-11-30 09:23:23.431 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:4d6e70d2-7b74-4b07-b900-b5bb36ef4581
+[I 2023-11-30 09:32:12.251 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:4d6e70d2-7b74-4b07-b900-b5bb36ef4581
+[W 2023-11-30 09:42:12.255 ServerApp] WebSocket ping timeout after 119959 ms.
+[I 2023-11-30 09:42:17.258 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:4d6e70d2-7b74-4b07-b900-b5bb36ef4581
+[I 2023-11-30 09:46:44.770 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:4d6e70d2-7b74-4b07-b900-b5bb36ef4581
+[W 2023-11-30 11:23:14.772 ServerApp] WebSocket ping timeout after 119955 ms.
+[I 2023-11-30 11:23:19.774 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:4d6e70d2-7b74-4b07-b900-b5bb36ef4581
+[I 2023-11-30 11:49:38.966 LabApp] Build is up to date
+[I 2023-11-30 12:53:03.815 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-30 13:06:58.631 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:06:58.642 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[I 2023-11-30 13:06:58.662 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[W 2023-11-30 13:07:03.171 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:07:11.407 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-30 13:09:05.369 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:09:05.385 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[I 2023-11-30 13:09:05.401 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[W 2023-11-30 13:09:09.913 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:09:11.492 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-30 13:11:13.201 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-30 13:12:02.129 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:12:02.139 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[I 2023-11-30 13:12:02.160 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[W 2023-11-30 13:12:06.672 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:13:13.305 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-30 13:13:14.491 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:13:14.502 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[I 2023-11-30 13:13:14.526 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[W 2023-11-30 13:13:19.036 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:15:13.835 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-30 13:17:30.083 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:17:30.095 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[I 2023-11-30 13:17:30.120 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[W 2023-11-30 13:17:34.629 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:17:49.306 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 13:17:49.318 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[I 2023-11-30 13:17:49.339 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[I 2023-11-30 13:19:26.617 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-30 14:54:45.041 ServerApp] Kernel restarted: 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 14:54:45.069 ServerApp] Starting buffering for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[I 2023-11-30 14:54:45.086 ServerApp] Restoring connection for 7aba4a9a-92f9-438e-97c7-649137d1668b:7abd0661-ddbe-464d-910d-ac814a5efaf0
+[W 2023-11-30 14:54:49.597 ServerApp] Nudge: attempt 10 on kernel 7aba4a9a-92f9-438e-97c7-649137d1668b
+[I 2023-11-30 14:55:14.840 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-30 14:57:14.993 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+slurmstepd: error: *** JOB 2625413 ON s05r1b15 CANCELLED AT 2023-11-30T15:23:08 DUE TO TIME LIMIT ***

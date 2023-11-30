@@ -1,0 +1,37 @@
+
+The following have been reloaded with a version change:
+  1) matplotlib/3.4.3-foss-2019b-Python-3.7.4 => matplotlib/3.1.1-foss-2019b-Python-3.7.4
+
+[I 2023-11-28 16:04:28.040 ServerApp] jupyterlab | extension was successfully linked.
+[I 2023-11-28 16:04:28.468 LabApp] JupyterLab extension loaded from /gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/lib/python3.7/site-packages/jupyterlab
+[I 2023-11-28 16:04:28.468 LabApp] JupyterLab application directory is /.statelite/tmpfs/gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/share/jupyter/lab
+[I 2023-11-28 16:04:28.474 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2023-11-28 16:04:28.474 ServerApp] Serving notebooks from local directory: /.statelite/tmpfs/gpfs/archive/bsc32/esarchive/obs/ghost/scripts/Providentia-interactive
+[I 2023-11-28 16:04:28.474 ServerApp] Jupyter Server 1.4.1 is running at:
+[I 2023-11-28 16:04:28.474 ServerApp] http://s05r1b37:9759/lab?token=7bbbd8071d92ce5a6986545d4361d992c8cf68e53a1704b6
+[I 2023-11-28 16:04:28.474 ServerApp]  or http://127.0.0.1:9759/lab?token=7bbbd8071d92ce5a6986545d4361d992c8cf68e53a1704b6
+[I 2023-11-28 16:04:28.474 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2023-11-28 16:04:28.531 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-2671240-open.html
+    Or copy and paste one of these URLs:
+        http://s05r1b37:9759/lab?token=7bbbd8071d92ce5a6986545d4361d992c8cf68e53a1704b6
+     or http://127.0.0.1:9759/lab?token=7bbbd8071d92ce5a6986545d4361d992c8cf68e53a1704b6
+[I 2023-11-28 16:05:14.411 LabApp] Build is up to date
+[I 2023-11-28 16:05:16.574 ServerApp] Kernel started: aff6c36d-75e3-40eb-942c-7ae494bfac3a
+[W 2023-11-28 16:05:22.308 ServerApp] Got events for closed stream None
+[I 2023-11-28 16:05:23.010 ServerApp] Kernel restarted: aff6c36d-75e3-40eb-942c-7ae494bfac3a
+[I 2023-11-28 16:07:16.344 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 16:09:15.690 ServerApp] Kernel restarted: aff6c36d-75e3-40eb-942c-7ae494bfac3a
+[I 2023-11-28 16:09:16.450 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[W 2023-11-28 16:09:20.288 ServerApp] Nudge: attempt 10 on kernel aff6c36d-75e3-40eb-942c-7ae494bfac3a
+[I 2023-11-28 16:11:16.569 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[W 2023-11-28 16:48:15.777 ServerApp] WebSocket ping timeout after 119946 ms.
+[W 2023-11-28 16:48:19.273 ServerApp] WebSocket ping timeout after 119965 ms.
+[I 2023-11-28 16:48:24.276 ServerApp] Starting buffering for aff6c36d-75e3-40eb-942c-7ae494bfac3a:259437de-ae9e-479e-a16c-4716c7bbc71c
+[W 2023-11-28 16:58:43.194 ServerApp] WebSocket ping timeout after 119991 ms.
+[W 2023-11-28 16:58:43.197 ServerApp] WebSocket ping timeout after 119991 ms.
+[I 2023-11-28 16:58:48.199 ServerApp] Starting buffering for aff6c36d-75e3-40eb-942c-7ae494bfac3a:259437de-ae9e-479e-a16c-4716c7bbc71c
+[I 2023-11-28 17:57:34.903 ServerApp] Starting buffering for aff6c36d-75e3-40eb-942c-7ae494bfac3a:1b6a59c7-3081-4d7c-9c92-31af46499df5
+slurmstepd: error: *** JOB 2621967 ON s05r1b37 CANCELLED AT 2023-11-28T17:57:43 ***
