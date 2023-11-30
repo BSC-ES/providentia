@@ -66,9 +66,10 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resolution)    
         read_instance.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(read_instance.resolution) 
 
-    # create new dictionaries to store selected station data by network / species, per data label
+    # create new dictionaries to store selected station data and metadata by network / species, per data label
     # and station inds per networkspeci
     canvas_instance.selected_station_data = {}
+    canvas_instance.selected_station_metadata = {}
     canvas_instance.selected_station_data_labels = {}
     canvas_instance.selected_station_data_min = {}
     canvas_instance.selected_station_data_max = {}
@@ -81,8 +82,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         # initialise data labels
         canvas_instance.selected_station_data_labels[networkspeci] = []
 
-        # add nested dictionary for networkspeci in selected station data dictionary
+        # add nested dictionary for networkspeci in selected station data / metadata dictionaries
         canvas_instance.selected_station_data[networkspeci] = {}
+        canvas_instance.selected_station_metadata[networkspeci] = {}
         if data_range_min:
             canvas_instance.selected_station_data_min[networkspeci] = data_range_min[networkspeci]
         else:
@@ -106,7 +108,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         # get selected station indices
         canvas_instance.station_inds[networkspeci] = get_station_inds(read_instance, canvas_instance, networkspeci, station_index)
 
-        # get data cut
+        # get data cut for relevant stations
         read_instance.data_array = read_instance.data_array[:,canvas_instance.station_inds[networkspeci],:]
                     
         # get NaNs in data array
@@ -115,6 +117,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         # if data array has no valid data for selected stations, do not cut data array
         # data array has valid data and is not all nan?
         if read_instance.data_array.size > 0 and not np.all(nan_data_array):
+
+            # set metadata cut for relevant stations
+            canvas_instance.selected_station_metadata[networkspeci] = read_instance.metadata_in_memory[networkspeci][canvas_instance.station_inds[networkspeci],:]
 
             # get which data labels have some valid data
             valid_data_labels_mask = ~np.all(np.all(nan_data_array, axis=-1), axis=-1)
@@ -243,9 +248,9 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
     else:
         if (read_instance.offline) or (read_instance.interactive):
             if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
+                station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][read_instance.observations_data_label]
             else:
-                station_inds = read_instance.valid_station_inds[networkspeci]['observations'] 
+                station_inds = read_instance.valid_station_inds[networkspeci][read_instance.observations_data_label] 
         else:
             station_inds = canvas_instance.relative_selected_station_inds
 
@@ -328,9 +333,9 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             # check if have valid station data first
             # if not update z statistic and active map valid station indices to be empty lists and return
             if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                n_valid_stations = len(read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations'])
+                n_valid_stations = len(read_instance.valid_station_inds_temporal_colocation[networkspeci][read_instance.observations_data_label])
             else:
-                n_valid_stations = len(read_instance.valid_station_inds[networkspeci]['observations'])
+                n_valid_stations = len(read_instance.valid_station_inds[networkspeci][read_instance.observations_data_label])
             if n_valid_stations == 0:             
                 z_statistic = np.array([], dtype=np.float32)
                 active_map_valid_station_inds = np.array([], dtype=np.int64)

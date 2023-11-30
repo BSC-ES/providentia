@@ -16,7 +16,7 @@ class DataFilter:
         self.read_instance = read_instance
 
         # get indices of some data variables
-        self.obs_index = self.read_instance.data_labels.index('observations')
+        self.obs_index = self.read_instance.data_labels.index(self.read_instance.observations_data_label)
         if self.read_instance.reading_ghost:
             if self.read_instance.resolution != 'daily' and self.read_instance.resolution != 'monthly':
                 self.day_night_index = self.read_instance.ghost_data_vars_to_read.index('day_night_code')
@@ -481,7 +481,7 @@ class DataFilter:
 
                 # iterate through experiment data arrays in data in memory dictionary
                 # save indices for colocation with observations
-                for experiment in self.read_instance.experiments:
+                for experiment in self.read_instance.experiments.values():
                     
                     #get expid data label index
                     exp_data_index = self.read_instance.data_labels.index(experiment)
@@ -521,7 +521,7 @@ class DataFilter:
             for data_label in self.read_instance.data_labels:
 
                 # check if data array is observational data array
-                if data_label == 'observations':
+                if data_label == self.read_instance.observations_data_label:
 
                     # get obs data array
                     obs_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
@@ -557,10 +557,10 @@ class DataFilter:
             for data_label in self.read_instance.data_labels:
 
                 # check if data array is not an observational data array
-                if data_label != 'observations':
+                if data_label != self.read_instance.observations_data_label:
 
                     # get indices of valid observational data array stations
-                    valid_station_inds = copy.deepcopy(self.read_instance.valid_station_inds[networkspeci]['observations'])
+                    valid_station_inds = copy.deepcopy(self.read_instance.valid_station_inds[networkspeci][self.read_instance.observations_data_label])
 
                     # get experimental data array (first subset by valid observational stations)
                     exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),valid_station_inds,:])
@@ -604,7 +604,7 @@ class DataFilter:
                 
                 # remove observations from data labels
                 relevant_data_labels = copy.deepcopy(self.read_instance.data_labels)
-                relevant_data_labels.remove('observations')
+                relevant_data_labels.remove(self.read_instance.observations_data_label)
 
                 # get calibration factor per experiment
                 for data_label_ii, data_label in enumerate(relevant_data_labels):

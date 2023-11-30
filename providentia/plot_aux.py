@@ -147,18 +147,18 @@ def update_plotting_parameters(instance):
     clrs = sns.color_palette(instance.plot_characteristics_templates['general']['legend_color_palette'], n_colors=len(instance.data_labels)-1)
 
     # add colour and zorder for observations
-    instance.plotting_params['observations']['colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
-    instance.plotting_params['observations']['zorder'] = instance.plot_characteristics_templates['general']['obs_zorder']
+    instance.plotting_params[instance.observations_data_label]['colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
+    instance.plotting_params[instance.observations_data_label]['zorder'] = instance.plot_characteristics_templates['general']['obs_zorder']
 
     # add colours and zorder for each experiment
     experiment_ind = 1
     for data_label in instance.data_labels:
-        if data_label != 'observations':
+        if data_label != instance.observations_data_label:
             # define colour for experiment
             instance.plotting_params[data_label]['colour'] = clrs[experiment_ind-1]
             # define zorder for experiment (obs zorder + experiment_ind)
             instance.plotting_params[data_label]['zorder'] = \
-                instance.plotting_params['observations']['zorder'] + experiment_ind
+                instance.plotting_params[instance.observations_data_label]['zorder'] + experiment_ind
             # update count of experiments
             experiment_ind += 1
 

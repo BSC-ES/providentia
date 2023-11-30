@@ -133,7 +133,8 @@ class ProvidentiaOffline:
             # set some key configuration variables
             self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
             self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
-            self.data_labels = ['observations'] + list(self.experiments.keys())
+            self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+            self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
             self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
 
             # get valid observations in date range
@@ -622,7 +623,7 @@ class ProvidentiaOffline:
                             grid_dict['month'].axis('off')
                             
                             # format axis
-                            format_axis(self, self, grid_dict, base_plot_type, plot_characteristics, set_extent=False, 
+                            format_axis(self, self, grid_dict, base_plot_type, plot_characteristics,
                                         relevant_temporal_resolutions=self.relevant_temporal_resolutions)
 
                             # get references to periodic label annotations made, and then hide them
@@ -640,7 +641,7 @@ class ProvidentiaOffline:
                             self.plot_dictionary[page_n]['axs'].append({'handle':ax, 'data_labels':[]})
                             
                             # format axis 
-                            format_axis(self, self, ax, base_plot_type, plot_characteristics, set_extent=False)
+                            format_axis(self, self, ax, base_plot_type, plot_characteristics)
 
                     # turn off axes until some data is plottted
                     ax.axis('off')
@@ -685,10 +686,6 @@ class ProvidentiaOffline:
         # define dictionary to store stats from all subsections for heatmap and table plots
         self.stats_summary = {}
         self.stats_station = {}
-
-        # set default markersize from density
-        if self.do_plot_geometry_setup:
-            self.plot.map_markersize_from_density = False
 
         # iterate through subsections
         for subsection_ind, subsection in enumerate(self.subsections):
@@ -798,9 +795,9 @@ class ProvidentiaOffline:
 
         # get valid station inds for networkspeci 
         if self.temporal_colocation and len(self.data_labels) > 1:
-            self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci]['observations']
+            self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
         else:
-            self.relevant_station_inds = self.valid_station_inds[networkspeci]['observations']  
+            self.relevant_station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
 
         # get N stations for networkspeci
         self.n_stations = len(self.relevant_station_inds)
@@ -915,9 +912,9 @@ class ProvidentiaOffline:
 
         # get valid station inds for networkspeci 
         if self.temporal_colocation and len(self.data_labels) > 1:
-            self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci]['observations']
+            self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
         else:
-            self.relevant_station_inds = self.valid_station_inds[networkspeci]['observations']  
+            self.relevant_station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
 
         # get N stations for networkspeci
         self.n_stations = len(self.relevant_station_inds)
@@ -1109,7 +1106,7 @@ class ProvidentiaOffline:
                 zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=stat)
 
                 # skip observations data label when plotting bias
-                if (data_label == 'observations') & (z_statistic_sign == 'bias'):
+                if (data_label == self.observations_data_label) & (z_statistic_sign == 'bias'):
                     continue
 
                 if plotting_paradigm == 'summary':
@@ -1129,7 +1126,7 @@ class ProvidentiaOffline:
                     # otherwise calculate statistic
                     else:
                         if z_statistic_sign == 'bias':
-                            data_to_add = calculate_statistic(self, self, networkspeci, zstat, ['observations'], [data_label])
+                            data_to_add = calculate_statistic(self, self, networkspeci, zstat, [self.observations_data_label], [data_label])
                         else:
                             data_to_add = calculate_statistic(self, self, networkspeci, zstat, [data_label], [])
                 else:
@@ -1182,7 +1179,7 @@ class ProvidentiaOffline:
 
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
-        data_labels_sans_obs.remove('observations')
+        data_labels_sans_obs.remove(self.observations_data_label)
 
         # determine if have some data to plot
         plot_validity = False
@@ -1220,10 +1217,10 @@ class ProvidentiaOffline:
             
             # get necessary data labels to plot
             if z_statistic_sign == 'bias':
-                z1 = ['observations'] * len(data_labels_sans_obs)
+                z1 = [self.observations_data_label] * len(data_labels_sans_obs)
                 z2 = data_labels_sans_obs
             elif 'obs' in plot_options:
-                z1 = ['observations']
+                z1 = [self.observations_data_label]
                 z2 = ['']
             else:
                 z1 = data_labels
@@ -1257,12 +1254,10 @@ class ProvidentiaOffline:
                 # set axis title
                 if relevant_axis.get_title() == '':
                     if z2_label != '':
-                        label = self.experiments[z2_label]
+                        label = copy.deepcopy(z2_label)
                     else:
-                        if z1_label == 'observations':
-                            label = copy.deepcopy(z1_label) 
-                        else:
-                            label = self.experiments[z1_label]
+                        label = copy.deepcopy(z1_label) 
+
                     axis_title_label = '{}\n{} '.format(label, self.subsection)
                     if self.n_stations == 1:
                         axis_title_label += '(1 station)'
@@ -1274,14 +1269,9 @@ class ProvidentiaOffline:
                 if self.map_extent:
                     set_map_extent(self, self, relevant_axis)
 
-                # calculate z statistic
-                z_statistic, self.active_map_valid_station_inds = calculate_statistic(self, self, networkspeci,
-                                                                                      zstat, z1_label, z2_label, 
-                                                                                      map=True)
-
                 # make map plot
-                self.plot.make_map(relevant_axis, networkspeci, z_statistic, self.plot_characteristics[plot_type], 
-                                   plot_options=plot_options)
+                self.plot.make_map(relevant_axis, networkspeci, self.plot_characteristics[plot_type], 
+                                   zstat=zstat, labela=z1_label, labelb=z2_label, plot_options=plot_options)
                 
                 # save plot information for later formatting 
                 if z2 == '':
@@ -1330,7 +1320,6 @@ class ProvidentiaOffline:
                             axis_ind = (current_plot_ind + self.subsection_ind + len(self.experiments) * self.subsection_ind)
                     else:
                         axis_ind = self.subsection_ind
-                    station_inds = copy.deepcopy(self.relevant_station_inds) 
                 elif plotting_paradigm == 'station':
                     if 'individual' in plot_options:
                         if ((base_plot_type == 'scatter') or ('bias' in plot_options) or 
@@ -1340,7 +1329,6 @@ class ProvidentiaOffline:
                             axis_ind = (current_plot_ind + self.station_ind + len(self.experiments) * self.station_ind)
                     else:
                         axis_ind = self.station_ind
-                    station_inds = [self.relevant_station_inds[self.station_ind]]
                 
                 # get relevant axis
                 relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, 
@@ -1428,10 +1416,7 @@ class ProvidentiaOffline:
                 # get plotting function                
                 func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
 
-                if base_plot_type == 'metadata':
-                    func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                            plot_options=plot_options, station_inds=station_inds)
-                elif base_plot_type == 'periodic':
+                if base_plot_type == 'periodic':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                             zstat=zstat, plot_options=plot_options)    
                 elif base_plot_type == 'distribution':
@@ -1512,9 +1497,9 @@ class ProvidentiaOffline:
                 
                 # get data labels (based on statistic type)
                 if z_statistic_sign == 'bias':
-                    data_labels = list(self.experiments.keys())
+                    data_labels = list(self.experiments.values())
                 else:
-                    data_labels = ['observations'] + list(self.experiments.keys())
+                    data_labels = [self.observations_data_label] + list(self.experiments.values())
 
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([networkspecies, self.subsections],
@@ -1553,10 +1538,10 @@ class ProvidentiaOffline:
                 # get stats
                 if 'bias' in plot_options:
                     stats = self.plot_characteristics[plot_type]['experiment_bias']
-                    data_labels = list(self.experiments.keys())
+                    data_labels = list(self.experiments.values())
                 else:
                     stats = self.plot_characteristics[plot_type]['basic']
-                    data_labels = ['observations'] + list(self.experiments.keys())
+                    data_labels = [self.observations_data_label] + list(self.experiments.values())
 
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, data_labels],

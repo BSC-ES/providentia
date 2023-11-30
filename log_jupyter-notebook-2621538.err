@@ -1,0 +1,42 @@
+
+The following have been reloaded with a version change:
+  1) matplotlib/3.4.3-foss-2019b-Python-3.7.4 => matplotlib/3.1.1-foss-2019b-Python-3.7.4
+
+[I 2023-11-28 12:56:56.726 ServerApp] jupyterlab | extension was successfully linked.
+[I 2023-11-28 12:56:57.058 LabApp] JupyterLab extension loaded from /gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/lib/python3.7/site-packages/jupyterlab
+[I 2023-11-28 12:56:57.058 LabApp] JupyterLab application directory is /.statelite/tmpfs/gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/share/jupyter/lab
+[I 2023-11-28 12:56:57.063 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2023-11-28 12:56:57.063 ServerApp] Serving notebooks from local directory: /.statelite/tmpfs/gpfs/archive/bsc32/esarchive/obs/ghost/scripts/Providentia-interactive
+[I 2023-11-28 12:56:57.063 ServerApp] Jupyter Server 1.4.1 is running at:
+[I 2023-11-28 12:56:57.063 ServerApp] http://s03r1b55:9781/lab?token=19687ad3e30fca0b964b4b0f6480776b4838b0ff2c600d23
+[I 2023-11-28 12:56:57.063 ServerApp]  or http://127.0.0.1:9781/lab?token=19687ad3e30fca0b964b4b0f6480776b4838b0ff2c600d23
+[I 2023-11-28 12:56:57.063 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2023-11-28 12:56:57.073 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-1003858-open.html
+    Or copy and paste one of these URLs:
+        http://s03r1b55:9781/lab?token=19687ad3e30fca0b964b4b0f6480776b4838b0ff2c600d23
+     or http://127.0.0.1:9781/lab?token=19687ad3e30fca0b964b4b0f6480776b4838b0ff2c600d23
+[I 2023-11-28 12:58:31.030 LabApp] Build is up to date
+[I 2023-11-28 12:58:33.544 ServerApp] Kernel started: 27e8640f-a7fc-4857-b0fa-76f183169858
+[I 2023-11-28 12:58:40.609 ServerApp] Kernel restarted: 27e8640f-a7fc-4857-b0fa-76f183169858
+[I 2023-11-28 13:00:33.406 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 14:40:08.415 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 14:43:19.505 ServerApp] Kernel restarted: 27e8640f-a7fc-4857-b0fa-76f183169858
+[W 2023-11-28 14:43:24.124 ServerApp] Nudge: attempt 10 on kernel 27e8640f-a7fc-4857-b0fa-76f183169858
+[I 2023-11-28 14:44:08.803 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 14:46:09.638 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 14:47:12.164 ServerApp] Kernel restarted: 27e8640f-a7fc-4857-b0fa-76f183169858
+[W 2023-11-28 14:47:16.764 ServerApp] Nudge: attempt 10 on kernel 27e8640f-a7fc-4857-b0fa-76f183169858
+[I 2023-11-28 14:48:19.031 ServerApp] Kernel restarted: 27e8640f-a7fc-4857-b0fa-76f183169858
+[I 2023-11-28 14:50:10.179 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 14:52:10.815 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 14:54:11.380 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 14:55:36.617 ServerApp] Kernel restarted: 27e8640f-a7fc-4857-b0fa-76f183169858
+[W 2023-11-28 14:55:41.204 ServerApp] Nudge: attempt 10 on kernel 27e8640f-a7fc-4857-b0fa-76f183169858
+[I 2023-11-28 14:56:11.598 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[W 2023-11-28 14:56:36.619 ServerApp] Timeout waiting for kernel_info_reply: 27e8640f-a7fc-4857-b0fa-76f183169858
+[I 2023-11-28 14:58:11.749 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 15:00:11.840 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+slurmstepd: error: *** JOB 2621538 ON s03r1b55 CANCELLED AT 2023-11-28T15:01:38 DUE TO TIME LIMIT ***

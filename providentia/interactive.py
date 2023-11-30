@@ -37,6 +37,7 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
 expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
+# do not print deprecated warnings
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -85,7 +86,8 @@ class Interactive:
         # set some key configuration variables
         self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
         self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
-        self.data_labels = ['observations'] + list(self.experiments.keys())
+        self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+        self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
 
         # get valid observations in date range
@@ -148,7 +150,8 @@ class Interactive:
         #re-filter 
         self.filter()
 
-    def make_plot(self, plot, data_labels=[], title='', xlabel='', ylabel='', legend=True, plot_options=[], format={}):
+    def make_plot(self, plot, data_labels=[], labela='', labelb='', title=None, xlabel=None, ylabel=None, 
+                  cb=True, legend=True, plot_options=[], return_plot=False, format={}):
         """wrapper method to make a Providentia plot"""
 
         # get base plot type (no plot options), and plot type (with plot options)
@@ -167,6 +170,8 @@ class Interactive:
         self.plot_characteristics = dict()
         self.plot.set_plot_characteristics([plot_type], format=format)
         
+        # create figure and axis/axes for plot
+        # differentiation in approach between jupyter and standard call for creation of figure geometry
         if jupyter_session:
             fig = plt.figure(figsize=self.plot_characteristics[plot_type]['figsize'])
         else:
@@ -175,12 +180,15 @@ class Interactive:
             screenRect = desktop.screenGeometry()
             width = screenRect.width()
             height = screenRect.height()
-
             dpi = plt.rcParams['figure.dpi']
             px = 1.0/dpi
             fig = plt.figure(figsize=(width*px,height*px))
-        
-        ax = fig.add_subplot(111)
+
+        #create axes
+        if base_plot_type == 'map':
+            ax = fig.add_subplot(111, projection=self.plotcrs)
+        else:
+            ax = fig.add_subplot(111)
 
         if base_plot_type in ['periodic', 'periodic-violin']:
             gs = gridspec.GridSpecFromSubplotSpec(100, 100, subplot_spec=ax)
@@ -188,7 +196,6 @@ class Interactive:
             grid_dict['hour'] = fig.add_subplot(gs[:46, :])
             grid_dict['dayofweek'] = fig.add_subplot(gs[54:, 64:])
             grid_dict['month'] = fig.add_subplot(gs[54:, :61])
-            self.plot_dictionary[page_n]['axs'].append({'handle':grid_dict, 'data_labels':[]})
             ax.spines['top'].set_color('none')
             ax.spines['bottom'].set_color('none')
             ax.spines['left'].set_color('none')
@@ -198,10 +205,14 @@ class Interactive:
         else:
             relevant_ax = ax
 
+        # adjust margings and subplot spacing if defined
+        if 'subplots_adjust' in self.plot_characteristics[plot_type]:
+            fig.subplots_adjust(**self.plot_characteristics[plot_type]['subplots_adjust'])
+
         # get plotting function
-        if plot_type == 'statsummary':
+        if base_plot_type == 'statsummary':
             func = getattr(self.plot, 'make_table')
-        else:
+        elif base_plot_type != 'legend':
             func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
 
         # get data labels for plot
@@ -210,18 +221,48 @@ class Interactive:
 
         # get networkspeci to plot
         networkspeci = self.networkspecies[0]
+        speci = networkspeci.split('|')[-1]
         if len(self.networkspecies) > 1:
-            print('Warning: More than 1 network or species defined, can only plot for 1 pair. Taking {}'.format(networkspeci))
+            print('Warning: More than 1 network or species defined, can only plot for 1 pair. Taking {}.'.format(networkspeci))
 
+        # legend plot (on its own axis)
+        if base_plot_type == 'legend':
+            legend_handles = self.make_legend(plot_type)
+            relevant_ax.legend(**legend_handles)
+
+        # map plot
+        elif base_plot_type == 'map':
+            # get map data labels to plot
+            # if no specific labels defined then take first data label and give warning
+            if (labela == '') & (labelb == ''):
+                labela = data_labels[0]
+                print('Warning: No specific data labels set, plotting first available data label: {}.'.format(z1_label))
+            # labelb defined but labela for some reason, set labela to be labelb, and labelb empty str 
+            elif (labela == ''):
+                labela = copy.deepcopy(labelb)
+                labelb = ''
+            func(relevant_ax, networkspeci, self.plot_characteristics[plot_type], zstat=zstat, 
+                 labela=labela, labelb=labelb, plot_options=plot_options)
         # periodic plot
-        if base_plot_type == 'periodic':
+        elif base_plot_type == 'periodic':
             func(grid_dict, networkspeci, data_labels, self.plot_characteristics[plot_type], zstat=zstat, 
                  plot_options=plot_options)
         # make statsummary plot
         elif base_plot_type == 'statsummary':
             relevant_zstats = self.active_statsummary_stats['basic']
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
+                 zstats=relevant_zstats, statsummary=True, plot_options=plot_options) 
+
+            func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                         statsummary=True, plot_options=plot_options, subsection=self.subsection, 
+                         plotting_paradigm=plotting_paradigm, stats_df=stats_df)     
+
+        # make heatmap / table plot
+        elif base_plot_type in ['heatmap','table']:                
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 plot_options=plot_options, subsection=self.subsection, 
+                 plotting_paradigm=plotting_paradigm, stats_df=stats_df)
+                           
         # other plots
         else: 
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
@@ -230,35 +271,80 @@ class Interactive:
         # format plot
         format_axis(self, self, relevant_ax, base_plot_type, self.plot_characteristics[plot_type])
 
-        # make legend 
-        if legend:
-            legend_handles = self.make_legend(plot_type)
-            relevant_ax.legend(**legend_handles['plot'])
+        # make legend (embedded on plot axis)
+        if (legend) & (base_plot_type != 'legend'):
+            if 'legend' in self.plot_characteristics[plot_type]:
+                legend_handles = self.make_legend(plot_type)
+                if base_plot_type in ['periodic', 'periodic-violin']:
+                    try:
+                        ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
+                    except:
+                        print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.json, or passed via 'format' argument.\n\Taking first available axis.")
+                        ax_to_plot = self.relevant_temporal_resolutions[0]
+                    if ax_to_plot not in self.relevant_temporal_resolutions:
+                        print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")
+                        ax_to_plot = self.relevant_temporal_resolutions[0]
+                    relevant_ax[ax_to_plot].legend(**legend_handles)
+                else:
+                    relevant_ax.legend(**legend_handles)
+            else:
+                print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json")
 
-        # set tight layout
-        plt.tight_layout()
+        # make colourbar
+        if cb:
+            if 'cb' in  self.plot_characteristics[plot_type]:
+                self.make_colourbar(relevant_ax, zstat, speci, plot_type)
+            else:
+                print("Warning: 'cb' not defined for plot type in plot_characteristics_interactive.json")
 
-        # show plot
-        plt.show()
 
-    def make_legend(self, plot_type, format={}):
+        # if return_plot is passed then return plot axis/axes
+        if return_plot:
+            return relevant_ax
+        # otherwise show plot
+        else:
+            plt.show()
+
+    def make_colourbar(self, plot_ax, stat, speci, plot_type):
+        """wrapper method to make colourbar"""
+
+        # create cb axis
+        cb_ax = fig.add_axes(plot_characteristics['cb']['position'])
+        cb_ax.set_rasterized(True)
+
+        # generate colourbar
+        generate_colourbar(self, [plot_ax], [cb_ax], stat, self.plot_characteristics[plot_type], speci)
+
+    def make_legend(self, plot_type):
         """wrapper method to make legend"""
         
-        if 'legend' in self.plot_characteristics[plot_type]:
-            legend_handles = self.plot.make_legend_handles(self.plot_characteristics[plot_type]['legend'])
+        if plot_type == 'legend':
+            legend_characteristics = self.plot_characteristics['legend']
+        elif 'legend' in self.plot_characteristics[plot_type]:
+            legend_characteristics = self.plot_characteristics[plot_type]['legend']
         else:
-            print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json, or passed via 'format argument")
+            print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json")
+            return
 
-        return legend_handles
+        legend_handles = self.plot.make_legend_handles(legend_characteristics)
+        return legend_handles['plot']
 
-
-    def calculate_statistic(self, statistic='', labela='', labelb='', per_station=False):
+    def calculate_statistic(self, stat='', labela='', labelb='', per_station=False):
         """wrapper method to calculate statistic/s"""
 
+        # if no specific labels defined then take first data label and give warning
+        if (labela == '') & (labelb == ''):
+            labela = data_labels[0]
+            print('Warning: No specific data labels set, plotting first available data label: {}.'.format(z1_label))
+        # labelb defined but labela for some reason, set labela to be labelb, and labelb empty str 
+        elif (labela == ''):
+            labela = copy.deepcopy(labelb)
+            labelb = ''
+
         if per_station:
-            stat, active_map_valid_station_inds = calculate_statistic(self, self, networkspeci, statistic, labela, labelb, map=True)
+            stat, active_map_valid_station_inds = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], map=True)
         else:
-            stat = calculate_statistic(self, self, networkspeci, statistic, labela, labelb)
+            stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb])
         return stat
 
     def set_config(self, **kwargs):
@@ -401,7 +487,7 @@ class Interactive:
 
         # if variable is undefined then print warning
         if var == '':
-            print('Warning: Variable to read is undefined')
+            print('Warning: Variable to read is undefined.')
             return 
         else:
             data = self.get_data(format='npz')

@@ -54,9 +54,9 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         # get valid station indices (from observations because valid stations for the experiment is a 
         # subset of the observations)
         if prv.temporal_colocation:
-            valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci]['observations']
+            valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
         else:
-            valid_station_inds = prv.valid_station_inds[networkspeci]['observations']
+            valid_station_inds = prv.valid_station_inds[networkspeci][prv.observations_data_label]
 
         if apply_filters:
             if prv.reading_ghost:
@@ -231,9 +231,9 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         # get valid station indices (from observations because valid stations for the experiment is a 
         # subset of the observations)
         if prv.temporal_colocation:
-            valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci]['observations']
+            valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
         else:
-            valid_station_inds = prv.valid_station_inds[networkspeci]['observations']
+            valid_station_inds = prv.valid_station_inds[networkspeci][prv.observations_data_label]
 
         # set attributes
         var.standard_name = data_format_dict[speci]['standard_name']

@@ -203,7 +203,7 @@ class MPLCanvas(FigureCanvas):
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
             format_axis(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
-                        self.plot_characteristics[plot_type])
+                        self.plot_characteristics[plot_type], set_extent=True)
 
         # create covers to hide parts of canvas when updating / plotting
         self.canvas_cover = set_formatting(QtWidgets.QWidget(self), formatting_dict['canvas_cover'])
@@ -522,14 +522,10 @@ class MPLCanvas(FigureCanvas):
         else:
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
-        # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
-        self.z_statistic, self.active_map_valid_station_inds = calculate_statistic(self.read_instance, self, 
-                                                                                   self.read_instance.networkspeci,
-                                                                                   zstat, 
-                                                                                   [self.map_z1.currentText()], 
-                                                                                   [self.map_z2.currentText()], 
-                                                                                    map=True)
-
+        # plot map for zstat --> updating active map valid station indices and setting up plot picker
+        self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.plot_characteristics['map'], 
+                           zstat=zstat, labela=self.map_z1.currentText(), labelb=self.map_z2.currentText())
+        
         # update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array(
             [np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind in
@@ -554,15 +550,11 @@ class MPLCanvas(FigureCanvas):
             self.absolute_selected_station_inds = np.array([], dtype=np.int64)
             self.absolute_non_selected_station_inds = np.array([], dtype=np.int64)
 
-            # plot map with 0 stations
-            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, 
-                               self.plot_characteristics['map'])
-
-        # otherwise plot valid active map stations on map
+        # else, if any of the currently selected stations are not in the current active map
+        # valid station indices --> unselect selected stations (and associated plots)
+        # also uncheck select all/intersect/extent checkboxes
         else:
-            # if any of the currently selected stations are not in the current active map
-            # valid station indices --> unselect selected stations (and associated plots)
-            # also uncheck select all/intersect/extent checkboxes
+
             if not np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)):
                 
                 # unselect all/intersect/extent checkboxes
@@ -576,9 +568,6 @@ class MPLCanvas(FigureCanvas):
             # get absolute non-selected station inds
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                                  self.absolute_selected_station_inds))[0]
-
-            # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, self.plot_characteristics['map'])
 
             # create 2D numpy array of plotted station coordinates
             self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.read_instance.networkspeci][self.active_map_valid_station_inds], 
@@ -871,14 +860,14 @@ class MPLCanvas(FigureCanvas):
 
             # if selected_z_stat and selected_z1_array are empty strings it is
             # because they being initialised for the first time
-            # force them to be 'observations' and first basic z statistic respectively
+            # force them to be observations label and first basic z statistic respectively
             if selected_z_stat == '':
                 selected_z_stat = self.read_instance.basic_z_stats[0]
             if hasattr(self.read_instance, 'map_z'):
                 if self.read_instance.map_z in self.read_instance.basic_z_stats:
                     selected_z_stat = self.read_instance.map_z
             if selected_z1_array == '':
-                selected_z1_array = 'observations'
+                selected_z1_array = copy.deepcopy(self.read_instance.observations_data_label)
 
             # update z statistic field to all basic stats if colocation not-active OR z2
             # array not selected, else select basic+bias stats
@@ -1596,7 +1585,7 @@ class MPLCanvas(FigureCanvas):
                 else:
                     intersect_lists = [self.active_map_valid_station_inds]
                     for data_label in self.read_instance.data_labels:
-                        if data_label != 'observations':
+                        if data_label != self.read_instance.observations_data_label:
                             if self.read_instance.temporal_colocation:
                                 valid_station_inds = self.read_instance.valid_station_inds_temporal_colocation[self.read_instance.networkspeci][data_label]
                             else:
@@ -2434,17 +2423,17 @@ class MPLCanvas(FigureCanvas):
                                                     element.set_visible(True)
                                     else:
                                         if plot_type == 'statsummary':
-                                            if data_label == 'observations':
+                                            if data_label == self.read_instance.observations_data_label:
                                                 bias_labels_to_plot.append(data_label) 
                                         else:
-                                            if data_label not in ['observations', 'ALL']:
+                                            if data_label not in [self.read_instance.observations_data_label, 'ALL']:
                                                 bias_labels_to_plot.append(data_label) 
                                 else:
                                     if plot_type == 'statsummary':
-                                        if data_label == 'observations':
+                                        if data_label == self.read_instance.observations_data_label:
                                             bias_labels_to_plot.append(data_label) 
                                     else:
-                                        if data_label not in ['observations', 'ALL']:
+                                        if data_label not in [self.read_instance.observations_data_label, 'ALL']:
                                             bias_labels_to_plot.append(data_label) 
 
                             # if do not already have bias elements, then make them (tracking plot elements also) 
@@ -2514,7 +2503,7 @@ class MPLCanvas(FigureCanvas):
                                                 element.set_visible(True)
                                 else:
                                     if plot_type == 'statsummary':
-                                        if data_label == 'observations':
+                                        if data_label == self.read_instance.observations_data_label:
                                             absolute_labels_to_plot.append(data_label) 
                                     else:
                                         if data_label != 'ALL':
@@ -2582,10 +2571,10 @@ class MPLCanvas(FigureCanvas):
             if do not already exist.
         """
 
-        # if 'bias' is active, remove 'observations' from data_labels
+        # if 'bias' is active, remove observations data label from data labels
         data_labels_alt = copy.deepcopy(data_labels)
         if active == 'bias':
-            data_labels_alt.remove('observations')
+            data_labels_alt.remove(self.read_instance.observations_data_label)
 
         # iterate through plot_options
         for plot_option in plot_options:

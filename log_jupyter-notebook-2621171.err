@@ -40,3 +40,21 @@ The following have been reloaded with a version change:
 [I 2023-11-28 12:01:54.820 ServerApp] Saving file at /notebooks/test_interactive.ipynb
 [I 2023-11-28 12:02:40.590 ServerApp] Kernel restarted: f2104a90-6c44-4132-a2fe-97d80242339d
 [W 2023-11-28 12:02:45.166 ServerApp] Nudge: attempt 10 on kernel f2104a90-6c44-4132-a2fe-97d80242339d
+[I 2023-11-28 12:03:55.039 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:14:03.064 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:15:40.478 ServerApp] Kernel restarted: f2104a90-6c44-4132-a2fe-97d80242339d
+[W 2023-11-28 12:15:45.019 ServerApp] Nudge: attempt 10 on kernel f2104a90-6c44-4132-a2fe-97d80242339d
+[W 2023-11-28 12:15:50.028 ServerApp] Nudge: attempt 20 on kernel f2104a90-6c44-4132-a2fe-97d80242339d
+[I 2023-11-28 12:16:03.599 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:18:03.709 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:18:55.339 ServerApp] Kernel restarted: f2104a90-6c44-4132-a2fe-97d80242339d
+[W 2023-11-28 12:18:59.882 ServerApp] Nudge: attempt 10 on kernel f2104a90-6c44-4132-a2fe-97d80242339d
+[I 2023-11-28 12:20:03.874 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:22:04.082 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:43:02.349 ServerApp] Kernel restarted: f2104a90-6c44-4132-a2fe-97d80242339d
+[W 2023-11-28 12:43:06.919 ServerApp] Nudge: attempt 10 on kernel f2104a90-6c44-4132-a2fe-97d80242339d
+[W 2023-11-28 12:44:02.380 ServerApp] Timeout waiting for kernel_info_reply: f2104a90-6c44-4132-a2fe-97d80242339d
+[I 2023-11-28 12:44:10.795 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:46:10.986 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-11-28 12:53:31.859 ServerApp] Starting buffering for f2104a90-6c44-4132-a2fe-97d80242339d:0828fe48-c63e-4a3d-a799-5343da683200
+slurmstepd: error: *** JOB 2621171 ON s05r1b37 CANCELLED AT 2023-11-28T12:53:38 ***
