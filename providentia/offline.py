@@ -1400,7 +1400,7 @@ class ProvidentiaOffline:
                         if ylabel_units == 'measurement_units':
                             ylabel_units = self.measurement_units[networkspeci.split('|')[-1]] 
                         if ylabel_units != '':
-                            ylabel = '[{}]'.format(ylabel_units)
+                            ylabel += ' [{}]'.format(ylabel_units)
                     else:
                         if 'ylabel' in self.plot_characteristics[plot_type]:
                             if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':

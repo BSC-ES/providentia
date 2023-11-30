@@ -19,7 +19,6 @@ localhost:${port}  (prefix w/ https:// if using password)
 "
 # load modules or conda environments here
 source load_modules.sh
-module load jupyterlab/3.0.9-foss-2019b-Python-3.7.4
 export PYTHONPATH=$(pwd):${PYTHONPATH}
 # DON'T USE ADDRESS BELOW.
 # DO USE TOKEN BELOW
