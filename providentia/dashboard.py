@@ -1034,7 +1034,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 # format axis                
                 format_axis(self.mpl_canvas, self.mpl_canvas.read_instance, 
                             self.mpl_canvas.plot_axes[changed_plot_type], 
-                            changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type])
+                            changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type],
+                            set_extent=True)
                 
                 # make plot
                 self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
@@ -1194,6 +1195,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
+        self.previous_data_labels_raw = self.data_labels_raw
         self.mpl_canvas.previous_plot_options = copy.deepcopy(self.mpl_canvas.current_plot_options) 
 
         # set new active variables as selected variables from menu
@@ -1209,7 +1211,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
-        self.data_labels = ['observations'] + list(self.experiments.keys())
+        self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+        self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
         # remove bias plot options if have no experiments loaded
         if len(self.data_labels) == 1:
             for plot_type in self.mpl_canvas.all_plots:
@@ -1360,7 +1363,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # before experiments, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
             if len(self.data_labels) == 1:  
-                self.z1_arrays = np.array(['observations'])
+                self.z1_arrays = np.array([self.observations_data_label])
             else:
                 self.z1_arrays = np.array(self.data_labels)
             self.z2_arrays = np.append([''], self.z1_arrays)
