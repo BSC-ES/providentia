@@ -203,7 +203,7 @@ class MPLCanvas(FigureCanvas):
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
             format_axis(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
-                        self.plot_characteristics[plot_type], set_extent=True)
+                        self.plot_characteristics[plot_type], map_extent=self.read_instance.map_extent)
 
         # create covers to hide parts of canvas when updating / plotting
         self.canvas_cover = set_formatting(QtWidgets.QWidget(self), formatting_dict['canvas_cover'])
@@ -675,7 +675,7 @@ class MPLCanvas(FigureCanvas):
                     else:
                         ylabel = expbias_stats[base_zstat]['label']
                         ylabel_units = expbias_stats[base_zstat]['units']
-                    if ylabel_units == 'measurement_units':
+                    if ylabel_units == '[measurement_units]':
                         ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
                     if ylabel_units != '':
                         ylabel += ' [{}]'.format(ylabel_units)
@@ -697,19 +697,17 @@ class MPLCanvas(FigureCanvas):
                 else:    
                     # set new xlabel
                     if 'xlabel' in self.plot_characteristics[plot_type]:
-                        if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
-                            xlabel = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]])
-                        else:
-                            xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                        xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                        if '[measurement_units]' in xlabel:
+                            xlabel = xlabel.replace('[measurement_units]', '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]]))
                     else:
                         xlabel = ''
 
                     # set new ylabel
                     if 'ylabel' in self.plot_characteristics[plot_type]:
-                        if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
-                            ylabel = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]])
-                        else:
-                            ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                        ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                        if '[measurement_units]' in ylabel:
+                            ylabel = ylabel.replace('[measurement_units]', '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]]))
                     else:
                         ylabel = ''
 
@@ -734,14 +732,15 @@ class MPLCanvas(FigureCanvas):
                          self.plot_characteristics[plot_type], plot_options=plot_options)
 
                 # reset axes limits (harmonising across subplots for periodic plots) 
-                if plot_type == 'scatter':
-                    harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
-                                               self.plot_characteristics[plot_type], plot_options, relim=True)
-                elif plot_type != 'taylor':
-                    harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
-                                               self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
+                if plot_type not in ['map', 'taylor']:
+                    if plot_type == 'scatter':
+                        harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
+                                                self.plot_characteristics[plot_type], plot_options, relim=True)
+                    else:
+                        harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
+                                                self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
 
-                # skip setting axes labels for Taylor diagram
+                # set axes labels
                 if plot_type != 'taylor':
                     # set xlabel
                     set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
@@ -2548,12 +2547,12 @@ class MPLCanvas(FigureCanvas):
                         self.read_instance.block_config_bar_handling_updates = False
 
                     # reset axes limits (harmonising across subplots for periodic plots) 
-                    if plot_type != 'map':
+                    if plot_type not in ['map', 'taylor']:
                         if plot_type == 'scatter':
                             harmonise_xy_lims_paradigm(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
                                                        self.plot_characteristics[plot_type], 
                                                        self.current_plot_options[plot_type], relim=True)
-                        elif plot_type != 'taylor':
+                        else:
                             harmonise_xy_lims_paradigm(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
                                                        self.plot_characteristics[plot_type], 
                                                        self.current_plot_options[plot_type], relim=True, autoscale=True)                       

@@ -217,16 +217,17 @@ def legend_picker_func(canvas_instance, event):
                                         plot_element.set_visible(False)
 
                         # reset axes limits (harmonising across subplots for periodic plots) 
-                        if plot_type == 'scatter':
-                            harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
-                                                       canvas_instance.plot_axes[plot_type], plot_type, 
-                                                       canvas_instance.plot_characteristics[plot_type], 
-                                                       plot_options, relim=True)
-                        elif plot_type != 'taylor':
-                            harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
-                                                       canvas_instance.plot_axes[plot_type], plot_type, 
-                                                       canvas_instance.plot_characteristics[plot_type], 
-                                                       plot_options, relim=True, autoscale=True)
+                        if plot_type not in ['taylor']:
+                            if plot_type == 'scatter':
+                                harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
+                                                        canvas_instance.plot_axes[plot_type], plot_type, 
+                                                        canvas_instance.plot_characteristics[plot_type], 
+                                                        plot_options, relim=True)
+                            else:
+                                harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
+                                                        canvas_instance.plot_axes[plot_type], plot_type, 
+                                                        canvas_instance.plot_characteristics[plot_type], 
+                                                        plot_options, relim=True, autoscale=True)
 
             # change font weight of label
             legend_label._fontproperties = canvas_instance.legend.get_texts()[0]._fontproperties.copy()
