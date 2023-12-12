@@ -123,13 +123,8 @@ class ProvConfiguration:
                 
         # get available N CPUs
         elif key == 'available_cpus':
-            if (MACHINE == 'power') or (MACHINE == 'mn4'):
-                bash_command = 'squeue -h -o "%C"'
-                process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
-                output, _ = process.communicate()
-                return int(re.findall(r'\d+', str(output))[0])
-            else:
-                return int(os.cpu_count())
+            return int(os.getenv('SLURM_NTASKS'))
+            #return len(os.sched_getaffinity(0))
 
         elif key == 'cartopy_data_dir':
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external

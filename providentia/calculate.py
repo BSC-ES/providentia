@@ -8,10 +8,21 @@ https://www.cmascenter.org/conference/2003/session_poster/yu_abstract3.pdf ,
 and https://github.com/davidcarslaw/openair/blob/HEAD/R/modStats.R 
 """
 
+import copy
 import numpy as np
 import numpy.ma as ma
 import scipy
 
+def nansumwrapper(data, **kwargs):
+    """ np.nansum returns 0 when all NaNs are encountered,
+        as opposed to np.NaN, which is inconsistent with the other
+        Nan functions. This is a wrapper function to make operation 
+        consistent.
+    """
+    if np.isnan(data).all():
+        return np.full(data.shape[:data.ndim-1], np.NaN, dtype=np.float32)
+    else:
+        return np.nansum(data, **kwargs)
 
 class Stats(object):
 
@@ -166,7 +177,7 @@ class Stats(object):
         if data.size == 0:
             return np.NaN
         else:
-            n_exceed = np.nansum(data > threshold, axis=-1).astype('float32')
+            n_exceed = nansumwrapper(data > threshold, axis=-1).astype('float32')
             return n_exceed
 
 class ExpBias(object):
@@ -192,8 +203,8 @@ class ExpBias(object):
         if obs.size == 0:
             return np.NaN
         else:
-            return 1.0 - np.nansum(np.abs(exp - obs), axis=-1) / \
-                   np.nansum(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1) 
+            return 1.0 - nansumwrapper(np.abs(exp - obs), axis=-1) / \
+                   nansumwrapper(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1) 
 
     @staticmethod
     def calculate_ioa(obs, exp):
@@ -215,8 +226,8 @@ class ExpBias(object):
         if obs.size == 0:
             return np.NaN
         else:
-            lhs = np.nansum(np.abs(exp - obs), axis=-1)
-            rhs = 2.0 * np.nansum(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1)
+            lhs = nansumwrapper(np.abs(exp - obs), axis=-1)
+            rhs = 2.0 * nansumwrapper(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1)
             output = np.copy(lhs)
             lower_check = lhs <= rhs
             output[lower_check] = 1.0 - lhs[lower_check] / rhs[lower_check] 
@@ -242,7 +253,7 @@ class ExpBias(object):
             elif normalisation_type == 'mean':
                 mb = (mb / np.nanmean(obs, axis=-1)) * 100.0
             elif normalisation_type == 'sum':
-                mb = (mb / np.nansum(obs, axis=-1)) * 100.0
+                mb = (mb / nansumwrapper(obs, axis=-1)) * 100.0
             elif normalisation_type == 'iq':
                 mb = (mb / (np.nanpercentile(obs, 75, axis=-1) - np.nanpercentile(obs, 25, axis=-1))) * 100.0
             elif normalisation_type == 'stdev':
@@ -271,7 +282,7 @@ class ExpBias(object):
             elif normalisation_type == 'mean':
                 me = (me / np.nanmean(obs, axis=-1)) * 100.0
             elif normalisation_type == 'sum':
-                me = (me / np.nansum(obs, axis=-1)) * 100.0 
+                me = (me / nansumwrapper(obs, axis=-1)) * 100.0 
             elif normalisation_type == 'iq':
                 me = (me / (np.nanpercentile(obs, 75, axis=-1) - np.nanpercentile(obs, 25, axis=-1))) * 100.0 
             elif normalisation_type == 'stdev':
@@ -288,7 +299,10 @@ class ExpBias(object):
         if obs.size == 0:
             return np.NaN
         else:
-            mnb = np.nanmean(ma.masked_invalid((exp - obs) / obs), axis=-1) * 100.0
+            # to avoid ZeroDivisionError, replace all obs of 0 with NaN
+            obs_nan = copy.deepcopy(obs)
+            obs_nan[obs_nan == 0.0] = np.NaN
+            mnb = np.nanmean((exp - obs_nan) / obs_nan, axis=-1) * 100.0
             return mnb
 
     @staticmethod
@@ -302,7 +316,10 @@ class ExpBias(object):
         if obs.size == 0:
             return np.NaN
         else:
-            mne = np.nanmean(ma.masked_invalid((np.abs(exp - obs)) / obs), axis=-1) * 100.0
+            # to avoid ZeroDivisionError, replace all obs of 0 with NaN
+            obs_nan = copy.deepcopy(obs)
+            obs_nan[obs_nan == 0.0] = np.NaN
+            mne = np.nanmean((np.abs(exp - obs_nan)) / obs_nan, axis=-1) * 100.0
             return mne
     
     @staticmethod
@@ -322,7 +339,11 @@ class ExpBias(object):
         if obs.size == 0:
             return np.NaN
         else:
-            mfb = np.nanmean((exp - obs) / ma.masked_invalid((exp + obs) / 2.0), axis=-1) * 100.0
+            lhs = exp - obs
+            rhs = (exp + obs) / 2.0
+            # to avoid ZeroDivisionError, replace all rhs values of 0 with NaN
+            rhs[rhs == 0.0] = np.NaN
+            mfb = np.nanmean(lhs / rhs, axis=-1) * 100.0
             return mfb
 
     @staticmethod
@@ -334,7 +355,11 @@ class ExpBias(object):
         if obs.size == 0:
             return np.NaN
         else:
-            mfe = np.nanmean(np.abs(exp - obs) / ma.masked_invalid((exp + obs) / 2.0), axis=-1) * 100.0
+            lhs = np.abs(exp - obs)
+            rhs = (exp + obs) / 2.0
+            # to avoid ZeroDivisionError, replace all rhs values of 0 with NaN
+            rhs[rhs == 0.0] = np.NaN
+            mfe = np.nanmean(lhs / rhs, axis=-1) * 100.0
             return mfe
 
     @staticmethod
@@ -355,7 +380,7 @@ class ExpBias(object):
             elif normalisation_type == 'mean':
                 rmse = (rmse / np.nanmean(obs, axis=-1)) * 100.0 
             elif normalisation_type == 'rmse':
-                rmse = (rmse / np.nansum(obs, axis=-1)) * 100.0 
+                rmse = (rmse / nansumwrapper(obs, axis=-1)) * 100.0 
             elif normalisation_type == 'iq':
                 rmse = (rmse / (np.nanpercentile(obs, 75, axis=-1) - np.nanpercentile(obs, 25, axis=-1))) * 100.0 
             elif normalisation_type == 'stdev':
@@ -380,12 +405,13 @@ class ExpBias(object):
             std_obs = np.expand_dims(np.nanstd(obs, axis=-1), axis=-1)
             mean_exp = np.expand_dims(np.nanmean(exp, axis=-1), axis=-1)
             std_exp = np.expand_dims(np.nanstd(exp, axis=-1), axis=-1)
-            standard_score_obs = ma.masked_invalid((obs - mean_obs) / std_obs)
-            standard_score_exp = ma.masked_invalid((exp - mean_exp) / std_exp)
-            standard_score_mult = standard_score_obs*standard_score_exp
-            # get number of non-masked values in the time dimension
-            n = standard_score_mult.count(axis=-1)
-            return np.nansum(standard_score_mult, axis=-1) / n
+            # to avoid ZeroDivisionError, replace all stds of 0 with NaN
+            std_obs[std_obs == 0.0] = np.NaN
+            std_exp[std_exp == 0.0] = np.NaN
+            standard_score_obs = (obs - mean_obs) / std_obs
+            standard_score_exp = (exp - mean_exp) / std_exp
+            standard_score_mult = standard_score_obs * standard_score_exp
+            return nansumwrapper(standard_score_mult, axis=-1) / np.count_nonzero(~np.isnan(standard_score_mult), axis=-1)
 
     @staticmethod
     def calculate_r_squared(obs, exp):
@@ -408,9 +434,12 @@ class ExpBias(object):
         if obs.size == 0:
             return np.NaN
         else:
-            frac = ma.masked_invalid(exp / obs)
-            n = frac.count(axis=-1)
-            return (100.0 / n) * np.nansum(((frac >= 0.5) & (frac <= 2.0)), axis=-1)
+            # to avoid ZeroDivisionError, replace all obs of 0 with NaN
+            obs_nan = copy.deepcopy(obs)
+            obs_nan[obs_nan == 0.0] = np.NaN
+            frac = exp / obs_nan
+            n = np.count_nonzero(~np.isnan(frac), axis=-1)
+            return (100.0 / n) * nansumwrapper(((frac >= 0.5) & (frac <= 2.0)), axis=-1)
 
     @staticmethod
     def calculate_upa(obs, exp):

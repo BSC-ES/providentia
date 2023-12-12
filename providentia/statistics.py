@@ -611,7 +611,8 @@ def get_axes_vminmax(axs):
     else:
         return np.NaN, np.NaN
 
-def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci):
+def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci, 
+                              only_label=False):
     """ Function that generates neccessary detail to crate colourbar.
 
         :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
@@ -626,6 +627,8 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         :type plot_characteristics: dict
         :param speci: speci to plot
         :type speci: str
+        :param only_label: boolean if only to return label
+        :type only_label: boolean
         :return: cbar min, cbar max, cbar label, cbar cmap
         :rtype: np.float32, np.float32, str, str
     """
@@ -639,7 +642,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     else:
         stats_dict = expbias_stats[base_zstat]
     label_units = stats_dict['units']
-    if label_units == 'measurement_units':
+    if label_units == '[measurement_units]':
         label_units = read_instance.measurement_units[speci]
 
     # generate z colourbar label
@@ -668,7 +671,10 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                 if label_units != '':
                     z_label = '{} [{}]'.format(stats_dict['label'], label_units)
                 else:
-                    z_label = copy.deepcopy(stats_dict['label'])        
+                    z_label = copy.deepcopy(stats_dict['label'])     
+    # return label if only that is wanted
+    if only_label:
+        return z_label
 
     # set cmap for z statistic
     # first check if have defined cmap (in this order: 1. configuration file 2. specific for z statistic)

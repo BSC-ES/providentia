@@ -78,9 +78,12 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--end_date",
                                      dest="end_date",
                                      help="define end date in format as 20170101")
+            self.parser.add_argument("--observations_data_label",
+                                     dest="observations_data_label",
+                                     help="alias for observations data label")
             self.parser.add_argument("--experiments",
                                      dest="experiments",
-                                    help="experiments to read")
+                                     help="experiments to read")
             self.parser.add_argument("--temporal_colocation",
                                      dest="temporal_colocation",
                                      help="activate temporal colocation betwen observations and experiments")

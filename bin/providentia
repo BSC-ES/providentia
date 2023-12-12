@@ -119,13 +119,13 @@ ip=$(hostname --ip-address)
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
     
-    if [$debug]; then
+    if $debug; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         echo "Entering debug mode"
         eval "${load_command}"
         eval "${salloc_command} ${queue_option} ${memory_option}"
     else
-        if [$debugexec]; then
+        if $debugexec; then
             eval "srun ${python_command}"
         else
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
