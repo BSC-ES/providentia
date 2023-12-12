@@ -1,0 +1,22 @@
+[I 2023-12-12 16:07:34.515 ServerApp] jupyterlab | extension was successfully linked.
+[I 2023-12-12 16:07:34.743 LabApp] JupyterLab extension loaded from /gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/lib/python3.7/site-packages/jupyterlab
+[I 2023-12-12 16:07:34.744 LabApp] JupyterLab application directory is /.statelite/tmpfs/gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/share/jupyter/lab
+[I 2023-12-12 16:07:34.749 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2023-12-12 16:07:34.749 ServerApp] Serving notebooks from local directory: /.statelite/tmpfs/gpfs/archive/bsc32/esarchive/obs/ghost/scripts/Providentia-interactive
+[I 2023-12-12 16:07:34.749 ServerApp] Jupyter Server 1.4.1 is running at:
+[I 2023-12-12 16:07:34.749 ServerApp] http://s04r2b51:8458/lab?token=8bbf9dc685ec4bf3ca359fb4c5a81fb6fc9839dc0abd8478
+[I 2023-12-12 16:07:34.749 ServerApp]  or http://127.0.0.1:8458/lab?token=8bbf9dc685ec4bf3ca359fb4c5a81fb6fc9839dc0abd8478
+[I 2023-12-12 16:07:34.749 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2023-12-12 16:07:34.759 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-2836889-open.html
+    Or copy and paste one of these URLs:
+        http://s04r2b51:8458/lab?token=8bbf9dc685ec4bf3ca359fb4c5a81fb6fc9839dc0abd8478
+     or http://127.0.0.1:8458/lab?token=8bbf9dc685ec4bf3ca359fb4c5a81fb6fc9839dc0abd8478
+[I 2023-12-12 16:08:29.365 LabApp] Build is up to date
+[I 2023-12-12 16:08:32.337 ServerApp] Kernel started: 1a903bf6-2fd4-4f2f-be67-f82ca7f872f7
+[W 2023-12-12 16:08:38.164 ServerApp] Got events for closed stream None
+[I 2023-12-12 16:10:31.947 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2023-12-12 16:14:36.671 ServerApp] Kernel restarted: 1a903bf6-2fd4-4f2f-be67-f82ca7f872f7
+[I 2023-12-12 16:16:32.489 ServerApp] Saving file at /notebooks/test_interactive.ipynb
