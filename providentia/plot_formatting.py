@@ -91,7 +91,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         :type autoscale_y: boolean
         :param bias_centre: centre bias plots at 0 on the y axis
         :type bias_centre: boolean
-        :param harmonise: harmonise axes switch
+        :param harmonise: switch for harmonisation of axes 
         :type harmonise: boolean
     """
     
@@ -107,6 +107,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
     ylim_min = None
     ylim_max = None
     
+    # transform axis dict or str to list
     if not isinstance(relevant_axs, list):
         # if changes only apply to one axis, put it in list
         if not isinstance(relevant_axs, dict):
@@ -121,7 +122,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         mapped_resolutions = read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(
             read_instance.relevant_temporal_resolutions)))
 
-    # remove any axes from relevant_axs which are not active (only for offline)
+    # remove any axes from relevant_axs which are not active (only for offline and interactive)
     if (read_instance.offline) or (read_instance.interactive):
         relevant_axs_active = []
         mapped_resolutions_active = []
@@ -167,26 +168,27 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 all_xlim_lower.append(xlim_lower)
                 all_xlim_upper.append(xlim_upper)
 
-        if ylim is None and ('ylim' not in plot_characteristics):
+        if (ylim is None) and ('ylim' not in plot_characteristics):
             ylim_lower, ylim_upper = ax.get_ylim()
             all_ylim_lower.append(ylim_lower)
             all_ylim_upper.append(ylim_upper)
 
     # get minimum and maximum from all axes and set limits
-    for ax in relevant_axs_active:
+    for ax_ii, ax in enumerate(relevant_axs_active):
 
         # get xlim
-        set_xlim = False
-        if (xlim is None) and ('xlim' not in plot_characteristics):
-            if base_plot_type not in ['boxplot', 'periodic', 'periodic-violin']:
-                xlim_min = np.min(all_xlim_lower)
-                xlim_max = np.max(all_xlim_upper)
-                xlim = {'left':xlim_min, 'right':xlim_max}
-                if harmonise:
-                    set_xlim = True
-        elif 'xlim' in plot_characteristics:
-            xlim = plot_characteristics['xlim']
-            set_xlim = True
+        if ax_ii == 0:
+            set_xlim = False
+            if (xlim is None) and ('xlim' not in plot_characteristics):
+                if base_plot_type not in ['boxplot', 'periodic', 'periodic-violin']:
+                    xlim_min = np.min(all_xlim_lower)
+                    xlim_max = np.max(all_xlim_upper)
+                    xlim = {'left':xlim_min, 'right':xlim_max}
+                    if harmonise:
+                        set_xlim = True
+            elif 'xlim' in plot_characteristics:
+                xlim = plot_characteristics['xlim']
+                set_xlim = True
 
         # set xlim
         if ((set_xlim) and ('equal_aspect' not in plot_characteristics) and
@@ -194,24 +196,25 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             ax.set_xlim(**xlim)
 
         # get ylim
-        set_ylim = False
-        if (ylim is None) and ('ylim' not in plot_characteristics):
-            ylim_min = np.min(all_ylim_lower) 
-            ylim_max = np.max(all_ylim_upper)
-            # if have bias_centre option, centre around zero
-            if ('bias' in plot_options) & (bias_centre):                    
-                if np.abs(np.max(all_ylim_upper)) >= np.abs(np.min(all_ylim_lower)):
-                    ylim_min = -np.abs(np.max(all_ylim_upper))
-                    ylim_max = np.abs(np.max(all_ylim_upper))
-                elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
-                    ylim_min = -np.abs(np.min(all_ylim_lower))
-                    ylim_max = np.abs(np.min(all_ylim_lower))
-            ylim = {'bottom':ylim_min, 'top':ylim_max}
-            if harmonise:
+        if ax_ii == 0:
+            set_ylim = False
+            if (ylim is None) and ('ylim' not in plot_characteristics):
+                ylim_min = np.min(all_ylim_lower) 
+                ylim_max = np.max(all_ylim_upper)
+                # if have bias_centre option, centre around zero
+                if ('bias' in plot_options) & (bias_centre):                    
+                    if np.abs(np.max(all_ylim_upper)) >= np.abs(np.min(all_ylim_lower)):
+                        ylim_min = -np.abs(np.max(all_ylim_upper))
+                        ylim_max = np.abs(np.max(all_ylim_upper))
+                    elif np.abs(np.max(all_ylim_upper)) < np.abs(np.min(all_ylim_lower)):
+                        ylim_min = -np.abs(np.min(all_ylim_lower))
+                        ylim_max = np.abs(np.min(all_ylim_lower))
+                ylim = {'bottom':ylim_min, 'top':ylim_max}
+                if harmonise:
+                    set_ylim = True
+            elif 'ylim' in plot_characteristics:
+                ylim = plot_characteristics['ylim']
                 set_ylim = True
-        elif 'ylim' in plot_characteristics:
-            ylim = plot_characteristics['ylim']
-            set_ylim = True
 
         # set ylim
         if (set_ylim) and ('equal_aspect' not in plot_characteristics):
@@ -242,6 +245,50 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             xlim = plot_characteristics['xlim']
             for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
                 sub_ax.set_xlim(**xlim)
+
+        # if harmonisation is off, and ylim not manually set, 
+        # ensure harmonisation is at least done for a plot across resolutions
+        if (not harmonise) and (not set_ylim):
+            
+            current_resolutions = []
+            current_axs = []
+            current_ylim_lower = []
+            current_ylim_upper = []
+
+            for ax_ii, (temporal_resolution, sub_ax) in zip(mapped_resolutions_active, relevant_axs_active):
+
+                # if resolution does not 
+                if temporal_resolution not in current_resolutions:
+                    ylim_lower, ylim_upper = sub_ax.get_ylim()
+                    current_axs.append(sub_ax)
+                    current_ylim_lower.append(ylim_lower)
+                    current_ylim_upper.append(ylim_upper)
+                
+                # if resolution already exists, or on last axis, then set ylim for relevant axes
+                # finally reset lists
+                if (temporal_resolution in current_resolutions) or (ax_ii == (len(relevant_axs_active)-1)): 
+                    ylim_min = np.min(current_ylim_lower) 
+                    ylim_max = np.max(current_ylim_upper)
+                    # if have bias_centre option, centre around zero
+                    if ('bias' in plot_options) & (bias_centre):                    
+                        if np.abs(np.max(current_ylim_upper)) >= np.abs(np.min(current_ylim_lower)):
+                            ylim_min = -np.abs(np.max(current_ylim_upper))
+                            ylim_max = np.abs(np.max(current_ylim_upper))
+                        elif np.abs(np.max(current_ylim_upper)) < np.abs(np.min(current_ylim_lower)):
+                            ylim_min = -np.abs(np.min(current_ylim_lower))
+                            ylim_max = np.abs(np.min(current_ylim_lower))
+                    ylim = {'bottom':ylim_min, 'top':ylim_max}
+                    for current_ax in current_axs:
+                        current_ax.set_ylim(**ylim)
+
+                    # reset lists
+                    current_resolutions = []
+                    current_axs = []
+                    current_ylim_lower = []
+                    current_ylim_upper = []
+            
+                # append current resolution
+                current_resolutions.append(temporal_resolution)
 
     # get minimum and maximum from all axes and set limits for timeseries
     elif base_plot_type == 'timeseries':
@@ -374,8 +421,8 @@ def set_axis_label(relevant_axis, label_ax, label, plot_characteristics,
             relevant_axis.set_ylabel(**axis_label_characteristics)
 
 
-def do_formatting(canvas_instance, read_instance, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, plot_type, 
-                  plot_options, plotting_paradigm):
+def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_data_labels, networkspeci, 
+                        base_plot_type, plot_type, plot_options):
     """ Function that handles formatting of a plot axis,
         based on given plot options.
 
@@ -391,9 +438,18 @@ def do_formatting(canvas_instance, read_instance, relevant_axs, relevant_data_la
         :type plot_type: str
         :param plot_options: list of options to configure plots
         :type plot_options: list
-        :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
-        :type plotting_paradigm: str
     """
+
+    # transform axis dict or str to list
+    if not isinstance(relevant_axs, list):
+        # if changes only apply to one axis, put it in list
+        if not isinstance(relevant_axs, dict):
+            relevant_axs = [relevant_axs]
+        # transform dictionaries into lists
+        else:
+            relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
+                            relevant_temporal_resolution in read_instance.relevant_temporal_resolutions]
+            relevant_data_labels = copy.deepcopy(relevant_data_labels) * len(read_instance.relevant_temporal_resolutions)
 
     for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
 
@@ -422,7 +478,7 @@ def do_formatting(canvas_instance, read_instance, relevant_axs, relevant_data_la
                 annotation(canvas_instance, read_instance, relevant_ax, networkspeci, 
                            relevant_data_labels[relevant_ax_ii], base_plot_type, 
                            canvas_instance.plot_characteristics[plot_type],
-                           plot_options=plot_options, plotting_paradigm=plotting_paradigm)
+                           plot_options=plot_options)
                 # annotate on first axis
                 if base_plot_type in ['periodic', 'periodic-violin']:
                     break
@@ -441,7 +497,7 @@ def do_formatting(canvas_instance, read_instance, relevant_axs, relevant_data_la
 
 
 def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_characteristics, col_ii=0, last_valid_row=True, 
-                last_row_on_page=True, set_extent=False, relevant_temporal_resolutions=['hour','dayofweek','month']):
+                last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=['hour','dayofweek','month']):
     """ Format a plotting axis.
     
         :param ax: axis object
@@ -456,8 +512,8 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         :type last_valid_row: boolean
         :param last_row_on_page: boolean informing if last valid row on page (for offline report)
         :type last_row_on_page: boolean
-        :param map_extent: boolean informing if wanting to set map_extent or not
-        :type map_extent: boolean
+        :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
+        :type map_extent: list
         :param relevant_temporal_resolutions: list of relevant temporal resolutions
         :type relevant_temporal_resolutions: list
     """
@@ -484,16 +540,16 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         ax_to_format.set_axisbelow(True)
 
         # make axis ylabel (only on leftmost column of visible axes)?
-        if 'axis_title' in plot_characteristics_vars:
-            ax_to_format.set_title(**plot_characteristics['axis_title'])
+        #if 'axis_title' in plot_characteristics_vars:
+        #    ax_to_format.set_title(**plot_characteristics['axis_title'])
 
         # make axis xlabel?
-        if 'xlabel' in plot_characteristics_vars:
-            ax_to_format.set_xlabel(**plot_characteristics['xlabel'])
+        #if 'xlabel' in plot_characteristics_vars:
+        #    ax_to_format.set_xlabel(**plot_characteristics['xlabel'])
 
         # make axis ylabel (only on leftmost column of visible axes)?
-        if 'ylabel' in plot_characteristics_vars:
-            ax_to_format.set_ylabel(**plot_characteristics['ylabel'])
+        #if 'ylabel' in plot_characteristics_vars:
+        #    ax_to_format.set_ylabel(**plot_characteristics['ylabel'])
 
         # set xtick params ?
         if 'xtick_params' in plot_characteristics_vars:
@@ -580,5 +636,5 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
                                        **plot_characteristics['gridlines'])
 
             # set map extent (if wanted)
-            if set_extent:
-                set_map_extent(canvas_instance, read_instance, ax_to_format)
+            if map_extent:
+                set_map_extent(canvas_instance, ax_to_format, map_extent)

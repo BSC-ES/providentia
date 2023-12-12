@@ -24,12 +24,14 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
                            period_conf, representativity_conf)
 from .filter import DataFilter
 from .plot import Plot
-from .plot_formatting import do_formatting, format_axis, set_axis_label, set_axis_title
+from .plot_formatting import (format_plot_options, format_axis, set_axis_label, set_axis_title, 
+                              harmonise_xy_lims_paradigm)
 from .read import DataReader
 from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_tree, 
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
-from .statistics import calculate_statistic, generate_colourbar, get_selected_station_data, get_z_statistic_info
+from .statistics import (calculate_statistic, generate_colourbar, generate_colourbar_detail, 
+                         get_selected_station_data, get_z_statistic_info)
 from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -107,9 +109,6 @@ class Interactive:
         # filter
         self.reset_filter()
 
-        # get selected station data (i.e. data for all remaining stations)
-        get_selected_station_data(read_instance=self, canvas_instance=self, networkspecies=self.networkspecies)
-
     def read(self):
         """wrapper method to read data"""
 
@@ -127,10 +126,16 @@ class Interactive:
 
         print('Filtering data')
 
+        # filter data
         DataFilter(self)
+
+        # get selected station data
+        get_selected_station_data(read_instance=self, canvas_instance=self, networkspecies=self.networkspecies)
 
     def reset_filter(self):
         """wrapper method to reset filter data"""
+
+        print('Resetting filter')
 
         # reset representativity fields        
         init_representativity(self)
@@ -151,7 +156,8 @@ class Interactive:
         self.filter()
 
     def make_plot(self, plot, data_labels=[], labela='', labelb='', title=None, xlabel=None, ylabel=None, 
-                  cb=True, legend=True, plot_options=[], return_plot=False, format={}):
+                  cb=True, legend=True, map_extent=None, plot_options=[], return_plot=False, set_obs_legend=True, 
+                  format={}):
         """wrapper method to make a Providentia plot"""
 
         # get base plot type (no plot options), and plot type (with plot options)
@@ -165,11 +171,24 @@ class Interactive:
         if (len(base_plot_type_split) > 1) & (base_plot_type != 'periodic-violin'):
             base_plot_type = base_plot_type_split[0]
             zstat = base_plot_type_split[1]
-        
+        else:
+            zstat = None
+
+        # get zstat information 
+        zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
+
+        # set boolean on whether to plot obs in legend or not
+        if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+            set_obs_legend = False
+
         # set plot characteristics
         self.plot_characteristics = dict()
         self.plot.set_plot_characteristics([plot_type], format=format)
         
+        # if map extent passed not passed as argument, set it as value from .conf in memory
+        if (not map_extent) and (self.map_extent):
+            map_extent = copy.deepcopy(self.map_extent)
+
         # create figure and axis/axes for plot
         # differentiation in approach between jupyter and standard call for creation of figure geometry
         if jupyter_session:
@@ -195,7 +214,7 @@ class Interactive:
             grid_dict = dict()
             grid_dict['hour'] = fig.add_subplot(gs[:46, :])
             grid_dict['dayofweek'] = fig.add_subplot(gs[54:, 64:])
-            grid_dict['month'] = fig.add_subplot(gs[54:, :61])
+            grid_dict['month'] = fig.add_subplot(gs[54:, :62])
             ax.spines['top'].set_color('none')
             ax.spines['bottom'].set_color('none')
             ax.spines['left'].set_color('none')
@@ -227,7 +246,7 @@ class Interactive:
 
         # legend plot (on its own axis)
         if base_plot_type == 'legend':
-            legend_handles = self.make_legend(plot_type)
+            legend_handles = self.make_legend(plot_type, set_obs=set_obs_legend)
             relevant_ax.legend(**legend_handles)
 
         # map plot
@@ -268,13 +287,122 @@ class Interactive:
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                  plot_options=plot_options)
 
-        # format plot
-        format_axis(self, self, relevant_ax, base_plot_type, self.plot_characteristics[plot_type])
+        # get number of total available stations, and individual station information if just have 1 station
+        if (self.temporal_colocation) and (len(data_labels) > 1):
+            station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
+        else:
+            station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
+        n_stations = len(station_inds)
+        if n_stations == 1:
+            station_ind = station_inds[0]
+            current_lon = round(self.station_longitudes[networkspeci][station_ind], 2)
+            current_lat = round(self.station_latitudes[networkspeci][station_ind], 2)
+            current_station_name = self.station_names[networkspeci][station_ind]
+            current_station_reference = self.station_references[networkspeci][station_ind]
+
+        # set title, xlabel and ylabel for plots
+
+        # set xlabel / ylabel
+        if base_plot_type == 'periodic':
+            if not ylabel:
+                
+                if 'ylabel' in self.plot_characteristics[plot_type]:
+                    ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                else:
+                    ylabel = ''
+
+                if ylabel == '':                            
+                    if z_statistic_type == 'basic':
+                        ylabel = basic_stats[base_zstat]['label']
+                        ylabel_units = basic_stats[base_zstat]['units']
+                    else:
+                        ylabel = expbias_stats[base_zstat]['label']
+                        ylabel_units = expbias_stats[base_zstat]['units']
+                    if ylabel_units == '[measurement_units]':
+                        ylabel_units = self.read_instance.measurement_units[speci] 
+                    if ylabel_units != '':
+                        ylabel += ' [{}]'.format(ylabel_units)
+
+        elif base_plot_type not in ['legend', 'metadata', 'map', 'heatmap', 'table', 'statsummary', 'taylor']:
+            if not xlabel:
+                if 'xlabel' in self.plot_characteristics[plot_type]:
+                    xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                    if '[measurement_units]' in xlabel:
+                        xlabel = xlabel.replace('[measurement_units]', '[{}]'.format(self.measurement_units[speci]))
+
+            if not ylabel:
+                if 'ylabel' in self.plot_characteristics[plot_type]:
+                    ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                    if '[measurement_units]' in ylabel:
+                        ylabel = ylabel.replace('[measurement_units]', '[{}]'.format(self.measurement_units[speci]))
+
+        # set title
+        if not title:
+            if zstat:
+                if 'axis_title' in self.plot_characteristics[plot_type]:
+                    title = self.plot_characteristics[plot_type]['axis_title']['label']
+                    if title == '':
+                        stat_label = generate_colourbar_detail(self, zstat, 0, 1, self.plot_characteristics[plot_type], 
+                                                               speci, only_label=True)
+                        if '[' in stat_label:
+                            stat_label = stat_label.split('[')[0].strip()
+                        if n_stations == 1:
+                            title = '{} for {}, {} ({:.{}f}, {:.{}f})'.format(stat_label, current_station_reference,
+                                                                             current_station_name, 
+                                                                             current_lon,
+                                                                             self.plot_characteristics[plot_type]['round_decimal_places']['title'],
+                                                                             current_lat,
+                                                                             self.plot_characteristics[plot_type]['round_decimal_places']['title'])
+                        else:
+                            title = '{} at {} stations'.format(stat_label, n_stations)
+
+            elif base_plot_type not in ['legend', 'metadata']:
+                if 'axis_title' in self.plot_characteristics[plot_type]:
+                    title = self.plot_characteristics[plot_type]['axis_title']['label']
+                    if title == '':
+                        if n_stations == 1:
+                            title = '{}, {} ({:.{}f}, {:.{}f})'.format(current_station_reference,
+                                                                       current_station_name, 
+                                                                       current_lon,
+                                                                       self.plot_characteristics[plot_type]['round_decimal_places']['title'],
+                                                                       current_lat,
+                                                                       self.plot_characteristics[plot_type]['round_decimal_places']['title'])
+                        else:
+                            title = '{} stations'.format(n_stations)
+
+        # overwrite passed xlabels and ylabels
+        if title:
+            #self.plot_characteristics[plot_type]['axis_title']['label'] = title
+            set_axis_title(self, relevant_ax, title, self.plot_characteristics[plot_type])
+        if xlabel:
+            #self.plot_characteristics[plot_type]['xlabel']['xlabel'] = xlabel
+            set_axis_label(relevant_ax, 'x', xlabel, self.plot_characteristics[plot_type])
+        if ylabel:
+            #self.plot_characteristics[plot_type]['ylabel']['ylabel'] = ylabel
+            set_axis_label(relevant_ax, 'y', ylabel, self.plot_characteristics[plot_type])
+
+        # format plot axis/axes
+        format_axis(self, self, relevant_ax, base_plot_type, self.plot_characteristics[plot_type], 
+                    map_extent=map_extent)
+
+        # format plot options
+        format_plot_options(self, self, relevant_ax, [data_labels], networkspeci, base_plot_type, plot_type, 
+                            plot_options)                         
+
+        # handle harmonisation of axes
+        if base_plot_type not in ['legend', 'metadata', 'map', 'taylor']:
+            if base_plot_type == 'scatter':
+                harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
+                                           self.plot_characteristics[plot_type], plot_options, relim=True)
+            else:
+                harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
+                                           self.plot_characteristics[plot_type], plot_options, relim=True, 
+                                           autoscale=True)
 
         # make legend (embedded on plot axis)
         if (legend) & (base_plot_type != 'legend'):
             if 'legend' in self.plot_characteristics[plot_type]:
-                legend_handles = self.make_legend(plot_type)
+                legend_handles = self.make_legend(plot_type, set_obs=set_obs_legend)
                 if base_plot_type in ['periodic', 'periodic-violin']:
                     try:
                         ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
@@ -287,16 +415,11 @@ class Interactive:
                     relevant_ax[ax_to_plot].legend(**legend_handles)
                 else:
                     relevant_ax.legend(**legend_handles)
-            else:
-                print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json")
 
-        # make colourbar
+        # make colourbar (embedded on plot axis)
         if cb:
-            if 'cb' in  self.plot_characteristics[plot_type]:
-                self.make_colourbar(relevant_ax, zstat, speci, plot_type)
-            else:
-                print("Warning: 'cb' not defined for plot type in plot_characteristics_interactive.json")
-
+            if 'cb' in self.plot_characteristics[plot_type]:
+                self.make_colourbar(fig, relevant_ax, zstat, speci, plot_type)
 
         # if return_plot is passed then return plot axis/axes
         if return_plot:
@@ -305,17 +428,17 @@ class Interactive:
         else:
             plt.show()
 
-    def make_colourbar(self, plot_ax, stat, speci, plot_type):
+    def make_colourbar(self, fig, plot_ax, stat, speci, plot_type):
         """wrapper method to make colourbar"""
 
         # create cb axis
-        cb_ax = fig.add_axes(plot_characteristics['cb']['position'])
+        cb_ax = fig.add_axes(self.plot_characteristics[plot_type]['cb']['position'])
         cb_ax.set_rasterized(True)
 
         # generate colourbar
         generate_colourbar(self, [plot_ax], [cb_ax], stat, self.plot_characteristics[plot_type], speci)
 
-    def make_legend(self, plot_type):
+    def make_legend(self, plot_type, set_obs=True):
         """wrapper method to make legend"""
         
         if plot_type == 'legend':
@@ -326,7 +449,7 @@ class Interactive:
             print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json")
             return
 
-        legend_handles = self.plot.make_legend_handles(legend_characteristics)
+        legend_handles = self.plot.make_legend_handles(legend_characteristics, set_obs=set_obs)
         return legend_handles['plot']
 
     def calculate_statistic(self, stat='', labela='', labelb='', per_station=False):
@@ -433,15 +556,17 @@ class Interactive:
 
         return True
 
-    #def select_station(self, station=''):
-    #    """wrapper method to select specific station/s"""
+    def select_station(self, station):
+        """wrapper method to select specific station/s"""
         
-    #    if type(station) == 'str':
-
-    #    else:
+        if type(station) == 'str':
+            stations_to_keep = [station]
+        else:
+            stations_to_keep = station
+        self.metadata_menu['STATION MISCELLANEOUS']['station_reference']['checkboxes']['keep_selected'] = stations_to_keep
 
         #filter for station/s    
-    #    self.filter()
+        self.filter()
 
     def save(self, fname='', format='nc'):
         """wrapper method to save current data/ metadata in memory"""

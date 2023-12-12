@@ -448,15 +448,15 @@ def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=Fa
     return ghelper
 
 
-def set_map_extent(canvas_instance, read_instance, ax):
+def set_map_extent(canvas_instance, ax, map_extent):
     """ Set map extent, done set_xlim and set_ylim rather than set_extent 
         to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697).
     """
 
-    mlon = np.mean(read_instance.map_extent[:2])
-    mlat = np.mean(read_instance.map_extent[2:])
-    xtrm_data = np.array([[read_instance.map_extent[0], mlat], [mlon, read_instance.map_extent[2]], 
-                          [read_instance.map_extent[1], mlat], [mlon, read_instance.map_extent[3]]])
+    mlon = np.mean(map_extent[:2])
+    mlat = np.mean(map_extent[2:])
+    xtrm_data = np.array([[map_extent[0], mlat], [mlon, map_extent[2]], 
+                          [map_extent[1], mlat], [mlon, map_extent[3]]])
     proj_to_data = canvas_instance.datacrs._as_mpl_transform(ax) - ax.transData
     xtrm = proj_to_data.transform(xtrm_data)
     ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
