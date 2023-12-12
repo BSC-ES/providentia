@@ -205,25 +205,28 @@ class Plot:
                 elif self.canvas_instance.plot_characteristics[plot_type]['orientation'] == 'portrait':
                     self.canvas_instance.plot_characteristics[plot_type]['figure']['figsize'] = self.canvas_instance.portrait_figsize
 
-    def make_legend_handles(self, plot_characteristics_legend, plot_options=[]):
+    def make_legend_handles(self, plot_characteristics_legend, set_obs=True):
         """ Make legend element handles.
         
             :param plot_characteristics_legend: plot characteristics for relevant legend
             :type plot_characteristics_legend: dict
-            :param plot_options: list of options to configure plot  
-            :type plot_options: list    
+            :param set_obs: boolean switch if to set observations in legend or not  
+            :type set_obs: boolean 
             :return: plot_characteristics_legend with handles updated
             :rtype: dict
         """
 
         # create legend elements
+        legend_elements = []
+
         # add observations element
-        legend_elements = [Line2D([0], [0], 
-                                  marker=plot_characteristics_legend['handles']['marker'], 
-                                  color=plot_characteristics_legend['handles']['color'],
-                                  markerfacecolor=self.read_instance.plotting_params[self.read_instance.observations_data_label]['colour'],
-                                  markersize=plot_characteristics_legend['handles']['markersize'], 
-                                  label=self.read_instance.observations_data_label)]
+        if set_obs:
+            legend_elements.append(Line2D([0], [0], 
+                                marker=plot_characteristics_legend['handles']['marker'], 
+                                color=plot_characteristics_legend['handles']['color'],
+                                markerfacecolor=self.read_instance.plotting_params[self.read_instance.observations_data_label]['colour'],
+                                markersize=plot_characteristics_legend['handles']['markersize'], 
+                                label=self.read_instance.observations_data_label))
                                   
         # add element for each experiment
         for experiment in self.read_instance.data_labels:
@@ -240,11 +243,9 @@ class Plot:
         
         return plot_characteristics_legend
 
-    def make_experiment_domain_polygons(self, plot_options=[]):
+    def make_experiment_domain_polygons(self):
         """ Make experiment domain polygons.
         
-            :param plot_options: list of options to configure plot  
-            :type plot_options: list
             :return: grid_edge_polygons
             :rtype: list
         """
@@ -651,11 +652,16 @@ class Plot:
                     # get median zorder
                     median_zorder = self.read_instance.plotting_params[data_label]['zorder']+len(cut_data_labels)
                     
-                    # get alpha
+                    # get alpha and violin fill information 
                     if data_label == self.read_instance.observations_data_label:
-                        alpha = plot_characteristics['patch']['alpha_obs']
+                        alpha = plot_characteristics['violin_alphas']['alpha_obs']
+                        violin_fill = plot_characteristics['violin_fill_obs']
                     else:
-                        alpha = plot_characteristics['patch']['alpha_exp']
+                        alpha = plot_characteristics['violin_alphas']['alpha_exp']
+                        if (len(cut_data_labels) < 3) or ('individual' in plot_options):
+                            violin_fill = plot_characteristics['violin_fill_1model']
+                        else:
+                            violin_fill = plot_characteristics['violin_fill_2+models']
 
                     # make plot of median
                     median_plots = relevant_sub_ax.plot(xticks, medians[:, data_label_ii], 
@@ -676,10 +682,18 @@ class Plot:
                         PDF_sampled = PDFs_sampled[data_label_ii, period_ii, :]
                         if not np.all(np.isnan(PDF_sampled)):
                             
-                            PDF_sampled = 0.5 * plot_characteristics['plot']['violin']['widths'] * PDF_sampled / PDF_sampled.max()
-                            self.violin_plot = relevant_sub_ax.fill_betweenx(x_grid, -PDF_sampled + period_pos, PDF_sampled + period_pos,
-                                                                             facecolor=self.read_instance.plotting_params[data_label]['colour'], 
-                                                                             alpha=alpha)
+                            PDF_sampled = 0.5 * plot_characteristics['violin_widths'] * PDF_sampled / PDF_sampled.max()
+
+                            # make violin plot (filled or unfilled)
+                            if violin_fill:
+                                self.violin_plot = relevant_sub_ax.fill_betweenx(x_grid, -PDF_sampled + period_pos, PDF_sampled + period_pos,
+                                                                                 facecolor=self.read_instance.plotting_params[data_label]['colour'], 
+                                                                                 alpha=alpha,
+                                                                                 **plot_characteristics['plot']['violin'])
+                            else:
+                                self.violin_plot = relevant_sub_ax.fill_betweenx(x_grid, -PDF_sampled + period_pos, PDF_sampled + period_pos,
+                                                                                 facecolor='None', edgecolor=self.read_instance.plotting_params[data_label]['colour'], 
+                                                                                 **plot_characteristics['plot']['violin'])
 
                             # if have at least 1 valid experiment data array, split the violin plot across the horizontal
                             # (observations on left, experiment violin_plots on right)

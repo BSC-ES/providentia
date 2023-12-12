@@ -619,6 +619,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.time_array = None
             self.yearmonths = None
             self.data_labels = None
+            self.data_labels_raw = None
 
             # set initial station references to be empty dict
             self.station_references = {}
@@ -1035,7 +1036,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 format_axis(self.mpl_canvas, self.mpl_canvas.read_instance, 
                             self.mpl_canvas.plot_axes[changed_plot_type], 
                             changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type],
-                            set_extent=True)
+                            map_extent=self.map_extent)
                 
                 # make plot
                 self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)

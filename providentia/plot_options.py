@@ -147,7 +147,7 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
 
 
 def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
-               plot_characteristics, plot_options=[], plotting_paradigm=None):
+               plot_characteristics, plot_options=[]):
     """ Add statistical annotations to plot.
 
         :param relevant_axis: axis to plot on 
@@ -162,8 +162,6 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
-        :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
-        :type plotting_paradigm: str
     """
 
     # get stats wished to be annotated
@@ -186,13 +184,15 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     # cut data_labels for those in valid data labels
     cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-    # bias plot?  
+    # bias plot? Then do not plot obs annotation label
     if 'bias' in plot_options:
         bias = True
         if read_instance.observations_data_label in cut_data_labels:
             cut_data_labels.remove(read_instance.observations_data_label)
     else:
         bias = False
+
+    # making plot for a bias stat? Then do not plot obs annotation label
 
     # avoid plotting stats for observations data for scatter plots
     if base_plot_type == 'scatter':
@@ -204,13 +204,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     # show number of stations if defined
     if plot_characteristics['annotate_text']['n_stations']:
         colours.append('black')
-        if (read_instance.offline) or (read_instance.interactive):
-            if plotting_paradigm == 'station':
-                str_to_annotate.append('Stations: 1')
-            else:
-                str_to_annotate.append('Stations: ' + str(len(canvas_instance.station_inds[networkspeci])))
-        else:
-            str_to_annotate.append('Stations: ' + str(len(canvas_instance.station_inds[networkspeci])))
+        str_to_annotate.append('Stations: ' + str(len(canvas_instance.station_inds[networkspeci])))
 
     # generate annotation line by line (one line per data label, for all stats)
     for data_label_ii, data_label in enumerate(cut_data_labels):

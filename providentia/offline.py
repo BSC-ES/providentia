@@ -23,7 +23,7 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
 from .filter import DataFilter
 from .plot import Plot
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent
-from .plot_formatting import do_formatting, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
+from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .read import DataReader
 from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_tree, 
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
@@ -402,7 +402,7 @@ class ProvidentiaOffline:
                                 harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type, 
                                                            self.plot_characteristics[plot_type], plot_options, 
                                                            relim=True, harmonise=harmonise)
-                            elif base_plot_type != 'taylor':
+                            else:
                                 harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type,
                                                            self.plot_characteristics[plot_type], plot_options, 
                                                            relim=True, autoscale=True, harmonise=harmonise)
@@ -658,7 +658,12 @@ class ProvidentiaOffline:
 
                 # make legend?
                 if 'legend' in plot_characteristics_vars:
-                    plot_characteristics['legend'] = self.plot.make_legend_handles(plot_characteristics['legend'])
+                    if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                        set_obs = False
+                    else:
+                        set_obs = True
+                    plot_characteristics['legend'] = self.plot.make_legend_handles(plot_characteristics['legend'], 
+                                                                                   set_obs=set_obs)
                     fig.legend(**plot_characteristics['legend']['plot'])
 
                 # add colourbar axis to plot dictionary (if not already there)?
@@ -895,11 +900,11 @@ class ProvidentiaOffline:
             print('Making summary {0}'.format(plot_type))
             plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
 
-            # do formatting
+            # do formatting for plot options
             relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
                 base_plot_type, plot_indices)
-            do_formatting(self, self, relevant_axs, relevant_data_labels, networkspeci, 
-                          base_plot_type, plot_type, plot_options, 'summary')
+            format_plot_options(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, 
+                                plot_type, plot_options)
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
@@ -1059,11 +1064,11 @@ class ProvidentiaOffline:
                     if relevant_station_ind != self.relevant_station_inds[-1]:
                         continue
 
-                # do formatting
+                # do formatting for plot options
                 relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
                     base_plot_type, plot_indices)
-                do_formatting(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, plot_type, 
-                              plot_options, 'station')
+                format_plot_options(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, 
+                                    plot_type, plot_options)
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
@@ -1267,7 +1272,7 @@ class ProvidentiaOffline:
 
                 # set map extent ? 
                 if self.map_extent:
-                    set_map_extent(self, self, relevant_axis)
+                    set_map_extent(self, relevant_axis, self.map_extent)
 
                 # make map plot
                 self.plot.make_map(relevant_axis, networkspeci, self.plot_characteristics[plot_type], 
@@ -1376,12 +1381,11 @@ class ProvidentiaOffline:
                     axis_ylabel = relevant_axis.get_ylabel()
 
                 # axis xlabel is empty?
-                if (axis_xlabel == '') or (axis_xlabel == 'measurement_units'):
+                if (axis_xlabel == '') or ('[measurement_units]' in axis_xlabel):
                     if 'xlabel' in self.plot_characteristics[plot_type]:
-                        if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
-                            xlabel = '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]])
-                        else:
-                            xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                        xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                        if '[measurement_units]' in xlabel:
+                            xlabel = xlabel.replace('[measurement_units]', '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]]))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
                     else:
                         xlabel = ''
                     # set xlabel
@@ -1389,7 +1393,7 @@ class ProvidentiaOffline:
                         set_axis_label(relevant_axis, 'x', xlabel, self.plot_characteristics[plot_type])
 
                 # axis ylabel is empty?
-                if (axis_ylabel == '') or (axis_ylabel == 'measurement_units'):
+                if (axis_ylabel == '') or ('[measurement_units]' in axis_ylabel):
                     if base_plot_type in ['periodic']:
                         if z_statistic_type == 'basic':
                             ylabel = basic_stats[base_zstat]['label']
@@ -1397,16 +1401,15 @@ class ProvidentiaOffline:
                         else:
                             ylabel = expbias_stats[base_zstat]['label']
                             ylabel_units = expbias_stats[base_zstat]['units']
-                        if ylabel_units == 'measurement_units':
+                        if ylabel_units == '[measurement_units]':
                             ylabel_units = self.measurement_units[networkspeci.split('|')[-1]] 
                         if ylabel_units != '':
                             ylabel += ' [{}]'.format(ylabel_units)
                     else:
                         if 'ylabel' in self.plot_characteristics[plot_type]:
-                            if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
-                                ylabel = '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]])
-                            else:
-                                ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                            ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                            if '[measurement_units]' in ylabel:
+                                ylabel = ylabel.replace('[measurement_units]', '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]]))
                         else:
                             ylabel = ''
                     # set ylabel
