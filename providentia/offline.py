@@ -32,9 +32,6 @@ from .statistics import calculate_statistic, generate_colourbar, get_selected_st
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
-
 
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
@@ -44,6 +41,10 @@ class ProvidentiaOffline:
 
     def __init__(self, **kwargs):
         print("Starting Providentia offline...")
+
+        # load statistical jsons
+        self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+        self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -1126,7 +1127,7 @@ class ProvidentiaOffline:
                 # get stat for current data label
                 if data_label in self.selected_station_data_labels[networkspeci]:
                     # if relevant stat is expbias stat, then ensure temporal colocation is active
-                    if (base_plot_type == 'statsummary') and (stat in expbias_stats) and (not self.temporal_colocation):
+                    if (base_plot_type == 'statsummary') and (stat in self.expbias_stats) and (not self.temporal_colocation):
                         data_to_add = np.NaN
                     # otherwise calculate statistic
                     else:
@@ -1396,11 +1397,11 @@ class ProvidentiaOffline:
                 if (axis_ylabel == '') or ('[measurement_units]' in axis_ylabel):
                     if base_plot_type in ['periodic']:
                         if z_statistic_type == 'basic':
-                            ylabel = basic_stats[base_zstat]['label']
-                            ylabel_units = basic_stats[base_zstat]['units']
+                            ylabel = self.basic_stats[base_zstat]['label']
+                            ylabel_units = self.basic_stats[base_zstat]['units']
                         else:
-                            ylabel = expbias_stats[base_zstat]['label']
-                            ylabel_units = expbias_stats[base_zstat]['units']
+                            ylabel = self.expbias_stats[base_zstat]['label']
+                            ylabel_units = self.expbias_stats[base_zstat]['units']
                         if ylabel_units == '[measurement_units]':
                             ylabel_units = self.measurement_units[networkspeci.split('|')[-1]] 
                         if ylabel_units != '':

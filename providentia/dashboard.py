@@ -40,8 +40,6 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
 
 
@@ -56,6 +54,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # allow access to methods of parent class QtWidgets.QWidget
         super(ProvidentiaMainWindow, self).__init__()
+
+        # load statistical jsons
+        self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+        self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -155,10 +157,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
         if not hasattr(self, 'basic_z_stats'):
             self.basic_z_stats = np.array(list(
-                OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
+                OrderedDict(sorted(self.basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
         if not hasattr(self, 'basic_and_bias_z_stats'):
             self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-                OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
+                OrderedDict(sorted(self.expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
 
         # initialise UI
         self.init_ui(**kwargs)

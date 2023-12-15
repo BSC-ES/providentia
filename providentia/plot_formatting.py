@@ -9,43 +9,51 @@ import numpy as np
 import pandas as pd
 
 from .plot_aux import get_land_polygon_resolution, set_map_extent
-from .plot_options import annotation, get_no_margin_lim, linear_regression, log_axes, log_validity, smooth
-
+from .plot_options import (annotation, experiment_domain, get_no_margin_lim, linear_regression, log_axes, log_validity, 
+                           smooth)
+from .statistics import get_z_statistic_info
 
 def set_equal_axes(ax, plot_options):
     """ Set equal aspect and limits (useful for scatter plots). """
 
-    # set equal aspect
-    # only if no axis is in log scale
-    if 'logy' in plot_options or 'logx' in plot_options:
+    # set equal aspect if no axis is in log scale
+    if ('logx' in plot_options) or ('logy' in plot_options):
+        log_active = True
         ax.set_aspect(aspect='auto')
     else:
+        log_active = False
         ax.set_aspect(aspect='equal', adjustable='box')
 
     if len(ax.lines) == 0:
         return None
 
     # get min and max values for ticks
+    lines_xdata = []
+    lines_ydata = []
     for i, line in enumerate(ax.lines):
         line_xdata = line.get_xdata()
         line_ydata = line.get_ydata()
-        if list(line_xdata) != [0, 1] and list(line_xdata) != [0, 0.5]:
-            break
-        
-    xtickmin = np.nanmin(line_xdata)
-    xtickmax = np.nanmax(line_xdata)
-    ytickmin = np.nanmin(line_ydata)
-    ytickmax = np.nanmax(line_ydata)
+        if (list(line_xdata) == [0, 1]) or (list(line_xdata) == [0, 0.5]):
+            continue
+        lines_xdata.extend(line_xdata)
+        lines_ydata.extend(line_ydata)
 
-    for line in ax.lines[i:]:
-        if np.nanmin(line.get_xdata()) < xtickmin:
-            xtickmin = np.nanmin(line.get_xdata())
-        if np.nanmax(line.get_xdata()) > xtickmax:
-            xtickmax = np.nanmax(line.get_xdata())
-        if np.nanmin(line.get_ydata()) < ytickmin:
-            ytickmin = np.nanmin(line.get_ydata())
-        if np.nanmax(line.get_ydata()) > ytickmax:
-            ytickmax = np.nanmax(line.get_ydata())
+    # if log of an axis is active, remove values < 0 to ensure limits are set correctly
+    if log_active:
+        lines_xdata = np.array(lines_xdata)
+        x_above_zero = lines_xdata > 0
+        lines_xdata = lines_xdata[x_above_zero]
+        lines_ydata = np.array(lines_ydata)
+        y_above_zero = lines_ydata > 0
+        lines_ydata = lines_ydata[y_above_zero]
+        if (x_above_zero.any()) or (y_above_zero.any()):
+            print("Warning: Data <= 0 will not be plotted as a log axis is set.")
+
+    # get x and y axes min/max across line artists
+    xtickmin = np.nanmin(lines_xdata)
+    xtickmax = np.nanmax(lines_xdata)
+    ytickmin = np.nanmin(lines_ydata)
+    ytickmax = np.nanmax(lines_ydata)
 
     # compare min and max across axes
     if xtickmin < ytickmin:
@@ -179,7 +187,8 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         # get xlim
         if ax_ii == 0:
             set_xlim = False
-            if (xlim is None) and ('xlim' not in plot_characteristics):
+            if ((xlim is None) and ('xlim' not in plot_characteristics) and (len(all_xlim_lower) > 0) and 
+               (len(all_xlim_upper) > 0)):
                 if base_plot_type not in ['boxplot', 'periodic', 'periodic-violin']:
                     xlim_min = np.min(all_xlim_lower)
                     xlim_max = np.max(all_xlim_upper)
@@ -198,7 +207,8 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         # get ylim
         if ax_ii == 0:
             set_ylim = False
-            if (ylim is None) and ('ylim' not in plot_characteristics):
+            if ((ylim is None) and ('ylim' not in plot_characteristics) and (len(all_ylim_lower) > 0) and 
+               (len(all_ylim_upper) > 0)):
                 ylim_min = np.min(all_ylim_lower) 
                 ylim_max = np.max(all_ylim_upper)
                 # if have bias_centre option, centre around zero
@@ -292,7 +302,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 
     # get minimum and maximum from all axes and set limits for timeseries
     elif base_plot_type == 'timeseries':
-        if plot_characteristics['xtick_alteration']['define']:
+        if (plot_characteristics['xtick_alteration']['define']) and (xlim):
         
             # get steps for all data labels
             steps = pd.date_range(xlim['left'], xlim['right'], freq=read_instance.active_frequency_code)
@@ -451,6 +461,9 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
                             relevant_temporal_resolution in read_instance.relevant_temporal_resolutions]
             relevant_data_labels = copy.deepcopy(relevant_data_labels) * len(read_instance.relevant_temporal_resolutions)
 
+    # get zstat info (if any)
+    zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
+
     for relevant_ax_ii, relevant_ax in enumerate(relevant_axs):
 
         # log axes?
@@ -472,13 +485,21 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
                 msg += "in {0} with negative values.".format(plot_type)
                 print(msg)
 
+        # domain
+        if 'domain' in plot_options:
+            if len(relevant_data_labels[relevant_ax_ii]) == 1:
+                if relevant_data_labels[relevant_ax_ii][0] == read_instance.observations_data_label:
+                    print("Warning: 'domain' plot option cannot be made as have no experiments.")
+                    return
+            experiment_domain(canvas_instance, relevant_ax, relevant_data_labels[relevant_ax_ii])
+
         # annotation
         if 'annotate' in plot_options:
             if base_plot_type not in ['heatmap']:
                 annotation(canvas_instance, read_instance, relevant_ax, networkspeci, 
                            relevant_data_labels[relevant_ax_ii], base_plot_type, 
                            canvas_instance.plot_characteristics[plot_type],
-                           plot_options=plot_options)
+                           plot_options=plot_options, plot_z_statistic_sign=z_statistic_sign)
                 # annotate on first axis
                 if base_plot_type in ['periodic', 'periodic-violin']:
                     break
