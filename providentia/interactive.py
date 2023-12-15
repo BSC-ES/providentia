@@ -36,8 +36,6 @@ from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
 # do not print deprecated warnings
 import warnings
@@ -57,6 +55,10 @@ class Interactive:
 
         #set mode as interactive
         kwargs['interactive'] = True
+
+        # load statistical jsons
+        self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+        self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
         #set configuration variables, as well as any other defined variables
         valid_config = self.set_config(**kwargs)
@@ -177,14 +179,24 @@ class Interactive:
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
 
-        # set boolean on whether to plot obs in legend or not
-        if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
-            set_obs_legend = False
+        # get data labels for plot
+        if len(data_labels) == 0:
+            data_labels = copy.deepcopy(self.data_labels)
+        # if any passed data labels are not available then pass warning and return
+        else:
+            invalid_data_labels = [data_label for data_label in data_labels if data_label not in self.data_labels]
+            if len(invalid_data_labels) > 0:
+                print("Warning: Passed data labels {} are not available. Not making plot.".format(invalid_data_labels))
+                return
 
         # set plot characteristics
         self.plot_characteristics = dict()
-        self.plot.set_plot_characteristics([plot_type], format=format)
-        
+        valid_plot = self.plot.set_plot_characteristics([plot_type], format=format, data_labels=data_labels)
+
+        # if after setting plot charateristics it has been determined plot is not valid, then return
+        if not valid_plot:
+            return
+
         # if map extent passed not passed as argument, set it as value from .conf in memory
         if (not map_extent) and (self.map_extent):
             map_extent = copy.deepcopy(self.map_extent)
@@ -233,20 +245,20 @@ class Interactive:
             func = getattr(self.plot, 'make_table')
         elif base_plot_type != 'legend':
             func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
-
-        # get data labels for plot
-        if len(data_labels) == 0:
-            data_labels = copy.deepcopy(self.data_labels)
+         
+        # set boolean on whether to plot obs in legend or not
+        if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+            set_obs_legend = False
 
         # get networkspeci to plot
         networkspeci = self.networkspecies[0]
         speci = networkspeci.split('|')[-1]
         if len(self.networkspecies) > 1:
-            print('Warning: More than 1 network or species defined, can only plot for 1 pair. Taking {}.'.format(networkspeci))
+            print("Warning: More than 1 network or species defined, can only plot for 1 pair. Taking {}.".format(networkspeci))
 
         # legend plot (on its own axis)
         if base_plot_type == 'legend':
-            legend_handles = self.make_legend(plot_type, set_obs=set_obs_legend)
+            legend_handles = self.make_legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
             relevant_ax.legend(**legend_handles)
 
         # map plot
@@ -255,7 +267,7 @@ class Interactive:
             # if no specific labels defined then take first data label and give warning
             if (labela == '') & (labelb == ''):
                 labela = data_labels[0]
-                print('Warning: No specific data labels set, plotting first available data label: {}.'.format(z1_label))
+                print("Warning: No specific data labels set, plotting first available data label: {}.".format(z1_label))
             # labelb defined but labela for some reason, set labela to be labelb, and labelb empty str 
             elif (labela == ''):
                 labela = copy.deepcopy(labelb)
@@ -313,13 +325,13 @@ class Interactive:
 
                 if ylabel == '':                            
                     if z_statistic_type == 'basic':
-                        ylabel = basic_stats[base_zstat]['label']
-                        ylabel_units = basic_stats[base_zstat]['units']
+                        ylabel = self.basic_stats[base_zstat]['label']
+                        ylabel_units = self.basic_stats[base_zstat]['units']
                     else:
-                        ylabel = expbias_stats[base_zstat]['label']
-                        ylabel_units = expbias_stats[base_zstat]['units']
+                        ylabel = self.expbias_stats[base_zstat]['label']
+                        ylabel_units = self.expbias_stats[base_zstat]['units']
                     if ylabel_units == '[measurement_units]':
-                        ylabel_units = self.read_instance.measurement_units[speci] 
+                        ylabel_units = self.measurement_units[speci] 
                     if ylabel_units != '':
                         ylabel += ' [{}]'.format(ylabel_units)
 
@@ -402,7 +414,7 @@ class Interactive:
         # make legend (embedded on plot axis)
         if (legend) & (base_plot_type != 'legend'):
             if 'legend' in self.plot_characteristics[plot_type]:
-                legend_handles = self.make_legend(plot_type, set_obs=set_obs_legend)
+                legend_handles = self.make_legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
                 if base_plot_type in ['periodic', 'periodic-violin']:
                     try:
                         ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
@@ -438,7 +450,7 @@ class Interactive:
         # generate colourbar
         generate_colourbar(self, [plot_ax], [cb_ax], stat, self.plot_characteristics[plot_type], speci)
 
-    def make_legend(self, plot_type, set_obs=True):
+    def make_legend(self, plot_type, data_labels=None, set_obs=True):
         """wrapper method to make legend"""
         
         if plot_type == 'legend':
@@ -449,7 +461,7 @@ class Interactive:
             print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json")
             return
 
-        legend_handles = self.plot.make_legend_handles(legend_characteristics, set_obs=set_obs)
+        legend_handles = self.plot.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)
         return legend_handles['plot']
 
     def calculate_statistic(self, stat='', labela='', labelb='', per_station=False):
@@ -458,7 +470,7 @@ class Interactive:
         # if no specific labels defined then take first data label and give warning
         if (labela == '') & (labelb == ''):
             labela = data_labels[0]
-            print('Warning: No specific data labels set, plotting first available data label: {}.'.format(z1_label))
+            print("Warning: No specific data labels set, plotting first available data label: {}.".format(z1_label))
         # labelb defined but labela for some reason, set labela to be labelb, and labelb empty str 
         elif (labela == ''):
             labela = copy.deepcopy(labelb)
@@ -505,11 +517,11 @@ class Interactive:
             if self.section in self.parent_section_names:
                 have_section = True
             else:
-                print('Warning: Defined section {} does not exist in configuration file.'.format(self.section))
+                print("Warning: Defined section {} does not exist in configuration file.".format(self.section))
         if not have_section:
             self.section = self.parent_section_names[0]
             if len(self.parent_section_names) > 1:
-                print('Warning: Taking first defined section ({}) to be read.'.format(self.section))
+                print("Warning: Taking first defined section ({}) to be read.".format(self.section))
 
         # update self with section variables
         self.section_opts = self.sub_opts[self.section]
@@ -529,14 +541,14 @@ class Interactive:
             if self.subsection in self.child_subsection_names:
                 have_subsection = True
             else:
-                print('Warning: Defined subsection {} does not exist in configuration file.'.format(self.subsection))
+                print("Warning: Defined subsection {} does not exist in configuration file.".format(self.subsection))
 
         if len(self.child_subsection_names) > 0:
             if not have_subsection:
                 self.subsection = self.child_subsection_names[0]
                 have_subsection = True
                 if len(self.child_subsection_names) > 1:
-                    print('Warning: Taking first defined subsection ({}) to be read.'.format(self.subsection))
+                    print("Warning: Taking first defined subsection ({}) to be read.".format(self.subsection))
         else:
             self.subsection = [self.section]
 
@@ -555,6 +567,26 @@ class Interactive:
         provconf.check_validity()
 
         return True
+
+    def print_config(self, conf=None, config=None):
+        """print selected config file to console"""
+
+        # if conf or config not None, then print that file
+        if conf:
+            pass
+        elif config:
+            conf = copy.deepcopy(config) 
+        # otherwise take it to be file previously loaded
+        else:
+            conf = copy.deepcopy(self.config)
+
+        # check file exists
+        if not os.path.isfile(conf):
+            print("Warning: The passed .conf file: '{}' does not exist.".format(conf))
+        # otherwise, print conf
+        else:
+            with open(conf, "r") as f:
+                print(f.read())
 
     def select_station(self, station):
         """wrapper method to select specific station/s"""
@@ -612,7 +644,7 @@ class Interactive:
 
         # if variable is undefined then print warning
         if var == '':
-            print('Warning: Variable to read is undefined.')
+            print("Warning: Variable to read is undefined.")
             return 
         else:
             data = self.get_data(format='npz')
