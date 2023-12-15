@@ -512,14 +512,14 @@ class DataFilter:
                 # load default selected z statistic arguments for passing to statistical function
                 function_arguments = stats_dict['arguments']
 
-                # if stat is exceedances then add threshold value (if available)  
-                if base_zstat == 'Exceedances':
-                    function_arguments['threshold'] = exceedance_lim(networkspeci)
-                
                 # iterate through network / species  
                 for ii, networkspeci in enumerate(self.read_instance.networkspecies):
                     # get speci
                     speci = networkspeci.split('|')[1]
+
+                    # if stat is exceedances then add threshold value (if available)  
+                    if base_zstat == 'Exceedances':
+                        function_arguments['threshold'] = exceedance_lim(speci)
 
                     # get list of statistic limits specific for speci (if wanted)
                     if speci_specific_limits:
