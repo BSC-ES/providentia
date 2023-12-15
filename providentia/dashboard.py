@@ -503,7 +503,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable that blocks updating of MPL canvas until some data has been read
         self.block_MPL_canvas_updates = True
         self.mpl_canvas = MPLCanvas(self)
-              
+
         # initialise configuration bar fields
         self.config_bar_initialisation = True
         self.update_configuration_bar_fields()

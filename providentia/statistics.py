@@ -307,6 +307,9 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
        for different aggregation modes.
     """
 
+    # get speci
+    speci = networkspeci.split('|')[1]
+
     #if data_labels_a, data_labels_b are strings then convert to lists
     if type(data_labels_a) != list:
         data_labels_a = [data_labels_a]
@@ -394,7 +397,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # if stat is exceedances then add threshold value (if available)  
             if base_zstat == 'Exceedances':
-                function_arguments['threshold'] = exceedance_lim(networkspeci)
+                function_arguments['threshold'] = exceedance_lim(speci)
 
             # calculate statistics
             
@@ -459,7 +462,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 function_arguments_a = stats_dict['arguments']
                 # if stat is exceedances then add threshold value (if available)  
                 if base_zstat == 'Exceedances':
-                    function_arguments_a['threshold'] = exceedance_lim(networkspeci)
+                    function_arguments_a['threshold'] = exceedance_lim(speci)
                 function_arguments_b = copy.deepcopy(function_arguments_a)
 
                 # calculate statistics for data_labels_a and data_labels_b, then subtract data_labels_b - data_labels_a
@@ -978,7 +981,7 @@ def exceedance_lim(species):
         :rtype: int
     """
 
-    exceedance_limits = {'sconco3': 90.21, 'sconcno2': 106.38}
+    exceedance_limits = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/exceedances.json')))
     if species in exceedance_limits:
         return exceedance_limits[species]
     else:

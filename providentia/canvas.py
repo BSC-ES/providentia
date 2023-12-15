@@ -131,9 +131,9 @@ class MPLCanvas(FigureCanvas):
         for plot_type in self.all_plots:
             # for plot types with zstat, initialise with default zstat (Mean)
             if plot_type in ['map', 'periodic']:
-                self.plot.set_plot_characteristics([plot_type], zstat='Mean')
+                self.plot.set_plot_characteristics([plot_type], zstat='Mean', data_labels=['dummy'])
             else:
-                self.plot.set_plot_characteristics([plot_type])
+                self.plot.set_plot_characteristics([plot_type], data_labels=['dummy'])
             self.current_plot_options[plot_type] = []
             self.previous_plot_options[plot_type] = []
 
