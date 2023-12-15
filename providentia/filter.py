@@ -2,13 +2,18 @@
 
 import copy
 
+import json
+import os
 import numpy as np
 import pandas as pd
 
-from .calculate import Stats
+from .calculate import Stats, ExpBias
 from .configuration import split_options
+from .statistics import get_z_statistic_info, exceedance_lim
 from .warnings import show_message
 
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 class DataFilter:
 
@@ -36,6 +41,7 @@ class DataFilter:
         self.filter_by_period()
         self.filter_by_data_availability()
         self.filter_by_metadata()
+        self.filter_extreme_stations()
         self.temporally_colocate_data()
         self.apply_calibration_factor()
         self.get_valid_stations_after_filtering()
@@ -439,6 +445,128 @@ class DataFilter:
                 return False
         else:
             return True
+
+    def filter_extreme_stations(self):
+        """ Define function which filters out extreme stations based on set statistical limits.
+            There can be multiple limit arguments for a statistic e.g. 'MB': ['<10','>20']
+            There can also be limits per species e.g. 'RMSE': {'sconco3': ['<50.0', '>70.0'], 'sconco':[>100.0]}
+            An absolute statistic can be set to be a bias statistic by adding '_bias' e.g. 
+            'p95_bias': ['<10','>20']
+
+            If statistic is an absolute statistic, then only remove stations based on observations.
+            If statistic is a bias statistic, then remove collection of all stations outside limits across all obs-exp
+            comparsions.
+        """
+
+        # option to remove extreme stations set?
+        if self.read_instance.remove_extreme_stations:
+
+            # load json of defined stattistics limits
+            remove_extreme_stations_fname = os.path.join(PROVIDENTIA_ROOT, 'settings/remove_extreme_stations.json')
+            stat_defs = json.load(open(remove_extreme_stations_fname))
+
+            # get specific set of limits (if available)
+            # throw wraning if not
+            if self.read_instance.remove_extreme_stations not in stat_defs:
+                msg = "'{}' not defined in '{}'. Not removing extreme stations.".format(self.read_instance.remove_extreme_stations, remove_extreme_stations_fname)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                return
+            else:
+                stat_limits = stat_defs[self.read_instance.remove_extreme_stations]
+
+            # loop through and calculate each statistic per station and remove stations outside statistical limits
+            for zstat in stat_limits:
+                # get list of statistical limits for specific stat 
+                stat_arguments = stat_limits[zstat]
+                
+                # if have a dict, the limits are specific per species, so limit for species
+                speci_specific_limits = False
+                if type(stat_arguments) == dict:
+                    speci_specific_limits = True                        
+
+                # determine if station is absolute or bias statistic
+                zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
+
+                # handle some possible errors
+
+                # if have only observations data then cannot calculate bias statistic, so continue to next stat
+                if z_statistic_sign == 'bias':
+                    if len(self.read_instance.data_labels) < 2:
+                        msg = "Cannot remove extreme stations via calculation of '{}' as no experiment data has been read.".format(zstat)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        continue
+                        
+                # if temporal_colocation is not active then cannot calculate ExpBias statistic, so continue to next stat 
+                if z_statistic_type == 'expbias':
+                    if not self.read_instance.temporal_colocation:
+                        msg = "Cannot remove extreme stations via calculation of '{}' as 'temporal_colocation' is not active.".format(zstat)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        continue
+
+                # get dictionary containing necessary information for calculation of selected statistic
+                if z_statistic_type == 'basic':
+                    stats_dict = self.read_instance.basic_stats[base_zstat]
+                else:
+                    stats_dict = self.read_instance.expbias_stats[base_zstat]
+
+                # load default selected z statistic arguments for passing to statistical function
+                function_arguments = stats_dict['arguments']
+
+                # if stat is exceedances then add threshold value (if available)  
+                if base_zstat == 'Exceedances':
+                    function_arguments['threshold'] = exceedance_lim(networkspeci)
+                
+                # iterate through network / species  
+                for ii, networkspeci in enumerate(self.read_instance.networkspecies):
+                    # get speci
+                    speci = networkspeci.split('|')[1]
+
+                    # get list of statistic limits specific for speci (if wanted)
+                    if speci_specific_limits:
+                        # if have not defined limits for speci, then throw warning and continue to next speci
+                        if speci not in stat_arguments:
+                            msg = "No statistical limits defined for '{}' in '{}' section of '{}'. Not removing extreme stations for '{}'.".format(
+                                  speci, self.read_instance.remove_extreme_stations, remove_extreme_stations_fname, speci)
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                            continue
+                        else:
+                            specific_stat_arguments = stat_arguments[speci]
+                    else:
+                        specific_stat_arguments = copy.deepcopy(stat_arguments)
+
+                    # calculate statistic per station and then compare statistic against limits
+                    # set stations exceeding limits to NaN
+                    # calculate basic stats
+                    if (z_statistic_type == 'basic') and (z_statistic_sign != 'bias'):            
+                        data_array_a = self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:]
+                        calc_stat = np.array(getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments))
+                        non_finite_stat = ~np.isfinite(calc_stat)
+                        self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,non_finite_stat,:] = np.NaN
+                        for specific_stat_argument in specific_stat_arguments:
+                            invalid_stations = eval('calc_stat{}'.format(specific_stat_argument))
+                            self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.NaN
+                    # calculate basic bias stats and expbias stats
+                    else:
+                        for data_label in self.read_instance.data_labels:
+                            if data_label != self.read_instance.observations_data_label:
+                                #get expid data label index
+                                exp_data_index = self.read_instance.data_labels.index(data_label)
+                                data_array_a = self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:]
+                                data_array_b = self.read_instance.data_in_memory_filtered[networkspeci][exp_data_index,:,:]
+                                # calculate basic bias stats
+                                if (z_statistic_type == 'basic') and (z_statistic_sign == 'bias'): 
+                                    statistic_a = np.array(getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments))
+                                    statistic_b = np.array(getattr(Stats, stats_dict['function'])(data_array_b, **function_arguments))
+                                    calc_stat = statistic_b - statistic_a
+                                # calculate expbias stats
+                                elif z_statistic_type == 'expbias':
+                                    calc_stat = np.array(getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'exp':data_array_b}}))
+                                non_finite_stat = ~np.isfinite(calc_stat)
+                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,non_finite_stat,:] = np.NaN
+                                for specific_stat_argument in specific_stat_arguments:
+                                    invalid_stations = eval('calc_stat{}'.format(specific_stat_argument))
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.NaN
+                                    
 
     def temporally_colocate_data(self):
         """ Define function which temporally colocates observational and experiment data.

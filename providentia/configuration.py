@@ -88,6 +88,7 @@ class ProvConfiguration:
             'plot_characteristics_filename': '',
             'harmonise_summary': True,
             'harmonise_stations': True,
+            'remove_extreme_stations': False,
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
                                     'available_resolutions', 'available_networks',

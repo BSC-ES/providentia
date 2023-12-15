@@ -129,6 +129,10 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--harmonise_summary",
                                      dest="harmonise_summary",
                                      help="harmonise axes limits across subsections for summary report")
+            self.parser.add_argument("--remove_extreme_stations",
+                                     dest="remove_extreme_stations",
+                                     help="remove extreme stations using defined statistic limits")
+
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
