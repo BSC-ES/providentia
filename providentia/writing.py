@@ -90,7 +90,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
 
     # if set_in_memory is active, load and return the variable in memory  
     if set_in_memory:   
-        data = np.load(fname)
+        data = np.load(fname, allow_pickle=True)
         # delete temporary save file after load
         os.remove(fname)  
         return data                  
@@ -249,6 +249,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         if prv.reading_ghost:
             var.ghost_version = str(prv.ghost_version)
         if apply_filters:
+            test = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
             var[:] = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
         else:
             var[:] = prv.data_in_memory[networkspeci]
@@ -298,12 +299,13 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     # if set_in_memory is active, load and return the variable in memory  
     if set_in_memory:   
         if xarray:
-            data = xr.open_dataset(fname)
+            data = xr.load_dataset(fname)
         else:
             data = Dataset(fname)
+
         # delete temporary save file after load
         os.remove(fname)  
-        
+
         return data  
 
 def export_configuration(prv, cname, separator="||"):

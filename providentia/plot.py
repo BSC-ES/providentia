@@ -30,9 +30,6 @@ pyproj.set_use_global_context()
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
-
 
 class Plot:
     """ Class that makes plots and handles plot configuration options when defined. """
@@ -55,7 +52,7 @@ class Plot:
         self.canvas_instance.periodic_xticks = periodic_xticks()
         self.canvas_instance.periodic_labels = periodic_labels()
 
-    def set_plot_characteristics(self, plot_types, zstat=False, format={}):
+    def set_plot_characteristics(self, plot_types, zstat=False, data_labels=None, format={}):
         """ Iterate through all plots to make, and determine if they can and cannot be made.
             Update plot characteristics associated with specific plot types due to plot options. 
 
@@ -63,9 +60,15 @@ class Plot:
             :type plot_types: list  
             :param zstat: z statistic str 
             :type zstat: str
+            :param data_labels: list of data labels to plot in legend  
+            :type data_labels: list 
             :param format: format dict to overwrite default formatting 
             :type format: dict
         """
+
+        # if data_labels are not defined, take all in memory
+        if not data_labels:
+            data_labels = copy.deepcopy(self.read_instance.data_labels)
 
         # add all valid defined plots to plot_characteristics
         for plot_type in plot_types:
@@ -91,7 +94,7 @@ class Plot:
 
             # if no experiments are defined, remove all bias plots 
             if ('bias' in plot_options) or (z_statistic_sign == 'bias'):
-                if len(self.read_instance.data_labels) == 1:
+                if len(data_labels) == 1:
                     if (self.read_instance.offline) or (self.read_instance.interactive):
                         print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created.')
                         valid_plot_type = False
@@ -108,12 +111,13 @@ class Plot:
                 # get base plot type (without stat and options)
                 base_plot_type = plot_type.split('-')[0] 
                 # combine basic and expbias stats dicts together
-                stats_dict = {**basic_stats, **expbias_stats}
+                stats_dict = {**self.read_instance.basic_stats, **self.read_instance.expbias_stats}
                 
                 # check all defined plot options are allowed for current plot type
-                if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
+                invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
+                if len(invalid_plot_options) > 0:
                     if (self.read_instance.offline) or (self.read_instance.interactive):
-                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid.')
+                        print(f'Warning: {plot_type} cannot be created as {invalid_plot_options} plot options are not valid.')
                         valid_plot_type = False
                 # check desired statistic is defined in stats dict
                 if base_zstat not in stats_dict:
@@ -127,10 +131,13 @@ class Plot:
                         valid_plot_type = False
 
                 if not valid_plot_type:
-                    if plot_type in self.read_instance.summary_plots_to_make:
-                        self.read_instance.summary_plots_to_make.remove(plot_type)
-                    if plot_type in self.read_instance.station_plots_to_make:
-                        self.read_instance.station_plots_to_make.remove(plot_type)
+                    if self.read_instance.offline:
+                        if plot_type in self.read_instance.summary_plots_to_make:
+                            self.read_instance.summary_plots_to_make.remove(plot_type)
+                        if plot_type in self.read_instance.station_plots_to_make:
+                            self.read_instance.station_plots_to_make.remove(plot_type)
+                    elif self.read_instance.interactive:
+                        return valid_plot_type
                     continue
 
                 # add information for plot type 
@@ -160,9 +167,10 @@ class Plot:
                 base_plot_type = plot_type.split('_')[0] 
 
                 # check all defined plot options are allowed for current plot type
-                if not all(plot_option in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options'] for plot_option in plot_options):
+                invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
+                if len(invalid_plot_options) > 0:
                     if (self.read_instance.offline) or (self.read_instance.interactive):
-                        print(f'Warning: {plot_type} cannot be created as some plot options are not valid.')
+                        print(f'Warning: {plot_type} cannot be created as {invalid_plot_options} plot options are not valid.')
                         valid_plot_type = False
                 # warning for scatter plot if the temporal colocation is not active
                 elif ('scatter' == base_plot_type) & (not self.read_instance.temporal_colocation):
@@ -177,10 +185,13 @@ class Plot:
 
                 # break loop if the plot type is not valid and remove plot type from lists
                 if not valid_plot_type:
-                    if plot_type in self.read_instance.summary_plots_to_make:
-                        self.read_instance.summary_plots_to_make.remove(plot_type)
-                    if plot_type in self.read_instance.station_plots_to_make:
-                        self.read_instance.station_plots_to_make.remove(plot_type)
+                    if self.read_instance.offline:
+                        if plot_type in self.read_instance.summary_plots_to_make:
+                            self.read_instance.summary_plots_to_make.remove(plot_type)
+                        if plot_type in self.read_instance.station_plots_to_make:
+                            self.read_instance.station_plots_to_make.remove(plot_type)
+                    elif self.read_instance.interactive:
+                        return valid_plot_type
                     continue
 
                 # add information for plot type for base plot type 
@@ -205,22 +216,32 @@ class Plot:
                 elif self.canvas_instance.plot_characteristics[plot_type]['orientation'] == 'portrait':
                     self.canvas_instance.plot_characteristics[plot_type]['figure']['figsize'] = self.canvas_instance.portrait_figsize
 
-    def make_legend_handles(self, plot_characteristics_legend, set_obs=True):
+        # return valid plot type if interactive mode
+        if self.read_instance.interactive:
+            return valid_plot_type
+
+    def make_legend_handles(self, plot_characteristics_legend, data_labels=None, set_obs=True):
         """ Make legend element handles.
         
             :param plot_characteristics_legend: plot characteristics for relevant legend
             :type plot_characteristics_legend: dict
+            :param data_labels: list of data labels to plot in legend  
+            :type data_labels: list 
             :param set_obs: boolean switch if to set observations in legend or not  
             :type set_obs: boolean 
             :return: plot_characteristics_legend with handles updated
             :rtype: dict
         """
 
+        # if data_labels are not defined, take all in memory
+        if not data_labels:
+            data_labels = copy.deepcopy(self.read_instance.data_labels)
+
         # create legend elements
         legend_elements = []
 
-        # add observations element
-        if set_obs:
+        # add observations element, if available, and set_obs == True
+        if (self.read_instance.observations_data_label in data_labels) and (set_obs):
             legend_elements.append(Line2D([0], [0], 
                                 marker=plot_characteristics_legend['handles']['marker'], 
                                 color=plot_characteristics_legend['handles']['color'],
@@ -229,7 +250,7 @@ class Plot:
                                 label=self.read_instance.observations_data_label))
                                   
         # add element for each experiment
-        for experiment in self.read_instance.data_labels:
+        for experiment in data_labels:
             if experiment != self.read_instance.observations_data_label:
                 # add experiment element
                 legend_elements.append(Line2D([0], [0], 
@@ -243,17 +264,23 @@ class Plot:
         
         return plot_characteristics_legend
 
-    def make_experiment_domain_polygons(self):
+    def make_experiment_domain_polygons(self, data_labels=None):
         """ Make experiment domain polygons.
-        
+            
+            :param data_labels: list of data labels to plot in legend  
+            :type data_labels: list 
             :return: grid_edge_polygons
             :rtype: list
         """
 
+        # if data_labels are not defined, take all in memory
+        if not data_labels:
+            data_labels = copy.deepcopy(self.read_instance.data_labels)
+
         grid_edge_polygons = []
 
         # iterate through read experiments and plot grid domain edges on map
-        for experiment in self.read_instance.data_labels:
+        for experiment in data_labels:
             if experiment != self.read_instance.observations_data_label:
                 # create matplotlib polygon object from experiment grid edge map projection coordinates
                 grid_edge_outline_poly = \
@@ -486,7 +513,7 @@ class Plot:
         if (self.read_instance.offline) or (self.read_instance.interactive):
             self.get_markersize(relevant_axis, 'map', networkspeci, plot_characteristics, 
                                 active_map_valid_station_inds=active_map_valid_station_inds)
-        # if using dashbaord make z_statistic and active_map_valid_station_inds class variables
+        # if using dashboard make z_statistic and active_map_valid_station_inds class variables
         else:
             self.canvas_instance.z_statistic = z_statistic
             self.canvas_instance.active_map_valid_station_inds = active_map_valid_station_inds
@@ -515,6 +542,12 @@ class Plot:
             :param plot_options: list of options to configure plot  
             :type plot_options: list
         """
+
+        # if 'hidedata' in plot_options, do not plot any data
+        if 'hidedata' in plot_options:
+            if 'smooth' not in plot_options:
+                print("Warning: 'hidedata' plot option is set for timeseries plot, but 'smooth' is not active. This will result in an empty plot.")
+            return
 
         # if 'obs' in plot_options, set data labels to just observations data label
         if 'obs' in plot_options:
@@ -610,7 +643,13 @@ class Plot:
         
         # cut data_labels for those in valid data labels
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
-        
+
+        # get number of experiments in data  labels
+        if self.read_instance.observations_data_label in cut_data_labels:
+            n_exps = len(cut_data_labels) - 1
+        else:
+            n_exps = len(cut_data_labels) 
+
         # hide non-relevant resolution axes
         for nonrelevant_temporal_resolution in self.read_instance.nonrelevant_temporal_resolutions:
             # get subplot axis
@@ -658,7 +697,7 @@ class Plot:
                         violin_fill = plot_characteristics['violin_fill_obs']
                     else:
                         alpha = plot_characteristics['violin_alphas']['alpha_exp']
-                        if (len(cut_data_labels) < 3) or ('individual' in plot_options):
+                        if (n_exps == 1) or ('individual' in plot_options):
                             violin_fill = plot_characteristics['violin_fill_1model']
                         else:
                             violin_fill = plot_characteristics['violin_fill_2+models']
@@ -695,9 +734,11 @@ class Plot:
                                                                                  facecolor='None', edgecolor=self.read_instance.plotting_params[data_label]['colour'], 
                                                                                  **plot_characteristics['plot']['violin'])
 
-                            # if have at least 1 valid experiment data array, split the violin plot across the horizontal
+                            # if have more than 1 valid data array (both obs and model), 
+                            # split the violin plot across the horizontal
                             # (observations on left, experiment violin_plots on right)
-                            if (len(cut_data_labels) > 1) & ('individual' not in plot_options):
+                            if ((n_exps > 0) and (self.read_instance.observations_data_label in cut_data_labels) and
+                               ('individual' not in plot_options)):
                                 m = np.mean(self.violin_plot.get_paths()[0].vertices[:, 0])
                                 # observations on left
                                 if data_label == self.read_instance.observations_data_label:
@@ -728,9 +769,9 @@ class Plot:
                 if z_statistic_sign == 'bias':
                     # get value/s of minimum bias for statistic
                     if z_statistic_type == 'basic':
-                        minimum_bias = basic_stats[base_zstat]['minimum_bias']
+                        minimum_bias = self.read_instance.basic_stats[base_zstat]['minimum_bias']
                     else:
-                        minimum_bias = expbias_stats[base_zstat]['minimum_bias']
+                        minimum_bias = self.read_instance.expbias_stats[base_zstat]['minimum_bias']
                     bias_lines = []
                     for mb in minimum_bias:
                         bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
@@ -996,6 +1037,12 @@ class Plot:
         if '2:1_line' in plot_characteristics:
             relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
                             **plot_characteristics['2:1_line'])
+
+        # if 'hidedata' in plot_options, do not plot any data
+        if 'hidedata' in plot_options:
+            if 'regression' not in plot_options:
+                print("Warning: 'hidedata' plot option is set for scatter plot, but 'regression' is not active. This will result in an empty plot.")
+            return
 
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]

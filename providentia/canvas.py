@@ -41,8 +41,6 @@ mplstyle.use('fast')
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
 settings_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.json')))
 
@@ -670,11 +668,11 @@ class MPLCanvas(FigureCanvas):
                     
                     # set new ylabel
                     if z_statistic_type == 'basic':
-                        ylabel = basic_stats[base_zstat]['label']
-                        ylabel_units = basic_stats[base_zstat]['units']
+                        ylabel = self.read_instance.basic_stats[base_zstat]['label']
+                        ylabel_units = self.read_instance.basic_stats[base_zstat]['units']
                     else:
-                        ylabel = expbias_stats[base_zstat]['label']
-                        ylabel_units = expbias_stats[base_zstat]['units']
+                        ylabel = self.read_instance.expbias_stats[base_zstat]['label']
+                        ylabel_units = self.read_instance.expbias_stats[base_zstat]['units']
                     if ylabel_units == '[measurement_units]':
                         ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
                     if ylabel_units != '':
@@ -2210,16 +2208,25 @@ class MPLCanvas(FigureCanvas):
             else:
                 plot_type = copy.deepcopy(plot_type_alt)
 
+            # define z_statistic_sign to be absolute (will be overwritten if bias)
+            z_statistic_sign = 'absolute'
+
             # an option is selected or there are options in previous to undo?
             if event_source.currentData() or self.previous_plot_options[plot_type]:
 
                 self.current_plot_options[plot_type] = copy.deepcopy(event_source.currentData())
-                all_plot_options = event_source.currentData(all=True)
+                orig_plot_options = event_source.currentData(all=True)
+                mod_plot_options = copy.deepcopy(orig_plot_options)
 
-                for option in all_plot_options:
+                #ensure bias option is handled first (to set z_statistic_sign)
+                if 'bias' in mod_plot_options:
+                    mod_plot_options.remove('bias')
+                    mod_plot_options.insert(0, 'bias')
+
+                for option in mod_plot_options:
                     
-                    # get index to raise errors and uncheck options
-                    index = all_plot_options.index(option)
+                    # get index to raise errors and uncheck options (in original plot options order)
+                    index = orig_plot_options.index(option)
 
                     # if do not have selected station_station_data in memory, then no data has been read
                     # so return
@@ -2327,7 +2334,8 @@ class MPLCanvas(FigureCanvas):
                                                    self.read_instance.data_labels, 
                                                    plot_type,
                                                    self.plot_characteristics[plot_type], 
-                                                   plot_options=self.current_plot_options[plot_type])
+                                                   plot_options=self.current_plot_options[plot_type],
+                                                   plot_z_statistic_sign=z_statistic_sign)
                                         break
                             else:
                                 annotation(self, 
@@ -2337,7 +2345,8 @@ class MPLCanvas(FigureCanvas):
                                            self.read_instance.data_labels, 
                                            plot_type,
                                            self.plot_characteristics[plot_type], 
-                                           plot_options=self.current_plot_options[plot_type])
+                                           plot_options=self.current_plot_options[plot_type],
+                                           plot_z_statistic_sign=z_statistic_sign)
 
                     # option 'smooth'
                     elif option == 'smooth':
@@ -2378,7 +2387,8 @@ class MPLCanvas(FigureCanvas):
 
                             # create other active plot option elements for now absolute plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, plot_type, 
-                                                       'absolute', self.current_plot_options[plot_type])
+                                                       'absolute', self.current_plot_options[plot_type],
+                                                       z_statistic_sign=z_statistic_sign)
 
                         # if bias option is enabled then first check if bias elements stored
                         elif not undo:
@@ -2465,7 +2475,8 @@ class MPLCanvas(FigureCanvas):
 
                             # create other active plot option elements for bias plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, plot_type, 
-                                                       'bias', self.current_plot_options[plot_type])
+                                                       'bias', self.current_plot_options[plot_type],
+                                                       z_statistic_sign=z_statistic_sign)
 
                         # if bias option is not enabled then hide bias plot elements and show absolute plots again
                         else:
@@ -2538,7 +2549,8 @@ class MPLCanvas(FigureCanvas):
 
                             # create other active plot option elements for absolute plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, 
-                                                       plot_type, 'absolute', self.current_plot_options[plot_type])
+                                                       plot_type, 'absolute', self.current_plot_options[plot_type],
+                                                       z_statistic_sign=z_statistic_sign)
 
                     # check stats for the selected periodic cycle
                     if plot_type in ['statsummary']:
@@ -2565,7 +2577,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    def redraw_active_options(self, data_labels, plot_type, active, plot_options):
+    def redraw_active_options(self, data_labels, plot_type, active, plot_options, z_statistic_sign='absolute'):
         """ Redraw active plot option elements when moving between absolute and bias plots,
             if do not already exist.
         """
@@ -2583,11 +2595,13 @@ class MPLCanvas(FigureCanvas):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
                             annotation(self, self.read_instance, sub_ax, self.read_instance.networkspeci, data_labels, 
-                                       plot_type, self.plot_characteristics[plot_type], plot_options=plot_options)
+                                       plot_type, self.plot_characteristics[plot_type], plot_options=plot_options,
+                                       plot_z_statistic_sign=z_statistic_sign)
                             break
                 else:
                     annotation(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
-                               data_labels, plot_type, self.plot_characteristics[plot_type], plot_options=plot_options)
+                               data_labels, plot_type, self.plot_characteristics[plot_type], plot_options=plot_options,
+                               plot_z_statistic_sign=z_statistic_sign)
 
             elif plot_option == 'smooth':
                 smooth(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,

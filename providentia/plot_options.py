@@ -147,7 +147,7 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
 
 
 def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
-               plot_characteristics, plot_options=[]):
+               plot_characteristics, plot_options=[], plot_z_statistic_sign='absolute'):
     """ Add statistical annotations to plot.
 
         :param relevant_axis: axis to plot on 
@@ -193,6 +193,9 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         bias = False
 
     # making plot for a bias stat? Then do not plot obs annotation label
+    if plot_z_statistic_sign == 'bias':
+        if read_instance.observations_data_label in cut_data_labels:
+            cut_data_labels.remove(read_instance.observations_data_label)
 
     # avoid plotting stats for observations data for scatter plots
     if base_plot_type == 'scatter':
@@ -220,7 +223,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
 
             # calculate stats
-            if (bias) or (z_statistic_sign == 'bias'):
+            if (bias) or (plot_z_statistic_sign == 'bias') or (z_statistic_sign == 'bias'):
                 if data_label != read_instance.observations_data_label:
                     stat_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, zstat, 
                                                     [read_instance.observations_data_label], [data_label])
@@ -266,8 +269,25 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         show_message(read_instance, msg)
 
 
+def experiment_domain(canvas_instance, relevant_axis, data_labels):
+    """ Plot experiment domain extents on map
+
+        :param relevant_axis: axis to plot on 
+        :type relevant_axis: object
+        :param data_labels: names of plotted data arrays 
+        :type data_labels: list
+    """
+
+    #get experiment domain polygons
+    grid_edge_polygons = canvas_instance.plot.make_experiment_domain_polygons(data_labels=data_labels) 
+
+    # plot grid edge polygons on map
+    for grid_edge_polygon in grid_edge_polygons:
+        relevant_axis.add_patch(grid_edge_polygon)
+
+
 def get_no_margin_lim(ax, lim):
-    """ Get true limits of plot area. """
+    """ Get true limits of plot area (with no margins)"""
 
     # xlim
     if lim == 'xlim':
