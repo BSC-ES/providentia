@@ -47,8 +47,8 @@ setup(
     version=__version__,
 
     # Application author details:
-    author="Dene Bowdalo, Amalia Vradi, Alba Vilanova",
-    author_email="dene.bowdalo@bsc.es, amalia.vradi@bsc.es, alba.vilanova@bsc.es",
+    author="Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa",
+    author_email="dene.bowdalo@bsc.es, amalia.vradi@bsc.es, alba.vilanova@bsc.es, francesco.benincasa@bsc.es",
 
     # Packages
     packages=['providentia', 'providentia.interpolation'],
