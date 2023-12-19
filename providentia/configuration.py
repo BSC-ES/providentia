@@ -107,7 +107,7 @@ class ProvConfiguration:
     def parse_parameter(self, key, value):
         """ Parse a parameter. """
 
-        #parse config file name
+        # parse config file name
         if key == 'conf':
             if value != '':
                 self.read_instance.config = value
@@ -122,10 +122,12 @@ class ProvConfiguration:
             else:
                 return value
                 
-        # get available N CPUs
         elif key == 'available_cpus':
-            return int(os.getenv('SLURM_NTASKS'))
-            #return len(os.sched_getaffinity(0))
+            # get available N CPUs
+            if MACHINE in ['power', 'mn4', 'nord3v2']:
+                return int(os.getenv('SLURM_NTASKS'))
+            else:
+                return len(os.sched_getaffinity(0))
 
         elif key == 'cartopy_data_dir':
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
