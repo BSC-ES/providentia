@@ -37,9 +37,13 @@ def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
         
 
 def linear_regression(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
-                      plot_characteristics, plot_options=[]):
+                      plot_characteristics, plot_options):
     """ Add linear regression to plot.
 
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
         :param networkspeci: str of currently active network and species 
@@ -92,9 +96,13 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
 
 
 def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
-           plot_characteristics, plot_options=[]):
+           plot_characteristics, plot_options):
     """ Add smooth line to plot.
 
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
         :param networkspeci: str of currently active network and species 
@@ -147,9 +155,13 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
 
 
 def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
-               plot_characteristics, plot_options=[], plot_z_statistic_sign='absolute'):
+               plot_characteristics, plot_options, plot_z_statistic_sign='absolute'):
     """ Add statistical annotations to plot.
 
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
         :param networkspeci: str of currently active network and species 
@@ -162,6 +174,8 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
+        :param plot_z_statistic_sign: sign of plotted z statistic (absolute or bias)
+        :type plot_z_statistic_sign: str
     """
 
     # get stats wished to be annotated
@@ -272,6 +286,8 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
 def experiment_domain(canvas_instance, relevant_axis, data_labels):
     """ Plot experiment domain extents on map
 
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
         :param data_labels: names of plotted data arrays 
@@ -284,51 +300,3 @@ def experiment_domain(canvas_instance, relevant_axis, data_labels):
     # plot grid edge polygons on map
     for grid_edge_polygon in grid_edge_polygons:
         relevant_axis.add_patch(grid_edge_polygon)
-
-
-def get_no_margin_lim(ax, lim):
-    """ Get true limits of plot area (with no margins)"""
-
-    # xlim
-    if lim == 'xlim':
-        xlim = ax.get_xlim()
-        xwidth = xlim[1] - xlim[0]
-        lower_lim = xlim[0] + (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
-        upper_lim = xlim[1] - (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
-
-    # ylim
-    if lim == 'ylim':
-        ylim = ax.get_ylim()
-        ywidth = ylim[1] - ylim[0]
-        lower_lim = ylim[0] + (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
-        upper_lim = ylim[1] - (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
-
-    return lower_lim, upper_lim
-
-
-def log_validity(relevant_axis, log_ax):
-    """ Determine if log operation for a given axes is valid (no values <= 0).
-    
-        :param relevant_axis: relevant axes
-        :type relevant_axis: list
-        :param log_ax: which axis to log
-        :type log_ax: str
-        :return: validity to log axis
-        :rtype: boolean
-    """
-
-    if log_ax == 'logx':
-        lower_lim, _ = get_no_margin_lim(relevant_axis, 'xlim')
-        if round(lower_lim, 2) >= 0:
-            validity = True
-        else:
-            validity = False
-    
-    if log_ax == 'logy':
-        lower_lim, _ = get_no_margin_lim(relevant_axis, 'ylim')
-        if round(lower_lim, 2) >= 0:
-            validity = True
-        else:
-            validity = False
-
-    return validity
