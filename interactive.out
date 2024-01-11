@@ -23,3 +23,4 @@ ssh -N -L 8293:s03r1b17:8293 bsc32025@nord4.bsc.es
 [W 2024-01-11 10:09:24.866 ServerApp] Got events for closed stream None
 [I 2024-01-11 10:12:43.112 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
 [I 2024-01-11 10:13:18.383 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 10:15:24.129 ServerApp] Saving file at /notebooks/test_interactive.ipynb
