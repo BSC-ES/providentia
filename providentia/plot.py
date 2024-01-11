@@ -274,11 +274,11 @@ class Plot:
         """
 
         # if data_labels are not defined, take all in memory
-        if not data_labels:
+        if data_labels is not None:
             data_labels = copy.deepcopy(self.read_instance.data_labels)
 
         grid_edge_polygons = []
-
+        
         # iterate through read experiments and plot grid domain edges on map
         for experiment in data_labels:
             if experiment != self.read_instance.observations_data_label:
