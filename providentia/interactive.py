@@ -53,15 +53,17 @@ class Interactive:
 
     def __init__(self, **kwargs):
 
+        self.kwargs = kwargs
+
         #set mode as interactive
-        kwargs['interactive'] = True
+        self.kwargs['interactive'] = True
 
         # load statistical jsons
         self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
         self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
         #set configuration variables, as well as any other defined variables
-        valid_config = self.set_config(**kwargs)
+        valid_config = self.set_config(**self.kwargs)
         # if configuration read was not valid then return here
         if not valid_config:
             return
@@ -86,6 +88,10 @@ class Interactive:
 
         # initialise Plot class
         self.plot = Plot(read_instance=self, canvas_instance=self)
+
+        # add general plot characteristics to self
+        for k, val in self.plot_characteristics_templates['general'].items():
+            setattr(self, k, val)
 
         # set some key configuration variables
         self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
@@ -157,10 +163,59 @@ class Interactive:
         #re-filter 
         self.filter()
 
-    def make_plot(self, plot, data_labels=[], labela='', labelb='', title=None, xlabel=None, ylabel=None, 
-                  cb=True, legend=True, map_extent=None, plot_options=[], return_plot=False, set_obs_legend=True, 
-                  format={}):
+    def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
+                  cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
+                  domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
+                  smooth=False, plot_options=None, return_plot=False, format=None):
         """wrapper method to make a Providentia plot"""
+
+        # define default argument mutables
+        if data_labels is None:
+            data_labels = []
+        if plot_options is None:
+            plot_options = []
+        if format is None:
+            format = {}
+
+        # if any of plot options are given via keywords, put them in a list (with other passed plot options)
+        if annotate:
+            if 'annotate' not in plot_options:
+                plot_options.append('annotate')
+            # if passed argument is a list, then use that for stat list (if valid)
+            if type(annotate) == list:
+                annotation_stats = copy.deepcopy(annotate)
+        if bias:
+            if 'bias' not in plot_options:
+                plot_options.append('bias')
+        if domain:
+            if 'domain' not in plot_options:
+                plot_options.append('domain')
+        if hidedata:
+            if 'hidedata' not in plot_options:
+                plot_options.append('hidedata')
+        if logx:
+            if 'logx' not in plot_options:
+                plot_options.append('logx')
+        if logy:
+            if 'logy' not in plot_options:
+                plot_options.append('logy')
+        if multispecies:
+            if 'multispecies' not in plot_options:
+                plot_options.append('multispecies')
+        if regression:
+            if 'regression' not in plot_options:
+                plot_options.append('regression')
+        if smooth:
+            if 'smooth' not in plot_options:
+                plot_options.append('smooth')
+            # if passed argument is a str/int/float, then use that for smoothing window
+            if type(smooth) == str:
+                try:
+                    smooth = int(smooth)
+                except:
+                    pass
+            if (type(smooth) == int) or (type(smooth) == float):
+                smooth_window = int(smooth)
 
         # get base plot type (no plot options), and plot type (with plot options)
         base_plot_type = copy.deepcopy(plot)
@@ -179,15 +234,23 @@ class Interactive:
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
 
+        # if only 1 label passed for map plot, and stat is a bias statistic then throw error
+        if (base_plot_type == 'map') & (z_statistic_sign == 'bias') & (labelb == ''):
+            print("Warning: Plotting a bias statistic, and only 1 label is set. Not making plot.")
+            return
+
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)
-        # if any passed data labels are not available then pass warning and return
+        # if any passed data labels are not available then pass warning
         else:
             invalid_data_labels = [data_label for data_label in data_labels if data_label not in self.data_labels]
-            if len(invalid_data_labels) > 0:
-                print("Warning: Passed data labels {} are not available. Not making plot.".format(invalid_data_labels))
+            data_labels = [data_label for data_label in data_labels if data_label in self.data_labels]
+            if len(data_labels) == 0:
+                print("Warning: None of the passed data labels are available. Not making plot.")
                 return
+            elif len(invalid_data_labels) > 0:
+                print("Warning: Passed data labels {} are not available.".format(invalid_data_labels))
 
         # set plot characteristics
         self.plot_characteristics = dict()
@@ -196,6 +259,13 @@ class Interactive:
         # if after setting plot charateristics it has been determined plot is not valid, then return
         if not valid_plot:
             return
+
+        # adjust plot option attributes if passed
+        if ('annotation_stats' in locals()) & ('annotate_stats' in self.plot_characteristics[plot_type]):
+            self.plot_characteristics[plot_type]['annotate_stats'] = annotation_stats
+        if ('smooth_window' in locals()) & ('smooth' in self.plot_characteristics[plot_type]):
+            print('hiya')
+            self.plot_characteristics[plot_type]['smooth']['window'] = smooth_window
 
         # if map extent passed not passed as argument, set it as value from .conf in memory
         if (not map_extent) and (self.map_extent):
@@ -272,32 +342,81 @@ class Interactive:
             elif (labela == ''):
                 labela = copy.deepcopy(labelb)
                 labelb = ''
-            func(relevant_ax, networkspeci, self.plot_characteristics[plot_type], zstat=zstat, 
-                 labela=labela, labelb=labelb, plot_options=plot_options)
+            # set map title
+            if z_statistic_sign == 'absolute':
+                map_title = '{}'.format(labela)
+            elif z_statistic_sign == 'bias':
+                map_title = '{}'.format(labelb)
+
+            func(relevant_ax, networkspeci, self.plot_characteristics[plot_type], plot_options, zstat=zstat, 
+                 labela=labela, labelb=labelb)
         # periodic plot
         elif base_plot_type == 'periodic':
-            func(grid_dict, networkspeci, data_labels, self.plot_characteristics[plot_type], zstat=zstat, 
-                 plot_options=plot_options)
+            func(grid_dict, networkspeci, data_labels, self.plot_characteristics[plot_type], plot_options, zstat=zstat)
         # make statsummary plot
         elif base_plot_type == 'statsummary':
             relevant_zstats = self.active_statsummary_stats['basic']
-            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 zstats=relevant_zstats, statsummary=True, plot_options=plot_options) 
-
-            func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         statsummary=True, plot_options=plot_options, subsection=self.subsection, 
-                         plotting_paradigm=plotting_paradigm, stats_df=stats_df)     
+            func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], plot_options,
+                 statsummary=True, subsection=self.subsection, plotting_paradigm=plotting_paradigm, stats_df=stats_df)     
 
         # make heatmap / table plot
-        elif base_plot_type in ['heatmap','table']:                
-            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 plot_options=plot_options, subsection=self.subsection, 
-                 plotting_paradigm=plotting_paradigm, stats_df=stats_df)
-                           
+        elif base_plot_type in ['heatmap','table']:  
+
+            # get multiple networkspecies for multispecies (used in heatmaps, tables and statsummaries)
+            if 'multispecies' in plot_options:
+                networkspecies = copy.deepcopy(self.networkspecies)
+            # get unique networkspeci
+            else:
+                networkspecies = [networkspeci]
+
+            # get data labels to plot (based on statistic type)
+            if z_statistic_sign == 'bias':
+                data_labels_to_plot = list(self.experiments.values())
+            else:
+                data_labels_to_plot = [self.observations_data_label] + list(self.experiments.values())
+
+            # create empty dataframe with networkspecies and subsections
+            index = pd.MultiIndex.from_product([networkspecies, self.subsections],
+                                                names=["networkspecies", "subsections"])
+            stats_df = pd.DataFrame(np.nan, index=index, columns=data_labels_to_plot, dtype=np.float64)
+            
+            # fill dataframe
+            kwargs = copy.deepcopy(self.kwargs)
+            for ss in self.subsections:
+                kwargs['subsection'] = ss
+                self.set_config(**kwargs)
+                # filter data
+                self.reset_filter()
+                for ns in networkspecies:
+                    stats_per_data_label = []
+                    for dl in data_labels_to_plot:
+                        # calculate statistic
+                        if dl in self.selected_station_data_labels[ns]:
+                            if z_statistic_sign == 'bias':
+                                stats_per_data_label.append(calculate_statistic(self, self, ns, zstat, [self.observations_data_label], [dl]))
+                            else:
+                                stats_per_data_label.append(calculate_statistic(self, self, ns, zstat, [dl], []))
+                        else:
+                            stats_per_data_label.append(np.NaN)
+
+                    # get floats instead of arrays with 1 element each and save
+                    stats_per_data_label = [stat_per_data_label[0] 
+                                            if isinstance(stat_per_data_label, np.ndarray) 
+                                            else stat_per_data_label 
+                                            for stat_per_data_label in stats_per_data_label]
+
+                    # put data in dataframe
+                    stats_df.loc[(ns, ss)] = stats_per_data_label
+
+            print(stats_df)
+
+            # make plot
+            func(relevant_ax, networkspeci, data_labels_to_plot, self.plot_characteristics[plot_type], plot_options,
+                 plotting_paradigm='summary', stats_df=stats_df)
+         
         # other plots
         else: 
-            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 plot_options=plot_options)
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], plot_options)
 
         # get number of total available stations, and individual station information if just have 1 station
         if (self.temporal_colocation) and (len(data_labels) > 1):
@@ -360,13 +479,18 @@ class Interactive:
                             stat_label = stat_label.split('[')[0].strip()
                         if n_stations == 1:
                             title = '{} for {}, {} ({:.{}f}, {:.{}f})'.format(stat_label, current_station_reference,
-                                                                             current_station_name, 
-                                                                             current_lon,
-                                                                             self.plot_characteristics[plot_type]['round_decimal_places']['title'],
-                                                                             current_lat,
-                                                                             self.plot_characteristics[plot_type]['round_decimal_places']['title'])
+                                                                              current_station_name, 
+                                                                              current_lon,
+                                                                              self.plot_characteristics[plot_type]['round_decimal_places']['title'],
+                                                                              current_lat,
+                                                                              self.plot_characteristics[plot_type]['round_decimal_places']['title'])
+                            if base_plot_type == 'map':
+                                title = '{} {}'.format(map_title, title)
+
                         else:
                             title = '{} at {} stations'.format(stat_label, n_stations)
+                            if base_plot_type == 'map':
+                                title = '{} {}'.format(map_title, title)
 
             elif base_plot_type not in ['legend', 'metadata']:
                 if 'axis_title' in self.plot_characteristics[plot_type]:
@@ -414,19 +538,30 @@ class Interactive:
         # make legend (embedded on plot axis)
         if (legend) & (base_plot_type != 'legend'):
             if 'legend' in self.plot_characteristics[plot_type]:
-                legend_handles = self.make_legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
-                if base_plot_type in ['periodic', 'periodic-violin']:
-                    try:
-                        ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
-                    except:
-                        print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.json, or passed via 'format' argument.\n\Taking first available axis.")
-                        ax_to_plot = self.relevant_temporal_resolutions[0]
-                    if ax_to_plot not in self.relevant_temporal_resolutions:
-                        print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")
-                        ax_to_plot = self.relevant_temporal_resolutions[0]
-                    relevant_ax[ax_to_plot].legend(**legend_handles)
-                else:
-                    relevant_ax.legend(**legend_handles)
+            
+                # only make map legend in 'domain' plot option is a active 
+                # also remove observations from legend
+                valid_legend = True
+                if base_plot_type == 'map':
+                    if 'domain' in plot_options:
+                        set_obs_legend = False
+                    else:
+                        valid_legend = False
+
+                if valid_legend:
+                    legend_handles = self.make_legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
+                    if base_plot_type in ['periodic', 'periodic-violin']:
+                        try:
+                            ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
+                        except:
+                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.json, or passed via 'format' argument.\n\Taking first available axis.")
+                            ax_to_plot = self.relevant_temporal_resolutions[0]
+                        if ax_to_plot not in self.relevant_temporal_resolutions:
+                            print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")
+                            ax_to_plot = self.relevant_temporal_resolutions[0]
+                        relevant_ax[ax_to_plot].legend(**legend_handles)
+                    else:
+                        relevant_ax.legend(**legend_handles)
 
         # make colourbar (embedded on plot axis)
         if cb:
@@ -464,7 +599,7 @@ class Interactive:
         legend_handles = self.plot.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)
         return legend_handles['plot']
 
-    def calculate_statistic(self, stat='', labela='', labelb='', per_station=False):
+    def calculate_stat(self, stat, labela='', labelb='', per_station=False):
         """wrapper method to calculate statistic/s"""
 
         # if no specific labels defined then take first data label and give warning
@@ -476,8 +611,21 @@ class Interactive:
             labela = copy.deepcopy(labelb)
             labelb = ''
 
+        # get zstat information 
+        zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=stat) 
+
+        # if only 1 label passed and stat is a bias statistic then throw error
+        if (z_statistic_sign == 'bias') & (labelb == ''):
+              print("Warning: Calculating a bias statistic, and only 1 label is set. Cannot calculate statistic.")
+              return
+
+        # get networkspeci to calculate for
+        networkspeci = self.networkspecies[0]
+        if len(self.networkspecies) > 1:
+            print("Warning: More than 1 network or species defined, can only calculate for 1. Taking {}.".format(networkspeci))
+
         if per_station:
-            stat, active_map_valid_station_inds = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], map=True)
+            stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], per_station=True)
         else:
             stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb])
         return stat
@@ -488,6 +636,11 @@ class Interactive:
         # initialise default configuration variables
         # modified by passed arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
+
+        # for any passed arguments not in default Providentia variables, now set them to self
+        for kwarg in kwargs:
+            if kwarg not in provconf.var_defaults:
+                setattr(self, kwarg, kwargs[kwarg])
 
         # update variables from config file
         if self.config != '':
@@ -511,16 +664,17 @@ class Interactive:
         # parse section
         # if section name provided, try and use that
         # otherwise take first defined section name
+        self.sections = copy.deepcopy(self.parent_section_names)
         have_section = False
         if hasattr(self, 'section'): 
             # check that section actually exists
-            if self.section in self.parent_section_names:
+            if self.section in self.sections:
                 have_section = True
             else:
                 print("Warning: Defined section {} does not exist in configuration file.".format(self.section))
         if not have_section:
-            self.section = self.parent_section_names[0]
-            if len(self.parent_section_names) > 1:
+            self.section = self.sections[0]
+            if len(self.sections) > 1:
                 print("Warning: Taking first defined section ({}) to be read.".format(self.section))
 
         # update self with section variables
@@ -534,20 +688,25 @@ class Interactive:
         # if have no subsections, section is set as subsection name
         have_subsection = False
         # get subsection names
-        self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
-                                        if self.section == subsection_name.split('·')[0]]
+        self.subsections = [subsection_name for subsection_name in self.subsection_names 
+                            if self.section == subsection_name.split('·')[0]]
+        self.subsections_reduced = [subsection_name.split('·')[1] for subsection_name in self.subsections]
+
         if hasattr(self, 'subsection'): 
             # check that subsection actually exists
-            if self.subsection in self.child_subsection_names:
+            if self.subsection in self.subsections:
                 have_subsection = True
+            elif self.subsection in self.subsections_reduced:
+                have_subsection = True
+                self.subsection = self.subsections[self.subsections_reduced.index(self.subsection)]
             else:
                 print("Warning: Defined subsection {} does not exist in configuration file.".format(self.subsection))
 
-        if len(self.child_subsection_names) > 0:
+        if len(self.subsections) > 0:
             if not have_subsection:
-                self.subsection = self.child_subsection_names[0]
+                self.subsection = self.subsections[0]
                 have_subsection = True
-                if len(self.child_subsection_names) > 1:
+                if len(self.subsections) > 1:
                     print("Warning: Taking first defined subsection ({}) to be read.".format(self.subsection))
         else:
             self.subsection = [self.section]
@@ -647,6 +806,9 @@ class Interactive:
             print("Warning: Variable to read is undefined.")
             return 
         else:
-            data = self.get_data(format='npz')
-            var_data = data[var]
-            return var_data
+            data = self.get_data(format='nc')
+            if var not in data.variables.keys():
+                print("Warning: Variable '{}' is not defined".format(var))
+            else:
+                var_data = data[var][:]
+                return var_data

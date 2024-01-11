@@ -1,9 +1,6 @@
 #!/bin/bash
-##SBATCH --ntasks 12
-##SBATCH --qos debug
-##SBATCH --time 24:00:00
-##SBATCH --job-name PROVI
 #SBATCH --output interactive.out
+
 # get tunneling info
 XDG_RUNTIME_DIR=""
 port=$(shuf -i8000-9999 -n1)
@@ -14,8 +11,6 @@ echo -e "
 Create an SSH tunnel via terminal on your local machine:
 ssh -N -L ${port}:${node}:${port} ${user}@nord4.bsc.es
 "
-# load modules or conda environments here
-source load_modules.sh
 export PYTHONPATH=$(pwd):${PYTHONPATH}
 # DON'T USE ADDRESS BELOW.
 # DO USE TOKEN BELOW
