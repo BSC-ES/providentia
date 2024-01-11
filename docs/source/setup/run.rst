@@ -62,11 +62,11 @@ If you do not have access to the BSC machines, you will need to define the direc
 
 ::
     
-    'ghost_root': '/data/providentia/obs/ghost/'
-    'nonghost_root': '/data/providentia/obs/nonghost/'
-    'exp_root': '/data/providentia/exp/'
+    'local_ghost_root': '/data/providentia/obs/ghost/'
+    'local_nonghost_root': '/data/providentia/obs/nonghost/'
+    'local_exp_root': '/data/providentia/exp/'
 
-You should download the data that you need from the BSC systems to the local machine. The tool has 2 set locations where it grabs the observational/experiment data on the **esarchive**:
+You should download the data that you need from the BSC systems to the local machine. The tool has set locations where it grabs the observational/experiment data on the **esarchive**:
 
 * GHOST observational data: `/esarchive/obs/ghost`
 * Non-GHOST observational data: `/esarchive/obs/`
@@ -81,6 +81,7 @@ If you are running the tool on a personal machine, you will also need to install
     conda create -n providentia-env python=3.9
     conda activate providentia-env
     conda install -c conda-forge cartopy
+    conda install -c conda-forge jupyterlab
     pip install -r requirements.txt
 
 Once the environment is activated and all modules are installed, you can open the dashboard and generate reports as explained above.
