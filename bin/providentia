@@ -2,6 +2,7 @@
 # init
 cores=12
 jobname="PRV"
+time="02:00:00"
 queue="debug"
 mem="20Gb"
 constraint="medmem"
@@ -29,8 +30,8 @@ IFS=$'\n\t'
 # An option followed by a single colon ':' means that it *needs* an argument.
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
-SHORT=uc:J:q:m:V
-LONG=usage,cores:,jobname:,queue:,mem:,constraint:,help,version,debug,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,offline,interactive,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
+SHORT=uc:t:J:q:m:V
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,interactive,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,offline,interactive,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -64,6 +65,8 @@ while [ $# -gt 0 ]; do
                     ;;
         -c|--cores) shift
                     cores=$OPTARG;;
+        -t|--time) shift
+                    cores=$OPTARG;;
         -J|--jobname) shift
                     jobname=$OPTARG;;
         -q|--queue) shift
@@ -84,12 +87,13 @@ memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
 load_command="source load_modules.sh"
 python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $OTHEROPTS"
+interactive_alloc_command="sbatch -t $time -c $cores -J $jobname interactive.sh"
 
 # avoid x11 forwarding when creating offline reports
 if [[ $PARSED =~ "--offline" ]]; then
-    salloc_command="salloc -t 02:00:00 -c $cores -J $jobname"
+    salloc_command="salloc -t $time -c $cores -J $jobname"
 else
-    salloc_command="salloc -t 02:00:00 -c $cores -J $jobname --x11"
+    salloc_command="salloc -t $time -c $cores -J $jobname --x11"
 fi
 
 # if using debug mode then just reserve allocation, do not execute providentia
@@ -97,6 +101,13 @@ if [[ $PARSED =~ "--debug" ]]; then
     debug=true
 else
     debug=false
+fi
+
+# if using interactive mode then 
+if [[ $PARSED =~ "--interactive" ]]; then
+    interactive=true
+else
+    interactive=false
 fi
 
 # determine if need to just excecute python if have allocation made (i.e. are in debug mode)
@@ -164,8 +175,18 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
 
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
-    
-    if $debug; then
+    if $interactive; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+        echo "Starting interactive jupyter session."
+        echo "Check 'interactive.out' for information on how to connect to session."
+        eval "${load_command}"
+        if [[ "${constraint}" == "lowmem" ]]; then
+            eval "${interactive_alloc_command} ${queue_option} interactive.sh"
+        else
+            eval "${interactive_alloc_command} ${constraint_option} ${queue_option} interactive.sh"
+        fi
+
+    elif $debug; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
         echo "Entering debug mode"
         eval "${load_command}"
