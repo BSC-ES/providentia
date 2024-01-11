@@ -23,10 +23,10 @@ Training sessions
 
 Below you will find the recorded videos of the last training sessions, as well as the presentations:
 
-- 16/10/2023: `Presentation`_ and `video <https://youtu.be/G-L2VohxSz8?si=8qrMDHvhmP6i-QTX>`_
-- 29/09/2022: `Presentation`_ and `video <https://youtu.be/jijPmbvCYgo>`_
-- 22/09/2022: `Presentation`_ and `video <https://youtu.be/Mz6KFAvEtKA>`_
-- 24/03/2021: `Presentation`_ and `video <https://www.youtube.com/watch?v=Pu_kXjHM1nw>`_
+- 16/10/2023: `Presentation <https://nextcloud.bsc.es/index.php/s/aHQeAsmgxBGywik>`__ and `video <https://youtu.be/G-L2VohxSz8?si=8qrMDHvhmP6i-QTX>`__
+- 29/09/2022: `Presentation <https://nextcloud.bsc.es/index.php/s/XoLc4RJJcz3XFb6>`__ and `video <https://youtu.be/jijPmbvCYgo>`__
+- 22/09/2022: `Presentation <https://nextcloud.bsc.es/index.php/s/dQTwPDXyBwsygPJ>`__ and `video <https://youtu.be/Mz6KFAvEtKA>`__
+- 24/03/2021: `Presentation <https://nextcloud.bsc.es/index.php/s/pMP6e6ACFMjxTLB>`__ and `video <https://www.youtube.com/watch?v=Pu_kXjHM1nw>`__
 
 Contact persons
 ---------------

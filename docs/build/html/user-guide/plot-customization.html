@@ -33,6 +33,14 @@
             
   <section id="plot-customization">
 <h1>Plot customization<a class="headerlink" href="#plot-customization" title="Link to this heading">¶</a></h1>
+<section id="editing-the-plot-style-from-the-configuration-files">
+<h2>Editing the plot style from the configuration files<a class="headerlink" href="#editing-the-plot-style-from-the-configuration-files" title="Link to this heading">¶</a></h2>
+<p>If you want to edit the style of your plots, you will need to edit it in one of the following files and launch the tool again:</p>
+<ul class="simple">
+<li><p>Plots in the dashboard: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_dashboard.json</span></code></p></li>
+<li><p>Plots in the offline reports: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_offline.json</span></code></p></li>
+</ul>
+</section>
 <section id="editing-the-plot-style-in-the-dashboard">
 <h2>Editing the plot style in the dashboard<a class="headerlink" href="#editing-the-plot-style-in-the-dashboard" title="Link to this heading">¶</a></h2>
 <section id="changing-the-plot-style">
@@ -60,15 +68,6 @@
 <p>It is possible to add a smoothing line to the timeseries plot and make the points disappear. In order to achieve this, you will need to increase the smooth window, which by default is 0 and bring the marker size down to 0. You can also use the plot option <code class="docutils literal notranslate"><span class="pre">hidedata</span></code> to hide the points.</p>
 <img alt="Smooth line" src="../_images/smoothing.png" />
 </section>
-</section>
-<section id="editing-the-plot-style-from-the-configuration-files">
-<h2>Editing the plot style from the configuration files<a class="headerlink" href="#editing-the-plot-style-from-the-configuration-files" title="Link to this heading">¶</a></h2>
-<p>If you want to edit the style of your plots, you will need to edit it in one of the following files and launch the tool again:</p>
-<ul class="simple">
-<li><p>Plots in the dashboard: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_dashboard.json</span></code></p></li>
-<li><p>Plots in the offline reports: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_offline.json</span></code></p></li>
-</ul>
-<p>Most parameters are based on Matplotlib and, although their names are quite self-explanatory, a summary can be find below with more details.</p>
 </section>
 </section>
 
@@ -98,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="configuration-files.html">Configuration files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot-types-and-options.html">Plot types and options</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Plot customization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-from-the-configuration-files">Editing the plot style from the configuration files</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-in-the-dashboard">Editing the plot style in the dashboard</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#changing-the-plot-style">Changing the plot style</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#legend-picking">Legend picking</a></li>
@@ -106,7 +106,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#smoothing">Smoothing</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-from-the-configuration-files">Editing the plot style from the configuration files</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="statistics.html">Statistics</a></li>
