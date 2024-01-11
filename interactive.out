@@ -38,3 +38,29 @@ ssh -N -L 8293:s03r1b17:8293 bsc32025@nord4.bsc.es
 [W 2024-01-11 10:39:54.221 ServerApp] Got events for closed stream None
 [I 2024-01-11 10:39:59.345 ServerApp] Saving file at /notebooks/test_interactive.ipynb
 [I 2024-01-11 10:42:01.691 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[W 2024-01-11 11:08:47.994 ServerApp] WebSocket ping timeout after 119901 ms.
+[W 2024-01-11 11:08:51.802 ServerApp] WebSocket ping timeout after 119858 ms.
+[I 2024-01-11 11:08:56.806 ServerApp] Starting buffering for 6fbb8eb7-db21-43ee-967b-df46656e171e:d33467d1-669a-47d6-bbf3-9d29ed75a740
+[I 2024-01-11 11:43:45.200 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
+[I 2024-01-11 11:43:45.440 ServerApp] Discarding 3 buffered messages for 6fbb8eb7-db21-43ee-967b-df46656e171e:d33467d1-669a-47d6-bbf3-9d29ed75a740
+[W 2024-01-11 11:43:49.953 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 11:43:54.962 ServerApp] Nudge: attempt 20 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 11:43:59.971 ServerApp] Nudge: attempt 30 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[I 2024-01-11 11:44:05.872 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 11:46:06.493 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 11:47:51.451 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
+[I 2024-01-11 11:47:51.540 ServerApp] Starting buffering for 6fbb8eb7-db21-43ee-967b-df46656e171e:3011fad9-8eee-47fb-beff-2c847e3ddd0e
+[I 2024-01-11 11:47:51.612 ServerApp] Restoring connection for 6fbb8eb7-db21-43ee-967b-df46656e171e:3011fad9-8eee-47fb-beff-2c847e3ddd0e
+[W 2024-01-11 11:47:56.122 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 11:48:01.131 ServerApp] Nudge: attempt 20 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 11:48:06.141 ServerApp] Nudge: attempt 30 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[I 2024-01-11 11:48:06.896 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 11:50:07.472 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 11:50:16.859 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
+[I 2024-01-11 11:50:17.046 ServerApp] Starting buffering for 6fbb8eb7-db21-43ee-967b-df46656e171e:3011fad9-8eee-47fb-beff-2c847e3ddd0e
+[I 2024-01-11 11:50:17.185 ServerApp] Restoring connection for 6fbb8eb7-db21-43ee-967b-df46656e171e:3011fad9-8eee-47fb-beff-2c847e3ddd0e
+[W 2024-01-11 11:50:21.698 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 11:50:26.712 ServerApp] Nudge: attempt 20 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 11:50:31.724 ServerApp] Nudge: attempt 30 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[I 2024-01-11 11:52:08.444 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 11:54:09.685 ServerApp] Saving file at /notebooks/test_interactive.ipynb

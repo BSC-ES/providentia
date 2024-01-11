@@ -273,7 +273,7 @@
                    "parent_section_names": false,
                    "xticklabels": {"rotation": 0, "fontsize": 16},
                    "yticklabels": {"rotation": 0, "fontsize": 16},
-                   "multispecies": {"xmin": -2, "network_names": false,
+                   "multispecies": {"xmin": -0.5, "network_names": false,
                                     "yticklabels": {"fontsize": 16, "fontweight": 600},
                                     "hlines": {"color": "grey", "linewidth": 0.5}},
                    "round_decimal_places": {"title": 2, "table": 2},
