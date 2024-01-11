@@ -33,7 +33,7 @@ class ProvConfiguration:
         self.read_instance = read_instance 
 
         # set variable defaults
-        var_defaults = {
+        self.var_defaults = {
             'ghost_version': '1.5',
             'conf': '',
             'config': '',
@@ -100,7 +100,7 @@ class ProvConfiguration:
         }
 
         # if variable is given by command line, set that value, otherwise set as default value 
-        for k, val in var_defaults.items():
+        for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
@@ -124,8 +124,7 @@ class ProvConfiguration:
                 
         # get available N CPUs
         elif key == 'available_cpus':
-            return int(os.getenv('SLURM_NTASKS'))
-            #return len(os.sched_getaffinity(0))
+            return(int(os.getenv('SLURM_CPUS_PER_TASK')))
 
         elif key == 'cartopy_data_dir':
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external

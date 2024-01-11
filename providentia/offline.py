@@ -1276,8 +1276,8 @@ class ProvidentiaOffline:
                     set_map_extent(self, relevant_axis, self.map_extent)
 
                 # make map plot
-                self.plot.make_map(relevant_axis, networkspeci, self.plot_characteristics[plot_type], 
-                                   zstat=zstat, labela=z1_label, labelb=z2_label, plot_options=plot_options)
+                self.plot.make_map(relevant_axis, networkspeci, self.plot_characteristics[plot_type], plot_options,
+                                   zstat=zstat, labela=z1_label, labelb=z2_label)
                 
                 # save plot information for later formatting 
                 if z2 == '':
@@ -1422,16 +1422,16 @@ class ProvidentiaOffline:
 
                 if base_plot_type == 'periodic':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                            zstat=zstat, plot_options=plot_options)    
+                         plot_options, zstat=zstat)    
                 elif base_plot_type == 'distribution':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                        plot_options=plot_options, data_range_min=data_range_min, data_range_max=data_range_max) 
+                         plot_options, data_range_min=data_range_min, data_range_max=data_range_max) 
                 elif base_plot_type == 'taylor':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                        plot_options=plot_options, stddev_max=stddev_max)
+                         plot_options, stddev_max=stddev_max)
                 else:
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                        plot_options=plot_options) 
+                         plot_options) 
                 
                 # save plot information for later formatting
                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(data_labels)
@@ -1458,7 +1458,9 @@ class ProvidentiaOffline:
                 # iterate number of plots made for current type of plot 
                 current_plot_ind += 1     
 
-        # make plot heatmap / table / statsummary plot
+        # make heatmap / table / statsummary plot
+        # heatmap / table is one stat per networkspecies, subsections and data labels (columns are data labels, rows are networkspecies / subsections)
+        # statsummary is multiple stats per networkspecies, subsections and data labels (columns are stats, rows are networkspecies / subsections / data labels)
         elif base_plot_type in ['heatmap', 'table', 'statsummary']:
             
             # get relevant axis to plot on
@@ -1587,14 +1589,14 @@ class ProvidentiaOffline:
                     # make statsummary
                     func = getattr(self.plot, 'make_table')
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         statsummary=True, plot_options=plot_options, subsection=self.subsection, 
+                         plot_options, statsummary=True, subsection=self.subsection, 
                          plotting_paradigm=plotting_paradigm, stats_df=stats_df)
                 else:
                     # make table/heatmap
                     func = getattr(self.plot, 'make_{}'.format(base_plot_type))
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         plot_options=plot_options, subsection=self.subsection, 
-                         plotting_paradigm=plotting_paradigm, stats_df=stats_df)
+                         plot_options, subsection=self.subsection, plotting_paradigm=plotting_paradigm, 
+                         stats_df=stats_df)
                 
                 # save plot information for later formatting
                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(data_labels)
