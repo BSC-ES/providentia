@@ -146,7 +146,7 @@ It is mandatory to define sections to launch Providentia. Their names must be wr
      - Alternative name for observations.
    * - remove_extreme_stations
      - ✗
-     - Boolean variable to set if you wish to remove extreme stations.
+     - Type of extreme stations removal, from the options given in remove_extreme_stations.json.
 
 Defining a list of experiments is optional since the user might only want to check the observations data.
 
