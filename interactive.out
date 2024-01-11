@@ -24,3 +24,17 @@ ssh -N -L 8293:s03r1b17:8293 bsc32025@nord4.bsc.es
 [I 2024-01-11 10:12:43.112 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
 [I 2024-01-11 10:13:18.383 ServerApp] Saving file at /notebooks/test_interactive.ipynb
 [I 2024-01-11 10:15:24.129 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 10:25:17.243 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 10:25:21.977 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[I 2024-01-11 10:25:30.668 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 10:27:34.982 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 10:29:40.111 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 10:32:37.317 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 10:32:41.981 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[I 2024-01-11 10:33:53.806 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 10:37:58.952 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 10:39:47.918 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 10:39:52.505 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 10:39:54.221 ServerApp] Got events for closed stream None
+[I 2024-01-11 10:39:59.345 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-11 10:42:01.691 ServerApp] Saving file at /notebooks/test_interactive.ipynb

@@ -397,7 +397,7 @@ class Interactive:
                             else:
                                 stats_per_data_label.append(calculate_statistic(self, self, ns, zstat, [dl], []))
                         else:
-                            stats_per_data_label.append(NaN)
+                            stats_per_data_label.append(np.NaN)
 
                     # get floats instead of arrays with 1 element each and save
                     stats_per_data_label = [stat_per_data_label[0] 
@@ -407,6 +407,8 @@ class Interactive:
 
                     # put data in dataframe
                     stats_df.loc[(ns, ss)] = stats_per_data_label
+
+            print(stats_df)
 
             # make plot
             func(relevant_ax, networkspeci, data_labels_to_plot, self.plot_characteristics[plot_type], plot_options,
