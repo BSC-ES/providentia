@@ -302,13 +302,10 @@ def group_periodic(read_instance, canvas_instance, networkspeci):
             canvas_instance.selected_station_data[networkspeci][temporal_aggregation_resolution]['valid_xticks'].append(unique_period)
 
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, data_labels_b, 
-                        map=False, period=None):
+                        map=False, per_station=False, period=None):
     """Function that calculates a statistic for data labels, either absolute or bias, 
        for different aggregation modes.
     """
-
-    # get speci
-    speci = networkspeci.split('|')[1]
 
     #if data_labels_a, data_labels_b are strings then convert to lists
     if type(data_labels_a) != list:
@@ -332,7 +329,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
 
         # for map statistics, get active map valid station indices and then data_labels_a data 
-        if map:
+        if (map) or (per_station):
             # check if have valid station data first
             # if not update z statistic and active map valid station indices to be empty lists and return
             if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
@@ -341,8 +338,11 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 n_valid_stations = len(read_instance.valid_station_inds[networkspeci][read_instance.observations_data_label])
             if n_valid_stations == 0:             
                 z_statistic = np.array([], dtype=np.float32)
-                active_map_valid_station_inds = np.array([], dtype=np.int64)
-                return z_statistic, active_map_valid_station_inds 
+                if map:
+                    active_map_valid_station_inds = np.array([], dtype=np.int64)
+                    return z_statistic, active_map_valid_station_inds 
+                elif per_station:
+                    return z_statistic
 
             # get active map valid station indices (i.e. the indices of the stations data to plot on the map)
             # if only have data_labels_a, valid map indices are those simply for the data_labels_a array
@@ -397,7 +397,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # if stat is exceedances then add threshold value (if available)  
             if base_zstat == 'Exceedances':
-                function_arguments['threshold'] = exceedance_lim(speci)
+                function_arguments['threshold'] = exceedance_lim(networkspeci)
 
             # calculate statistics
             
@@ -433,7 +433,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         else:
 
             # get data_labels_b data for map
-            if map:
+            if (map) or (per_station):
                 data_array_b = \
                     copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_labels_b[0]),:,:])
                 # temporally colocate data (if active)
@@ -462,7 +462,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 function_arguments_a = stats_dict['arguments']
                 # if stat is exceedances then add threshold value (if available)  
                 if base_zstat == 'Exceedances':
-                    function_arguments_a['threshold'] = exceedance_lim(speci)
+                    function_arguments_a['threshold'] = exceedance_lim(networkspeci)
                 function_arguments_b = copy.deepcopy(function_arguments_a)
 
                 # calculate statistics for data_labels_a and data_labels_b, then subtract data_labels_b - data_labels_a
@@ -514,10 +514,13 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 # temporal colocation must be turned on for calculation, so if not return NaNs
                 if not read_instance.temporal_colocation:
-                    if map:
+                    if (map) or (per_station):
                         z_statistic = np.array([], dtype=np.float32)
-                        active_map_valid_station_inds = np.array([], dtype=np.int64)
-                        return z_statistic, active_map_valid_station_inds 
+                        if map:
+                            active_map_valid_station_inds = np.array([], dtype=np.int64)
+                            return z_statistic, active_map_valid_station_inds
+                        elif per_station:
+                            return z_statistic
                     else: 
                         if period: 
                             stats_calc[zstat] = np.full((len(data_array_b),len(data_labels_b)), np.NaN)
@@ -571,6 +574,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             # if any station z statistics come out as NaN/inf, cut z_statistic to remove invalid NaNs/infs, 
             # and also remove respective stations from active map valid station indices
             return z_statistic[finite_boolean], active_map_valid_station_inds[finite_boolean] 
+
+        # return per station statistics
+        elif per_station:
+            return z_statistic
 
         # otherwise, save desired statistic for specific statistical calculation mode 
         else:
@@ -971,18 +978,25 @@ def aggregation(data_array, statistic_aggregation, axis=0):
     return aggregated_data
 
 
-def exceedance_lim(species):
+def exceedance_lim(networkspeci):
     """ Return the exceedance limit depending on the species input. 
         If species doesn't have a reported limit, returns np.NaN.
 
-        :param species: name of species currently selected (e.g. sconco3)
-        :type species: str
+        Try to get limit for specific networkspeci first, and then species.
+
+        :param networkspeci: name of networkspeci or currently selected (e.g. EBAS|sconco3)
+        :type networkspeci: str
         :return: value of exceedance limit
         :rtype: int
     """
 
+    # get speci
+    speci = networkspeci.split('|')[1]
+
     exceedance_limits = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/exceedances.json')))
-    if species in exceedance_limits:
-        return exceedance_limits[species]
+    if networkspeci in exceedance_limits:
+        return exceedance_limits[networkspeci]
+    elif speci in exceedance_limits:
+        return exceedance_limits[speci]
     else:
         return np.NaN

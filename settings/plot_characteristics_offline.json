@@ -90,7 +90,7 @@
                                  "color": "", "round_decimal_places": 2},
                "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
                "plot": {"s": "", "zorder": 3, "linewidth": 0.0, "alpha": null},
-               "plot_options": ["bias", "obs", "annotate"]},
+               "plot_options": ["bias", "obs", "annotate", "domain"]},
  
        "timeseries": {"orientation": "landscape",
                       "figure": {"ncols": 1, "nrows": 2},

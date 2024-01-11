@@ -294,13 +294,11 @@ class Plot:
             
         return grid_edge_polygons
 
-    def make_header(self, pdf, plot_characteristics, plot_options=[]):
+    def make_header(self, pdf, plot_characteristics):
         """ Make header.
         
             :param plot_characteristics: plot characteristics 
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
-            :type plot_options: list
         """
 
         # set header title
@@ -352,7 +350,7 @@ class Plot:
         pdf.savefig(page, dpi=self.canvas_instance.dpi)
         plt.close(page)
 
-    def make_metadata(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
+    def make_metadata(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make metadata summary plot.
 
             :param relevant_axis: axis to plot on 
@@ -484,8 +482,8 @@ class Plot:
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
             self.track_plot_elements(self.read_instance.observations_data_label, 'metadata', 'plot', plot_txt, bias=False)
 
-    def make_map(self, relevant_axis, networkspeci, plot_characteristics, zstat=None, 
-                 labela='', labelb='', plot_options=[]):
+    def make_map(self, relevant_axis, networkspeci, plot_characteristics, plot_options, zstat=None, labela='', 
+                 labelb=''):
         """ Make map plot.
 
             :param relevant_axis: axis to plot on 
@@ -494,14 +492,14 @@ class Plot:
             :type networkspeci: str
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
             :param zstat: name of statistic to plot
             :type zstat: str
             :param labela: name of data to plot
             :type labela: str
             :param labelb: name of data to plot (if defined then a bias plot is made)
             :type labelb: str
-            :param plot_options: list of options to configure plot  
-            :type plot_options: list
         """
 
         # calculate statistic
@@ -528,7 +526,7 @@ class Plot:
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
             self.track_plot_elements(self.read_instance.observations_data_label, 'map', 'plot', [self.stations_scatter], bias=False)
 
-    def make_timeseries(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
+    def make_timeseries(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make timeseries plot.
 
             :param relevant_axis: axis to plot on 
@@ -606,8 +604,7 @@ class Plot:
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
 
-    def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
-                      zstat=None, plot_options=[]):
+    def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, zstat=None):
         """ Make period or period-violin plot.
 
             :param relevant_axis: axis to plot on 
@@ -618,10 +615,11 @@ class Plot:
             :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
-            :param zstat: name of statistic
-            :type zstat: str
             :param plot_options: list of options to configure plot  
             :type plot_options: list
+            :param zstat: name of statistic
+            :type zstat: str
+
         """
 
         # if 'obs' in plot_options, set data labels to just observations data label
@@ -679,7 +677,7 @@ class Plot:
 
                 # calculate PDF for data label
                 period_x_grid, PDFs_sampled = self.make_distribution(relevant_axis, networkspeci, data_labels, 
-                                                                     plot_characteristics, 
+                                                                     plot_characteristics, plot_options,
                                                                      violin_resolution=relevant_temporal_resolution)
 
                 # iterate through data labels and plot violins
@@ -808,7 +806,7 @@ class Plot:
                     if (not self.read_instance.offline) and (not self.read_instance.interactive):
                         self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), self.periodic_plots, bias=bias)
 
-    def make_distribution(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[],
+    def make_distribution(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options,
                           data_range_min=None, data_range_max=None, violin_resolution=None):
         """ Make distribution plot.
 
@@ -1006,7 +1004,7 @@ class Plot:
         if violin_resolution:
             return period_x_grid, PDFs_sampled
 
-    def make_scatter(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
+    def make_scatter(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make scatter plot.
 
             :param relevant_axis: axis to plot on 
@@ -1089,7 +1087,7 @@ class Plot:
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'scatter', 'plot', self.scatter_plot, bias=False)
 
-    def make_boxplot(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[]):
+    def make_boxplot(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make boxplot.
 
             :param relevant_axis: axis to plot on 
@@ -1205,8 +1203,8 @@ class Plot:
         relevant_axis.xaxis.set_tick_params(**xtick_params)
         relevant_axis.set_xticklabels(xtick_labels, **xticklabel_params)
 
-    def make_heatmap(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
-                     zstats=None, plot_options=[], subsection=None, plotting_paradigm=None, stats_df=None):
+    def make_heatmap(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options,
+                     zstat=None, subsection=None, plotting_paradigm=None, stats_df=None):
         """ Make heatmap plot.
 
             :param relevant_axis: axis to plot on 
@@ -1217,10 +1215,10 @@ class Plot:
             :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
-            :param zstats: name of statistics
-            :type zstats: list
             :param plot_options: list of options to configure plot  
             :type plot_options: list
+            :param zstat: name of statistic
+            :type zstat: str
             :param subsection: str of currently active subsection
             :type subsection: str
             :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
@@ -1248,10 +1246,10 @@ class Plot:
             if bias:
                 if self.read_instance.observations_data_label in cut_data_labels:
                     cut_data_labels.remove(self.read_instance.observations_data_label)
-                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, [zstat], 
                                                 [self.read_instance.observations_data_label]*len(cut_data_labels), cut_data_labels)
             else:
-                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, [zstat], 
                                                  cut_data_labels, [])
 
             # create stats dataframe
@@ -1356,9 +1354,9 @@ class Plot:
         # format for non multispecies
         else:
             # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
-            # if len(stats_df.index) > 1:
-            #     bottom, top = relevant_axis.get_ylim()
-            #     relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+            if len(stats_df.index) > 1:
+                bottom, top = relevant_axis.get_ylim()
+                relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
 
             # vertically align yticklabels due to bug again in matplotlib - hack fix. Remove in Future!
             for tick in relevant_axis.get_yticklabels():
@@ -1368,9 +1366,8 @@ class Plot:
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
             self.track_plot_elements(self.read_instance.observations_data_label, 'heatmap', 'plot', heatmap, bias=bias)
 
-    def make_table(self, relevant_axis, networkspeci, data_labels, plot_characteristics,
-                   zstats=None, statsummary=False, plot_options=[],
-                   subsection=None, plotting_paradigm=None, stats_df=None):
+    def make_table(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options,
+                   zstats=None, statsummary=False, subsection=None, plotting_paradigm=None, stats_df=None):
         """ Make table plot.
 
             :param relevant_axis: axis to plot on 
@@ -1381,12 +1378,12 @@ class Plot:
             :type data_labels: list
             :param plot_characteristics: plot characteristics  
             :type plot_characteristics: dict
+            :param plot_options: list of options to configure plot  
+            :type plot_options: list
             :param zstats: name of statistics
             :type zstats: list
             :param statsummary: boolean indiciating if making alternative statistical summary table plot  
             :type statsummary: boolean
-            :param plot_options: list of options to configure plot  
-            :type plot_options: list
             :param subsection: str of currently active subsection
             :type subsection: str
             :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
@@ -1598,7 +1595,7 @@ class Plot:
             else:
                 self.track_plot_elements(self.read_instance.observations_data_label, 'table', 'plot', [table], bias=bias)
     
-    def make_taylor(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options=[], 
+    def make_taylor(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, 
                     stddev_max=None):
         """ Make Taylor diagram plot.
             Reference: https://gist.github.com/ycopin/3342888.

@@ -2,6 +2,7 @@
 
 import datetime
 from glob import glob
+import multiprocessing
 import os
 import sys
 import time
@@ -46,6 +47,8 @@ def read_netcdf_data(tuple_arguments):
     relevant_file, station_references, station_names, speci,\
     observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
     metadata_dtype, metadata_vars_to_read, default_qa, filter_read = tuple_arguments
+
+    start = time.time()
 
     # wrap shared arrays as numpy arrays to more easily manipulate the data
     data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])

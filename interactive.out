@@ -1,0 +1,25 @@
+
+Create an SSH tunnel via terminal on your local machine:
+ssh -N -L 8293:s03r1b17:8293 bsc32025@nord4.bsc.es
+
+[I 2024-01-11 10:07:22.931 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-01-11 10:07:23.295 LabApp] JupyterLab extension loaded from /gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/lib/python3.7/site-packages/jupyterlab
+[I 2024-01-11 10:07:23.295 LabApp] JupyterLab application directory is /.statelite/tmpfs/gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/share/jupyter/lab
+[I 2024-01-11 10:07:23.301 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-01-11 10:07:23.301 ServerApp] Serving notebooks from local directory: /.statelite/tmpfs/gpfs/archive/bsc32/esarchive/obs/ghost/scripts/Providentia-interactive
+[I 2024-01-11 10:07:23.301 ServerApp] Jupyter Server 1.4.1 is running at:
+[I 2024-01-11 10:07:23.302 ServerApp] http://s03r1b17:8293/lab?token=a921c1aa724636f6eecaf9de9b6914199ade84590a98f35a
+[I 2024-01-11 10:07:23.302 ServerApp]  or http://127.0.0.1:8293/lab?token=a921c1aa724636f6eecaf9de9b6914199ade84590a98f35a
+[I 2024-01-11 10:07:23.302 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-01-11 10:07:23.324 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-4055115-open.html
+    Or copy and paste one of these URLs:
+        http://s03r1b17:8293/lab?token=a921c1aa724636f6eecaf9de9b6914199ade84590a98f35a
+     or http://127.0.0.1:8293/lab?token=a921c1aa724636f6eecaf9de9b6914199ade84590a98f35a
+[I 2024-01-11 10:09:13.848 LabApp] Build is up to date
+[I 2024-01-11 10:09:19.124 ServerApp] Kernel started: 6fbb8eb7-db21-43ee-967b-df46656e171e
+[W 2024-01-11 10:09:24.866 ServerApp] Got events for closed stream None
+[I 2024-01-11 10:12:43.112 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
+[I 2024-01-11 10:13:18.383 ServerApp] Saving file at /notebooks/test_interactive.ipynb
