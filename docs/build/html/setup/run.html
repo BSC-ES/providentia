@@ -71,12 +71,12 @@ By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total 
 <section id="running-the-tool-on-a-personal-machine">
 <h2>Running the tool on a personal machine<a class="headerlink" href="#running-the-tool-on-a-personal-machine" title="Link to this heading">¶</a></h2>
 <p>If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file configuration.py and defining ghost_root, nonghost_root and exp_root. For instance:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;ghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/ghost/&#39;</span>
-<span class="s1">&#39;nonghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/nonghost/&#39;</span>
-<span class="s1">&#39;exp_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/exp/&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;local_ghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/ghost/&#39;</span>
+<span class="s1">&#39;local_nonghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/nonghost/&#39;</span>
+<span class="s1">&#39;local_exp_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/exp/&#39;</span>
 </pre></div>
 </div>
-<p>You should download the data that you need from the BSC systems to the local machine. The tool has 2 set locations where it grabs the observational/experiment data on the <strong>esarchive</strong>:</p>
+<p>You should download the data that you need from the BSC systems to the local machine. The tool has set locations where it grabs the observational/experiment data on the <strong>esarchive</strong>:</p>
 <ul class="simple">
 <li><p>GHOST observational data: <cite>/esarchive/obs/ghost</cite></p></li>
 <li><p>Non-GHOST observational data: <cite>/esarchive/obs/</cite></p></li>
@@ -87,6 +87,7 @@ By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total 
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.9</span>
 <span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env</span>
 <span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">cartopy</span>
+<span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">jupyterlab</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
