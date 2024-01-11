@@ -29,6 +29,8 @@ class ProvArgumentParser(object):
                                      help="returns Providentia version number and exit")
             self.parser.add_argument('--debug',
                                      help="runs Providentia in debug mode, just reserving allocation")
+            self.parser.add_argument('--interactive',
+                                     help="runs Providentia interactive mode on Jupyter notebook")
             self.parser.add_argument('--conf', '--config', 
                                      dest="config",
                                      help='specifies the config file to read') 
@@ -58,11 +60,6 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="run Providentia offline mode")
-            self.parser.add_argument("--interactive",
-                                     dest="interactive",
-                                     default=False,
-                                     action='store_true',
-                                     help="run Providentia interactive mode")
             self.parser.add_argument("--network",
                                      dest="network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")

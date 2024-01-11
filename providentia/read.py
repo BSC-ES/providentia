@@ -220,7 +220,7 @@ class DataReader:
                                                         self.read_instance.end_date, self.read_instance.resolution)
 
             # read data 
-            self.read_data(yearmonths_to_read, self.read_instance.data_labels_raw)
+            self.read_data(yearmonths_to_read, self.read_instance.data_labels)
 
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
             # non-GHOST
@@ -491,13 +491,13 @@ class DataReader:
                         all_yearmonths_to_read.extend(yearmonths_to_read)
 
                 # read data 
-                self.read_data(all_yearmonths_to_read, self.read_instance.data_labels_raw) 
+                self.read_data(all_yearmonths_to_read, self.read_instance.data_labels) 
 
         # need to remove experiment/s ?
         if 'remove_exp' in operations: 
 
             # get indices of experiments to remove
-            experiments_to_remove_inds = [self.read_instance.previous_data_labels_raw.index(experiment) for experiment in experiments_to_remove]
+            experiments_to_remove_inds = [self.read_instance.previous_data_labels.index(experiment) for experiment in experiments_to_remove]
             
             # remove experiment data
             self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
@@ -512,7 +512,7 @@ class DataReader:
 
             # insert space for new experiments in data array
             for experiment in experiments_to_read:
-                experiments_to_read_ind = self.read_instance.data_labels_raw.index(experiment) 
+                experiments_to_read_ind = self.read_instance.data_labels.index(experiment) 
                 
                 self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
                     np.insert(self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], 
@@ -759,6 +759,9 @@ class DataReader:
             # iterate through data labels
             for data_label in data_labels:
 
+                # get raw data label (non-alias)
+                data_label_raw = self.read_instance.data_labels_raw[self.read_instance.data_labels.index(data_label)]
+
                 # get species matrix
                 matrix = self.read_instance.parameter_dictionary[speci]['matrix']
 
@@ -794,14 +797,14 @@ class DataReader:
                     elif '/' in network:
                         file_root = \
                             '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                        data_label, self.read_instance.resolution, speci, 
+                                                        data_label_raw, self.read_instance.resolution, speci, 
                                                         network.replace('/', '-'), speci)
                     else:
                         file_root = \
                             '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                       data_label, self.read_instance.resolution, speci, network, speci)
+                                                       data_label_raw, self.read_instance.resolution, speci, network, speci)
                     try:
-                        available_yearmonths = self.read_instance.available_experiment_data[network][self.read_instance.resolution][speci][data_label]
+                        available_yearmonths = self.read_instance.available_experiment_data[network][self.read_instance.resolution][speci][data_label_raw]
                     except KeyError:
                         continue
 
@@ -843,7 +846,7 @@ class DataReader:
 
             # fill arrays
             if not filter_read:
-                data_label_indices = [self.read_instance.data_labels_raw.index(data_label) for data_label in data_labels]
+                data_label_indices = [self.read_instance.data_labels.index(data_label) for data_label in data_labels]
                 np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :])
             else:
                 np.copyto(data_in_memory_shared_np, self.read_instance.filter_data_in_memory[networkspeci][:, :])
@@ -877,7 +880,7 @@ class DataReader:
                                             self.read_instance.metadata_dtype, 
                                             self.read_instance.metadata_vars_to_read,
                                             default_qa_active, filter_read))
-
+  
             returned_data = pool.map(read_netcdf_data, tuple_arguments)
 
             pool.close()

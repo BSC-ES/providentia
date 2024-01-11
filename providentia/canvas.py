@@ -27,8 +27,8 @@ from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom
 from .filter import DataFilter
 from .plot import Plot
 from .plot_aux import get_map_extent
-from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
-from .plot_options import annotation, linear_regression, log_axes, log_validity, smooth
+from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
+from .plot_options import annotation, linear_regression, log_axes, smooth
 from .statistics import *
 from .warnings import show_message
 
@@ -522,7 +522,8 @@ class MPLCanvas(FigureCanvas):
 
         # plot map for zstat --> updating active map valid station indices and setting up plot picker
         self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.plot_characteristics['map'], 
-                           zstat=zstat, labela=self.map_z1.currentText(), labelb=self.map_z2.currentText())
+                           self.current_plot_options['map'], zstat=zstat, labela=self.map_z1.currentText(), 
+                           labelb=self.map_z2.currentText())
         
         # update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array(
@@ -713,7 +714,7 @@ class MPLCanvas(FigureCanvas):
                 # periodic plot
                 if plot_type == 'periodic':
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
-                         self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options)
+                         self.plot_characteristics[plot_type], plot_options, zstat=zstat)
                 # make statsummary plot
                 elif plot_type == 'statsummary':
                     if 'bias' in plot_options:
@@ -722,12 +723,12 @@ class MPLCanvas(FigureCanvas):
                         relevant_zstats = self.active_statsummary_stats['basic']
                     
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
-                         self.plot_characteristics[plot_type], 
-                         zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
+                         self.plot_characteristics[plot_type], plot_options,
+                         zstats=relevant_zstats, statsummary=True)                
                 # other plots
                 else:
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
-                         self.plot_characteristics[plot_type], plot_options=plot_options)
+                         self.plot_characteristics[plot_type], plot_options)
 
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 if plot_type not in ['map', 'taylor']:
@@ -1340,9 +1341,15 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
-    def remove_axis_objects(self, ax_elements, elements_to_skip=[], types_to_remove=[]):
+    def remove_axis_objects(self, ax_elements, elements_to_skip=None, types_to_remove=None):
         """ Remove objects (artists, lines, collections, patches) from axis. """
         
+        # define default argument mutables
+        if elements_to_skip is None:
+            elements_to_skip = []
+        if types_to_remove is None:
+            types_to_remove = []
+
         # put elements from dicts in lists for periodic plots
         if isinstance(elements_to_skip, dict):
             elements_to_skip = list(elements_to_skip.values())
@@ -2334,7 +2341,7 @@ class MPLCanvas(FigureCanvas):
                                                    self.read_instance.data_labels, 
                                                    plot_type,
                                                    self.plot_characteristics[plot_type], 
-                                                   plot_options=self.current_plot_options[plot_type],
+                                                   self.current_plot_options[plot_type],
                                                    plot_z_statistic_sign=z_statistic_sign)
                                         break
                             else:
@@ -2345,7 +2352,7 @@ class MPLCanvas(FigureCanvas):
                                            self.read_instance.data_labels, 
                                            plot_type,
                                            self.plot_characteristics[plot_type], 
-                                           plot_options=self.current_plot_options[plot_type],
+                                           self.current_plot_options[plot_type],
                                            plot_z_statistic_sign=z_statistic_sign)
 
                     # option 'smooth'
@@ -2358,7 +2365,7 @@ class MPLCanvas(FigureCanvas):
                                    self.read_instance.data_labels, 
                                    plot_type,
                                    self.plot_characteristics[plot_type], 
-                                   plot_options=self.current_plot_options[plot_type])
+                                   self.current_plot_options[plot_type])
                           
                     # option 'regression'
                     elif option == 'regression':
@@ -2370,7 +2377,7 @@ class MPLCanvas(FigureCanvas):
                                               self.read_instance.data_labels, 
                                               plot_type,
                                               self.plot_characteristics[plot_type],  
-                                              plot_options=self.current_plot_options[plot_type])
+                                              self.current_plot_options[plot_type])
 
                     # option 'bias'
                     elif option == 'bias':
@@ -2458,20 +2465,20 @@ class MPLCanvas(FigureCanvas):
                                 # periodic plot
                                 if plot_type =='periodic':
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
-                                         bias_labels_to_plot, self.plot_characteristics[plot_type], zstat=zstat, 
-                                         plot_options=self.current_plot_options[plot_type])
+                                         bias_labels_to_plot, self.plot_characteristics[plot_type], 
+                                         self.current_plot_options[plot_type], zstat=zstat)
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
                                     relevant_zstats = self.active_statsummary_stats['expbias']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
-                                         zstats=relevant_zstats, statsummary=True, 
-                                         plot_options=self.current_plot_options[plot_type])                
+                                         self.current_plot_options[plot_type], zstats=relevant_zstats, 
+                                         statsummary=True)                
                                 # other plots
                                 else: 
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          bias_labels_to_plot, self.plot_characteristics[plot_type], 
-                                         plot_options=self.current_plot_options[plot_type])
+                                         self.current_plot_options[plot_type])
 
                             # create other active plot option elements for bias plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, plot_type, 
@@ -2532,20 +2539,20 @@ class MPLCanvas(FigureCanvas):
                                 # periodic plot
                                 if plot_type =='periodic':
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
-                                         absolute_labels_to_plot, self.plot_characteristics[plot_type], zstat=zstat, 
-                                         plot_options=self.current_plot_options[plot_type])
+                                         absolute_labels_to_plot, self.plot_characteristics[plot_type], 
+                                         self.current_plot_options[plot_type], zstat=zstat)
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
                                     relevant_zstats = self.active_statsummary_stats['basic']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
-                                         zstats=relevant_zstats, statsummary=True, 
-                                         plot_options=self.current_plot_options[plot_type])                
+                                         self.current_plot_options[plot_type], zstats=relevant_zstats, 
+                                         statsummary=True)                
                                 # other plots
                                 else: 
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          absolute_labels_to_plot, self.plot_characteristics[plot_type], 
-                                         plot_options=self.current_plot_options[plot_type])
+                                         self.current_plot_options[plot_type])
 
                             # create other active plot option elements for absolute plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, 
@@ -2595,22 +2602,21 @@ class MPLCanvas(FigureCanvas):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
                             annotation(self, self.read_instance, sub_ax, self.read_instance.networkspeci, data_labels, 
-                                       plot_type, self.plot_characteristics[plot_type], plot_options=plot_options,
+                                       plot_type, self.plot_characteristics[plot_type], plot_options,
                                        plot_z_statistic_sign=z_statistic_sign)
                             break
                 else:
                     annotation(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
-                               data_labels, plot_type, self.plot_characteristics[plot_type], plot_options=plot_options,
+                               data_labels, plot_type, self.plot_characteristics[plot_type], plot_options,
                                plot_z_statistic_sign=z_statistic_sign)
 
             elif plot_option == 'smooth':
                 smooth(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
-                       data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options=plot_options)
+                       data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
             
             elif plot_option == 'regression':
                 linear_regression(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
-                                  data_labels_alt, plot_type, self.plot_characteristics[plot_type],  
-                                  plot_options=plot_options)
+                                  data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
 
     def update_markersize(self, ax, plot_type, markersize, event_source):
         """ Update markers size for each plot type. """

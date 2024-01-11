@@ -514,12 +514,10 @@ class DataFilter:
 
                 # iterate through network / species  
                 for ii, networkspeci in enumerate(self.read_instance.networkspecies):
-                    # get speci
-                    speci = networkspeci.split('|')[1]
 
                     # if stat is exceedances then add threshold value (if available)  
                     if base_zstat == 'Exceedances':
-                        function_arguments['threshold'] = exceedance_lim(speci)
+                        function_arguments['threshold'] = exceedance_lim(networkspeci)
 
                     # get list of statistic limits specific for speci (if wanted)
                     if speci_specific_limits:

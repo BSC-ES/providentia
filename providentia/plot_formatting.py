@@ -9,12 +9,17 @@ import numpy as np
 import pandas as pd
 
 from .plot_aux import get_land_polygon_resolution, set_map_extent
-from .plot_options import (annotation, experiment_domain, get_no_margin_lim, linear_regression, log_axes, log_validity, 
-                           smooth)
+from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth
 from .statistics import get_z_statistic_info
 
 def set_equal_axes(ax, plot_options):
-    """ Set equal aspect and limits (useful for scatter plots). """
+    """ Set equal aspect and limits (useful for scatter plots). 
+
+        :param ax: axis to set equal axes
+        :type ax: object
+        :param plot_options: active plot options 
+        :type plot_options: list
+    """
 
     # set equal aspect if no axis is in log scale
     if ('logx' in plot_options) or ('logy' in plot_options):
@@ -27,47 +32,23 @@ def set_equal_axes(ax, plot_options):
     if len(ax.lines) == 0:
         return None
 
-    # get min and max values for ticks
-    lines_xdata = []
-    lines_ydata = []
-    for i, line in enumerate(ax.lines):
-        line_xdata = line.get_xdata()
-        line_ydata = line.get_ydata()
-        if (list(line_xdata) == [0, 1]) or (list(line_xdata) == [0, 0.5]):
-            continue
-        lines_xdata.extend(line_xdata)
-        lines_ydata.extend(line_ydata)
+    # get min and max values for axes from plotted data
+    xmin, xmax = get_data_lims(ax, 'xlim', plot_options)
+    ymin, ymax = get_data_lims(ax, 'ylim', plot_options)
 
-    # if log of an axis is active, remove values < 0 to ensure limits are set correctly
-    if log_active:
-        lines_xdata = np.array(lines_xdata)
-        x_above_zero = lines_xdata > 0
-        lines_xdata = lines_xdata[x_above_zero]
-        lines_ydata = np.array(lines_ydata)
-        y_above_zero = lines_ydata > 0
-        lines_ydata = lines_ydata[y_above_zero]
-        if (x_above_zero.any()) or (y_above_zero.any()):
-            print("Warning: Data <= 0 will not be plotted as a log axis is set.")
-
-    # get x and y axes min/max across line artists
-    xtickmin = np.nanmin(lines_xdata)
-    xtickmax = np.nanmax(lines_xdata)
-    ytickmin = np.nanmin(lines_ydata)
-    ytickmax = np.nanmax(lines_ydata)
-
-    # compare min and max across axes
-    if xtickmin < ytickmin:
-        tickmin = xtickmin
+    # compare min and max lims across axes
+    if xmin < ymin:
+        axmin = xmin
     else:
-        tickmin = ytickmin
-    if xtickmax > ytickmax:
-        tickmax = xtickmax
+        axmin = ymin
+    if xmax > ymax:
+        axmax = xmax
     else:
-        tickmax = ytickmax
+        axmax = ymax
 
-    # set equal ticks
-    ax.set_xlim(tickmin, tickmax)
-    ax.set_ylim(tickmin, tickmax)
+    # set equal lims
+    ax.set_xlim(axmin, axmax)
+    ax.set_ylim(axmin, axmax)
 
     return None
 
@@ -77,6 +58,10 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                                autoscale_y=False, bias_centre=False, harmonise=True):
     """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
     
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
         :param base_plot_type: plot type, without statistical information
@@ -357,6 +342,8 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
     """ Set title of plot axis.
 
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
         :param title: axis title
@@ -389,7 +376,7 @@ def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
 
 
 def set_axis_label(relevant_axis, label_ax, label, plot_characteristics, 
-                   relevant_temporal_resolutions=['hour', 'month']):
+                   relevant_temporal_resolutions=None):
     """ Set label of plot axis.
 
         :param relevant_axis: axis to plot on 
@@ -400,11 +387,17 @@ def set_axis_label(relevant_axis, label_ax, label, plot_characteristics,
         :type label: str
         :param plot_characteristics: plot characteristics  
         :type plot_characteristics: dict
+        :param relevant_temporal_resolutions: list of relevant temporal resolutions  
+        :type relevant_temporal_resolutions: list
     """
 
     # return if label is empty str
     if label == '':
         return
+
+    # define default argument mutables
+    if relevant_temporal_resolutions is None:
+        relevant_temporal_resolutions = ['hour', 'month']
 
     # get appropriate axis for plotting label for plots with multiple sub-axes (hour and month axes)
     axs_to_set_label = []
@@ -436,6 +429,10 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
     """ Function that handles formatting of a plot axis,
         based on given plot options.
 
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
         :param relevant_data_labels: names of plotted data arrays 
@@ -499,7 +496,7 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
                 annotation(canvas_instance, read_instance, relevant_ax, networkspeci, 
                            relevant_data_labels[relevant_ax_ii], base_plot_type, 
                            canvas_instance.plot_characteristics[plot_type],
-                           plot_options=plot_options, plot_z_statistic_sign=z_statistic_sign)
+                           plot_options, plot_z_statistic_sign=z_statistic_sign)
                 # annotate on first axis
                 if base_plot_type in ['periodic', 'periodic-violin']:
                     break
@@ -508,19 +505,23 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
         if 'regression' in plot_options:
             linear_regression(canvas_instance, read_instance, relevant_ax, networkspeci, 
                               relevant_data_labels[relevant_ax_ii], base_plot_type, 
-                              canvas_instance.plot_characteristics[plot_type], plot_options=plot_options)
+                              canvas_instance.plot_characteristics[plot_type], plot_options)
 
         # smooth line
         if 'smooth' in plot_options:
             smooth(canvas_instance, read_instance, relevant_ax, networkspeci,
                    relevant_data_labels[relevant_ax_ii], base_plot_type, 
-                   canvas_instance.plot_characteristics[plot_type], plot_options=plot_options)
+                   canvas_instance.plot_characteristics[plot_type], plot_options)
 
 
 def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_characteristics, col_ii=0, last_valid_row=True, 
-                last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=['hour','dayofweek','month']):
+                last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=None):
     """ Format a plotting axis.
     
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param ax: axis object
         :type ax: object
         :param base_plot_type: plot to make, without statistical information
@@ -538,6 +539,10 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         :param relevant_temporal_resolutions: list of relevant temporal resolutions
         :type relevant_temporal_resolutions: list
     """
+
+    # define default argument mutables
+    if relevant_temporal_resolutions is None:
+        relevant_temporal_resolutions = ['hour', 'dayofweek', 'month']
 
     # get plot characteristics vars
     plot_characteristics_vars = list(plot_characteristics.keys())
@@ -659,3 +664,94 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             # set map extent (if wanted)
             if map_extent:
                 set_map_extent(canvas_instance, ax_to_format, map_extent)
+
+
+def get_no_margin_lim(ax, lim):
+    """ Get true limits of plot area (with no margins)
+
+        :param ax: axis to get limits
+        :type ax: object
+        :param lim: xlim or ylim
+        :type lim: str
+        :return: lower_lim, upper_lim
+        :rtype: float32, float32
+    """
+
+    # xlim
+    if lim == 'xlim':
+        xlim = ax.get_xlim()
+        xwidth = xlim[1] - xlim[0]
+        lower_lim = xlim[0] + (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
+        upper_lim = xlim[1] - (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
+
+    # ylim
+    if lim == 'ylim':
+        ylim = ax.get_ylim()
+        ywidth = ylim[1] - ylim[0]
+        lower_lim = ylim[0] + (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
+        upper_lim = ylim[1] - (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
+
+    return lower_lim, upper_lim
+
+
+def get_data_lims(ax, lim, plot_options):
+    """ Get x and y limits of a plot axis from plotted data
+
+        :param ax: axis to get limits
+        :type ax: object
+        :param lim: xlim or ylim
+        :type lim: str
+        :param plot_options: list of options to configure plots
+        :type plot_options: list
+        return: lower_lim, upper_lim
+        :rtype: float32, float32
+    """
+
+    # get min and max values for axis
+    lines = []
+    for i, line in enumerate(ax.lines):
+        if lim == 'xlim':
+            line_data = line.get_xdata()
+        elif lim == 'ylim':
+            line_data = line.get_ydata()
+        if (list(line_data) == [0, 1]) or (list(line_data) == [0, 0.5]):
+            continue
+        lines.extend(line_data)
+
+    # if log of an axis is active, remove values <= 0 to ensure limits are obtained correctly
+    if (('logx' in plot_options) and (lim == 'xlim')) or (('logy' in plot_options) and (lim == 'ylim')):
+        lines = np.array(lines)
+        above_zero = lines > 0
+        lines = lines[above_zero]
+
+    # get min/max across line artists
+    if len(lines) == 0:
+        return np.NaN, np.NaN
+    else:
+        lower_lim = np.nanmin(lines)
+        upper_lim = np.nanmax(lines)
+        return lower_lim, upper_lim
+
+
+def log_validity(ax, log_ax):
+    """ Determine if log operation for a given axes is valid (no values < 0).
+    
+        :param ax: relevant axis
+        :type ax: object
+        :param log_ax: which axis to log
+        :type log_ax: str
+        :return: validity to log axis
+        :rtype: boolean
+    """
+
+    if log_ax == 'logx':
+        lower_lim, _ = get_data_lims(ax, 'xlim', ['logx'])
+    elif log_ax == 'logy':
+        lower_lim, _ = get_data_lims(ax, 'ylim', ['logy'])
+
+    if lower_lim < 0:
+        validity = False
+    else:
+        validity = True
+
+    return validity

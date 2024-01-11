@@ -1295,8 +1295,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     read_operations = ['cut_right']
 
         # determine if any experiments need removing or reading 
-        experiments_to_remove = [experiment for experiment in self.previous_experiments if experiment not in self.experiments]
-        experiments_to_read = [experiment for experiment in self.experiments if experiment not in self.previous_experiments]
+        experiments_to_remove = [experiment for experiment in self.previous_experiments.values() if experiment not in list(self.experiments.values())]
+        experiments_to_read = [experiment for experiment in self.experiments.values() if experiment not in list(self.previous_experiments.values())]
         if 'reset' not in read_operations:
             if len(experiments_to_remove) > 0:
                 read_operations.append('remove_exp')
