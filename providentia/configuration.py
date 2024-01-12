@@ -24,6 +24,8 @@ if MACHINE not in ['power', 'mn4', 'nord3v2']:
     ip = socket.gethostbyname(socket.gethostname())
     if "bscearth" in hostname:
         MACHINE = "workstation"
+    elif "bscesdust02.bsc.es" in hostname:
+        MACHINE = "dust"
     elif ip == "84.88.185.48":
         MACHINE = "hub"
     else:
@@ -169,7 +171,7 @@ class ProvConfiguration:
                 if MACHINE in ['power', 'mn4', 'nord3v2']:
                     return '/gpfs/projects/bsc32/AC_cache/obs/ghost'
                 # running on workstation or hub?
-                elif MACHINE in ['hub', 'workstation']:
+                elif MACHINE in ['hub', 'workstation', 'dust']:
                     return '/esarchive/obs/ghost'
                 # running locally?
                 else:
@@ -185,7 +187,7 @@ class ProvConfiguration:
                 if MACHINE == 'mn4':
                     return '/gpfs/projects/bsc32/AC_cache/obs/nonghost'
                 # running on other machines?
-                elif MACHINE in ['power', 'nord3v2', 'hub', 'workstation']:
+                elif MACHINE in ['power', 'nord3v2', 'hub', 'workstation', 'dust']:
                     return '/esarchive/obs'
                 # running locally?
                 else:
@@ -199,7 +201,7 @@ class ProvConfiguration:
                 if MACHINE in ['power', 'mn4', 'nord3v2']:
                     return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
                 # running on workstation or hub?
-                elif MACHINE in ['hub', 'workstation']:
+                elif MACHINE in ['hub', 'workstation', 'dust']:
                     return '/esarchive/recon/prov_interp'
                 # running locally?
                 else:
