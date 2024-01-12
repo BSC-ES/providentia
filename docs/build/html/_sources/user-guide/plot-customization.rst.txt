@@ -1,6 +1,14 @@
 Plot customization
 ==================
 
+Editing the plot style from the configuration files
+---------------------------------------------------
+
+If you want to edit the style of your plots, you will need to edit it in one of the following files and launch the tool again:
+
+- Plots in the dashboard: ``/providentia/settings/plot_characteristics_dashboard.json``
+- Plots in the offline reports: ``/providentia/settings/plot_characteristics_offline.json``
+
 Editing the plot style in the dashboard
 ---------------------------------------
 
@@ -41,14 +49,3 @@ It is possible to add a smoothing line to the timeseries plot and make the point
 
 .. image:: ../images/plot-customization/smoothing.png
   :alt: Smooth line
-
-
-Editing the plot style from the configuration files
----------------------------------------------------
-
-If you want to edit the style of your plots, you will need to edit it in one of the following files and launch the tool again:
-
-- Plots in the dashboard: ``/providentia/settings/plot_characteristics_dashboard.json``
-- Plots in the offline reports: ``/providentia/settings/plot_characteristics_offline.json``
-
-Most parameters are based on Matplotlib and, although their names are quite self-explanatory, a summary can be find below with more details.
