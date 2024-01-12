@@ -1,16 +1,19 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Run the tool &#8212; Providentia 2.3.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
-    <script src="../_static/documentation_options.js?v=c3c8ae58"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="User guide" href="../user-guide.html" />
@@ -32,9 +35,9 @@
           <div class="body" role="main">
             
   <section id="run-the-tool">
-<h1>Run the tool<a class="headerlink" href="#run-the-tool" title="Link to this heading">¶</a></h1>
+<h1>Run the tool<a class="headerlink" href="#run-the-tool" title="Permalink to this heading">¶</a></h1>
 <section id="running-the-tool-on-a-bsc-machine">
-<h2>Running the tool on a BSC machine<a class="headerlink" href="#running-the-tool-on-a-bsc-machine" title="Link to this heading">¶</a></h2>
+<h2>Running the tool on a BSC machine<a class="headerlink" href="#running-the-tool-on-a-bsc-machine" title="Permalink to this heading">¶</a></h2>
 <p>If you are on Nord3v2 or Marenostrum4, you should request an interactive session:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
 </pre></div>
@@ -69,7 +72,7 @@ By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total 
 <p>The reports will be saved under the folder reports. You can add a path in the report_filename of the configuration file to change the default directory.</p>
 </section>
 <section id="running-the-tool-on-a-personal-machine">
-<h2>Running the tool on a personal machine<a class="headerlink" href="#running-the-tool-on-a-personal-machine" title="Link to this heading">¶</a></h2>
+<h2>Running the tool on a personal machine<a class="headerlink" href="#running-the-tool-on-a-personal-machine" title="Permalink to this heading">¶</a></h2>
 <p>If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file configuration.py and defining ghost_root, nonghost_root and exp_root. For instance:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;local_ghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/ghost/&#39;</span>
 <span class="s1">&#39;local_nonghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/nonghost/&#39;</span>
@@ -162,11 +165,11 @@ By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total 
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2023, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa.
+      &copy;2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/setup/run.rst.txt"

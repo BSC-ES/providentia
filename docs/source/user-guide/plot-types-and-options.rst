@@ -153,5 +153,13 @@ Hide points and only show regression / smooth lines (``_hidedata``)
 
 The option ``_hidedata`` needs to be accompanied by ``_smooth`` in the ``timeseries`` plot and by ``_regression`` in the ``scatter`` plot.
 
-.. image:: ../images/plot-options/hidedata.jpg
+.. image:: ../images/plot-options/hidedata.png
   :alt: Hide data option
+
+Show the model grid in the maps (``_domain``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Adding ``_domain`` will add the model grid on top of the map.
+
+.. image:: ../images/plot-options/domain.png
+  :alt: Domain option
