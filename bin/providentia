@@ -215,8 +215,14 @@ elif [ "${ip}" == "84.88.185.48" ]; then
     eval "${load_command}"
     eval "${python_command}"
 
-# Workstations
+# Local machines (Workstations, dust02 machine and personal laptops)
 else
-    echo "Warning: running in your workstation/laptop may make Providentia slower ..."
-    eval "${python_command}"
+    echo "Warning: running in local machines may make Providentia slower ..."
+    if $interactive; then
+        echo "Starting interactive jupyter session."
+        export PYTHONPATH=$(pwd):${PYTHONPATH}
+        jupyter-lab
+    else
+        eval "${python_command}"
+    fi
 fi
