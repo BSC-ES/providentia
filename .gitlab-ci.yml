@@ -5,7 +5,7 @@ tests:
   stage: tests
   script:
     - echo "Activating virtual environment..."
-    - source $HOME/providentia-env/bin/activate
+    - conda activate $HOME/providentia-env
     - export PYTHONPATH=$(pwd):${PYTHONPATH}
     - echo "Running unit tests..."
     - coverage run -m pytest tests
