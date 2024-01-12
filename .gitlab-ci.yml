@@ -8,4 +8,4 @@ tests:
     - conda activate $HOME/providentia-env
     - export PYTHONPATH=$(pwd):${PYTHONPATH}
     - echo "Running unit tests..."
-    - python -m coverage run -m pytest tests
+    - python -m coverage run -m pytest
