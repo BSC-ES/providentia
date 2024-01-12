@@ -5,9 +5,9 @@ import copy
 import json
 import os
 import re
+import socket
 import subprocess
 import sys
-
 import numpy as np
 import pandas as pd
 
@@ -17,6 +17,19 @@ from .warnings import show_message
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+
+# set MACHINE to be the hub, workstation or local machine
+if MACHINE not in ['power', 'mn4', 'nord3v2']:
+    hostname = os.environ.get('HOSTNAME', '')
+    ip = socket.gethostbyname(socket.gethostname())
+    if "bscearth" in hostname:
+        MACHINE = "workstation"
+    elif "bscesdust02.bsc.es" in hostname:
+        MACHINE = "dust"
+    elif ip == "84.88.185.48":
+        MACHINE = "hub"
+    else:
+        MACHINE = "local"
 
 
 def parse_path(dir, f):
@@ -41,6 +54,9 @@ class ProvConfiguration:
             'cartopy_data_dir': '',
             'available_cpus': '',
             'n_cpus': '',
+            'local_ghost_root': '/data/providentia/obs/ghost/',
+            'local_nonghost_root': '/data/providentia/obs/nonghost/',
+            'local_exp_root': '/data/providentia/exp/',
             'ghost_root': '',
             'nonghost_root': '',
             'exp_root': '',
@@ -154,9 +170,12 @@ class ProvConfiguration:
                 # running on CTE-POWER/MN4/N3?
                 if MACHINE in ['power', 'mn4', 'nord3v2']:
                     return '/gpfs/projects/bsc32/AC_cache/obs/ghost'
-                else:
-                    # running on workstation or hub?
+                # running on workstation or hub?
+                elif MACHINE in ['hub', 'workstation', 'dust']:
                     return '/esarchive/obs/ghost'
+                # running locally?
+                else:
+                    return self.read_instance.local_ghost_root
 
         elif key == 'nonghost_root':
             # define non-GHOST observational root data directory (if undefined it is
@@ -165,10 +184,14 @@ class ProvConfiguration:
             # set default if left undefined
             if value == '':
                 # running on MN4?
-                if (MACHINE == 'mn4'):
+                if MACHINE == 'mn4':
                     return '/gpfs/projects/bsc32/AC_cache/obs/nonghost'
-                else:
+                # running on other machines?
+                elif MACHINE in ['power', 'nord3v2', 'hub', 'workstation', 'dust']:
                     return '/esarchive/obs'
+                # running locally?
+                else:
+                    return self.read_instance.local_nonghost_root
 
         elif key == 'exp_root':
             # define experiment root data directory
@@ -177,9 +200,12 @@ class ProvConfiguration:
                 # not running on workstation?
                 if MACHINE in ['power', 'mn4', 'nord3v2']:
                     return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
-                else:
-                    # running on workstation or hub?
+                # running on workstation or hub?
+                elif MACHINE in ['hub', 'workstation', 'dust']:
                     return '/esarchive/recon/prov_interp'
+                # running locally?
+                else:
+                    return self.read_instance.local_exp_root
 
         elif key == 'ghost_version':
             # parse GHOST version
