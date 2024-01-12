@@ -273,9 +273,12 @@ class Plot:
             :rtype: list
         """
 
-        # if data_labels are not defined, take all in memory
+        # if data_labels are not defined, or are just observations, then take all labels in memory
         if not data_labels:
             data_labels = copy.deepcopy(self.read_instance.data_labels)
+        elif len(data_labels) == 1:
+            if data_labels[0] == self.read_instance.observations_data_label:
+                data_labels = copy.deepcopy(self.read_instance.data_labels)
 
         grid_edge_polygons = []
 
@@ -1322,8 +1325,14 @@ class Plot:
         # set xticklables
         relevant_axis.set_xticklabels(stats_df.columns, **plot_characteristics['xticklabels'])
 
+        # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
+        if len(stats_df.index) > 1:
+            bottom, top = relevant_axis.get_ylim()
+            relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+
         # format for multispecies
         if 'multispecies' in plot_options:
+
             # if we have more than one subsection and we are plotting summaries
             if (len(subsections) > 1) and (plotting_paradigm == 'summary'):
                 # add horizontal lines to separate networkspecies
@@ -1353,10 +1362,6 @@ class Plot:
         
         # format for non multispecies
         else:
-            # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
-            if len(stats_df.index) > 1:
-                bottom, top = relevant_axis.get_ylim()
-                relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
 
             # vertically align yticklabels due to bug again in matplotlib - hack fix. Remove in Future!
             for tick in relevant_axis.get_yticklabels():

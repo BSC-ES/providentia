@@ -905,7 +905,7 @@ class ProvidentiaOffline:
             relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
                 base_plot_type, plot_indices)
             format_plot_options(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, 
-                                plot_type, plot_options)
+                                plot_type, plot_options, map_extent=self.map_extent)
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
@@ -1069,7 +1069,7 @@ class ProvidentiaOffline:
                 relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
                     base_plot_type, plot_indices)
                 format_plot_options(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, 
-                                    plot_type, plot_options)
+                                    plot_type, plot_options, map_extent=self.map_extent)
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
@@ -1234,7 +1234,7 @@ class ProvidentiaOffline:
 
             # iterate through relevant data labels making plots
             for z1_label, z2_label in zip(z1, z2):
-                
+
                 # skip map if we have no data for a specific label
                 skip_map = False
                 if (z2_label == '') and (z1_label not in self.selected_station_data_labels[networkspeci]):
@@ -1278,9 +1278,9 @@ class ProvidentiaOffline:
                 # make map plot
                 self.plot.make_map(relevant_axis, networkspeci, self.plot_characteristics[plot_type], plot_options,
                                    zstat=zstat, labela=z1_label, labelb=z2_label)
-                
+
                 # save plot information for later formatting 
-                if z2 == '':
+                if z2_label == '':
                     self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z1_label)
                 else:
                     self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z2_label)

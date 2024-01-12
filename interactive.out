@@ -1,66 +1,46 @@
 
 Create an SSH tunnel via terminal on your local machine:
-ssh -N -L 8293:s03r1b17:8293 bsc32025@nord4.bsc.es
+ssh -N -L 8451:s05r1b09:8451 bsc32025@nord4.bsc.es
 
-[I 2024-01-11 10:07:22.931 ServerApp] jupyterlab | extension was successfully linked.
-[I 2024-01-11 10:07:23.295 LabApp] JupyterLab extension loaded from /gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/lib/python3.7/site-packages/jupyterlab
-[I 2024-01-11 10:07:23.295 LabApp] JupyterLab application directory is /.statelite/tmpfs/gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/share/jupyter/lab
-[I 2024-01-11 10:07:23.301 ServerApp] jupyterlab | extension was successfully loaded.
-[I 2024-01-11 10:07:23.301 ServerApp] Serving notebooks from local directory: /.statelite/tmpfs/gpfs/archive/bsc32/esarchive/obs/ghost/scripts/Providentia-interactive
-[I 2024-01-11 10:07:23.301 ServerApp] Jupyter Server 1.4.1 is running at:
-[I 2024-01-11 10:07:23.302 ServerApp] http://s03r1b17:8293/lab?token=a921c1aa724636f6eecaf9de9b6914199ade84590a98f35a
-[I 2024-01-11 10:07:23.302 ServerApp]  or http://127.0.0.1:8293/lab?token=a921c1aa724636f6eecaf9de9b6914199ade84590a98f35a
-[I 2024-01-11 10:07:23.302 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
-[C 2024-01-11 10:07:23.324 ServerApp] 
+[I 2024-01-12 16:03:38.240 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-01-12 16:03:38.544 LabApp] JupyterLab extension loaded from /gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/lib/python3.7/site-packages/jupyterlab
+[I 2024-01-12 16:03:38.544 LabApp] JupyterLab application directory is /.statelite/tmpfs/gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/share/jupyter/lab
+[I 2024-01-12 16:03:38.550 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-01-12 16:03:38.550 ServerApp] Serving notebooks from local directory: /.statelite/tmpfs/gpfs/archive/bsc32/esarchive/obs/ghost/scripts/Providentia-interactive
+[I 2024-01-12 16:03:38.550 ServerApp] Jupyter Server 1.4.1 is running at:
+[I 2024-01-12 16:03:38.551 ServerApp] http://s05r1b09:8451/lab?token=944798552e98b3b05176d0b4b3304ac0f01a73eed7e2b729
+[I 2024-01-12 16:03:38.551 ServerApp]  or http://127.0.0.1:8451/lab?token=944798552e98b3b05176d0b4b3304ac0f01a73eed7e2b729
+[I 2024-01-12 16:03:38.551 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-01-12 16:03:38.561 ServerApp] 
     
     To access the server, open this file in a browser:
-        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-4055115-open.html
+        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-1936914-open.html
     Or copy and paste one of these URLs:
-        http://s03r1b17:8293/lab?token=a921c1aa724636f6eecaf9de9b6914199ade84590a98f35a
-     or http://127.0.0.1:8293/lab?token=a921c1aa724636f6eecaf9de9b6914199ade84590a98f35a
-[I 2024-01-11 10:09:13.848 LabApp] Build is up to date
-[I 2024-01-11 10:09:19.124 ServerApp] Kernel started: 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 10:09:24.866 ServerApp] Got events for closed stream None
-[I 2024-01-11 10:12:43.112 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
-[I 2024-01-11 10:13:18.383 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 10:15:24.129 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 10:25:17.243 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 10:25:21.977 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[I 2024-01-11 10:25:30.668 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 10:27:34.982 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 10:29:40.111 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 10:32:37.317 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 10:32:41.981 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[I 2024-01-11 10:33:53.806 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 10:37:58.952 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 10:39:47.918 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 10:39:52.505 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 10:39:54.221 ServerApp] Got events for closed stream None
-[I 2024-01-11 10:39:59.345 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 10:42:01.691 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[W 2024-01-11 11:08:47.994 ServerApp] WebSocket ping timeout after 119901 ms.
-[W 2024-01-11 11:08:51.802 ServerApp] WebSocket ping timeout after 119858 ms.
-[I 2024-01-11 11:08:56.806 ServerApp] Starting buffering for 6fbb8eb7-db21-43ee-967b-df46656e171e:d33467d1-669a-47d6-bbf3-9d29ed75a740
-[I 2024-01-11 11:43:45.200 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
-[I 2024-01-11 11:43:45.440 ServerApp] Discarding 3 buffered messages for 6fbb8eb7-db21-43ee-967b-df46656e171e:d33467d1-669a-47d6-bbf3-9d29ed75a740
-[W 2024-01-11 11:43:49.953 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 11:43:54.962 ServerApp] Nudge: attempt 20 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 11:43:59.971 ServerApp] Nudge: attempt 30 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[I 2024-01-11 11:44:05.872 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 11:46:06.493 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 11:47:51.451 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
-[I 2024-01-11 11:47:51.540 ServerApp] Starting buffering for 6fbb8eb7-db21-43ee-967b-df46656e171e:3011fad9-8eee-47fb-beff-2c847e3ddd0e
-[I 2024-01-11 11:47:51.612 ServerApp] Restoring connection for 6fbb8eb7-db21-43ee-967b-df46656e171e:3011fad9-8eee-47fb-beff-2c847e3ddd0e
-[W 2024-01-11 11:47:56.122 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 11:48:01.131 ServerApp] Nudge: attempt 20 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 11:48:06.141 ServerApp] Nudge: attempt 30 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[I 2024-01-11 11:48:06.896 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 11:50:07.472 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 11:50:16.859 ServerApp] Kernel restarted: 6fbb8eb7-db21-43ee-967b-df46656e171e
-[I 2024-01-11 11:50:17.046 ServerApp] Starting buffering for 6fbb8eb7-db21-43ee-967b-df46656e171e:3011fad9-8eee-47fb-beff-2c847e3ddd0e
-[I 2024-01-11 11:50:17.185 ServerApp] Restoring connection for 6fbb8eb7-db21-43ee-967b-df46656e171e:3011fad9-8eee-47fb-beff-2c847e3ddd0e
-[W 2024-01-11 11:50:21.698 ServerApp] Nudge: attempt 10 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 11:50:26.712 ServerApp] Nudge: attempt 20 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[W 2024-01-11 11:50:31.724 ServerApp] Nudge: attempt 30 on kernel 6fbb8eb7-db21-43ee-967b-df46656e171e
-[I 2024-01-11 11:52:08.444 ServerApp] Saving file at /notebooks/test_interactive.ipynb
-[I 2024-01-11 11:54:09.685 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+        http://s05r1b09:8451/lab?token=944798552e98b3b05176d0b4b3304ac0f01a73eed7e2b729
+     or http://127.0.0.1:8451/lab?token=944798552e98b3b05176d0b4b3304ac0f01a73eed7e2b729
+[W 2024-01-12 16:04:02.128 ServerApp] 404 GET /apple-touch-icon-precomposed.png (10.2.9.201) 37.70ms referer=None
+[W 2024-01-12 16:04:02.289 ServerApp] 404 GET /apple-touch-icon.png (10.2.9.201) 1.73ms referer=None
+[I 2024-01-12 16:04:08.902 LabApp] Build is up to date
+[I 2024-01-12 16:04:12.862 ServerApp] Kernel started: 74f08609-408d-4959-9aa5-e210de8477af
+[I 2024-01-12 16:04:18.132 ServerApp] Kernel restarted: 74f08609-408d-4959-9aa5-e210de8477af
+[I 2024-01-12 16:06:12.254 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 16:08:13.070 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 16:12:08.351 ServerApp] Kernel restarted: 74f08609-408d-4959-9aa5-e210de8477af
+[W 2024-01-12 16:12:12.975 ServerApp] Nudge: attempt 10 on kernel 74f08609-408d-4959-9aa5-e210de8477af
+[I 2024-01-12 16:12:13.354 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 16:14:13.870 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 16:16:14.451 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 16:20:10.201 ServerApp] Kernel restarted: 74f08609-408d-4959-9aa5-e210de8477af
+[W 2024-01-12 16:20:14.883 ServerApp] Nudge: attempt 10 on kernel 74f08609-408d-4959-9aa5-e210de8477af
+[I 2024-01-12 16:20:15.606 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 16:22:16.120 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 16:34:45.392 ServerApp] Kernel restarted: 74f08609-408d-4959-9aa5-e210de8477af
+[W 2024-01-12 16:34:50.080 ServerApp] Nudge: attempt 10 on kernel 74f08609-408d-4959-9aa5-e210de8477af
+[I 2024-01-12 16:36:38.802 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 16:45:32.026 ServerApp] Kernel restarted: 74f08609-408d-4959-9aa5-e210de8477af
+[W 2024-01-12 16:45:36.669 ServerApp] Nudge: attempt 10 on kernel 74f08609-408d-4959-9aa5-e210de8477af
+[I 2024-01-12 16:46:39.466 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 16:48:40.220 ServerApp] Saving file at /notebooks/test_interactive.ipynb
+[I 2024-01-12 17:17:09.858 ServerApp] Kernel restarted: 74f08609-408d-4959-9aa5-e210de8477af
+[W 2024-01-12 17:17:14.515 ServerApp] Nudge: attempt 10 on kernel 74f08609-408d-4959-9aa5-e210de8477af
+[I 2024-01-12 17:18:39.920 ServerApp] Saving file at /notebooks/test_interactive.ipynb

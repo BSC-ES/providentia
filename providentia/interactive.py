@@ -166,7 +166,7 @@ class Interactive:
     def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
                   domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
-                  smooth=False, plot_options=None, return_plot=False, format=None):
+                  smooth=False, plot_options=None, save=False, return_plot=False, format=None):
         """wrapper method to make a Providentia plot"""
 
         # define default argument mutables
@@ -264,7 +264,6 @@ class Interactive:
         if ('annotation_stats' in locals()) & ('annotate_stats' in self.plot_characteristics[plot_type]):
             self.plot_characteristics[plot_type]['annotate_stats'] = annotation_stats
         if ('smooth_window' in locals()) & ('smooth' in self.plot_characteristics[plot_type]):
-            print('hiya')
             self.plot_characteristics[plot_type]['smooth']['window'] = smooth_window
 
         # if map extent passed not passed as argument, set it as value from .conf in memory
@@ -316,16 +315,26 @@ class Interactive:
         elif base_plot_type != 'legend':
             func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
          
-        # set boolean on whether to plot obs in legend or not
+        # set boolean on whether to plot obs in legend or not, and relevant data labels (data labels plotted)
         if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
             set_obs_legend = False
+            relevant_data_labels = list(self.experiments.values())
+        else:
+            relevant_data_labels = copy.deepcopy(data_labels)
 
-        # get networkspeci to plot
+        # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
         networkspeci = self.networkspecies[0]
         speci = networkspeci.split('|')[-1]
-        if len(self.networkspecies) > 1:
-            print("Warning: More than 1 network or species defined, can only plot for 1 pair. Taking {}.".format(networkspeci))
 
+        # if multispecies is active then use all networkspecies, otherwise take first
+        if 'multispecies' in plot_options:
+            networkspecies = copy.deepcopy(self.networkspecies)
+        # take first defined networkspeci
+        else:
+            networkspecies = [networkspeci]
+            if len(self.networkspecies) > 1:
+                print("Warning: More than 1 network or species defined, can only plot for 1 pair. Taking {}.".format(networkspeci))
+            
         # legend plot (on its own axis)
         if base_plot_type == 'legend':
             legend_handles = self.make_legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
@@ -355,64 +364,111 @@ class Interactive:
             func(grid_dict, networkspeci, data_labels, self.plot_characteristics[plot_type], plot_options, zstat=zstat)
         # make statsummary plot
         elif base_plot_type == 'statsummary':
-            relevant_zstats = self.active_statsummary_stats['basic']
-            func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], plot_options,
-                 statsummary=True, subsection=self.subsection, plotting_paradigm=plotting_paradigm, stats_df=stats_df)     
-
-        # make heatmap / table plot
-        elif base_plot_type in ['heatmap','table']:  
-
-            # get multiple networkspecies for multispecies (used in heatmaps, tables and statsummaries)
-            if 'multispecies' in plot_options:
-                networkspecies = copy.deepcopy(self.networkspecies)
-            # get unique networkspeci
+            
+            # get stats to plot
+            if 'bias' in plot_options:
+                stats_to_plot = self.plot_characteristics[plot_type]['experiment_bias']
             else:
-                networkspecies = [networkspeci]
-
-            # get data labels to plot (based on statistic type)
-            if z_statistic_sign == 'bias':
-                data_labels_to_plot = list(self.experiments.values())
-            else:
-                data_labels_to_plot = [self.observations_data_label] + list(self.experiments.values())
+                stats_to_plot = self.plot_characteristics[plot_type]['basic']
 
             # create empty dataframe with networkspecies and subsections
-            index = pd.MultiIndex.from_product([networkspecies, self.subsections],
-                                                names=["networkspecies", "subsections"])
-            stats_df = pd.DataFrame(np.nan, index=index, columns=data_labels_to_plot, dtype=np.float64)
+            index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, relevant_data_labels],
+                                                names=["networkspecies", "subsections", "labels"])
+            stats_df = pd.DataFrame(np.nan, index=index, columns=stats_to_plot, dtype=np.float64)
             
             # fill dataframe
             kwargs = copy.deepcopy(self.kwargs)
+            # save current subsection 
+            orig_ss = copy.deepcopy(self.subsection)
             for ss in self.subsections:
                 kwargs['subsection'] = ss
                 self.set_config(**kwargs)
                 # filter data
                 self.reset_filter()
                 for ns in networkspecies:
-                    stats_per_data_label = []
-                    for dl in data_labels_to_plot:
+                    for dl in relevant_data_labels:
+                        stats_per_data_label = []
+                        for stp in stats_to_plot:
+                            # get zstat information 
+                            zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=stp)
+                            # calculate statistic
+                            if dl in self.selected_station_data_labels[ns]:
+                                # if relevant stat is expbias stat, then ensure temporal colocation is active
+                                if (base_plot_type == 'statsummary') and (stp in self.expbias_stats) and (not self.temporal_colocation):
+                                    stats_per_data_label.append(np.NaN)
+                                # otherwise calculate statistic
+                                else:
+                                    if z_statistic_sign == 'bias':
+                                        stats_per_data_label.append(calculate_statistic(self, self, ns, zstat, [self.observations_data_label], [dl]))
+                                    else:
+                                        stats_per_data_label.append(calculate_statistic(self, self, ns, zstat, [dl], []))
+                            else:
+                                stats_per_data_label.append(np.NaN)
+
+                        # get floats instead of arrays with 1 element each and save
+                        stats_per_data_label = [stat_per_data_label[0] 
+                                                if isinstance(stat_per_data_label, np.ndarray) 
+                                                else stat_per_data_label 
+                                                for stat_per_data_label in stats_per_data_label]
+                        
+                        # put data in dataframe
+                        stats_df.loc[(ns, ss, dl)] = stats_per_data_label
+                
+            # make plot
+            func(relevant_ax, networkspeci, relevant_data_labels, self.plot_characteristics[plot_type], plot_options,
+                 statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
+
+            # re-filter for original subsection
+            kwargs['subsection'] = orig_ss
+            self.set_config(**kwargs)
+            self.reset_filter()
+
+        # make heatmap / table plot
+        elif base_plot_type in ['heatmap','table']:  
+
+            # create empty dataframe with networkspecies and subsections
+            index = pd.MultiIndex.from_product([networkspecies, self.subsections],
+                                                names=["networkspecies", "subsections"])
+            stats_df = pd.DataFrame(np.nan, index=index, columns=relevant_data_labels, dtype=np.float64)
+            
+            # fill dataframe
+            kwargs = copy.deepcopy(self.kwargs)
+            # save current subsection 
+            orig_ss = copy.deepcopy(self.subsection)
+            for ss in self.subsections:
+                kwargs['subsection'] = ss
+                self.set_config(**kwargs)
+                # filter data
+                self.reset_filter()
+                for ns in networkspecies:
+                    stat_per_data_labels = []
+                    for dl in relevant_data_labels:
                         # calculate statistic
                         if dl in self.selected_station_data_labels[ns]:
                             if z_statistic_sign == 'bias':
-                                stats_per_data_label.append(calculate_statistic(self, self, ns, zstat, [self.observations_data_label], [dl]))
+                                stat_per_data_labels.append(calculate_statistic(self, self, ns, zstat, [self.observations_data_label], [dl]))
                             else:
-                                stats_per_data_label.append(calculate_statistic(self, self, ns, zstat, [dl], []))
+                                stat_per_data_labels.append(calculate_statistic(self, self, ns, zstat, [dl], []))
                         else:
-                            stats_per_data_label.append(np.NaN)
+                            stat_per_data_labels.append(np.NaN)
 
                     # get floats instead of arrays with 1 element each and save
-                    stats_per_data_label = [stat_per_data_label[0] 
+                    stat_per_data_labels = [stat_per_data_label[0] 
                                             if isinstance(stat_per_data_label, np.ndarray) 
                                             else stat_per_data_label 
-                                            for stat_per_data_label in stats_per_data_label]
+                                            for stat_per_data_label in stat_per_data_labels]
 
                     # put data in dataframe
-                    stats_df.loc[(ns, ss)] = stats_per_data_label
-
-            print(stats_df)
+                    stats_df.loc[(ns, ss)] = stat_per_data_labels
 
             # make plot
-            func(relevant_ax, networkspeci, data_labels_to_plot, self.plot_characteristics[plot_type], plot_options,
+            func(relevant_ax, networkspeci, relevant_data_labels, self.plot_characteristics[plot_type], plot_options,
                  plotting_paradigm='summary', stats_df=stats_df)
+
+            # re-filter for original subsection
+            kwargs['subsection'] = orig_ss
+            self.set_config(**kwargs)
+            self.reset_filter()
          
         # other plots
         else: 
@@ -522,8 +578,8 @@ class Interactive:
                     map_extent=map_extent)
 
         # format plot options
-        format_plot_options(self, self, relevant_ax, [data_labels], networkspeci, base_plot_type, plot_type, 
-                            plot_options)                         
+        format_plot_options(self, self, relevant_ax, [relevant_data_labels], networkspeci, base_plot_type, plot_type, 
+                            plot_options, map_extent=map_extent)                         
 
         # handle harmonisation of axes
         if base_plot_type not in ['legend', 'metadata', 'map', 'taylor']:
@@ -568,8 +624,19 @@ class Interactive:
             if 'cb' in self.plot_characteristics[plot_type]:
                 self.make_colourbar(fig, relevant_ax, zstat, speci, plot_type)
 
-        # if return_plot is passed then return plot axis/axes
-        if return_plot:
+        # if save is passed then save plot and return
+        if save:
+            # if save is boolean then auto generate fname
+            if type(save) == bool:
+                figure_fname = os.path.join(PROVIDENTIA_ROOT, 'plots/{}.png'.format(plot_type))
+            else:
+                figure_fname = copy.deepcopy(save)
+            print('Saving {} figure to {}'.format(plot_type, figure_fname))
+            # save figure
+            plt.savefig(figure_fname)
+            return
+        # elif return_plot is passed then return plot axis/axes
+        elif return_plot:
             return relevant_ax
         # otherwise show plot
         else:
@@ -699,6 +766,8 @@ class Interactive:
             elif self.subsection in self.subsections_reduced:
                 have_subsection = True
                 self.subsection = self.subsections[self.subsections_reduced.index(self.subsection)]
+            elif self.subsection == self.section:
+                have_subsection = True
             else:
                 print("Warning: Defined subsection {} does not exist in configuration file.".format(self.subsection))
 
@@ -709,7 +778,8 @@ class Interactive:
                 if len(self.subsections) > 1:
                     print("Warning: Taking first defined subsection ({}) to be read.".format(self.subsection))
         else:
-            self.subsection = [self.section]
+            self.subsections = [self.section]
+            self.subsection = self.subsections[0]
 
         # update self with subsection variables (if have subsection) 
         if have_subsection:   
