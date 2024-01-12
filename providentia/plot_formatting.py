@@ -425,7 +425,7 @@ def set_axis_label(relevant_axis, label_ax, label, plot_characteristics,
 
 
 def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_data_labels, networkspeci, 
-                        base_plot_type, plot_type, plot_options):
+                        base_plot_type, plot_type, plot_options, map_extent=False):
     """ Function that handles formatting of a plot axis,
         based on given plot options.
 
@@ -435,7 +435,7 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
         :type read_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
-        :param relevant_data_labels: names of plotted data arrays 
+        :param relevant_data_labels: names of plotted data arrays per axis
         :type relevant_data_labels: list
         :param networkspeci: str of currently active network and species 
         :type networkspeci: str
@@ -445,6 +445,8 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
         :type plot_type: str
         :param plot_options: list of options to configure plots
         :type plot_options: list
+        :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
+        :type map_extent: list
     """
 
     # transform axis dict or str to list
@@ -484,11 +486,11 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
 
         # domain
         if 'domain' in plot_options:
-            if len(relevant_data_labels[relevant_ax_ii]) == 1:
-                if relevant_data_labels[relevant_ax_ii][0] == read_instance.observations_data_label:
+            if len(read_instance.data_labels) == 1:
+                if read_instance.data_labels[0] == read_instance.observations_data_label:
                     print("Warning: 'domain' plot option cannot be made as have no experiments.")
                     return
-            experiment_domain(canvas_instance, relevant_ax, relevant_data_labels[relevant_ax_ii])
+            experiment_domain(canvas_instance, relevant_ax, relevant_data_labels[relevant_ax_ii], map_extent)
 
         # annotation
         if 'annotate' in plot_options:
