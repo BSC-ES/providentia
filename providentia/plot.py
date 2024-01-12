@@ -272,9 +272,9 @@ class Plot:
             :return: grid_edge_polygons
             :rtype: list
         """
-
+        
         # if data_labels are not defined, take all in memory
-        if not data_labels:
+        if data_labels == ['']:
             data_labels = copy.deepcopy(self.read_instance.data_labels)
         
         grid_edge_polygons = []

@@ -1227,10 +1227,10 @@ class ProvidentiaOffline:
                 z2 = data_labels_sans_obs
             elif 'obs' in plot_options:
                 z1 = [self.observations_data_label]
-                z2 = []
+                z2 = ['']
             else:
                 z1 = data_labels
-                z2 = []*len(data_labels)
+                z2 = ['']*len(data_labels)
 
             # iterate through relevant data labels making plots
             for z1_label, z2_label in zip(z1, z2):
