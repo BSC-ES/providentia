@@ -1,6 +1,7 @@
 # Tested using a conda environment with Python=3.9
-# Before using pip install -r requirements.txt, we need to install cartopy:
+# Before using pip install -r requirements.txt, we need to install cartopy and jupyterlab usind conda:
 # conda install -c conda-forge cartopy
+# conda install -c conda-forge jupyterlab
 
 matplotlib==3.8
 netCDF4==1.6.5
@@ -15,3 +16,5 @@ cftime==1.0.3.4
 KDEpy==1.1.8
 xarray==2023.12.0
 Sphinx==7.2.6
+coverage==7.4.0
+pytest==7.4.4
