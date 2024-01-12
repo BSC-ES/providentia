@@ -283,7 +283,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         show_message(read_instance, msg)
 
 
-def experiment_domain(canvas_instance, relevant_axis, data_labels):
+def experiment_domain(canvas_instance, relevant_axis, data_labels, map_extent):
     """ Plot experiment domain extents on map
 
         :param canvas_instance: canvas instance
@@ -292,6 +292,8 @@ def experiment_domain(canvas_instance, relevant_axis, data_labels):
         :type relevant_axis: object
         :param data_labels: names of plotted data arrays 
         :type data_labels: list
+        :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
+        :type map_extent: list
     """
 
     #get experiment domain polygons
@@ -300,3 +302,8 @@ def experiment_domain(canvas_instance, relevant_axis, data_labels):
     # plot grid edge polygons on map
     for grid_edge_polygon in grid_edge_polygons:
         relevant_axis.add_patch(grid_edge_polygon)
+
+    # if map extent is not set then re-set automatic limits based now domain is plotted.
+    if not map_extent:
+        relevant_axis.relim(visible_only=True)
+        relevant_axis.autoscale(tight=False)
