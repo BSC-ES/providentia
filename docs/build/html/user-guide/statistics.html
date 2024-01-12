@@ -1,16 +1,19 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Statistics &#8212; Providentia 2.3.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
-    <script src="../_static/documentation_options.js?v=c3c8ae58"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Other topics" href="../other-topics.html" />
@@ -32,9 +35,9 @@
           <div class="body" role="main">
             
   <section id="statistics">
-<h1>Statistics<a class="headerlink" href="#statistics" title="Link to this heading">¶</a></h1>
+<h1>Statistics<a class="headerlink" href="#statistics" title="Permalink to this heading">¶</a></h1>
 <section id="statistical-modes">
-<h2>Statistical modes<a class="headerlink" href="#statistical-modes" title="Link to this heading">¶</a></h2>
+<h2>Statistical modes<a class="headerlink" href="#statistical-modes" title="Permalink to this heading">¶</a></h2>
 <p>There are three statistical modes:</p>
 <ul class="simple">
 <li><p>Flattened (new default)</p></li>
@@ -45,11 +48,11 @@
 <p>When selecting data across multiple stations, it has 2 dimensions: Spatial and Temporal.</p>
 <p>In the versions of Providentia prior to 2.2.0, the mode was always Spatial|Temporal, with aggregation performed across stations (e.g. taking mean across stations per timestep), going to 1D, before calculating the desired statistic across the aggregated timesteps (e.g. median), going to 0D.</p>
 <section id="dimensional-reduction-by-statistical-mode">
-<h3>Dimensional reduction by statistical mode<a class="headerlink" href="#dimensional-reduction-by-statistical-mode" title="Link to this heading">¶</a></h3>
+<h3>Dimensional reduction by statistical mode<a class="headerlink" href="#dimensional-reduction-by-statistical-mode" title="Permalink to this heading">¶</a></h3>
 <img alt="Statistical modes" src="../_images/statistical-modes.png" />
 </section>
 <section id="dimensional-reduction-by-statistical-mode-and-plot-type">
-<h3>Dimensional reduction by statistical mode and plot type<a class="headerlink" href="#dimensional-reduction-by-statistical-mode-and-plot-type" title="Link to this heading">¶</a></h3>
+<h3>Dimensional reduction by statistical mode and plot type<a class="headerlink" href="#dimensional-reduction-by-statistical-mode-and-plot-type" title="Permalink to this heading">¶</a></h3>
 <p>For some plot types the full dimensional reduction is not possible, e.g map. Therefore, they are locked in certain reduction configurations. This is illustrated per plot type:</p>
 <img alt="Statistical reduction" src="../_images/statistical-reduction.png" />
 <p>In both the dashboard and offline versions of Providentia, the statistical modes and aggregation statistics can be set.</p>
@@ -62,7 +65,7 @@
 </section>
 </section>
 <section id="periodic-statistics">
-<h2>Periodic statistics<a class="headerlink" href="#periodic-statistics" title="Link to this heading">¶</a></h2>
+<h2>Periodic statistics<a class="headerlink" href="#periodic-statistics" title="Permalink to this heading">¶</a></h2>
 <p>The periodic plot gives statistical information for grouped data in individual timesteps. Thus it can be seen how each individual timesteps compare for observations vs experiment/s.</p>
 <p>However, when looking to evaluate the agreement across the whole of the periodic cycle, Providentia was previously lacking statistics to enable such a comparison.</p>
 <p>Statistics can now be calculated which assess the available periodic cycles, i.e. diurnal, weekly, monthly. These statistics are available via the statsummary, table and heatmap plot types.</p>
@@ -157,11 +160,11 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2023, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa.
+      &copy;2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/user-guide/statistics.rst.txt"

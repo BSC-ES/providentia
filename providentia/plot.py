@@ -281,7 +281,7 @@ class Plot:
                 data_labels = copy.deepcopy(self.read_instance.data_labels)
 
         grid_edge_polygons = []
-
+        
         # iterate through read experiments and plot grid domain edges on map
         for experiment in data_labels:
             if experiment != self.read_instance.observations_data_label:
