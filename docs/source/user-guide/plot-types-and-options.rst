@@ -147,3 +147,11 @@ Incorporate all read species in the plot type.
 
 .. image:: ../images/plot-options/multispecies.jpg
   :alt: Multispecies option
+
+Hide points and only show regression / smooth lines (``_hidedata``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The option ``_hidedata`` needs to be accompanied by ``_smooth`` in the ``timeseries`` plot and by ``_regression`` in the ``scatter`` plot.
+
+.. image:: ../images/plot-options/hidedata.jpg
+  :alt: Hide data option
