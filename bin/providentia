@@ -87,7 +87,7 @@ memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
 load_command="source load_modules.sh"
 python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $OTHEROPTS"
-interactive_alloc_command="sbatch -t $time -c $cores -J $jobname interactive.sh"
+interactive_alloc_command="sbatch -t $time -c $cores -J $jobname"
 
 # avoid x11 forwarding when creating offline reports
 if [[ $PARSED =~ "--offline" ]]; then
@@ -130,11 +130,19 @@ ip=$(hostname --ip-address)
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
     
-    if $debug; then
+    if $interactive; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        echo "Starting interactive jupyter session."
+        echo "Check 'interactive.out' for information on how to connect to session."
+        eval "${load_command}"
+        eval "${interactive_alloc_command} ${queue_option} ${memory_option} interactive.sh"
+
+    elif $debug; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         echo "Entering debug mode"
         eval "${load_command}"
         eval "${salloc_command} ${queue_option} ${memory_option}"
+
     else
         if $debugexec; then
             eval "srun ${python_command}"
@@ -150,7 +158,18 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
     # avoid magnified graphics
     eval export QT_AUTO_SCREEN_SCALE_FACTOR=0
 
-    if $debug; then
+    if $interactive; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+        echo "Starting interactive jupyter session."
+        echo "Check 'interactive.out' for information on how to connect to session."
+        eval "${load_command}"
+        if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+            eval "${interactive_alloc_command} ${queue_option} interactive.sh"
+        else
+            eval "${interactive_alloc_command} ${constraint_option} ${queue_option} interactive.sh"
+        fi
+
+    elif $debug; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
         echo "Entering debug mode"
         eval "${load_command}"
@@ -159,6 +178,7 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
         else
             eval "${salloc_command} ${constraint_option} ${queue_option}"
         fi
+
     else
         if $debugexec; then
             eval "srun ${python_command}"
@@ -175,6 +195,7 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
 
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
+
     if $interactive; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
         echo "Starting interactive jupyter session."
@@ -195,6 +216,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
         else
             eval "${salloc_command} ${constraint_option} ${queue_option}"
         fi
+
     else
         if $debugexec; then
             eval "srun ${python_command}"
@@ -213,7 +235,13 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
 elif [ "${ip}" == "84.88.185.48" ]; then
     echo "Warning: running in the hub may make Providentia slower ..."
     eval "${load_command}"
-    eval "${python_command}"
+    if $interactive; then
+        echo "Starting interactive jupyter session."
+        export PYTHONPATH=$(pwd):${PYTHONPATH}
+        jupyter-lab
+    else
+        eval "${python_command}"
+    fi
 
 # Local machines (Workstations, dust02 machine and personal laptops)
 else
