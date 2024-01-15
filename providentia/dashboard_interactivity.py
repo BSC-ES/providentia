@@ -181,22 +181,14 @@ def legend_picker_func(canvas_instance, event):
             legend_label = event.artist
             data_label = legend_label.get_text()
 
-            # transform legend label into data labels
-            for exp_label, exp_alias in canvas_instance.read_instance.experiments.items():
-                if data_label == exp_alias:
-                    data_label = exp_label
-                    continue
-            if data_label == canvas_instance.plot_characteristics['legend']['handles']['obs_label']:
-                data_label = 'observations'
-
             if data_label not in canvas_instance.plot_elements['data_labels_active']:
                 visible = True
                 # put observations label always first in pop-ups on hover
-                if data_label == 'observations':
+                if data_label == canvas_instance.read_instance.observations_data_label:
                     canvas_instance.plot_elements['data_labels_active'].insert(0, data_label)
                 # put experiment labels in the same order as in the legend
                 else:
-                    canvas_instance.plot_elements['data_labels_active'].insert(list(canvas_instance.read_instance.experiments.keys()).index(data_label)+1, 
+                    canvas_instance.plot_elements['data_labels_active'].insert(list(canvas_instance.read_instance.experiments.values()).index(data_label)+1, 
                                                                                data_label)
             else:
                 visible = False
@@ -225,16 +217,17 @@ def legend_picker_func(canvas_instance, event):
                                         plot_element.set_visible(False)
 
                         # reset axes limits (harmonising across subplots for periodic plots) 
-                        if plot_type == 'scatter':
-                            harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
-                                                       canvas_instance.plot_axes[plot_type], plot_type, 
-                                                       canvas_instance.plot_characteristics[plot_type], 
-                                                       plot_options, relim=True)
-                        elif plot_type != 'taylor':
-                            harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
-                                                       canvas_instance.plot_axes[plot_type], plot_type, 
-                                                       canvas_instance.plot_characteristics[plot_type], 
-                                                       plot_options, relim=True, autoscale=True)
+                        if plot_type not in ['taylor']:
+                            if plot_type == 'scatter':
+                                harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
+                                                        canvas_instance.plot_axes[plot_type], plot_type, 
+                                                        canvas_instance.plot_characteristics[plot_type], 
+                                                        plot_options, relim=True)
+                            else:
+                                harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
+                                                        canvas_instance.plot_axes[plot_type], plot_type, 
+                                                        canvas_instance.plot_characteristics[plot_type], 
+                                                        plot_options, relim=True, autoscale=True)
 
             # change font weight of label
             legend_label._fontproperties = canvas_instance.legend.get_texts()[0]._fontproperties.copy()
@@ -311,7 +304,7 @@ class HoverAnnotation(object):
                         # skip observations for bias plot
                         if ((plot_type in ['timeseries', 'distribution']) 
                             and (self.canvas_instance.plot_elements[plot_type]['active'] == 'bias')
-                            and (data_label == 'observations')):
+                            and (data_label == canvas_instance.read_instance.observations_data_label)):
                             continue
 
                         # do not annotate if plot is cleared
@@ -355,7 +348,7 @@ class HoverAnnotation(object):
             if data_label == self.annotate_data_label:
                 
                 # skip observations for bias plot
-                if self.canvas_instance.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
+                if self.canvas_instance.plot_elements['timeseries']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
                     continue
                 
                 # do not annotate if plot is cleared
@@ -386,7 +379,7 @@ class HoverAnnotation(object):
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
             
             # skip observations for bias plot
-            if self.canvas_instance.plot_elements['timeseries']['active'] == 'bias' and data_label == 'observations':
+            if self.canvas_instance.plot_elements['timeseries']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
                 continue
 
             # do not annotate if plot is cleared
@@ -399,12 +392,7 @@ class HoverAnnotation(object):
 
             # for all labels if there is data
             if len(concentration) >= 1:
-                if data_label != 'observations':
-                    exp_alias = self.canvas_instance.read_instance.experiments[data_label]
-                    text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration[0])
-                else:
-                    text_label += ('\n{0}: {1:.2f}').format(self.canvas_instance.plot_characteristics['legend']['handles']['obs_label'], 
-                                                            concentration[0])
+                text_label += ('\n{0}: {1:.2f}').format(data_label, concentration[0])
 
         self.annotation.set_text(text_label)
 
@@ -440,8 +428,7 @@ class HoverAnnotation(object):
 
                 # create annotation text
                 # experiment label
-                exp_alias = self.canvas_instance.read_instance.experiments[data_label]
-                text_label = exp_alias
+                text_label = copy.deepcopy(data_label)
                 # observations label
                 text_label += ('\n{0}: {1:.2f}').format('x', concentration_x)
                 # experiment label
@@ -460,7 +447,7 @@ class HoverAnnotation(object):
             if data_label == self.annotate_data_label:
                 
                 # skip observations for bias plot
-                if self.canvas_instance.plot_elements['distribution']['active'] == 'bias' and data_label == 'observations':
+                if self.canvas_instance.plot_elements['distribution']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
                     continue
                 
                 # do not annotate if plot is cleared
@@ -491,7 +478,7 @@ class HoverAnnotation(object):
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
             
             # skip observations for bias plot
-            if self.canvas_instance.plot_elements['distribution']['active'] == 'bias' and data_label == 'observations':
+            if self.canvas_instance.plot_elements['distribution']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
                 continue
 
             # do not annotate if plot is cleared
@@ -504,13 +491,8 @@ class HoverAnnotation(object):
 
             # for all labels if there is data
             if len(density) >= 1:
-                if data_label != 'observations':
-                    exp_alias = self.canvas_instance.read_instance.experiments[data_label]
-                    text_label += ('\n{0}: {1:.3f}').format(exp_alias, density[0])
-                else:
-                    text_label += ('\n{0}: {1:.3f}').format(self.canvas_instance.plot_characteristics['legend']['handles']['obs_label'], 
-                                                            density[0])
-
+                text_label += ('\n{0}: {1:.3f}').format(data_label, density[0])
+   
         self.annotation.set_text(text_label)
 
         return None
@@ -544,8 +526,7 @@ class HoverAnnotation(object):
                     self.annotation.set_ha('left')
 
                 # create annotation text
-                exp_alias = self.canvas_instance.read_instance.experiments[data_label]
-                text_label = exp_alias
+                text_label = copy.deepcopy(data_label)
                 text_label += ('\n{0}: {1:.2f}').format(self.canvas_instance.plot_characteristics['taylor']['corr_stat'], 
                                                         np.cos(corr_stat))
                 text_label += ('\n{0}: {1:.2f}').format('StdDev', stddev)
@@ -574,7 +555,7 @@ class HoverAnnotation(object):
                             for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
                                 # skip observations for bias plot
-                                if self.canvas_instance.plot_elements[plot_type]['active'] == 'bias' and data_label == 'observations':
+                                if self.canvas_instance.plot_elements[plot_type]['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
                                     continue
 
                                 # do not annotate if plot is cleared
@@ -621,7 +602,7 @@ class HoverAnnotation(object):
             if data_label == self.annotate_data_label:
                 
                 # skip observations for bias plot
-                if self.canvas_instance.plot_elements['periodic']['active'] == 'bias' and data_label == 'observations':
+                if self.canvas_instance.plot_elements['periodic']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
                     continue
                 
                 # do not annotate if plot is cleared
@@ -663,7 +644,7 @@ class HoverAnnotation(object):
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
             
             # skip observations for bias plot
-            if self.canvas_instance.plot_elements['periodic']['active'] == 'bias' and data_label == 'observations':
+            if self.canvas_instance.plot_elements['periodic']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
                 continue
 
             # do not annotate if plot is cleared
@@ -676,13 +657,8 @@ class HoverAnnotation(object):
             
             # for all labels if there is data
             if len(concentration) >= 1:
-                if data_label != 'observations':
-                    exp_alias = self.canvas_instance.read_instance.experiments[data_label]
-                    text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration[0])
-                else:
-                    text_label += ('\n{0}: {1:.2f}').format(self.canvas_instance.plot_characteristics['legend']['handles']['obs_label'], 
-                                                            concentration[0])
-        
+                text_label += ('\n{0}: {1:.2f}').format(data_label, concentration[0])
+
         self.canvas_instance.annotations['periodic'][resolution].set_text(text_label)
 
         return None
@@ -696,7 +672,7 @@ class HoverAnnotation(object):
             if data_label == self.annotate_data_label:
                 
                 # skip observations for bias plot
-                if self.canvas_instance.plot_elements['periodic-violin']['active'] == 'bias' and data_label == 'observations':
+                if self.canvas_instance.plot_elements['periodic-violin']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
                     continue
                 
                 # do not annotate if plot is cleared
@@ -738,7 +714,7 @@ class HoverAnnotation(object):
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
             
             # skip observations for bias plot
-            if self.canvas_instance.plot_elements['periodic-violin']['active'] == 'bias' and data_label == 'observations':
+            if self.canvas_instance.plot_elements['periodic-violin']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
                 continue
 
             # do not annotate if plot is cleared
@@ -751,13 +727,8 @@ class HoverAnnotation(object):
             
             # for all labels if there is data
             if len(concentration) >= 1:
-                if data_label != 'observations':
-                    exp_alias = self.canvas_instance.read_instance.experiments[data_label]
-                    text_label += ('\n{0}: {1:.2f}').format(exp_alias, concentration[0])
-                else:
-                    text_label += ('\n{0}: {1:.2f}').format(self.canvas_instance.plot_characteristics['legend']['handles']['obs_label'], 
-                                                            concentration[0])
-        
+                text_label += ('\n{0}: {1:.2f}').format(data_label, concentration[0])
+
         self.canvas_instance.annotations['periodic-violin'][resolution].set_text(text_label)
 
         return None

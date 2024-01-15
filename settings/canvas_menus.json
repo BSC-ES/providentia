@@ -587,7 +587,7 @@
                       "periodic_mode_label": {"element_type": "label",
                                               "size": [230, 20],
                                               "relative_position": [-240, 100],
-                                              "text": "Periodic cycle"},
+                                              "text": "Periodic mode"},
                   
                       "periodic_mode": {"element_type": "combobox",
                                         "formatting_dict": "combobox_menu",
