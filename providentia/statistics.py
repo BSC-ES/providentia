@@ -41,8 +41,11 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         :type stddev_max: dict
     """
 
-    if read_instance.resampling:
-
+    possible_resolutions = ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
+                            '6hourly', '6hourly_instantaneous', 'daily', 'monthly', 'annual']
+    
+    if read_instance.resampling_resolution in possible_resolutions:
+        
         # update relevant/nonrelevant temporal resolutions 
         read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resampling_resolution)
         read_instance.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(read_instance.resampling_resolution)
@@ -129,7 +132,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             read_instance.data_array = read_instance.data_array[valid_data_labels_mask]
 
             # temporally resample data array if required
-            if read_instance.resampling:
+            if read_instance.resampling_resolution in possible_resolutions:
                 # flatten networkspecies dimension for creation of pandas dataframe
                 data_array_reduced = read_instance.data_array.reshape(read_instance.data_array.shape[0]*read_instance.data_array.shape[1], 
                                                                       read_instance.data_array.shape[2])
