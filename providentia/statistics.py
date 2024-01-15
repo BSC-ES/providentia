@@ -657,7 +657,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     label_units = stats_dict['units']
     if label_units == '[measurement_units]':
         label_units = read_instance.measurement_units[speci]
-
+    
     # generate z colourbar label
     # first check if have defined label (in this order: 1. configuration file 2. specific for z statistic)
     set_label = False
@@ -703,7 +703,15 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
             set_cmap = True
     #2. get cmap specific for z statistic
     if not set_cmap:
-        z_colourmap = stats_dict[cmap_var_name]
+        if isinstance(stats_dict[cmap_var_name], dict):
+            if speci in stats_dict[cmap_var_name].keys():
+                z_colourmap = stats_dict[cmap_var_name][speci]
+            else:
+                error = "Error: Colormap needs to be defined for all species, using a dictionary with the "
+                error += f"cmap for each speci or a string for all. Colormap for {speci} has not been defined."
+                sys.exit(error)
+        else:
+            z_colourmap = stats_dict[cmap_var_name]
 
     # check if have defined vmin (in this order: 1. configuration file 2. specific for z statistic)
     # if have no defined vmin, then take vmin as minimum range value of calculated statistic
@@ -721,8 +729,15 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     if not set_vmin:
         if vmin_var_name in stats_dict:
             if stats_dict[vmin_var_name] != '':
-                z_vmin = stats_dict[vmin_var_name]
+                # 3. get vmin specific for species
                 set_vmin = True
+                if isinstance(stats_dict[vmin_var_name], dict):
+                    if speci in stats_dict[vmin_var_name].keys():
+                        z_vmin = stats_dict[vmin_var_name][speci]
+                    else:
+                        set_vmin = False
+                else:
+                    z_vmin = stats_dict[vmin_var_name]
     # if have no defined vmin, take vmin as minimum range value of calculated statistic
     if not set_vmin:
         z_vmin = plotted_min
@@ -743,8 +758,15 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     if not set_vmax:
         if vmax_var_name in stats_dict:
             if stats_dict[vmax_var_name] != '':
-                z_vmax = stats_dict[vmax_var_name]
                 set_vmax = True
+                # 3. get vmax specific for species
+                if isinstance(stats_dict[vmax_var_name], dict):
+                    if speci in stats_dict[vmax_var_name].keys():
+                        z_vmax = stats_dict[vmax_var_name][speci]
+                    else:
+                        set_vmax = False
+                else:
+                    z_vmax = stats_dict[vmax_var_name]
     # if have no defined vmax, take vmax as maximum range value of calculated statistic
     if not set_vmax:
         z_vmax = plotted_max
