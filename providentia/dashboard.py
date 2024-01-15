@@ -632,7 +632,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_matrix = self.parameter_dictionary[self.species[0]]['matrix']
             self.selected_species = copy.deepcopy(self.species[0])
             self.selected_resampling_resolution = copy.deepcopy(self.resampling_resolution)
-            self.selected_resampling = copy.deepcopy(self.resampling)
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
             self.selected_statistic_aggregation = copy.deepcopy(self.statistic_aggregation)
 
@@ -911,7 +910,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             elif event_source == self.cb_resampling_resolution:
                 self.selected_resampling_resolution = changed_param
-                self.selected_resampling = False
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
@@ -1321,9 +1319,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             for plot_type, ax in self.mpl_canvas.plot_axes.items():
                 self.mpl_canvas.remove_axis_elements(ax, plot_type)
 
-            # inactivate resampling
-            self.resampling = False
-
             # set current time array, as previous time array
             self.previous_time_array = self.time_array
 
@@ -1392,8 +1387,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # unselect all/intersect/extent checkboxes
             self.mpl_canvas.unselect_map_checkboxes()
             
-            # reset resampling
-            self.cb_resampling_resolution.setCurrentText('None')
+            # update resampling resolution
+            self.mpl_canvas.handle_resampling_update()
 
             # unset variable to allow updating of MPL canvas
             self.block_MPL_canvas_updates = False

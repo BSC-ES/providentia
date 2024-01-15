@@ -95,7 +95,6 @@ class ProvConfiguration:
             'report_title': 'Providentia Offline Report',
             'report_filename': 'PROVIDENTIA_Report',
             'active_dashboard_plots': None,
-            'resampling': False,
             'resampling_resolution': None,
             'statistic_mode': None,
             'statistic_aggregation': None,
@@ -517,7 +516,7 @@ class ProvConfiguration:
 
     def check_validity(self):
         """ Check validity of set variables after parsing. """
-
+        
         # check have network information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:
@@ -756,13 +755,6 @@ class ProvConfiguration:
 
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
-
-        # check have resampling_resolution if resampling is True
-        # if offline, throw message, stating error
-        if (self.read_instance.resampling) and (self.read_instance.resampling_resolution == 'None'):
-            msg = 'Resampling will not be applied because resampling resolution was not defined.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-            self.read_instance.resampling = False
         
         # check bounds inside filter_species
         if self.read_instance.filter_species:
