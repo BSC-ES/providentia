@@ -1,91 +1,136 @@
 """ Module storing writing functions """
 
 import copy
+from netCDF4 import Dataset, num2date
 import numpy as np
+import os
 import pandas as pd
 import sys
-
-from netCDF4 import Dataset, num2date
+import xarray as xr
 
 from .configuration import write_conf
 from .dashboard_elements import InputDialog
 
 
-def export_data_npz(canvas_instance, fname):
-    """ Function that writes out current data / ghost data / metadata in memory to .npy file. """
+def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
+    """ Function that writes out current data / ghost data / metadata 
+        in memory to .npy file. 
+
+        :prv: Instance of providentia 
+        :type prv: instance of ProvidentiaMainWindow / Interactive
+        :fname: Name of the file to save
+        :type fname: str
+        :input_dialogue: boolean informing whether to open input prompt to ask if to filter data or not
+        :type input_dialogue: boolean
+        :set_in_memory: booolean informing if saved data is set in memory
+        :type set_in_memory: boolean
+    """
+
+    # ensure fname has correct extension
+    if fname[-4:] != '.npz':
+        fname = '{}.npz'.format(fname)
 
     # open dialog to choose if data is filtered or not
-    title = 'Export data'
-    msg = 'Select option'
-    options = ['Apply metadata filters and temporal colocation (if active) to exported data', 
-               'Do not apply metadata filters and temporal colocation to exported data']
-    dialog = InputDialog(canvas_instance.read_instance, title, msg, options)
-    selected_option, okpressed = dialog.selected_option, dialog.okpressed
-    if selected_option == options[0]:
+    if input_dialogue:
+        title = 'Export data'
+        msg = 'Select option'
+        options = ['Apply metadata filters and temporal colocation (if active) to exported data', 
+                'Do not apply metadata filters and temporal colocation to exported data']
+        dialog = InputDialog(prv, title, msg, options)
+        selected_option, okpressed = dialog.selected_option, dialog.okpressed
+        if selected_option == options[0]:
+            apply_filters = True
+        elif selected_option == options[1]:
+            apply_filters = False
+    else:
         apply_filters = True
-    elif selected_option == options[1]:
-        apply_filters = False
 
     # create dict to save data
     save_data_dict = {}
 
     # save data / ghost data / metadata
-    for networkspeci in canvas_instance.read_instance.networkspecies:
+    for networkspeci in prv.networkspecies:
 
         # get valid station indices (from observations because valid stations for the experiment is a 
         # subset of the observations)
-        if canvas_instance.read_instance.temporal_colocation:
-            valid_station_inds = canvas_instance.read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
+        if prv.temporal_colocation:
+            valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
         else:
-            valid_station_inds = canvas_instance.read_instance.valid_station_inds[networkspeci]['observations']
+            valid_station_inds = prv.valid_station_inds[networkspeci][prv.observations_data_label]
 
         if apply_filters:
-            if canvas_instance.read_instance.reading_ghost:
-                save_data_dict['{}_ghost_data'.format(networkspeci)] = np.take(canvas_instance.read_instance.ghost_data_in_memory[networkspeci], 
+            if prv.reading_ghost:
+                save_data_dict['{}_ghost_data'.format(networkspeci)] = np.take(prv.ghost_data_in_memory[networkspeci], 
                     valid_station_inds, axis=1)
-            save_data_dict['{}_data'.format(networkspeci)] = np.take(canvas_instance.read_instance.data_in_memory_filtered[networkspeci], 
+            save_data_dict['{}_data'.format(networkspeci)] = np.take(prv.data_in_memory_filtered[networkspeci], 
                 valid_station_inds, axis=1)
-            save_data_dict['{}_metadata'.format(networkspeci)] = np.take(canvas_instance.read_instance.metadata_in_memory[networkspeci], 
+            save_data_dict['{}_metadata'.format(networkspeci)] = np.take(prv.metadata_in_memory[networkspeci], 
                 valid_station_inds, axis=0)
         else:
-            if canvas_instance.read_instance.reading_ghost:
-                save_data_dict['{}_ghost_data'.format(networkspeci)] = canvas_instance.read_instance.ghost_data_in_memory[networkspeci]
-            save_data_dict['{}_data'.format(networkspeci)] = canvas_instance.read_instance.data_in_memory_filtered[networkspeci]
-            save_data_dict['{}_metadata'.format(networkspeci)] = canvas_instance.read_instance.metadata_in_memory[networkspeci]
+            if prv.reading_ghost:
+                save_data_dict['{}_ghost_data'.format(networkspeci)] = prv.ghost_data_in_memory[networkspeci]
+            save_data_dict['{}_data'.format(networkspeci)] = prv.data_in_memory_filtered[networkspeci]
+            save_data_dict['{}_metadata'.format(networkspeci)] = prv.metadata_in_memory[networkspeci]
 
     # save out miscellaneous variables 
-    save_data_dict['time'] = canvas_instance.read_instance.time_array
-    save_data_dict['data_labels'] = canvas_instance.read_instance.data_labels
-    save_data_dict['resolution'] = canvas_instance.read_instance.resolution
-    save_data_dict['start_date'] = canvas_instance.read_instance.start_date
-    save_data_dict['end_date'] = canvas_instance.read_instance.end_date
-    save_data_dict['temporal_colocation'] = canvas_instance.read_instance.temporal_colocation
-    save_data_dict['spatial_colocation'] = canvas_instance.read_instance.spatial_colocation
-    save_data_dict['filter_species'] = canvas_instance.read_instance.filter_species
-    if canvas_instance.read_instance.reading_ghost:
-        save_data_dict['ghost_version'] = canvas_instance.read_instance.ghost_version
-        save_data_dict['ghost_data_variables'] = canvas_instance.read_instance.ghost_data_vars_to_read
+    save_data_dict['time'] = prv.time_array
+    save_data_dict['data_labels'] = prv.data_labels
+    save_data_dict['resolution'] = prv.resolution
+    save_data_dict['start_date'] = prv.start_date
+    save_data_dict['end_date'] = prv.end_date
+    save_data_dict['temporal_colocation'] = prv.temporal_colocation
+    save_data_dict['spatial_colocation'] = prv.spatial_colocation
+    save_data_dict['filter_species'] = prv.filter_species
+    if prv.reading_ghost:
+        save_data_dict['ghost_version'] = prv.ghost_version
+        save_data_dict['ghost_data_variables'] = prv.ghost_data_vars_to_read
 
     # save out dict to .npz file
     np.savez(fname, **save_data_dict)
 
-def export_netcdf(canvas_instance, fname):
-    """ Write data and metadata to netcdf file. """
+    # if set_in_memory is active, load and return the variable in memory  
+    if set_in_memory:   
+        data = np.load(fname, allow_pickle=True)
+        # delete temporary save file after load
+        os.remove(fname)  
+        return data                  
+
+def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=False):
+    """ Write data and metadata to netcdf file. 
+    
+        :prv: Instance of providentia
+        :type prv: instance of ProvidentiaMainWindow / Interactive
+        :fname: Name of the file to save
+        :type fname: str
+        :input_dialogue: boolean informing whether to open input prompt to ask if to filter data or not
+        :type input_dialogue: boolean
+        :set_in_memory: booolean informing if saved data is set in memory
+        :type set_in_memory: boolean
+        :xarray: booolean informing if data is read in xarray format or not
+        :type xarray: boolean
+
+    """
+
+    # ensure fname has correct extension
+    if fname[-3:] != '.nc':
+        fname = '{}.nc'.format(fname)
 
     # open dialog to choose if data is filtered or not
-    title = 'Export data'
-    msg = 'Select option'
-    options = ['Apply metadata filters and temporal colocation (if active) to exported data', 
-               'Do not apply metadata filters and temporal colocation to exported data']
-    dialog = InputDialog(canvas_instance.read_instance, title, msg, options)
-    selected_option, okpressed = dialog.selected_option, dialog.okpressed
-    if selected_option == options[0]:
+    if input_dialogue:
+        title = 'Export data'
+        msg = 'Select option'
+        options = ['Apply metadata filters and temporal colocation (if active) to exported data', 
+                'Do not apply metadata filters and temporal colocation to exported data']
+        dialog = InputDialog(prv, title, msg, options)
+        selected_option, okpressed = dialog.selected_option, dialog.okpressed
+        if selected_option == options[0]:
+            apply_filters = True
+        elif selected_option == options[1]:
+            apply_filters = False
+    else:
         apply_filters = True
-    elif selected_option == options[1]:
-        apply_filters = False
-        
+
     # set up some structural variables
-    read_instance = canvas_instance.read_instance
     from GHOST_standards import standard_parameters, get_standard_data, get_standard_metadata
     parameter_dictionary = {}
     for _, param_dict in standard_parameters.items():
@@ -96,33 +141,36 @@ def export_netcdf(canvas_instance, fname):
                 np.float32: 'f4', np.float64: 'f8'}
 
     # start file
-    fout = Dataset(fname+".nc", 'w', format="NETCDF4")
+    fout = Dataset(fname, 'w', format="NETCDF4")
 
     # file contents
-    fout.title = 'Saved data from the Providentia dashboard.'
+    if prv.interactive:
+        fout.title = 'Saved data from Providentia interactive.'
+    else:
+        fout.title = 'Saved data from the Providentia dashboard.'
     fout.institution = 'Barcelona Supercomputing Center'
     fout.source = 'Providentia'
-    if read_instance.reading_ghost:
-        fout.data_version = read_instance.ghost_version
+    if prv.reading_ghost:
+        fout.data_version = prv.ghost_version
 
     # netcdf dimensions
-    fout.createDimension('data_label', len(read_instance.data_labels))
+    fout.createDimension('data_label', len(prv.data_labels))
     fout.createDimension('station', None)
-    fout.createDimension('time', len(read_instance.time_array))
-    fout.createDimension('month', len(read_instance.yearmonths))
+    fout.createDimension('time', len(prv.time_array))
+    fout.createDimension('month', len(prv.yearmonths))
     
     # create dimensions only for GHOST case
-    if read_instance.reading_ghost:
-        fout.createDimension('ghost_data_variable', len(read_instance.ghost_data_vars_to_read))
+    if prv.reading_ghost:
+        fout.createDimension('ghost_data_variable', len(prv.ghost_data_vars_to_read))
 
     # iterate through networkspecies 
-    for speci_ii, networkspeci in enumerate(read_instance.networkspecies):
+    for speci_ii, networkspeci in enumerate(prv.networkspecies):
 
         # get species
         speci = networkspeci.split('|')[1]
 
         # get prefix (name of networkspeci) to be added to variable names
-        if read_instance.reading_ghost:
+        if prv.reading_ghost:
             var_prefix = networkspeci
         else:
             var_prefix = networkspeci.replace('/', '_')
@@ -139,41 +187,41 @@ def export_netcdf(canvas_instance, fname):
             current_data_type = type_map[data_format_dict['time']['data_type']]
             var = fout.createVariable('time', current_data_type, ('time',))
             # set attributes
-            if 'hourly' in read_instance.resolution:
+            if 'hourly' in prv.resolution:
                 res_str = 'hours'
-            elif 'daily' in read_instance.resolution:
+            elif 'daily' in prv.resolution:
                 res_str = 'days'
-            elif 'monthly' in read_instance.resolution:
+            elif 'monthly' in prv.resolution:
                 res_str = 'months'
             var.standard_name = data_format_dict['time']['standard_name']
             var.long_name = data_format_dict['time']['long_name']
             var.units = '{} since {}-{}-01 00:00:00'.format(res_str, 
-                                                            str(read_instance.start_date)[:4], 
-                                                            str(read_instance.start_date)[4:6])
+                                                            str(prv.start_date)[:4], 
+                                                            str(prv.start_date)[4:6])
             msg = 'Time in {} since {}-{}-01 00:00 UTC. Time given refers '.format(res_str, 
-                                                                                   str(read_instance.start_date)[:4], 
-                                                                                   str(read_instance.start_date)[4:6])
+                                                                                   str(prv.start_date)[:4], 
+                                                                                   str(prv.start_date)[4:6])
             msg += 'to the start of the time window the measurement is representative of '
             msg += '(temporal resolution).'
             var.description = msg
             var.axis = 'T'
             var.calendar = 'standard'
             var.tz = 'UTC'
-            var[:] = np.arange(len(read_instance.time_array))
+            var[:] = np.arange(len(prv.time_array))
             
             # miscellaneous variables 
             var = fout.createVariable('data_labels', str, ('data_label',))
             var.standard_name = 'data_labels'
             var.long_name = 'data_labels'
             var.description = 'Labels associated with each data array, e.g. observations, experiment_1, etc.'
-            var[:] = np.array(read_instance.data_labels)
+            var[:] = np.array(prv.data_labels)
             
-            if read_instance.reading_ghost:
+            if prv.reading_ghost:
                 var = fout.createVariable('ghost_data_variables', str, ('ghost_data_variable',))
                 var.standard_name = 'ghost_data_variables'
                 var.long_name = 'ghost_data_variables'
                 var.description = 'The names of the GHOST data variables used for additional filtering.'
-                var[:] = np.array(read_instance.ghost_data_vars_to_read)
+                var[:] = np.array(prv.ghost_data_vars_to_read)
          
         # data
         current_data_type = type_map[data_format_dict[speci]['data_type']]
@@ -182,31 +230,32 @@ def export_netcdf(canvas_instance, fname):
         
         # get valid station indices (from observations because valid stations for the experiment is a 
         # subset of the observations)
-        if canvas_instance.read_instance.temporal_colocation:
-            valid_station_inds = canvas_instance.read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
+        if prv.temporal_colocation:
+            valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
         else:
-            valid_station_inds = canvas_instance.read_instance.valid_station_inds[networkspeci]['observations']
+            valid_station_inds = prv.valid_station_inds[networkspeci][prv.observations_data_label]
 
         # set attributes
         var.standard_name = data_format_dict[speci]['standard_name']
         var.long_name = data_format_dict[speci]['long_name']
         var.units = data_format_dict[speci]['units']
         var.description = data_format_dict[speci]['description']
-        var.resolution = str(read_instance.resolution)
-        var.start_date = str(read_instance.start_date)
-        var.end_date = str(read_instance.end_date)
-        var.temporal_colocation = str(read_instance.temporal_colocation)
-        var.spatial_colocation = str(read_instance.spatial_colocation)
-        var.filter_species = str(read_instance.filter_species)
-        if read_instance.reading_ghost:
-            var.ghost_version = str(read_instance.ghost_version)
+        var.resolution = str(prv.resolution)
+        var.start_date = str(prv.start_date)
+        var.end_date = str(prv.end_date)
+        var.temporal_colocation = str(prv.temporal_colocation)
+        var.spatial_colocation = str(prv.spatial_colocation)
+        var.filter_species = str(prv.filter_species)
+        if prv.reading_ghost:
+            var.ghost_version = str(prv.ghost_version)
         if apply_filters:
-            var[:] = np.take(read_instance.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
+            test = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
+            var[:] = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
         else:
-            var[:] = read_instance.data_in_memory[networkspeci]
+            var[:] = prv.data_in_memory[networkspeci]
 
         # GHOST data
-        if read_instance.reading_ghost:
+        if prv.reading_ghost:
             var = fout.createVariable('{}_ghost_data'.format(networkspeci), 'f4', 
                                       ('ghost_data_variable', 'station', 'time',))
             # set attributes 
@@ -214,15 +263,15 @@ def export_netcdf(canvas_instance, fname):
             var.long_name = '{}_ghost_data'.format(networkspeci)
             var.description = 'GHOST data variables used for additional filtering.'
             if apply_filters:
-                var[:] = np.take(read_instance.ghost_data_in_memory[networkspeci], valid_station_inds, axis=1)
+                var[:] = np.take(prv.ghost_data_in_memory[networkspeci], valid_station_inds, axis=1)
             else:
-                var[:] = read_instance.ghost_data_in_memory[networkspeci]
+                var[:] = prv.ghost_data_in_memory[networkspeci]
 
         # save metadata (as individual variables)
         if apply_filters:
-            metadata_arr = np.take(read_instance.metadata_in_memory[networkspeci], valid_station_inds, axis=0)
+            metadata_arr = np.take(prv.metadata_in_memory[networkspeci], valid_station_inds, axis=0)
         else:
-            metadata_arr = read_instance.metadata_in_memory[networkspeci]
+            metadata_arr = prv.metadata_in_memory[networkspeci]
         
         for metadata_var in metadata_arr.dtype.names:
             
@@ -247,17 +296,33 @@ def export_netcdf(canvas_instance, fname):
     # close writing to netCDF
     fout.close()
 
+    # if set_in_memory is active, load and return the variable in memory  
+    if set_in_memory:   
+        if xarray:
+            data = xr.load_dataset(fname)
+        else:
+            data = Dataset(fname)
+
+        # delete temporary save file after load
+        os.remove(fname)  
+
+        return data  
+
 def export_configuration(prv, cname, separator="||"):
     """ Create all items to be written in configuration file
         and send them to write_conf.
 
-        :prv: Instance of providentia main window
-        :type prv: instance of ProvidentiaMainWindow
+        :prv: Instance of providentia
+        :type prv: instance of ProvidentiaMainWindow / Interactive
         :cname: Name for the configuration file
-        :type cname:
+        :type cname: str
         :separator: delimiter for keep/remove fields
         :type separator: str
     """
+
+    # ensure cname has correct extension
+    if cname[-5:] != '.conf':
+        cname = '{}.conf'.format(cname)
 
     # set section and subsection names in config file
     if not hasattr(prv, 'section'):
@@ -382,4 +447,4 @@ def export_configuration(prv, cname, separator="||"):
                     meta_remove = " remove: " + ",".join(str(i) for i in removes) + separator
                     options['subsection'][label] = meta_keep + meta_remove
     
-    write_conf(section, subsection, cname + '.conf', options)
+    write_conf(section, subsection, cname, options)

@@ -27,8 +27,8 @@ from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom
 from .filter import DataFilter
 from .plot import Plot
 from .plot_aux import get_map_extent
-from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
-from .plot_options import annotation, linear_regression, log_axes, log_validity, smooth
+from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
+from .plot_options import annotation, linear_regression, log_axes, smooth
 from .statistics import *
 from .warnings import show_message
 
@@ -40,10 +40,9 @@ register_matplotlib_converters()
 mplstyle.use('fast')
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
-formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
-settings_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/canvas_menus.json')))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
+settings_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.json')))
 
 
 class MPLCanvas(FigureCanvas):
@@ -132,9 +131,9 @@ class MPLCanvas(FigureCanvas):
         for plot_type in self.all_plots:
             # for plot types with zstat, initialise with default zstat (Mean)
             if plot_type in ['map', 'periodic']:
-                self.plot.set_plot_characteristics([plot_type], zstat='Mean')
+                self.plot.set_plot_characteristics([plot_type], zstat='Mean', data_labels=['dummy'])
             else:
-                self.plot.set_plot_characteristics([plot_type])
+                self.plot.set_plot_characteristics([plot_type], data_labels=['dummy'])
             self.current_plot_options[plot_type] = []
             self.previous_plot_options[plot_type] = []
 
@@ -202,7 +201,7 @@ class MPLCanvas(FigureCanvas):
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
             format_axis(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
-                        self.plot_characteristics[plot_type])
+                        self.plot_characteristics[plot_type], map_extent=self.read_instance.map_extent)
 
         # create covers to hide parts of canvas when updating / plotting
         self.canvas_cover = set_formatting(QtWidgets.QWidget(self), formatting_dict['canvas_cover'])
@@ -312,12 +311,8 @@ class MPLCanvas(FigureCanvas):
         
         if not self.read_instance.block_MPL_canvas_updates:
 
-            # activate or deactivate resampling
+            # update resampling resolution
             self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
-            if self.read_instance.resampling_resolution == 'None':
-                self.read_instance.resampling = False
-            else:
-                self.read_instance.resampling = True
 
             # if have selected stations on map, then now remake plots
             if hasattr(self, 'relative_selected_station_inds'):
@@ -521,14 +516,11 @@ class MPLCanvas(FigureCanvas):
         else:
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
-        # calculate map z statistic (for selected z statistic) --> updating active map valid station indices
-        self.z_statistic, self.active_map_valid_station_inds = calculate_statistic(self.read_instance, self, 
-                                                                                   self.read_instance.networkspeci,
-                                                                                   zstat, 
-                                                                                   [self.map_z1.currentText()], 
-                                                                                   [self.map_z2.currentText()], 
-                                                                                    map=True)
-
+        # plot map for zstat --> updating active map valid station indices and setting up plot picker
+        self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.plot_characteristics['map'], 
+                           self.current_plot_options['map'], zstat=zstat, labela=self.map_z1.currentText(), 
+                           labelb=self.map_z2.currentText())
+        
         # update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array(
             [np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind in
@@ -553,15 +545,11 @@ class MPLCanvas(FigureCanvas):
             self.absolute_selected_station_inds = np.array([], dtype=np.int64)
             self.absolute_non_selected_station_inds = np.array([], dtype=np.int64)
 
-            # plot map with 0 stations
-            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, 
-                               self.plot_characteristics['map'])
-
-        # otherwise plot valid active map stations on map
+        # else, if any of the currently selected stations are not in the current active map
+        # valid station indices --> unselect selected stations (and associated plots)
+        # also uncheck select all/intersect/extent checkboxes
         else:
-            # if any of the currently selected stations are not in the current active map
-            # valid station indices --> unselect selected stations (and associated plots)
-            # also uncheck select all/intersect/extent checkboxes
+
             if not np.all(np.in1d(self.relative_selected_station_inds, self.active_map_valid_station_inds)):
                 
                 # unselect all/intersect/extent checkboxes
@@ -575,9 +563,6 @@ class MPLCanvas(FigureCanvas):
             # get absolute non-selected station inds
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
                                                                  self.absolute_selected_station_inds))[0]
-
-            # plot new station points on map - coloured by currently active z statisitic, setting up plot picker
-            self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.z_statistic, self.plot_characteristics['map'])
 
             # create 2D numpy array of plotted station coordinates
             self.map_points_coordinates = np.vstack((self.read_instance.station_longitudes[self.read_instance.networkspeci][self.active_map_valid_station_inds], 
@@ -680,12 +665,12 @@ class MPLCanvas(FigureCanvas):
                     
                     # set new ylabel
                     if z_statistic_type == 'basic':
-                        ylabel = basic_stats[base_zstat]['label']
-                        ylabel_units = basic_stats[base_zstat]['units']
+                        ylabel = self.read_instance.basic_stats[base_zstat]['label']
+                        ylabel_units = self.read_instance.basic_stats[base_zstat]['units']
                     else:
-                        ylabel = expbias_stats[base_zstat]['label']
-                        ylabel_units = expbias_stats[base_zstat]['units']
-                    if ylabel_units == 'measurement_units':
+                        ylabel = self.read_instance.expbias_stats[base_zstat]['label']
+                        ylabel_units = self.read_instance.expbias_stats[base_zstat]['units']
+                    if ylabel_units == '[measurement_units]':
                         ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
                     if ylabel_units != '':
                         ylabel += ' [{}]'.format(ylabel_units)
@@ -707,19 +692,17 @@ class MPLCanvas(FigureCanvas):
                 else:    
                     # set new xlabel
                     if 'xlabel' in self.plot_characteristics[plot_type]:
-                        if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
-                            xlabel = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]])
-                        else:
-                            xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                        xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                        if '[measurement_units]' in xlabel:
+                            xlabel = xlabel.replace('[measurement_units]', '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]]))
                     else:
                         xlabel = ''
 
                     # set new ylabel
                     if 'ylabel' in self.plot_characteristics[plot_type]:
-                        if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
-                            ylabel = '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]])
-                        else:
-                            ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                        ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                        if '[measurement_units]' in ylabel:
+                            ylabel = ylabel.replace('[measurement_units]', '[{}]'.format(self.read_instance.measurement_units[self.read_instance.species[0]]))
                     else:
                         ylabel = ''
 
@@ -727,7 +710,7 @@ class MPLCanvas(FigureCanvas):
                 # periodic plot
                 if plot_type == 'periodic':
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
-                         self.plot_characteristics[plot_type], zstat=zstat, plot_options=plot_options)
+                         self.plot_characteristics[plot_type], plot_options, zstat=zstat)
                 # make statsummary plot
                 elif plot_type == 'statsummary':
                     if 'bias' in plot_options:
@@ -736,22 +719,23 @@ class MPLCanvas(FigureCanvas):
                         relevant_zstats = self.active_statsummary_stats['basic']
                     
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
-                         self.plot_characteristics[plot_type], 
-                         zstats=relevant_zstats, statsummary=True, plot_options=plot_options)                
+                         self.plot_characteristics[plot_type], plot_options,
+                         zstats=relevant_zstats, statsummary=True)                
                 # other plots
                 else:
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
-                         self.plot_characteristics[plot_type], plot_options=plot_options)
+                         self.plot_characteristics[plot_type], plot_options)
 
                 # reset axes limits (harmonising across subplots for periodic plots) 
-                if plot_type == 'scatter':
-                    harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
-                                               self.plot_characteristics[plot_type], plot_options, relim=True)
-                elif plot_type != 'taylor':
-                    harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
-                                               self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
+                if plot_type not in ['map', 'taylor']:
+                    if plot_type == 'scatter':
+                        harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
+                                                self.plot_characteristics[plot_type], plot_options, relim=True)
+                    else:
+                        harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
+                                                self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
 
-                # skip setting axes labels for Taylor diagram
+                # set axes labels
                 if plot_type != 'taylor':
                     # set xlabel
                     set_axis_label(ax, 'x', xlabel, self.plot_characteristics[plot_type])
@@ -870,14 +854,14 @@ class MPLCanvas(FigureCanvas):
 
             # if selected_z_stat and selected_z1_array are empty strings it is
             # because they being initialised for the first time
-            # force them to be 'observations' and first basic z statistic respectively
+            # force them to be observations label and first basic z statistic respectively
             if selected_z_stat == '':
                 selected_z_stat = self.read_instance.basic_z_stats[0]
             if hasattr(self.read_instance, 'map_z'):
                 if self.read_instance.map_z in self.read_instance.basic_z_stats:
                     selected_z_stat = self.read_instance.map_z
             if selected_z1_array == '':
-                selected_z1_array = 'observations'
+                selected_z1_array = copy.deepcopy(self.read_instance.observations_data_label)
 
             # update z statistic field to all basic stats if colocation not-active OR z2
             # array not selected, else select basic+bias stats
@@ -1353,9 +1337,15 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
-    def remove_axis_objects(self, ax_elements, elements_to_skip=[], types_to_remove=[]):
+    def remove_axis_objects(self, ax_elements, elements_to_skip=None, types_to_remove=None):
         """ Remove objects (artists, lines, collections, patches) from axis. """
         
+        # define default argument mutables
+        if elements_to_skip is None:
+            elements_to_skip = []
+        if types_to_remove is None:
+            types_to_remove = []
+
         # put elements from dicts in lists for periodic plots
         if isinstance(elements_to_skip, dict):
             elements_to_skip = list(elements_to_skip.values())
@@ -1595,7 +1585,7 @@ class MPLCanvas(FigureCanvas):
                 else:
                     intersect_lists = [self.active_map_valid_station_inds]
                     for data_label in self.read_instance.data_labels:
-                        if data_label != 'observations':
+                        if data_label != self.read_instance.observations_data_label:
                             if self.read_instance.temporal_colocation:
                                 valid_station_inds = self.read_instance.valid_station_inds_temporal_colocation[self.read_instance.networkspeci][data_label]
                             else:
@@ -2221,16 +2211,25 @@ class MPLCanvas(FigureCanvas):
             else:
                 plot_type = copy.deepcopy(plot_type_alt)
 
+            # define z_statistic_sign to be absolute (will be overwritten if bias)
+            z_statistic_sign = 'absolute'
+
             # an option is selected or there are options in previous to undo?
             if event_source.currentData() or self.previous_plot_options[plot_type]:
 
                 self.current_plot_options[plot_type] = copy.deepcopy(event_source.currentData())
-                all_plot_options = event_source.currentData(all=True)
+                orig_plot_options = event_source.currentData(all=True)
+                mod_plot_options = copy.deepcopy(orig_plot_options)
 
-                for option in all_plot_options:
+                #ensure bias option is handled first (to set z_statistic_sign)
+                if 'bias' in mod_plot_options:
+                    mod_plot_options.remove('bias')
+                    mod_plot_options.insert(0, 'bias')
+
+                for option in mod_plot_options:
                     
-                    # get index to raise errors and uncheck options
-                    index = all_plot_options.index(option)
+                    # get index to raise errors and uncheck options (in original plot options order)
+                    index = orig_plot_options.index(option)
 
                     # if do not have selected station_station_data in memory, then no data has been read
                     # so return
@@ -2338,7 +2337,8 @@ class MPLCanvas(FigureCanvas):
                                                    self.read_instance.data_labels, 
                                                    plot_type,
                                                    self.plot_characteristics[plot_type], 
-                                                   plot_options=self.current_plot_options[plot_type])
+                                                   self.current_plot_options[plot_type],
+                                                   plot_z_statistic_sign=z_statistic_sign)
                                         break
                             else:
                                 annotation(self, 
@@ -2348,7 +2348,8 @@ class MPLCanvas(FigureCanvas):
                                            self.read_instance.data_labels, 
                                            plot_type,
                                            self.plot_characteristics[plot_type], 
-                                           plot_options=self.current_plot_options[plot_type])
+                                           self.current_plot_options[plot_type],
+                                           plot_z_statistic_sign=z_statistic_sign)
 
                     # option 'smooth'
                     elif option == 'smooth':
@@ -2360,7 +2361,7 @@ class MPLCanvas(FigureCanvas):
                                    self.read_instance.data_labels, 
                                    plot_type,
                                    self.plot_characteristics[plot_type], 
-                                   plot_options=self.current_plot_options[plot_type])
+                                   self.current_plot_options[plot_type])
                           
                     # option 'regression'
                     elif option == 'regression':
@@ -2372,7 +2373,7 @@ class MPLCanvas(FigureCanvas):
                                               self.read_instance.data_labels, 
                                               plot_type,
                                               self.plot_characteristics[plot_type],  
-                                              plot_options=self.current_plot_options[plot_type])
+                                              self.current_plot_options[plot_type])
 
                     # option 'bias'
                     elif option == 'bias':
@@ -2389,7 +2390,8 @@ class MPLCanvas(FigureCanvas):
 
                             # create other active plot option elements for now absolute plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, plot_type, 
-                                                       'absolute', self.current_plot_options[plot_type])
+                                                       'absolute', self.current_plot_options[plot_type],
+                                                       z_statistic_sign=z_statistic_sign)
 
                         # if bias option is enabled then first check if bias elements stored
                         elif not undo:
@@ -2433,17 +2435,17 @@ class MPLCanvas(FigureCanvas):
                                                     element.set_visible(True)
                                     else:
                                         if plot_type == 'statsummary':
-                                            if data_label == 'observations':
+                                            if data_label == self.read_instance.observations_data_label:
                                                 bias_labels_to_plot.append(data_label) 
                                         else:
-                                            if data_label not in ['observations', 'ALL']:
+                                            if data_label not in [self.read_instance.observations_data_label, 'ALL']:
                                                 bias_labels_to_plot.append(data_label) 
                                 else:
                                     if plot_type == 'statsummary':
-                                        if data_label == 'observations':
+                                        if data_label == self.read_instance.observations_data_label:
                                             bias_labels_to_plot.append(data_label) 
                                     else:
-                                        if data_label not in ['observations', 'ALL']:
+                                        if data_label not in [self.read_instance.observations_data_label, 'ALL']:
                                             bias_labels_to_plot.append(data_label) 
 
                             # if do not already have bias elements, then make them (tracking plot elements also) 
@@ -2459,24 +2461,25 @@ class MPLCanvas(FigureCanvas):
                                 # periodic plot
                                 if plot_type =='periodic':
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
-                                         bias_labels_to_plot, self.plot_characteristics[plot_type], zstat=zstat, 
-                                         plot_options=self.current_plot_options[plot_type])
+                                         bias_labels_to_plot, self.plot_characteristics[plot_type], 
+                                         self.current_plot_options[plot_type], zstat=zstat)
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
                                     relevant_zstats = self.active_statsummary_stats['expbias']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
-                                         zstats=relevant_zstats, statsummary=True, 
-                                         plot_options=self.current_plot_options[plot_type])                
+                                         self.current_plot_options[plot_type], zstats=relevant_zstats, 
+                                         statsummary=True)                
                                 # other plots
                                 else: 
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          bias_labels_to_plot, self.plot_characteristics[plot_type], 
-                                         plot_options=self.current_plot_options[plot_type])
+                                         self.current_plot_options[plot_type])
 
                             # create other active plot option elements for bias plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, plot_type, 
-                                                       'bias', self.current_plot_options[plot_type])
+                                                       'bias', self.current_plot_options[plot_type],
+                                                       z_statistic_sign=z_statistic_sign)
 
                         # if bias option is not enabled then hide bias plot elements and show absolute plots again
                         else:
@@ -2513,7 +2516,7 @@ class MPLCanvas(FigureCanvas):
                                                 element.set_visible(True)
                                 else:
                                     if plot_type == 'statsummary':
-                                        if data_label == 'observations':
+                                        if data_label == self.read_instance.observations_data_label:
                                             absolute_labels_to_plot.append(data_label) 
                                     else:
                                         if data_label != 'ALL':
@@ -2532,24 +2535,25 @@ class MPLCanvas(FigureCanvas):
                                 # periodic plot
                                 if plot_type =='periodic':
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
-                                         absolute_labels_to_plot, self.plot_characteristics[plot_type], zstat=zstat, 
-                                         plot_options=self.current_plot_options[plot_type])
+                                         absolute_labels_to_plot, self.plot_characteristics[plot_type], 
+                                         self.current_plot_options[plot_type], zstat=zstat)
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
                                     relevant_zstats = self.active_statsummary_stats['basic']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
-                                         zstats=relevant_zstats, statsummary=True, 
-                                         plot_options=self.current_plot_options[plot_type])                
+                                         self.current_plot_options[plot_type], zstats=relevant_zstats, 
+                                         statsummary=True)                
                                 # other plots
                                 else: 
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          absolute_labels_to_plot, self.plot_characteristics[plot_type], 
-                                         plot_options=self.current_plot_options[plot_type])
+                                         self.current_plot_options[plot_type])
 
                             # create other active plot option elements for absolute plot (if do not already exist)
                             self.redraw_active_options(self.read_instance.data_labels, 
-                                                       plot_type, 'absolute', self.current_plot_options[plot_type])
+                                                       plot_type, 'absolute', self.current_plot_options[plot_type],
+                                                       z_statistic_sign=z_statistic_sign)
 
                     # check stats for the selected periodic cycle
                     if plot_type in ['statsummary']:
@@ -2558,12 +2562,12 @@ class MPLCanvas(FigureCanvas):
                         self.read_instance.block_config_bar_handling_updates = False
 
                     # reset axes limits (harmonising across subplots for periodic plots) 
-                    if plot_type != 'map':
+                    if plot_type not in ['map', 'taylor']:
                         if plot_type == 'scatter':
                             harmonise_xy_lims_paradigm(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
                                                        self.plot_characteristics[plot_type], 
                                                        self.current_plot_options[plot_type], relim=True)
-                        elif plot_type != 'taylor':
+                        else:
                             harmonise_xy_lims_paradigm(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
                                                        self.plot_characteristics[plot_type], 
                                                        self.current_plot_options[plot_type], relim=True, autoscale=True)                       
@@ -2576,15 +2580,15 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    def redraw_active_options(self, data_labels, plot_type, active, plot_options):
+    def redraw_active_options(self, data_labels, plot_type, active, plot_options, z_statistic_sign='absolute'):
         """ Redraw active plot option elements when moving between absolute and bias plots,
             if do not already exist.
         """
 
-        # if 'bias' is active, remove 'observations' from data_labels
+        # if 'bias' is active, remove observations data label from data labels
         data_labels_alt = copy.deepcopy(data_labels)
         if active == 'bias':
-            data_labels_alt.remove('observations')
+            data_labels_alt.remove(self.read_instance.observations_data_label)
 
         # iterate through plot_options
         for plot_option in plot_options:
@@ -2594,20 +2598,21 @@ class MPLCanvas(FigureCanvas):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
                             annotation(self, self.read_instance, sub_ax, self.read_instance.networkspeci, data_labels, 
-                                       plot_type, self.plot_characteristics[plot_type], plot_options=plot_options)
+                                       plot_type, self.plot_characteristics[plot_type], plot_options,
+                                       plot_z_statistic_sign=z_statistic_sign)
                             break
                 else:
                     annotation(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
-                               data_labels, plot_type, self.plot_characteristics[plot_type], plot_options=plot_options)
+                               data_labels, plot_type, self.plot_characteristics[plot_type], plot_options,
+                               plot_z_statistic_sign=z_statistic_sign)
 
             elif plot_option == 'smooth':
                 smooth(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
-                       data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options=plot_options)
+                       data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
             
             elif plot_option == 'regression':
                 linear_regression(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
-                                  data_labels_alt, plot_type, self.plot_characteristics[plot_type],  
-                                  plot_options=plot_options)
+                                  data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
 
     def update_markersize(self, ax, plot_type, markersize, event_source):
         """ Update markers size for each plot type. """
