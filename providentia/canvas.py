@@ -311,12 +311,8 @@ class MPLCanvas(FigureCanvas):
         
         if not self.read_instance.block_MPL_canvas_updates:
 
-            # activate or deactivate resampling
+            # update resampling resolution
             self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
-            if self.read_instance.resampling_resolution == 'None':
-                self.read_instance.resampling = False
-            else:
-                self.read_instance.resampling = True
 
             # if have selected stations on map, then now remake plots
             if hasattr(self, 'relative_selected_station_inds'):

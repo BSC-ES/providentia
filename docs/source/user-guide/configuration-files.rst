@@ -134,7 +134,7 @@ It is mandatory to define sections to launch Providentia. Their names must be wr
      - The path to the file containing the plot characteristics.
    * - active_dashboard_plots
      - ✗
-     - Plots that will be active in the dashboard once it is launched (e.g. `timeseries, periodic-violin, scatter, distribution`).
+     - Plots that will be active in the dashboard once it is launched (e.g. ``timeseries, periodic-violin, scatter, distribution``).
    * - harmonise_stations
      - ✗
      - Boolean variable to set if you wish to harmonise axes limits across stations for stations report.
@@ -146,7 +146,10 @@ It is mandatory to define sections to launch Providentia. Their names must be wr
      - Alternative name for observations.
    * - remove_extreme_stations
      - ✗
-     - Type of extreme stations removal, from the options given in remove_extreme_stations.json.
+     - Type of extreme stations removal, from the options given in ``remove_extreme_stations.json``.
+   * - resampling_resolution
+     - ✗
+     - Resolution you want to resample your data to. Options: ``hourly``, ``hourly_instantaneous``, ``3hourly``, ``3hourly_instantaneous``, ``6hourly``, ``6hourly_instantaneous``, ``daily``, ``monthly``, ``annual``
 
 Defining a list of experiments is optional since the user might only want to check the observations data.
 
