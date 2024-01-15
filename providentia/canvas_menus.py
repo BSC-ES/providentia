@@ -10,8 +10,9 @@ from .dashboard_elements import CheckableComboBox, ComboBox
 from .dashboard_elements import set_formatting
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-settings_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/canvas_menus.json')))
-formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+settings_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.json')))
+formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
 
 
 class SettingsMenu(object):

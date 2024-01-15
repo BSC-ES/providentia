@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Plot customization &#8212; Providentia 2.3.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <script src="../_static/documentation_options.js?v=c3c8ae58"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Statistics" href="statistics.html" />
+    <link rel="prev" title="Plot types and options" href="plot-types-and-options.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="plot-customization">
+<h1>Plot customization<a class="headerlink" href="#plot-customization" title="Link to this heading">¶</a></h1>
+<section id="editing-the-plot-style-from-the-configuration-files">
+<h2>Editing the plot style from the configuration files<a class="headerlink" href="#editing-the-plot-style-from-the-configuration-files" title="Link to this heading">¶</a></h2>
+<p>If you want to edit the style of your plots, you will need to edit it in one of the following files and launch the tool again:</p>
+<ul class="simple">
+<li><p>Plots in the dashboard: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_dashboard.json</span></code></p></li>
+<li><p>Plots in the offline reports: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_offline.json</span></code></p></li>
+</ul>
+</section>
+<section id="editing-the-plot-style-in-the-dashboard">
+<h2>Editing the plot style in the dashboard<a class="headerlink" href="#editing-the-plot-style-in-the-dashboard" title="Link to this heading">¶</a></h2>
+<section id="changing-the-plot-style">
+<h3>Changing the plot style<a class="headerlink" href="#changing-the-plot-style" title="Link to this heading">¶</a></h3>
+<p>The style of the plots can be edited by clicking on the burger menus and changing the settings.</p>
+<img alt="Burger menu" src="../_images/burger-menu.png" />
+</section>
+<section id="legend-picking">
+<h3>Legend picking<a class="headerlink" href="#legend-picking" title="Link to this heading">¶</a></h3>
+<p>Clicking on the legend labels will remove or add data to each of the plots. If the label appears in bold, the data will be visible. If not, it will disappear.</p>
+<img alt="Legend picking" src="../_images/legend-picking.png" />
+</section>
+<section id="changing-the-statistics">
+<h3>Changing the statistics<a class="headerlink" href="#changing-the-statistics" title="Link to this heading">¶</a></h3>
+<p>The statistics in the <code class="docutils literal notranslate"><span class="pre">statsummary</span></code> can be updated from the burger menu.</p>
+<img alt="Changing the statistics" src="../_images/statistics-change.png" />
+</section>
+<section id="information-on-hover">
+<h3>Information on hover<a class="headerlink" href="#information-on-hover" title="Link to this heading">¶</a></h3>
+<p>Most plots show information when hovering over them. Take a look for instance at the distribution plot:</p>
+<img alt="Information on hover" src="../_images/info-hover.png" />
+</section>
+<section id="smoothing">
+<h3>Smoothing<a class="headerlink" href="#smoothing" title="Link to this heading">¶</a></h3>
+<p>It is possible to add a smoothing line to the timeseries plot and make the points disappear. In order to achieve this, you will need to increase the smooth window, which by default is 0 and bring the marker size down to 0. You can also use the plot option <code class="docutils literal notranslate"><span class="pre">hidedata</span></code> to hide the points.</p>
+<img alt="Smooth line" src="../_images/smoothing.png" />
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Providentia</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Tool setup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../user-guide.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="offline-reports.html">Offline reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration-files.html">Configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot-types-and-options.html">Plot types and options</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Plot customization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-from-the-configuration-files">Editing the plot style from the configuration files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-in-the-dashboard">Editing the plot style in the dashboard</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#changing-the-plot-style">Changing the plot style</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#legend-picking">Legend picking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#changing-the-statistics">Changing the statistics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#information-on-hover">Information on hover</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#smoothing">Smoothing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="statistics.html">Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../other-topics.html">Other topics</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../user-guide.html">User guide</a><ul>
+      <li>Previous: <a href="plot-types-and-options.html" title="previous chapter">Plot types and options</a></li>
+      <li>Next: <a href="statistics.html" title="next chapter">Statistics</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/user-guide/plot-customization.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

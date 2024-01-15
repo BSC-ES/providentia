@@ -16,8 +16,9 @@ from .calculate import Stats, ExpBias
 from .read_aux import drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
 
 def get_selected_station_data(read_instance, canvas_instance, networkspecies, 
@@ -40,8 +41,11 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         :type stddev_max: dict
     """
 
-    if read_instance.resampling:
-
+    possible_resolutions = ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
+                            '6hourly', '6hourly_instantaneous', 'daily', 'monthly', 'annual']
+    
+    if read_instance.resampling_resolution in possible_resolutions:
+        
         # update relevant/nonrelevant temporal resolutions 
         read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resampling_resolution)
         read_instance.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(read_instance.resampling_resolution)
@@ -65,9 +69,10 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resolution)    
         read_instance.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(read_instance.resolution) 
 
-    # create new dictionaries to store selected station data by network / species, per data label
+    # create new dictionaries to store selected station data and metadata by network / species, per data label
     # and station inds per networkspeci
     canvas_instance.selected_station_data = {}
+    canvas_instance.selected_station_metadata = {}
     canvas_instance.selected_station_data_labels = {}
     canvas_instance.selected_station_data_min = {}
     canvas_instance.selected_station_data_max = {}
@@ -80,8 +85,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         # initialise data labels
         canvas_instance.selected_station_data_labels[networkspeci] = []
 
-        # add nested dictionary for networkspeci in selected station data dictionary
+        # add nested dictionary for networkspeci in selected station data / metadata dictionaries
         canvas_instance.selected_station_data[networkspeci] = {}
+        canvas_instance.selected_station_metadata[networkspeci] = {}
         if data_range_min:
             canvas_instance.selected_station_data_min[networkspeci] = data_range_min[networkspeci]
         else:
@@ -105,7 +111,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         # get selected station indices
         canvas_instance.station_inds[networkspeci] = get_station_inds(read_instance, canvas_instance, networkspeci, station_index)
 
-        # get data cut
+        # get data cut for relevant stations
         read_instance.data_array = read_instance.data_array[:,canvas_instance.station_inds[networkspeci],:]
                     
         # get NaNs in data array
@@ -115,6 +121,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         # data array has valid data and is not all nan?
         if read_instance.data_array.size > 0 and not np.all(nan_data_array):
 
+            # set metadata cut for relevant stations
+            canvas_instance.selected_station_metadata[networkspeci] = read_instance.metadata_in_memory[networkspeci][canvas_instance.station_inds[networkspeci],:]
+
             # get which data labels have some valid data
             valid_data_labels_mask = ~np.all(np.all(nan_data_array, axis=-1), axis=-1)
             canvas_instance.selected_station_data_labels[networkspeci] = list(np.array(read_instance.data_labels)[valid_data_labels_mask])
@@ -123,7 +132,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             read_instance.data_array = read_instance.data_array[valid_data_labels_mask]
 
             # temporally resample data array if required
-            if read_instance.resampling:
+            if read_instance.resampling_resolution in possible_resolutions:
                 # flatten networkspecies dimension for creation of pandas dataframe
                 data_array_reduced = read_instance.data_array.reshape(read_instance.data_array.shape[0]*read_instance.data_array.shape[1], 
                                                                       read_instance.data_array.shape[2])
@@ -242,9 +251,9 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
     else:
         if (read_instance.offline) or (read_instance.interactive):
             if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations']
+                station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][read_instance.observations_data_label]
             else:
-                station_inds = read_instance.valid_station_inds[networkspeci]['observations'] 
+                station_inds = read_instance.valid_station_inds[networkspeci][read_instance.observations_data_label] 
         else:
             station_inds = canvas_instance.relative_selected_station_inds
 
@@ -296,7 +305,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci):
             canvas_instance.selected_station_data[networkspeci][temporal_aggregation_resolution]['valid_xticks'].append(unique_period)
 
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, data_labels_b, 
-                        map=False, period=None):
+                        map=False, per_station=False, period=None):
     """Function that calculates a statistic for data labels, either absolute or bias, 
        for different aggregation modes.
     """
@@ -323,17 +332,20 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
 
         # for map statistics, get active map valid station indices and then data_labels_a data 
-        if map:
+        if (map) or (per_station):
             # check if have valid station data first
             # if not update z statistic and active map valid station indices to be empty lists and return
             if read_instance.temporal_colocation and len(read_instance.data_labels) > 1:
-                n_valid_stations = len(read_instance.valid_station_inds_temporal_colocation[networkspeci]['observations'])
+                n_valid_stations = len(read_instance.valid_station_inds_temporal_colocation[networkspeci][read_instance.observations_data_label])
             else:
-                n_valid_stations = len(read_instance.valid_station_inds[networkspeci]['observations'])
+                n_valid_stations = len(read_instance.valid_station_inds[networkspeci][read_instance.observations_data_label])
             if n_valid_stations == 0:             
                 z_statistic = np.array([], dtype=np.float32)
-                active_map_valid_station_inds = np.array([], dtype=np.int64)
-                return z_statistic, active_map_valid_station_inds 
+                if map:
+                    active_map_valid_station_inds = np.array([], dtype=np.int64)
+                    return z_statistic, active_map_valid_station_inds 
+                elif per_station:
+                    return z_statistic
 
             # get active map valid station indices (i.e. the indices of the stations data to plot on the map)
             # if only have data_labels_a, valid map indices are those simply for the data_labels_a array
@@ -424,7 +436,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         else:
 
             # get data_labels_b data for map
-            if map:
+            if (map) or (per_station):
                 data_array_b = \
                     copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][read_instance.data_labels.index(data_labels_b[0]),:,:])
                 # temporally colocate data (if active)
@@ -505,10 +517,13 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 # temporal colocation must be turned on for calculation, so if not return NaNs
                 if not read_instance.temporal_colocation:
-                    if map:
+                    if (map) or (per_station):
                         z_statistic = np.array([], dtype=np.float32)
-                        active_map_valid_station_inds = np.array([], dtype=np.int64)
-                        return z_statistic, active_map_valid_station_inds 
+                        if map:
+                            active_map_valid_station_inds = np.array([], dtype=np.int64)
+                            return z_statistic, active_map_valid_station_inds
+                        elif per_station:
+                            return z_statistic
                     else: 
                         if period: 
                             stats_calc[zstat] = np.full((len(data_array_b),len(data_labels_b)), np.NaN)
@@ -563,6 +578,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             # and also remove respective stations from active map valid station indices
             return z_statistic[finite_boolean], active_map_valid_station_inds[finite_boolean] 
 
+        # return per station statistics
+        elif per_station:
+            return z_statistic
+
         # otherwise, save desired statistic for specific statistical calculation mode 
         else:
             if read_instance.statistic_mode == 'Temporal|Spatial':
@@ -605,7 +624,8 @@ def get_axes_vminmax(axs):
     else:
         return np.NaN, np.NaN
 
-def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci):
+def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci, 
+                              only_label=False):
     """ Function that generates neccessary detail to crate colourbar.
 
         :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
@@ -620,6 +640,8 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         :type plot_characteristics: dict
         :param speci: speci to plot
         :type speci: str
+        :param only_label: boolean if only to return label
+        :type only_label: boolean
         :return: cbar min, cbar max, cbar label, cbar cmap
         :rtype: np.float32, np.float32, str, str
     """
@@ -633,7 +655,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     else:
         stats_dict = expbias_stats[base_zstat]
     label_units = stats_dict['units']
-    if label_units == 'measurement_units':
+    if label_units == '[measurement_units]':
         label_units = read_instance.measurement_units[speci]
 
     # generate z colourbar label
@@ -662,7 +684,10 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                 if label_units != '':
                     z_label = '{} [{}]'.format(stats_dict['label'], label_units)
                 else:
-                    z_label = copy.deepcopy(stats_dict['label'])        
+                    z_label = copy.deepcopy(stats_dict['label'])     
+    # return label if only that is wanted
+    if only_label:
+        return z_label
 
     # set cmap for z statistic
     # first check if have defined cmap (in this order: 1. configuration file 2. specific for z statistic)
@@ -956,18 +981,25 @@ def aggregation(data_array, statistic_aggregation, axis=0):
     return aggregated_data
 
 
-def exceedance_lim(species):
+def exceedance_lim(networkspeci):
     """ Return the exceedance limit depending on the species input. 
         If species doesn't have a reported limit, returns np.NaN.
 
-        :param species: name of species currently selected (e.g. sconco3)
-        :type species: str
+        Try to get limit for specific networkspeci first, and then species.
+
+        :param networkspeci: name of networkspeci or currently selected (e.g. EBAS|sconco3)
+        :type networkspeci: str
         :return: value of exceedance limit
         :rtype: int
     """
 
-    exceedance_limits = {'sconco3': 90.21, 'sconcno2': 106.38}
-    if species in exceedance_limits:
-        return exceedance_limits[species]
+    # get speci
+    speci = networkspeci.split('|')[1]
+
+    exceedance_limits = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/exceedances.json')))
+    if networkspeci in exceedance_limits:
+        return exceedance_limits[networkspeci]
+    elif speci in exceedance_limits:
+        return exceedance_limits[speci]
     else:
         return np.NaN

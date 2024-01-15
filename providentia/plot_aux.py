@@ -147,18 +147,18 @@ def update_plotting_parameters(instance):
     clrs = sns.color_palette(instance.plot_characteristics_templates['general']['legend_color_palette'], n_colors=len(instance.data_labels)-1)
 
     # add colour and zorder for observations
-    instance.plotting_params['observations']['colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
-    instance.plotting_params['observations']['zorder'] = instance.plot_characteristics_templates['general']['obs_zorder']
+    instance.plotting_params[instance.observations_data_label]['colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
+    instance.plotting_params[instance.observations_data_label]['zorder'] = instance.plot_characteristics_templates['general']['obs_zorder']
 
     # add colours and zorder for each experiment
     experiment_ind = 1
     for data_label in instance.data_labels:
-        if data_label != 'observations':
+        if data_label != instance.observations_data_label:
             # define colour for experiment
             instance.plotting_params[data_label]['colour'] = clrs[experiment_ind-1]
             # define zorder for experiment (obs zorder + experiment_ind)
             instance.plotting_params[data_label]['zorder'] = \
-                instance.plotting_params['observations']['zorder'] + experiment_ind
+                instance.plotting_params[instance.observations_data_label]['zorder'] + experiment_ind
             # update count of experiments
             experiment_ind += 1
 
@@ -448,15 +448,15 @@ def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=Fa
     return ghelper
 
 
-def set_map_extent(canvas_instance, read_instance, ax):
+def set_map_extent(canvas_instance, ax, map_extent):
     """ Set map extent, done set_xlim and set_ylim rather than set_extent 
         to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697).
     """
 
-    mlon = np.mean(read_instance.map_extent[:2])
-    mlat = np.mean(read_instance.map_extent[2:])
-    xtrm_data = np.array([[read_instance.map_extent[0], mlat], [mlon, read_instance.map_extent[2]], 
-                          [read_instance.map_extent[1], mlat], [mlon, read_instance.map_extent[3]]])
+    mlon = np.mean(map_extent[:2])
+    mlat = np.mean(map_extent[2:])
+    xtrm_data = np.array([[map_extent[0], mlat], [mlon, map_extent[2]], 
+                          [map_extent[1], mlat], [mlon, map_extent[3]]])
     proj_to_data = canvas_instance.datacrs._as_mpl_transform(ax) - ax.transData
     xtrm = proj_to_data.transform(xtrm_data)
     ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
