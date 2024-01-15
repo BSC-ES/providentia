@@ -23,7 +23,7 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
 from .filter import DataFilter
 from .plot import Plot
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent
-from .plot_formatting import do_formatting, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
+from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .read import DataReader
 from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_tree, 
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
@@ -31,9 +31,7 @@ from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_
 from .statistics import calculate_statistic, generate_colourbar, get_selected_station_data, get_z_statistic_info
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
-
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
@@ -44,6 +42,10 @@ class ProvidentiaOffline:
     def __init__(self, **kwargs):
         print("Starting Providentia offline...")
 
+        # load statistical jsons
+        self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+        self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
+
         # initialise default configuration variables
         # modified by commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
@@ -52,24 +54,32 @@ class ProvidentiaOffline:
         self.commandline_arguments = copy.deepcopy(kwargs)
 
         # update variables from config file
-        if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
-            load_conf(self, kwargs['config'])
-            self.from_conf = True
-        elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-            error = 'Error: The path to the configuration file specified in the command line does not exist.'
-            sys.exit(error)
+        if self.config != '':  
+            read_conf = False
+            if os.path.exists(self.config):
+                read_conf = True
+            else: 
+                if os.path.exists(os.path.join(self.config_dir, self.config)):
+                    self.config = os.path.join(self.config_dir, self.config)
+                    read_conf = True
+            if read_conf:
+                load_conf(self, self.config)
+                self.from_conf = True
+            else:
+                error = 'Error: The path to the configuration file specified in the command line does not exist.'
+                sys.exit(error)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
 
         # load report plot presets
-        self.report_plots = json.load(open(os.path.join(CURRENT_PATH, '../settings/report_plots.json')))
+        self.report_plots = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/report_plots.json')))
 
         # create dictionary of all available observational GHOST data
         self.all_observation_data = get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
+        nonghost_observation_data_json = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
@@ -101,7 +111,7 @@ class ProvidentiaOffline:
 
             # check for self defined plot characteristics file
             if self.plot_characteristics_filename == '':
-                self.plot_characteristics_filename = os.path.join(CURRENT_PATH, '../settings/plot_characteristics_offline.json')
+                self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_offline.json')
             self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
             self.plot_characteristics = {}
 
@@ -124,7 +134,8 @@ class ProvidentiaOffline:
             # set some key configuration variables
             self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
             self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
-            self.data_labels = ['observations'] + list(self.experiments.keys())
+            self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+            self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
             self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
 
             # get valid observations in date range
@@ -212,7 +223,7 @@ class ProvidentiaOffline:
             if os.path.isdir(os.path.dirname(self.report_filename)):
                 reports_path = self.report_filename
         else:
-            reports_path = (os.path.join(CURRENT_PATH, '../reports/')) + self.report_filename
+            reports_path = (os.path.join(PROVIDENTIA_ROOT, 'reports/')) + self.report_filename
 
         # create reports folder
         if not os.path.exists(os.path.dirname(reports_path)):
@@ -392,7 +403,7 @@ class ProvidentiaOffline:
                                 harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type, 
                                                            self.plot_characteristics[plot_type], plot_options, 
                                                            relim=True, harmonise=harmonise)
-                            elif base_plot_type != 'taylor':
+                            else:
                                 harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type,
                                                            self.plot_characteristics[plot_type], plot_options, 
                                                            relim=True, autoscale=True, harmonise=harmonise)
@@ -613,7 +624,7 @@ class ProvidentiaOffline:
                             grid_dict['month'].axis('off')
                             
                             # format axis
-                            format_axis(self, self, grid_dict, base_plot_type, plot_characteristics, set_extent=False, 
+                            format_axis(self, self, grid_dict, base_plot_type, plot_characteristics,
                                         relevant_temporal_resolutions=self.relevant_temporal_resolutions)
 
                             # get references to periodic label annotations made, and then hide them
@@ -631,7 +642,7 @@ class ProvidentiaOffline:
                             self.plot_dictionary[page_n]['axs'].append({'handle':ax, 'data_labels':[]})
                             
                             # format axis 
-                            format_axis(self, self, ax, base_plot_type, plot_characteristics, set_extent=False)
+                            format_axis(self, self, ax, base_plot_type, plot_characteristics)
 
                     # turn off axes until some data is plottted
                     ax.axis('off')
@@ -648,7 +659,12 @@ class ProvidentiaOffline:
 
                 # make legend?
                 if 'legend' in plot_characteristics_vars:
-                    plot_characteristics['legend'] = self.plot.make_legend_handles(plot_characteristics['legend'])
+                    if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                        set_obs = False
+                    else:
+                        set_obs = True
+                    plot_characteristics['legend'] = self.plot.make_legend_handles(plot_characteristics['legend'], 
+                                                                                   set_obs=set_obs)
                     fig.legend(**plot_characteristics['legend']['plot'])
 
                 # add colourbar axis to plot dictionary (if not already there)?
@@ -676,10 +692,6 @@ class ProvidentiaOffline:
         # define dictionary to store stats from all subsections for heatmap and table plots
         self.stats_summary = {}
         self.stats_station = {}
-
-        # set default markersize from density
-        if self.do_plot_geometry_setup:
-            self.plot.map_markersize_from_density = False
 
         # iterate through subsections
         for subsection_ind, subsection in enumerate(self.subsections):
@@ -789,9 +801,9 @@ class ProvidentiaOffline:
 
         # get valid station inds for networkspeci 
         if self.temporal_colocation and len(self.data_labels) > 1:
-            self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci]['observations']
+            self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
         else:
-            self.relevant_station_inds = self.valid_station_inds[networkspeci]['observations']  
+            self.relevant_station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
 
         # get N stations for networkspeci
         self.n_stations = len(self.relevant_station_inds)
@@ -889,11 +901,11 @@ class ProvidentiaOffline:
             print('Making summary {0}'.format(plot_type))
             plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
 
-            # do formatting
+            # do formatting for plot options
             relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
                 base_plot_type, plot_indices)
-            do_formatting(self, self, relevant_axs, relevant_data_labels, networkspeci, 
-                          base_plot_type, plot_type, plot_options, 'summary')
+            format_plot_options(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, 
+                                plot_type, plot_options, map_extent=self.map_extent)
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
@@ -906,9 +918,9 @@ class ProvidentiaOffline:
 
         # get valid station inds for networkspeci 
         if self.temporal_colocation and len(self.data_labels) > 1:
-            self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci]['observations']
+            self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
         else:
-            self.relevant_station_inds = self.valid_station_inds[networkspeci]['observations']  
+            self.relevant_station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
 
         # get N stations for networkspeci
         self.n_stations = len(self.relevant_station_inds)
@@ -1053,11 +1065,11 @@ class ProvidentiaOffline:
                     if relevant_station_ind != self.relevant_station_inds[-1]:
                         continue
 
-                # do formatting
+                # do formatting for plot options
                 relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
                     base_plot_type, plot_indices)
-                do_formatting(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, plot_type, 
-                              plot_options, 'station')
+                format_plot_options(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, 
+                                    plot_type, plot_options, map_extent=self.map_extent)
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
@@ -1100,7 +1112,7 @@ class ProvidentiaOffline:
                 zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=stat)
 
                 # skip observations data label when plotting bias
-                if (data_label == 'observations') & (z_statistic_sign == 'bias'):
+                if (data_label == self.observations_data_label) & (z_statistic_sign == 'bias'):
                     continue
 
                 if plotting_paradigm == 'summary':
@@ -1115,12 +1127,12 @@ class ProvidentiaOffline:
                 # get stat for current data label
                 if data_label in self.selected_station_data_labels[networkspeci]:
                     # if relevant stat is expbias stat, then ensure temporal colocation is active
-                    if (base_plot_type == 'statsummary') and (stat in expbias_stats) and (not self.temporal_colocation):
+                    if (base_plot_type == 'statsummary') and (stat in self.expbias_stats) and (not self.temporal_colocation):
                         data_to_add = np.NaN
                     # otherwise calculate statistic
                     else:
                         if z_statistic_sign == 'bias':
-                            data_to_add = calculate_statistic(self, self, networkspeci, zstat, ['observations'], [data_label])
+                            data_to_add = calculate_statistic(self, self, networkspeci, zstat, [self.observations_data_label], [data_label])
                         else:
                             data_to_add = calculate_statistic(self, self, networkspeci, zstat, [data_label], [])
                 else:
@@ -1173,7 +1185,7 @@ class ProvidentiaOffline:
 
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
-        data_labels_sans_obs.remove('observations')
+        data_labels_sans_obs.remove(self.observations_data_label)
 
         # determine if have some data to plot
         plot_validity = False
@@ -1211,10 +1223,10 @@ class ProvidentiaOffline:
             
             # get necessary data labels to plot
             if z_statistic_sign == 'bias':
-                z1 = ['observations'] * len(data_labels_sans_obs)
+                z1 = [self.observations_data_label] * len(data_labels_sans_obs)
                 z2 = data_labels_sans_obs
             elif 'obs' in plot_options:
-                z1 = ['observations']
+                z1 = [self.observations_data_label]
                 z2 = ['']
             else:
                 z1 = data_labels
@@ -1222,7 +1234,7 @@ class ProvidentiaOffline:
 
             # iterate through relevant data labels making plots
             for z1_label, z2_label in zip(z1, z2):
-                
+
                 # skip map if we have no data for a specific label
                 skip_map = False
                 if (z2_label == '') and (z1_label not in self.selected_station_data_labels[networkspeci]):
@@ -1248,12 +1260,10 @@ class ProvidentiaOffline:
                 # set axis title
                 if relevant_axis.get_title() == '':
                     if z2_label != '':
-                        label = self.experiments[z2_label]
+                        label = copy.deepcopy(z2_label)
                     else:
-                        if z1_label == 'observations':
-                            label = copy.deepcopy(z1_label) 
-                        else:
-                            label = self.experiments[z1_label]
+                        label = copy.deepcopy(z1_label) 
+
                     axis_title_label = '{}\n{} '.format(label, self.subsection)
                     if self.n_stations == 1:
                         axis_title_label += '(1 station)'
@@ -1263,19 +1273,14 @@ class ProvidentiaOffline:
 
                 # set map extent ? 
                 if self.map_extent:
-                    set_map_extent(self, self, relevant_axis)
-
-                # calculate z statistic
-                z_statistic, self.active_map_valid_station_inds = calculate_statistic(self, self, networkspeci,
-                                                                                      zstat, z1_label, z2_label, 
-                                                                                      map=True)
+                    set_map_extent(self, relevant_axis, self.map_extent)
 
                 # make map plot
-                self.plot.make_map(relevant_axis, networkspeci, z_statistic, self.plot_characteristics[plot_type], 
-                                   plot_options=plot_options)
-                
+                self.plot.make_map(relevant_axis, networkspeci, self.plot_characteristics[plot_type], plot_options,
+                                   zstat=zstat, labela=z1_label, labelb=z2_label)
+
                 # save plot information for later formatting 
-                if z2 == '':
+                if z2_label == '':
                     self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z1_label)
                 else:
                     self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].append(z2_label)
@@ -1321,7 +1326,6 @@ class ProvidentiaOffline:
                             axis_ind = (current_plot_ind + self.subsection_ind + len(self.experiments) * self.subsection_ind)
                     else:
                         axis_ind = self.subsection_ind
-                    station_inds = copy.deepcopy(self.relevant_station_inds) 
                 elif plotting_paradigm == 'station':
                     if 'individual' in plot_options:
                         if ((base_plot_type == 'scatter') or ('bias' in plot_options) or 
@@ -1331,7 +1335,6 @@ class ProvidentiaOffline:
                             axis_ind = (current_plot_ind + self.station_ind + len(self.experiments) * self.station_ind)
                     else:
                         axis_ind = self.station_ind
-                    station_inds = [self.relevant_station_inds[self.station_ind]]
                 
                 # get relevant axis
                 relevant_page, page_ind, relevant_axis = self.get_relevant_page_axis(plotting_paradigm, networkspeci, 
@@ -1379,12 +1382,11 @@ class ProvidentiaOffline:
                     axis_ylabel = relevant_axis.get_ylabel()
 
                 # axis xlabel is empty?
-                if (axis_xlabel == '') or (axis_xlabel == 'measurement_units'):
+                if (axis_xlabel == '') or ('[measurement_units]' in axis_xlabel):
                     if 'xlabel' in self.plot_characteristics[plot_type]:
-                        if self.plot_characteristics[plot_type]['xlabel']['xlabel'] == 'measurement_units':
-                            xlabel = '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]])
-                        else:
-                            xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                        xlabel = self.plot_characteristics[plot_type]['xlabel']['xlabel']
+                        if '[measurement_units]' in xlabel:
+                            xlabel = xlabel.replace('[measurement_units]', '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]]))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
                     else:
                         xlabel = ''
                     # set xlabel
@@ -1392,24 +1394,23 @@ class ProvidentiaOffline:
                         set_axis_label(relevant_axis, 'x', xlabel, self.plot_characteristics[plot_type])
 
                 # axis ylabel is empty?
-                if (axis_ylabel == '') or (axis_ylabel == 'measurement_units'):
+                if (axis_ylabel == '') or ('[measurement_units]' in axis_ylabel):
                     if base_plot_type in ['periodic']:
                         if z_statistic_type == 'basic':
-                            ylabel = basic_stats[base_zstat]['label']
-                            ylabel_units = basic_stats[base_zstat]['units']
+                            ylabel = self.basic_stats[base_zstat]['label']
+                            ylabel_units = self.basic_stats[base_zstat]['units']
                         else:
-                            ylabel = expbias_stats[base_zstat]['label']
-                            ylabel_units = expbias_stats[base_zstat]['units']
-                        if ylabel_units == 'measurement_units':
+                            ylabel = self.expbias_stats[base_zstat]['label']
+                            ylabel_units = self.expbias_stats[base_zstat]['units']
+                        if ylabel_units == '[measurement_units]':
                             ylabel_units = self.measurement_units[networkspeci.split('|')[-1]] 
                         if ylabel_units != '':
                             ylabel += ' [{}]'.format(ylabel_units)
                     else:
                         if 'ylabel' in self.plot_characteristics[plot_type]:
-                            if self.plot_characteristics[plot_type]['ylabel']['ylabel'] == 'measurement_units':
-                                ylabel = '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]])
-                            else:
-                                ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                            ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+                            if '[measurement_units]' in ylabel:
+                                ylabel = ylabel.replace('[measurement_units]', '[{}]'.format(self.measurement_units[networkspeci.split('|')[-1]]))
                         else:
                             ylabel = ''
                     # set ylabel
@@ -1419,21 +1420,18 @@ class ProvidentiaOffline:
                 # get plotting function                
                 func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
 
-                if base_plot_type == 'metadata':
+                if base_plot_type == 'periodic':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                            plot_options=plot_options, station_inds=station_inds)
-                elif base_plot_type == 'periodic':
-                    func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                            zstat=zstat, plot_options=plot_options)    
+                         plot_options, zstat=zstat)    
                 elif base_plot_type == 'distribution':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                        plot_options=plot_options, data_range_min=data_range_min, data_range_max=data_range_max) 
+                         plot_options, data_range_min=data_range_min, data_range_max=data_range_max) 
                 elif base_plot_type == 'taylor':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                        plot_options=plot_options, stddev_max=stddev_max)
+                         plot_options, stddev_max=stddev_max)
                 else:
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                        plot_options=plot_options) 
+                         plot_options) 
                 
                 # save plot information for later formatting
                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(data_labels)
@@ -1460,7 +1458,9 @@ class ProvidentiaOffline:
                 # iterate number of plots made for current type of plot 
                 current_plot_ind += 1     
 
-        # make plot heatmap / table / statsummary plot
+        # make heatmap / table / statsummary plot
+        # heatmap / table is one stat per networkspecies, subsections and data labels (columns are data labels, rows are networkspecies / subsections)
+        # statsummary is multiple stats per networkspecies, subsections and data labels (columns are stats, rows are networkspecies / subsections / data labels)
         elif base_plot_type in ['heatmap', 'table', 'statsummary']:
             
             # get relevant axis to plot on
@@ -1503,9 +1503,9 @@ class ProvidentiaOffline:
                 
                 # get data labels (based on statistic type)
                 if z_statistic_sign == 'bias':
-                    data_labels = list(self.experiments.keys())
+                    data_labels = list(self.experiments.values())
                 else:
-                    data_labels = ['observations'] + list(self.experiments.keys())
+                    data_labels = [self.observations_data_label] + list(self.experiments.values())
 
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([networkspecies, self.subsections],
@@ -1544,10 +1544,10 @@ class ProvidentiaOffline:
                 # get stats
                 if 'bias' in plot_options:
                     stats = self.plot_characteristics[plot_type]['experiment_bias']
-                    data_labels = list(self.experiments.keys())
+                    data_labels = list(self.experiments.values())
                 else:
                     stats = self.plot_characteristics[plot_type]['basic']
-                    data_labels = ['observations'] + list(self.experiments.keys())
+                    data_labels = [self.observations_data_label] + list(self.experiments.values())
 
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, data_labels],
@@ -1589,14 +1589,14 @@ class ProvidentiaOffline:
                     # make statsummary
                     func = getattr(self.plot, 'make_table')
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         statsummary=True, plot_options=plot_options, subsection=self.subsection, 
+                         plot_options, statsummary=True, subsection=self.subsection, 
                          plotting_paradigm=plotting_paradigm, stats_df=stats_df)
                 else:
                     # make table/heatmap
                     func = getattr(self.plot, 'make_{}'.format(base_plot_type))
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         plot_options=plot_options, subsection=self.subsection, 
-                         plotting_paradigm=plotting_paradigm, stats_df=stats_df)
+                         plot_options, subsection=self.subsection, plotting_paradigm=plotting_paradigm, 
+                         stats_df=stats_df)
                 
                 # save plot information for later formatting
                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(data_labels)

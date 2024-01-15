@@ -1,12 +1,12 @@
 {
     "MB":   {"function": "calculate_mb", "order": 0,  "label": "MB", "arguments": {}, "minimum_bias": [0.0],       
-             "units": "measurement_units", "cmap_bias": "RdYlBu_r"},
+             "units": "[measurement_units]", "cmap_bias": "RdYlBu_r"},
     
     "NMB":  {"function": "calculate_mb", "order": 1, "label": "NMB", "arguments": {"normalisation_type": "mean"}, 
              "minimum_bias": [0.0], "units": "%", "cmap_bias": "RdYlBu_r"},
     
     "ME":   {"function": "calculate_me", "order": 2, "label": "ME", "arguments": {}, "minimum_bias": [0.0], 
-             "vmin_bias": 0.0, "units": "measurement_units", "cmap_bias": "viridis"},
+             "vmin_bias": 0.0, "units": "[measurement_units]", "cmap_bias": "viridis"},
     
     "NME":  {"function": "calculate_me", "order": 3, "label": "NME", "arguments": {"normalisation_type": "mean"}, 
              "minimum_bias": [0.0], "vmin_bias": 0.0, "units": "%", "cmap_bias": "viridis"},
@@ -24,7 +24,7 @@
              "vmin_bias": 0.0, "units": "%", "cmap_bias": "viridis"},
     
     "RMSE": {"function": "calculate_rmse", "order": 8, "label": "RMSE", "arguments": {}, "minimum_bias": [0.0],
-             "vmin_bias": 0.0, "units": "measurement_units", "cmap_bias": "viridis"},
+             "vmin_bias": 0.0, "units": "[measurement_units]", "cmap_bias": "viridis"},
     
     "NRMSE": {"function": "calculate_rmse", "order": 9, "label": "NRMSE", "arguments": {"normalisation_type": "mean"}, 
               "minimum_bias": [0.0],  "vmin_bias": 0.0, "units": "%", "cmap_bias": "viridis"},
