@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Run the tool &#8212; Providentia 2.3.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <script src="../_static/documentation_options.js?v=c3c8ae58"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="User guide" href="../user-guide.html" />
+    <link rel="prev" title="Clone the project" href="clone.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="run-the-tool">
+<h1>Run the tool<a class="headerlink" href="#run-the-tool" title="Link to this heading">¶</a></h1>
+<section id="running-the-tool-on-a-bsc-machine">
+<h2>Running the tool on a BSC machine<a class="headerlink" href="#running-the-tool-on-a-bsc-machine" title="Link to this heading">¶</a></h2>
+<p>If you are on Nord3v2 or Marenostrum4, you should request an interactive session:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
+</pre></div>
+</div>
+<p>After some seconds you will have entered onto an allocated node and the dashboard will be launched.
+By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">-</span><span class="n">u</span>
+</pre></div>
+</div>
+<p>In order to run the tool, it is necessary to load the modules. These have already been loaded using the first command.</p>
+<p><strong>Launch the dashboard</strong></p>
+<p>As explained, you can launch the dashboard by simply running:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
+</pre></div>
+</div>
+<p>If you already have a configuration file, you can specify its path in the command line with the argument –config:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+</pre></div>
+</div>
+<p>A pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool.</p>
+<p><strong>Generate an offline report</strong></p>
+<p>If you have your configuration file ready, you can generate reports by running Providentia with the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">offline</span>
+</pre></div>
+</div>
+<p>The mandatory commands are:</p>
+<ul class="simple">
+<li><p>–config: specify the path of your configuration file</p></li>
+<li><p>–offline: for running offline, without launching the dashboard</p></li>
+</ul>
+<p>You can also launch the dashboard or get a report for only one section by using the option  –section. In order to indicate subsections, you will need to write the section name, followed by a hyphen (-) and the subsection name.</p>
+<p>The reports will be saved under the folder reports. You can add a path in the report_filename of the configuration file to change the default directory.</p>
+</section>
+<section id="running-the-tool-on-a-personal-machine">
+<h2>Running the tool on a personal machine<a class="headerlink" href="#running-the-tool-on-a-personal-machine" title="Link to this heading">¶</a></h2>
+<p>If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file configuration.py and defining ghost_root, nonghost_root and exp_root. For instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;local_ghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/ghost/&#39;</span>
+<span class="s1">&#39;local_nonghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/nonghost/&#39;</span>
+<span class="s1">&#39;local_exp_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/exp/&#39;</span>
+</pre></div>
+</div>
+<p>You should download the data that you need from the BSC systems to the local machine. The tool has set locations where it grabs the observational/experiment data on the <strong>esarchive</strong>:</p>
+<ul class="simple">
+<li><p>GHOST observational data: <cite>/esarchive/obs/ghost</cite></p></li>
+<li><p>Non-GHOST observational data: <cite>/esarchive/obs/</cite></p></li>
+<li><p>Interpolated experiment data: <cite>/esarchive/recon/exp_interp</cite></p></li>
+</ul>
+<p>The entire data collection comprises <strong>several terabytes</strong>, therefore it is not recommended to download the entire archive.</p>
+<p>If you are running the tool on a personal machine, you will also need to install all the modules by yourself. To do this you can create a virtual environment with Conda and install the necessary packages by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.9</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env</span>
+<span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">cartopy</span>
+<span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">jupyterlab</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>Once the environment is activated and all modules are installed, you can open the dashboard and generate reports as explained above.</p>
+<p>Enjoy!</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Providentia</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../setup.html">Tool setup</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="clone.html">Clone the project</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Run the tool</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-tool-on-a-bsc-machine">Running the tool on a BSC machine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-tool-on-a-personal-machine">Running the tool on a personal machine</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other-topics.html">Other topics</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../setup.html">Tool setup</a><ul>
+      <li>Previous: <a href="clone.html" title="previous chapter">Clone the project</a></li>
+      <li>Next: <a href="../user-guide.html" title="next chapter">User guide</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/setup/run.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

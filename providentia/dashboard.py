@@ -39,9 +39,8 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-basic_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(CURRENT_PATH, '../settings/experiment_bias_stats.json')))
-formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
 
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
@@ -56,6 +55,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # allow access to methods of parent class QtWidgets.QWidget
         super(ProvidentiaMainWindow, self).__init__()
 
+        # load statistical jsons
+        self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
+        self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
+
         # initialise default configuration variables
         # modified by commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
@@ -63,41 +66,51 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update variables from config file (if available)
         self.from_conf = False
         self.current_config = {}
-        
-        if ('config' in kwargs) and (os.path.exists(kwargs['config'])):
-            if 'section' in kwargs:
-                # config and section defined 
-                load_conf(self, fpath=kwargs['config'])
-                if kwargs['section'] in self.all_sections:
-                    self.from_conf = True
-                    self.current_config = self.sub_opts[kwargs['section']]
+
+        if self.config != '': 
+            read_conf = False
+            if os.path.exists(self.config):
+                read_conf = True
+            else:
+                if os.path.exists(os.path.join(self.config_dir, self.config)):
+                    self.config = os.path.join(self.config_dir, self.config)
+                    read_conf = True
+
+            if read_conf:
+                if hasattr(self, 'section'):
+                    # config and section defined 
+                    load_conf(self, fpath=self.config)
+                    if self.section in self.all_sections:
+                        self.from_conf = True
+                        self.current_config = self.sub_opts[self.section]
+                    else:
+                        error = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.section)
+                        tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                        tip += 'before the subsection name (e.g. SECTIONA·Spain).'
+                        sys.exit(error + '\n' + tip)
+
                 else:
-                    error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
-                    tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
-                    tip += 'before the subsection name (e.g. SECTIONA·Spain).'
-                    sys.exit(error + '\n' + tip)
+                    # config defined, section undefined
+                    load_conf(self, fpath=self.config)    
+                    all_sections = self.sub_opts.keys()
+                    
+                    if len(all_sections) == 1:
+                        okpressed = False
+                        selected_section = list(all_sections)[0]
+                    else:
+                        title = 'Sections'
+                        msg = 'Select section to load'
+                        dialog = InputDialog(self, title, msg, all_sections)
+                        selected_section, okpressed = dialog.selected_option, dialog.okpressed
 
-            elif 'section' not in kwargs:
-                # config defined, section undefined
-                load_conf(self, fpath=kwargs['config'])    
-                all_sections = self.sub_opts.keys()
-                
-                if len(all_sections) == 1:
-                    okpressed = False
-                    selected_section = list(all_sections)[0]
-                else:
-                    title = 'Sections'
-                    msg = 'Select section to load'
-                    dialog = InputDialog(self, title, msg, all_sections)
-                    selected_section, okpressed = dialog.selected_option, dialog.okpressed
-
-                if okpressed or (len(all_sections) == 1):
-                    self.from_conf = True
-                    self.current_config = self.sub_opts[selected_section]
-
-        elif ('config' in kwargs) and (not os.path.exists(kwargs['config'])):     
-            error = 'Error: The path to the configuration file specified in the command line does not exist.'
-            sys.exit(error)
+                    if okpressed or (len(all_sections) == 1):
+                        self.from_conf = True
+                        self.current_config = self.sub_opts[selected_section]
+            
+            else:
+                # have config, but path does not exist
+                error = 'Error: The path to the configuration file specified in the command line does not exist.'
+                sys.exit(error)
         
         # set initial filter species
         self.previous_filter_species = {}
@@ -115,7 +128,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
             self.plot_characteristics_filename = os.path.join(
-                CURRENT_PATH, '../settings/plot_characteristics_dashboard.json')
+                PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.json')
         self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
 
         # error when using wrong custom plot characteristics path to launch dashboard
@@ -131,7 +144,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.all_observation_data = get_ghost_observational_tree(self)
 
         # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(CURRENT_PATH, '../settings/nonghost_files.json')))
+        nonghost_observation_data_json = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_files.json')))
         # merge to existing GHOST observational data dict if we have the path
         if self.nonghost_root is not None:
             nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
@@ -144,10 +157,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # generate lists of basic and basis+bias statistics for using in the z statistic combobox
         if not hasattr(self, 'basic_z_stats'):
             self.basic_z_stats = np.array(list(
-                OrderedDict(sorted(basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
+                OrderedDict(sorted(self.basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
         if not hasattr(self, 'basic_and_bias_z_stats'):
             self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-                OrderedDict(sorted(expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
+                OrderedDict(sorted(self.expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
 
         # initialise UI
         self.init_ui(**kwargs)
@@ -490,7 +503,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable that blocks updating of MPL canvas until some data has been read
         self.block_MPL_canvas_updates = True
         self.mpl_canvas = MPLCanvas(self)
-              
+
         # initialise configuration bar fields
         self.config_bar_initialisation = True
         self.update_configuration_bar_fields()
@@ -608,6 +621,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.time_array = None
             self.yearmonths = None
             self.data_labels = None
+            self.data_labels_raw = None
 
             # set initial station references to be empty dict
             self.station_references = {}
@@ -618,7 +632,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_matrix = self.parameter_dictionary[self.species[0]]['matrix']
             self.selected_species = copy.deepcopy(self.species[0])
             self.selected_resampling_resolution = copy.deepcopy(self.resampling_resolution)
-            self.selected_resampling = copy.deepcopy(self.resampling)
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
             self.selected_statistic_aggregation = copy.deepcopy(self.statistic_aggregation)
 
@@ -897,7 +910,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             elif event_source == self.cb_resampling_resolution:
                 self.selected_resampling_resolution = changed_param
-                self.selected_resampling = False
 
             # set variable to check if date range changes
             self.date_range_has_changed = False
@@ -1023,7 +1035,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 # format axis                
                 format_axis(self.mpl_canvas, self.mpl_canvas.read_instance, 
                             self.mpl_canvas.plot_axes[changed_plot_type], 
-                            changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type])
+                            changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type],
+                            map_extent=self.map_extent)
                 
                 # make plot
                 self.mpl_canvas.update_associated_active_dashboard_plot(changed_plot_type)
@@ -1183,6 +1196,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_qa = self.qa
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
+        self.previous_data_labels_raw = self.data_labels_raw
         self.mpl_canvas.previous_plot_options = copy.deepcopy(self.mpl_canvas.current_plot_options) 
 
         # set new active variables as selected variables from menu
@@ -1198,7 +1212,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
-        self.data_labels = ['observations'] + list(self.experiments.keys())
+        self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+        self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
         # remove bias plot options if have no experiments loaded
         if len(self.data_labels) == 1:
             for plot_type in self.mpl_canvas.all_plots:
@@ -1278,8 +1293,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     read_operations = ['cut_right']
 
         # determine if any experiments need removing or reading 
-        experiments_to_remove = [experiment for experiment in self.previous_experiments if experiment not in self.experiments]
-        experiments_to_read = [experiment for experiment in self.experiments if experiment not in self.previous_experiments]
+        experiments_to_remove = [experiment for experiment in self.previous_experiments.values() if experiment not in list(self.experiments.values())]
+        experiments_to_read = [experiment for experiment in self.experiments.values() if experiment not in list(self.previous_experiments.values())]
         if 'reset' not in read_operations:
             if len(experiments_to_remove) > 0:
                 read_operations.append('remove_exp')
@@ -1303,9 +1318,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # clear all axes elements 
             for plot_type, ax in self.mpl_canvas.plot_axes.items():
                 self.mpl_canvas.remove_axis_elements(ax, plot_type)
-
-            # inactivate resampling
-            self.resampling = False
 
             # set current time array, as previous time array
             self.previous_time_array = self.time_array
@@ -1349,7 +1361,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # before experiments, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
             if len(self.data_labels) == 1:  
-                self.z1_arrays = np.array(['observations'])
+                self.z1_arrays = np.array([self.observations_data_label])
             else:
                 self.z1_arrays = np.array(self.data_labels)
             self.z2_arrays = np.append([''], self.z1_arrays)
@@ -1375,8 +1387,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # unselect all/intersect/extent checkboxes
             self.mpl_canvas.unselect_map_checkboxes()
             
-            # reset resampling
-            self.cb_resampling_resolution.setCurrentText('None')
+            # update resampling resolution
+            self.mpl_canvas.handle_resampling_update()
 
             # unset variable to allow updating of MPL canvas
             self.block_MPL_canvas_updates = False

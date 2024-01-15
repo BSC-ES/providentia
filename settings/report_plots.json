@@ -8,9 +8,9 @@
                  "distribution", "distribution_bias", "scatter"],
     
     "operational": ["statsummary_multispecies", "statsummary_multispecies_bias",
-                    "map-Mean", "map-MB", "map-RMSE", "map-r",
+                    "map-Mean", "map-MB", "map-RMSE", "map-r", "map-NMB", "map-NRMSE",
                     "timeseries_annotate", "timeseries_bias_annotate", "distribution", "scatter_annotate",
-                    "periodic-Mean", "periodic-MB", "periodic-RMSE", "periodic-r"],
+                    "periodic-violin", "periodic-Mean", "periodic-MB", "periodic-RMSE", "periodic-r"],
 
     "dod": ["map-r", "map-MB", "map-RMSE", "map-MFB", "distribution", "distribution_bias",
             "statsummary", "statsummary_bias", 
@@ -47,5 +47,6 @@
                   "table-Median", "table-Median_bias", "table-Mean_multispecies", 
                   "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias"],
     
-    "debug": ["statsummary_multispecies", "timeseries"]
+    "debug": ["timeseries_smooth_hidedata", "timeseries", "map-Mean", "map-Mean_domain"]
+
 }

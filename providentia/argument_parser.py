@@ -16,9 +16,6 @@ import providentia
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-
-
 class ProvArgumentParser(object):
     """ Class that handles the argument parser. """
 
@@ -32,6 +29,8 @@ class ProvArgumentParser(object):
                                      help="returns Providentia version number and exit")
             self.parser.add_argument('--debug',
                                      help="runs Providentia in debug mode, just reserving allocation")
+            self.parser.add_argument('--interactive',
+                                     help="runs Providentia interactive mode on Jupyter notebook")
             self.parser.add_argument('--conf', '--config', 
                                      dest="config",
                                      help='specifies the config file to read') 
@@ -61,11 +60,6 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="run Providentia offline mode")
-            self.parser.add_argument("--interactive",
-                                     dest="interactive",
-                                     default=False,
-                                     action='store_true',
-                                     help="run Providentia interactive mode")
             self.parser.add_argument("--network",
                                      dest="network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
@@ -81,9 +75,12 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--end_date",
                                      dest="end_date",
                                      help="define end date in format as 20170101")
+            self.parser.add_argument("--observations_data_label",
+                                     dest="observations_data_label",
+                                     help="alias for observations data label")
             self.parser.add_argument("--experiments",
                                      dest="experiments",
-                                    help="experiments to read")
+                                     help="experiments to read")
             self.parser.add_argument("--temporal_colocation",
                                      dest="temporal_colocation",
                                      help="activate temporal colocation betwen observations and experiments")
@@ -129,6 +126,10 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--harmonise_summary",
                                      dest="harmonise_summary",
                                      help="harmonise axes limits across subsections for summary report")
+            self.parser.add_argument("--remove_extreme_stations",
+                                     dest="remove_extreme_stations",
+                                     help="remove extreme stations using defined statistic limits")
+
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)

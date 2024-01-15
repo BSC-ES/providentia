@@ -11,6 +11,7 @@ if [ "${BSC_MACHINE}" == "power" ]; then
         numpy/1.16.4-foss-2018b-Python-3.7.0 \
         pandas/0.24.2-foss-2018b-Python-3.7.0 \
         PyQt5/5.13.0-foss-2018b-Python-3.7.0 \
+        seaborn/0.11.1-foss-2018b-Python-3.7.0 \
         scipy/1.3.0-foss-2018b-Python-3.7.0 \
         kdepy/1.1.1-fosscuda-2019b-Python-3.7.4 \
         Ghostscript/9.50-GCCcore-8.3.0
@@ -26,6 +27,8 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then 
     module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
     module load Python/3.7.4-GCCcore-8.3.0 \
+        Ghostscript/9.50-GCCcore-8.3.0 \
+        xarray/0.19.0-foss-2019b-Python-3.7.4 \
         matplotlib/3.1.1-foss-2019b-Python-3.7.4 \
         seaborn/0.9.0-foss-2019b-Python-3.7.4 \
         Cartopy/0.20.3-foss-2019b-Python-3.7.4 \
@@ -36,7 +39,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
         OpenMPI/4.0.5-GCC-8.3.0-nord3-v2 \
         pyproj/3.2.1-foss-2019b-Python-3.7.4 \
         kdepy/1.1.1-foss-2019b-Python-3.7.4 \
-        Ghostscript/9.50-GCCcore-8.3.0
+        jupyterlab/3.0.9-foss-2019b-Python-3.7.4
 
 # Hub
 elif [ "${ip}" == "84.88.185.48" ]; then
