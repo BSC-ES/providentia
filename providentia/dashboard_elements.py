@@ -9,7 +9,8 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from textwrap import wrap
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-formatting_dict = json.load(open(os.path.join(CURRENT_PATH, '../settings/stylesheet.json')))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
 
 
 def set_formatting(PyQt5_obj, format):

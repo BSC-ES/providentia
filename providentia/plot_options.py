@@ -37,9 +37,13 @@ def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
         
 
 def linear_regression(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
-                      plot_characteristics, plot_options=[]):
+                      plot_characteristics, plot_options):
     """ Add linear regression to plot.
 
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
         :param networkspeci: str of currently active network and species 
@@ -61,7 +65,7 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
     cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
     # get observations data (flattened and drop NaNs)
-    observations_data = drop_nans(canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index('observations'),0,:])
+    observations_data = drop_nans(canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(read_instance.observations_data_label),0,:])
 
     # determine if number of points per data array exceeds max limit,
     # if so subset arrays
@@ -74,7 +78,7 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
 
     # iterate through experiment data, making regression line to observations
     for data_label in cut_data_labels:
-        if data_label != 'observations':
+        if data_label != read_instance.observations_data_label:
             # get experiement data (flattened and drop NaNs)
             experiment_data = drop_nans(canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])
             # subset data if neccessary
@@ -92,9 +96,13 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
 
 
 def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
-           plot_characteristics, plot_options=[]):
+           plot_characteristics, plot_options):
     """ Add smooth line to plot.
 
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
         :param networkspeci: str of currently active network and species 
@@ -120,10 +128,10 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
 
         # bias plot?
         if 'bias' in plot_options:
-            # skip to next data label if making bias, and data label == 'observations'
-            if data_label == 'observations':
+            # skip to next data label if making bias, and data label == observations
+            if data_label == read_instance.observations_data_label:
                 continue
-            ts_obs = canvas_instance.selected_station_data[networkspeci]['timeseries']['observations']
+            ts_obs = canvas_instance.selected_station_data[networkspeci]['timeseries'][read_instance.observations_data_label]
             ts_model = canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label] 
             ts = ts_model - ts_obs
             bias = True
@@ -147,9 +155,13 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
 
 
 def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
-               plot_characteristics, plot_options=[], plotting_paradigm=None):
+               plot_characteristics, plot_options, plot_z_statistic_sign='absolute'):
     """ Add statistical annotations to plot.
 
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param read_instance: canvas instance
+        :type read_instance: object
         :param relevant_axis: axis to plot on 
         :type relevant_axis: object
         :param networkspeci: str of currently active network and species 
@@ -162,8 +174,8 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         :type plot_characteristics: dict
         :param plot_options: list of options to configure plots
         :type plot_options: list
-        :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
-        :type plotting_paradigm: str
+        :param plot_z_statistic_sign: sign of plotted z statistic (absolute or bias)
+        :type plot_z_statistic_sign: str
     """
 
     # get stats wished to be annotated
@@ -186,31 +198,30 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     # cut data_labels for those in valid data labels
     cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-    # bias plot?  
+    # bias plot? Then do not plot obs annotation label
     if 'bias' in plot_options:
         bias = True
-        if 'observations' in cut_data_labels:
-            cut_data_labels.remove('observations')
+        if read_instance.observations_data_label in cut_data_labels:
+            cut_data_labels.remove(read_instance.observations_data_label)
     else:
         bias = False
 
+    # making plot for a bias stat? Then do not plot obs annotation label
+    if plot_z_statistic_sign == 'bias':
+        if read_instance.observations_data_label in cut_data_labels:
+            cut_data_labels.remove(read_instance.observations_data_label)
+
     # avoid plotting stats for observations data for scatter plots
     if base_plot_type == 'scatter':
-        if 'observations' in cut_data_labels:
-            cut_data_labels.remove('observations')
+        if read_instance.observations_data_label in cut_data_labels:
+            cut_data_labels.remove(read_instance.observations_data_label)
 
     # generate annotation str to plot
 
     # show number of stations if defined
     if plot_characteristics['annotate_text']['n_stations']:
         colours.append('black')
-        if (read_instance.offline) or (read_instance.interactive):
-            if plotting_paradigm == 'station':
-                str_to_annotate.append('Stations: 1')
-            else:
-                str_to_annotate.append('Stations: ' + str(len(canvas_instance.station_inds[networkspeci])))
-        else:
-            str_to_annotate.append('Stations: ' + str(len(canvas_instance.station_inds[networkspeci])))
+        str_to_annotate.append('Stations: ' + str(len(canvas_instance.station_inds[networkspeci])))
 
     # generate annotation line by line (one line per data label, for all stats)
     for data_label_ii, data_label in enumerate(cut_data_labels):
@@ -226,10 +237,10 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
 
             # calculate stats
-            if (bias) or (z_statistic_sign == 'bias'):
-                if data_label != 'observations':
+            if (bias) or (plot_z_statistic_sign == 'bias') or (z_statistic_sign == 'bias'):
+                if data_label != read_instance.observations_data_label:
                     stat_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, zstat, 
-                                                    ['observations'], [data_label])
+                                                    [read_instance.observations_data_label], [data_label])
                 # skip bias stats for observations
                 else:
                     continue
@@ -243,15 +254,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
 
         # append annotation line
         if (plot_characteristics['annotate_text']['exp_labels']):
-            if data_label == 'observations':
-                if 'legend' in plot_characteristics:
-                    str_to_append = plot_characteristics['legend']['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate)
-                elif 'legend' in canvas_instance.plot_characteristics_templates.keys():
-                    str_to_append = canvas_instance.plot_characteristics_templates['legend']['handles']['obs_label'] + ' | ' + ', '.join(stats_annotate)
-                else:
-                    str_to_append = 'Observations | ' + ', '.join(stats_annotate)
-            else:
-                str_to_append = read_instance.experiments[data_label] + ' | ' + ', '.join(stats_annotate)
+            str_to_append = data_label + ' | ' + ', '.join(stats_annotate)
         else:
             str_to_append = ', '.join(stats_annotate)
         str_to_annotate.append(str_to_append)
@@ -280,49 +283,27 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         show_message(read_instance, msg)
 
 
-def get_no_margin_lim(ax, lim):
-    """ Get true limits of plot area. """
+def experiment_domain(canvas_instance, relevant_axis, data_labels, map_extent):
+    """ Plot experiment domain extents on map
 
-    # xlim
-    if lim == 'xlim':
-        xlim = ax.get_xlim()
-        xwidth = xlim[1] - xlim[0]
-        lower_lim = xlim[0] + (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
-        upper_lim = xlim[1] - (0.5 * ax.margins()[0]) / (0.5 + ax.margins()[0]) * xwidth
-
-    # ylim
-    if lim == 'ylim':
-        ylim = ax.get_ylim()
-        ywidth = ylim[1] - ylim[0]
-        lower_lim = ylim[0] + (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
-        upper_lim = ylim[1] - (0.5 * ax.margins()[1]) / (0.5 + ax.margins()[1]) * ywidth
-
-    return lower_lim, upper_lim
-
-
-def log_validity(relevant_axis, log_ax):
-    """ Determine if log operation for a given axes is valid (no values <= 0).
-    
-        :param relevant_axis: relevant axes
-        :type relevant_axis: list
-        :param log_ax: which axis to log
-        :type log_ax: str
-        :return: validity to log axis
-        :rtype: boolean
+        :param canvas_instance: canvas instance
+        :type canvas_instance: object
+        :param relevant_axis: axis to plot on 
+        :type relevant_axis: object
+        :param data_labels: names of plotted data arrays 
+        :type data_labels: list
+        :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
+        :type map_extent: list
     """
 
-    if log_ax == 'logx':
-        lower_lim, _ = get_no_margin_lim(relevant_axis, 'xlim')
-        if round(lower_lim, 2) >= 0:
-            validity = True
-        else:
-            validity = False
-    
-    if log_ax == 'logy':
-        lower_lim, _ = get_no_margin_lim(relevant_axis, 'ylim')
-        if round(lower_lim, 2) >= 0:
-            validity = True
-        else:
-            validity = False
+    #get experiment domain polygons
+    grid_edge_polygons = canvas_instance.plot.make_experiment_domain_polygons(data_labels=data_labels) 
 
-    return validity
+    # plot grid edge polygons on map
+    for grid_edge_polygon in grid_edge_polygons:
+        relevant_axis.add_patch(grid_edge_polygon)
+
+    # if map extent is not set then re-set automatic limits based now domain is plotted.
+    if not map_extent:
+        relevant_axis.relim(visible_only=True)
+        relevant_axis.autoscale(tight=False)

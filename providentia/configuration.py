@@ -5,9 +5,9 @@ import copy
 import json
 import os
 import re
+import socket
 import subprocess
 import sys
-
 import numpy as np
 import pandas as pd
 
@@ -16,6 +16,20 @@ from .warnings import show_message
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+
+# set MACHINE to be the hub, workstation or local machine
+if MACHINE not in ['power', 'mn4', 'nord3v2']:
+    hostname = os.environ.get('HOSTNAME', '')
+    ip = socket.gethostbyname(socket.gethostname())
+    if "bscearth" in hostname:
+        MACHINE = "workstation"
+    elif "bscesdust02.bsc.es" in hostname:
+        MACHINE = "dust"
+    elif ip == "84.88.185.48":
+        MACHINE = "hub"
+    else:
+        MACHINE = "local"
 
 
 def parse_path(dir, f):
@@ -32,12 +46,17 @@ class ProvConfiguration:
         self.read_instance = read_instance 
 
         # set variable defaults
-        var_defaults = {
+        self.var_defaults = {
             'ghost_version': '1.5',
-            'config_dir': os.path.join(os.environ['HOME'], '.providentia'),
+            'conf': '',
+            'config': '',
+            'config_dir': os.path.join(PROVIDENTIA_ROOT, 'configurations/'),
             'cartopy_data_dir': '',
             'available_cpus': '',
             'n_cpus': '',
+            'local_ghost_root': '/data/providentia/obs/ghost/',
+            'local_nonghost_root': '/data/providentia/obs/nonghost/',
+            'local_exp_root': '/data/providentia/exp/',
             'ghost_root': '',
             'nonghost_root': '',
             'exp_root': '',
@@ -59,6 +78,7 @@ class ProvConfiguration:
             'resolution': None,
             'start_date': None,
             'end_date': None,
+            'observations_data_label': 'observations',
             'experiments': {},
             'qa': None,
             'flags': None,
@@ -75,7 +95,6 @@ class ProvConfiguration:
             'report_title': 'Providentia Offline Report',
             'report_filename': 'PROVIDENTIA_Report',
             'active_dashboard_plots': None,
-            'resampling': False,
             'resampling_resolution': None,
             'statistic_mode': None,
             'statistic_aggregation': None,
@@ -84,32 +103,46 @@ class ProvConfiguration:
             'plot_characteristics_filename': '',
             'harmonise_summary': True,
             'harmonise_stations': True,
+            'remove_extreme_stations': False,
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
                                     'available_resolutions', 'available_networks',
-                                    'network', 'species', 'resolution', 'start_date', 'end_date', 'experiments', 
-                                    'temporal_colocation', 'spatial_colocation', 'report_type', 'report_summary', 
-                                    'report_stations', 'report_title', 'report_filename', 
-                                    'plot_characteristics_filename', 'harmonise_summary', 'harmonise_stations']
+                                    'network', 'species', 'resolution', 'start_date', 'end_date', 
+                                    'observations_data_label', 'experiments', 'temporal_colocation', 'spatial_colocation', 
+                                    'report_type', 'report_summary', 'report_stations', 'report_title', 
+                                    'report_filename', 'plot_characteristics_filename', 
+                                    'harmonise_summary', 'harmonise_stations']
         }
 
         # if variable is given by command line, set that value, otherwise set as default value 
-        for k, val in var_defaults.items():
+        for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
     def parse_parameter(self, key, value):
         """ Parse a parameter. """
 
-        # get available N CPUs
-        if key == 'available_cpus':
-            if (MACHINE == 'power') or (MACHINE == 'mn4'):
-                bash_command = 'squeue -h -o "%C"'
-                process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
-                output, _ = process.communicate()
-                return int(re.findall(r'\d+', str(output))[0])
+        # parse config file name
+        if key == 'conf':
+            if value != '':
+                self.read_instance.config = value
+            return ''
+
+        elif key == 'config':
+            if hasattr(self.read_instance, 'config'):
+                if self.read_instance.config != '':
+                    return self.read_instance.config
+                else:
+                    return value
             else:
-                return int(os.cpu_count())
+                return value
+                
+        elif key == 'available_cpus':
+            # get available N CPUs
+            if MACHINE in ['power', 'mn4', 'nord3v2']:
+                return int(os.getenv('SLURM_CPUS_PER_TASK'))
+            else:
+                return len(os.sched_getaffinity(0))
 
         elif key == 'cartopy_data_dir':
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
@@ -136,9 +169,12 @@ class ProvConfiguration:
                 # running on CTE-POWER/MN4/N3?
                 if MACHINE in ['power', 'mn4', 'nord3v2']:
                     return '/gpfs/projects/bsc32/AC_cache/obs/ghost'
-                else:
-                    # running on workstation or hub?
+                # running on workstation or hub?
+                elif MACHINE in ['hub', 'workstation', 'dust']:
                     return '/esarchive/obs/ghost'
+                # running locally?
+                else:
+                    return self.read_instance.local_ghost_root
 
         elif key == 'nonghost_root':
             # define non-GHOST observational root data directory (if undefined it is
@@ -147,10 +183,14 @@ class ProvConfiguration:
             # set default if left undefined
             if value == '':
                 # running on MN4?
-                if (MACHINE == 'mn4'):
+                if MACHINE == 'mn4':
                     return '/gpfs/projects/bsc32/AC_cache/obs/nonghost'
-                else:
+                # running on other machines?
+                elif MACHINE in ['power', 'nord3v2', 'hub', 'workstation', 'dust']:
                     return '/esarchive/obs'
+                # running locally?
+                else:
+                    return self.read_instance.local_nonghost_root
 
         elif key == 'exp_root':
             # define experiment root data directory
@@ -159,9 +199,12 @@ class ProvConfiguration:
                 # not running on workstation?
                 if MACHINE in ['power', 'mn4', 'nord3v2']:
                     return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
-                else:
-                    # running on workstation or hub?
+                # running on workstation or hub?
+                elif MACHINE in ['hub', 'workstation', 'dust']:
                     return '/esarchive/recon/prov_interp'
+                # running locally?
+                else:
+                    return self.read_instance.local_exp_root
 
         elif key == 'ghost_version':
             # parse GHOST version
@@ -453,14 +496,14 @@ class ProvConfiguration:
                 value_strip = "".join(value.split())
 
                 calibration_by_experiment = False
-                for experiment in self.read_instance.experiments.keys():
+                for experiment in self.read_instance.experiments.values():
                     if experiment in value_strip:
                         calibration_by_experiment = True
                         break
                 
                 if calibration_by_experiment:
                     calibration_factor_dict = {}
-                    for i, experiment in enumerate(self.read_instance.experiments.keys()):
+                    for i, experiment in enumerate(self.read_instance.experiments.values()):
                         calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
                         calibration_factor_dict[experiment] = calibration_factor_exp
                     return calibration_factor_dict
@@ -473,7 +516,7 @@ class ProvConfiguration:
 
     def check_validity(self):
         """ Check validity of set variables after parsing. """
-
+        
         # check have network information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:
@@ -712,13 +755,6 @@ class ProvConfiguration:
 
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
-
-        # check have resampling_resolution if resampling is True
-        # if offline, throw message, stating error
-        if (self.read_instance.resampling) and (self.read_instance.resampling_resolution == 'None'):
-            msg = 'Resampling will not be applied because resampling resolution was not defined.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-            self.read_instance.resampling = False
         
         # check bounds inside filter_species
         if self.read_instance.filter_species:
