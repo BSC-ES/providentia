@@ -118,7 +118,7 @@ class Interactive:
         self.reset_filter()
 
     def read(self):
-        """wrapper method to read data"""
+        """ Wrapper method to read data. """
 
         print('Reading data')
 
@@ -130,7 +130,7 @@ class Interactive:
             return
 
     def filter(self):
-        """wrapper method to filter data"""
+        """ Wrapper method to filter data. """
 
         print('Filtering data')
 
@@ -141,7 +141,7 @@ class Interactive:
         get_selected_station_data(read_instance=self, canvas_instance=self, networkspecies=self.networkspecies)
 
     def reset_filter(self):
-        """wrapper method to reset filter data"""
+        """ Wrapper method to reset filter data. """
 
         print('Resetting filter')
 
@@ -167,7 +167,59 @@ class Interactive:
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
                   domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
                   smooth=False, plot_options=None, save=False, return_plot=False, format=None):
-        """wrapper method to make a Providentia plot"""
+        """ Wrapper method to make a Providentia plot.
+
+        :param plot: Plot type
+        :type plot: str
+        :param data_labels: Data labels, defaults to None
+        :type data_labels: list, optional
+        :param labela: Label of first experiment, defaults to ''
+        :type labela: str, optional
+        :param labelb: Label of second experiment, defaults to ''
+        :type labelb: str, optional
+        :param title: Axes title, defaults to None
+        :type title: str, optional
+        :param xlabel: Label on x axes, defaults to None
+        :type xlabel: str, optional
+        :param ylabel: Label on y axes, defaults to None
+        :type ylabel: str, optional
+        :param cb: Indicates if colorbar appears on plot, defaults to True
+        :type cb: bool, optional
+        :param legend: Indicates if legend appears on plot, defaults to True
+        :type legend: bool, optional
+        :param set_obs_legend: Indicates if observations appear on legend, defaults to True
+        :type set_obs_legend: bool, optional
+        :param map_extent: Map extent, defaults to None
+        :type map_extent: list, optional
+        :param annotate: Indicates if there are annotations, defaults to False
+        :type annotate: bool, optional
+        :param bias: Indicates if data is biased, defaults to False
+        :type bias: bool, optional
+        :param domain: Indicates if domain shows in maps, defaults to False
+        :type domain: bool, optional
+        :param hidedata: Indicates if data points are hidden in plot, defaults to False
+        :type hidedata: bool, optional
+        :param logx: Indicates if the scale of the x axis is log, defaults to False
+        :type logx: bool, optional
+        :param logy: Indicates if the scale of the y axis is log, defaults to False
+        :type logy: bool, optional
+        :param multispecies: Indicates if plot has multispecies, defaults to False
+        :type multispecies: bool, optional
+        :param regression: Indicates if scatter plot has regression line/s, defaults to False
+        :type regression: bool, optional
+        :param smooth: Indicates if timeseries has smooth line/s, defaults to False
+        :type smooth: bool, optional
+        :param plot_options: List with plot options, defaults to None
+        :type plot_options: list, optional
+        :param save: Indicates if you want to save the figure, defaults to False
+        :type save: bool, optional
+        :param return_plot: Indicates if you want to get the axes, defaults to False
+        :type return_plot: bool, optional
+        :param format: Format to overwrite the plots format taken from plot characteristics 
+        :type format: dict, optional
+        :return: matplotlib.axes._axes.Axes
+        :rtype: Plot axes
+        """
 
         # define default argument mutables
         if data_labels is None:
@@ -643,7 +695,19 @@ class Interactive:
             plt.show()
 
     def make_colourbar(self, fig, plot_ax, stat, speci, plot_type):
-        """wrapper method to make colourbar"""
+        """ Wrapper method to make colourbar.
+
+        :param fig: Figure
+        :type fig: matplotlib.figure
+        :param plot_ax: Axis
+        :type plot_ax: matplotlib.axes
+        :param stat: Statistic
+        :type stat: str
+        :param speci: Species
+        :type speci: str
+        :param plot_type: Plot type
+        :type plot_type: str
+        """
 
         # create cb axis
         cb_ax = fig.add_axes(self.plot_characteristics[plot_type]['cb']['position'])
@@ -652,8 +716,20 @@ class Interactive:
         # generate colourbar
         generate_colourbar(self, [plot_ax], [cb_ax], stat, self.plot_characteristics[plot_type], speci)
 
+        return None
+    
     def make_legend(self, plot_type, data_labels=None, set_obs=True):
-        """wrapper method to make legend"""
+        """ Wrapper method to make legend.
+
+        :param plot_type: Plot type
+        :type plot_type: str
+        :param data_labels: Data labels, defaults to None
+        :type data_labels: list, optional
+        :param set_obs: Indicates if observations appear on legend, defaults to True
+        :type set_obs: bool, optional
+        :return: Legend
+        :rtype: dict
+        """
         
         if plot_type == 'legend':
             legend_characteristics = self.plot_characteristics['legend']
@@ -664,10 +740,23 @@ class Interactive:
             return
 
         legend_handles = self.plot.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)
+        
         return legend_handles['plot']
 
     def calculate_stat(self, stat, labela='', labelb='', per_station=False):
-        """wrapper method to calculate statistic/s"""
+        """ Wrapper method to calculate statistic/s.
+
+        :param stat: Statistic
+        :type stat: str
+        :param labela: Label of first experiment, defaults to ''
+        :type labela: str, optional
+        :param labelb: Label of second experiment, defaults to ''
+        :type labelb: str, optional
+        :param per_station: Indicates if the station data is per station or for all stations, defaults to False
+        :type per_station: bool, optional
+        :return: Statistic value
+        :rtype: np.ndarray
+        """
 
         # if no specific labels defined then take first data label and give warning
         if (labela == '') & (labelb == ''):
@@ -695,10 +784,11 @@ class Interactive:
             stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], per_station=True)
         else:
             stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb])
+        
         return stat
 
     def set_config(self, **kwargs):
-        """wrapper method to set configuration variables"""
+        """ Wrapper method to set configuration variables. """
 
         # initialise default configuration variables
         # modified by passed arguments, if given
@@ -798,7 +888,13 @@ class Interactive:
         return True
 
     def print_config(self, conf=None, config=None):
-        """print selected config file to console"""
+        """ Print selected config file to console.
+
+        :param conf: Configuration file name, defaults to None
+        :type conf: str, optional
+        :param config: Configuration file name, defaults to None
+        :type config: str, optional
+        """
 
         # if conf or config not None, then print that file
         if conf:
@@ -818,7 +914,11 @@ class Interactive:
                 print(f.read())
 
     def select_station(self, station):
-        """wrapper method to select specific station/s"""
+        """ Wrapper method to select specific station/s.
+
+        :param station: Station reference
+        :type station: str
+        """
         
         if type(station) == 'str':
             stations_to_keep = [station]
@@ -826,11 +926,17 @@ class Interactive:
             stations_to_keep = station
         self.metadata_menu['STATION MISCELLANEOUS']['station_reference']['checkboxes']['keep_selected'] = stations_to_keep
 
-        #filter for station/s    
+        # filter for station/s    
         self.filter()
 
     def save(self, fname='', format='nc'):
-        """wrapper method to save current data/ metadata in memory"""
+        """ Wrapper method to save current data/ metadata in memory.
+
+        :param fname: File name, defaults to ''
+        :type fname: str, optional
+        :param format: File format, defaults to 'nc'
+        :type format: str, optional
+        """
 
         # set fname if not provided
         if fname == '':
@@ -852,7 +958,13 @@ class Interactive:
         print('Data saved to {}'.format(fname))
 
     def get_data(self, format='nc'):
-        """wrapper method return data / metadata in specific format"""
+        """ Wrapper method return data / metadata in specific format.
+
+        :param format: File format, defaults to 'nc'
+        :type format: str, optional
+        :return: Data
+        :rtype: numpy.ndarray
+        """
 
         # set temporary fname for writing
         temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp')
@@ -869,7 +981,13 @@ class Interactive:
         return data
 
     def get_var(self, var=''):
-        """wrapper method to return specific data / metadata variable"""
+        """ Wrapper method to return specific data / metadata variable.
+
+        :param var: Variable name, defaults to ''
+        :type var: str, optional
+        :return: Data
+        :rtype: numpy.ndarray
+        """
 
         # if variable is undefined then print warning
         if var == '':
