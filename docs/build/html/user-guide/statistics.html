@@ -1,106 +1,50 @@
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<html lang="en" data-content_root="../">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistics &mdash; Providentia 2.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
-    <title>Statistics &#8212; Providentia 2.3.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
-    <script src="../_static/documentation_options.js?v=c3c8ae58"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=c3c8ae58"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Other topics" href="../other-topics.html" />
-    <link rel="prev" title="Plot customization" href="plot-customization.html" />
-   
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link rel="prev" title="Plot customization" href="plot-customization.html" /> 
+</head>
 
-  </head><body>
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
-
-          <div class="body" role="main">
-            
-  <section id="statistics">
-<h1>Statistics<a class="headerlink" href="#statistics" title="Link to this heading">¶</a></h1>
-<section id="statistical-modes">
-<h2>Statistical modes<a class="headerlink" href="#statistical-modes" title="Link to this heading">¶</a></h2>
-<p>There are three statistical modes:</p>
-<ul class="simple">
-<li><p>Flattened (new default)</p></li>
-<li><p>Spatial|Temporal (Providentia versions before 2.2.0)</p></li>
-<li><p>Temporal|Spatial (CAMS / AEROVAL)</p></li>
-</ul>
-<p>The name of each statistical mode relates to how the dimensions of the selected data are reduced to calculate the statistical metrics, e.g. mean, median etc, going from 2D to 0D.</p>
-<p>When selecting data across multiple stations, it has 2 dimensions: Spatial and Temporal.</p>
-<p>In the versions of Providentia prior to 2.2.0, the mode was always Spatial|Temporal, with aggregation performed across stations (e.g. taking mean across stations per timestep), going to 1D, before calculating the desired statistic across the aggregated timesteps (e.g. median), going to 0D.</p>
-<section id="dimensional-reduction-by-statistical-mode">
-<h3>Dimensional reduction by statistical mode<a class="headerlink" href="#dimensional-reduction-by-statistical-mode" title="Link to this heading">¶</a></h3>
-<img alt="Statistical modes" src="../_images/statistical-modes.png" />
-</section>
-<section id="dimensional-reduction-by-statistical-mode-and-plot-type">
-<h3>Dimensional reduction by statistical mode and plot type<a class="headerlink" href="#dimensional-reduction-by-statistical-mode-and-plot-type" title="Link to this heading">¶</a></h3>
-<p>For some plot types the full dimensional reduction is not possible, e.g map. Therefore, they are locked in certain reduction configurations. This is illustrated per plot type:</p>
-<img alt="Statistical reduction" src="../_images/statistical-reduction.png" />
-<p>In both the dashboard and offline versions of Providentia, the statistical modes and aggregation statistics can be set.</p>
-<p>On the dashboard, in the statistics tab at the top, the mode and aggregation can be selected via the dropdown menus. In the .conf file these can be set like so:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">statistic_mode</span> <span class="o">=</span> <span class="n">Temporal</span><span class="o">|</span><span class="n">Spatial</span>
-<span class="n">statistic_aggregation</span> <span class="o">=</span> <span class="n">Median</span>
-</pre></div>
-</div>
-<p>NOTE: For the Flattened mode, there is no aggregation statistic.</p>
-</section>
-</section>
-<section id="periodic-statistics">
-<h2>Periodic statistics<a class="headerlink" href="#periodic-statistics" title="Link to this heading">¶</a></h2>
-<p>The periodic plot gives statistical information for grouped data in individual timesteps. Thus it can be seen how each individual timesteps compare for observations vs experiment/s.</p>
-<p>However, when looking to evaluate the agreement across the whole of the periodic cycle, Providentia was previously lacking statistics to enable such a comparison.</p>
-<p>Statistics can now be calculated which assess the available periodic cycles, i.e. diurnal, weekly, monthly. These statistics are available via the statsummary, table and heatmap plot types.</p>
-<p>There exist 2 modes for calculating these periodic statistics:</p>
-<ul class="simple">
-<li><p>Independent (default)</p></li>
-<li><p>Cycle</p></li>
-</ul>
-<p>Independent works by calculating the desired statistic per timestep (i.e. as seen in periodic plot), before aggregating across the timesteps.</p>
-<p>Cycle works by aggregating the grouped data per timestep (e.g. mean), before then calculating the desired statistic across the timesteps.</p>
-<p>Again, in both the dashboard and offline versions of Providentia, the periodic statistical modes and aggregation statistic can be set.</p>
-<p>On the dashboard, in the plot options of the statsummary plot, the periodic statistic mode and aggregation can be selected via the dropdown menus. Additionally, periodic statistics can be added to the statsummary plot also via the dropdown menus.</p>
-<p>In the .conf file these can be set like so:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">periodic_statistic_mode</span> <span class="o">=</span> <span class="n">Independent</span>
-<span class="n">periodic_statistic_aggregation</span> <span class="o">=</span> <span class="n">Median</span>
-</pre></div>
-</div>
-</section>
-</section>
-
-
-          </div>
           
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">Providentia</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<ul class="current">
+          <a href="../index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../setup.html">Tool setup</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../user-guide.html">User guide</a><ul class="current">
@@ -123,53 +67,112 @@
 <li class="toctree-l1"><a class="reference internal" href="../other-topics.html">Other topics</a></li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="../user-guide.html">User guide</a><ul>
-      <li>Previous: <a href="plot-customization.html" title="previous chapter">Plot customization</a></li>
-      <li>Next: <a href="../other-topics.html" title="next chapter">Other topics</a></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
-      |
-      <a href="../_sources/user-guide/statistics.rst.txt"
-          rel="nofollow">Page source</a>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../user-guide.html">User guide</a></li>
+      <li class="breadcrumb-item active">Statistics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user-guide/statistics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="statistics">
+<h1>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h1>
+<section id="statistical-modes">
+<h2>Statistical modes<a class="headerlink" href="#statistical-modes" title="Link to this heading"></a></h2>
+<p>There are three statistical modes:</p>
+<ul class="simple">
+<li><p>Flattened (new default)</p></li>
+<li><p>Spatial|Temporal (Providentia versions before 2.2.0)</p></li>
+<li><p>Temporal|Spatial (CAMS / AEROVAL)</p></li>
+</ul>
+<p>The name of each statistical mode relates to how the dimensions of the selected data are reduced to calculate the statistical metrics, e.g. mean, median etc, going from 2D to 0D.</p>
+<p>When selecting data across multiple stations, it has 2 dimensions: Spatial and Temporal.</p>
+<p>In the versions of Providentia prior to 2.2.0, the mode was always Spatial|Temporal, with aggregation performed across stations (e.g. taking mean across stations per timestep), going to 1D, before calculating the desired statistic across the aggregated timesteps (e.g. median), going to 0D.</p>
+<section id="dimensional-reduction-by-statistical-mode">
+<h3>Dimensional reduction by statistical mode<a class="headerlink" href="#dimensional-reduction-by-statistical-mode" title="Link to this heading"></a></h3>
+<img alt="Statistical modes" src="../_images/statistical-modes.png" />
+</section>
+<section id="dimensional-reduction-by-statistical-mode-and-plot-type">
+<h3>Dimensional reduction by statistical mode and plot type<a class="headerlink" href="#dimensional-reduction-by-statistical-mode-and-plot-type" title="Link to this heading"></a></h3>
+<p>For some plot types the full dimensional reduction is not possible, e.g map. Therefore, they are locked in certain reduction configurations. This is illustrated per plot type:</p>
+<img alt="Statistical reduction" src="../_images/statistical-reduction.png" />
+<p>In both the dashboard and offline versions of Providentia, the statistical modes and aggregation statistics can be set.</p>
+<p>On the dashboard, in the statistics tab at the top, the mode and aggregation can be selected via the dropdown menus. In the .conf file these can be set like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">statistic_mode</span> <span class="o">=</span> <span class="n">Temporal</span><span class="o">|</span><span class="n">Spatial</span>
+<span class="n">statistic_aggregation</span> <span class="o">=</span> <span class="n">Median</span>
+</pre></div>
+</div>
+<p>NOTE: For the Flattened mode, there is no aggregation statistic.</p>
+</section>
+</section>
+<section id="periodic-statistics">
+<h2>Periodic statistics<a class="headerlink" href="#periodic-statistics" title="Link to this heading"></a></h2>
+<p>The periodic plot gives statistical information for grouped data in individual timesteps. Thus it can be seen how each individual timesteps compare for observations vs experiment/s.</p>
+<p>However, when looking to evaluate the agreement across the whole of the periodic cycle, Providentia was previously lacking statistics to enable such a comparison.</p>
+<p>Statistics can now be calculated which assess the available periodic cycles, i.e. diurnal, weekly, monthly. These statistics are available via the statsummary, table and heatmap plot types.</p>
+<p>There exist 2 modes for calculating these periodic statistics:</p>
+<ul class="simple">
+<li><p>Independent (default)</p></li>
+<li><p>Cycle</p></li>
+</ul>
+<p>Independent works by calculating the desired statistic per timestep (i.e. as seen in periodic plot), before aggregating across the timesteps.</p>
+<p>Cycle works by aggregating the grouped data per timestep (e.g. mean), before then calculating the desired statistic across the timesteps.</p>
+<p>Again, in both the dashboard and offline versions of Providentia, the periodic statistical modes and aggregation statistic can be set.</p>
+<p>On the dashboard, in the plot options of the statsummary plot, the periodic statistic mode and aggregation can be selected via the dropdown menus. Additionally, periodic statistics can be added to the statsummary plot also via the dropdown menus.</p>
+<p>In the .conf file these can be set like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">periodic_statistic_mode</span> <span class="o">=</span> <span class="n">Independent</span>
+<span class="n">periodic_statistic_aggregation</span> <span class="o">=</span> <span class="n">Median</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot-customization.html" class="btn btn-neutral float-left" title="Plot customization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../other-topics.html" class="btn btn-neutral float-right" title="Other topics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
-    
+  <hr/>
 
-    
-  </body>
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>
