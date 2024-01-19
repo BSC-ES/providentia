@@ -10,5 +10,5 @@ User guide
    user-guide/interactive.rst
    user-guide/configuration-files.rst
    user-guide/plot-types-and-options.rst
-   user-guide/plot-customization.rst
+   user-guide/plot-customisation.rst
    user-guide/statistics.rst
