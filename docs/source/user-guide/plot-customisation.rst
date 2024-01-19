@@ -1,4 +1,4 @@
-Plot customization
+Plot customisation
 ==================
 
 Editing the plot style from the configuration files
