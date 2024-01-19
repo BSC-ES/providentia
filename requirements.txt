@@ -16,5 +16,6 @@ cftime==1.0.3.4
 KDEpy==1.1.8
 xarray==2023.12.0
 Sphinx==7.2.6
+Sphinx-rtd-theme==2.0.0
 coverage==7.4.0
 pytest==7.4.4
