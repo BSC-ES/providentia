@@ -19,9 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Providentia. If not, see <http://www.gnu.org/licenses/>.
 
-from os import path
+from setuptools import find_packages
 from setuptools import setup
-
 from providentia import __version__
 
 REQUIREMENTS = {
@@ -34,39 +33,30 @@ REQUIREMENTS = {
         'pytest-metadata>=1.5.1',
     ],
     'setup': [
-#        'pytest-runner',
+    #    'pytest-runner',
         'setuptools_scm',
     ],
 }
 
+
+# Get the version number from the relevant file
+version = __version__
+
+with open("README.md", "r") as f:
+    long_description = f.read()
+
 setup(
-    # Application name:
     name="providentia",
     license='GNU GPL v3',
-    # Version number (initial):
-    version=__version__,
-
-    # Application author details:
+    version=version,
     author="Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa",
     author_email="dene.bowdalo@bsc.es, amalia.vradi@bsc.es, alba.vilanova@bsc.es, francesco.benincasa@bsc.es",
-
-    # Packages
-    packages=['providentia', 'providentia.interpolation'],
-
-    # Include additional files into the package
-    include_package_data=True,
-    scripts=['bin/providentia'],
-
-    # Details
+    packages=find_packages(),
     url="https://earth.bsc.es/gitlab/ac/Providentia",
-
     keywords=['earth sciences', 'evaluation', 'verification', 'observations', 'NWP models',
               'air quality'],
     description="Providentia is designed to allow on-the-fly and offline analysis of experiment outputs, with respect to processed observational data.",
-    #    long_description=open("README.rst").read(),
-    #    long_description_content_type='text/x-rst',
-
-    # Dependent packages (distributions)
+    long_description=long_description,
     setup_requires=REQUIREMENTS['setup'],
     install_requires=[
         "matplotlib",
@@ -78,6 +68,8 @@ setup(
         "PyQt5",
         "scipy",
     ],
+    package_data={'': [
+        'README.md',
+    ]},
     #tests_require=REQUIREMENTS['test'],
-
 )
