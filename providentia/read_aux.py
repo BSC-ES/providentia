@@ -446,7 +446,6 @@ def get_ghost_observational_tree(instance):
 
             # check if directory for resolution exists
             # if not, continue
-            print(instance.ghost_root, network, instance.ghost_version, resolution)
             if not os.path.exists('%s/%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version, resolution)):
                 continue
 
