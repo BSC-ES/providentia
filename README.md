@@ -1,5 +1,5 @@
-[![Version](https://earth.bsc.es/gitlab/ac/Providentia/-/badges/release.svg)](https://earth.bsc.es/gitlab/ac/Providentia/-/tags?key_text=Latest+release)
-[![CI](https://earth.bsc.es/gitlab/ac/Providentia/badges/master/pipeline.svg)](https://earth.bsc.es/gitlab/ac/Providentia/-/pipelines?key_text=CI)
+[![Version](https://earth.bsc.es/gitlab/ac/Providentia/-/badges/release.svg?key_text=Latest+release)](https://earth.bsc.es/gitlab/ac/Providentia/-/tags)
+[![CI](https://earth.bsc.es/gitlab/ac/Providentia/badges/master/pipeline.svg?key_text=CI)](https://earth.bsc.es/gitlab/ac/Providentia/-/pipelines)
 
 # About
 
