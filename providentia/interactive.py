@@ -1000,3 +1000,4 @@ class Interactive:
             else:
                 var_data = data[var][:]
                 return var_data
+            
