@@ -1,4 +1,4 @@
-[![Version](https://earth.bsc.es/gitlab/ac/Providentia/badges/release.svg)]
+[![Version](https://earth.bsc.es/gitlab/ac/Providentia/-/badges/release.svg)]
 
 [![CI](https://earth.bsc.es/gitlab/ac/Providentia/badges/master/pipeline.svg)](https://earth.bsc.es/gitlab/ac/Providentia/commits/master)
 
