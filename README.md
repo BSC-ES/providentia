@@ -1,3 +1,7 @@
+[![Version](https://earth.bsc.es/gitlab/ac/Providentia/badges/master/release.svg)](https://earth.bsc.es/gitlab/ac/Providentia/commits/master)
+
+[![CI](https://earth.bsc.es/gitlab/ac/Providentia/badges/master/pipeline.svg)](https://earth.bsc.es/gitlab/ac/Providentia/commits/master)
+
 # About
 
 Providentia is designed to allow on-the-fly and offline analysis of experiment outputs, with respect to processed observational data.
