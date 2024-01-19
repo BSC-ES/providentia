@@ -1,7 +1,7 @@
 Offline reports
 ===============
 
-Providentia's offline version was designed to obtain complete reports and carry out in-depth analysis of BSC experiment output, with respect to GHOST processed observational data.
+Providentia's offline mode was designed to be able to generate complete reports and carry out in-depth analysis of BSC experiment output, with respect to GHOST processed observational data.
 
 Plot types and options
 ----------------------
