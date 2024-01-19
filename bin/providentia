@@ -86,7 +86,7 @@ queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
 load_command="source load_modules.sh"
-python_command="python3 -u -Wi -c 'from providentia import providentia;providentia.main()' $OTHEROPTS"
+python_command="python3 -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 interactive_alloc_command="sbatch -t $time -c $cores -J $jobname"
 
 # avoid x11 forwarding when creating offline reports
