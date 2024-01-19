@@ -446,6 +446,7 @@ def get_ghost_observational_tree(instance):
 
             # check if directory for resolution exists
             # if not, continue
+            print(instance.ghost_root, network, instance.ghost_version, resolution)
             if not os.path.exists('%s/%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version, resolution)):
                 continue
 
@@ -462,7 +463,7 @@ def get_ghost_observational_tree(instance):
                 available_files = os.listdir(
                     '%s/%s/%s/%s/%s' % (instance.ghost_root, network, instance.ghost_version, resolution, speci))
                 
-                # coninue if have no files
+                # continue if have no files
                 if len(available_files) == 0:
                     continue
 
