@@ -398,7 +398,7 @@ class Interactive:
             # if no specific labels defined then take first data label and give warning
             if (labela == '') & (labelb == ''):
                 labela = data_labels[0]
-                print("Warning: No specific data labels set, plotting first available data label: {}.".format(z1_label))
+                print("Warning: No specific data labels set, plotting first available data label: {}.".format(labela))
             # labelb defined but labela for some reason, set labela to be labelb, and labelb empty str 
             elif (labela == ''):
                 labela = copy.deepcopy(labelb)
@@ -760,8 +760,8 @@ class Interactive:
 
         # if no specific labels defined then take first data label and give warning
         if (labela == '') & (labelb == ''):
-            labela = data_labels[0]
-            print("Warning: No specific data labels set, plotting first available data label: {}.".format(z1_label))
+            labela = self.data_labels[0]
+            print("Warning: No specific data labels set, plotting first available data label: {}.".format(labela))
         # labelb defined but labela for some reason, set labela to be labelb, and labelb empty str 
         elif (labela == ''):
             labela = copy.deepcopy(labelb)
