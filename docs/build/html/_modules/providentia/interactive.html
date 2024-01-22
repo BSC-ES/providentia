@@ -192,7 +192,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  
 
         <span class="c1"># filter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># set variable to know if data is in intial state or not</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intialised</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to read data. &quot;&quot;&quot;</span>
@@ -219,28 +222,41 @@
 
 <div class="viewcode-block" id="Interactive.reset_filter">
 <a class="viewcode-back" href="../../user-guide/interactive.html#providentia.interactive.Interactive.reset_filter">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to reset filter data. &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">reset_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialise</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to reset filter data.</span>
+
+<span class="sd">        :param initialise: Indicates whether to reset data to initial state when class was initialised </span>
+<span class="sd">        :type initialise: boolean, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Resetting filter&#39;</span><span class="p">)</span>
-
+   
         <span class="c1"># reset representativity fields        </span>
         <span class="n">init_representativity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">update_representativity_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">representativity_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initialise</span><span class="p">:</span>
+            <span class="n">representativity_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># reset period fields </span>
         <span class="n">init_period</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">update_period_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">period_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initialise</span><span class="p">:</span>
+            <span class="n">period_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># reset metadata</span>
         <span class="n">init_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">update_metadata_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">metadata_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initialise</span><span class="p">:</span>
+            <span class="n">metadata_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1">#re-filter </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
+
+        <span class="c1"># set variable to know if data is in intial state or not</span>
+        <span class="k">if</span> <span class="n">initialise</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intialised</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intialised</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="Interactive.make_plot">
@@ -511,6 +527,7 @@
             <span class="n">stats_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">stats_to_plot</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
             
             <span class="c1"># fill dataframe</span>
+            <span class="n">is_initial</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intialised</span><span class="p">)</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># save current subsection </span>
             <span class="n">orig_ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">)</span>
@@ -518,7 +535,7 @@
                 <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;subsection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ss</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="c1"># filter data</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">networkspecies</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">dl</span> <span class="ow">in</span> <span class="n">relevant_data_labels</span><span class="p">:</span>
                         <span class="n">stats_per_data_label</span> <span class="o">=</span> <span class="p">[]</span>
@@ -555,7 +572,10 @@
             <span class="c1"># re-filter for original subsection</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;subsection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_ss</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">is_initial</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
 
         <span class="c1"># make heatmap / table plot</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;heatmap&#39;</span><span class="p">,</span><span class="s1">&#39;table&#39;</span><span class="p">]:</span>  
@@ -566,6 +586,7 @@
             <span class="n">stats_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">relevant_data_labels</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
             
             <span class="c1"># fill dataframe</span>
+            <span class="n">is_initial</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intialised</span><span class="p">)</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># save current subsection </span>
             <span class="n">orig_ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">)</span>
@@ -573,7 +594,7 @@
                 <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;subsection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ss</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="c1"># filter data</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">networkspecies</span><span class="p">:</span>
                     <span class="n">stat_per_data_labels</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="k">for</span> <span class="n">dl</span> <span class="ow">in</span> <span class="n">relevant_data_labels</span><span class="p">:</span>
@@ -602,7 +623,10 @@
             <span class="c1"># re-filter for original subsection</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;subsection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_ss</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">is_initial</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
          
         <span class="c1"># other plots</span>
         <span class="k">else</span><span class="p">:</span> 

@@ -13,11 +13,13 @@ Providentia interactive can be used in any script, through simply importing the 
 
    from providentia import Interactive
 
-If your script is not inside the Providentia directory, in order to import from Providentia, then it is necessary to add this line to your code first:            
+If your script is not inside the Providentia directory, in order to import from Providentia, then it is necessary to add these lines to your code first:            
 
 ::
    
-   export PYTHONPATH=$(provdir):${PYTHONPATH}
+   import sys
+   sys.path.append(provdir)
+
       
 where ``provdir`` is the path where your Providentia code exists.
 
@@ -106,6 +108,12 @@ After data has been read and filtered, it will stay filtered until it is reset. 
 ::
 
    provi.reset_filter()  
+
+If at any point wanting to return to the state when the Interactive class was initialised, this can be done by adding the following argument to the method:
+
+::
+
+   initialise=True 
 
 Selecting for stations
 ^^^^^^^^^^^^^^^^^^^^^^
