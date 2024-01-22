@@ -54,7 +54,12 @@
 <li class="toctree-l2"><a class="reference internal" href="configuration-files.html">Configuration files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plot-types-and-options.html">Plot types and options</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Plot customisation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-from-the-configuration-files">Editing the plot style from the configuration files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-from-the-configuration-files">Editing the plot style from the configuration files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#setting-custom-bounds-and-cmap-per-species">Setting custom bounds and cmap per species</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-extreme-stations-by-their-statistical-values">Remove extreme stations by their statistical values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#calculating-exceedances">Calculating exceedances</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-in-the-dashboard">Editing the plot style in the dashboard</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#changing-the-plot-style">Changing the plot style</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#legend-picking">Legend picking</a></li>
@@ -105,6 +110,55 @@
 <li><p>Plots in the dashboard: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_dashboard.json</span></code></p></li>
 <li><p>Plots in the offline reports: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_offline.json</span></code></p></li>
 </ul>
+<section id="setting-custom-bounds-and-cmap-per-species">
+<h3>Setting custom bounds and cmap per species<a class="headerlink" href="#setting-custom-bounds-and-cmap-per-species" title="Link to this heading"></a></h3>
+<p>Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per species using a dictionary, with the keys being the names of the species inside <code class="docutils literal notranslate"><span class="pre">basic_stats.json</span></code> and <code class="docutils literal notranslate"><span class="pre">experiment_bias_stats.json</span></code>. An example can be seen in the image below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;Mean&quot;</span><span class="p">:</span>        <span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="s2">&quot;calculate_mean&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Mean&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;arguments&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;[measurement_units]&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;minimum_bias&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+                <span class="s2">&quot;vmin_absolute&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+                <span class="s2">&quot;vmax_absolute&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+                <span class="s2">&quot;vmin_bias&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">&quot;vmax_bias&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">&quot;cmap_absolute&quot;</span><span class="p">:</span> <span class="s2">&quot;viridis&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;cmap_bias&quot;</span><span class="p">:</span> <span class="s2">&quot;RdYlBu_r&quot;</span><span class="p">},</span>
+</pre></div>
+</div>
+<p>If they define the cmap, they will need to give a complete list of cmap options for each of the species that they load or otherwise a warning will appear. For vmin and vmax, they can define the bounds for some species and the rest will take the data minimum and maximum values.</p>
+</section>
+<section id="remove-extreme-stations-by-their-statistical-values">
+<h3>Remove extreme stations by their statistical values<a class="headerlink" href="#remove-extreme-stations-by-their-statistical-values" title="Link to this heading"></a></h3>
+<p>If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file <cite>remove_extreme_stations.json</cite>. An example of this exists for CAMS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;CAMS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;0.3&quot;</span><span class="p">],</span>
+         <span class="s2">&quot;NMB&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;-100.0&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;100.0&quot;</span><span class="p">],</span>
+         <span class="s2">&quot;NRMSE&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;100.0&quot;</span><span class="p">]}</span>
+</pre></div>
+</div>
+<p>The statistics can be general, across all components, or they can be specific per component, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;CAMS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;0.3&quot;</span><span class="p">],</span>
+                     <span class="s2">&quot;NMB&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;-100.0&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;100.0&quot;</span><span class="p">],</span>
+                     <span class="s2">&quot;NRMSE&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;100.0&quot;</span><span class="p">]},</span>
+         <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;0.55&quot;</span><span class="p">],</span>
+                      <span class="s2">&quot;NMB&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;-20.0&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;20.0&quot;</span><span class="p">],</span>
+                      <span class="s2">&quot;NRMSE&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;200.0&quot;</span><span class="p">]}}</span>
+</pre></div>
+</div>
+<p>You will also need to add the variable <cite>remove_extreme_stations</cite> in your configuration file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">remove_extreme_stations</span><span class="o">=</span><span class="n">CAMS</span>
+</pre></div>
+</div>
+</section>
+<section id="calculating-exceedances">
+<h3>Calculating exceedances<a class="headerlink" href="#calculating-exceedances" title="Link to this heading"></a></h3>
+<p>In Providentia <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component, and each instance where values exceed this limit will be counted. Therefore the exceeedances statistic simply gives the number of instances. The threshold values can be set in the file <code class="docutils literal notranslate"><span class="pre">settings/exceedances.json</span></code>, as so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="mf">90.21</span><span class="p">,</span>
+ <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mf">106.38</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="editing-the-plot-style-in-the-dashboard">
 <h2>Editing the plot style in the dashboard<a class="headerlink" href="#editing-the-plot-style-in-the-dashboard" title="Link to this heading"></a></h2>
