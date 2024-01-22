@@ -146,7 +146,7 @@ class Interactive:
     def reset_filter(self, initialise=False):
         """ Wrapper method to reset filter data.
 
-        :param initialise: whether to reset data to initial state when class was initialised 
+        :param initialise: Indicates whether to reset data to initial state when class was initialised 
         :type initialise: boolean, optional
         """
 

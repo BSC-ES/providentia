@@ -116,8 +116,9 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">providentia</span> <span class="kn">import</span> <span class="n">Interactive</span>
 </pre></div>
 </div>
-<p>If your script is not inside the Providentia directory, in order to import from Providentia, then it is necessary to add this line to your code first:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export PYTHONPATH=$(provdir):${PYTHONPATH}
+<p>If your script is not inside the Providentia directory, in order to import from Providentia, then it is necessary to add these lines to your code first:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">provdir</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">provdir</span></code> is the path where your Providentia code exists.</p>
@@ -177,6 +178,10 @@
 <h3>Reset filter<a class="headerlink" href="#reset-filter" title="Link to this heading"></a></h3>
 <p>After data has been read and filtered, it will stay filtered until it is reset. This can be done by the following method:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If at any point wanting to return to the state when the Interactive class was initialised, this can be done by adding the following argument to the method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span>
 </pre></div>
 </div>
 </section>
@@ -537,8 +542,13 @@ The legend plot can be made as follows:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="providentia.interactive.Interactive.reset_filter">
-<span class="sig-name descname"><span class="pre">reset_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.reset_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.reset_filter" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reset_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.reset_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.reset_filter" title="Link to this definition"></a></dt>
 <dd><p>Wrapper method to reset filter data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>initialise</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Indicates whether to reset data to initial state when class was initialised</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
