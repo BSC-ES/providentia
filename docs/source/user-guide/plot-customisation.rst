@@ -34,7 +34,7 @@ If they define the cmap, they will need to give a complete list of cmap options 
 Remove extreme stations by their statistical values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file `remove_extreme_stations.json`. An example of this exists for CAMS:
+If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file ``remove_extreme_stations.json``. An example of this exists for ``CAMS``:
 
 ::
 
@@ -53,7 +53,13 @@ The statistics can be general, across all components, or they can be specific pe
                         "NMB": ["<-20.0", ">20.0"],
                         "NRMSE": [">200.0"]}}
 
-You will also need to add the variable `remove_extreme_stations` in your configuration file:
+Any absolute statistic can be set to be a bias statistic by adding ``_bias`` e.g.:
+
+::
+
+  p95_bias": ["<10",">20"]
+
+You will also need to add the variable ``remove_extreme_stations`` in your configuration file, referencing the group of statistics to filter by that you defined, e.g. ``CAMS``:
 
 ::
 
@@ -62,12 +68,16 @@ You will also need to add the variable `remove_extreme_stations` in your configu
 Calculating exceedances
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-In Providentia ``exceedances`` is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component, and each instance where values exceed this limit will be counted. Therefore the exceeedances statistic simply gives the number of instances. The threshold values can be set in the file ``settings/exceedances.json``, as so:
+In Providentia the ``exceedances`` statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the ``exceedances`` statistic simply gives the number of instances above the threshold. The threshold values can be set in the file ``settings/exceedances.json`` per component, or network-component pair, as so:
 
 ::
   
   {"sconco3": 90.21, 
-   "sconcno2": 106.38}
+   "sconcno2": 106.38,
+   "EBAS|sconco3": 109.77,
+   "EBAS|sconcno2": 88.88}
+
+In the case a threshold is set for a specific component, and per network-component, then the threshold for network-component is taken preferentially.
 
 Editing the plot style in the dashboard
 ---------------------------------------
