@@ -131,7 +131,7 @@
 </section>
 <section id="remove-extreme-stations-by-their-statistical-values">
 <h3>Remove extreme stations by their statistical values<a class="headerlink" href="#remove-extreme-stations-by-their-statistical-values" title="Link to this heading"></a></h3>
-<p>If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file <cite>remove_extreme_stations.json</cite>. An example of this exists for CAMS:</p>
+<p>If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.json</span></code>. An example of this exists for <code class="docutils literal notranslate"><span class="pre">CAMS</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;CAMS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;0.3&quot;</span><span class="p">],</span>
          <span class="s2">&quot;NMB&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;-100.0&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;100.0&quot;</span><span class="p">],</span>
          <span class="s2">&quot;NRMSE&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;100.0&quot;</span><span class="p">]}</span>
@@ -146,18 +146,25 @@
                       <span class="s2">&quot;NRMSE&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;200.0&quot;</span><span class="p">]}}</span>
 </pre></div>
 </div>
-<p>You will also need to add the variable <cite>remove_extreme_stations</cite> in your configuration file:</p>
+<p>Any absolute statistic can be set to be a bias statistic by adding <code class="docutils literal notranslate"><span class="pre">_bias</span></code> e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p95_bias</span><span class="s2">&quot;: [&quot;</span><span class="o">&lt;</span><span class="mi">10</span><span class="s2">&quot;,&quot;</span><span class="o">&gt;</span><span class="mi">20</span><span class="s2">&quot;]</span>
+</pre></div>
+</div>
+<p>You will also need to add the variable <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations</span></code> in your configuration file, referencing the group of statistics to filter by that you defined, e.g. <code class="docutils literal notranslate"><span class="pre">CAMS</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">remove_extreme_stations</span><span class="o">=</span><span class="n">CAMS</span>
 </pre></div>
 </div>
 </section>
 <section id="calculating-exceedances">
 <h3>Calculating exceedances<a class="headerlink" href="#calculating-exceedances" title="Link to this heading"></a></h3>
-<p>In Providentia <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component, and each instance where values exceed this limit will be counted. Therefore the exceeedances statistic simply gives the number of instances. The threshold values can be set in the file <code class="docutils literal notranslate"><span class="pre">settings/exceedances.json</span></code>, as so:</p>
+<p>In Providentia the <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> statistic simply gives the number of instances above the threshold. The threshold values can be set in the file <code class="docutils literal notranslate"><span class="pre">settings/exceedances.json</span></code> per component, or network-component pair, as so:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="mf">90.21</span><span class="p">,</span>
- <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mf">106.38</span><span class="p">}</span>
+ <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mf">106.38</span><span class="p">,</span>
+ <span class="s2">&quot;EBAS|sconco3&quot;</span><span class="p">:</span> <span class="mf">109.77</span><span class="p">,</span>
+ <span class="s2">&quot;EBAS|sconcno2&quot;</span><span class="p">:</span> <span class="mf">88.88</span><span class="p">}</span>
 </pre></div>
 </div>
+<p>In the case a threshold is set for a specific component, and per network-component, then the threshold for network-component is taken preferentially.</p>
 </section>
 </section>
 <section id="editing-the-plot-style-in-the-dashboard">
