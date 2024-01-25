@@ -44,7 +44,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # reset SLURM_EXPORT_ENV so that things like srun & sbatch work out of the box
-    export SLURM_EXPORT_ENV=ALL
+export SLURM_EXPORT_ENV=ALL
 
 # update key arguments for job submission
 OTHEROPTS=""
