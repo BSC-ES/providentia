@@ -140,7 +140,11 @@ class ProvConfiguration:
         elif key == 'available_cpus':
             # get available N CPUs
             if MACHINE in ['power', 'mn4', 'nord3v2']:
-                return int(os.getenv('SLURM_CPUS_PER_TASK'))
+                # handle cases where are testing briefly on login nodes (1 cpu capped)
+                try:
+                    return int(os.getenv('SLURM_CPUS_PER_TASK'))
+                except:
+                    return 1
             else:
                 return len(os.sched_getaffinity(0))
 
