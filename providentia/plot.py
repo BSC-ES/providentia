@@ -372,12 +372,12 @@ class Plot:
         str_to_plot = ''
         
         # get number of selected stations
-        n_stations = self.read_instance.selected_station_metadata[networkspeci].shape[0]
+        n_stations = self.canvas_instance.selected_station_metadata[networkspeci].shape[0]
 
         # set first line of metadata print to be either selected stations or number of stations 
         if n_stations == 1:
             var_str_name = 'name_one' 
-            station_references = self.read_instance.selected_station_metadata[networkspeci][
+            station_references = self.canvas_instance.selected_station_metadata[networkspeci][
                                  'station_reference'].flatten()
             station_reference = station_references[~pd.isnull(station_references)].astype(str)[0]
             str_to_plot += 'Station: {}'.format(station_reference)
@@ -412,14 +412,14 @@ class Plot:
             # round decimal places if float
             if 'dp' in ghost_var_dict:
                 str_to_plot += '{}: {:.{}f}'.format(ghost_var_dict[var_str_name],
-                                                    np.nanmedian(self.read_instance.selected_station_metadata[
+                                                    np.nanmedian(self.canvas_instance.selected_station_metadata[
                                                     networkspeci][ghost_var].astype(np.float32)), 
                                                     ghost_var_dict['dp'])
 
             # if str then get unique elements or percentage dependent on n uniques
             else:
                 # gather all selected station metadata for current meta variable
-                all_current_meta = self.read_instance.selected_station_metadata[networkspeci][
+                all_current_meta = self.canvas_instance.selected_station_metadata[networkspeci][
                                    ghost_var].flatten()
                 # remove NaNs
                 all_current_meta = all_current_meta[~pd.isnull(all_current_meta)].astype(str)
