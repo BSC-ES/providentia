@@ -1372,6 +1372,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update timeseries statistic combobox
             self.mpl_canvas.handle_timeseries_statistic_update()
 
+            # update timeseries chunk statistic combobox
+            self.mpl_canvas.handle_timeseries_chunk_statistic_update()
+
             # update periodic statistic combobox
             self.mpl_canvas.handle_periodic_statistic_update()
 
