@@ -152,24 +152,22 @@ class Interactive:
 
         print('Resetting filter')
    
-        # reset representativity fields        
+        # initialise structures to store fields        
         init_representativity(self)
+        init_period(self)
+        init_metadata(self)
+
+        # update available fields
         update_representativity_fields(self)
+        update_period_fields(self)
+        update_metadata_fields(self)
+        
+        # apply set fields at intialisation for filtering
         if initialise:
             representativity_conf(self)
-
-        # reset period fields 
-        init_period(self)
-        update_period_fields(self)
-        if initialise:
             period_conf(self)
-
-        # reset metadata
-        init_metadata(self)
-        update_metadata_fields(self)
-        if initialise:
             metadata_conf(self)
-
+            
         #re-filter 
         self.filter()
 
@@ -823,7 +821,7 @@ class Interactive:
             if kwarg not in provconf.var_defaults:
                 setattr(self, kwarg, kwargs[kwarg])
 
-        # update variables from config file
+        # update variables to set from config file
         if self.config != '':
             read_conf = False 
             if os.path.exists(self.config):
@@ -858,10 +856,11 @@ class Interactive:
             if len(self.sections) > 1:
                 print("Warning: Taking first defined section ({}) to be read.".format(self.section))
 
-        # update self with section variables
+        # update self with section variables (if not overwritten by kwargs)
         self.section_opts = self.sub_opts[self.section]
         for k, val in self.section_opts.items():
-            setattr(self, k, provconf.parse_parameter(k, val))
+            if k not in kwargs:
+                setattr(self, k, provconf.parse_parameter(k, val))
 
         # parse subsection
         # if subsection name is provided, try and use that
@@ -904,7 +903,8 @@ class Interactive:
                                     for (k, val) in self.subsection_opts.items()}
             # update subsection variables
             for k, val in self.subsection_opts.items():
-                setattr(self, k, provconf.parse_parameter(k, val))
+                if k not in kwargs:
+                    setattr(self, k, provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
@@ -944,6 +944,7 @@ class Interactive:
         :type station: str
         """
         
+
         if type(station) == 'str':
             stations_to_keep = [station]
         else:
@@ -953,6 +954,117 @@ class Interactive:
         # filter for station/s    
         self.filter()
 
+    def apply_filter(self, field, limit=None, keep=None, remove=None, lower=None, upper=None):
+        """ Wrapper method to select specific station/s.
+
+        :param field: field to filter by
+        :type field: str
+        :param limit: limit for filtering representativity fields
+        :type limit: str, optional
+        :param keep: data to keep
+        :type keep: str, optional
+        :param remove: data to remove
+        :type remove: str, optional
+        :param lower: lower bound to retain data
+        :type lower: str, optional
+        :param upper: upper bound to retain data
+        :type upper: str, optional
+        """
+
+        # variable to know if to filter or not
+        do_filter = False
+
+        # make sure keep and remove arguments are lists
+        if keep:
+            if type(keep) == str:
+                keep = [keep]
+        if remove:
+            if type(remove) == str:
+                remove = [remove]
+
+        # field is a represenativity field?
+        if field in self.representativity_menu['rangeboxes']['map_vars']:
+            do_filter = True
+
+            field_index = self.representativity_menu['rangeboxes']['map_vars'].index(field)
+            # ensure limit is set for field
+            if limit:
+                self.representativity_menu['rangeboxes']['current_lower'][field_index] = limit
+            else:
+                print("Warning: When filtering by representativity field: {}, 'limit' must be passed as an argument.".format(field)) 
+                return
+
+        # field is a period field?
+        elif field == 'period':
+            do_filter = True
+
+            # if neither keep or remove are defined, filtering cannot be done
+            if (not keep) and (not remove): 
+                print("Warning: When filtering by a period field, 'keep' or 'remove' must be passed as arguments.")
+                return
+
+            if keep:
+                new_keep = copy.deepcopy(self.period_menu['checkboxes']['keep_selected'])
+                for item in keep:
+                    if item not in new_keep:
+                        new_keep.append(item)
+                self.period_menu['checkboxes']['keep_selected'] = new_keep
+            if remove:
+                new_remove = copy.deepcopy(self.period_menu['checkboxes']['remove_selected'])
+                for item in remove:
+                    if item not in new_remove:
+                        new_remove.append(item)
+                self.period_menu['checkboxes']['remove_selected'] = new_remove
+
+        # fields is a metadata field?
+        else:
+            for menu_type in self.metadata_types:
+                if field in self.metadata_menu[menu_type]['rangeboxes']['labels']:
+                    do_filter = True
+
+                    # if neither lower or upper are defined, filtering cannot be done
+                    if (not lower) and (not upper): 
+                        print("Warning: When filtering by a numeric metadata field, 'lower' or 'upper' must be passed as arguments.")
+                        return
+
+                    field_index = self.metadata_menu[menu_type]['rangeboxes']['labels'].index(field)
+                    if lower:
+                        self.metadata_menu[menu_type]['rangeboxes']['current_lower'][field_index] = lower
+                    if upper:
+                        self.metadata_menu[menu_type]['rangeboxes']['current_upper'][field_index] = upper           
+                    if field not in self.metadata_menu[menu_type]['rangeboxes']['apply_selected']:
+                        self.metadata_menu[menu_type]['rangeboxes']['apply_selected'].append(field)
+                    break
+
+                elif field in self.metadata_menu[menu_type]['navigation_buttons']['labels']:
+                    do_filter = True
+
+                    # if neither keep or remove are defined, filtering cannot be done
+                    if (not keep) and (not remove): 
+                        print("Warning: When filtering by a text period field, 'keep' or 'remove' must be passed as arguments.")
+                        return
+
+                    if keep:
+                        new_keep = copy.deepcopy(self.metadata_menu[menu_type][field]['checkboxes']['keep_selected'])
+                        for item in keep:
+                            if item not in new_keep:
+                                new_keep.append(item)
+                        self.metadata_menu[menu_type][field]['checkboxes']['keep_selected'] = new_keep
+                    if remove:
+                        new_remove = copy.deepcopy(self.metadata_menu[menu_type][field]['checkboxes']['remove_selected'])
+                        for item in remove:
+                            if item not in new_remove:
+                                new_remove.append(item)
+                        self.metadata_menu[menu_type][field]['checkboxes']['remove_selected'] = new_remove
+                    break
+
+        # do filtering?
+        if do_filter: 
+            self.filter()
+        # otherwise set warning that field was not found
+        else:
+            print('Warning: {} not available for filtering.'.format(field)) 
+        
     def save(self, fname='', format='nc'):
         """ Wrapper method to save current data/ metadata in memory.
 
@@ -1020,6 +1132,12 @@ class Interactive:
         else:
             data = self.get_data(format='nc')
             if var not in data.variables.keys():
+                # try adding networkspeci to variable, if just have 1 networkspecies
+                if len(self.networkspecies) == 1:
+                    test_var = '{}_{}'.format(self.networkspecies[0], var)
+                    if test_var in data.variables.keys():
+                        var_data = data[test_var][:]
+                        return var_data
                 print("Warning: Variable '{}' is not defined".format(var))
             else:
                 var_data = data[var][:]
