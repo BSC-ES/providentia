@@ -250,18 +250,25 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             current_ylim_lower = []
             current_ylim_upper = []
 
-            for ax_ii, (temporal_resolution, sub_ax) in zip(mapped_resolutions_active, relevant_axs_active):
+            for ax_ii, (temporal_resolution, sub_ax) in enumerate(zip(mapped_resolutions_active, relevant_axs_active)):
 
-                # if resolution does not 
+                # get temporal resolution of next axis
+                if ax_ii != (len(relevant_axs_active)-1):
+                    next_temporal_resolution = mapped_resolutions_active[ax_ii+1]
+                else:
+                    next_temporal_resolution = None
+
+                # if resolution not yet in current resolutions, then add information for it
                 if temporal_resolution not in current_resolutions:
-                    ylim_lower, ylim_upper = sub_ax.get_ylim()
-                    current_axs.append(sub_ax)
-                    current_ylim_lower.append(ylim_lower)
-                    current_ylim_upper.append(ylim_upper)
-                
-                # if resolution already exists, or on last axis, then set ylim for relevant axes
-                # finally reset lists
-                if (temporal_resolution in current_resolutions) or (ax_ii == (len(relevant_axs_active)-1)): 
+                     ylim_lower, ylim_upper = sub_ax.get_ylim()
+                     current_resolutions.append(temporal_resolution)
+                     current_axs.append(sub_ax)
+                     current_ylim_lower.append(ylim_lower)
+                     current_ylim_upper.append(ylim_upper)
+
+                # if next resolution already in current resolutions, or on last axis, then set ylim for relevant axes
+                if (next_temporal_resolution in current_resolutions) or (ax_ii == (len(relevant_axs_active)-1)):
+
                     ylim_min = np.min(current_ylim_lower) 
                     ylim_max = np.max(current_ylim_upper)
                     # if have bias_centre option, centre around zero
@@ -281,10 +288,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                     current_axs = []
                     current_ylim_lower = []
                     current_ylim_upper = []
-            
-                # append current resolution
-                current_resolutions.append(temporal_resolution)
-
+      
     # get minimum and maximum from all axes and set limits for timeseries
     elif base_plot_type == 'timeseries':
         if (plot_characteristics['xtick_alteration']['define']) and (xlim):
