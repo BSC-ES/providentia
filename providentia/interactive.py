@@ -115,7 +115,10 @@ class Interactive:
         self.read()  
 
         # filter
-        self.reset_filter()
+        self.reset_filter(initialise=True)
+
+        # set variable to know if data is in intial state or not
+        self.intialised = True
 
     def read(self):
         """ Wrapper method to read data. """
@@ -140,28 +143,41 @@ class Interactive:
         # get selected station data
         get_selected_station_data(read_instance=self, canvas_instance=self, networkspecies=self.networkspecies)
 
-    def reset_filter(self):
-        """ Wrapper method to reset filter data. """
+    def reset_filter(self, initialise=False):
+        """ Wrapper method to reset filter data.
+
+        :param initialise: Indicates whether to reset data to initial state when class was initialised 
+        :type initialise: boolean, optional
+        """
 
         print('Resetting filter')
-
+   
         # reset representativity fields        
         init_representativity(self)
         update_representativity_fields(self)
-        representativity_conf(self)
+        if initialise:
+            representativity_conf(self)
 
         # reset period fields 
         init_period(self)
         update_period_fields(self)
-        period_conf(self)
+        if initialise:
+            period_conf(self)
 
         # reset metadata
         init_metadata(self)
         update_metadata_fields(self)
-        metadata_conf(self)
+        if initialise:
+            metadata_conf(self)
 
         #re-filter 
         self.filter()
+
+        # set variable to know if data is in intial state or not
+        if initialise:
+            self.intialised = True
+        else:
+            self.intialised = False
 
     def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
@@ -429,6 +445,7 @@ class Interactive:
             stats_df = pd.DataFrame(np.nan, index=index, columns=stats_to_plot, dtype=np.float64)
             
             # fill dataframe
+            is_initial = copy.deepcopy(self.intialised)
             kwargs = copy.deepcopy(self.kwargs)
             # save current subsection 
             orig_ss = copy.deepcopy(self.subsection)
@@ -436,7 +453,7 @@ class Interactive:
                 kwargs['subsection'] = ss
                 self.set_config(**kwargs)
                 # filter data
-                self.reset_filter()
+                self.reset_filter(initialise=True)
                 for ns in networkspecies:
                     for dl in relevant_data_labels:
                         stats_per_data_label = []
@@ -473,7 +490,10 @@ class Interactive:
             # re-filter for original subsection
             kwargs['subsection'] = orig_ss
             self.set_config(**kwargs)
-            self.reset_filter()
+            if is_initial:
+                self.reset_filter(initialise=True)
+            else:
+                self.reset_filter()
 
         # make heatmap / table plot
         elif base_plot_type in ['heatmap','table']:  
@@ -484,6 +504,7 @@ class Interactive:
             stats_df = pd.DataFrame(np.nan, index=index, columns=relevant_data_labels, dtype=np.float64)
             
             # fill dataframe
+            is_initial = copy.deepcopy(self.intialised)
             kwargs = copy.deepcopy(self.kwargs)
             # save current subsection 
             orig_ss = copy.deepcopy(self.subsection)
@@ -491,7 +512,7 @@ class Interactive:
                 kwargs['subsection'] = ss
                 self.set_config(**kwargs)
                 # filter data
-                self.reset_filter()
+                self.reset_filter(initialise=True)
                 for ns in networkspecies:
                     stat_per_data_labels = []
                     for dl in relevant_data_labels:
@@ -520,7 +541,10 @@ class Interactive:
             # re-filter for original subsection
             kwargs['subsection'] = orig_ss
             self.set_config(**kwargs)
-            self.reset_filter()
+            if is_initial:
+                self.reset_filter(initialise=True)
+            else:
+                self.reset_filter()
          
         # other plots
         else: 

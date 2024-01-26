@@ -33,7 +33,7 @@ def test_make_timeseries():
 
     # check if annotations are correct
     annotations = [child for child in ax.get_children() if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
-    expected_annotations = ['OBS | Mean: 34.62', 'MONARCH | Mean: 29.52, MB: -5.11, RMSE: 11.53, r: 0.70']
+    expected_annotations = ['OBS | Mean: 34.60', 'MONARCH | Mean: 29.55, MB: -5.05, RMSE: 6.15, r: 0.90']
     for annotation, expected_annotation in zip(annotations.get_child().get_children(), expected_annotations):
         assert annotation.get_text() == expected_annotation
 
@@ -64,7 +64,7 @@ def test_make_distribution():
 
     # check if annotations are correct
     annotations = [child for child in ax.get_children() if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
-    expected_annotations = ['OBS | Min: 0.00, Max: 119.35', 'MONARCH | Min: 0.00, Max: 106.75']
+    expected_annotations = ['OBS | Min: 17.08, Max: 57.89', 'MONARCH | Min: 12.68, Max: 52.29']
     for annotation, expected_annotation in zip(annotations.get_child().get_children(), expected_annotations):
         assert annotation.get_text() == expected_annotation
 
@@ -95,7 +95,7 @@ def test_make_scatter():
 
     # check if annotations are correct
     annotations = [child for child in ax.get_children() if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
-    expected_annotations = ['MONARCH | r2: 0.49, RMSE: 11.53']
+    expected_annotations = ['MONARCH | r2: 0.80, RMSE: 6.15']
     for annotation, expected_annotation in zip(annotations.get_child().get_children(), expected_annotations):
         assert annotation.get_text() == expected_annotation
 
