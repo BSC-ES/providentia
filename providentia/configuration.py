@@ -103,7 +103,7 @@ class ProvConfiguration:
             'plot_characteristics_filename': '',
             'harmonise_summary': True,
             'harmonise_stations': True,
-            'remove_extreme_stations': False,
+            'remove_extreme_stations': None,
             'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
                                     'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
                                     'available_resolutions', 'available_networks',
@@ -140,7 +140,11 @@ class ProvConfiguration:
         elif key == 'available_cpus':
             # get available N CPUs
             if MACHINE in ['power', 'mn4', 'nord3v2']:
-                return int(os.getenv('SLURM_CPUS_PER_TASK'))
+                # handle cases where are testing briefly on login nodes (1 cpu capped)
+                try:
+                    return int(os.getenv('SLURM_CPUS_PER_TASK'))
+                except:
+                    return 1
             else:
                 return len(os.sched_getaffinity(0))
 
