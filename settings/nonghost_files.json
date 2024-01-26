@@ -103,7 +103,7 @@
             "sconcc7h8": [],
             "sconcisop": [],
             "sconcxyl": []
-        }
+            }
     },
 
     "meteofrance/eionet-cams2_40": {
@@ -130,6 +130,25 @@
 
     "ineris/eionet-cams2_40-ira": {
         "hourly": {
+            "pm10": [],
+            "pm2p5": [],
+            "sconcco": [],
+            "sconcno2": [],
+            "sconco3": [],
+            "sconcso2": []
+            }
+    },
+
+    "xvpca/xvpca": {
+        "hourly": {
+            "pm10": [],
+            "pm2p5": [],
+            "sconcco": [],
+            "sconcno2": [],
+            "sconco3": [],
+            "sconcso2": []
+            },
+        "daily": {
             "pm10": [],
             "pm2p5": [],
             "sconcco": [],
