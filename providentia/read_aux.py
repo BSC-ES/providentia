@@ -470,13 +470,14 @@ def get_ghost_observational_tree(instance):
                 file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files if f != 'temporary'])
                 
                 # get matrix for current species
-                matrix = instance.parameter_dictionary[speci]['matrix']
-                if matrix not in ghost_observation_data[network][resolution]:
-                    # write nested empty dictionary for matrix
-                    ghost_observation_data[network][resolution][matrix] = {}
+                if speci in instance.parameter_dictionary:
+                    matrix = instance.parameter_dictionary[speci]['matrix']
+                    if matrix not in ghost_observation_data[network][resolution]:
+                        # write nested empty dictionary for matrix
+                        ghost_observation_data[network][resolution][matrix] = {}
 
-                # write nested dictionary for species, with associated file yearmonths
-                ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
+                    # write nested dictionary for species, with associated file yearmonths
+                    ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
 
     return ghost_observation_data
 
@@ -532,14 +533,15 @@ def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
                 file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
 
                 # get matrix for current species
-                matrix = instance.parameter_dictionary[speci]['matrix']
-                if matrix not in nonghost_observation_data[network][resolution]:
-                    # write nested empty dictionary for matrix
-                    nonghost_observation_data[network][resolution][matrix] = {}
+                if speci in instance.parameter_dictionary:
+                    matrix = instance.parameter_dictionary[speci]['matrix']
+                    if matrix not in nonghost_observation_data[network][resolution]:
+                        # write nested empty dictionary for matrix
+                        nonghost_observation_data[network][resolution][matrix] = {}
 
-                # write nested dictionary for species, with associated file yearmonths
-                nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
-    
+                    # write nested dictionary for species, with associated file yearmonths
+                    nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
+        
     return nonghost_observation_data
 
 
