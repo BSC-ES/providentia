@@ -20,7 +20,8 @@ import pyproj
 import seaborn as sns
 
 from .dashboard_interactivity import HoverAnnotation
-from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info
+from .statistics import (boxplot_inner_fences, calculate_statistic, get_timeseries_chunked_data, 
+                         get_z_statistic_info)
 from .read_aux import drop_nans
 from .plot_aux import (get_multispecies_aliases, get_taylor_diagram_ghelper_info, kde_fft, merge_cells, 
                        periodic_labels, periodic_xticks, round_decimal_places, temp_axis_dict)
@@ -79,10 +80,10 @@ class Plot:
             # do not create empty plots
             if plot_type == 'None':
                 continue
-
+            
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
-
+            
             # get zstat information from plot_type
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type)
             
@@ -529,7 +530,8 @@ class Plot:
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
             self.track_plot_elements(self.read_instance.observations_data_label, 'map', 'plot', [self.stations_scatter], bias=False)
 
-    def make_timeseries(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
+    def make_timeseries(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, 
+                        chunk_stat=None, chunk_resolution=None):
         """ Make timeseries plot.
 
             :param relevant_axis: axis to plot on 
@@ -542,6 +544,10 @@ class Plot:
             :type plot_characteristics: dict
             :param plot_options: list of options to configure plot  
             :type plot_options: list
+            :param chunk_stat: name of chunk statistic
+            :type chunk_stat: str
+            :param chunk_resolution: name of chunk resolution
+            :type chunk_resolution: str
         """
 
         # if 'hidedata' in plot_options, do not plot any data
@@ -570,6 +576,13 @@ class Plot:
         # cut data_labels for those in valid data labels
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
+        # put chunk statistics on timeseries plot
+        timeseries_data = copy.deepcopy(self.canvas_instance.selected_station_data[networkspeci]["timeseries"])
+        if (self.read_instance.offline) or (self.read_instance.interactive):
+            if (chunk_stat is not None) and (chunk_resolution is not None):
+                timeseries_data = get_timeseries_chunked_data(self.read_instance, self.canvas_instance, networkspeci, 
+                                                              chunk_resolution, chunk_stat)
+       
         # iterate through data labels
         for data_label in cut_data_labels:
 
@@ -581,14 +594,14 @@ class Plot:
                     continue
 
                 bias = True
-                ts_obs = self.canvas_instance.selected_station_data[networkspeci]['timeseries'][self.read_instance.observations_data_label]
-                ts_model = self.canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label] 
+                ts_obs = timeseries_data[self.read_instance.observations_data_label]
+                ts_model = timeseries_data[data_label] 
                 ts = ts_model - ts_obs
 
             else:
                 bias = False
-                ts = self.canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label]
-
+                ts = timeseries_data[data_label]
+            
             # get marker size (for offline and interactive)
             if (self.read_instance.offline) or (self.read_instance.interactive):
                 self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics, data=ts)
