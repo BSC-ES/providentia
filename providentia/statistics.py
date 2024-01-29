@@ -1,10 +1,10 @@
 """ Functions for the processing/calculation of statistics and colourbars """
 
 import copy
+import datetime
 import json
 import os
 import sys
-import time
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -13,7 +13,8 @@ import pandas as pd
 import scipy.stats as st
 
 from .calculate import Stats, ExpBias
-from .read_aux import drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions
+from .read_aux import (drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
+                       get_frequency_code)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -173,7 +174,16 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                                                                                              columns=canvas_instance.selected_station_data_labels[networkspeci], 
                                                                                              index=read_instance.time_index)
 
+            # get timeseries chunk statistic and resolution
+            timeseries_chunk_stat = canvas_instance.timeseries_chunk_stat.currentText()
+            timeseries_chunk_resolution = canvas_instance.timeseries_chunk_resolution.currentText()
 
+            # put chunk statistics on timeseries plot
+            if (timeseries_chunk_stat != "None") and (timeseries_chunk_resolution != "None"):
+                canvas_instance.selected_station_data[networkspeci]["timeseries"] = \
+                    get_timeseries_chunked_data(read_instance, canvas_instance, networkspeci, 
+                                                timeseries_chunk_resolution, timeseries_chunk_stat)
+                    
             # flatten data across stations
             canvas_instance.selected_station_data[networkspeci]['flat'] = canvas_instance.selected_station_data[networkspeci]['per_station'].reshape(canvas_instance.selected_station_data[networkspeci]['per_station'].shape[0],
                                                                                                                                                      1,
@@ -266,7 +276,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci):
         :type read_instance: object
         :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type canvas_instance: object
-        :param networkspeci: name of networkspeci str
+        :param networkspeci: Name of current networkspeci (e.g. EBAS|sconco3)
         :type networkspeci: str
     """
 
@@ -1009,7 +1019,7 @@ def exceedance_lim(networkspeci):
 
         Try to get limit for specific networkspeci first, and then species.
 
-        :param networkspeci: name of networkspeci or currently selected (e.g. EBAS|sconco3)
+        :param networkspeci: Name of current networkspeci (e.g. EBAS|sconco3)
         :type networkspeci: str
         :return: value of exceedance limit
         :rtype: int
@@ -1025,3 +1035,103 @@ def exceedance_lim(networkspeci):
         return exceedance_limits[speci]
     else:
         return np.NaN
+
+
+def get_timeseries_chunked_data(read_instance, canvas_instance, networkspeci, timeseries_chunk_resolution, timeseries_chunk_stat):
+    """ Update selected data on timeseries given the chunk resolution and statistic
+
+    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+    :type read_instance: object
+    :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+    :type canvas_instance: object
+    :param networkspeci: Name of current networkspeci (e.g. EBAS|sconco3)
+    :type networkspeci: str
+    :param timeseries_chunk_resolution: Timeseries plot chunk resolution
+    :type timeseries_chunk_resolution: str
+    :param timeseries_chunk_stat: Timeseries plot chunk statistic
+    :type timeseries_chunk_stat: str
+    :return: Dataframe with statistics per chunk and data label
+    :rtype: pd.DataFrame
+    """
+
+    # determine if station is absolute or bias statistic
+    zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(
+        zstat=timeseries_chunk_stat) 
+
+    # get new frequency
+    new_freq = get_frequency_code(timeseries_chunk_resolution)
+
+    # break selected data into chunks and calculate stat per chunk
+    timeseries_data = copy.deepcopy(canvas_instance.selected_station_data[networkspeci]['timeseries'])
+    new_index = timeseries_data.asfreq(new_freq).index
+    new_df = pd.DataFrame(index=new_index, columns=read_instance.data_labels)
+    for i in range(len(new_index)):
+        # is daily chunk resolution?
+        if new_freq == "D":
+            start_date = datetime.datetime(year=new_index[i].year, 
+                                           month=new_index[i].month, 
+                                           day=new_index[i].day, 
+                                           hour=0)
+            end_date = datetime.datetime(year=new_index[i].year, 
+                                         month=new_index[i].month, 
+                                         day=new_index[i].day, 
+                                         hour=23)
+        # is monthly chunk resolution?
+        elif new_freq == "MS":
+            start_date = datetime.datetime(year=new_index[i].year, 
+                                           month=new_index[i].month, 
+                                           day=1,
+                                           hour=0)
+            
+            for possible_end_day in [31, 30, 29, 28]:
+                try: 
+                    end_date = datetime.datetime(year=new_index[i].year, 
+                                                 month=new_index[i].month, 
+                                                 day=possible_end_day, 
+                                                 hour=23)
+                    break
+                except:
+                    continue
+        # is annual chunk resolution?
+        elif new_freq == "AS":
+            start_date = datetime.datetime(year=new_index[i].year, 
+                                           month=1, 
+                                           day=1,
+                                           hour=0)
+            end_date = datetime.datetime(year=new_index[i].year, 
+                                         month=12, 
+                                         day=31, 
+                                         hour=23)
+
+        # get data in chunks
+        timeseries_chunk_data = timeseries_data.loc[start_date:end_date]
+
+        # get dictionary containing necessary information for calculation of selected statistic
+        if z_statistic_type == 'basic':
+            # calculate statistic per chunk
+            stats_dict = read_instance.basic_stats[zstat]
+            timeseries_chunk_data = np.array([
+                timeseries_chunk_data[label] for label in read_instance.data_labels])
+            timeseries_chunked_stats = [getattr(Stats, stats_dict['function'])(
+                group, **stats_dict['arguments']) for group in timeseries_chunk_data]
+
+            # save stats per chunk and data label
+            for data_label_i, data_label in enumerate(read_instance.data_labels):
+                new_df.loc[start_date, data_label] = timeseries_chunked_stats[data_label_i]
+        else:
+            # get labels without obs
+            data_labels_exp = copy.deepcopy(read_instance.data_labels[1:])
+
+            #  get data for obs
+            data_array_a = timeseries_chunk_data[read_instance.data_labels[0]]
+
+            # calculate and save stats per chunk and exp
+            stats_dict = read_instance.expbias_stats[zstat]
+                                                                                                    
+            for data_label_i, data_label in enumerate(data_labels_exp):
+                data_array_b = timeseries_chunk_data[data_label]
+                timeseries_chunked_stat = np.array(getattr(ExpBias, stats_dict['function'])(
+                    **{**stats_dict['arguments'], **{'obs':data_array_a,'exp':data_array_b}}))
+                new_df.loc[start_date, data_label] = timeseries_chunked_stat
+                
+    return new_df
