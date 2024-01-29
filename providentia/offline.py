@@ -1420,7 +1420,9 @@ class ProvidentiaOffline:
 
                 # axis ylabel is empty?
                 if (axis_ylabel == '') or ('[measurement_units]' in axis_ylabel):
-                    if base_plot_type in ['periodic']:
+                    if base_plot_type in ['periodic'] or ((base_plot_type == 'timeseries') 
+                                                          and (chunk_stat is not None) 
+                                                          and (chunk_resolution is not None)):
                         if z_statistic_type == 'basic':
                             ylabel = self.basic_stats[base_zstat]['label']
                             ylabel_units = self.basic_stats[base_zstat]['units']
