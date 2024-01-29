@@ -175,14 +175,15 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                                                                                              index=read_instance.time_index)
 
             # get timeseries chunk statistic and resolution
-            timeseries_chunk_stat = canvas_instance.timeseries_chunk_stat.currentText()
-            timeseries_chunk_resolution = canvas_instance.timeseries_chunk_resolution.currentText()
+            if (not read_instance.offline) and (not read_instance.interactive):
+                timeseries_chunk_stat = canvas_instance.timeseries_chunk_stat.currentText()
+                timeseries_chunk_resolution = canvas_instance.timeseries_chunk_resolution.currentText()
 
-            # put chunk statistics on timeseries plot
-            if (timeseries_chunk_stat != "None") and (timeseries_chunk_resolution != "None"):
-                canvas_instance.selected_station_data[networkspeci]["timeseries"] = \
-                    get_timeseries_chunked_data(read_instance, canvas_instance, networkspeci, 
-                                                timeseries_chunk_resolution, timeseries_chunk_stat)
+                # put chunk statistics on timeseries plot
+                if (timeseries_chunk_stat != "None") and (timeseries_chunk_resolution != "None"):
+                    canvas_instance.selected_station_data[networkspeci]["timeseries"] = \
+                        get_timeseries_chunked_data(read_instance, canvas_instance, networkspeci, 
+                                                    timeseries_chunk_resolution, timeseries_chunk_stat)
                     
             # flatten data across stations
             canvas_instance.selected_station_data[networkspeci]['flat'] = canvas_instance.selected_station_data[networkspeci]['per_station'].reshape(canvas_instance.selected_station_data[networkspeci]['per_station'].shape[0],
@@ -1064,7 +1065,7 @@ def get_timeseries_chunked_data(read_instance, canvas_instance, networkspeci, ti
     # break selected data into chunks and calculate stat per chunk
     timeseries_data = copy.deepcopy(canvas_instance.selected_station_data[networkspeci]['timeseries'])
     new_index = timeseries_data.asfreq(new_freq).index
-    new_df = pd.DataFrame(index=new_index, columns=read_instance.data_labels)
+    new_df = pd.DataFrame(index=new_index, columns=read_instance.data_labels, dtype=np.float64)
     for i in range(len(new_index)):
         # is daily chunk resolution?
         if new_freq == "D":
