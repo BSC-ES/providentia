@@ -658,18 +658,35 @@ class MPLCanvas(FigureCanvas):
                 else:
                     func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
 
+                # get timeseries chunking info
+                if plot_type == 'timeseries':
+                    chunk_stat = self.timeseries_chunk_stat.currentText()
+                    chunk_resolution = self.timeseries_chunk_resolution.currentText()
+
                 # set ylabel for periodic plot
-                if plot_type == 'periodic':
-                    # get currently selected periodic statistic name
-                    base_zstat = self.periodic_stat.currentText()
-                    if 'bias' in plot_options:
-                        zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
-                    else:
-                        zstat = get_z_statistic_comboboxes(base_zstat)
+                if plot_type == 'periodic' or ((plot_type == 'timeseries') 
+                                               and (chunk_stat != 'None') 
+                                               and (chunk_resolution != 'None')):
                     
-                    # get zstat information 
-                    zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
+                    # get information on periodic stat
+                    if plot_type == 'periodic':
+                        
+                        base_zstat = self.periodic_stat.currentText()
+
+                        if 'bias' in plot_options:
+                            zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
+                        else:
+                            zstat = get_z_statistic_comboboxes(base_zstat)
                     
+                        # get zstat information 
+                        zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
+                    
+                    # get information on timeseries stat
+                    elif plot_type == 'timeseries':
+
+                        # get zstat information 
+                        zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=chunk_stat) 
+
                     # set new ylabel
                     if z_statistic_type == 'basic':
                         ylabel = self.read_instance.basic_stats[base_zstat]['label']
