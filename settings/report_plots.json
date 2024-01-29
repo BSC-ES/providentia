@@ -31,7 +31,7 @@
              "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
 
     "bdrc": ["metadata", "map-r", "map-MB", "map-RMSE", "map-MFB", "map-MFE", "timeseries_smooth",
-             "timeseries_bias_smooth","periodic-r", "periodic-MB", "periodic-RMSE", "periodic-MFB", "periodic-MFE",
+             "timeseries_bias_smooth", "periodic-r", "periodic-MB", "periodic-RMSE", "periodic-MFB", "periodic-MFE",
              "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
 
     "all_plots": ["metadata",
@@ -47,6 +47,6 @@
                   "table-Median", "table-Median_bias", "table-Mean_multispecies", 
                   "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias"],
     
-    "debug": ["timeseries_smooth_hidedata", "timeseries", "map-Mean", "map-Mean_domain"]
+    "debug": ["periodic-MB", "periodic-RMSE", "periodic-MFB", "periodic-MFE", "periodic-r"]
 
 }
