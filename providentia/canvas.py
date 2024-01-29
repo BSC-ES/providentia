@@ -30,6 +30,7 @@ from .plot import Plot
 from .plot_aux import get_map_extent
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
 from .plot_options import annotation, linear_regression, log_axes, smooth
+from .read_aux import get_lower_resolutions
 from .statistics import *
 from .warnings import show_message
 
@@ -325,6 +326,9 @@ class MPLCanvas(FigureCanvas):
                     # update associated plots with selected stations
                     self.update_associated_active_dashboard_plots()
 
+                    # update timeseries chunk resolution
+                    self.handle_timeseries_chunk_resolution_update()
+
                     # draw changes
                     self.figure.canvas.draw_idle()
 
@@ -458,6 +462,7 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_MPL_canvas_updates = True
             self.handle_map_z_statistic_update()
             self.handle_timeseries_statistic_update()
+            self.handle_timeseries_chunk_resolution_update()
             self.handle_timeseries_chunk_statistic_update()
             self.handle_periodic_statistic_update()
             self.handle_statsummary_statistics_update()
@@ -980,16 +985,16 @@ class MPLCanvas(FigureCanvas):
 
     def handle_timeseries_chunk_statistic_update(self):
         """ Function that handles update of plotted timeseries chunk statistic
-            upon interaction with timeseries statistic combobox.
+            upon interaction with timeseries chunk statistic combobox.
         """
-
+        
         if not self.read_instance.block_config_bar_handling_updates:
-
+            
             # update mouse cursor to a waiting cursor
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
-            # to the timeseries statistic combobox are made
+            # to the timeseries chunk statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
 
             # get currently selected statistic
@@ -998,60 +1003,88 @@ class MPLCanvas(FigureCanvas):
             # update timeseries chunk statistics, to all basic stats
             # if colocation not-active, and basic+bias stats if colocation active
             if not self.read_instance.temporal_colocation:
-                available_timeseries_chunk_stats = ['None',] + list(copy.deepcopy(self.read_instance.basic_z_stats))
+                available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_z_stats))
             else:
-                available_timeseries_chunk_stats = ['None',] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
+                available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
 
-            # if base_zstat is empty string, it is because fields are being initialised for the first time
-            if zstat == '':
-                # set timeseries stat to be None
+            # if zstat is empty string, it is because fields are being initialised for the first time
+            if zstat == "":
+                # set timeseries chunk statistic to be None
                 zstat = available_timeseries_chunk_stats[0]
                 
-            # update timeseries statistic combobox (clear, then add items)
+            # update timeseries chunk statistic combobox (clear, then add items)
             self.timeseries_chunk_stat.clear()
             self.timeseries_chunk_stat.addItems(available_timeseries_chunk_stats)
 
-            # maintain currently selected timeseries statistic (if exists in new item list)
+            # maintain currently selected timeseries chunk statistic (if exists in new item list)
             if zstat in available_timeseries_chunk_stats:
                 self.timeseries_chunk_stat.setCurrentText(zstat)
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
 
-            # update plotted timeseries statistic
+            # update plotted timeseries chunk statistic
             if not self.read_instance.block_MPL_canvas_updates:
 
-                # update selected data on timeseries plot
-                if (len(self.station_inds[self.read_instance.networkspeci]) >= 1) and (zstat != 'None'):
-                    print("update chunk stat to", zstat)
-                    print(self.selected_station_data[self.read_instance.networkspeci]['timeseries'])
-                    timeseries_data = copy.deepcopy(self.selected_station_data[self.read_instance.networkspeci]['timeseries'])
+                # get selected station data
+                get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
+                                            networkspecies=[self.read_instance.networkspeci])
 
-                    # update timeseries data
-                    timeseries_chunk_stat = self.timeseries_chunk_stat.currentText()
+                # update plot                                                                         
+                self.update_associated_active_dashboard_plot("timeseries")
+  
+            # draw changes
+            self.figure.canvas.draw_idle()
 
-                    # TODO: GET RESOLUTION
-                    timeseries_chunk_resolution = "daily"
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
 
-                    # determine if station is absolute or bias statistic
-                    zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
+        return None
+    
+    def handle_timeseries_chunk_resolution_update(self):
+        """ Function that handles update of plotted timeseries chunk resolution
+            upon interaction with timeseries chunk resolution combobox.
+        """
 
-                    # get dictionary containing necessary information for calculation of selected statistic
-                    if z_statistic_type == 'basic':
-                        stats_dict = self.read_instance.basic_stats[zstat]
-                    else:
-                        stats_dict = self.read_instance.expbias_stats[zstat]
+        if not self.read_instance.block_config_bar_handling_updates:
+            
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            
+            # set variable that blocks configuration bar handling updates until all changes
+            # to the timeseries chunk resolution combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
 
-                    # load default selected z statistic arguments for passing to statistical function
-                    function_arguments = stats_dict['arguments']
-                    
-                    # calculate statistic per resolution
-                    timeseries_chunked_data = np.array(getattr(Stats, stats_dict['function'])(timeseries_data, **function_arguments))
-                    print(timeseries_chunked_data)
+            # get currently selected resolution
+            chunk_resolution = self.timeseries_chunk_resolution.currentText()
+            
+            # update timeseries chunk resolution, to all higher resolutions
+            if self.read_instance.selected_resampling_resolution == "None":
+                available_timeseries_chunk_resolutions = ["None",] + \
+                    list(get_lower_resolutions(self.read_instance.selected_resolution))
+            else:
+                available_timeseries_chunk_resolutions = ["None",] + \
+                    list(get_lower_resolutions(self.read_instance.selected_resampling_resolution))
+                
+            # if resolution is empty string, it is because fields are being initialised for the first time
+            if chunk_resolution == "":
+                # set timeseries resolution to be None
+                chunk_resolution = available_timeseries_chunk_resolutions[0]
+                
+            # update timeseries chunk resolution combobox (clear, then add items)
+            self.timeseries_chunk_resolution.clear()
+            self.timeseries_chunk_resolution.addItems(available_timeseries_chunk_resolutions)
 
-                    # update plot                                                                         
-                    self.update_associated_active_dashboard_plot('timeseries')
+            # maintain currently selected timeseries resolution (if exists in new item list)
+            if chunk_resolution in available_timeseries_chunk_resolutions:
+                self.timeseries_chunk_resolution.setCurrentText(chunk_resolution)
 
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update timeseries plot
+            self.handle_timeseries_chunk_statistic_update()
+        
             # draw changes
             self.figure.canvas.draw_idle()
 
@@ -2006,9 +2039,10 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_options = self.timeseries_menu.checkable_comboboxes['options']
         self.timeseries_elements = self.timeseries_menu.get_elements()
 
-        # get stats
+        # get aggregation stat, chunk stat and chunk resolution
         self.timeseries_stat = self.timeseries_menu.comboboxes['stat']
         self.timeseries_chunk_stat = self.timeseries_menu.comboboxes['chunk_stat']
+        self.timeseries_chunk_resolution = self.timeseries_menu.comboboxes['chunk_resolution']
 
         # get sliders and update values
         self.timeseries_markersize_sl = self.timeseries_menu.sliders['markersize_sl']
