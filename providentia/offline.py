@@ -860,7 +860,7 @@ class ProvidentiaOffline:
 
         # iterate through plots to make
         for plot_type in summary_plots_to_make:
-            print(plot_type)
+            
             # get zstat information from plot_type
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type)
             
