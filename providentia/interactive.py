@@ -306,6 +306,9 @@ class Interactive:
                 chunk_stat = copy.deepcopy(zstat)
                 chunk_resolution = plot_type.split('-')[2]
                 
+                # get zstat information 
+                zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=chunk_stat)
+                
                 # check if chunk resolution is available
                 if self.resampling_resolution is None:
                     available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resolution))
@@ -596,25 +599,21 @@ class Interactive:
         # set title, xlabel and ylabel for plots
 
         # set xlabel / ylabel
-        if base_plot_type == 'periodic':
-            if not ylabel:
-                
-                if 'ylabel' in self.plot_characteristics[plot_type]:
-                    ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+        if base_plot_type == 'periodic' or ((base_plot_type == 'timeseries') 
+                                            and (chunk_stat is not None) 
+                                            and (chunk_resolution is not None)):
+            
+            if not ylabel:         
+                if z_statistic_type == 'basic':
+                    ylabel = self.basic_stats[base_zstat]['label']
+                    ylabel_units = self.basic_stats[base_zstat]['units']
                 else:
-                    ylabel = ''
-
-                if ylabel == '':                            
-                    if z_statistic_type == 'basic':
-                        ylabel = self.basic_stats[base_zstat]['label']
-                        ylabel_units = self.basic_stats[base_zstat]['units']
-                    else:
-                        ylabel = self.expbias_stats[base_zstat]['label']
-                        ylabel_units = self.expbias_stats[base_zstat]['units']
-                    if ylabel_units == '[measurement_units]':
-                        ylabel_units = self.measurement_units[speci] 
-                    if ylabel_units != '':
-                        ylabel += ' [{}]'.format(ylabel_units)
+                    ylabel = self.expbias_stats[base_zstat]['label']
+                    ylabel_units = self.expbias_stats[base_zstat]['units']
+                if ylabel_units == '[measurement_units]':
+                    ylabel_units = self.measurement_units[speci] 
+                if ylabel_units != '':
+                    ylabel += ' [{}]'.format(ylabel_units)
 
         elif base_plot_type not in ['legend', 'metadata', 'map', 'heatmap', 'table', 'statsummary', 'taylor']:
             if not xlabel:
