@@ -1104,27 +1104,28 @@ def get_timeseries_chunked_data(read_instance, canvas_instance, networkspeci, ti
                                          day=31, 
                                          hour=23)
 
-        # get data in chunks
+        # get data in chunks and available labels
         timeseries_chunk_data = timeseries_data.loc[start_date:end_date]
+        data_labels = copy.deepcopy(timeseries_chunk_data.columns)
 
         # get dictionary containing necessary information for calculation of selected statistic
         if z_statistic_type == 'basic':
             # calculate statistic per chunk
             stats_dict = read_instance.basic_stats[zstat]
             timeseries_chunk_data = np.array([
-                timeseries_chunk_data[label] for label in read_instance.data_labels])
+                timeseries_chunk_data[label] for label in data_labels])
             timeseries_chunked_stats = [getattr(Stats, stats_dict['function'])(
                 group, **stats_dict['arguments']) for group in timeseries_chunk_data]
 
             # save stats per chunk and data label
-            for data_label_i, data_label in enumerate(read_instance.data_labels):
+            for data_label_i, data_label in enumerate(data_labels):
                 new_df.loc[start_date, data_label] = timeseries_chunked_stats[data_label_i]
         else:
             # get labels without obs
-            data_labels_exp = copy.deepcopy(read_instance.data_labels[1:])
+            data_labels_exp = copy.deepcopy(data_labels[1:])
 
             #  get data for obs
-            data_array_a = timeseries_chunk_data[read_instance.data_labels[0]]
+            data_array_a = timeseries_chunk_data[data_labels[0]]
 
             # calculate and save stats per chunk and exp
             stats_dict = read_instance.expbias_stats[zstat]
