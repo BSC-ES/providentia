@@ -20,8 +20,7 @@ import pyproj
 import seaborn as sns
 
 from .dashboard_interactivity import HoverAnnotation
-from .statistics import (boxplot_inner_fences, calculate_statistic, get_timeseries_chunked_data, 
-                         get_z_statistic_info)
+from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info, get_z_statistic_sign
 from .read_aux import drop_nans
 from .plot_aux import (get_multispecies_aliases, get_taylor_diagram_ghelper_info, kde_fft, merge_cells, 
                        periodic_labels, periodic_xticks, round_decimal_places, temp_axis_dict)
@@ -576,13 +575,40 @@ class Plot:
         # cut data_labels for those in valid data labels
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-        # put chunk statistics on timeseries plot
-        timeseries_data = copy.deepcopy(self.canvas_instance.selected_station_data[networkspeci]["timeseries"])
-        if (self.read_instance.offline) or (self.read_instance.interactive):
-            if (chunk_stat is not None) and (chunk_resolution is not None):
-                timeseries_data = get_timeseries_chunked_data(self.read_instance, self.canvas_instance, networkspeci, 
-                                                              chunk_resolution, chunk_stat)
-       
+        # get chunking stat and resolution in dashboard
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            chunk_stat = self.canvas_instance.timeseries_chunk_stat.currentText()
+            chunk_resolution = self.canvas_instance.timeseries_chunk_resolution.currentText()
+            chunk_stat = None if chunk_stat == 'None' else chunk_stat
+            chunk_resolution = None if chunk_resolution == 'None' else chunk_resolution
+        
+        # chunk timeseries
+        if (chunk_stat is not None) and (chunk_resolution is not None):
+
+            z_statistic_sign = get_z_statistic_sign(chunk_stat)
+            if z_statistic_sign == 'bias':
+                if self.read_instance.observations_data_label in cut_data_labels:
+                    cut_data_labels.remove(self.read_instance.observations_data_label)
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, chunk_stat, 
+                                                [self.read_instance.observations_data_label]*len(cut_data_labels), 
+                                                cut_data_labels, chunking=True, chunk_stat=chunk_stat, 
+                                                chunk_resolution=chunk_resolution)
+                
+            else:
+                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 
+                                                 chunk_stat, cut_data_labels, [], chunking=True, 
+                                                 chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
+
+            chunk_dates = self.canvas_instance.selected_station_data[networkspeci]["timeseries_chunks"][chunk_resolution]['valid_xticks']
+            timeseries_data = pd.DataFrame(index=chunk_dates, columns=cut_data_labels, dtype=np.float64)
+
+            for chunk_date_idx, chunk_date in enumerate(chunk_dates):
+                for label_idx, data_label in enumerate(cut_data_labels):
+                    timeseries_data.loc[chunk_date, data_label] = stats_calc[chunk_date_idx][label_idx]
+        else:
+            # normal timeseries
+            timeseries_data = copy.deepcopy(self.canvas_instance.selected_station_data[networkspeci]["timeseries"])
+        
         # iterate through data labels
         for data_label in cut_data_labels:
 
