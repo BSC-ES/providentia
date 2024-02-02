@@ -14,7 +14,7 @@ import scipy.stats as st
 
 from .calculate import Stats, ExpBias
 from .read_aux import (drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
-                       get_frequency_code)
+                       get_frequency_code, get_lower_resolutions)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -174,17 +174,6 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                                                                                              columns=canvas_instance.selected_station_data_labels[networkspeci], 
                                                                                              index=read_instance.time_index)
 
-            # get timeseries chunk statistic and resolution
-            if (not read_instance.offline) and (not read_instance.interactive):
-                timeseries_chunk_stat = canvas_instance.timeseries_chunk_stat.currentText()
-                timeseries_chunk_resolution = canvas_instance.timeseries_chunk_resolution.currentText()
-
-                # put chunk statistics on timeseries plot
-                if (timeseries_chunk_stat != "None") and (timeseries_chunk_resolution != "None"):
-                    canvas_instance.selected_station_data[networkspeci]["timeseries"] = \
-                        get_timeseries_chunked_data(read_instance, canvas_instance, networkspeci, 
-                                                    timeseries_chunk_resolution, timeseries_chunk_stat)
-                    
             # flatten data across stations
             canvas_instance.selected_station_data[networkspeci]['flat'] = canvas_instance.selected_station_data[networkspeci]['per_station'].reshape(canvas_instance.selected_station_data[networkspeci]['per_station'].shape[0],
                                                                                                                                                      1,
@@ -212,6 +201,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
             # group data into periodic chunks
             group_periodic(read_instance, canvas_instance, networkspeci)
+
+            # group data into timeseries chunks
+            group_timeseries(read_instance, canvas_instance, networkspeci)
 
 def boxplot_inner_fences(data):
 
@@ -286,7 +278,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci):
 
         # get all temporal periods for current resolution
         all_periods = getattr(read_instance.time_index, temporal_aggregation_resolution)
-       
+
         # get all unique temporal periods for current resolution
         unique_periods = np.unique(all_periods)
 
@@ -297,13 +289,12 @@ def group_periodic(read_instance, canvas_instance, networkspeci):
 
         # iterate through unique temporal periods and store associated data with each period, per data label
         for unique_period in unique_periods:
-
             # get mask for current period
             valid_period = all_periods == unique_period
 
             # get associated data with period
             period_data = canvas_instance.selected_station_data[networkspeci]['per_station'][:,:,valid_period]
-
+            
             # if have valid data for period, append it
             # otherwise, append empty list
             if period_data.size > 0:
@@ -312,11 +303,85 @@ def group_periodic(read_instance, canvas_instance, networkspeci):
                     period_data = period_data.reshape(period_data.shape[0],1,period_data.shape[1]*period_data.shape[2])
             else:
                 period_data = []
+            
             canvas_instance.selected_station_data[networkspeci][temporal_aggregation_resolution]['active_mode'].append(period_data)
             canvas_instance.selected_station_data[networkspeci][temporal_aggregation_resolution]['valid_xticks'].append(unique_period)
 
-def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, data_labels_b, 
-                        map=False, per_station=False, period=None):
+
+def group_timeseries(read_instance, canvas_instance, networkspeci):
+
+    # update timeseries chunk resolution, to all higher resolutions
+    if (read_instance.resampling_resolution == "None") or (read_instance.resampling_resolution is None):
+        chunk_resolutions = list(get_lower_resolutions(read_instance.resolution))
+    else:
+        chunk_resolutions = list(get_lower_resolutions(read_instance.resampling_resolution))
+    
+    # init dictionary where all data will be saved in chunks
+    canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'] = {}
+
+    # iterate through available chunk resolutions  
+    for chunk_resolution in chunk_resolutions:
+        
+        # get new frequency and apply to timeseries data
+        timeseries_data = copy.deepcopy(canvas_instance.selected_station_data[networkspeci]['timeseries'])
+        new_freq = get_frequency_code(chunk_resolution)
+        new_index = timeseries_data.asfreq(new_freq).index
+
+        # init arrays where chunk data will be saved
+        canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'][chunk_resolution] = {}
+        canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'][chunk_resolution]['valid_xticks'] = new_index
+        canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'][chunk_resolution]['active_mode'] = []
+        
+        # get timeseries data for each chunk
+        for i in range(len(new_index)):
+            
+            # is daily chunk resolution?
+            if new_freq == "D":
+                start_date = datetime.datetime(year=new_index[i].year, 
+                                            month=new_index[i].month, 
+                                            day=new_index[i].day, 
+                                            hour=0)
+                end_date = datetime.datetime(year=new_index[i].year, 
+                                            month=new_index[i].month, 
+                                            day=new_index[i].day, 
+                                            hour=23)
+            # is monthly chunk resolution?
+            elif new_freq == "MS":
+                start_date = datetime.datetime(year=new_index[i].year, 
+                                            month=new_index[i].month, 
+                                            day=1,
+                                            hour=0)
+                
+                for possible_end_day in [31, 30, 29, 28]:
+                    try: 
+                        end_date = datetime.datetime(year=new_index[i].year, 
+                                                    month=new_index[i].month, 
+                                                    day=possible_end_day, 
+                                                    hour=23)
+                        break
+                    except:
+                        continue
+            # is annual chunk resolution?
+            elif new_freq == "AS":
+                start_date = datetime.datetime(year=new_index[i].year, 
+                                            month=1, 
+                                            day=1,
+                                            hour=0)
+                end_date = datetime.datetime(year=new_index[i].year, 
+                                            month=12, 
+                                            day=31, 
+                                            hour=23)
+            
+            data = timeseries_data.loc[start_date:end_date]
+            data_labels = copy.deepcopy(data.columns)
+            timeseries_chunk_data = np.array([data[label] for label in data_labels])
+            timeseries_chunk_data = np.expand_dims(timeseries_chunk_data, axis=1)  
+            canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'][chunk_resolution]['active_mode'].append(
+                timeseries_chunk_data
+            )
+
+def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, 
+                        data_labels_b, map=False, per_station=False, period=None, chunking=None, chunk_stat=None, chunk_resolution=None):
     """Function that calculates a statistic for data labels, either absolute or bias, 
        for different aggregation modes.
     """
@@ -393,6 +458,9 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 data_array_a = [arr[indices_a] for arr in canvas_instance.selected_station_data[networkspeci][period]['active_mode']]
             elif z_statistic_period:
                 data_array_a = [arr[indices_a] for arr in canvas_instance.selected_station_data[networkspeci][z_statistic_period]['active_mode']]
+            # timeseries chunked data
+            elif chunking:
+                data_array_a = [arr[indices_a] for arr in canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'][chunk_resolution]['active_mode']]
             # non-periodic grouped data
             else:
                 data_array_a = canvas_instance.selected_station_data[networkspeci]['active_mode'][indices_a]
@@ -416,7 +484,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             # calculate statistics
             
             # calculate statistics per periodic grouping per station
-            if period:
+            if period or chunking:
                 z_statistic = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments) 
                                         for group in data_array_a])
 
@@ -464,6 +532,9 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     data_array_b = [arr[indices_b] for arr in canvas_instance.selected_station_data[networkspeci][period]['active_mode']]
                 elif z_statistic_period:
                     data_array_b = [arr[indices_b] for arr in canvas_instance.selected_station_data[networkspeci][z_statistic_period]['active_mode']]
+                # timeseries chunked data
+                elif chunking:
+                    data_array_b = [arr[indices_b] for arr in canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'][chunk_resolution]['active_mode']]
                 # non-periodic grouped data
                 else:
                     data_array_b = canvas_instance.selected_station_data[networkspeci]['active_mode'][indices_b]
@@ -482,12 +553,12 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # calculate statistics for data_labels_a and data_labels_b, then subtract data_labels_b - data_labels_a
                 
                 # calculate statistics per periodic grouping per station
-                if period:
+                if period or chunking:
                     statistic_a = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments_a) 
                                             for group in data_array_a])
                     statistic_b = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments_b) 
                                             for group in data_array_b])
-
+                
                 # calculate periodic statistic per station
                 elif z_statistic_period:
                     # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
@@ -536,7 +607,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                         elif per_station:
                             return z_statistic
                     else: 
-                        if period: 
+                        if period or chunking: 
                             stats_calc[zstat] = np.full((len(data_array_b),len(data_labels_b)), np.NaN)
                         else:
                             stats_calc[zstat] = np.full((len(data_labels_b)), np.NaN)
@@ -548,7 +619,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # calculate statistics
             
                 # calculate statistics per periodic grouping per station
-                if period:
+                if period or chunking:
                     z_statistic = np.array([getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':group_a,'exp':group_b}})
                                             for group_a, group_b in zip(data_array_a, data_array_b)])
 
@@ -913,7 +984,7 @@ def get_z_statistic_type(zstat):
     else:
         return 'expbias'
 
-def get_z_statistic_sign(zstat, zstat_type):
+def get_z_statistic_sign(zstat, zstat_type=None):
     """ Function that checks if the z statistic is an absolute or bias statistic.
 
         :param zstat: name of statistic
@@ -923,6 +994,9 @@ def get_z_statistic_sign(zstat, zstat_type):
         :return: zstat sign
         :rtype: str
     """
+    
+    if zstat_type is None:
+        zstat_type = get_z_statistic_type(zstat)
 
     # statistic is bias?
     if ('_bias' in zstat) or (zstat_type == 'expbias'):
@@ -1036,104 +1110,3 @@ def exceedance_lim(networkspeci):
         return exceedance_limits[speci]
     else:
         return np.NaN
-
-
-def get_timeseries_chunked_data(read_instance, canvas_instance, networkspeci, timeseries_chunk_resolution, timeseries_chunk_stat):
-    """ Update selected data on timeseries given the chunk resolution and statistic
-
-    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
-    :type read_instance: object
-    :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
-    :type canvas_instance: object
-    :param networkspeci: Name of current networkspeci (e.g. EBAS|sconco3)
-    :type networkspeci: str
-    :param timeseries_chunk_resolution: Timeseries plot chunk resolution
-    :type timeseries_chunk_resolution: str
-    :param timeseries_chunk_stat: Timeseries plot chunk statistic
-    :type timeseries_chunk_stat: str
-    :return: Dataframe with statistics per chunk and data label
-    :rtype: pd.DataFrame
-    """
-
-    # determine if station is absolute or bias statistic
-    zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(
-        zstat=timeseries_chunk_stat) 
-
-    # get new frequency
-    new_freq = get_frequency_code(timeseries_chunk_resolution)
-
-    # break selected data into chunks and calculate stat per chunk
-    timeseries_data = copy.deepcopy(canvas_instance.selected_station_data[networkspeci]['timeseries'])
-    new_index = timeseries_data.asfreq(new_freq).index
-    new_df = pd.DataFrame(index=new_index, columns=read_instance.data_labels, dtype=np.float64)
-    for i in range(len(new_index)):
-        # is daily chunk resolution?
-        if new_freq == "D":
-            start_date = datetime.datetime(year=new_index[i].year, 
-                                           month=new_index[i].month, 
-                                           day=new_index[i].day, 
-                                           hour=0)
-            end_date = datetime.datetime(year=new_index[i].year, 
-                                         month=new_index[i].month, 
-                                         day=new_index[i].day, 
-                                         hour=23)
-        # is monthly chunk resolution?
-        elif new_freq == "MS":
-            start_date = datetime.datetime(year=new_index[i].year, 
-                                           month=new_index[i].month, 
-                                           day=1,
-                                           hour=0)
-            
-            for possible_end_day in [31, 30, 29, 28]:
-                try: 
-                    end_date = datetime.datetime(year=new_index[i].year, 
-                                                 month=new_index[i].month, 
-                                                 day=possible_end_day, 
-                                                 hour=23)
-                    break
-                except:
-                    continue
-        # is annual chunk resolution?
-        elif new_freq == "AS":
-            start_date = datetime.datetime(year=new_index[i].year, 
-                                           month=1, 
-                                           day=1,
-                                           hour=0)
-            end_date = datetime.datetime(year=new_index[i].year, 
-                                         month=12, 
-                                         day=31, 
-                                         hour=23)
-
-        # get data in chunks and available labels
-        timeseries_chunk_data = timeseries_data.loc[start_date:end_date]
-        data_labels = copy.deepcopy(timeseries_chunk_data.columns)
-
-        # get dictionary containing necessary information for calculation of selected statistic
-        if z_statistic_type == 'basic':
-            # calculate statistic per chunk
-            stats_dict = read_instance.basic_stats[zstat]
-            timeseries_chunk_data = np.array([
-                timeseries_chunk_data[label] for label in data_labels])
-            timeseries_chunked_stats = [getattr(Stats, stats_dict['function'])(
-                group, **stats_dict['arguments']) for group in timeseries_chunk_data]
-
-            # save stats per chunk and data label
-            for data_label_i, data_label in enumerate(data_labels):
-                new_df.loc[start_date, data_label] = timeseries_chunked_stats[data_label_i]
-        else:
-            # get labels without obs
-            data_labels_exp = copy.deepcopy(data_labels[1:])
-
-            #  get data for obs
-            data_array_a = timeseries_chunk_data[data_labels[0]]
-
-            # calculate and save stats per chunk and exp
-            stats_dict = read_instance.expbias_stats[zstat]
-                                                                                                    
-            for data_label_i, data_label in enumerate(data_labels_exp):
-                data_array_b = timeseries_chunk_data[data_label]
-                timeseries_chunked_stat = np.array(getattr(ExpBias, stats_dict['function'])(
-                    **{**stats_dict['arguments'], **{'obs':data_array_a,'exp':data_array_b}}))
-                new_df.loc[start_date, data_label] = timeseries_chunked_stat
-                
-    return new_df
