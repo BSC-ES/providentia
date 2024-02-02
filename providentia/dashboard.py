@@ -31,7 +31,7 @@ from .read import DataReader
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_ghost_observational_tree, 
                        get_nonghost_observational_tree, get_valid_experiments, get_valid_obs_files_in_date_range,
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions,
-                       temporal_resolution_order_dict, get_resampling_resolutions)
+                       temporal_resolution_order_dict, get_lower_resolutions)
 from .toolbar import NavigationToolbar
 from .warnings import show_message
 
@@ -737,7 +737,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_statistic_aggregation = self.cb_statistic_aggregation.currentText()
 
         # get available resampling resolutions
-        available_resampling_resolutions = get_resampling_resolutions(self.selected_resolution)
+        available_resampling_resolutions = get_lower_resolutions(self.selected_resolution)
 
         # remove resolutions if resampled data would be less than 2 timesteps
         resampling_resolutions = copy.deepcopy(available_resampling_resolutions)
@@ -1372,6 +1372,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update timeseries statistic combobox
             self.mpl_canvas.handle_timeseries_statistic_update()
 
+            # update resampling resolution
+            self.mpl_canvas.handle_resampling_update()
+            
+            # update timeseries chunk statistic and resolution comboboxes
+            self.mpl_canvas.handle_timeseries_chunk_resolution_update()
+            self.mpl_canvas.handle_timeseries_chunk_statistic_update()
+
             # update periodic statistic combobox
             self.mpl_canvas.handle_periodic_statistic_update()
 
@@ -1386,9 +1393,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # unselect all/intersect/extent checkboxes
             self.mpl_canvas.unselect_map_checkboxes()
-            
-            # update resampling resolution
-            self.mpl_canvas.handle_resampling_update()
 
             # unset variable to allow updating of MPL canvas
             self.block_MPL_canvas_updates = False
