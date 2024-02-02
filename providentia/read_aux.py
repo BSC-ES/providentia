@@ -814,8 +814,8 @@ def valid_date(date_text):
         return False
 
 
-def get_resampling_resolutions(resolution):
-    """ Get available resampling resolutions. """
+def get_lower_resolutions(resolution):
+    """ Get available lower resolutions. """
 
     if resolution in ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
                       '6hourly', '6hourly_instantaneous']:
