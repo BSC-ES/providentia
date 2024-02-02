@@ -975,7 +975,6 @@ class Interactive:
         :type station: str
         """
         
-
         if type(station) == 'str':
             stations_to_keep = [station]
         else:
@@ -1134,7 +1133,19 @@ class Interactive:
         """
 
         # set temporary fname for writing
-        temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp')
+        temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(self.networkspecies[0]))
+
+        # check if temporary fname already exists 
+        if os.path.isfile(temporary_fname):
+            # if so, keep iterating until find fname is new
+            invalid_fname = True
+            dup_count = 2
+            while invalid_fname:
+                temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}_{}'.format(self.networkspecies[0], dup_count))
+                if os.path.isfile(temporary_fname):
+                    dup_count += 1
+                else:
+                    invalid_fname = False
 
         if format in ['netCDF', 'netcdf', 'netCDF4', 'netcdf4', 'nc', '.nc']:
             data = export_netcdf(self, temporary_fname, set_in_memory=True)
