@@ -988,6 +988,10 @@ class MPLCanvas(FigureCanvas):
                             aggregated_data.T, 
                             columns=self.selected_station_data_labels[self.read_instance.networkspeci], 
                             index=self.read_instance.time_index)
+                        
+                        # get selected station data
+                        get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
+                                                networkspecies=[self.read_instance.networkspeci])
 
                         # update plot                                                                         
                         self.update_associated_active_dashboard_plot('timeseries')
@@ -1045,7 +1049,7 @@ class MPLCanvas(FigureCanvas):
 
                 # get selected station data
                 get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
-                                            networkspecies=[self.read_instance.networkspeci])
+                                          networkspecies=[self.read_instance.networkspeci])
 
                 # update plot                                                                         
                 self.update_associated_active_dashboard_plot("timeseries")
