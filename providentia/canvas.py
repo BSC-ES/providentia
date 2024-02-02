@@ -981,14 +981,6 @@ class MPLCanvas(FigureCanvas):
                 # update selected data on timeseries plot
                 elif self.read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
                     if len(self.station_inds[self.read_instance.networkspeci]) >= 1:
-                        # update timeseries data
-                        timeseries_stat = self.timeseries_stat.currentText()
-                        aggregated_data = aggregation(self.read_instance.data_array, timeseries_stat, axis=1)
-                        self.selected_station_data[self.read_instance.networkspeci]['timeseries'] = pd.DataFrame(
-                            aggregated_data.T, 
-                            columns=self.selected_station_data_labels[self.read_instance.networkspeci], 
-                            index=self.read_instance.time_index)
-                        
                         # get selected station data
                         get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
                                                 networkspecies=[self.read_instance.networkspeci])
