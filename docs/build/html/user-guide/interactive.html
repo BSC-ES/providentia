@@ -56,7 +56,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#features">Features</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#reading-and-filtering-data-from-a-conf-file">Reading and filtering data from a .conf file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#reset-filter">Reset filter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#selecting-for-stations">Selecting for stations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#applying-specific-filter">Applying specific filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filtering-for-specific-station-s">Filtering for specific station/s</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#print-active-conf-file">Print active .conf file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#calculate-statistics">Calculate statistics</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saving-data">Saving data</a></li>
@@ -185,13 +186,39 @@
 </pre></div>
 </div>
 </section>
-<section id="selecting-for-stations">
-<h3>Selecting for stations<a class="headerlink" href="#selecting-for-stations" title="Link to this heading"></a></h3>
-<p>If wanting to select a specific station or stations of the read data, the following method can be used:</p>
+<section id="applying-specific-filter">
+<h3>Applying specific filter<a class="headerlink" href="#applying-specific-filter" title="Link to this heading"></a></h3>
+<p>If wanting to apply a filter not set in the .conf, this can be done using the following method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">field</span></code> is the field to filter by. The fields to filter by can be representativity fields, period fields or metadata fields.</p>
+<p>If the field is numeric, lower and upper limits to retain data between can be set as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">31</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>NOTE: it is not mandatory to pass <code class="docutils literal notranslate"><span class="pre">lower</span></code> and <code class="docutils literal notranslate"><span class="pre">upper</span></code> arguments together.</p>
+<p>If the field is textual, values to keep and remove associated data with can be set as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If multiple values are wanted to be removed concurrently, the arguments passed should be lists.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span><span class="s1">&#39;France&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>NOTE: it is not mandatory to pass <code class="docutils literal notranslate"><span class="pre">keep</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> arguments together.</p>
+<p>For the specific case of representativity fields, the argument passed should be <code class="docutils literal notranslate"><span class="pre">limit</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">rep_field</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="filtering-for-specific-station-s">
+<h3>Filtering for specific station/s<a class="headerlink" href="#filtering-for-specific-station-s" title="Link to this heading"></a></h3>
+<p>If wanting to filter data for a specific station or stations, the following convenience method can also be used (rather than using <code class="docutils literal notranslate"><span class="pre">apply_filter</span></code>):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">select_station</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>where <cite>station</cite> can be a str <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> of one station of interest, or can be a list of multiple stations of interest. This will then subsequently mean the data in memory is filtered for the relevant station or stations.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">station</span></code> can be a str <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> of one station of interest, or can be a list of multiple stations of interest. This will then subsequently mean the data in memory is filtered for the relevant station or stations.</p>
 </section>
 <section id="print-active-conf-file">
 <h3>Print active .conf file<a class="headerlink" href="#print-active-conf-file" title="Link to this heading"></a></h3>

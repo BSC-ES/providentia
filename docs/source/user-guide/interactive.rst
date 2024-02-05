@@ -115,16 +115,60 @@ If at any point wanting to return to the state when the Interactive class was in
 
    initialise=True 
 
-Selecting for stations
-^^^^^^^^^^^^^^^^^^^^^^
+Applying specific filter
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-If wanting to select a specific station or stations of the read data, the following method can be used:
+If wanting to apply a filter not set in the .conf, this can be done using the following method:
+
+::
+
+   provi.apply_filter(field, ...)
+
+where ``field`` is the field to filter by. The fields to filter by can be representativity fields, period fields or metadata fields.
+
+If the field is numeric, lower and upper limits to retain data between can be set as follows:
+
+::
+   
+   provi.apply_filter(field, lower=28, upper=31)
+
+
+NOTE: it is not mandatory to pass ``lower`` and ``upper`` arguments together.
+
+If the field is textual, values to keep and remove associated data with can be set as follows:
+
+::
+
+   provi.apply_filter(field, keep='Spain', remove='')
+
+
+If multiple values are wanted to be removed concurrently, the arguments passed should be lists.
+
+::
+   
+   provi.apply_filter(field, remove=['Spain','France'])
+
+
+NOTE: it is not mandatory to pass ``keep`` and ``remove`` arguments together.
+
+For the specific case of representativity fields, the argument passed should be ``limit``:
+
+::
+   
+   provi.apply_filter(rep_field, limit=20)
+
+
+Filtering for specific station/s
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If wanting to filter data for a specific station or stations, the following convenience method can also be used (rather than using ``apply_filter``):
 
 ::
 
    provi.select_station(station)
 
-where `station` can be a str ``station_reference`` of one station of interest, or can be a list of multiple stations of interest. This will then subsequently mean the data in memory is filtered for the relevant station or stations.
+
+where ``station`` can be a str ``station_reference`` of one station of interest, or can be a list of multiple stations of interest. This will then subsequently mean the data in memory is filtered for the relevant station or stations.
 
 Print active .conf file
 ^^^^^^^^^^^^^^^^^^^^^^^
