@@ -188,9 +188,9 @@ class Interactive:
         :type plot: str
         :param data_labels: Data labels, defaults to None
         :type data_labels: list, optional
-        :param labela: Label of first experiment, defaults to ''
+        :param labela: Label of first dataset, defaults to ''
         :type labela: str, optional
-        :param labelb: Label of second experiment, defaults to ''
+        :param labelb: Label of second dataset, defaults to ''
         :type labelb: str, optional
         :param title: Axes title, defaults to None
         :type title: str, optional
@@ -801,9 +801,9 @@ class Interactive:
 
         :param stat: Statistic
         :type stat: str
-        :param labela: Label of first experiment, defaults to ''
+        :param labela: Label of first dataset, defaults to ''
         :type labela: str, optional
-        :param labelb: Label of second experiment, defaults to ''
+        :param labelb: Label of second dataset, defaults to ''
         :type labelb: str, optional
         :param per_station: Indicates if the station data is per station or for all stations, defaults to False
         :type per_station: bool, optional
