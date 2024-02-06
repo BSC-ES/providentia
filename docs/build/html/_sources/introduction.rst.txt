@@ -5,10 +5,11 @@ Introduction
 About
 -----
 
-Providentia consists of these two main features:
+Providentia consists currently has 3 different modes:
 
 * Dashboard, designed to allow on-the-fly analysis of BSC experiment output.
 * Offline reports, designed to obtain complete reports and carry out in-depth analysis of BSC experiment output.
+* Interactive mode, allowing use of the Providentia backend functions, and use within Jupyter notebooks.
 
 .. image:: /images/providentia.png
   :alt: Providentia dashboard
