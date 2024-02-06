@@ -522,13 +522,13 @@ class DataFilter:
                     # get list of statistic limits specific for speci (if wanted)
                     if speci_specific_limits:
                         # if have not defined limits for speci, then throw warning and continue to next speci
-                        if speci not in stat_arguments:
+                        if networkspeci not in stat_arguments:
                             msg = "No statistical limits defined for '{}' in '{}' section of '{}'. Not removing extreme stations for '{}'.".format(
-                                  speci, self.read_instance.remove_extreme_stations, remove_extreme_stations_fname, speci)
+                                  networkspeci, self.read_instance.remove_extreme_stations, remove_extreme_stations_fname, speci)
                             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                             continue
                         else:
-                            specific_stat_arguments = stat_arguments[speci]
+                            specific_stat_arguments = stat_arguments[networkspeci]
                     else:
                         specific_stat_arguments = copy.deepcopy(stat_arguments)
 

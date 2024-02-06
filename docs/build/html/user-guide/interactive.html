@@ -56,7 +56,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#features">Features</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#reading-and-filtering-data-from-a-conf-file">Reading and filtering data from a .conf file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#reset-filter">Reset filter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#selecting-for-stations">Selecting for stations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#applying-specific-filter">Applying specific filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filtering-for-specific-station-s">Filtering for specific station/s</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#print-active-conf-file">Print active .conf file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#calculate-statistics">Calculate statistics</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saving-data">Saving data</a></li>
@@ -185,13 +186,39 @@
 </pre></div>
 </div>
 </section>
-<section id="selecting-for-stations">
-<h3>Selecting for stations<a class="headerlink" href="#selecting-for-stations" title="Link to this heading"></a></h3>
-<p>If wanting to select a specific station or stations of the read data, the following method can be used:</p>
+<section id="applying-specific-filter">
+<h3>Applying specific filter<a class="headerlink" href="#applying-specific-filter" title="Link to this heading"></a></h3>
+<p>If wanting to apply a filter not set in the .conf, this can be done using the following method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">field</span></code> is the field to filter by. The fields to filter by can be representativity fields, period fields or metadata fields.</p>
+<p>If the field is numeric, lower and upper limits to retain data between can be set as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">31</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>NOTE: it is not mandatory to pass <code class="docutils literal notranslate"><span class="pre">lower</span></code> and <code class="docutils literal notranslate"><span class="pre">upper</span></code> arguments together.</p>
+<p>If the field is textual, values to keep and remove associated data with can be set as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If multiple values are wanted to be removed concurrently, the arguments passed should be lists.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span><span class="s1">&#39;France&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>NOTE: it is not mandatory to pass <code class="docutils literal notranslate"><span class="pre">keep</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> arguments together.</p>
+<p>For the specific case of representativity fields, the argument passed should be <code class="docutils literal notranslate"><span class="pre">limit</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">rep_field</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="filtering-for-specific-station-s">
+<h3>Filtering for specific station/s<a class="headerlink" href="#filtering-for-specific-station-s" title="Link to this heading"></a></h3>
+<p>If wanting to filter data for a specific station or stations, the following convenience method can also be used (rather than using <code class="docutils literal notranslate"><span class="pre">apply_filter</span></code>):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">select_station</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>where <cite>station</cite> can be a str <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> of one station of interest, or can be a list of multiple stations of interest. This will then subsequently mean the data in memory is filtered for the relevant station or stations.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">station</span></code> can be a str <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> of one station of interest, or can be a list of multiple stations of interest. This will then subsequently mean the data in memory is filtered for the relevant station or stations.</p>
 </section>
 <section id="print-active-conf-file">
 <h3>Print active .conf file<a class="headerlink" href="#print-active-conf-file" title="Link to this heading"></a></h3>
@@ -429,6 +456,24 @@ The legend plot can be made as follows:</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class to create interactive Providentia session.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.apply_filter">
+<span class="sig-name descname"><span class="pre">apply_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.apply_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.apply_filter" title="Link to this definition"></a></dt>
+<dd><p>Wrapper method to select specific station/s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>str</em>) – field to filter by</p></li>
+<li><p><strong>limit</strong> (<em>str</em><em>, </em><em>optional</em>) – limit for filtering representativity fields</p></li>
+<li><p><strong>keep</strong> (<em>str</em><em>, </em><em>optional</em>) – data to keep</p></li>
+<li><p><strong>remove</strong> (<em>str</em><em>, </em><em>optional</em>) – data to remove</p></li>
+<li><p><strong>lower</strong> (<em>str</em><em>, </em><em>optional</em>) – lower bound to retain data</p></li>
+<li><p><strong>upper</strong> (<em>str</em><em>, </em><em>optional</em>) – upper bound to retain data</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="providentia.interactive.Interactive.calculate_stat">
 <span class="sig-name descname"><span class="pre">calculate_stat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labela</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.calculate_stat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.calculate_stat" title="Link to this definition"></a></dt>
 <dd><p>Wrapper method to calculate statistic/s.</p>
@@ -436,8 +481,8 @@ The legend plot can be made as follows:</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stat</strong> (<em>str</em>) – Statistic</p></li>
-<li><p><strong>labela</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of first experiment, defaults to ‘’</p></li>
-<li><p><strong>labelb</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of second experiment, defaults to ‘’</p></li>
+<li><p><strong>labela</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of first dataset, defaults to ‘’</p></li>
+<li><p><strong>labelb</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of second dataset, defaults to ‘’</p></li>
 <li><p><strong>per_station</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if the station data is per station or for all stations, defaults to False</p></li>
 </ul>
 </dd>
@@ -493,8 +538,8 @@ The legend plot can be made as follows:</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>plot</strong> (<em>str</em>) – Plot type</p></li>
 <li><p><strong>data_labels</strong> (<em>list</em><em>, </em><em>optional</em>) – Data labels, defaults to None</p></li>
-<li><p><strong>labela</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of first experiment, defaults to ‘’</p></li>
-<li><p><strong>labelb</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of second experiment, defaults to ‘’</p></li>
+<li><p><strong>labela</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of first dataset, defaults to ‘’</p></li>
+<li><p><strong>labelb</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of second dataset, defaults to ‘’</p></li>
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Axes title, defaults to None</p></li>
 <li><p><strong>xlabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Label on x axes, defaults to None</p></li>
 <li><p><strong>ylabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Label on y axes, defaults to None</p></li>
