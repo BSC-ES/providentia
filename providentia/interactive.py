@@ -27,9 +27,10 @@ from .plot import Plot
 from .plot_formatting import (format_plot_options, format_axis, set_axis_label, set_axis_title, 
                               harmonise_xy_lims_paradigm)
 from .read import DataReader
-from .read_aux import (get_ghost_observational_tree, get_nonghost_observational_tree, 
-                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
-                       get_valid_experiments, get_valid_obs_files_in_date_range)
+from .read_aux import (get_ghost_observational_tree, get_lower_resolutions, 
+                       get_nonghost_observational_tree, get_nonrelevant_temporal_resolutions, 
+                       get_relevant_temporal_resolutions, get_valid_experiments, 
+                       get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, generate_colourbar, generate_colourbar_detail, 
                          get_selected_station_data, get_z_statistic_info)
 from .writing import export_configuration, export_data_npz, export_netcdf
@@ -187,9 +188,9 @@ class Interactive:
         :type plot: str
         :param data_labels: Data labels, defaults to None
         :type data_labels: list, optional
-        :param labela: Label of first experiment, defaults to ''
+        :param labela: Label of first dataset, defaults to ''
         :type labela: str, optional
-        :param labelb: Label of second experiment, defaults to ''
+        :param labelb: Label of second dataset, defaults to ''
         :type labelb: str, optional
         :param title: Axes title, defaults to None
         :type title: str, optional
@@ -289,6 +290,7 @@ class Interactive:
             plot_type = '{}_{}'.format(base_plot_type, '_'.join(plot_options))
         else:
             plot_type = copy.deepcopy(plot)
+
         # get zstat for required plots
         base_plot_type_split = base_plot_type.split('-')
         if (len(base_plot_type_split) > 1) & (base_plot_type != 'periodic-violin'):
@@ -296,6 +298,34 @@ class Interactive:
             zstat = base_plot_type_split[1]
         else:
             zstat = None
+
+        # for timeseries chunking
+        if base_plot_type == 'timeseries':
+            if zstat:
+                # get chunk statistic and resolution
+                chunk_stat = copy.deepcopy(zstat)
+                chunk_resolution = plot_type.split('-')[2]
+                
+                # get zstat information 
+                zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=chunk_stat)
+                
+                # check if chunk resolution is available
+                if self.resampling_resolution is None:
+                    available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resolution))
+                else:
+                    available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resampling_resolution))
+
+                # show warning if it is not
+                if chunk_resolution not in available_timeseries_chunk_resolutions:
+                    msg = f'Warning: {plot_type} cannot be created because {chunk_resolution} '
+                    msg += 'is not an available chunking resolution.'
+                    if len(available_timeseries_chunk_resolutions) > 0:
+                        msg += f'The available resolutions are: {available_timeseries_chunk_resolutions}'
+                    print(msg)
+                    return
+            else:
+                chunk_stat = None
+                chunk_resolution = None
 
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
@@ -533,8 +563,9 @@ class Interactive:
                     stats_df.loc[(ns, ss)] = stat_per_data_labels
 
             # make plot
-            func(relevant_ax, networkspeci, relevant_data_labels, self.plot_characteristics[plot_type], plot_options,
-                 plotting_paradigm='summary', stats_df=stats_df)
+            func(relevant_ax, networkspeci, relevant_data_labels, 
+                 self.plot_characteristics[plot_type], plot_options, plotting_paradigm='summary', 
+                 stats_df=stats_df)
 
             # re-filter for original subsection
             kwargs['subsection'] = orig_ss
@@ -543,10 +574,14 @@ class Interactive:
                 self.reset_filter(initialise=True)
             else:
                 self.reset_filter()
-         
+        
+        elif base_plot_type == 'timeseries':
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 plot_options, chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
         # other plots
         else: 
-            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], plot_options)
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 plot_options)
 
         # get number of total available stations, and individual station information if just have 1 station
         if (self.temporal_colocation) and (len(data_labels) > 1):
@@ -564,25 +599,21 @@ class Interactive:
         # set title, xlabel and ylabel for plots
 
         # set xlabel / ylabel
-        if base_plot_type == 'periodic':
-            if not ylabel:
-                
-                if 'ylabel' in self.plot_characteristics[plot_type]:
-                    ylabel = self.plot_characteristics[plot_type]['ylabel']['ylabel']
+        if base_plot_type == 'periodic' or ((base_plot_type == 'timeseries') 
+                                            and (chunk_stat is not None) 
+                                            and (chunk_resolution is not None)):
+            
+            if not ylabel:         
+                if z_statistic_type == 'basic':
+                    ylabel = self.basic_stats[base_zstat]['label']
+                    ylabel_units = self.basic_stats[base_zstat]['units']
                 else:
-                    ylabel = ''
-
-                if ylabel == '':                            
-                    if z_statistic_type == 'basic':
-                        ylabel = self.basic_stats[base_zstat]['label']
-                        ylabel_units = self.basic_stats[base_zstat]['units']
-                    else:
-                        ylabel = self.expbias_stats[base_zstat]['label']
-                        ylabel_units = self.expbias_stats[base_zstat]['units']
-                    if ylabel_units == '[measurement_units]':
-                        ylabel_units = self.measurement_units[speci] 
-                    if ylabel_units != '':
-                        ylabel += ' [{}]'.format(ylabel_units)
+                    ylabel = self.expbias_stats[base_zstat]['label']
+                    ylabel_units = self.expbias_stats[base_zstat]['units']
+                if ylabel_units == '[measurement_units]':
+                    ylabel_units = self.measurement_units[speci] 
+                if ylabel_units != '':
+                    ylabel += ' [{}]'.format(ylabel_units)
 
         elif base_plot_type not in ['legend', 'metadata', 'map', 'heatmap', 'table', 'statsummary', 'taylor']:
             if not xlabel:
@@ -770,9 +801,9 @@ class Interactive:
 
         :param stat: Statistic
         :type stat: str
-        :param labela: Label of first experiment, defaults to ''
+        :param labela: Label of first dataset, defaults to ''
         :type labela: str, optional
-        :param labelb: Label of second experiment, defaults to ''
+        :param labelb: Label of second dataset, defaults to ''
         :type labelb: str, optional
         :param per_station: Indicates if the station data is per station or for all stations, defaults to False
         :type per_station: bool, optional
