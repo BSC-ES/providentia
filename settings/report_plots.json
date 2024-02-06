@@ -47,6 +47,6 @@
                   "table-Median", "table-Median_bias", "table-Mean_multispecies", 
                   "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias"],
     
-    "debug": ["periodic-MB", "periodic-RMSE", "periodic-MFB", "periodic-MFE", "periodic-r"]
+    "debug": ["timeseries-Mean-daily", "timeseries", "timeseries-r-monthly"]
 
 }
