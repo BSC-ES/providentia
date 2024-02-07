@@ -170,7 +170,7 @@
 </div>
 <p>If there are multiple section and subsection pairs in the .conf file, and a specific pair is not explicitly set to be read, then simply the first pair is taken to be read.</p>
 <p>When wanting to change any data or filters applied to the data, simply update the appropriate the .conf and reinitiate the class instance.</p>
-<p>If wanting to overwrite any overwrite any arguments in the .conf file, directly in the script, each argument can be simply passed when initiating the class instance, e.g.:</p>
+<p>If wanting to overwrite any arguments in the .conf file, directly in the script, each argument can be simply passed when initiating the class instance, e.g.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s1">&#39;EANET&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -226,7 +226,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">print_config</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>If wanting to visually print any other existing .conf, this can be done by passing the <code class="docutils literal notranslate"><span class="pre">conf</span></code> or <code class="docutils literal notranslate"><span class="pre">config</span></code> argument argument:</p>
+<p>If wanting to visually print any other existing .conf, this can be done by passing the <code class="docutils literal notranslate"><span class="pre">conf</span></code> or <code class="docutils literal notranslate"><span class="pre">config</span></code> argument:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;important.conf&#39;</span>
 </pre></div>
 </div>
@@ -265,7 +265,7 @@
 <section id="accessing-data-in-memory">
 <h3>Accessing data in memory<a class="headerlink" href="#accessing-data-in-memory" title="Link to this heading"></a></h3>
 <p>As well as being able to save data out, data can be returned directly in memory in specific formats, via the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;xr&#39;</span><span class="p">),</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;xr&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">format</span></code> is the format of the returned data, and can be <code class="docutils literal notranslate"><span class="pre">nc</span></code> (netCDF), <code class="docutils literal notranslate"><span class="pre">np</span></code> (numpy) or <code class="docutils literal notranslate"><span class="pre">xr</span></code> (xarray).</p>

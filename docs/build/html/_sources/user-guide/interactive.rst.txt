@@ -93,7 +93,7 @@ If there are multiple section and subsection pairs in the .conf file, and a spec
 
 When wanting to change any data or filters applied to the data, simply update the appropriate the .conf and reinitiate the class instance. 
 
-If wanting to overwrite any overwrite any arguments in the .conf file, directly in the script, each argument can be simply passed when initiating the class instance, e.g.:
+If wanting to overwrite any arguments in the .conf file, directly in the script, each argument can be simply passed when initiating the class instance, e.g.:
 
 ::
 
@@ -180,7 +180,7 @@ If wanting to visually print the .conf file that is currently active this can be
    provi.print_config()
 
 
-If wanting to visually print any other existing .conf, this can be done by passing the ``conf`` or ``config`` argument argument: 
+If wanting to visually print any other existing .conf, this can be done by passing the ``conf`` or ``config`` argument: 
 
 ::
 
@@ -239,7 +239,7 @@ As well as being able to save data out, data can be returned directly in memory 
 
 ::
 
-   data = provi.get_data(format='xr'),
+   data = provi.get_data(format='xr')
 
 where ``format`` is the format of the returned data, and can be ``nc`` (netCDF), ``np`` (numpy) or ``xr`` (xarray).
 
