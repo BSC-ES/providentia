@@ -20,10 +20,10 @@ import pyproj
 import seaborn as sns
 
 from .dashboard_interactivity import HoverAnnotation
-from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info, get_z_statistic_sign
+from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info
 from .read_aux import drop_nans
-from .plot_aux import (get_multispecies_aliases, get_taylor_diagram_ghelper_info, kde_fft, merge_cells, 
-                       periodic_labels, periodic_xticks, round_decimal_places, temp_axis_dict)
+from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, get_taylor_diagram_ghelper_info, 
+                       kde_fft, merge_cells, periodic_labels, periodic_xticks, round_decimal_places, temp_axis_dict)
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
@@ -56,13 +56,13 @@ class Plot:
         """ Iterate through all plots to make, and determine if they can and cannot be made.
             Update plot characteristics associated with specific plot types due to plot options. 
 
-            :param plot_types: plot types to create 
+            :param plot_types: Plot types to create 
             :type plot_types: list  
-            :param zstat: z statistic str 
+            :param zstat: Statistic 
             :type zstat: str
-            :param data_labels: list of data labels to plot in legend  
+            :param data_labels: Data arrays to plot
             :type data_labels: list 
-            :param format: format dict to overwrite default formatting 
+            :param format: Dictionary to overwrite default formatting 
             :type format: dict
         """
 
@@ -223,11 +223,11 @@ class Plot:
     def make_legend_handles(self, plot_characteristics_legend, data_labels=None, set_obs=True):
         """ Make legend element handles.
         
-            :param plot_characteristics_legend: plot characteristics for relevant legend
+            :param plot_characteristics_legend: Plot characteristics for relevant legend
             :type plot_characteristics_legend: dict
-            :param data_labels: list of data labels to plot in legend  
+            :param data_labels: Data arrays to plot
             :type data_labels: list 
-            :param set_obs: boolean switch if to set observations in legend or not  
+            :param set_obs: Indicates if to set observations in legend or not  
             :type set_obs: boolean 
             :return: plot_characteristics_legend with handles updated
             :rtype: dict
@@ -267,7 +267,7 @@ class Plot:
     def make_experiment_domain_polygons(self, data_labels=None):
         """ Make experiment domain polygons.
             
-            :param data_labels: list of data labels to plot in legend  
+            :param data_labels: Data arrays to plot
             :type data_labels: list 
             :return: grid_edge_polygons
             :rtype: list
@@ -300,7 +300,7 @@ class Plot:
     def make_header(self, pdf, plot_characteristics):
         """ Make header.
         
-            :param plot_characteristics: plot characteristics 
+            :param plot_characteristics: Plot characteristics 
             :type plot_characteristics: dict
         """
 
@@ -356,15 +356,15 @@ class Plot:
     def make_metadata(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make metadata summary plot.
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param data_labels: name of data arrays to plot
+            :param data_labels: Data arrays to plot
             :type data_labels: str
-            :param plot_characteristics: plot characteristics 
+            :param plot_characteristics: Plot characteristics 
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
         """
 
@@ -489,19 +489,19 @@ class Plot:
                  labelb=''):
         """ Make map plot.
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
-            :param zstat: name of statistic to plot
+            :param zstat: Statistic to plot
             :type zstat: str
-            :param labela: name of data to plot
+            :param labela: Label of first dataset
             :type labela: str
-            :param labelb: name of data to plot (if defined then a bias plot is made)
+            :param labelb: Label of second dataset (if defined then a bias plot is made)
             :type labelb: str
         """
 
@@ -533,19 +533,19 @@ class Plot:
                         chunk_stat=None, chunk_resolution=None):
         """ Make timeseries plot.
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param data_labels: name of data arrays to plot
+            :param data_labels: Data arrays to plot
             :type data_labels: list
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
-            :param chunk_stat: name of chunk statistic
+            :param chunk_stat: Chunk statistic
             :type chunk_stat: str
-            :param chunk_resolution: name of chunk resolution
+            :param chunk_resolution: Chunk resolution
             :type chunk_resolution: str
         """
 
@@ -584,30 +584,11 @@ class Plot:
         
         # chunk timeseries
         if (chunk_stat is not None) and (chunk_resolution is not None):
-
-            z_statistic_sign = get_z_statistic_sign(chunk_stat)
-            if z_statistic_sign == 'bias':
-                if self.read_instance.observations_data_label in cut_data_labels:
-                    cut_data_labels.remove(self.read_instance.observations_data_label)
-                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, chunk_stat, 
-                                                [self.read_instance.observations_data_label]*len(cut_data_labels), 
-                                                cut_data_labels, chunking=True, chunk_stat=chunk_stat, 
-                                                chunk_resolution=chunk_resolution)
-                
-            else:
-                stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 
-                                                 chunk_stat, cut_data_labels, [], chunking=True, 
-                                                 chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
-
-            chunk_dates = self.canvas_instance.selected_station_data[networkspeci]["timeseries_chunks"][chunk_resolution]['valid_xticks']
-            timeseries_data = pd.DataFrame(index=chunk_dates, columns=cut_data_labels, dtype=np.float64)
-
-            for chunk_date_idx, chunk_date in enumerate(chunk_dates):
-                for label_idx, data_label in enumerate(cut_data_labels):
-                    timeseries_data.loc[chunk_date, data_label] = stats_calc[chunk_date_idx][label_idx]
+            timeseries_data = create_chunked_timeseries(self.read_instance, self.canvas_instance, chunk_stat, 
+                                                        chunk_resolution, networkspeci, cut_data_labels)
+        # normal timeseries
         else:
-            # normal timeseries
-            timeseries_data = copy.deepcopy(self.canvas_instance.selected_station_data[networkspeci]["timeseries"])
+            timeseries_data = self.canvas_instance.selected_station_data[networkspeci]["timeseries"]
         
         # iterate through data labels
         for data_label in cut_data_labels:
@@ -649,17 +630,17 @@ class Plot:
     def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, zstat=None):
         """ Make period or period-violin plot.
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param data_labels: name of data arrays to plot
+            :param data_labels: Data arrays to plot
             :type data_labels: list
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
-            :param zstat: name of statistic
+            :param zstat: Statistic
             :type zstat: str
 
         """
@@ -852,21 +833,21 @@ class Plot:
                           data_range_min=None, data_range_max=None, violin_resolution=None):
         """ Make distribution plot.
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param data_labels: name of data arrays to plot
+            :param data_labels: Data arrays to plot
             :type data_labels: list
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
-            :param data_range_min: minimum data range of distribution plot grid 
+            :param data_range_min: Minimum data range of distribution plot grid 
             :type data_range_min: float
-            :param data_range_max: maximum data range of distribution plot grid 
+            :param data_range_max: Maximum data range of distribution plot grid 
             :type data_range_max: float
-            :param violin_resolution: if are calculating distribution for violin plot, this is set to temporal resolution of groupings
+            :param violin_resolution: If are calculating distribution for violin plot, this is set to temporal resolution of groupings
             :type violin_resolution: int
         """
 
@@ -1049,15 +1030,15 @@ class Plot:
     def make_scatter(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make scatter plot.
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param data_labels: name of data arrays to plot
+            :param data_labels: Data arrays to plot
             :type data_labels: list
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
         """
 
@@ -1132,15 +1113,15 @@ class Plot:
     def make_boxplot(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make boxplot.
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param data_labels: name of data arrays to plot
+            :param data_labels: Data arrays to plot
             :type data_labels: list
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
         """
 
@@ -1249,23 +1230,23 @@ class Plot:
                      zstat=None, subsection=None, plotting_paradigm=None, stats_df=None):
         """ Make heatmap plot.
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param data_labels: name of data arrays to plot
+            :param data_labels: Data arrays to plot
             :type data_labels: list
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
-            :param zstat: name of statistic
+            :param zstat: Statistic
             :type zstat: str
-            :param subsection: str of currently active subsection
+            :param subsection: Currently active subsection
             :type subsection: str
-            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+            :param plotting_paradigm: Plotting paradigm (summary or station in offline reports)
             :type plotting_paradigm: str
-            :param stats_df: dataframe of previously calculated statistics, default is None
+            :param stats_df: Dataframe of previously calculated statistics, default is None
             :param stats_df: pandas dataframe
         """
 
@@ -1414,25 +1395,25 @@ class Plot:
                    zstats=None, statsummary=False, subsection=None, plotting_paradigm=None, stats_df=None):
         """ Make table plot.
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param data_labels: name of data arrays to plot
+            :param data_labels: Data arrays to plot
             :type data_labels: list
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
-            :param zstats: name of statistics
+            :param zstats: Statistics
             :type zstats: list
-            :param statsummary: boolean indiciating if making alternative statistical summary table plot  
+            :param statsummary: To indicate if making alternative statistical summary table plot  
             :type statsummary: boolean
-            :param subsection: str of currently active subsection
+            :param subsection: Currently active subsection
             :type subsection: str
-            :param plotting_paradigm: plotting paradigm (summary or station in offline reports)
+            :param plotting_paradigm: Plotting paradigm (summary or station in offline reports)
             :type plotting_paradigm: str
-            :param stats_df: dataframe of previously calculated statistics, default is None
+            :param stats_df: Dataframe of previously calculated statistics, default is None
             :param stats_df: pandas dataframe
         """
 
@@ -1647,17 +1628,17 @@ class Plot:
             See explanation of calculations here:
             https://waterprogramming.wordpress.com/2020/12/22/taylor-diagram/
 
-            :param relevant_axis: axis to plot on 
+            :param relevant_axis: Axis to plot on 
             :type relevant_axis: object
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param data_labels: name of data arrays to plot
+            :param data_labels: Data arrays to plot
             :type data_labels: list
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param plot_options: list of options to configure plot  
+            :param plot_options: Options to configure plot  
             :type plot_options: list
-            :param stddev_max: maximum standard deviation
+            :param stddev_max: Maximum standard deviation
             :type stddev_max: float
         """
 
@@ -1832,15 +1813,15 @@ class Plot:
         """ Function that tracks plotted lines and collections
             that will be removed/added when picking up legend elements on dashboard.
 
-            :param data_label: name of data array to plot
+            :param data_label: Data array to plot
             :type data_label: str
-            :param base_plot_type: plot type, without statistical information
+            :param base_plot_type: Plot type, without statistical information
             :type base_plot_type: str
-            :param element_type: type of element
+            :param element_type: Element type
             :type element_type: str
-            :param plot_object: plotted element object
+            :param plot_object: Plotted element object
             :type plot_object: object
-            :param bias: boolean stating if plot is a bias plot
+            :param bias: Indicates if plot is a bias plot
             :type bias: boolean
         """
 
@@ -1887,9 +1868,7 @@ class Plot:
             self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['caps']
             self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['fliers']
             self.canvas_instance.plot_elements[base_plot_type][plot_element_varname][data_label][element_type] += plot_object['means']
-        # do not save elements for plot objects that can not be made invisisble
-        elif (base_plot_type in ['metadata', 'map']) & (data_label != 'ALL'):
-            pass
+        # do not save elements for plot objecplot type, without statistical information
         # all other plot elements
         else:
             # add list of lines
@@ -1904,15 +1883,15 @@ class Plot:
                        data=None, active_map_valid_station_inds=[]):
         """ Set markersize for plot.
         
-            :param base_plot_type: plot type, without statistical information
+            :param base_plot_type: Plot type, without statistical information
             :type base_plot_type: str
-            :param networkspeci: str of currently active network and species 
+            :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
             :type networkspeci: str
-            :param plot_characteristics: plot characteristics  
+            :param plot_characteristics: Plot characteristics  
             :type plot_characteristics: dict
-            :param data: data array to be plotted
+            :param data: Data array to be plotted
             :type data: numpy array
-            :param active_map_valid_station_inds: valid map indices to plot
+            :param active_map_valid_station_inds: Valid map indices to plot
             :type data: numpy array
         """
 
