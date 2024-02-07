@@ -1310,7 +1310,7 @@ class ProvidentiaOffline:
                 if zstat:
                     # get chunk statistic and resolution
                     chunk_stat = copy.deepcopy(zstat)
-                    chunk_resolution = plot_type.split('-')[2]
+                    chunk_resolution = plot_type.split('-')[2].split('_')[0]
                     
                     # check if chunk resolution is available
                     if self.resampling_resolution is None:
