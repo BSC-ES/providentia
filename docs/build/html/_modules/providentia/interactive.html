@@ -268,11 +268,11 @@
 
 <span class="sd">        :param plot: Plot type</span>
 <span class="sd">        :type plot: str</span>
-<span class="sd">        :param data_labels: Data labels, defaults to None</span>
+<span class="sd">        :param data_labels: Data arrays to plot, defaults to None</span>
 <span class="sd">        :type data_labels: list, optional</span>
 <span class="sd">        :param labela: Label of first dataset, defaults to &#39;&#39;</span>
 <span class="sd">        :type labela: str, optional</span>
-<span class="sd">        :param labelb: Label of second dataset, defaults to &#39;&#39;</span>
+<span class="sd">        :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to &#39;&#39;</span>
 <span class="sd">        :type labelb: str, optional</span>
 <span class="sd">        :param title: Axes title, defaults to None</span>
 <span class="sd">        :type title: str, optional</span>
@@ -317,6 +317,9 @@
 <span class="sd">        :return: matplotlib.axes._axes.Axes</span>
 <span class="sd">        :rtype: Plot axes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># close any previously open figures</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="c1"># define default argument mutables</span>
         <span class="k">if</span> <span class="n">data_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -386,7 +389,7 @@
             <span class="k">if</span> <span class="n">zstat</span><span class="p">:</span>
                 <span class="c1"># get chunk statistic and resolution</span>
                 <span class="n">chunk_stat</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">zstat</span><span class="p">)</span>
-                <span class="n">chunk_resolution</span> <span class="o">=</span> <span class="n">plot_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">chunk_resolution</span> <span class="o">=</span> <span class="n">plot_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                 
                 <span class="c1"># get zstat information </span>
                 <span class="n">zstat</span><span class="p">,</span> <span class="n">base_zstat</span><span class="p">,</span> <span class="n">z_statistic_type</span><span class="p">,</span> <span class="n">z_statistic_sign</span><span class="p">,</span> <span class="n">z_statistic_period</span> <span class="o">=</span> <span class="n">get_z_statistic_info</span><span class="p">(</span><span class="n">zstat</span><span class="o">=</span><span class="n">chunk_stat</span><span class="p">)</span>
@@ -821,10 +824,10 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving </span><span class="si">{}</span><span class="s1"> figure to </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">figure_fname</span><span class="p">))</span>
             <span class="c1"># save figure</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">figure_fname</span><span class="p">)</span>
-            <span class="k">return</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="c1"># elif return_plot is passed then return plot axis/axes</span>
         <span class="k">elif</span> <span class="n">return_plot</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">relevant_ax</span>
+            <span class="k">return</span> <span class="n">fig</span>
         <span class="c1"># otherwise show plot</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
@@ -859,7 +862,7 @@
 
 <span class="sd">        :param plot_type: Plot type</span>
 <span class="sd">        :type plot_type: str</span>
-<span class="sd">        :param data_labels: Data labels, defaults to None</span>
+<span class="sd">        :param data_labels: Data arrays to plot, defaults to None</span>
 <span class="sd">        :type data_labels: list, optional</span>
 <span class="sd">        :param set_obs: Indicates if observations appear on legend, defaults to True</span>
 <span class="sd">        :type set_obs: bool, optional</span>
@@ -888,7 +891,7 @@
 <span class="sd">        :type stat: str</span>
 <span class="sd">        :param labela: Label of first dataset, defaults to &#39;&#39;</span>
 <span class="sd">        :type labela: str, optional</span>
-<span class="sd">        :param labelb: Label of second dataset, defaults to &#39;&#39;</span>
+<span class="sd">        :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to &#39;&#39;</span>
 <span class="sd">        :type labelb: str, optional</span>
 <span class="sd">        :param per_station: Indicates if the station data is per station or for all stations, defaults to False</span>
 <span class="sd">        :type per_station: bool, optional</span>
