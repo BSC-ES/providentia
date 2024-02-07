@@ -36,7 +36,7 @@ Code developed by Barcelona Supercomputing Centre (BSC-CNS).
 
 Developers:
 
-- Dene Bowdalo (dene.bowdalo@bsc.es) - Current
-- Alba Vilanova (alba.vilanova@bsc.es) - Current
+- Dene Bowdalo (dene.bowdalo@bsc.es) - Active
+- Alba Vilanova (alba.vilanova@bsc.es) - Active
 - Amalia Vradi (amalia.vradi@bsc.es)
 - Francesco Benincasa (francesco.benincasa@bsc.es)

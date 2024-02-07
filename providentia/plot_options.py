@@ -6,18 +6,19 @@ import numpy as np
 from .read_aux import drop_nans
 from .statistics import calculate_statistic, get_z_statistic_info
 from .warnings import show_message
+from .plot_aux import create_chunked_timeseries
 
 
 def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
     """ Log plot axes.
 
-        :param relevant_axis: axis to plot on 
+        :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
-        :param log_ax: which axis to log
+        :param log_ax: Axis to log
         :type log_ax: str
-        :param plot_characteristics: plot characteristics  
+        :param plot_characteristics: Plot characteristics  
         :type plot_characteristics: dict
-        :param undo: unlog plot axes
+        :param undo: Indicates if scale needs to be set to linear
         :type undo: boolean
     """
 
@@ -40,21 +41,21 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
                       plot_characteristics, plot_options):
     """ Add linear regression to plot.
 
-        :param canvas_instance: canvas instance
+        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
         :type canvas_instance: object
-        :param read_instance: canvas instance
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type read_instance: object
-        :param relevant_axis: axis to plot on 
+        :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
+        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
         :type networkspeci: str
-        :param data_labels: names of plotted data arrays  
+        :param data_labels: Data arrays to plot  
         :type data_labels: list
-        :param base_plot_type: plot type, without statistical information
+        :param base_plot_type: Plot type, without statistical information
         :type base_plot_type: str
-        :param plot_characteristics: plot characteristics  
+        :param plot_characteristics: Plot characteristics  
         :type plot_characteristics: dict
-        :param plot_options: list of options to configure plots
+        :param plot_options: Options to configure plots
         :type plot_options: list
     """
 
@@ -99,21 +100,21 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
            plot_characteristics, plot_options):
     """ Add smooth line to plot.
 
-        :param canvas_instance: canvas instance
+        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
         :type canvas_instance: object
-        :param read_instance: canvas instance
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type read_instance: object
-        :param relevant_axis: axis to plot on 
+        :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
+        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
         :type networkspeci: str
-        :param data_labels: names of plotted data arrays   
+        :param data_labels: Data arrays to plot   
         :type data_labels: list
-        :param base_plot_type: plot type, without statistical information
+        :param base_plot_type: Plot type, without statistical information
         :type base_plot_type: str
-        :param plot_characteristics: plot characteristics  
+        :param plot_characteristics: Plot characteristics  
         :type plot_characteristics: dict
-        :param plot_options: list of options to configure plots
+        :param plot_options: Options to configure plots
         :type plot_options: list
     """
 
@@ -123,6 +124,21 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
     # cut data_labels for those in valid data labels
     cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
+    # get chunking stat and resolution in dashboard
+    if (not read_instance.offline) and (not read_instance.interactive):
+        chunk_stat = canvas_instance.timeseries_chunk_stat.currentText()
+        chunk_resolution = canvas_instance.timeseries_chunk_resolution.currentText()
+        chunk_stat = None if chunk_stat == 'None' else chunk_stat
+        chunk_resolution = None if chunk_resolution == 'None' else chunk_resolution
+    
+    # chunk timeseries
+    if (chunk_stat is not None) and (chunk_resolution is not None):
+        timeseries_data = create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, 
+                                                    chunk_resolution, networkspeci, cut_data_labels)
+    # normal timeseries
+    else:
+        timeseries_data = canvas_instance.selected_station_data[networkspeci]["timeseries"]
+            
     # iterate through plotted data arrays making smooth line
     for data_label in cut_data_labels:
 
@@ -137,7 +153,7 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
             bias = True
         # normal plot?
         else:
-            ts = canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label]
+            ts = timeseries_data[data_label]
             bias = False
 
         # make smooth line
@@ -158,21 +174,21 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
                plot_characteristics, plot_options, plot_z_statistic_sign='absolute'):
     """ Add statistical annotations to plot.
 
-        :param canvas_instance: canvas instance
+        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
         :type canvas_instance: object
-        :param read_instance: canvas instance
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type read_instance: object
-        :param relevant_axis: axis to plot on 
+        :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
-        :param networkspeci: str of currently active network and species 
+        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
         :type networkspeci: str
-        :param data_labels: names of plotted data arrays 
+        :param data_labels: Data arrays to plot 
         :type data_labels: list
-        :param base_plot_type: plot type, without statistical information
+        :param base_plot_type: Plot type, without statistical information
         :type base_plot_type: str
-        :param plot_characteristics: plot characteristics  
+        :param plot_characteristics: Plot characteristics  
         :type plot_characteristics: dict
-        :param plot_options: list of options to configure plots
+        :param plot_options: Options to configure plots
         :type plot_options: list
         :param plot_z_statistic_sign: sign of plotted z statistic (absolute or bias)
         :type plot_z_statistic_sign: str
@@ -286,11 +302,11 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
 def experiment_domain(canvas_instance, relevant_axis, data_labels, map_extent):
     """ Plot experiment domain extents on map
 
-        :param canvas_instance: canvas instance
+        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
         :type canvas_instance: object
-        :param relevant_axis: axis to plot on 
+        :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
-        :param data_labels: names of plotted data arrays 
+        :param data_labels: Data arrays to plot 
         :type data_labels: list
         :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
         :type map_extent: list

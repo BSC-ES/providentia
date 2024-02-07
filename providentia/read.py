@@ -721,7 +721,7 @@ class DataReader:
 
             :param yearmonths_to_read: list of yearmonths to read
             :type yearmonths_to_read: list
-            :param data_labels: data labels to read
+            :param data_labels: Data arrays to plot
             :type data_labels: list
         """
 
