@@ -559,7 +559,7 @@ class Plot:
         if 'obs' in plot_options:
             data_labels = [self.read_instance.observations_data_label]
 
-         # plot horizontal line across x axis at 0 if bias plot
+        # plot horizontal line across x axis at 0 if bias plot
         if 'bias' in plot_options:
             bias =  True
             bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
@@ -585,7 +585,7 @@ class Plot:
         # chunk timeseries
         if (chunk_stat is not None) and (chunk_resolution is not None):
             timeseries_data = create_chunked_timeseries(self.read_instance, self.canvas_instance, chunk_stat, 
-                                                        chunk_resolution, networkspeci, cut_data_labels)
+                                                        chunk_resolution, networkspeci, cut_data_labels, bias)
         # normal timeseries
         else:
             timeseries_data = self.canvas_instance.selected_station_data[networkspeci]["timeseries"]
@@ -599,14 +599,17 @@ class Plot:
                 # skip if data label is for observations
                 if data_label == self.read_instance.observations_data_label:
                     continue
-
-                bias = True
-                ts_obs = timeseries_data[self.read_instance.observations_data_label]
-                ts_model = timeseries_data[data_label] 
-                ts = ts_model - ts_obs
+                
+                # chunk bias timeseries
+                if (chunk_stat is not None) and (chunk_resolution is not None):
+                    ts = timeseries_data[data_label] 
+                # normal bias timeseries
+                else:
+                    ts_obs = timeseries_data[self.read_instance.observations_data_label]
+                    ts_model = timeseries_data[data_label] 
+                    ts = ts_model - ts_obs
 
             else:
-                bias = False
                 ts = timeseries_data[data_label]
             
             # get marker size (for offline and interactive)
