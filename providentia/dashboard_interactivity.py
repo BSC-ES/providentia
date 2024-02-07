@@ -304,7 +304,7 @@ class HoverAnnotation(object):
                         # skip observations for bias plot
                         if ((plot_type in ['timeseries', 'distribution']) 
                             and (self.canvas_instance.plot_elements[plot_type]['active'] == 'bias')
-                            and (data_label == canvas_instance.read_instance.observations_data_label)):
+                            and (data_label == self.canvas_instance.read_instance.observations_data_label)):
                             continue
 
                         # do not annotate if plot is cleared

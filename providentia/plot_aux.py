@@ -523,7 +523,7 @@ def get_map_extent(canvas_instance):
 
 
 def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_resolution, 
-                              networkspeci, cut_data_labels):
+                              networkspeci, cut_data_labels, bias):
     """ Create statistical timeseries data by chunk resolution
 
     :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
@@ -543,7 +543,7 @@ def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_
     """
     
     z_statistic_sign = get_z_statistic_sign(chunk_stat)
-    if z_statistic_sign == 'bias':
+    if z_statistic_sign == 'bias' or bias:
         if read_instance.observations_data_label in cut_data_labels:
             cut_data_labels.remove(read_instance.observations_data_label)
         stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, chunk_stat, 
