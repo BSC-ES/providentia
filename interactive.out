@@ -1,0 +1,42 @@
+
+Create an SSH tunnel via terminal on your local machine:
+ssh -N -L 9202:s02r1b16:9202 bsc32025@nord4.bsc.es
+
+[I 2024-02-07 12:15:45.409 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-02-07 12:15:45.802 LabApp] JupyterLab extension loaded from /gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/lib/python3.7/site-packages/jupyterlab
+[I 2024-02-07 12:15:45.803 LabApp] JupyterLab application directory is /.statelite/tmpfs/gpfs/projects/bsc32/software/suselinux/11/software/jupyterlab/3.0.9-foss-2019b-Python-3.7.4/share/jupyter/lab
+[I 2024-02-07 12:15:45.811 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-02-07 12:15:45.811 ServerApp] Serving notebooks from local directory: /.statelite/tmpfs/gpfs/archive/bsc32/esarchive/obs/ghost/scripts/Providentia
+[I 2024-02-07 12:15:45.811 ServerApp] Jupyter Server 1.4.1 is running at:
+[I 2024-02-07 12:15:45.811 ServerApp] http://s02r1b16:9202/lab?token=8347478aab7adbd70c64c7621ba8db01342a97a58d9116f5
+[I 2024-02-07 12:15:45.811 ServerApp]  or http://127.0.0.1:9202/lab?token=8347478aab7adbd70c64c7621ba8db01342a97a58d9116f5
+[I 2024-02-07 12:15:45.811 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-02-07 12:15:45.823 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-3270729-open.html
+    Or copy and paste one of these URLs:
+        http://s02r1b16:9202/lab?token=8347478aab7adbd70c64c7621ba8db01342a97a58d9116f5
+     or http://127.0.0.1:9202/lab?token=8347478aab7adbd70c64c7621ba8db01342a97a58d9116f5
+[I 2024-02-07 12:17:11.738 LabApp] Build is up to date
+[I 2024-02-07 12:17:17.532 ServerApp] Kernel started: 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[W 2024-02-07 12:17:23.262 ServerApp] Got events for closed stream None
+[I 2024-02-07 12:18:49.411 ServerApp] Kernel restarted: 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[I 2024-02-07 12:19:16.493 ServerApp] Saving file at /notebooks/interactive_template.ipynb
+[I 2024-02-07 12:21:17.267 ServerApp] Saving file at /notebooks/interactive_template.ipynb
+[I 2024-02-07 12:22:55.138 ServerApp] Kernel restarted: 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[W 2024-02-07 12:22:59.739 ServerApp] Nudge: attempt 10 on kernel 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[I 2024-02-07 12:23:17.677 ServerApp] Saving file at /notebooks/interactive_template.ipynb
+[I 2024-02-07 12:25:18.325 ServerApp] Saving file at /notebooks/interactive_template.ipynb
+[I 2024-02-07 12:27:44.018 ServerApp] Kernel restarted: 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[W 2024-02-07 12:27:48.547 ServerApp] Nudge: attempt 10 on kernel 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[I 2024-02-07 12:29:20.464 ServerApp] Saving file at /notebooks/interactive_template.ipynb
+[I 2024-02-07 12:30:52.036 ServerApp] Kernel restarted: 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[W 2024-02-07 12:30:56.613 ServerApp] Nudge: attempt 10 on kernel 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[I 2024-02-07 12:31:20.966 ServerApp] Saving file at /notebooks/interactive_template.ipynb
+[I 2024-02-07 12:33:21.756 ServerApp] Saving file at /notebooks/interactive_template.ipynb
+[I 2024-02-07 12:35:22.733 ServerApp] Saving file at /notebooks/interactive_template.ipynb
+[I 2024-02-07 12:35:28.993 ServerApp] Kernel restarted: 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[W 2024-02-07 12:35:33.607 ServerApp] Nudge: attempt 10 on kernel 237ffdd6-02a1-4f4d-92be-56943bd1d784
+[I 2024-02-07 12:37:23.635 ServerApp] Saving file at /notebooks/interactive_template.ipynb
+[I 2024-02-07 12:39:24.884 ServerApp] Saving file at /notebooks/interactive_template.ipynb
