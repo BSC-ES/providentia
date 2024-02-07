@@ -7,10 +7,11 @@ from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
+import pandas as pd
 from scipy.signal import convolve, gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
-
+from .statistics import calculate_statistic, get_z_statistic_sign
 
 def get_multispecies_aliases(networkspecies):
     """ Map networkspecies to networkspecies aliases.
@@ -82,7 +83,7 @@ def get_multispecies_aliases(networkspecies):
 def temp_axis_dict():
     """ Return temporal mapping as a dictionary used for the plots.
 
-        :return: numbering of months/days
+        :return: Numbering of months/days
         :rtype: dict
     """
 
@@ -102,8 +103,8 @@ def temp_axis_dict():
 def periodic_xticks():
     """ Return xticks for periodic subplots.
 
-        :return dictionary of xticks per temporal resolution
-        :rtype dict
+        :return: Dictionary of xticks per temporal resolution
+        :rtype: dict
     """
 
     return {'hour': np.arange(24, dtype=np.int64), 
@@ -114,7 +115,7 @@ def periodic_xticks():
 def periodic_labels():
     """ Return axes labels for periodic subplots.
 
-        :return: axes labels
+        :return: Axes labels
         :rtype: dict
     """
 
@@ -124,9 +125,9 @@ def periodic_labels():
 def get_land_polygon_resolution(selection):
     """ Get resolution of land polygons to plot on map.
 
-        :param selection: name of selected temporal resolution
+        :param selection: Selected temporal resolution
         :type resolution: str
-        :return: selected land polygon resolution
+        :return: Selected land polygon resolution
         :rtype: list
     """
     
@@ -320,12 +321,12 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
 def round_decimal_places(x, decimal_places):
     """ Round x to decimal places
 
-    Parameters
-    ----------
-    x : float
-        Value
-    decimal_places : int
-        Desired number of decimal places
+    :param x: Value
+    :type x: float
+    :param decimal_places: Desired number of decimal places
+    :type decimal_places: int
+    :return: Rounded value
+    :rtype: str
     """
 
     # if cell value is not nan
@@ -348,9 +349,9 @@ def merge_cells(table, cells):
     """
     Merge cells in matplotlib.Table. Reference: https://stackoverflow.com/a/53819765/12684122.
 
-    :param table: table
+    :param table: Table
     :type table: matplotlib.Table
-    :param cells: cells to merge in table coordinates, e.g. [(0,1), (0,0), (0,2)]
+    :param cells: Cells to merge in table coordinates, e.g. [(0,1), (0,0), (0,2)]
     :type cells: list
     """
 
@@ -387,11 +388,11 @@ def merge_cells(table, cells):
 def get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, extend=False):
     """ Make Taylor diagram plot axis extremes and labels. 
         
-        :param reference_stddev: reference standard deviation to set the limits
+        :param reference_stddev: Reference standard deviation to set the limits
         :type reference_stddev: float
-        :param plot_characteristics: plot characteristics  
+        :param plot_characteristics: Plot characteristics  
         :type plot_characteristics: dict
-        :param extend: extend to negative correlations
+        :param extend: Indicates if plots needs to show negative correlations
         :type undo: boolean
     """
 
@@ -427,11 +428,11 @@ def get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, exte
 def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=False):
     """ Make Taylor diagram plot grid helper. 
 
-        :param reference_stddev: reference standard deviation to set the limits
+        :param reference_stddev: Reference standard deviation to set the limits
         :type reference_stddev: float
-        :param plot_characteristics: plot characteristics  
+        :param plot_characteristics: Plot characteristics  
         :type plot_characteristics: dict
-        :param extend: extend to negative correlations
+        :param extend: Indicates if plots needs to show negative correlations
         :type undo: boolean
     """
 
@@ -519,3 +520,47 @@ def get_map_extent(canvas_instance):
                   transformed_coords[:,1].min(), transformed_coords[:,1].max()]
 
     return map_extent
+
+
+def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_resolution, 
+                              networkspeci, cut_data_labels):
+    """ Create statistical timeseries data by chunk resolution
+
+    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+    :type read_instance: object
+    :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+    :type canvas_instance: object
+    :param chunk_stat: Chunk statistic
+    :type chunk_stat: str
+    :param chunk_resolution: Chunk resolution
+    :type chunk_resolution: str
+    :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
+    :type networkspeci: str
+    :param cut_data_labels: Valid data labels
+    :type cut_data_labels: list
+    :return: Dataframe with statistics per day / month / year
+    :rtype: pandas dataframe
+    """
+    
+    z_statistic_sign = get_z_statistic_sign(chunk_stat)
+    if z_statistic_sign == 'bias':
+        if read_instance.observations_data_label in cut_data_labels:
+            cut_data_labels.remove(read_instance.observations_data_label)
+        stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, chunk_stat, 
+                                         [read_instance.observations_data_label]*len(cut_data_labels), 
+                                         cut_data_labels, chunking=True, chunk_stat=chunk_stat, 
+                                         chunk_resolution=chunk_resolution)
+        
+    else:
+        stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 
+                                         chunk_stat, cut_data_labels, [], chunking=True, 
+                                         chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
+
+    chunk_dates = canvas_instance.selected_station_data[networkspeci]["timeseries_chunks"][chunk_resolution]['valid_xticks']
+    timeseries_data = pd.DataFrame(index=chunk_dates, columns=cut_data_labels, dtype=np.float64)
+
+    for chunk_date_idx, chunk_date in enumerate(chunk_dates):
+        for label_idx, data_label in enumerate(cut_data_labels):
+            timeseries_data.loc[chunk_date, data_label] = stats_calc[chunk_date_idx][label_idx]
+    
+    return timeseries_data

@@ -58,17 +58,17 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                                autoscale_y=False, bias_centre=False, harmonise=True):
     """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
     
-        :param canvas_instance: canvas instance
+        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
         :type canvas_instance: object
-        :param read_instance: canvas instance
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type read_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
-        :param base_plot_type: plot type, without statistical information
+        :param base_plot_type: Plot type, without statistical information
         :type base_plot_type: str
-        :param plot_characteristics: plot characteristics  
+        :param plot_characteristics: Plot characteristics  
         :type plot_characteristics: dict
-        :param plot_options: list of options to configure plots
+        :param plot_options: Options to configure plots
         :type plot_options: list
         :param xlim: xlimits to set
         :type xlim: dict
@@ -346,13 +346,13 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
     """ Set title of plot axis.
 
-        :param read_instance: canvas instance
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type read_instance: object
-        :param relevant_axis: axis to plot on 
+        :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
         :param title: axis title
         :type title: str
-        :param plot_characteristics: plot characteristics  
+        :param plot_characteristics: Plot characteristics  
         :type plot_characteristics: dict
     """    
 
@@ -383,13 +383,13 @@ def set_axis_label(relevant_axis, label_ax, label, plot_characteristics,
                    relevant_temporal_resolutions=None):
     """ Set label of plot axis.
 
-        :param relevant_axis: axis to plot on 
+        :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
         :param label_ax: which axis to set label of
         :type label_ax: str
         :param label: axis label
         :type label: str
-        :param plot_characteristics: plot characteristics  
+        :param plot_characteristics: Plot characteristics  
         :type plot_characteristics: dict
         :param relevant_temporal_resolutions: list of relevant temporal resolutions  
         :type relevant_temporal_resolutions: list
@@ -433,21 +433,21 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
     """ Function that handles formatting of a plot axis,
         based on given plot options.
 
-        :param canvas_instance: canvas instance
+        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
         :type canvas_instance: object
-        :param read_instance: canvas instance
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type read_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
         :param relevant_data_labels: names of plotted data arrays per axis
         :type relevant_data_labels: list
-        :param networkspeci: str of currently active network and species 
+        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
         :type networkspeci: str
-        :param base_plot_type: plot type, without statistical information
+        :param base_plot_type: Plot type, without statistical information
         :type base_plot_type: str
         :param plot_type: plot type
         :type plot_type: str
-        :param plot_options: list of options to configure plots
+        :param plot_options: Options to configure plots
         :type plot_options: list
         :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
         :type map_extent: list
@@ -524,9 +524,9 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
                 last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=None):
     """ Format a plotting axis.
     
-        :param canvas_instance: canvas instance
+        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
         :type canvas_instance: object
-        :param read_instance: canvas instance
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type read_instance: object
         :param ax: axis object
         :type ax: object
@@ -707,7 +707,7 @@ def get_data_lims(ax, lim, plot_options):
         :type ax: object
         :param lim: xlim or ylim
         :type lim: str
-        :param plot_options: list of options to configure plots
+        :param plot_options: Options to configure plots
         :type plot_options: list
         return: lower_lim, upper_lim
         :rtype: float32, float32

@@ -269,7 +269,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci):
         :type read_instance: object
         :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type canvas_instance: object
-        :param networkspeci: Name of current networkspeci (e.g. EBAS|sconco3)
+        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3)
         :type networkspeci: str
     """
 
@@ -712,7 +712,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
 
         :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
         :type read_instance: object
-        :param zstat: name of statistic
+        :param zstat: Statistic
         :type zstat: str
         :param plotted_min: minimum plotted value
         :type plotted_min: np.float32
@@ -871,7 +871,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         :type axs: list
         :param cb_axs: list of relevant colourbar axes
         :type cb_axs: list
-        :param zstat: name of statistic
+        :param zstat: Statistic
         :type zstat: str    
         :param plot_characteristics: dictionary of plot characteristics
         :type plot_characteristics: dict
@@ -946,7 +946,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
 def get_z_statistic_comboboxes(base_zstat, bias=False):
     """ Function that gets appropriate zstat name for selected zstatistic comboboxes.
 
-        :param base_zstat: name of statistic
+        :param base_zstat: Statistic
         :type base_zstat: str   
         :param second_data_label: name if secondary data label (if exists)
         :type second_data_label: str
@@ -971,7 +971,7 @@ def get_z_statistic_comboboxes(base_zstat, bias=False):
 def get_z_statistic_type(zstat):
     """ Function that checks if the z statistic is basic or expbias statistic.
     
-        :param zstat: name of statistic
+        :param zstat: Statistic
         :type zstat: str   
         :return: zstat type
         :rtype: str
@@ -987,7 +987,7 @@ def get_z_statistic_type(zstat):
 def get_z_statistic_sign(zstat, zstat_type=None):
     """ Function that checks if the z statistic is an absolute or bias statistic.
 
-        :param zstat: name of statistic
+        :param zstat: Statistic
         :type zstat: str   
         :param zstat_type: type of statistic
         :type zstat_type: str   
@@ -1012,7 +1012,7 @@ def get_z_statistic_info(plot_type=None, zstat=None):
     
         :param plot_type: plot type
         :type plot_type: str
-        :param zstat: name of statistic
+        :param zstat: Statistic
         :type plot_type: str
         :return zstat name, base zstat name, zstat type, zstat sign, zstat period
         :rtype: str, str, str, str, str
@@ -1094,7 +1094,7 @@ def exceedance_lim(networkspeci):
 
         Try to get limit for specific networkspeci first, and then species.
 
-        :param networkspeci: Name of current networkspeci (e.g. EBAS|sconco3)
+        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3)
         :type networkspeci: str
         :return: value of exceedance limit
         :rtype: int

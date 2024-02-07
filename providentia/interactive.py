@@ -186,11 +186,11 @@ class Interactive:
 
         :param plot: Plot type
         :type plot: str
-        :param data_labels: Data labels, defaults to None
+        :param data_labels: Data arrays to plot, defaults to None
         :type data_labels: list, optional
         :param labela: Label of first dataset, defaults to ''
         :type labela: str, optional
-        :param labelb: Label of second dataset, defaults to ''
+        :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to ''
         :type labelb: str, optional
         :param title: Axes title, defaults to None
         :type title: str, optional
@@ -779,7 +779,7 @@ class Interactive:
 
         :param plot_type: Plot type
         :type plot_type: str
-        :param data_labels: Data labels, defaults to None
+        :param data_labels: Data arrays to plot, defaults to None
         :type data_labels: list, optional
         :param set_obs: Indicates if observations appear on legend, defaults to True
         :type set_obs: bool, optional
@@ -806,7 +806,7 @@ class Interactive:
         :type stat: str
         :param labela: Label of first dataset, defaults to ''
         :type labela: str, optional
-        :param labelb: Label of second dataset, defaults to ''
+        :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to ''
         :type labelb: str, optional
         :param per_station: Indicates if the station data is per station or for all stations, defaults to False
         :type per_station: bool, optional
