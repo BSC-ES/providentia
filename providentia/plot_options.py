@@ -124,6 +124,12 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
     # cut data_labels for those in valid data labels
     cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
+    # bias plot?
+    if 'bias' in plot_options:
+        bias =  True
+    else:
+        bias = False
+
     # get chunking stat and resolution in dashboard
     if (not read_instance.offline) and (not read_instance.interactive):
         chunk_stat = canvas_instance.timeseries_chunk_stat.currentText()
@@ -134,7 +140,8 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
     # chunk timeseries
     if (chunk_stat is not None) and (chunk_resolution is not None):
         timeseries_data = create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, 
-                                                    chunk_resolution, networkspeci, cut_data_labels)
+                                                    chunk_resolution, networkspeci, cut_data_labels, 
+                                                    bias)
     # normal timeseries
     else:
         timeseries_data = canvas_instance.selected_station_data[networkspeci]["timeseries"]
@@ -144,17 +151,23 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
 
         # bias plot?
         if 'bias' in plot_options:
+            
             # skip to next data label if making bias, and data label == observations
             if data_label == read_instance.observations_data_label:
                 continue
-            ts_obs = canvas_instance.selected_station_data[networkspeci]['timeseries'][read_instance.observations_data_label]
-            ts_model = canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label] 
-            ts = ts_model - ts_obs
-            bias = True
+            
+            # chunk bias timeseries
+            if (chunk_stat is not None) and (chunk_resolution is not None):
+                ts = timeseries_data[data_label]
+            # normal bias timeseries
+            else:
+                ts_obs = canvas_instance.selected_station_data[networkspeci]['timeseries'][read_instance.observations_data_label]
+                ts_model = canvas_instance.selected_station_data[networkspeci]['timeseries'][data_label] 
+                ts = ts_model - ts_obs
+
         # normal plot?
         else:
             ts = timeseries_data[data_label]
-            bias = False
 
         # make smooth line
         smooth_line_data = ts.rolling(plot_characteristics['smooth']['window'], 
