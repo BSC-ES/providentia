@@ -304,7 +304,7 @@ class Interactive:
             if zstat:
                 # get chunk statistic and resolution
                 chunk_stat = copy.deepcopy(zstat)
-                chunk_resolution = plot_type.split('-')[2]
+                chunk_resolution = plot_type.split('-')[2].split('_')[0]
                 
                 # get zstat information 
                 zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=chunk_stat)
