@@ -236,6 +236,9 @@ class Interactive:
         :rtype: Plot axes
         """
 
+        # close any previously open figures
+        plt.close()
+
         # define default argument mutables
         if data_labels is None:
             data_labels = []
@@ -739,10 +742,10 @@ class Interactive:
             print('Saving {} figure to {}'.format(plot_type, figure_fname))
             # save figure
             plt.savefig(figure_fname)
-            return
+            return None
         # elif return_plot is passed then return plot axis/axes
         elif return_plot:
-            return relevant_ax
+            return fig
         # otherwise show plot
         else:
             plt.show()
