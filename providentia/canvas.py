@@ -198,7 +198,7 @@ class MPLCanvas(FigureCanvas):
 
         # setup zoom on scroll wheel on map
         self.lock_zoom = False
-        self.figure.canvas.mpl_connect('scroll_event', zoom_map_func)
+        self.figure.canvas.mpl_connect('scroll_event', lambda event: zoom_map_func(self, event))
 
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
@@ -2547,6 +2547,22 @@ class MPLCanvas(FigureCanvas):
                                     event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                     self.read_instance.block_MPL_canvas_updates = False
                                     self.plot_elements[plot_type]['active'] = 'absolute'
+
+                            if plot_type == 'timeseries':
+
+                                # get currently selected chunk statistic and resolution name
+                                chunk_stat = self.timeseries_chunk_stat.currentText()
+                                chunk_resolution = self.timeseries_chunk_resolution.currentText()
+                                
+                                # if get_z_statistic_type == 'expbias' then return as bias already plotted
+                                z_statistic_type = get_z_statistic_type(chunk_stat)
+                                if z_statistic_type == 'expbias':
+                                    # chunk timeseries is active?
+                                    if (chunk_stat != 'None') and (chunk_resolution != 'None'):
+                                        self.read_instance.block_MPL_canvas_updates = True
+                                        event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+                                        self.read_instance.block_MPL_canvas_updates = False
+                                        self.plot_elements[plot_type]['active'] = 'absolute'
 
                             # iterate through valid data labels 
                             bias_labels_to_plot = []
