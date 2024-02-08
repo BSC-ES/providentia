@@ -20,7 +20,7 @@ import pyproj
 import seaborn as sns
 
 from .dashboard_interactivity import HoverAnnotation
-from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info
+from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info, get_z_statistic_type
 from .read_aux import drop_nans
 from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, get_taylor_diagram_ghelper_info, 
                        kde_fft, merge_cells, periodic_labels, periodic_xticks, round_decimal_places, temp_axis_dict)
@@ -559,15 +559,13 @@ class Plot:
         if 'obs' in plot_options:
             data_labels = [self.read_instance.observations_data_label]
 
-        # plot horizontal line across x axis at 0 if bias plot
+        # get bias and set if bias line will be added
         if 'bias' in plot_options:
             bias =  True
-            bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
-            # track plot elements if using dashboard 
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
-                self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
+            add_bias_line = True
         else:
             bias = False
+            add_bias_line = False
 
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
@@ -586,10 +584,22 @@ class Plot:
         if (chunk_stat is not None) and (chunk_resolution is not None):
             timeseries_data = create_chunked_timeseries(self.read_instance, self.canvas_instance, chunk_stat, 
                                                         chunk_resolution, networkspeci, cut_data_labels, bias)
+
+            # if it is a bias chunk statistic, add bias line
+            z_statistic_type = get_z_statistic_type(chunk_stat)
+            if z_statistic_type == 'expbias':
+                add_bias_line = True
         # normal timeseries
         else:
             timeseries_data = self.canvas_instance.selected_station_data[networkspeci]["timeseries"]
         
+        # plot horizontal line across x axis at 0 if bias plot
+        if add_bias_line:
+            bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
+            # track plot elements if using dashboard 
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
+
         # iterate through data labels
         for data_label in cut_data_labels:
 
