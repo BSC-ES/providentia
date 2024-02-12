@@ -303,6 +303,8 @@ class Interactive:
             zstat = None
 
         # for timeseries chunking
+        chunk_stat = None
+        chunk_resolution = None
         if base_plot_type == 'timeseries':
             if zstat:
                 # get chunk statistic and resolution
@@ -326,9 +328,6 @@ class Interactive:
                         msg += f'The available resolutions are: {available_timeseries_chunk_resolutions}'
                     print(msg)
                     return
-            else:
-                chunk_stat = None
-                chunk_resolution = None
 
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
@@ -686,8 +685,9 @@ class Interactive:
                     map_extent=map_extent)
 
         # format plot options
-        format_plot_options(self, self, relevant_ax, [relevant_data_labels], networkspeci, base_plot_type, plot_type, 
-                            plot_options, map_extent=map_extent)                         
+        format_plot_options(self, self, relevant_ax, [relevant_data_labels], networkspeci, 
+                            base_plot_type, plot_type, plot_options, map_extent=map_extent, 
+                            chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)                         
 
         # handle harmonisation of axes
         if base_plot_type not in ['legend', 'metadata', 'map', 'taylor']:
