@@ -429,7 +429,8 @@ def set_axis_label(relevant_axis, label_ax, label, plot_characteristics,
 
 
 def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_data_labels, networkspeci, 
-                        base_plot_type, plot_type, plot_options, map_extent=False):
+                        base_plot_type, plot_type, plot_options, map_extent=False, chunk_stat=None, 
+                        chunk_resolution=None):
     """ Function that handles formatting of a plot axis,
         based on given plot options.
 
@@ -451,6 +452,10 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
         :type plot_options: list
         :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
         :type map_extent: list
+        :param chunk_stat: Chunk statistic
+        :type chunk_stat: str
+        :param chunk_resolution: Chunk resolution
+        :type chunk_resolution: str
     """
 
     # transform axis dict or str to list
@@ -517,7 +522,8 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
         if 'smooth' in plot_options:
             smooth(canvas_instance, read_instance, relevant_ax, networkspeci,
                    relevant_data_labels[relevant_ax_ii], base_plot_type, 
-                   canvas_instance.plot_characteristics[plot_type], plot_options)
+                   canvas_instance.plot_characteristics[plot_type], plot_options,
+                   chunk_stat, chunk_resolution)
 
 
 def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_characteristics, col_ii=0, last_valid_row=True, 
