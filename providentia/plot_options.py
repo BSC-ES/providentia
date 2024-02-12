@@ -97,7 +97,7 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
 
 
 def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
-           plot_characteristics, plot_options):
+           plot_characteristics, plot_options, chunk_stat=None, chunk_resolution=None):
     """ Add smooth line to plot.
 
         :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
@@ -116,6 +116,10 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
         :type plot_characteristics: dict
         :param plot_options: Options to configure plots
         :type plot_options: list
+        :param chunk_stat: Chunk statistic
+        :type chunk_stat: str
+        :param chunk_resolution: Chunk resolution
+        :type chunk_resolution: str
     """
 
     # get valid data labels for networkspeci
