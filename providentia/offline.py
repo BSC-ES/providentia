@@ -873,6 +873,15 @@ class ProvidentiaOffline:
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
 
+            # for timeseries chunking
+            chunk_stat = None
+            chunk_resolution = None
+            if base_plot_type == 'timeseries':
+                if zstat:
+                    # get chunk statistic and resolution
+                    chunk_stat = copy.deepcopy(zstat)
+                    chunk_resolution = plot_type.split('-')[2].split('_')[0]
+
             # do not make plot if there is no data and it is not multispecies
             if (multispecies_pass) and ('multispecies' not in plot_options):
                 continue
@@ -905,7 +914,8 @@ class ProvidentiaOffline:
             relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
                 base_plot_type, plot_indices)
             format_plot_options(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, 
-                                plot_type, plot_options, map_extent=self.map_extent)
+                                plot_type, plot_options, map_extent=self.map_extent,
+                                chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
@@ -999,9 +1009,18 @@ class ProvidentiaOffline:
                     base_plot_type = plot_type.split('-')[0] 
                 else:
                     base_plot_type = plot_type.split('_')[0] 
-
+                
                 # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                 plot_options = plot_type.split('_')[1:]
+
+                # for timeseries chunking
+                chunk_stat = None
+                chunk_resolution = None
+                if base_plot_type == 'timeseries':
+                    if zstat:
+                        # get chunk statistic and resolution
+                        chunk_stat = copy.deepcopy(zstat)
+                        chunk_resolution = plot_type.split('-')[2].split('_')[0]
 
                 # do not make plot if there is no data and it is not multispecies
                 if (multispecies_pass) and ('multispecies' not in plot_options):
@@ -1069,7 +1088,8 @@ class ProvidentiaOffline:
                 relevant_axs, relevant_data_labels = self.get_relevant_axs_per_networkspeci_plot_type_page_ind(
                     base_plot_type, plot_indices)
                 format_plot_options(self, self, relevant_axs, relevant_data_labels, networkspeci, base_plot_type, 
-                                    plot_type, plot_options, map_extent=self.map_extent)
+                                    plot_type, plot_options, map_extent=self.map_extent, 
+                                    chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
 
         # update N total pages 
         self.n_total_pages = len(self.plot_dictionary)
