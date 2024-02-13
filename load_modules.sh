@@ -24,7 +24,7 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
         geos/3.10.2 gdal/3.6.2 libtiff
 
 # Nord3v2
-elif [ "${BSC_MACHINE}" == "nord3v2" ]; then 
+elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then 
     module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
     module load Python/3.7.4-GCCcore-8.3.0 \
         Ghostscript/9.50-GCCcore-8.3.0 \
