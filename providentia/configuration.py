@@ -17,6 +17,7 @@ from .warnings import show_message
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.json')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2']:
@@ -54,9 +55,6 @@ class ProvConfiguration:
             'cartopy_data_dir': '',
             'available_cpus': '',
             'n_cpus': '',
-            'local_ghost_root': '/data/providentia/obs/ghost/',
-            'local_nonghost_root': '/data/providentia/obs/nonghost/',
-            'local_exp_root': '/data/providentia/exp/',
             'ghost_root': '',
             'nonghost_root': '',
             'exp_root': '',
@@ -170,15 +168,7 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == '':
-                # running on CTE-POWER/MN4/N3?
-                if MACHINE in ['power', 'mn4', 'nord3v2']:
-                    return '/gpfs/projects/bsc32/AC_cache/obs/ghost'
-                # running on workstation or hub?
-                elif MACHINE in ['hub', 'workstation', 'dust']:
-                    return '/esarchive/obs/ghost'
-                # running locally?
-                else:
-                    return self.read_instance.local_ghost_root
+                return data_paths[MACHINE]["ghost_root"]
 
         elif key == 'nonghost_root':
             # define non-GHOST observational root data directory (if undefined it is
@@ -186,29 +176,13 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == '':
-                # running on MN4?
-                if MACHINE == 'mn4':
-                    return '/gpfs/projects/bsc32/AC_cache/obs/nonghost'
-                # running on other machines?
-                elif MACHINE in ['power', 'nord3v2', 'hub', 'workstation', 'dust']:
-                    return '/esarchive/obs'
-                # running locally?
-                else:
-                    return self.read_instance.local_nonghost_root
+                return data_paths[MACHINE]["nonghost_root"]
 
         elif key == 'exp_root':
             # define experiment root data directory
             # set experiment root data directory if left undefined
             if value == '':
-                # not running on workstation?
-                if MACHINE in ['power', 'mn4', 'nord3v2']:
-                    return '/gpfs/projects/bsc32/AC_cache/recon/exp_interp'
-                # running on workstation or hub?
-                elif MACHINE in ['hub', 'workstation', 'dust']:
-                    return '/esarchive/recon/prov_interp'
-                # running locally?
-                else:
-                    return self.read_instance.local_exp_root
+                return data_paths[MACHINE]["exp_root"]
 
         elif key == 'ghost_version':
             # parse GHOST version
