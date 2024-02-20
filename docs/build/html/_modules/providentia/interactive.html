@@ -385,6 +385,8 @@
             <span class="n">zstat</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># for timeseries chunking</span>
+        <span class="n">chunk_stat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">chunk_resolution</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;timeseries&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">zstat</span><span class="p">:</span>
                 <span class="c1"># get chunk statistic and resolution</span>
@@ -408,9 +410,6 @@
                         <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;The available resolutions are: </span><span class="si">{</span><span class="n">available_timeseries_chunk_resolutions</span><span class="si">}</span><span class="s1">&#39;</span>
                     <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="k">return</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">chunk_stat</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">chunk_resolution</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># get zstat information </span>
         <span class="n">zstat</span><span class="p">,</span> <span class="n">base_zstat</span><span class="p">,</span> <span class="n">z_statistic_type</span><span class="p">,</span> <span class="n">z_statistic_sign</span><span class="p">,</span> <span class="n">z_statistic_period</span> <span class="o">=</span> <span class="n">get_z_statistic_info</span><span class="p">(</span><span class="n">plot_type</span><span class="o">=</span><span class="n">plot_type</span><span class="p">)</span> 
@@ -768,8 +767,9 @@
                     <span class="n">map_extent</span><span class="o">=</span><span class="n">map_extent</span><span class="p">)</span>
 
         <span class="c1"># format plot options</span>
-        <span class="n">format_plot_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">relevant_ax</span><span class="p">,</span> <span class="p">[</span><span class="n">relevant_data_labels</span><span class="p">],</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">base_plot_type</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> 
-                            <span class="n">plot_options</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="n">map_extent</span><span class="p">)</span>                         
+        <span class="n">format_plot_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">relevant_ax</span><span class="p">,</span> <span class="p">[</span><span class="n">relevant_data_labels</span><span class="p">],</span> <span class="n">networkspeci</span><span class="p">,</span> 
+                            <span class="n">base_plot_type</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="n">map_extent</span><span class="p">,</span> 
+                            <span class="n">chunk_stat</span><span class="o">=</span><span class="n">chunk_stat</span><span class="p">,</span> <span class="n">chunk_resolution</span><span class="o">=</span><span class="n">chunk_resolution</span><span class="p">)</span>                         
 
         <span class="c1"># handle harmonisation of axes</span>
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="s1">&#39;map&#39;</span><span class="p">,</span> <span class="s1">&#39;taylor&#39;</span><span class="p">]:</span>
