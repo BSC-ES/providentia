@@ -19,7 +19,7 @@ if [ "${BSC_MACHINE}" == "power" ]; then
 # Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     module load intel impi mkl \
-        gcc/5.4.0 python/3.7.4_ES_test \
+        gcc/5.4.0 python/3.7.4_ES_test_jupyterlab \
         sqlite/3.41.0 proj/8.2.1 hdf5 netcdf \
         geos/3.10.2 gdal/3.6.2 libtiff
 
