@@ -90,7 +90,7 @@
             }
         },
 
-    "MITECO_VOC/MITECO_VOC": {
+    "miteco_voc/miteco_voc": {
         "hourly": {
             "sconcc6h6": [],
             "sconcc7h8": [],
@@ -155,6 +155,34 @@
             "sconcno2": [],
             "sconco3": [],
             "sconcso2": []
+            }
+    },
+
+    "ehu_valderejo/ehu_valderejo": {
+        "hourly": {
+            "pm10": [],
+            "pm2p5": [],
+            "sconcco": [],
+            "sconcno": [],
+            "sconcno2": [],
+            "sconco3": [],
+            "sconcso2": [],
+            "sconchcho": [],
+            "sconcisop": []
+            }
+    },
+
+    "csic_montseny/csic_montseny": {
+        "hourly": {
+            "sconcisop": [],
+            "sconchcho": [],
+            "sconcc6h6": [],
+            "sconcc7h8": [],
+            "sconco3": [],
+            "sconcso2": [],
+            "sconcno": [],
+            "sconcno2": [],
+            "sconcc10h16": []
             }
     }
 }
