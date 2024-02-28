@@ -1,7 +1,7 @@
 """ Module storing writing functions """
 
 import copy
-from netCDF4 import Dataset, num2date
+from netCDF4 import Dataset
 import numpy as np
 import os
 import pandas as pd
