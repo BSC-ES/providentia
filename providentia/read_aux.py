@@ -63,21 +63,21 @@ def read_netcdf_data(tuple_arguments):
     # read netCDF frame
     ncdf_root = Dataset(relevant_file)
 
-    # get time units
-    time_units = ncdf_root['time'].units
-
     # get file time (handle monthly resolution data differently to hourly/daily
     # as num2date does not support 'months since' units)
+    file_time = ncdf_root['time'][:] 
+    time_units = ncdf_root['time'].units
+    time_calendar = ncdf_root['time'].calendar
     if 'months' in time_units:
         monthly_start_date = time_units.split(' ')[2]
-        file_time = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
+        file_time_dt = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
     else:
-        file_time = num2date(ncdf_root['time'][:], time_units)
-        # remove microseconds and convert to integer
-        file_time = pd.to_datetime([t.replace(microsecond=0) for t in file_time])
+        file_time_dt = num2date(file_time, units=time_units, calendar=time_calendar)
+        # remove microseconds
+        file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
 
     # get file time as integer timestamp
-    file_timestamp = file_time.asi8
+    file_timestamp = file_time_dt.asi8
 
     # get valid file time indices (i.e. those times in active full time array)
     valid_file_time_indices = np.where(np.logical_and(file_timestamp>=timestamp_array[0], 
