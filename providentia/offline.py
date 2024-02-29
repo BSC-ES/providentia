@@ -1338,12 +1338,19 @@ class ProvidentiaOffline:
                     else:
                         available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resampling_resolution))
 
-                    # show warning if it is not
+                    # show warning if it is not available
                     if chunk_resolution not in available_timeseries_chunk_resolutions:
                         msg = f'Warning: {plot_type} cannot be created because {chunk_resolution} '
                         msg += 'is not an available chunking resolution.'
                         if len(available_timeseries_chunk_resolutions) > 0:
                             msg += f'The available resolutions are: {available_timeseries_chunk_resolutions}'
+                        print(msg)
+                        return plot_indices
+                    
+                    # show warning if chunk stat is NStations and mode is not Temporal|Spatial
+                    if chunk_stat == 'NStations' and self.statistic_mode != 'Temporal|Spatial':
+                        msg = f'Warning: {plot_type} cannot be created because {chunk_stat} '
+                        msg += 'it is only available when Temporal|Spatial mode is active.'
                         print(msg)
                         return plot_indices
                 else:

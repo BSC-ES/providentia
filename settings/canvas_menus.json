@@ -173,7 +173,7 @@
                    "stat_label": {"element_type": "label",
                                   "size": [230, 20],
                                   "relative_position": [-220, 50],
-                                  "text": "Aggregation statistic"},
+                                  "text": "Spatial aggregation statistic"},
 
                    "stat": {"element_type": "combobox",
                             "formatting_dict": "combobox_menu",
