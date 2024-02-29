@@ -730,6 +730,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             available_aggregation_statistics = []
         else:    
             available_aggregation_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+            if self.selected_statistic_aggregation == '':
+                self.selected_statistic_aggregation = available_aggregation_statistics[1]
         self.cb_statistic_aggregation.addItems(available_aggregation_statistics)
         if self.selected_statistic_aggregation in available_aggregation_statistics:
             self.cb_statistic_aggregation.setCurrentText(self.selected_statistic_aggregation)

@@ -47,6 +47,6 @@
                   "table-Median", "table-Median_bias", "table-Mean_multispecies", 
                   "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias"],
     
-    "debug": ["timeseries", "timeseries-r-daily"]
+    "debug": ["timeseries", "timeseries-NStations-daily"]
 
 }

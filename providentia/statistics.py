@@ -1,5 +1,6 @@
 """ Functions for the processing/calculation of statistics and colourbars """
 
+from calendar import monthrange
 import copy
 import datetime
 import json
@@ -184,7 +185,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                 canvas_instance.selected_station_data[networkspeci]['active_mode'] = canvas_instance.selected_station_data[networkspeci]['per_station']
             elif read_instance.statistic_mode == 'Flattened':
                 canvas_instance.selected_station_data[networkspeci]['active_mode'] = canvas_instance.selected_station_data[networkspeci]['flat']
-                
+
             # set lower/upper limits for specific plots
             # lower limit is always min of the data
             # The upper limit is set to be the inner Tukey fence, 
@@ -201,10 +202,10 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
             # group data into periodic chunks
             group_periodic(read_instance, canvas_instance, networkspeci)
-
+            
             # group data into timeseries chunks
             group_timeseries(read_instance, canvas_instance, networkspeci)
-
+            
 def boxplot_inner_fences(data):
 
     ''' Using adjusted boxplot methodology, calaculate Tukey inner fences of data, which beyond these limits data are 
@@ -278,7 +279,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci):
 
         # get all temporal periods for current resolution
         all_periods = getattr(read_instance.time_index, temporal_aggregation_resolution)
-
+        
         # get all unique temporal periods for current resolution
         unique_periods = np.unique(all_periods)
 
@@ -338,46 +339,53 @@ def group_timeseries(read_instance, canvas_instance, networkspeci):
             # is daily chunk resolution?
             if new_freq == "D":
                 start_date = datetime.datetime(year=new_index[i].year, 
-                                            month=new_index[i].month, 
-                                            day=new_index[i].day, 
-                                            hour=0)
+                                               month=new_index[i].month, 
+                                               day=new_index[i].day, 
+                                               hour=0)
                 end_date = datetime.datetime(year=new_index[i].year, 
-                                            month=new_index[i].month, 
-                                            day=new_index[i].day, 
-                                            hour=23)
+                                             month=new_index[i].month, 
+                                             day=new_index[i].day, 
+                                             hour=23)
             # is monthly chunk resolution?
             elif new_freq == "MS":
                 start_date = datetime.datetime(year=new_index[i].year, 
-                                            month=new_index[i].month, 
-                                            day=1,
-                                            hour=0)
+                                               month=new_index[i].month, 
+                                               day=1,
+                                               hour=0)
+                end_day = monthrange(new_index[i].year, new_index[i].month)[1]
+                end_date = datetime.datetime(year=new_index[i].year, 
+                                             month=new_index[i].month, 
+                                             day=end_day, 
+                                             hour=23)
                 
-                for possible_end_day in [31, 30, 29, 28]:
-                    try: 
-                        end_date = datetime.datetime(year=new_index[i].year, 
-                                                    month=new_index[i].month, 
-                                                    day=possible_end_day, 
-                                                    hour=23)
-                        break
-                    except:
-                        continue
             # is annual chunk resolution?
             elif new_freq == "AS":
                 start_date = datetime.datetime(year=new_index[i].year, 
-                                            month=1, 
-                                            day=1,
-                                            hour=0)
+                                               month=1, 
+                                               day=1,
+                                               hour=0)
                 end_date = datetime.datetime(year=new_index[i].year, 
-                                            month=12, 
-                                            day=31, 
-                                            hour=23)
+                                             month=12, 
+                                             day=31, 
+                                             hour=23)
             
-            data = timeseries_data.loc[start_date:end_date]
-            data_labels = copy.deepcopy(data.columns)
-            timeseries_chunk_data = np.array([data[label] for label in data_labels])
-            timeseries_chunk_data = np.expand_dims(timeseries_chunk_data, axis=1)  
+            time_indices = timeseries_data.index.get_indexer(timeseries_data[start_date:end_date].index)
+            timeseries_per_station_data = copy.deepcopy(canvas_instance.selected_station_data[networkspeci]['per_station'])
+            timeseries_per_station_data = np.take(timeseries_per_station_data, time_indices, axis=2)
+            
+            # if have valid data for period, append it
+            # otherwise, append empty list
+            if  timeseries_per_station_data.size > 0:
+                # flatten group for flattened stat mode
+                if read_instance.statistic_mode == 'Flattened':
+                    timeseries_per_station_data =  timeseries_per_station_data.reshape(timeseries_per_station_data.shape[0], 
+                                                                                       1, 
+                                                                                       timeseries_per_station_data.shape[1] * timeseries_per_station_data.shape[2])
+            else:
+                 timeseries_per_station_data = []
+
             canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'][chunk_resolution]['active_mode'].append(
-                timeseries_chunk_data
+                timeseries_per_station_data
             )
 
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, 
@@ -480,6 +488,12 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             # if stat is exceedances then add threshold value (if available)  
             if base_zstat == 'Exceedances':
                 function_arguments['threshold'] = exceedance_lim(networkspeci)
+
+            # need to do the aggregation inside the calculation of NStations, because if not we
+            # get arrays with different time dimensions (e.g. different months have different number of hours)
+            # and therefore np.array explodes
+            if base_zstat == 'NStations':
+                function_arguments['statistic_aggregation'] = read_instance.statistic_aggregation
 
             # calculate statistics
             
@@ -666,7 +680,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
         # otherwise, save desired statistic for specific statistical calculation mode 
         else:
-            if read_instance.statistic_mode == 'Temporal|Spatial':
+            if (read_instance.statistic_mode == 'Temporal|Spatial') and (base_zstat != 'NStations'):
                 z_statistic = aggregation(z_statistic, read_instance.statistic_aggregation,axis=-1)
             elif read_instance.statistic_mode in ['Flattened', 'Spatial|Temporal']:
                 z_statistic = np.squeeze(z_statistic, axis=-1)
@@ -1072,10 +1086,10 @@ def aggregation(data_array, statistic_aggregation, axis=0):
         :type axis: int
     """
 
-    if statistic_aggregation in ['Mean','']:
-        aggregated_data = np.nanmean(data_array, axis=axis)
-    elif statistic_aggregation == 'Median':
+    if statistic_aggregation in ['Median', '']:
         aggregated_data = np.nanmedian(data_array, axis=axis)
+    elif statistic_aggregation == 'Mean':
+        aggregated_data = np.nanmean(data_array, axis=axis)
     elif statistic_aggregation in ['p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']:
         aggregated_data = np.nanpercentile(data_array, 
                                            q=int(statistic_aggregation.split('p')[1]),

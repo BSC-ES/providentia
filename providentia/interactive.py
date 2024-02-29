@@ -329,6 +329,13 @@ class Interactive:
                     print(msg)
                     return
 
+                # show warning if chunk stat is NStations and mode is not Temporal|Spatial
+                if chunk_stat == 'NStations' and self.statistic_mode != 'Temporal|Spatial':
+                    msg = f'Warning: {plot_type} cannot be created because {chunk_stat} '
+                    msg += 'it is only available when Temporal|Spatial mode is active.'
+                    print(msg)
+                    return
+                    
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
 
@@ -651,7 +658,10 @@ class Interactive:
                                 title = '{} {}'.format(map_title, title)
 
                         else:
-                            title = '{} at {} stations'.format(stat_label, n_stations)
+                            if zstat == 'NStations':
+                                title = '{}'.format(stat_label)
+                            else:
+                                title = '{} at {} stations'.format(stat_label, n_stations)
                             if base_plot_type == 'map':
                                 title = '{} {}'.format(map_title, title)
 
