@@ -91,7 +91,7 @@
                     "cmap_bias": "RdYlBu_r"},
 
     "Data%":       {"function": "calculate_data_avail_fraction", 
-                    "order": 3, 
+                    "order": 4, 
                     "label": "Data Availability", 
                     "arguments": {}, 
                     "units": "%",
@@ -103,8 +103,21 @@
                     "cmap_absolute": "viridis", 
                     "cmap_bias": "RdYlBu_r"},
 
+    "NStations":   {"function": "calculate_stations_number", 
+                    "order": 5, 
+                    "label": "N Stations", 
+                    "arguments": {}, 
+                    "units": "", 
+                    "minimum_bias": [0.0], 
+                    "vmin_absolute": {}, 
+                    "vmax_absolute": {}, 
+                    "vmin_bias": {}, 
+                    "vmax_bias": {},
+                    "cmap_absolute": "viridis", 
+                    "cmap_bias": "RdYlBu_r"},
+
     "Exceedances": {"function": "calculate_exceedances", 
-                    "order": 4, 
+                    "order": 6, 
                     "label": "N Exceedances", 
                     "arguments": {}, 
                     "units": "", 
@@ -117,7 +130,7 @@
                     "cmap_bias": "RdYlBu_r"},
 
     "p1"  :        {"function": "calculate_percentile", 
-                    "order": 5, 
+                    "order": 7, 
                     "label": "p1", 
                     "arguments": {"percentile": 1.0},  
                     "units": "[measurement_units]", 
@@ -130,7 +143,7 @@
                     "cmap_bias": "RdYlBu_r"},
 
     "p5"  :        {"function": "calculate_percentile", 
-                    "order": 6, 
+                    "order": 8, 
                     "label": "p5", 
                     "arguments": {"percentile": 5.0},  
                     "units": "[measurement_units]", 
@@ -143,7 +156,7 @@
                     "cmap_bias": "RdYlBu_r"},
 
     "p10" :        {"function": "calculate_percentile", 
-                    "order": 7, 
+                    "order": 9, 
                     "label": "p10", 
                     "arguments": {"percentile": 10.0}, 
                     "units": "[measurement_units]", 
@@ -156,7 +169,7 @@
                     "cmap_bias": "RdYlBu_r"},
 
     "p25" :        {"function": "calculate_percentile", 
-                    "order": 8, 
+                    "order": 10, 
                     "label": "p25", 
                     "arguments": {"percentile": 25.0}, 
                     "units": "[measurement_units]", 
@@ -169,7 +182,7 @@
                     "cmap_bias": "RdYlBu_r"},
 
     "p75" :        {"function": "calculate_percentile", 
-                    "order": 10, 
+                    "order": 11, 
                     "label": "p75", 
                     "arguments": {"percentile": 75.0},
                     "units": "[measurement_units]",  
@@ -182,7 +195,7 @@
                     "cmap_bias": "RdYlBu_r"},
 
     "p90" :        {"function": "calculate_percentile", 
-                    "order": 11, 
+                    "order": 12, 
                     "label": "p90", 
                     "arguments": {"percentile": 90.0}, 
                     "units": "[measurement_units]", 
@@ -195,7 +208,7 @@
                     "cmap_bias": "RdYlBu_r"},
 
     "p95" :        {"function": "calculate_percentile", 
-                    "order": 12, 
+                    "order": 13, 
                     "label": "p95", 
                     "arguments": {"percentile": 95.0}, 
                     "units": "[measurement_units]", 
@@ -208,7 +221,7 @@
                     "cmap_bias": "RdYlBu_r"},
 
     "p99" :        {"function": "calculate_percentile", 
-                    "order": 13, 
+                    "order": 14, 
                     "label": "p99", 
                     "arguments": {"percentile": 99.0}, 
                     "units": "[measurement_units]", 
