@@ -483,7 +483,7 @@ class Plot:
 
         # track plot elements if using dashboard 
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
-            self.track_plot_elements(self.read_instance.observations_data_label, 'metadata', 'plot', plot_txt, bias=False)
+            self.track_plot_elements(self.read_instance.observations_data_label, 'metadata', 'plot', [plot_txt], bias=False)
 
     def make_map(self, relevant_axis, networkspeci, plot_characteristics, plot_options, zstat=None, labela='', 
                  labelb=''):
