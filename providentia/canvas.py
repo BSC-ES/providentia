@@ -361,22 +361,37 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
+            
+            # set variable that blocks configuration bar handling updates until all
+            # changes to the statistic mode are made
+            self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # get statistic
+            # update mode
             self.read_instance.selected_statistic_mode = self.read_instance.cb_statistic_mode.currentText()
-            
-            # update timeseries statistic if it is different than the selected statistic aggregation
-            if ((self.read_instance.selected_statistic_mode == 'Spatial|Temporal')
-                and (self.timeseries_stat.currentText() != self.read_instance.selected_statistic_aggregation)):
-                self.read_instance.block_MPL_canvas_updates = True
-                self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation)
-                self.read_instance.block_MPL_canvas_updates = False
-
-            # update statistic in memory
             self.read_instance.statistic_mode = self.read_instance.selected_statistic_mode 
+
+            # update aggregation statistics (timeseries and general)
+            self.update_aggregation_statistics()
+
+            if (self.read_instance.statistic_mode in ['Spatial|Temporal', 'Flattened']):
+                chunk_stat = self.timeseries_chunk_stat.currentText()
+                chunk_resolution = self.timeseries_chunk_resolution.currentText()
+
+                if (chunk_stat == 'NStations') and (chunk_resolution != 'None'):
+                    msg = 'It is not possible to get the number of stations when the '
+                    msg += f'statistic mode {self.read_instance.statistic_mode} is active. '
+                    msg += 'Chunking will be deactivated.'
+                    show_message(self.read_instance, msg)
+                    self.timeseries_chunk_stat.setCurrentText("None")
+                    self.timeseries_chunk_resolution.setCurrentText("None")
+
+            # update chunk statistic
+            self.update_timeseries_chunk_statistics()
+
+            self.read_instance.block_config_bar_handling_updates = False
 
             # update associated plots with selected stations
             self.update_associated_active_dashboard_plots()
@@ -395,22 +410,19 @@ class MPLCanvas(FigureCanvas):
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
+            
+            # set variable that blocks configuration bar handling updates until all
+            # changes to the statistics are made
+            self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # get statistic
-            self.read_instance.selected_statistic_aggregation = self.read_instance.cb_statistic_aggregation.currentText()
-            
-            # update timeseries statistic if it is different than the selected statistic aggregation
-            if ((self.read_instance.selected_statistic_mode == 'Spatial|Temporal')
-                and (self.timeseries_stat.currentText() != self.read_instance.selected_statistic_aggregation)):
-                self.read_instance.block_MPL_canvas_updates = True
-                self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation)
-                self.read_instance.block_MPL_canvas_updates = False
+            # update aggregation statistics (timeseries and general)
+            self.update_aggregation_statistics()
 
-            # update statistic in memory
-            self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
 
             # update associated plots with selected stations
             self.update_associated_active_dashboard_plots()
@@ -866,7 +878,6 @@ class MPLCanvas(FigureCanvas):
 
         if not self.read_instance.block_config_bar_handling_updates:
 
-            # update map z statistic comboboxes
             # set variable that blocks configuration bar handling updates until all
             # changes to the z statistic comboboxes are made
             self.read_instance.block_config_bar_handling_updates = True
@@ -893,6 +904,10 @@ class MPLCanvas(FigureCanvas):
                 z_stat_items = copy.deepcopy(self.read_instance.basic_z_stats)
             else:
                 z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
+
+            # remove NStations from list of available stats because it makes no sense to map it 
+            if "NStations" in z_stat_items:
+               z_stat_items = z_stat_items[z_stat_items != 'NStations']
 
             # remove selected z1/z2 items from opposite z2/z1 comboboxes (if have value
             # selected, i.e. z2 array not empty string)
@@ -934,8 +949,8 @@ class MPLCanvas(FigureCanvas):
             upon interaction with timeseries statistic combobox.
         """
 
-        if not self.read_instance.block_config_bar_handling_updates:
-
+        if not self.read_instance.block_config_bar_handling_updates:  
+        
             # update mouse cursor to a waiting cursor
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
@@ -951,8 +966,8 @@ class MPLCanvas(FigureCanvas):
 
             # if base_zstat is empty string, it is because fields are being initialised for the first time
             if zstat == '':
-                # set timeseries stat to be first available stat
-                zstat = available_timeseries_stats[0]
+                # set timeseries stat to be Median
+                zstat = available_timeseries_stats[1]
 
             # update timeseries statistic combobox (clear, then add items)
             self.timeseries_stat.clear()
@@ -965,9 +980,7 @@ class MPLCanvas(FigureCanvas):
             # update aggregation statistic if it is different than timeseries statistic
             if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
                 and (zstat != self.read_instance.cb_statistic_aggregation.currentText())):
-                self.read_instance.block_MPL_canvas_updates = True
                 self.read_instance.cb_statistic_aggregation.setCurrentText(zstat)
-                self.read_instance.block_MPL_canvas_updates = False
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -980,13 +993,12 @@ class MPLCanvas(FigureCanvas):
 
                 # update selected data on timeseries plot
                 elif self.read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
-                    if len(self.station_inds[self.read_instance.networkspeci]) >= 1:
-                        # get selected station data
-                        get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
-                                                networkspecies=[self.read_instance.networkspeci])
+                    # get selected station data
+                    get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
+                                            networkspecies=[self.read_instance.networkspeci])
 
-                        # update plot                                                                         
-                        self.update_associated_active_dashboard_plot('timeseries')
+                    # update plot                                                                         
+                    self.update_associated_active_dashboard_plot('timeseries')
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -1010,28 +1022,8 @@ class MPLCanvas(FigureCanvas):
             # to the timeseries chunk statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
 
-            # get currently selected statistic
-            zstat = self.timeseries_chunk_stat.currentText()
-
-            # update timeseries chunk statistics, to all basic stats
-            # if colocation not-active, and basic+bias stats if colocation active
-            if not self.read_instance.temporal_colocation:
-                available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_z_stats))
-            else:
-                available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
-
-            # if zstat is empty string, it is because fields are being initialised for the first time
-            if zstat == "":
-                # set timeseries chunk statistic to be None
-                zstat = available_timeseries_chunk_stats[0]
-                
-            # update timeseries chunk statistic combobox (clear, then add items)
-            self.timeseries_chunk_stat.clear()
-            self.timeseries_chunk_stat.addItems(available_timeseries_chunk_stats)
-
-            # maintain currently selected timeseries chunk statistic (if exists in new item list)
-            if zstat in available_timeseries_chunk_stats:
-                self.timeseries_chunk_stat.setCurrentText(zstat)
+            # update chunk statistic
+            self.update_timeseries_chunk_statistics()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -1159,13 +1151,15 @@ class MPLCanvas(FigureCanvas):
         return None
 
     def handle_taylor_correlation_statistic_update(self):
-        
+        """ Function that handles update of correlation statistic
+            upon interaction with Taylor diagram statistic combobox.
+        """
+
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # update taylor diagram correlation statistic combobox
             # set variable that blocks configuration bar handling updates until all
             # changes to the statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
@@ -1391,8 +1385,8 @@ class MPLCanvas(FigureCanvas):
 
             # if stat is empty string, it is because fields are being initialised for the first time
             if stat == '':
-                # set periodic stat to be first available stat
-                stat = available_stats[0]
+                # set periodic stat to be Median
+                stat = available_stats[1]
 
             # update periodic aggregation combobox (clear, then add items)
             self.statsummary_periodic_aggregation.clear()
@@ -3084,3 +3078,55 @@ class MPLCanvas(FigureCanvas):
         self.figure.canvas.draw_idle()
 
         return None
+
+    def update_timeseries_chunk_statistics(self):
+        """ Update timeseries chunk statistic and agreggreation statistic.
+        """
+
+        # get currently selected statistic
+        chunk_stat = self.timeseries_chunk_stat.currentText()
+
+        # update timeseries chunk statistics
+        if not self.read_instance.temporal_colocation:
+            available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_z_stats))
+        else:
+            available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
+
+        # the statistic number of stations only make sense when Temporal|Spatial mode is active
+        if self.read_instance.statistic_mode != 'Temporal|Spatial':
+            available_timeseries_chunk_stats.remove('NStations')
+
+        # if zstat is empty string, it is because fields are being initialised for the first time
+        if chunk_stat == "":
+            # set timeseries chunk statistic to be None
+            chunk_stat = available_timeseries_chunk_stats[0]
+            
+        # update timeseries chunk statistic combobox (clear, then add items)
+        self.timeseries_chunk_stat.clear()
+        self.timeseries_chunk_stat.addItems(available_timeseries_chunk_stats)
+
+        # maintain currently selected timeseries chunk statistic (if exists in new item list)
+        if chunk_stat in available_timeseries_chunk_stats:
+            self.timeseries_chunk_stat.setCurrentText(chunk_stat)
+
+        # disable spatial aggregation statistic
+        chunk_resolution = self.timeseries_chunk_resolution.currentText()
+        if chunk_stat != 'None' and chunk_resolution != 'None':
+            self.timeseries_stat.setEnabled(False)
+        else:
+            self.timeseries_stat.setEnabled(True)
+
+    def update_aggregation_statistics(self):
+        """ Update general and timeseries aggregation statistic
+        """
+        
+        # get statistic
+        self.read_instance.selected_statistic_aggregation = self.read_instance.cb_statistic_aggregation.currentText()
+        
+        # update timeseries statistic if it is different than the selected statistic aggregation
+        if ((self.read_instance.selected_statistic_mode == 'Spatial|Temporal')
+            and (self.timeseries_stat.currentText() != self.read_instance.selected_statistic_aggregation)):
+            self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation)
+
+        # update statistic in memory
+        self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 

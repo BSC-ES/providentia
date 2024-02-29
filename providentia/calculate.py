@@ -153,6 +153,23 @@ class Stats(object):
             return np.count_nonzero(~np.isnan(data), axis=-1).astype('float32')
 
     @staticmethod
+    def calculate_stations_number(data, statistic_aggregation):
+        """ Calculate number of stations.
+        """
+
+        if data.size == 0:
+            return np.NaN
+        else:
+            # get number of stations that do not have missing values per hour
+            original_stations_number = np.count_nonzero(~np.isnan(data), axis=-2).astype('float32')
+
+            # aggregation the number of stations per hour
+            from .statistics import aggregation
+            stations_number = aggregation(original_stations_number, statistic_aggregation, axis=-1)
+
+            return stations_number
+    
+    @staticmethod
     def max_repeated_nans_fraction(data):
         """ Get % of total period of the maximum run of consecutive NaNs in array. """
         if data.size == 0:
