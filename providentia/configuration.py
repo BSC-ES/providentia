@@ -98,6 +98,7 @@ class ProvConfiguration:
             'statistic_aggregation': None,
             'periodic_statistic_mode': None,
             'periodic_statistic_aggregation': None,
+            'timeseries_statistic_aggregation': None,
             'plot_characteristics_filename': '',
             'harmonise_summary': True,
             'harmonise_stations': True,
@@ -614,6 +615,21 @@ class ProvConfiguration:
             msg = "Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.periodic_statistic_aggregation = default
+
+        # check have timeseries_statistic_aggregation information,
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.timeseries_statistic_aggregation:
+            default = 'Median'
+            msg = "Timeseries statistic aggregation (timeseries_statistic_aggregation) was not "
+            msg += "defined in the configuration file. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            self.read_instance.timeseries_statistic_aggregation = default
+        else:
+            if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
+                and (self.read_instance.timeseries_statistic_aggregation != self.read_instance.statistic_aggregation)):
+                error = "Error: Aggregation statistic and timeseries aggregation statistic must be "
+                error += "the same when Spatial|Temporal mode is active."
+                sys.exit(error)
 
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
