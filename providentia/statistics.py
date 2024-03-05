@@ -158,7 +158,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = read_instance.data_array[:,0,:]
             else:
                 if (read_instance.offline) or (read_instance.interactive):
-                    timeseries_stat = read_instance.statistic_aggregation
+                    timeseries_stat = read_instance.timeseries_statistic_aggregation
                 else:
                     timeseries_stat = canvas_instance.timeseries_stat.currentText()
                 aggregated_data = aggregation(read_instance.data_array, timeseries_stat, axis=1)
