@@ -627,9 +627,9 @@ class ProvConfiguration:
         else:
             if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
                 and (self.read_instance.timeseries_statistic_aggregation != self.read_instance.statistic_aggregation)):
-                error = "Error: Aggregation statistic and timeseries aggregation statistic must be "
-                error += "the same when Spatial|Temporal mode is active."
-                sys.exit(error)
+                msg = "Aggregation statistic and timeseries aggregation statistic are not "
+                msg += "the same and Spatial|Temporal mode is active."
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
