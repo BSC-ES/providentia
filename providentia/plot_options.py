@@ -4,7 +4,7 @@ from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 import numpy as np
 
 from .read_aux import drop_nans
-from .statistics import calculate_statistic, get_z_statistic_info
+from .statistics import calculate_statistic, get_z_statistic_info, exceedance_lim
 from .warnings import show_message
 from .plot_aux import create_chunked_timeseries
 
@@ -185,6 +185,42 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
         # track plot elements if using dashboard 
         if (not read_instance.offline) and (not read_instance.interactive):
             canvas_instance.plot.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
+
+
+def threshold(canvas_instance, read_instance, relevant_axis, networkspeci, base_plot_type, 
+              plot_characteristics):
+    """ Add threshold line/s to plot.
+
+        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :type canvas_instance: object
+        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :type read_instance: object
+        :param relevant_axis: Axis to plot on 
+        :type relevant_axis: object
+        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
+        :type networkspeci: str
+        :param base_plot_type: Plot type, without statistical information
+        :type base_plot_type: str
+        :param plot_characteristics: Plot characteristics  
+        :type plot_characteristics: dict
+    """
+    # get exceendance value
+    threshold = exceedance_lim(networkspeci)
+
+    # draw vertical line
+    if base_plot_type in ['timeseries', 'scatter', 'periodic', 'periodic-violin', 'boxplot']:
+        threshold_line = relevant_axis.axhline(y=threshold, 
+                                               **plot_characteristics['threshold_line'])
+    
+    # draw horizontal line
+    if base_plot_type in ['distribution', 'scatter']:
+        threshold_line = relevant_axis.axvline(x=threshold, 
+                                               **plot_characteristics['threshold_line'])
+
+    # track plot elements if using dashboard 
+    if (not read_instance.offline) and (not read_instance.interactive):
+        canvas_instance.plot.track_plot_elements('ALL', base_plot_type, 'threshold', 
+                                                 [threshold_line], bias=False)
 
 
 def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
