@@ -181,7 +181,7 @@ class Interactive:
     def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
                   domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
-                  smooth=False, plot_options=None, save=False, return_plot=False, format=None):
+                  smooth=False, threshold=False, plot_options=None, save=False, return_plot=False, format=None):
         """ Wrapper method to make a Providentia plot.
 
         :param plot: Plot type
@@ -224,6 +224,8 @@ class Interactive:
         :type regression: bool, optional
         :param smooth: Indicates if timeseries has smooth line/s, defaults to False
         :type smooth: bool, optional
+        :param threshold: Indicates if plot has threshold line/s, defaults to False
+        :type threshold: bool, optional
         :param plot_options: List with plot options, defaults to None
         :type plot_options: list, optional
         :param save: Indicates if you want to save the figure, defaults to False
@@ -286,6 +288,9 @@ class Interactive:
                     pass
             if (type(smooth) == int) or (type(smooth) == float):
                 smooth_window = int(smooth)
+        if threshold:
+            if 'threshold' not in plot_options:
+                plot_options.append('threshold')
 
         # get base plot type (no plot options), and plot type (with plot options)
         base_plot_type = copy.deepcopy(plot)
@@ -342,6 +347,11 @@ class Interactive:
         # if only 1 label passed for map plot, and stat is a bias statistic then throw error
         if (base_plot_type == 'map') & (z_statistic_sign == 'bias') & (labelb == ''):
             print("Warning: Plotting a bias statistic, and only 1 label is set. Not making plot.")
+            return
+        
+        # if bias and threshold plots are in plot options throw error
+        if ('bias' in plot_options) & ('threshold' in plot_options):
+            print("Warning: Cannot make a bias plot showing threshold lines. Not making plot.")
             return
 
         # get data labels for plot

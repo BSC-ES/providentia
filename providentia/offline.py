@@ -1203,6 +1203,11 @@ class ProvidentiaOffline:
         if (('bias' in plot_options) or (z_statistic_sign == 'bias')) & (len(data_labels) < 2):
             return plot_indices
 
+        # do not make plot if bias and threshold plots are in plot options
+        if ('bias' in plot_options) & ('threshold' in plot_options):
+            print("Warning: Cannot make a bias plot showing threshold lines. Not making plot.")
+            return plot_indices
+
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
         data_labels_sans_obs.remove(self.observations_data_label)
