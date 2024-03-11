@@ -2271,6 +2271,11 @@ class MPLCanvas(FigureCanvas):
                 if event_source in self.interactive_elements[key]['markersize_sl']:
                     markersize = self.interactive_elements[key]['markersize_sl'][loc].value()
                     break
+        
+        # correct perodic-violin name
+        if key == 'periodic_violin':
+            key = 'periodic-violin'
+            
         self.update_markersize(self.plot_axes[key], key, markersize, event_source)
 
         return None
@@ -2304,6 +2309,11 @@ class MPLCanvas(FigureCanvas):
                 if event_source in self.interactive_elements[key]['linewidth_sl']:
                     linewidth = self.interactive_elements[key]['linewidth_sl'][0].value()/10
                     break
+
+        # correct perodic-violin name
+        if key == 'periodic_violin':
+            key = 'periodic-violin'
+
         self.update_linewidth(self.plot_axes[key], key, linewidth)
 
         return None
