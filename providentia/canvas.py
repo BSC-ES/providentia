@@ -29,7 +29,7 @@ from .filter import DataFilter
 from .plot import Plot
 from .plot_aux import get_map_extent
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
-from .plot_options import annotation, linear_regression, log_axes, smooth
+from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
 from .read_aux import get_lower_resolutions
 from .statistics import *
 from .warnings import show_message
@@ -2347,11 +2347,30 @@ class MPLCanvas(FigureCanvas):
                 orig_plot_options = event_source.currentData(all=True)
                 mod_plot_options = copy.deepcopy(orig_plot_options)
 
-                #ensure bias option is handled first (to set z_statistic_sign)
+                # ensure bias option is handled first (to set z_statistic_sign)
                 if 'bias' in mod_plot_options:
                     mod_plot_options.remove('bias')
                     mod_plot_options.insert(0, 'bias')
 
+                # disable bias when threshold is active and viceversa
+                if (('bias' in self.previous_plot_options[plot_type]) 
+                    and ("bias" in self.current_plot_options[plot_type]) 
+                    and ("threshold" in self.current_plot_options[plot_type])):
+                    msg = "Bias will be deactivated to show threshold lines"
+                    show_message(self.read_instance, msg)
+                    bias_index = orig_plot_options.index('bias')
+                    self.deactivate_option_on_combobox(event_source, bias_index)
+                    self.current_plot_options[plot_type].remove('bias')
+                if (('threshold' in self.previous_plot_options[plot_type]) 
+                    and ("bias" in self.current_plot_options[plot_type]) 
+                    and ("threshold" in self.current_plot_options[plot_type])
+                    and (len(self.read_instance.data_labels) > 1)):
+                    msg = "Thresholds will be deactivated to show bias plots"
+                    show_message(self.read_instance, msg)
+                    threshold_index = orig_plot_options.index('threshold')
+                    self.deactivate_option_on_combobox(event_source, threshold_index)
+                    self.current_plot_options[plot_type].remove('threshold')
+                        
                 for option in mod_plot_options:
                     
                     # get index to raise errors and uncheck options (in original plot options order)
@@ -2362,9 +2381,7 @@ class MPLCanvas(FigureCanvas):
                     if not hasattr(self, 'selected_station_data'):
                         msg = 'Select at least one station in the plot to apply options.'
                         show_message(self.read_instance, msg)
-                        self.read_instance.block_MPL_canvas_updates = True
-                        event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                        self.read_instance.block_MPL_canvas_updates = False
+                        self.deactivate_option_on_combobox(event_source, index)
                         return
 
                     # return from function if selected_station_data has not been updated for new species yet.
@@ -2432,9 +2449,7 @@ class MPLCanvas(FigureCanvas):
                                     msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                     msg += "in {0} with negative values.".format(plot_type)
                                     show_message(self.read_instance, msg)
-                                    self.read_instance.block_MPL_canvas_updates = True
-                                    event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                                    self.read_instance.block_MPL_canvas_updates = False
+                                    self.deactivate_option_on_combobox(event_source, index)
                                     return None
                         else:
                             log_valid = log_validity(self.plot_axes[plot_type], option)
@@ -2444,9 +2459,7 @@ class MPLCanvas(FigureCanvas):
                                 msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                 msg += "in {0} with negative values.".format(plot_type)
                                 show_message(self.read_instance, msg)
-                                self.read_instance.block_MPL_canvas_updates = True
-                                event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                                self.read_instance.block_MPL_canvas_updates = False
+                                self.deactivate_option_on_combobox(event_source, index)
                                 return None
 
                     # option 'annotate'
@@ -2501,16 +2514,34 @@ class MPLCanvas(FigureCanvas):
                                               self.plot_characteristics[plot_type],  
                                               self.current_plot_options[plot_type])
 
+                    # option 'threshold'
+                    elif option == 'threshold':
+                        if not undo:
+                            if isinstance(self.plot_axes[plot_type], dict):
+                                for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
+                                    if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                                        threshold(self, 
+                                        self.read_instance, 
+                                        sub_ax, 
+                                        self.read_instance.networkspeci, 
+                                        plot_type,
+                                        self.plot_characteristics[plot_type])
+                            else:
+                                threshold(self, 
+                                    self.read_instance, 
+                                    self.plot_axes[plot_type], 
+                                    self.read_instance.networkspeci, 
+                                    plot_type,
+                                    self.plot_characteristics[plot_type])
+                            
                     # option 'bias'
                     elif option == 'bias':
-
+                        
                         # firstly if just 1 data label then cannot make bias plot 
                         if len(self.read_instance.data_labels) == 1:
                             msg = 'It is not possible to make a bias plot with just observations loaded.'
                             show_message(self.read_instance, msg)
-                            self.read_instance.block_MPL_canvas_updates = True
-                            event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                            self.read_instance.block_MPL_canvas_updates = False
+                            self.deactivate_option_on_combobox(event_source, index)
                             self.plot_elements[plot_type]['active'] = 'absolute'
                             self.current_plot_options[plot_type].remove('bias')
 
@@ -2518,7 +2549,7 @@ class MPLCanvas(FigureCanvas):
                             self.redraw_active_options(self.read_instance.data_labels, plot_type, 
                                                        'absolute', self.current_plot_options[plot_type],
                                                        z_statistic_sign=z_statistic_sign)
-
+                        
                         # if bias option is enabled then first check if bias elements stored
                         elif not undo:
 
@@ -2537,9 +2568,7 @@ class MPLCanvas(FigureCanvas):
 
                                 # if get_z_statistic_type == 'expbias' then return as bias already plotted
                                 if z_statistic_type == 'expbias':
-                                    self.read_instance.block_MPL_canvas_updates = True
-                                    event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                                    self.read_instance.block_MPL_canvas_updates = False
+                                    self.deactivate_option_on_combobox(event_source, index)
                                     self.plot_elements[plot_type]['active'] = 'absolute'
 
                             if plot_type == 'timeseries':
@@ -2553,9 +2582,7 @@ class MPLCanvas(FigureCanvas):
                                 if z_statistic_type == 'expbias':
                                     # chunk timeseries is active?
                                     if (chunk_stat != 'None') and (chunk_resolution != 'None'):
-                                        self.read_instance.block_MPL_canvas_updates = True
-                                        event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                                        self.read_instance.block_MPL_canvas_updates = False
+                                        self.deactivate_option_on_combobox(event_source, index)
                                         self.plot_elements[plot_type]['active'] = 'absolute'
 
                             # iterate through valid data labels 
@@ -2696,7 +2723,7 @@ class MPLCanvas(FigureCanvas):
                             self.redraw_active_options(self.read_instance.data_labels, 
                                                        plot_type, 'absolute', self.current_plot_options[plot_type],
                                                        z_statistic_sign=z_statistic_sign)
-
+                            
                     # check stats for the selected periodic cycle
                     if plot_type in ['statsummary']:
                         self.read_instance.block_config_bar_handling_updates = True
@@ -2752,6 +2779,16 @@ class MPLCanvas(FigureCanvas):
                 smooth(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
                        data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
             
+            elif plot_option == 'threshold':
+                if isinstance(self.plot_axes[plot_type], dict):
+                    for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
+                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                            threshold(self, self.read_instance, sub_ax, self.read_instance.networkspeci, 
+                                        plot_type, self.plot_characteristics[plot_type])
+                else:
+                    threshold(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci, 
+                            plot_type, self.plot_characteristics[plot_type])
+                
             elif plot_option == 'regression':
                 linear_regression(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
                                   data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
@@ -3130,3 +3167,11 @@ class MPLCanvas(FigureCanvas):
 
         # update statistic in memory
         self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 
+
+    def deactivate_option_on_combobox(self, event_source, index):
+        """ Remove checked option from options combobox dropdown
+        """
+
+        self.read_instance.block_MPL_canvas_updates = True
+        event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+        self.read_instance.block_MPL_canvas_updates = False
