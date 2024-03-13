@@ -549,10 +549,9 @@ class Plot:
             :type chunk_resolution: str
         """
 
-        # if 'hidedata' in plot_options, do not plot any data
-        if 'hidedata' in plot_options:
-            if 'smooth' not in plot_options:
-                print("Warning: 'hidedata' plot option is set for timeseries plot, but 'smooth' is not active. This will result in an empty plot.")
+        # skip making timeseries (points) for offline and interactive mode
+        # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
+        if ((self.read_instance.offline) or (self.read_instance.interactive)) and ('hidedata' in plot_options):
             return
 
         # if 'obs' in plot_options, set data labels to just observations data label
@@ -1056,7 +1055,7 @@ class Plot:
             :param plot_options: Options to configure plot  
             :type plot_options: list
         """
-
+        
         # if 'obs' in plot_options, set data labels to just observations data label
         if 'obs' in plot_options:
             data_labels = [self.read_instance.observations_data_label]
@@ -1064,22 +1063,21 @@ class Plot:
         # add 1:1 line (if in plot_characteristics)
         if '1:1_line' in plot_characteristics:
             relevant_axis.plot([0, 1], [0, 1], transform=relevant_axis.transAxes, 
-                            **plot_characteristics['1:1_line'])
+                               **plot_characteristics['1:1_line'])
         # add 1:2 line (if in plot_characteristics)
         if '1:2_line' in plot_characteristics:
             relevant_axis.plot([0, 1], [0, 0.5], transform=relevant_axis.transAxes, 
-                            **plot_characteristics['1:2_line'])     
+                                **plot_characteristics['1:2_line'])     
         # add 2:1 line (if in plot_characteristics)
         if '2:1_line' in plot_characteristics:
             relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
-                            **plot_characteristics['2:1_line'])
+                               **plot_characteristics['2:1_line'])
 
-        # if 'hidedata' in plot_options, do not plot any data
-        if 'hidedata' in plot_options:
-            if 'regression' not in plot_options:
-                print("Warning: 'hidedata' plot option is set for scatter plot, but 'regression' is not active. This will result in an empty plot.")
+        # skip making scatter for offline and interactive mode
+        # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
+        if ((self.read_instance.offline) or (self.read_instance.interactive)) and ('hidedata' in plot_options):
             return
-
+        
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
 

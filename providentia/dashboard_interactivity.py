@@ -310,7 +310,11 @@ class HoverAnnotation(object):
                         # do not annotate if plot is cleared
                         if data_label not in self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']].keys():
                             continue
-
+                        
+                        # do no annotate if hidedata is active
+                        if len(self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot']) == 0:
+                            continue
+                        
                         line = self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot'][0]
                         is_contained, annotation_index = line.contains(event)
                         if is_contained:
