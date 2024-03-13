@@ -49,6 +49,6 @@
                   "timeseries_threshold", "periodic-Mean_threshold", "periodic-violin_threshold", 
                   "scatter_threshold", "boxplot_threshold", "distribution_threshold"],
     
-    "debug": ["timeseries", "timeseries-NStations-daily"]
+    "debug": ["scatter", "scatter_regression", "scatter_hidedata_regression"]
 
 }
