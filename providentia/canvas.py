@@ -2334,7 +2334,7 @@ class MPLCanvas(FigureCanvas):
 
     def update_plot_option(self):
         """ Function to handle the update of the plot options. """
-        
+
         if not self.read_instance.block_MPL_canvas_updates:
 
             # get source
@@ -2369,7 +2369,7 @@ class MPLCanvas(FigureCanvas):
                     msg = "Bias will be deactivated to show threshold lines"
                     show_message(self.read_instance, msg)
                     bias_index = orig_plot_options.index('bias')
-                    self.deactivate_option_on_combobox(event_source, bias_index)
+                    self.update_option_on_combobox(event_source, bias_index)
                     self.current_plot_options[plot_type].remove('bias')
                 if (('threshold' in self.previous_plot_options[plot_type]) 
                     and ("bias" in self.current_plot_options[plot_type]) 
@@ -2378,9 +2378,27 @@ class MPLCanvas(FigureCanvas):
                     msg = "Thresholds will be deactivated to show bias plots"
                     show_message(self.read_instance, msg)
                     threshold_index = orig_plot_options.index('threshold')
-                    self.deactivate_option_on_combobox(event_source, threshold_index)
+                    self.update_option_on_combobox(event_source, threshold_index)
                     self.current_plot_options[plot_type].remove('threshold')
-                        
+
+                # apply smooth/regression if hide data is checked for timeseries
+                if 'hidedata' in self.current_plot_options[plot_type]:
+                    # get option to check
+                    if (plot_type == 'timeseries') and ('smooth' not in self.current_plot_options[plot_type]):
+                        self.current_plot_options[plot_type].append('smooth')
+                        index_to_check = orig_plot_options.index('smooth')
+                    elif (plot_type == 'scatter') and ('regression' not in self.current_plot_options[plot_type]):
+                        self.current_plot_options[plot_type].append('regression')
+                        index_to_check = orig_plot_options.index('regression')
+                    
+                    if 'index_to_check' in locals():
+                        # check option in combobox
+                        self.update_option_on_combobox(event_source, index_to_check, uncheck=False)
+    
+                        # ensure hidedata option is handled second (to show smooth/regression after hiding data)
+                        mod_plot_options.remove('hidedata')
+                        mod_plot_options.insert(1, 'hidedata')
+
                 for option in mod_plot_options:
                     
                     # get index to raise errors and uncheck options (in original plot options order)
@@ -2391,9 +2409,9 @@ class MPLCanvas(FigureCanvas):
                     if not hasattr(self, 'selected_station_data'):
                         msg = 'Select at least one station in the plot to apply options.'
                         show_message(self.read_instance, msg)
-                        self.deactivate_option_on_combobox(event_source, index)
+                        self.update_option_on_combobox(event_source, index)
                         return
-
+                    
                     # return from function if selected_station_data has not been updated for new species yet.
                     if self.read_instance.networkspeci not in self.selected_station_data:
                         return
@@ -2413,7 +2431,7 @@ class MPLCanvas(FigureCanvas):
                     # if plot type not in plot_elements, then return
                     if plot_type not in self.plot_elements:
                         return
-
+                    
                     # if no selected stations then remove all plot_elements for active plot_options,
                     # and then return
                     if (len(self.relative_selected_station_inds) == 0):
@@ -2459,7 +2477,7 @@ class MPLCanvas(FigureCanvas):
                                     msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                     msg += "in {0} with negative values.".format(plot_type)
                                     show_message(self.read_instance, msg)
-                                    self.deactivate_option_on_combobox(event_source, index)
+                                    self.update_option_on_combobox(event_source, index)
                                     return None
                         else:
                             log_valid = log_validity(self.plot_axes[plot_type], option)
@@ -2469,7 +2487,7 @@ class MPLCanvas(FigureCanvas):
                                 msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                 msg += "in {0} with negative values.".format(plot_type)
                                 show_message(self.read_instance, msg)
-                                self.deactivate_option_on_combobox(event_source, index)
+                                self.update_option_on_combobox(event_source, index)
                                 return None
 
                     # option 'annotate'
@@ -2511,7 +2529,18 @@ class MPLCanvas(FigureCanvas):
                                    plot_type,
                                    self.plot_characteristics[plot_type], 
                                    self.current_plot_options[plot_type])
-                          
+
+                    # option 'hidedata'
+                    elif option == 'hidedata':
+                        active_type = 'bias' if 'bias' in self.current_plot_options[plot_type] else 'absolute'
+                        for data_label in self.plot_elements[plot_type][active_type]:
+                            if 'plot' in self.plot_elements[plot_type][active_type][data_label]:
+                                for element in self.plot_elements[plot_type][active_type][data_label]['plot']:
+                                    if not undo:
+                                        element.set_visible(False)
+                                    else:
+                                        element.set_visible(True)
+
                     # option 'regression'
                     elif option == 'regression':
                         if not undo:
@@ -2543,7 +2572,7 @@ class MPLCanvas(FigureCanvas):
                                     self.read_instance.networkspeci, 
                                     plot_type,
                                     self.plot_characteristics[plot_type])
-                            
+
                     # option 'bias'
                     elif option == 'bias':
                         
@@ -2551,7 +2580,7 @@ class MPLCanvas(FigureCanvas):
                         if len(self.read_instance.data_labels) == 1:
                             msg = 'It is not possible to make a bias plot with just observations loaded.'
                             show_message(self.read_instance, msg)
-                            self.deactivate_option_on_combobox(event_source, index)
+                            self.update_option_on_combobox(event_source, index)
                             self.plot_elements[plot_type]['active'] = 'absolute'
                             self.current_plot_options[plot_type].remove('bias')
 
@@ -2578,7 +2607,7 @@ class MPLCanvas(FigureCanvas):
 
                                 # if get_z_statistic_type == 'expbias' then return as bias already plotted
                                 if z_statistic_type == 'expbias':
-                                    self.deactivate_option_on_combobox(event_source, index)
+                                    self.update_option_on_combobox(event_source, index)
                                     self.plot_elements[plot_type]['active'] = 'absolute'
 
                             if plot_type == 'timeseries':
@@ -2592,7 +2621,7 @@ class MPLCanvas(FigureCanvas):
                                 if z_statistic_type == 'expbias':
                                     # chunk timeseries is active?
                                     if (chunk_stat != 'None') and (chunk_resolution != 'None'):
-                                        self.deactivate_option_on_combobox(event_source, index)
+                                        self.update_option_on_combobox(event_source, index)
                                         self.plot_elements[plot_type]['active'] = 'absolute'
 
                             # iterate through valid data labels 
@@ -3178,10 +3207,15 @@ class MPLCanvas(FigureCanvas):
         # update statistic in memory
         self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 
 
-    def deactivate_option_on_combobox(self, event_source, index):
-        """ Remove checked option from options combobox dropdown
+    def update_option_on_combobox(self, event_source, index, uncheck=True):
+        """ Check or uncheck option in combobox dropdown
         """
 
         self.read_instance.block_MPL_canvas_updates = True
-        event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+        if uncheck:
+            event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+        else:
+            event_source.model().item(index).setCheckState(QtCore.Qt.Checked)
         self.read_instance.block_MPL_canvas_updates = False
+
+        return None
