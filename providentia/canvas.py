@@ -2521,6 +2521,13 @@ class MPLCanvas(FigureCanvas):
                     # option 'smooth'
                     elif option == 'smooth':
                         if not undo:
+                            # uncheck option in combobox if window is 0
+                            if self.plot_characteristics[plot_type]['smooth']['window'] == 0:
+                                msg = "It is not possible to show the smooth line "
+                                msg += "if window is 0, increase it in advance."
+                                show_message(self.read_instance, msg)
+                                self.update_option_on_combobox(event_source, index)
+                                return None
                             smooth(self, 
                                    self.read_instance, 
                                    self.plot_axes[plot_type], 
@@ -2532,6 +2539,17 @@ class MPLCanvas(FigureCanvas):
 
                     # option 'hidedata'
                     elif option == 'hidedata':
+                        # uncheck option in combobox if smooth window is 0
+                        if (plot_type == 'timeseries'):
+                            if (self.plot_characteristics[plot_type]['smooth']['window'] == 0):
+                                msg = "It is not possible to show the smooth line "
+                                msg += "if window is 0, increase it in advance."
+                                show_message(self.read_instance, msg)
+                                self.update_option_on_combobox(event_source, index)
+                                # Deactivate also smooth
+                                smooth_index = orig_plot_options.index('smooth')
+                                self.update_option_on_combobox(event_source, smooth_index)
+                                return None
                         active_type = 'bias' if 'bias' in self.current_plot_options[plot_type] else 'absolute'
                         for data_label in self.plot_elements[plot_type][active_type]:
                             if 'plot' in self.plot_elements[plot_type][active_type][data_label]:
