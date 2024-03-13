@@ -1208,6 +1208,20 @@ class ProvidentiaOffline:
             print("Warning: Cannot make a bias plot showing threshold lines. Not making plot.")
             return plot_indices
 
+        # do not make plot if hidedata is active but smooth is not in plot options
+        if (base_plot_type == 'timeseries') and ('hidedata' in plot_options) and ('smooth' not in plot_options):
+            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg += "timeseries plot, but 'smooth' is not active. Not making plot."
+            print(msg)
+            return plot_indices
+        
+        # do not make plot if hidedata is active but regression is not in plot options
+        if (base_plot_type == 'scatter') and ('hidedata' in plot_options) and ('regression' not in plot_options):
+            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg += "scatter lot, but 'regression' is not active. Not making plot."
+            print(msg)
+            return plot_indices
+        
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
         data_labels_sans_obs.remove(self.observations_data_label)
