@@ -237,8 +237,9 @@ class MPLCanvas(FigureCanvas):
         # plot domain edges on map and legend if have valid data
         if len(self.active_map_valid_station_inds) > 0:
 
-            # plot experiment grid domain edges on map
-            self.update_experiment_domain_edges()
+            # add 'domain' to plot options
+            if 'domain' not in self.current_plot_options['map']:
+                self.current_plot_options['map'].append('domain')
 
             # update legend
             self.update_legend()
@@ -2398,24 +2399,26 @@ class MPLCanvas(FigureCanvas):
                         # ensure hidedata option is handled second (to show smooth/regression after hiding data)
                         mod_plot_options.remove('hidedata')
                         mod_plot_options.insert(1, 'hidedata')
-
+                
                 for option in mod_plot_options:
                     
                     # get index to raise errors and uncheck options (in original plot options order)
                     index = orig_plot_options.index(option)
 
-                    # if do not have selected station_station_data in memory, then no data has been read
-                    # so return
-                    if not hasattr(self, 'selected_station_data'):
-                        msg = 'Select at least one station in the plot to apply options.'
-                        show_message(self.read_instance, msg)
-                        self.update_option_on_combobox(event_source, index)
-                        return
-                    
-                    # return from function if selected_station_data has not been updated for new species yet.
-                    if self.read_instance.networkspeci not in self.selected_station_data:
-                        return
+                    # if any option other than domain is selected
+                    if 'domain' not in self.current_plot_options[plot_type]:
 
+                        # return if do not have selected station_station_data in memory, then no data has been read
+                        if not hasattr(self, 'selected_station_data'):
+                            msg = 'Select at least one station in the plot to apply options.'
+                            show_message(self.read_instance, msg)
+                            self.update_option_on_combobox(event_source, index)
+                            return
+                        
+                        # return from function if selected_station_data has not been updated for new species yet
+                        if self.read_instance.networkspeci not in self.selected_station_data:
+                            return
+                        
                     # undo plot options that were selected before but not now
                     if ((option in self.previous_plot_options[plot_type]) 
                         and (option not in self.current_plot_options[plot_type])):
@@ -2427,7 +2430,7 @@ class MPLCanvas(FigureCanvas):
                     elif ((option not in self.previous_plot_options[plot_type]) 
                         and (option not in self.current_plot_options[plot_type])): 
                         continue
-
+                    
                     # if plot type not in plot_elements, then return
                     if plot_type not in self.plot_elements:
                         return
@@ -2439,11 +2442,14 @@ class MPLCanvas(FigureCanvas):
                             if active_type != 'active':
                                 for data_label in self.plot_elements[plot_type][active_type]:
                                     for plot_option in self.current_plot_options[plot_type]:
-                                        if plot_option in self.plot_elements[plot_type][active_type][data_label]:
+                                        # do not remove domain even if there are no selected stations
+                                        if (plot_option in self.plot_elements[plot_type][active_type][data_label]) and (plot_option != 'domain'):
                                             for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
                                                 plot_element.remove()
                                             del self.plot_elements[plot_type][active_type][data_label][plot_option]
-                        return 
+                        # do not skip applying domain to map
+                        if (plot_type != 'map') and (plot_option != 'domain'):
+                            return 
 
                     # remove current option elements (both absolute and bias)
                     for active_type in self.plot_elements[plot_type]:
@@ -2558,6 +2564,15 @@ class MPLCanvas(FigureCanvas):
                                         element.set_visible(False)
                                     else:
                                         element.set_visible(True)
+
+                    # option 'domain'
+                    elif option == 'domain':
+                        if not undo:
+                            # plot experiment grid domain edges on map
+                            self.update_experiment_domain_edges()
+                        else:
+                            # remove grid domain polygon if previously plotted
+                            self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
 
                     # option 'regression'
                     elif option == 'regression':
