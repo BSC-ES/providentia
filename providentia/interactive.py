@@ -354,6 +354,20 @@ class Interactive:
             print("Warning: Cannot make a bias plot showing threshold lines. Not making plot.")
             return
 
+        # do not make plot if hidedata is active but smooth is not in plot options
+        if (base_plot_type == 'timeseries') and ('hidedata' in plot_options) and ('smooth' not in plot_options):
+            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg += "timeseries plot, but 'smooth' is not active. Not making plot."
+            print(msg)
+            return
+        
+        # do not make plot if hidedata is active but regression is not in plot options
+        if (base_plot_type == 'scatter') and ('hidedata' in plot_options) and ('regression' not in plot_options):
+            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg += "scatter lot, but 'regression' is not active. Not making plot."
+            print(msg)
+            return
+        
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)
