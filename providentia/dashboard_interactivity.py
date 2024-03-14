@@ -1,5 +1,6 @@
 """ Objects and functions to interact with the axes """
 
+import copy
 import datetime
 import math
 
@@ -7,6 +8,7 @@ import matplotlib
 from matplotlib.lines import Line2D
 from matplotlib.widgets import _SelectorWidget
 import numpy as np
+import pandas as pd
 
 from .plot_aux import get_map_extent
 from .plot_formatting import harmonise_xy_lims_paradigm
@@ -282,6 +284,10 @@ class HoverAnnotation(object):
             self.vline.set_visible(False)
             canvas_instance.annotation_elements.extend([self.vline])
 
+        # initialise dict with values that are in the middle of x axis per plot type
+        self.x_middle = {}
+        self.x_middle[plot_type] = {}
+
         return None
 
     def hover_annotation(self, event, plot_type):
@@ -342,10 +348,35 @@ class HoverAnnotation(object):
                     self.canvas_instance.annotations_lock[plot_type] = False
 
         return None
-      
+    
+    def update_x_middle(self, event, plot_type):
+        """ Function to find middle value in x axis per plot type.
+        """
+
+        # get current limits on x axis
+        xlim_range = event.get_xlim()
+
+        # transform range into dates for timeseries
+        if plot_type == 'timeseries':
+            xdata_range = [pd.Timestamp(xlim, unit='D') for xlim in xlim_range]
+        else:
+            xdata_range = xlim_range
+
+        # get value/date in the middle of range
+        x_middle = xdata_range[0] + (xdata_range[1] - xdata_range[0])/2
+        
+        # save into dictionary
+        if 'periodic' in plot_type:
+            for resolution in self.canvas_instance.read_instance.relevant_temporal_resolutions:
+                if event == self.canvas_instance.plot_axes[plot_type][resolution]:
+                    self.x_middle[plot_type][resolution] = x_middle
+                    break
+        else:
+            self.x_middle[plot_type] = x_middle
+
     def update_timeseries_annotation(self, annotation_index):
         """ Update annotation for each timeseries point that is hovered. """
-        
+    
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
             # for annotate data label
@@ -369,8 +400,7 @@ class HoverAnnotation(object):
                 self.vline.set_xdata(time)
 
                 # update bbox position
-                time_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
-                if time > time_middle:
+                if time > self.x_middle['timeseries']:
                     self.annotation.set_x(-10)
                     self.annotation.set_ha('right')
                 else:
@@ -422,8 +452,7 @@ class HoverAnnotation(object):
                 self.annotation.xy = (concentration_x, concentration_y)
 
                 # update bbox position
-                concentration_x_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
-                if concentration_x > concentration_x_middle:
+                if concentration_x > self.x_middle['scatter']:
                     self.annotation.set_x(-10)
                     self.annotation.set_ha('right')
                 else:
@@ -468,8 +497,7 @@ class HoverAnnotation(object):
                 self.vline.set_xdata(concentration)
 
                 # update bbox position
-                concentration_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
-                if concentration > concentration_middle:
+                if concentration > self.x_middle['distribution']:
                     self.annotation.set_x(-10)
                     self.annotation.set_ha('right')
                 else:
@@ -521,8 +549,7 @@ class HoverAnnotation(object):
                 self.annotation.xy = (corr_stat, stddev)
 
                 # update bbox position
-                corr_stat_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
-                if corr_stat > corr_stat_middle:
+                if corr_stat > self.x_middle['taylor']:
                     self.annotation.set_x(-10)
                     self.annotation.set_ha('right')
                 else:
@@ -599,7 +626,7 @@ class HoverAnnotation(object):
 
     def update_periodic_annotation(self, annotation_index, resolution):
         """ Update annotation for each periodic point that is hovered. """
-        
+
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
             # for annotate data label
@@ -623,8 +650,7 @@ class HoverAnnotation(object):
                 self.canvas_instance.annotations_vline['periodic'][resolution].set_xdata(time)
 
                 # update bbox position
-                time_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
-                if time > time_middle:
+                if time > self.x_middle['periodic'][resolution]:
                     self.canvas_instance.annotations['periodic'][resolution].set_x(-10)
                     self.canvas_instance.annotations['periodic'][resolution].set_ha('right')
                 else:
@@ -669,7 +695,7 @@ class HoverAnnotation(object):
     
     def update_periodic_violin_annotation(self, annotation_index, resolution):
         """ Update annotation for each periodic violin point that is hovered. """
-        
+
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
             # for annotate data label
@@ -693,8 +719,7 @@ class HoverAnnotation(object):
                 self.canvas_instance.annotations_vline['periodic-violin'][resolution].set_xdata(time)
 
                 # update bbox position
-                time_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
-                if time > time_middle:
+                if time > self.x_middle['periodic-violin'][resolution]:
                     self.canvas_instance.annotations['periodic-violin'][resolution].set_x(-10)
                     self.canvas_instance.annotations['periodic-violin'][resolution].set_ha('right')
                 else:

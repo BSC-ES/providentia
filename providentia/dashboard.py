@@ -1127,6 +1127,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if changed_plot_type == 'taylor':
             canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
 
+            # connect axis to xlim change on zoom
+            canvas_instance.plot.taylor_polar_relevant_axis.callbacks.connect(
+                'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
+            
         # setup annotations
         if changed_plot_type in ['periodic', 'periodic-violin']:
             # create annotation on hover
@@ -1140,6 +1144,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.annotations[changed_plot_type][resolution] = annotation.annotation
                 canvas_instance.annotations_lock[changed_plot_type][resolution] = False
                 canvas_instance.annotations_vline[changed_plot_type][resolution] = annotation.vline
+            
+                # connect axis to xlim change on zoom
+                canvas_instance.plot_axes[changed_plot_type][resolution].callbacks.connect(
+                    'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
             
             # connect axis to hover function
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
@@ -1164,6 +1172,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if add_vline:
                 canvas_instance.annotations_vline[changed_plot_type] = annotation.vline
 
+            # connect axis to xlim change on zoom
+            canvas_instance.plot_axes[changed_plot_type].callbacks.connect(
+                'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
+            
             # connect axis to hover function
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_annotation(event, changed_plot_type))
