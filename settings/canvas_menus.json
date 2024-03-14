@@ -235,7 +235,7 @@
                    "smooth_linewidth_sl_label": {"element_type": "label",
                                                  "size": [230, 20],
                                                  "relative_position": [-220, 250],
-                                                 "text": "Smooth line width"},
+                                                 "text": "Line width"},
                     
                    "smooth_linewidth_sl": {"element_type": "slider",
                                            "size": [230, 20],
