@@ -21,7 +21,7 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.json')))
 
 # set MACHINE to be the hub, workstation or local machine
-if MACHINE not in ['power', 'mn4', 'nord3v2']:
+if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
     hostname = os.environ.get('HOSTNAME', '')
     ip = socket.gethostbyname(socket.gethostname())
     if "bscearth" in hostname:
@@ -139,7 +139,7 @@ class ProvConfiguration:
                 
         elif key == 'available_cpus':
             # get available N CPUs
-            if MACHINE in ['power', 'mn4', 'nord3v2']:
+            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
                 # handle cases where are testing briefly on login nodes (1 cpu capped)
                 try:
                     return int(os.getenv('SLURM_CPUS_PER_TASK'))
@@ -152,7 +152,7 @@ class ProvConfiguration:
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
             # internet connection)
 
-            if MACHINE in ['power', 'mn4', 'nord3v2']:
+            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all other machines pull from internet
 

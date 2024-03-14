@@ -635,7 +635,7 @@ class Plot:
             # update maximum smooth value
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
-                    self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts)*2 - 1)
+                    self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
 
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
