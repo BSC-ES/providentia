@@ -8,6 +8,7 @@ import sys
 
 from collections import OrderedDict
 from functools import partial
+import matplotlib
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
@@ -812,20 +813,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
     
-        # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.8 is available
-        # # remove plot types that need active temporal colocation and experiments data
-        # for plot_type in ['scatter', 'taylor']:
-        #     if ((not self.temporal_colocation) 
-        #         or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
-        #         if plot_type in canvas_instance.layout_options:
-        #             canvas_instance.layout_options.remove(plot_type)
-        #     else:
-        #         if plot_type not in canvas_instance.layout_options:
-        #             canvas_instance.layout_options.append(plot_type)          
-
+        # TODO: For Taylor diagrams, replace this piece of code for the one below when we stop using Matplotlib 3.3
         # remove plot types that need active temporal colocation and experiments data
-        if 'taylor' in canvas_instance.layout_options:
-            canvas_instance.layout_options.remove('taylor')
+        if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
+            if 'taylor' in canvas_instance.layout_options:
+                canvas_instance.layout_options.remove('taylor')
+        else:
+            for plot_type in ['scatter', 'taylor']:
+                if ((not self.temporal_colocation) 
+                    or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+                    if plot_type in canvas_instance.layout_options:
+                        canvas_instance.layout_options.remove(plot_type)
+                else:
+                    if plot_type not in canvas_instance.layout_options:
+                        canvas_instance.layout_options.append(plot_type)   
 
         for plot_type in ['scatter']:
             if ((not self.temporal_colocation) 
@@ -1127,10 +1128,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if changed_plot_type == 'taylor':
             canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
 
-            # connect axis to xlim change on zoom
-            canvas_instance.plot.taylor_polar_relevant_axis.callbacks.connect(
-                'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
-            
         # setup annotations
         if changed_plot_type in ['periodic', 'periodic-violin']:
             # create annotation on hover
