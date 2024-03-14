@@ -190,11 +190,12 @@ class ProvidentiaOffline:
                             if plot_type[:4] != 'map-':
                                 self.station_plots_to_make.append(plot_type)
 
-            # TODO: For Taylor diagrams, remove this piece of code until Matplotlib 3.8 is available
-            for diagram_name in ['taylor', 'taylor-r', 'taylor-r2']:
-                if (diagram_name in self.station_plots_to_make) or (diagram_name in self.summary_plots_to_make):
-                    error = 'It is not possible to create Taylor diagrams yet, please remove.'
-                    sys.exit(error)
+            # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
+            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
+                for diagram_name in ['taylor', 'taylor-r', 'taylor-r2']:
+                    if (diagram_name in self.station_plots_to_make) or (diagram_name in self.summary_plots_to_make):
+                        error = 'It is not possible to create Taylor diagrams yet, please remove.'
+                        sys.exit(error)
 
             # set plot characteristics for all plot types (summary, station)
             self.plots_to_make = list(self.summary_plots_to_make)
