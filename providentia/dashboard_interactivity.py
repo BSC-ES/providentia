@@ -353,18 +353,22 @@ class HoverAnnotation(object):
         """ Function to find middle value in x axis per plot type.
         """
 
+        # do not annotate if plot has not been made yet
+        if plot_type not in self.canvas_instance.plot_elements:
+            return
+
         # get current limits on x axis
         xlim_range = event.get_xlim()
 
         # transform range into dates for timeseries
         if plot_type == 'timeseries':
-            xdata_range = [pd.Timestamp(xlim, unit='D') for xlim in xlim_range]
+            xdata_range = [matplotlib.dates.num2date(xlim) for xlim in xlim_range]
         else:
             xdata_range = xlim_range
-
+            
         # get value/date in the middle of range
         x_middle = xdata_range[0] + (xdata_range[1] - xdata_range[0])/2
-        
+
         # save into dictionary
         if 'periodic' in plot_type:
             for resolution in self.canvas_instance.read_instance.relevant_temporal_resolutions:
@@ -400,7 +404,7 @@ class HoverAnnotation(object):
                 self.vline.set_xdata(time)
 
                 # update bbox position
-                if time > self.x_middle['timeseries']:
+                if time > np.datetime64(self.x_middle['timeseries']):
                     self.annotation.set_x(-10)
                     self.annotation.set_ha('right')
                 else:
