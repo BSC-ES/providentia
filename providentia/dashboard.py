@@ -231,8 +231,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                         + str(position)]['y']
 
                     # calculate proportional position for different screen resolution
-                    x = (x * canvas_width) / 1848
-                    y = (y * canvas_height) / 1016
+                    x = int((x * canvas_width) / 1848)
+                    y = int((y * canvas_height) / 1016)
                     
                     # get geometries (old and new)
                     old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
@@ -240,7 +240,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     
                     # apply new geometry to menu and save buttons
                     menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(menu_button.x() - ((30 * canvas_width) / 1848), menu_button.y(), 20, 20)
+                    save_button.setGeometry(int(menu_button.x() - ((30 * canvas_width) / 1848)), int(menu_button.y()), 20, 20)
 
                     # show buttons if active
                     if show_buttons:
@@ -277,13 +277,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                             else:
                                 width_diff = 560
                             height_diff = 1
-                            new_x = menu_button.x() - ((width_diff * canvas_width) / 1848)
-                            new_y = menu_button.y() + ((height_diff * canvas_height) / 1016)
+                            new_x = int(menu_button.x() - ((width_diff * canvas_width) / 1848))
+                            new_y = int(menu_button.y() + ((height_diff * canvas_height) / 1016))
                             cb_position.move(new_x, new_y)
 
                             # apply new geometry to partial canvas covers
                             if position == 2:
-                                canvas_x = new_x - ((75 * canvas_width) / 1848) 
+                                canvas_x = int(new_x - ((75 * canvas_width) / 1848))
                                 self.mpl_canvas.top_right_canvas_cover.setGeometry(canvas_x, new_y,
                                                                                    canvas_width-canvas_x, 
                                                                                    canvas_height-new_y)
