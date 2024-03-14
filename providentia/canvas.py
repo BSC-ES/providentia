@@ -723,8 +723,7 @@ class MPLCanvas(FigureCanvas):
                     # get r or r2 as correlation statistic
                     corr_stat = self.plot_characteristics[plot_type]['corr_stat']
                     relevant_zstats = [corr_stat, "StdDev"]
-                    stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
-
+                
                 # setup xlabel / ylabel for other plot_types
                 else:    
                     # set new xlabel
