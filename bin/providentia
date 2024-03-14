@@ -129,6 +129,7 @@ ip=$(hostname --ip-address)
 # execution
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
+    echo "INFO: Running in Power9..."
     
     if $interactive; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
@@ -155,6 +156,8 @@ if [ "${BSC_MACHINE}" == "power" ]; then
     
 # Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
+    echo "INFO: Running in MN4..."
+
     # avoid magnified graphics
     eval export QT_AUTO_SCREEN_SCALE_FACTOR=0
 
@@ -195,7 +198,7 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
 
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
-
+    echo "INFO: Running in Nord3v2..."
     if $interactive; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
         echo "Starting interactive jupyter session."
@@ -233,7 +236,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
 
 # Hub
 elif [ "${ip}" == "84.88.185.48" ]; then
-    echo "Warning: running in the hub may make Providentia slower ..."
+    echo "INFO: Running in the hub..."
     eval "${load_command}"
     if $interactive; then
         echo "Starting interactive jupyter session."
@@ -245,7 +248,11 @@ elif [ "${ip}" == "84.88.185.48" ]; then
 
 # Local machines (Workstations, dust02 machine and personal laptops)
 else
-    echo "Warning: running in local machines may make Providentia slower ..."
+    if [ "${BSC_MACHINE}" == "mn5" ]; then
+        echo "INFO: Running in MN5..."
+    else
+        echo "INFO: Running in a local machine..."
+    fi
     if $interactive; then
         echo "Starting interactive jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}

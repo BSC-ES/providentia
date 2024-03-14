@@ -2024,13 +2024,13 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.map_markersize_unsel_sl = self.map_menu.sliders['markersize_unsel_sl']
-        self.map_markersize_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['s'])
+        self.map_markersize_unsel_sl.setValue(int(self.plot_characteristics['map']['marker_unselected']['s']))
         self.map_opacity_unsel_sl = self.map_menu.sliders['opacity_unsel_sl']
-        self.map_opacity_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['alpha']*10)
+        self.map_opacity_unsel_sl.setValue(int(self.plot_characteristics['map']['marker_unselected']['alpha']*10))
         self.map_markersize_sel_sl = self.map_menu.sliders['markersize_sel_sl']
-        self.map_markersize_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['s'])
+        self.map_markersize_sel_sl.setValue(int(self.plot_characteristics['map']['marker_selected']['s']))
         self.map_opacity_sel_sl = self.map_menu.sliders['opacity_sel_sl']
-        self.map_opacity_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['alpha']*10)
+        self.map_opacity_sel_sl.setValue(int(self.plot_characteristics['map']['marker_selected']['alpha']*10))
         
         # get map interactive dictionary
         self.interactive_elements['map'] = {'hidden': True,
@@ -2053,11 +2053,11 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.timeseries_markersize_sl = self.timeseries_menu.sliders['markersize_sl']
-        self.timeseries_markersize_sl.setMaximum(self.plot_characteristics['timeseries']['plot']['markersize']*10)
-        self.timeseries_markersize_sl.setValue(self.plot_characteristics['timeseries']['plot']['markersize'])
+        self.timeseries_markersize_sl.setMaximum(int(self.plot_characteristics['timeseries']['plot']['markersize']*10))
+        self.timeseries_markersize_sl.setValue(int(self.plot_characteristics['timeseries']['plot']['markersize']))
         self.timeseries_smooth_linewidth_sl = self.timeseries_menu.sliders['smooth_linewidth_sl']
-        self.timeseries_smooth_linewidth_sl.setMaximum(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*100)
-        self.timeseries_smooth_linewidth_sl.setValue(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*10)
+        self.timeseries_smooth_linewidth_sl.setMaximum(int(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*100))
+        self.timeseries_smooth_linewidth_sl.setValue(int(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*10))
         self.timeseries_smooth_window_sl = self.timeseries_menu.sliders['smooth_window_sl']
 
         # get timeseries interactive dictionary
@@ -2078,11 +2078,11 @@ class MPLCanvas(FigureCanvas):
         
         # get sliders and update values
         self.periodic_markersize_sl = self.periodic_menu.sliders['markersize_sl']
-        self.periodic_markersize_sl.setMaximum(self.plot_characteristics['periodic']['plot']['markersize']*10)
-        self.periodic_markersize_sl.setValue(self.plot_characteristics['periodic']['plot']['markersize'])
+        self.periodic_markersize_sl.setMaximum(int(self.plot_characteristics['periodic']['plot']['markersize']*10))
+        self.periodic_markersize_sl.setValue(int(self.plot_characteristics['periodic']['plot']['markersize']))
         self.periodic_linewidth_sl = self.periodic_menu.sliders['linewidth_sl']
-        self.periodic_linewidth_sl.setMaximum(self.plot_characteristics['periodic']['plot']['linewidth']*100)
-        self.periodic_linewidth_sl.setValue(self.plot_characteristics['periodic']['plot']['linewidth']*10)
+        self.periodic_linewidth_sl.setMaximum(int(self.plot_characteristics['periodic']['plot']['linewidth']*100))
+        self.periodic_linewidth_sl.setValue(int(self.plot_characteristics['periodic']['plot']['linewidth']*10))
 
         # get periodic interactive dictionary
         self.interactive_elements['periodic'] = {'hidden': True,
@@ -2098,11 +2098,11 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.periodic_violin_markersize_sl = self.periodic_violin_menu.sliders['markersize_sl']
-        self.periodic_violin_markersize_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['markersize']*10)
-        self.periodic_violin_markersize_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['markersize'])
+        self.periodic_violin_markersize_sl.setMaximum(int(self.plot_characteristics['periodic-violin']['plot']['median']['markersize']*10))
+        self.periodic_violin_markersize_sl.setValue(int(self.plot_characteristics['periodic-violin']['plot']['median']['markersize']))
         self.periodic_violin_linewidth_sl = self.periodic_violin_menu.sliders['linewidth_sl']
-        self.periodic_violin_linewidth_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*100)
-        self.periodic_violin_linewidth_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*10)
+        self.periodic_violin_linewidth_sl.setMaximum(int(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*100))
+        self.periodic_violin_linewidth_sl.setValue(int(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*10))
 
         # get periodic violin interactive dictionary
         self.interactive_elements['periodic_violin'] = {'hidden': True,
@@ -2128,7 +2128,7 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.distribution_linewidth_sl = self.distribution_menu.sliders['linewidth_sl']
-        self.distribution_linewidth_sl.setMaximum(self.plot_characteristics['distribution']['plot']['linewidth']*100)
+        self.distribution_linewidth_sl.setMaximum(int(self.plot_characteristics['distribution']['plot']['linewidth']*100))
         self.distribution_linewidth_sl.setValue(self.plot_characteristics['distribution']['plot']['linewidth']*10)
 
         # get distribution interactive dictionary
@@ -2144,11 +2144,11 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.scatter_markersize_sl = self.scatter_menu.sliders['markersize_sl']
-        self.scatter_markersize_sl.setMaximum(self.plot_characteristics['scatter']['plot']['markersize']*10)
-        self.scatter_markersize_sl.setValue(self.plot_characteristics['scatter']['plot']['markersize'])
+        self.scatter_markersize_sl.setMaximum(int(self.plot_characteristics['scatter']['plot']['markersize']*10))
+        self.scatter_markersize_sl.setValue(int(self.plot_characteristics['scatter']['plot']['markersize']))
         self.scatter_regression_linewidth_sl = self.scatter_menu.sliders['regression_linewidth_sl']
-        self.scatter_regression_linewidth_sl.setMaximum(self.plot_characteristics['scatter']['regression']['linewidth']*100)
-        self.scatter_regression_linewidth_sl.setValue(self.plot_characteristics['scatter']['regression']['linewidth']*10)
+        self.scatter_regression_linewidth_sl.setMaximum(int(self.plot_characteristics['scatter']['regression']['linewidth']*100))
+        self.scatter_regression_linewidth_sl.setValue(int(self.plot_characteristics['scatter']['regression']['linewidth']*10))
 
         # get scatter interactive dictionary
         self.interactive_elements['scatter'] = {'hidden': True,
@@ -2194,8 +2194,8 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.taylor_markersize_sl = self.taylor_menu.sliders['markersize_sl']
-        self.taylor_markersize_sl.setMaximum(self.plot_characteristics['taylor']['plot']['markersize']*10)
-        self.taylor_markersize_sl.setValue(self.plot_characteristics['taylor']['plot']['markersize'])
+        self.taylor_markersize_sl.setMaximum(int(self.plot_characteristics['taylor']['plot']['markersize']*10))
+        self.taylor_markersize_sl.setValue(int(self.plot_characteristics['taylor']['plot']['markersize']))
 
         # get statsummary interactive dictionary
         self.interactive_elements['taylor'] = {'hidden': True,
