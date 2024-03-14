@@ -153,7 +153,43 @@ if [ "${BSC_MACHINE}" == "power" ]; then
             eval "${salloc_command} ${queue_option} ${memory_option} srun ${python_command}"
         fi
     fi
-    
+
+# Marenostrum5
+elif [ "${BSC_MACHINE}" == "mn5" ]; then
+    echo "INFO: Running in MN5..."
+
+    if $interactive; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+        echo "Starting interactive jupyter session."
+        echo "Check 'interactive.out' for information on how to connect to session."
+        if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+            eval "${interactive_alloc_command} ${queue_option} interactive.sh"
+        else
+            eval "${interactive_alloc_command} ${constraint_option} ${queue_option} interactive.sh"
+        fi
+
+    elif $debug; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+        echo "Entering debug mode"
+        if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+            eval "${salloc_command} ${queue_option}"
+        else
+            eval "${salloc_command} ${constraint_option} ${queue_option}"
+        fi
+
+    else
+        if $debugexec; then
+            eval "srun ${python_command}"
+        else
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                eval "${salloc_command} ${queue_option} srun ${python_command}"
+            else
+                eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+            fi
+        fi
+    fi
+
 # Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     echo "INFO: Running in MN4..."
@@ -248,11 +284,7 @@ elif [ "${ip}" == "84.88.185.48" ]; then
 
 # Local machines (Workstations, dust02 machine and personal laptops)
 else
-    if [ "${BSC_MACHINE}" == "mn5" ]; then
-        echo "INFO: Running in MN5..."
-    else
-        echo "INFO: Running in a local machine..."
-    fi
+    echo "INFO: Running in a local machine..."
     if $interactive; then
         echo "Starting interactive jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
