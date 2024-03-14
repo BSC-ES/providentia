@@ -8,6 +8,7 @@ import re
 import socket
 import subprocess
 import sys
+import matplotlib
 import numpy as np
 import pandas as pd
 
@@ -636,11 +637,12 @@ class ProvConfiguration:
         if not self.read_instance.active_dashboard_plots:
             default = ['timeseries', 'statsummary', 'distribution', 'periodic']
             self.read_instance.active_dashboard_plots = default
-        # TODO: For Taylor diagrams, remove this piece of code until Matplotlib 3.7.2 is available
+        # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
         else:
-            if 'taylor' in self.read_instance.active_dashboard_plots:
-                error = 'It is not possible to create Taylor diagrams yet, please remove.'
-                sys.exit(error)
+            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
+                if 'taylor' in self.read_instance.active_dashboard_plots:
+                    error = 'It is not possible to create Taylor diagrams yet, please remove.'
+                    sys.exit(error)
 
         if (len(self.read_instance.active_dashboard_plots) != 4) and (not self.read_instance.offline) & (not self.read_instance.interactive):
             error = 'Error: there must be 4 "active_dashboard_plots"'

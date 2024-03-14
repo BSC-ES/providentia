@@ -549,7 +549,8 @@ class HoverAnnotation(object):
                 self.annotation.xy = (corr_stat, stddev)
 
                 # update bbox position
-                if corr_stat > self.x_middle['taylor']:
+                corr_stat_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
+                if corr_stat > corr_stat_middle:
                     self.annotation.set_x(-10)
                     self.annotation.set_ha('right')
                 else:
