@@ -731,7 +731,9 @@ def get_data_lims(ax, lim, plot_options):
             line_data = line.get_xdata()
         elif lim == 'ylim':
             line_data = line.get_ydata()
-        if (list(line_data) == [0, 1]) or (list(line_data) == [0, 0.5]):
+        if ((list(line_data) == [0, 1]) 
+            or (list(line_data) == [0, 0.5] 
+            or (list(line_data) == [[1.0], [1.0]]))):
             continue
         lines.extend(line_data)
 
