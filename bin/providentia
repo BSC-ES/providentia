@@ -314,23 +314,23 @@ elif [ "${ip}" == "84.88.185.48" ]; then
 else
     echo "INFO: Running in a local machine..."
     
-    # # load modules from conda environment
-    # active_env=false
-    # eval "$(conda shell.bash hook)"
-    # if conda info --envs | grep -q providentia-env; then 
-    #     conda activate providentia-env
-    #     active_env=true
-    # else
-    #     # create environment if it does not exist
-    #     echo "Environment providentia-env does not exist."; 
-    #     echo "Creating environment..."
-    #     conda create -n providentia-env -y
-    #     conda activate providentia-env
-    #     conda install -c conda-forge cartopy -y
-    #     conda install -c conda-forge jupyterlab -y
-    #     pip install -r requirements.txt
-    #     active_env=true
-    # fi
+    # load modules from conda environment
+    active_env=false
+    eval "$(conda shell.bash hook)"
+    if conda info --envs | grep -q providentia-env; then 
+        conda activate providentia-env
+        active_env=true
+    else
+        # create environment if it does not exist
+        echo "Environment providentia-env does not exist."; 
+        echo "Creating environment..."
+        conda create -n providentia-env -y
+        conda activate providentia-env
+        conda install -c conda-forge cartopy -y
+        conda install -c conda-forge jupyterlab -y
+        pip install -r requirements.txt
+        active_env=true
+    fi
 
     if $interactive; then
         echo "Starting interactive jupyter session."
