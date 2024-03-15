@@ -163,7 +163,7 @@ elif [ "${BSC_MACHINE}" == "mn5" ]; then
     # load modules from conda environment
     active_env=false
     eval "$(conda shell.bash hook)"
-    if conda info --envs | grep -q providentia-env; then 
+    if [ `conda info --envs | grep -q providentia-env` ]; then 
         conda activate providentia-env
         active_env=true
     else
@@ -317,7 +317,7 @@ else
     # load modules from conda environment
     active_env=false
     eval "$(conda shell.bash hook)"
-    if conda info --envs | grep -q providentia-env; then 
+    if [ `conda info --envs | grep -q providentia-env` ]; then 
         conda activate providentia-env
         active_env=true
     else
