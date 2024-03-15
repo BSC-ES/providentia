@@ -314,7 +314,7 @@ def spatial_colocation_ghost(longitudes, latitudes, measurement_altitudes):
             intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies], dtype=np.int64)
         else:
             _, species_intersect_inds, _ = np.intersect1d(pairwise_intersect_inds['{}_{}'.format(firstnetworkspecies, networkspecies)], pairwise_intersect_inds[firstnetworkspecies], return_indices=True)
-            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies][species_intersect_inds], dtype=np.int)
+            intersecting_indices[networkspecies] = np.array(pairwise_intersect_inds[networkspecies][species_intersect_inds], dtype=np.int64)
 
     return intersecting_indices
 
