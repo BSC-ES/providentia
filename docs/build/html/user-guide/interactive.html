@@ -68,7 +68,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#plot-types">Plot types</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-providentia.interactive">Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#providentia.interactive.Interactive"><code class="docutils literal notranslate"><span class="pre">Interactive</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="configuration-files.html">Configuration files</a></li>
@@ -444,8 +447,183 @@ The legend plot can be made as follows:</p>
 <code class="docutils literal notranslate"><span class="pre">bias</span></code>, <code class="docutils literal notranslate"><span class="pre">multispecies</span></code></p>
 </section>
 </section>
-<section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<section id="module-providentia.interactive">
+<span id="functions"></span><h2>Functions<a class="headerlink" href="#module-providentia.interactive" title="Link to this heading"></a></h2>
+<p>Class to create interactive session</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">providentia.interactive.</span></span><span class="sig-name descname"><span class="pre">Interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to create interactive Providentia session.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.apply_filter">
+<span class="sig-name descname"><span class="pre">apply_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.apply_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.apply_filter" title="Link to this definition"></a></dt>
+<dd><p>Wrapper method to select specific station/s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>str</em>) – field to filter by</p></li>
+<li><p><strong>limit</strong> (<em>str</em><em>, </em><em>optional</em>) – limit for filtering representativity fields</p></li>
+<li><p><strong>keep</strong> (<em>str</em><em>, </em><em>optional</em>) – data to keep</p></li>
+<li><p><strong>remove</strong> (<em>str</em><em>, </em><em>optional</em>) – data to remove</p></li>
+<li><p><strong>lower</strong> (<em>str</em><em>, </em><em>optional</em>) – lower bound to retain data</p></li>
+<li><p><strong>upper</strong> (<em>str</em><em>, </em><em>optional</em>) – upper bound to retain data</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.calculate_stat">
+<span class="sig-name descname"><span class="pre">calculate_stat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labela</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.calculate_stat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.calculate_stat" title="Link to this definition"></a></dt>
+<dd><p>Wrapper method to calculate statistic/s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stat</strong> (<em>str</em>) – Statistic</p></li>
+<li><p><strong>labela</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of first dataset, defaults to ‘’</p></li>
+<li><p><strong>labelb</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of second dataset (if defined then a bias plot is made), defaults to ‘’</p></li>
+<li><p><strong>per_station</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if the station data is per station or for all stations, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Statistic value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.get_data">
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nc'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.get_data" title="Link to this definition"></a></dt>
+<dd><p>Wrapper method return data / metadata in specific format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – File format, defaults to ‘nc’</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.get_var">
+<span class="sig-name descname"><span class="pre">get_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.get_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.get_var" title="Link to this definition"></a></dt>
+<dd><p>Wrapper method to return specific data / metadata variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>var</strong> (<em>str</em><em>, </em><em>optional</em>) – Variable name, defaults to ‘’</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.make_plot">
+<span class="sig-name descname"><span class="pre">make_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labela</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_obs_legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_extent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidedata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multispecies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.make_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.make_plot" title="Link to this definition"></a></dt>
+<dd><p>Wrapper method to make a Providentia plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plot</strong> (<em>str</em>) – Plot type</p></li>
+<li><p><strong>data_labels</strong> (<em>list</em><em>, </em><em>optional</em>) – Data arrays to plot, defaults to None</p></li>
+<li><p><strong>labela</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of first dataset, defaults to ‘’</p></li>
+<li><p><strong>labelb</strong> (<em>str</em><em>, </em><em>optional</em>) – Label of second dataset (if defined then a bias plot is made), defaults to ‘’</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Axes title, defaults to None</p></li>
+<li><p><strong>xlabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Label on x axes, defaults to None</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Label on y axes, defaults to None</p></li>
+<li><p><strong>cb</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if colorbar appears on plot, defaults to True</p></li>
+<li><p><strong>legend</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if legend appears on plot, defaults to True</p></li>
+<li><p><strong>set_obs_legend</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if observations appear on legend, defaults to True</p></li>
+<li><p><strong>map_extent</strong> (<em>list</em><em>, </em><em>optional</em>) – Map extent, defaults to None</p></li>
+<li><p><strong>annotate</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if there are annotations, defaults to False</p></li>
+<li><p><strong>bias</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if data is biased, defaults to False</p></li>
+<li><p><strong>domain</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if domain shows in maps, defaults to False</p></li>
+<li><p><strong>hidedata</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if data points are hidden in plot, defaults to False</p></li>
+<li><p><strong>logx</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if the scale of the x axis is log, defaults to False</p></li>
+<li><p><strong>logy</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if the scale of the y axis is log, defaults to False</p></li>
+<li><p><strong>multispecies</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if plot has multispecies, defaults to False</p></li>
+<li><p><strong>regression</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if scatter plot has regression line/s, defaults to False</p></li>
+<li><p><strong>smooth</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if timeseries has smooth line/s, defaults to False</p></li>
+<li><p><strong>threshold</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if plot has threshold line/s, defaults to False</p></li>
+<li><p><strong>plot_options</strong> (<em>list</em><em>, </em><em>optional</em>) – List with plot options, defaults to None</p></li>
+<li><p><strong>save</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if you want to save the figure, defaults to False</p></li>
+<li><p><strong>return_plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicates if you want to get the axes, defaults to False</p></li>
+<li><p><strong>format</strong> (<em>dict</em><em>, </em><em>optional</em>) – Format to overwrite the plots format taken from plot characteristics</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>matplotlib.axes._axes.Axes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Plot axes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.print_config">
+<span class="sig-name descname"><span class="pre">print_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.print_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.print_config" title="Link to this definition"></a></dt>
+<dd><p>Print selected config file to console.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf</strong> (<em>str</em><em>, </em><em>optional</em>) – Configuration file name, defaults to None</p></li>
+<li><p><strong>config</strong> (<em>str</em><em>, </em><em>optional</em>) – Configuration file name, defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.reset_filter">
+<span class="sig-name descname"><span class="pre">reset_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.reset_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.reset_filter" title="Link to this definition"></a></dt>
+<dd><p>Wrapper method to reset filter data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>initialise</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Indicates whether to reset data to initial state when class was initialised</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nc'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.save" title="Link to this definition"></a></dt>
+<dd><p>Wrapper method to save current data/ metadata in memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em><em>, </em><em>optional</em>) – File name, defaults to ‘’</p></li>
+<li><p><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – File format, defaults to ‘nc’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="providentia.interactive.Interactive.select_station">
+<span class="sig-name descname"><span class="pre">select_station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">station</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/providentia/interactive.html#Interactive.select_station"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.interactive.Interactive.select_station" title="Link to this definition"></a></dt>
+<dd><p>Wrapper method to select specific station/s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>station</strong> (<em>str</em>) – Station reference</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
