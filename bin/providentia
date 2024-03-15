@@ -3,7 +3,11 @@
 cores=12
 jobname="PRV"
 time="02:00:00"
-queue="debug"
+if [ "${BSC_MACHINE}" == "mn5" ]; then
+    queue="gp_interactive"
+else
+    queue="debug"
+fi
 mem="20Gb"
 constraint="medmem"
 
@@ -82,6 +86,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+account_option="--account=bsc32"
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
@@ -111,17 +116,13 @@ else
 fi
 
 # determine if need to just excecute python if have allocation made (i.e. are in debug mode)
-VALID_HOSTS="p9login1 login0 login1 login2 login3 login4"
+VALID_HOSTS="p9login1 login0 login1 login2 login3 login4 glogin1 glogin2 glogin3 glogin4"
 HOST=`hostname`
 if [[ " $VALID_HOSTS " =~ .*\ $HOST\ .* ]]; then
     debugexec=false
 else
     debugexec=true
 fi
-
-# load modules from conda environment
-# EXPORTPATH="/gpfs/home/bsc32/bsc32781/.conda/envs/myenv/lib/python3.9/site-packages"
-# export PYTHONPATH=${EXPORTPATH}:${PYTHONPATH}
 
 # get IP
 ip=$(hostname --ip-address)
@@ -156,36 +157,63 @@ if [ "${BSC_MACHINE}" == "power" ]; then
 
 # Marenostrum5
 elif [ "${BSC_MACHINE}" == "mn5" ]; then
+
     echo "INFO: Running in MN5..."
 
-    if $interactive; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-        echo "Starting interactive jupyter session."
-        echo "Check 'interactive.out' for information on how to connect to session."
-        if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-            eval "${interactive_alloc_command} ${queue_option} interactive.sh"
-        else
-            eval "${interactive_alloc_command} ${constraint_option} ${queue_option} interactive.sh"
-        fi
-
-    elif $debug; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-        echo "Entering debug mode"
-        if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-            eval "${salloc_command} ${queue_option}"
-        else
-            eval "${salloc_command} ${constraint_option} ${queue_option}"
-        fi
-
+    # load modules from conda environment
+    active_env=false
+    eval "$(conda shell.bash hook)"
+    if conda info --envs | grep -q providentia-env; then 
+        conda activate providentia-env
+        active_env=true
     else
-        if $debugexec; then
-            eval "srun ${python_command}"
+        # create environment if it does not exist if we are in glogin4 (with internet)
+        echo "Environment providentia-env does not exist."; 
+        node=$(hostname -s)
+        if [ "${node}" == "glogin4" ]; then
+            echo "Creating environment..."
+            conda create -n providentia-env -y
+            conda activate providentia-env
+            conda install -c conda-forge cartopy -y
+            conda install -c conda-forge jupyterlab -y
+            pip install -r requirements.txt
+            active_env=true
         else
+            echo "Please connect to MN5 using glogin4 to create the environment automatically."
+        fi
+    fi
+
+    if $active_env; then
+        if $interactive; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            echo "Starting interactive jupyter session."
+            echo "Check 'interactive.out' for information on how to connect to session."
+            
             if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                eval "${salloc_command} ${queue_option} srun ${python_command}"
+                eval "${interactive_alloc_command} ${account_option} ${queue_option} interactive.sh"
             else
-                eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
+                eval "${interactive_alloc_command} ${account_option} ${constraint_option} ${queue_option} interactive.sh"
+            fi
+
+        elif $debug; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            echo "Entering debug mode"
+            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                eval "${salloc_command} ${account_option} ${queue_option}"
+            else
+                eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option}"
+            fi
+
+        else
+            if $debugexec; then
+                eval "srun ${account_option} ${python_command}"
+            else
+                echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                    eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                else
+                    eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
+                fi
             fi
         fi
     fi
@@ -285,6 +313,25 @@ elif [ "${ip}" == "84.88.185.48" ]; then
 # Local machines (Workstations, dust02 machine and personal laptops)
 else
     echo "INFO: Running in a local machine..."
+    
+    # # load modules from conda environment
+    # active_env=false
+    # eval "$(conda shell.bash hook)"
+    # if conda info --envs | grep -q providentia-env; then 
+    #     conda activate providentia-env
+    #     active_env=true
+    # else
+    #     # create environment if it does not exist
+    #     echo "Environment providentia-env does not exist."; 
+    #     echo "Creating environment..."
+    #     conda create -n providentia-env -y
+    #     conda activate providentia-env
+    #     conda install -c conda-forge cartopy -y
+    #     conda install -c conda-forge jupyterlab -y
+    #     pip install -r requirements.txt
+    #     active_env=true
+    # fi
+
     if $interactive; then
         echo "Starting interactive jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
