@@ -4,7 +4,7 @@ cores=12
 jobname="PRV"
 time="02:00:00"
 if [ "${BSC_MACHINE}" == "mn5" ]; then
-    queue="gp_interactive"
+    queue="gp_debug"
 else
     queue="debug"
 fi
@@ -115,7 +115,7 @@ else
     interactive=false
 fi
 
-# determine if need to just excecute python if have allocation made (i.e. are in debug mode)
+# determine if need to just execute python if have allocation made (i.e. are in debug mode)
 VALID_HOSTS="p9login1 login0 login1 login2 login3 login4 glogin1 glogin2 glogin3 glogin4"
 HOST=`hostname`
 if [[ " $VALID_HOSTS " =~ .*\ $HOST\ .* ]]; then
