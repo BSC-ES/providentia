@@ -4,10 +4,12 @@ import configparser
 import copy
 import json
 import os
+import platform
 import re
 import socket
 import subprocess
 import sys
+
 import numpy as np
 import pandas as pd
 
@@ -52,12 +54,14 @@ class ProvConfiguration:
             'conf': '',
             'config': '',
             'config_dir': os.path.join(PROVIDENTIA_ROOT, 'configurations/'),
+            'operating_system': '',
             'cartopy_data_dir': '',
             'available_cpus': '',
             'n_cpus': '',
             'ghost_root': '',
             'nonghost_root': '',
             'exp_root': '',
+            'generate_file_tree': False,
             'offline': False,
             'interactive': False,
             'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
@@ -102,8 +106,8 @@ class ProvConfiguration:
             'harmonise_summary': True,
             'harmonise_stations': True,
             'remove_extreme_stations': None,
-            'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
-                                    'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
+            'fixed_section_vars':  ['ghost_version', 'config_dir', 'operating_system', 'cartopy_data_dir', 'available_cpus', 
+                                    'n_cpus', 'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
                                     'available_resolutions', 'available_networks',
                                     'network', 'species', 'resolution', 'start_date', 'end_date', 
                                     'observations_data_label', 'experiments', 'temporal_colocation', 'spatial_colocation', 
@@ -134,7 +138,21 @@ class ProvConfiguration:
                     return value
             else:
                 return value
-                
+    
+        elif key == 'operating_system':
+            # get operating system
+            operating_system = platform.system()
+            if operating_system == 'Darwin':
+                operating_system = 'Mac'
+            elif operating_system == 'Linux':
+                operating_system = 'Linux'
+            elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
+                operating_system = 'Windows'
+            else:
+                error = 'Error: The OS cannot be detected.'
+                sys.exit(error)
+            return operating_system
+
         elif key == 'available_cpus':
             # get available N CPUs
             if MACHINE in ['power', 'mn4', 'nord3v2']:
@@ -144,7 +162,10 @@ class ProvConfiguration:
                 except:
                     return 1
             else:
-                return len(os.sched_getaffinity(0))
+                if self.read_instance.operating_system == 'Linux':
+                    return len(os.sched_getaffinity(0))
+                else:
+                    return os.cpu_count()
 
         elif key == 'cartopy_data_dir':
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
