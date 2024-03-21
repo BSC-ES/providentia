@@ -263,7 +263,7 @@
     <span class="k">def</span> <span class="nf">make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                   <span class="n">cb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_obs_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
                   <span class="n">domain</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hidedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">multispecies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-                  <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                  <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make a Providentia plot.</span>
 
 <span class="sd">        :param plot: Plot type</span>
@@ -306,6 +306,8 @@
 <span class="sd">        :type regression: bool, optional</span>
 <span class="sd">        :param smooth: Indicates if timeseries has smooth line/s, defaults to False</span>
 <span class="sd">        :type smooth: bool, optional</span>
+<span class="sd">        :param threshold: Indicates if plot has threshold line/s, defaults to False</span>
+<span class="sd">        :type threshold: bool, optional</span>
 <span class="sd">        :param plot_options: List with plot options, defaults to None</span>
 <span class="sd">        :type plot_options: list, optional</span>
 <span class="sd">        :param save: Indicates if you want to save the figure, defaults to False</span>
@@ -368,6 +370,9 @@
                     <span class="k">pass</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">smooth</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">smooth</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">):</span>
                 <span class="n">smooth_window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">smooth</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;threshold&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">:</span>
+                <span class="n">plot_options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">)</span>
 
         <span class="c1"># get base plot type (no plot options), and plot type (with plot options)</span>
         <span class="n">base_plot_type</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
@@ -411,6 +416,13 @@
                     <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="k">return</span>
 
+                <span class="c1"># show warning if chunk stat is NStations and mode is not Temporal|Spatial</span>
+                <span class="k">if</span> <span class="n">chunk_stat</span> <span class="o">==</span> <span class="s1">&#39;NStations&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistic_mode</span> <span class="o">!=</span> <span class="s1">&#39;Temporal|Spatial&#39;</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Warning: </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s1"> cannot be created because </span><span class="si">{</span><span class="n">chunk_stat</span><span class="si">}</span><span class="s1"> &#39;</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;it is only available when Temporal|Spatial mode is active.&#39;</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="k">return</span>
+                    
         <span class="c1"># get zstat information </span>
         <span class="n">zstat</span><span class="p">,</span> <span class="n">base_zstat</span><span class="p">,</span> <span class="n">z_statistic_type</span><span class="p">,</span> <span class="n">z_statistic_sign</span><span class="p">,</span> <span class="n">z_statistic_period</span> <span class="o">=</span> <span class="n">get_z_statistic_info</span><span class="p">(</span><span class="n">plot_type</span><span class="o">=</span><span class="n">plot_type</span><span class="p">)</span> 
 
@@ -418,7 +430,26 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;map&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">z_statistic_sign</span> <span class="o">==</span> <span class="s1">&#39;bias&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">labelb</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Plotting a bias statistic, and only 1 label is set. Not making plot.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
+        
+        <span class="c1"># if bias and threshold plots are in plot options throw error</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;bias&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="s1">&#39;threshold&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Cannot make a bias plot showing threshold lines. Not making plot.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
 
+        <span class="c1"># do not make plot if hidedata is active but smooth is not in plot options</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;timeseries&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;hidedata&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;smooth&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Warning: Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2"> because &#39;hidedata&#39; plot option is set for &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;timeseries plot, but &#39;smooth&#39; is not active. Not making plot.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># do not make plot if hidedata is active but regression is not in plot options</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;scatter&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;hidedata&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;regression&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Warning: Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2"> because &#39;hidedata&#39; plot option is set for &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;scatter lot, but &#39;regression&#39; is not active. Not making plot.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
+        
         <span class="c1"># get data labels for plot</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">data_labels</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span>
@@ -733,7 +764,10 @@
                                 <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">map_title</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
 
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> at </span><span class="si">{}</span><span class="s1"> stations&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stat_label</span><span class="p">,</span> <span class="n">n_stations</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">zstat</span> <span class="o">==</span> <span class="s1">&#39;NStations&#39;</span><span class="p">:</span>
+                                <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stat_label</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> at </span><span class="si">{}</span><span class="s1"> stations&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stat_label</span><span class="p">,</span> <span class="n">n_stations</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;map&#39;</span><span class="p">:</span>
                                 <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">map_title</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
 
