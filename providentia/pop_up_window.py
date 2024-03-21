@@ -3,6 +3,7 @@
 import copy
 import json
 import os
+import platform
 import time
 
 import numpy as np
@@ -14,7 +15,14 @@ from .warnings import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
+# get operating system specific formatting
+operating_system = platform.system()
+if operating_system == 'Darwin':
+    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_mac.json')))
+elif operating_system == 'Linux':
+    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_linux.json')))
+elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
+    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_windows.json')))
 
 
 class PopUpWindow(QtWidgets.QWidget):

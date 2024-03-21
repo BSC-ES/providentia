@@ -40,7 +40,6 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
 
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
@@ -123,7 +122,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
-        
+
+        # get operating system specific formatting
+        if self.operating_system == 'Mac':
+            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_mac.json')))
+        elif self.operating_system == 'Linux':
+            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_linux.json')))
+        elif self.operating_system == 'Windows':
+            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_windows.json')))
+
         # load characteristics per plot type
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
@@ -140,14 +147,29 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # arguments are only local
         self.full_window_geometry = None
 
-        # create dictionary of all available observational GHOST data
-        self.all_observation_data = get_ghost_observational_tree(self)
+        # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
 
-        # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_files.json')))
-        # merge to existing GHOST observational data dict if we have the path
+        # generate file trees
+        if self.generate_file_tree:
+            self.all_observation_data = get_ghost_observational_tree(self)
+            if self.nonghost_root is not None:
+                nonghost_observation_data = get_nonghost_observational_tree(self)
+        # load file trees
+        else:
+            try:
+                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
+            except FileNotFoundError as file_error:
+                msg = "Error: Trying to load 'settings/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                sys.exit(msg)
+            if self.nonghost_root is not None:
+                try:
+                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json')))
+                except FileNotFoundError as file_error:
+                    msg = "Error: Trying to load 'settings/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                    sys.exit(msg)
+
+        # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:
-            nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
             self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
 
         # initialise DataReader
@@ -311,8 +333,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         parent_layout.setContentsMargins(0, 0, 0, 0)
 
         # define stylesheet for tooltips
-        self.setStyleSheet("QToolTip { font: %spt %s}" % (formatting_dict['tooltip']['font']['size'],
-                                                          formatting_dict['tooltip']['font']['style']))
+        self.setStyleSheet("QToolTip { font: %spt %s}" % (self.formatting_dict['tooltip']['font']['size'],
+                                                          self.formatting_dict['tooltip']['font']['style']))
 
         # setup configuration bar with combo boxes, input boxes and buttons
         # use a gridded layout to place objects
@@ -330,100 +352,100 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # define all configuration box objects (labels, comboboxes etc.)
         # data selection section
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"),
-                                                formatting_dict['title_menu'])
+                                                self.formatting_dict['title_menu'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
-        self.cb_network = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_network = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
         self.cb_network.setToolTip('Select providing observational data network. '
                                    'Names starting with * indicate non-GHOST datasets')
-        self.cb_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_resolution = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
         self.cb_resolution.setToolTip('Select temporal resolution of data')
-        self.cb_matrix = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_matrix = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
         self.cb_matrix.setToolTip('Select data matrix')
-        self.cb_species = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_species = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
         self.cb_species.setToolTip('Select species')
-        self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
+        self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
         self.le_start_date.setToolTip('Set data start date: YYYYMMDD')
-        self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
+        self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
         self.le_end_date.setToolTip('Set data end date: YYYYMMDD')
-        self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), formatting_dict['button_menu'])
+        self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), self.formatting_dict['button_menu'])
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
-        self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), formatting_dict['button_menu'])
+        self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), self.formatting_dict['button_menu'])
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
-        self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), formatting_dict['button_menu'])
+        self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), self.formatting_dict['button_menu'])
         self.bu_experiments.setToolTip('Select experiment/s data to read')
-        self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), formatting_dict['button_menu'])
+        self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), self.formatting_dict['button_menu'])
         self.bu_multispecies.setToolTip('Select data to filter by')
-        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), formatting_dict['button_menu'])
+        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), self.formatting_dict['button_menu'])
         self.bu_read.setStyleSheet("color: green;")
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
 
         # filters section
-        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), formatting_dict['title_menu'])
+        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), self.formatting_dict['title_menu'])
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
-        self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), formatting_dict['button_menu'])
+        self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), self.formatting_dict['button_menu'])
         self.bu_rep.setToolTip('Select % desired representativity in data across '
                                'whole record and for specific temporal periods')
-        self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), formatting_dict['button_menu'])
+        self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), self.formatting_dict['button_menu'])
         self.bu_meta.setToolTip('Select metadata to filter by')
-        self.bu_reset = set_formatting(QtWidgets.QPushButton('RESET', self), formatting_dict['button_menu'])
+        self.bu_reset = set_formatting(QtWidgets.QPushButton('RESET', self), self.formatting_dict['button_menu'])
         self.bu_reset.setToolTip('Reset filter fields to initial values')
         self.bu_reset.setStyleSheet("color: red;")
-        self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), formatting_dict['button_menu'])
+        self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), self.formatting_dict['button_menu'])
         self.bu_period.setToolTip('Select data in specific periods')
-        self.bu_filter = set_formatting(QtWidgets.QPushButton('FILTER', self), formatting_dict['button_menu'])
+        self.bu_filter = set_formatting(QtWidgets.QPushButton('FILTER', self), self.formatting_dict['button_menu'])
         self.bu_filter.setStyleSheet("color: blue;")
         self.bu_filter.setToolTip('Filter data')
-        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text="Bounds"), formatting_dict['label_menu'])
+        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text="Bounds"), self.formatting_dict['label_menu'])
         self.lb_data_bounds.setToolTip('Set lower/upper bounds of data')
-        self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
+        self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
         self.le_minimum_value.setToolTip('Set lower bound of data')
-        self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), formatting_dict['lineedit_menu'])
+        self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
 
         # statistical calculation section
         self.lb_statistic = set_formatting(QtWidgets.QLabel(self, text="Statistics"),
-                                             formatting_dict['title_menu'])
+                                             self.formatting_dict['title_menu'])
         self.lb_statistic.setToolTip('Select the type of statistical calculation')
-        self.lb_statistic_mode = set_formatting(QtWidgets.QLabel(self, text="Mode"), formatting_dict['label_menu'])
+        self.lb_statistic_mode = set_formatting(QtWidgets.QLabel(self, text="Mode"), self.formatting_dict['label_menu'])
         self.lb_statistic_mode.setToolTip('Select statistical calculation mode')
-        self.cb_statistic_mode = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_statistic_mode = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
         self.cb_statistic_mode.setToolTip('Select statistical calculation mode')
-        self.lb_statistic_aggregation = set_formatting(QtWidgets.QLabel(self, text="Aggregation"), formatting_dict['label_menu'])
+        self.lb_statistic_aggregation = set_formatting(QtWidgets.QLabel(self, text="Aggregation"), self.formatting_dict['label_menu'])
         self.lb_statistic_aggregation.setToolTip('Select statistic for spatial aggregation')
-        self.cb_statistic_aggregation = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_statistic_aggregation = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
         self.cb_statistic_aggregation.setToolTip('Select statistic for spatial aggregation')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
         
         # colocation section
-        self.lb_colocate = set_formatting(QtWidgets.QLabel(self, text="Colocation"), formatting_dict['title_menu'])
+        self.lb_colocate = set_formatting(QtWidgets.QLabel(self, text="Colocation"), self.formatting_dict['title_menu'])
         self.lb_colocate.setToolTip('Set colocation')
-        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Temporal"), formatting_dict['checkbox_menu'])
+        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Temporal"), self.formatting_dict['checkbox_menu'])
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
 
         # resampling section
-        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), formatting_dict['title_menu'])
+        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), self.formatting_dict['title_menu'])
         self.lb_resampling.setToolTip('Set resampling options')
-        self.cb_resampling_resolution = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.cb_resampling_resolution = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
         self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
         self.vertical_splitter_5 = QVLine()
         self.vertical_splitter_5.setMaximumWidth(20)
 
         # station selection section
         self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
-                                                   formatting_dict['title_menu'])
+                                                   self.formatting_dict['title_menu'])
         self.lb_station_selection.setToolTip('Select stations')
-        self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), formatting_dict['checkbox_menu'])
+        self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), self.formatting_dict['checkbox_menu'])
         self.ch_select_all.setToolTip('Select all stations')
-        self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), formatting_dict['checkbox_menu'])
+        self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), self.formatting_dict['checkbox_menu'])
         self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
-        self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), formatting_dict['checkbox_menu'])
+        self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), self.formatting_dict['checkbox_menu'])
         self.ch_extent.setToolTip('Select stations that are within the map extent')
 
         # position objects on gridded configuration bar
@@ -583,12 +605,17 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set finalised layout
         self.setLayout(parent_layout)
 
-        # plot whole dashboard
-        self.show()
-
-        # maximise window to fit screen
-        self.showMaximized()
-
+        # show dashboard. How to do this is different per system 
+        if self.operating_system == 'Mac':
+            self.showMaximized()
+            self.get_geometry()
+        elif self.operating_system == 'Linux':
+            self.show()
+            self.showMaximized()
+        elif self.operating_system == 'Windows':
+            self.show()
+            self.showMaximized()
+        
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
         

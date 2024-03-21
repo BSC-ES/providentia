@@ -1,7 +1,9 @@
 """ Objects and functions to interact with the axes """
 
+import copy
 import datetime
 import math
+import time
 
 import matplotlib
 from matplotlib.lines import Line2D
@@ -46,8 +48,8 @@ class LassoSelector(_SelectorWidget):
         which corresponds to all buttons.
     """
 
-    def __init__(self, canvas_instance, ax, onselect, useblit=True, props=None, button=None):
-        
+    def __init__(self, ax, onselect, useblit=True, props=None, button=None):
+
         super().__init__(ax, onselect, useblit=useblit, button=button)
         self.verts = None
         props = {
@@ -59,37 +61,18 @@ class LassoSelector(_SelectorWidget):
         line = Line2D([], [], **props)
         self.ax.add_line(line)
         self._selection_artist = line
-        self.canvas_instance = canvas_instance
 
         return None
     
     def _press(self, event):
-
+            
         self.verts = [self._get_data(event)]
         self._selection_artist.set_visible(True)
 
         return None
     
-    def _release(self, event):
-
-        if self.verts is not None:
-            self.verts.append(self._get_data(event))
-            self.onselect(self.verts)
-        self._selection_artist.set_data([[], []])
-        self._selection_artist.set_visible(False)
-        self.verts = None
-        if self.canvas_instance.map_annotation_disconnect:
-            self.canvas_instance.map_annotation_event = self.canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                self.canvas_instance.annotations['map'].hover_map_annotation)
-            self.canvas_instance.map_annotation_disconnect = False
-
-        return None
-    
     def _onmove(self, event):
-        
-        if not self.canvas_instance.map_annotation_disconnect:
-            self.canvas_instance.figure.canvas.mpl_disconnect(self.canvas_instance.map_annotation_event)
-            self.canvas_instance.map_annotation_disconnect = True
+
         if self.verts is None:
             return
         self.verts.append(self._get_data(event))
@@ -99,59 +82,71 @@ class LassoSelector(_SelectorWidget):
 
         return None
 
+    def _release(self, event):
+
+        if self.verts is not None:
+            self.verts.append(self._get_data(event))
+            self.onselect(self.verts)
+        self._selection_artist.set_data([[], []])
+        self._selection_artist.set_visible(False)
+        self.verts = None
+
+        return None
 
 def zoom_map_func(canvas_instance, event):
     """ Function to handle zoom on map using scroll wheel. """
 
     if event.inaxes == canvas_instance.plot_axes['map']:
+
+        # lock canvas drawing if can, else return
+        if canvas_instance.figure.canvas.widgetlock.locked():
+            if not canvas_instance.figure.canvas.widgetlock.isowner(canvas_instance.zoom_map_event):
+                return None
+        else:        
+            canvas_instance.figure.canvas.widgetlock(canvas_instance.zoom_map_event)
+
+        # get the current x and y limits
+        current_xlim = canvas_instance.plot_axes['map'].get_xlim()
+        current_ylim = canvas_instance.plot_axes['map'].get_ylim()
+
+        # get position of cursor
+        xdata = event.xdata
+        ydata = event.ydata
+        base_scale = canvas_instance.plot_characteristics['map']['base_scale']
+
+        if event.button == 'up':
+            # deal with zoom in
+            scale_factor = base_scale
+        elif event.button == 'down':
+            # deal with zoom out
+            scale_factor = 1/base_scale
+        else:
+            # exceptions
+            scale_factor = 1
         
-        if canvas_instance.lock_zoom == False:
-
-            # lock zoom
-            canvas_instance.lock_zoom = True
-
-            # get the current x and y limits
-            current_xlim = canvas_instance.plot_axes['map'].get_xlim()
-            current_ylim = canvas_instance.plot_axes['map'].get_ylim()
-
-            # get position of cursor
-            xdata = event.xdata
-            ydata = event.ydata
-            base_scale = canvas_instance.plot_characteristics['map']['base_scale']
-
-            if event.button == 'up':
-                # deal with zoom in
-                scale_factor = base_scale
-            elif event.button == 'down':
-                # deal with zoom out
-                scale_factor = 1/base_scale
-            else:
-                # exceptions
-                scale_factor = 1
+        if event.button == 'up' or event.button == 'down':
             
-            if event.button == 'up' or event.button == 'down':
-                
-                # set new limits
-                canvas_instance.plot_axes['map'].set_xlim([xdata - (xdata - current_xlim[0]) / scale_factor, 
-                                                           xdata + (current_xlim[1] - xdata) / scale_factor])
-                canvas_instance.plot_axes['map'].set_ylim([ydata - (ydata - current_ylim[0]) / scale_factor, 
-                                                           ydata + (current_ylim[1] - ydata) / scale_factor])
-                
-                # save map extent (in data coords)
-                canvas_instance.read_instance.map_extent = get_map_extent(canvas_instance)
-                
-                # draw changes
-                canvas_instance.figure.canvas.draw_idle()
+            # set new limits
+            canvas_instance.plot_axes['map'].set_xlim([xdata - (xdata - current_xlim[0]) / scale_factor, 
+                                                        xdata + (current_xlim[1] - xdata) / scale_factor])
+            canvas_instance.plot_axes['map'].set_ylim([ydata - (ydata - current_ylim[0]) / scale_factor, 
+                                                        ydata + (current_ylim[1] - ydata) / scale_factor])
             
-                # update buttons (previous-forward) history
-                canvas_instance.read_instance.navi_toolbar.push_current()
-                canvas_instance.read_instance.navi_toolbar.set_history_buttons()
+            # save map extent (in data coords)
+            canvas_instance.read_instance.map_extent = get_map_extent(canvas_instance)
+            
+            # draw changes
+            canvas_instance.figure.canvas.draw_idle()
+        
+            # update buttons (previous-forward) history
+            canvas_instance.read_instance.navi_toolbar.push_current()
+            canvas_instance.read_instance.navi_toolbar.set_history_buttons()
 
-                # unlock zoom
-                canvas_instance.lock_zoom = False
+        # unlock canvas drawing
+        if canvas_instance.figure.canvas.widgetlock.isowner(canvas_instance.zoom_map_event):
+            canvas_instance.figure.canvas.widgetlock.release(canvas_instance.zoom_map_event)
 
     return None
-
 
 def picker_block_func(canvas_instance, event):
     """ Block or unblock the station and legend pick functions
@@ -168,7 +163,6 @@ def picker_block_func(canvas_instance, event):
 
     return None
 
-
 def legend_picker_func(canvas_instance, event):
     """ Function to handle legend picker. """
 
@@ -176,7 +170,7 @@ def legend_picker_func(canvas_instance, event):
         if canvas_instance.plot_elements:
             # lock legend pick
             canvas_instance.lock_legend_pick = True
-        
+    
             # get legend label information
             legend_label = event.artist
             data_label = legend_label.get_text()
@@ -189,7 +183,7 @@ def legend_picker_func(canvas_instance, event):
                 # put experiment labels in the same order as in the legend
                 else:
                     canvas_instance.plot_elements['data_labels_active'].insert(list(canvas_instance.read_instance.experiments.values()).index(data_label)+1, 
-                                                                               data_label)
+                                                                                data_label)
             else:
                 visible = False
                 canvas_instance.plot_elements['data_labels_active'].remove(data_label)
@@ -207,10 +201,15 @@ def legend_picker_func(canvas_instance, event):
                         # get active (absolute / bias)
                         active = canvas_instance.plot_elements[plot_type]['active']
 
+                        #print(plot_type, active, visible)
+
                         # change visibility of plot elements (if data label in plot elements dictionary)
                         if data_label in canvas_instance.plot_elements[plot_type][active]:
                             for element_type in canvas_instance.plot_elements[plot_type][active][data_label]:
                                 for plot_element in canvas_instance.plot_elements[plot_type][active][data_label][element_type]:
+                                    #if plot_type == 'periodic':
+                                        #print(plot_element)
+
                                     if visible:
                                         plot_element.set_visible(True)
                                     else:
@@ -238,7 +237,7 @@ def legend_picker_func(canvas_instance, event):
 
             # draw changes
             canvas_instance.figure.canvas.draw_idle()
-            
+
             # unlock legend pick 
             canvas_instance.lock_legend_pick = False
 
@@ -287,10 +286,11 @@ class HoverAnnotation(object):
     def hover_annotation(self, event, plot_type):
         """ Function that annotates on hover in timeseries, scatter, distribution and taylor plots.
         """
-        
+
         # activate hover over plot
         if (plot_type in self.canvas_instance.read_instance.active_dashboard_plots):
             if event.inaxes == self.canvas_instance.plot_axes[plot_type]:
+
                 if ((hasattr(self.canvas_instance.plot, plot_type + '_plot')) 
                     and (plot_type in self.canvas_instance.plot_elements)
                     and (self.canvas_instance.annotations_lock[plot_type] == False)):
@@ -595,7 +595,7 @@ class HoverAnnotation(object):
 
     def update_periodic_annotation(self, annotation_index, resolution):
         """ Update annotation for each periodic point that is hovered. """
-        
+
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
             # for annotate data label
@@ -737,11 +737,11 @@ class HoverAnnotation(object):
         """ Function that annotates on hover in map.
         """
 
-        if (not self.canvas_instance.lock_zoom) & (event.inaxes == self.canvas_instance.plot_axes['map']):
+        if event.inaxes == self.canvas_instance.plot_axes['map']:
 
             # activate hover over map
             if (hasattr(self.canvas_instance.plot, 'stations_scatter')):
-                    
+
                 is_contained, annotation_index = self.canvas_instance.plot.stations_scatter.contains(event)
                 
                 if is_contained:
