@@ -190,11 +190,12 @@ class ProvidentiaOffline:
                             if plot_type[:4] != 'map-':
                                 self.station_plots_to_make.append(plot_type)
 
-            # TODO: For Taylor diagrams, remove this piece of code until Matplotlib 3.8 is available
-            for diagram_name in ['taylor', 'taylor-r', 'taylor-r2']:
-                if (diagram_name in self.station_plots_to_make) or (diagram_name in self.summary_plots_to_make):
-                    error = 'It is not possible to create Taylor diagrams yet, please remove.'
-                    sys.exit(error)
+            # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
+            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
+                if plot_type[:6] == 'taylor':
+                    if (plot_type in self.station_plots_to_make) or (plot_type in self.summary_plots_to_make):
+                        error = 'It is not possible to create Taylor diagrams yet, please remove.'
+                        sys.exit(error)
 
             # set plot characteristics for all plot types (summary, station)
             self.plots_to_make = list(self.summary_plots_to_make)
@@ -1203,6 +1204,32 @@ class ProvidentiaOffline:
         if (('bias' in plot_options) or (z_statistic_sign == 'bias')) & (len(data_labels) < 2):
             return plot_indices
 
+        # do not make plot if bias and threshold plots are in plot options
+        if ('bias' in plot_options) & ('threshold' in plot_options):
+            print("Warning: Cannot make a bias plot showing threshold lines. Not making plot.")
+            return plot_indices
+
+        # do not make plot if hidedata is active but smooth is not in plot options
+        if (base_plot_type == 'timeseries') and ('hidedata' in plot_options) and ('smooth' not in plot_options):
+            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg += "timeseries plot, but 'smooth' is not active. Not making plot."
+            print(msg)
+            return plot_indices
+        
+        # do not make plot if hidedata is active but regression is not in plot options
+        if (base_plot_type == 'scatter') and ('hidedata' in plot_options) and ('regression' not in plot_options):
+            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg += "scatter lot, but 'regression' is not active. Not making plot."
+            print(msg)
+            return plot_indices
+        
+        # do not make Taylor diagram if statistic is not r or r2
+        if (base_plot_type == 'taylor') and (zstat not in ['r', 'r2']):
+            msg = f"Warning: Cannot make {plot_type} because statistic is not available or defined. "
+            msg += "Choose between 'taylor-r' or 'taylor-r2'. Not making plot."
+            print(msg)
+            return plot_indices
+
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
         data_labels_sans_obs.remove(self.observations_data_label)
@@ -1482,7 +1509,7 @@ class ProvidentiaOffline:
                          plot_options, data_range_min=data_range_min, data_range_max=data_range_max) 
                 elif base_plot_type == 'taylor':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         plot_options, stddev_max=stddev_max)
+                         plot_options, zstat=zstat, stddev_max=stddev_max)
                 elif base_plot_type == 'timeseries':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                          plot_options, chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)   

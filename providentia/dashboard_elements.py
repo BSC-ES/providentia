@@ -31,7 +31,8 @@ def set_formatting(PyQt5_obj, format):
     for format_name, format_val in format.items():
         if format_name == 'font':
             
-            defined_font = QtGui.QFont(format['font']['style'], format['font']['size'])
+            
+            defined_font = QtGui.QFont(format['font']['style'], int(format['font']['size']))
 
             if 'bold' in format[format_name].keys():
                 defined_font.setBold(format['font']['bold'])

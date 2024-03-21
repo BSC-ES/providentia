@@ -31,7 +31,7 @@ from .filter import DataFilter
 from .plot import Plot
 from .plot_aux import get_map_extent
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
-from .plot_options import annotation, linear_regression, log_axes, smooth
+from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
 from .read_aux import get_lower_resolutions
 from .statistics import *
 from .warnings import show_message
@@ -235,8 +235,9 @@ class MPLCanvas(FigureCanvas):
         # plot domain edges on map and legend if have valid data
         if len(self.active_map_valid_station_inds) > 0:
 
-            # plot experiment grid domain edges on map
-            self.update_experiment_domain_edges()
+            # add 'domain' to plot options
+            if 'domain' not in self.current_plot_options['map']:
+                self.current_plot_options['map'].append('domain')
 
             # update legend
             self.update_legend()
@@ -749,8 +750,7 @@ class MPLCanvas(FigureCanvas):
                     # get r or r2 as correlation statistic
                     corr_stat = self.plot_characteristics[plot_type]['corr_stat']
                     relevant_zstats = [corr_stat, "StdDev"]
-                    stats_df = {relevant_zstat:[] for relevant_zstat in relevant_zstats}
-
+                
                 # setup xlabel / ylabel for other plot_types
                 else:    
                     # set new xlabel
@@ -783,7 +783,12 @@ class MPLCanvas(FigureCanvas):
                     
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
                          self.plot_characteristics[plot_type], plot_options,
-                         zstats=relevant_zstats, statsummary=True)                
+                         zstats=relevant_zstats, statsummary=True)   
+                # make taylor diagram
+                elif plot_type == 'taylor':
+                    corr_stat = self.plot_characteristics['taylor']['corr_stat']
+                    func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
+                         self.plot_characteristics[plot_type], plot_options, corr_stat)          
                 # other plots
                 else:
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
@@ -1200,7 +1205,7 @@ class MPLCanvas(FigureCanvas):
             # if correlation stat is empty string, it is because fields are being initialised for the first time
             if corr_stat == '':
                 # set stat to be the one in plot characteristics
-                corr_stat = self.plot_characteristics['taylor']['corr_stat']
+                corr_stat = available_corr_stats[0]
 
             # update statistic combobox (clear, then add items)
             self.taylor_corr_stat.clear()
@@ -2073,13 +2078,13 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.map_markersize_unsel_sl = self.map_menu.sliders['markersize_unsel_sl']
-        self.map_markersize_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['s'])
+        self.map_markersize_unsel_sl.setValue(int(self.plot_characteristics['map']['marker_unselected']['s']))
         self.map_opacity_unsel_sl = self.map_menu.sliders['opacity_unsel_sl']
-        self.map_opacity_unsel_sl.setValue(self.plot_characteristics['map']['marker_unselected']['alpha']*10)
+        self.map_opacity_unsel_sl.setValue(int(self.plot_characteristics['map']['marker_unselected']['alpha']*10))
         self.map_markersize_sel_sl = self.map_menu.sliders['markersize_sel_sl']
-        self.map_markersize_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['s'])
+        self.map_markersize_sel_sl.setValue(int(self.plot_characteristics['map']['marker_selected']['s']))
         self.map_opacity_sel_sl = self.map_menu.sliders['opacity_sel_sl']
-        self.map_opacity_sel_sl.setValue(self.plot_characteristics['map']['marker_selected']['alpha']*10)
+        self.map_opacity_sel_sl.setValue(int(self.plot_characteristics['map']['marker_selected']['alpha']*10))
         
         # get map interactive dictionary
         self.interactive_elements['map'] = {'hidden': True,
@@ -2102,11 +2107,11 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.timeseries_markersize_sl = self.timeseries_menu.sliders['markersize_sl']
-        self.timeseries_markersize_sl.setMaximum(self.plot_characteristics['timeseries']['plot']['markersize']*10)
-        self.timeseries_markersize_sl.setValue(self.plot_characteristics['timeseries']['plot']['markersize'])
+        self.timeseries_markersize_sl.setMaximum(int(self.plot_characteristics['timeseries']['plot']['markersize']*10))
+        self.timeseries_markersize_sl.setValue(int(self.plot_characteristics['timeseries']['plot']['markersize']))
         self.timeseries_smooth_linewidth_sl = self.timeseries_menu.sliders['smooth_linewidth_sl']
-        self.timeseries_smooth_linewidth_sl.setMaximum(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*100)
-        self.timeseries_smooth_linewidth_sl.setValue(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*10)
+        self.timeseries_smooth_linewidth_sl.setMaximum(int(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*100))
+        self.timeseries_smooth_linewidth_sl.setValue(int(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*10))
         self.timeseries_smooth_window_sl = self.timeseries_menu.sliders['smooth_window_sl']
 
         # get timeseries interactive dictionary
@@ -2127,11 +2132,11 @@ class MPLCanvas(FigureCanvas):
         
         # get sliders and update values
         self.periodic_markersize_sl = self.periodic_menu.sliders['markersize_sl']
-        self.periodic_markersize_sl.setMaximum(self.plot_characteristics['periodic']['plot']['markersize']*10)
-        self.periodic_markersize_sl.setValue(self.plot_characteristics['periodic']['plot']['markersize'])
+        self.periodic_markersize_sl.setMaximum(int(self.plot_characteristics['periodic']['plot']['markersize']*10))
+        self.periodic_markersize_sl.setValue(int(self.plot_characteristics['periodic']['plot']['markersize']))
         self.periodic_linewidth_sl = self.periodic_menu.sliders['linewidth_sl']
-        self.periodic_linewidth_sl.setMaximum(self.plot_characteristics['periodic']['plot']['linewidth']*100)
-        self.periodic_linewidth_sl.setValue(self.plot_characteristics['periodic']['plot']['linewidth']*10)
+        self.periodic_linewidth_sl.setMaximum(int(self.plot_characteristics['periodic']['plot']['linewidth']*100))
+        self.periodic_linewidth_sl.setValue(int(self.plot_characteristics['periodic']['plot']['linewidth']*10))
 
         # get periodic interactive dictionary
         self.interactive_elements['periodic'] = {'hidden': True,
@@ -2147,11 +2152,11 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.periodic_violin_markersize_sl = self.periodic_violin_menu.sliders['markersize_sl']
-        self.periodic_violin_markersize_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['markersize']*10)
-        self.periodic_violin_markersize_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['markersize'])
+        self.periodic_violin_markersize_sl.setMaximum(int(self.plot_characteristics['periodic-violin']['plot']['median']['markersize']*10))
+        self.periodic_violin_markersize_sl.setValue(int(self.plot_characteristics['periodic-violin']['plot']['median']['markersize']))
         self.periodic_violin_linewidth_sl = self.periodic_violin_menu.sliders['linewidth_sl']
-        self.periodic_violin_linewidth_sl.setMaximum(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*100)
-        self.periodic_violin_linewidth_sl.setValue(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*10)
+        self.periodic_violin_linewidth_sl.setMaximum(int(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*100))
+        self.periodic_violin_linewidth_sl.setValue(int(self.plot_characteristics['periodic-violin']['plot']['median']['linewidth']*10))
 
         # get periodic violin interactive dictionary
         self.interactive_elements['periodic_violin'] = {'hidden': True,
@@ -2177,7 +2182,7 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.distribution_linewidth_sl = self.distribution_menu.sliders['linewidth_sl']
-        self.distribution_linewidth_sl.setMaximum(self.plot_characteristics['distribution']['plot']['linewidth']*100)
+        self.distribution_linewidth_sl.setMaximum(int(self.plot_characteristics['distribution']['plot']['linewidth']*100))
         self.distribution_linewidth_sl.setValue(self.plot_characteristics['distribution']['plot']['linewidth']*10)
 
         # get distribution interactive dictionary
@@ -2193,11 +2198,11 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.scatter_markersize_sl = self.scatter_menu.sliders['markersize_sl']
-        self.scatter_markersize_sl.setMaximum(self.plot_characteristics['scatter']['plot']['markersize']*10)
-        self.scatter_markersize_sl.setValue(self.plot_characteristics['scatter']['plot']['markersize'])
+        self.scatter_markersize_sl.setMaximum(int(self.plot_characteristics['scatter']['plot']['markersize']*10))
+        self.scatter_markersize_sl.setValue(int(self.plot_characteristics['scatter']['plot']['markersize']))
         self.scatter_regression_linewidth_sl = self.scatter_menu.sliders['regression_linewidth_sl']
-        self.scatter_regression_linewidth_sl.setMaximum(self.plot_characteristics['scatter']['regression']['linewidth']*100)
-        self.scatter_regression_linewidth_sl.setValue(self.plot_characteristics['scatter']['regression']['linewidth']*10)
+        self.scatter_regression_linewidth_sl.setMaximum(int(self.plot_characteristics['scatter']['regression']['linewidth']*100))
+        self.scatter_regression_linewidth_sl.setValue(int(self.plot_characteristics['scatter']['regression']['linewidth']*10))
 
         # get scatter interactive dictionary
         self.interactive_elements['scatter'] = {'hidden': True,
@@ -2243,8 +2248,8 @@ class MPLCanvas(FigureCanvas):
 
         # get sliders and update values
         self.taylor_markersize_sl = self.taylor_menu.sliders['markersize_sl']
-        self.taylor_markersize_sl.setMaximum(self.plot_characteristics['taylor']['plot']['markersize']*10)
-        self.taylor_markersize_sl.setValue(self.plot_characteristics['taylor']['plot']['markersize'])
+        self.taylor_markersize_sl.setMaximum(int(self.plot_characteristics['taylor']['plot']['markersize']*10))
+        self.taylor_markersize_sl.setValue(int(self.plot_characteristics['taylor']['plot']['markersize']))
 
         # get statsummary interactive dictionary
         self.interactive_elements['taylor'] = {'hidden': True,
@@ -2320,6 +2325,11 @@ class MPLCanvas(FigureCanvas):
                 if event_source in self.interactive_elements[key]['markersize_sl']:
                     markersize = self.interactive_elements[key]['markersize_sl'][loc].value()
                     break
+        
+        # correct perodic-violin name
+        if key == 'periodic_violin':
+            key = 'periodic-violin'
+            
         self.update_markersize(self.plot_axes[key], key, markersize, event_source)
 
         return None
@@ -2353,6 +2363,11 @@ class MPLCanvas(FigureCanvas):
                 if event_source in self.interactive_elements[key]['linewidth_sl']:
                     linewidth = self.interactive_elements[key]['linewidth_sl'][0].value()/10
                     break
+
+        # correct perodic-violin name
+        if key == 'periodic_violin':
+            key = 'periodic-violin'
+
         self.update_linewidth(self.plot_axes[key], key, linewidth)
 
         return None
@@ -2396,30 +2411,67 @@ class MPLCanvas(FigureCanvas):
                 orig_plot_options = event_source.currentData(all=True)
                 mod_plot_options = copy.deepcopy(orig_plot_options)
 
-                #ensure bias option is handled first (to set z_statistic_sign)
+                # ensure bias option is handled first (to set z_statistic_sign)
                 if 'bias' in mod_plot_options:
                     mod_plot_options.remove('bias')
                     mod_plot_options.insert(0, 'bias')
 
+                # disable bias when threshold is active and viceversa
+                if (('bias' in self.previous_plot_options[plot_type]) 
+                    and ("bias" in self.current_plot_options[plot_type]) 
+                    and ("threshold" in self.current_plot_options[plot_type])):
+                    msg = "Bias will be deactivated to show threshold lines"
+                    show_message(self.read_instance, msg)
+                    bias_index = orig_plot_options.index('bias')
+                    self.update_option_on_combobox(event_source, bias_index)
+                    self.current_plot_options[plot_type].remove('bias')
+                if (('threshold' in self.previous_plot_options[plot_type]) 
+                    and ("bias" in self.current_plot_options[plot_type]) 
+                    and ("threshold" in self.current_plot_options[plot_type])
+                    and (len(self.read_instance.data_labels) > 1)):
+                    msg = "Thresholds will be deactivated to show bias plots"
+                    show_message(self.read_instance, msg)
+                    threshold_index = orig_plot_options.index('threshold')
+                    self.update_option_on_combobox(event_source, threshold_index)
+                    self.current_plot_options[plot_type].remove('threshold')
+
+                # apply smooth/regression if hide data is checked for timeseries
+                if 'hidedata' in self.current_plot_options[plot_type]:
+                    # get option to check
+                    if (plot_type == 'timeseries') and ('smooth' not in self.current_plot_options[plot_type]):
+                        self.current_plot_options[plot_type].append('smooth')
+                        index_to_check = orig_plot_options.index('smooth')
+                    elif (plot_type == 'scatter') and ('regression' not in self.current_plot_options[plot_type]):
+                        self.current_plot_options[plot_type].append('regression')
+                        index_to_check = orig_plot_options.index('regression')
+                    
+                    if 'index_to_check' in locals():
+                        # check option in combobox
+                        self.update_option_on_combobox(event_source, index_to_check, uncheck=False)
+    
+                        # ensure hidedata option is handled second (to show smooth/regression after hiding data)
+                        mod_plot_options.remove('hidedata')
+                        mod_plot_options.insert(1, 'hidedata')
+                
                 for option in mod_plot_options:
                     
                     # get index to raise errors and uncheck options (in original plot options order)
                     index = orig_plot_options.index(option)
 
-                    # if do not have selected station_station_data in memory, then no data has been read
-                    # so return
-                    if not hasattr(self, 'selected_station_data'):
-                        msg = 'Select at least one station in the plot to apply options.'
-                        show_message(self.read_instance, msg)
-                        self.read_instance.block_MPL_canvas_updates = True
-                        event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                        self.read_instance.block_MPL_canvas_updates = False
-                        return None
+                    # if any option other than domain is selected
+                    if 'domain' not in self.current_plot_options[plot_type]:
 
-                    # return from function if selected_station_data has not been updated for new species yet.
-                    if self.read_instance.networkspeci not in self.selected_station_data:
-                        return None
-
+                        # return if do not have selected station_station_data in memory, then no data has been read
+                        if not hasattr(self, 'selected_station_data'):
+                            msg = 'Select at least one station in the plot to apply options.'
+                            show_message(self.read_instance, msg)
+                            self.update_option_on_combobox(event_source, index)
+                            return None
+                        
+                        # return from function if selected_station_data has not been updated for new species yet
+                        if self.read_instance.networkspeci not in self.selected_station_data:
+                            return None
+                        
                     # undo plot options that were selected before but not now
                     if ((option in self.previous_plot_options[plot_type]) 
                         and (option not in self.current_plot_options[plot_type])):
@@ -2431,7 +2483,7 @@ class MPLCanvas(FigureCanvas):
                     elif ((option not in self.previous_plot_options[plot_type]) 
                         and (option not in self.current_plot_options[plot_type])): 
                         continue
-
+                    
                     # if plot type not in plot_elements, then return
                     if plot_type not in self.plot_elements:
                         return None
@@ -2443,11 +2495,14 @@ class MPLCanvas(FigureCanvas):
                             if active_type != 'active':
                                 for data_label in self.plot_elements[plot_type][active_type]:
                                     for plot_option in self.current_plot_options[plot_type]:
-                                        if plot_option in self.plot_elements[plot_type][active_type][data_label]:
+                                        # do not remove domain even if there are no selected stations
+                                        if (plot_option in self.plot_elements[plot_type][active_type][data_label]) and (plot_option != 'domain'):
                                             for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
                                                 plot_element.remove()
                                             del self.plot_elements[plot_type][active_type][data_label][plot_option]
-                        return None
+                        # do not skip applying domain to map
+                        if (plot_type != 'map') and (plot_option != 'domain'):
+                            return None
 
                     # remove current option elements (both absolute and bias)
                     for active_type in self.plot_elements[plot_type]:
@@ -2481,9 +2536,7 @@ class MPLCanvas(FigureCanvas):
                                     msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                     msg += "in {0} with negative values.".format(plot_type)
                                     show_message(self.read_instance, msg)
-                                    self.read_instance.block_MPL_canvas_updates = True
-                                    event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                                    self.read_instance.block_MPL_canvas_updates = False
+                                    self.update_option_on_combobox(event_source, index)
                                     return None
                         else:
                             log_valid = log_validity(self.plot_axes[plot_type], option)
@@ -2493,9 +2546,7 @@ class MPLCanvas(FigureCanvas):
                                 msg = "It is not possible to log the {0}-axis ".format(option[-1])
                                 msg += "in {0} with negative values.".format(plot_type)
                                 show_message(self.read_instance, msg)
-                                self.read_instance.block_MPL_canvas_updates = True
-                                event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                                self.read_instance.block_MPL_canvas_updates = False
+                                self.update_option_on_combobox(event_source, index)
                                 return None
 
                     # option 'annotate'
@@ -2529,6 +2580,13 @@ class MPLCanvas(FigureCanvas):
                     # option 'smooth'
                     elif option == 'smooth':
                         if not undo:
+                            # uncheck option in combobox if window is 0
+                            if self.plot_characteristics[plot_type]['smooth']['window'] == 0:
+                                msg = "It is not possible to show the smooth line "
+                                msg += "if window is 0, increase it in advance."
+                                show_message(self.read_instance, msg)
+                                self.update_option_on_combobox(event_source, index)
+                                return None
                             smooth(self, 
                                    self.read_instance, 
                                    self.plot_axes[plot_type], 
@@ -2537,7 +2595,38 @@ class MPLCanvas(FigureCanvas):
                                    plot_type,
                                    self.plot_characteristics[plot_type], 
                                    self.current_plot_options[plot_type])
-                          
+
+                    # option 'hidedata'
+                    elif option == 'hidedata':
+                        # uncheck option in combobox if smooth window is 0
+                        if (plot_type == 'timeseries'):
+                            if (self.plot_characteristics[plot_type]['smooth']['window'] == 0):
+                                msg = "It is not possible to show the smooth line "
+                                msg += "if window is 0, increase it in advance."
+                                show_message(self.read_instance, msg)
+                                self.update_option_on_combobox(event_source, index)
+                                # Deactivate also smooth
+                                smooth_index = orig_plot_options.index('smooth')
+                                self.update_option_on_combobox(event_source, smooth_index)
+                                return None
+                        active_type = 'bias' if 'bias' in self.current_plot_options[plot_type] else 'absolute'
+                        for data_label in self.plot_elements[plot_type][active_type]:
+                            if 'plot' in self.plot_elements[plot_type][active_type][data_label]:
+                                for element in self.plot_elements[plot_type][active_type][data_label]['plot']:
+                                    if not undo:
+                                        element.set_visible(False)
+                                    else:
+                                        element.set_visible(True)
+
+                    # option 'domain'
+                    elif option == 'domain':
+                        if not undo:
+                            # plot experiment grid domain edges on map
+                            self.update_experiment_domain_edges()
+                        else:
+                            # remove grid domain polygon if previously plotted
+                            self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
+
                     # option 'regression'
                     elif option == 'regression':
                         if not undo:
@@ -2550,16 +2639,34 @@ class MPLCanvas(FigureCanvas):
                                               self.plot_characteristics[plot_type],  
                                               self.current_plot_options[plot_type])
 
+                    # option 'threshold'
+                    elif option == 'threshold':
+                        if not undo:
+                            if isinstance(self.plot_axes[plot_type], dict):
+                                for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
+                                    if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                                        threshold(self, 
+                                        self.read_instance, 
+                                        sub_ax, 
+                                        self.read_instance.networkspeci, 
+                                        plot_type,
+                                        self.plot_characteristics[plot_type])
+                            else:
+                                threshold(self, 
+                                    self.read_instance, 
+                                    self.plot_axes[plot_type], 
+                                    self.read_instance.networkspeci, 
+                                    plot_type,
+                                    self.plot_characteristics[plot_type])
+
                     # option 'bias'
                     elif option == 'bias':
-
+                        
                         # firstly if just 1 data label then cannot make bias plot 
                         if len(self.read_instance.data_labels) == 1:
                             msg = 'It is not possible to make a bias plot with just observations loaded.'
                             show_message(self.read_instance, msg)
-                            self.read_instance.block_MPL_canvas_updates = True
-                            event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                            self.read_instance.block_MPL_canvas_updates = False
+                            self.update_option_on_combobox(event_source, index)
                             self.plot_elements[plot_type]['active'] = 'absolute'
                             self.current_plot_options[plot_type].remove('bias')
 
@@ -2587,9 +2694,7 @@ class MPLCanvas(FigureCanvas):
 
                                 # if get_z_statistic_type == 'expbias' then return as bias already plotted
                                 if z_statistic_type == 'expbias':
-                                    self.read_instance.block_MPL_canvas_updates = True
-                                    event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                                    self.read_instance.block_MPL_canvas_updates = False
+                                    self.update_option_on_combobox(event_source, index)
                                     self.plot_elements[plot_type]['active'] = 'absolute'
                                     self.current_plot_options[plot_type] = copy.deepcopy(self.previous_plot_options[plot_type])
                                     return None
@@ -2605,9 +2710,7 @@ class MPLCanvas(FigureCanvas):
                                 if z_statistic_type == 'expbias':
                                     # chunk timeseries is active?
                                     if (chunk_stat != 'None') and (chunk_resolution != 'None'):
-                                        self.read_instance.block_MPL_canvas_updates = True
-                                        event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
-                                        self.read_instance.block_MPL_canvas_updates = False
+                                        self.update_option_on_combobox(event_source, index)
                                         self.plot_elements[plot_type]['active'] = 'absolute'
                                         self.current_plot_options[plot_type] = copy.deepcopy(self.previous_plot_options[plot_type])
                                         return None
@@ -2750,7 +2853,7 @@ class MPLCanvas(FigureCanvas):
                             self.redraw_active_options(self.read_instance.data_labels, 
                                                        plot_type, 'absolute', self.current_plot_options[plot_type],
                                                        z_statistic_sign=z_statistic_sign)
-
+                            
                     # check stats for the selected periodic cycle
                     if plot_type in ['statsummary']:
                         self.read_instance.block_config_bar_handling_updates = True
@@ -2806,6 +2909,16 @@ class MPLCanvas(FigureCanvas):
                 smooth(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
                        data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
             
+            elif plot_option == 'threshold':
+                if isinstance(self.plot_axes[plot_type], dict):
+                    for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
+                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                            threshold(self, self.read_instance, sub_ax, self.read_instance.networkspeci, 
+                                        plot_type, self.plot_characteristics[plot_type])
+                else:
+                    threshold(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci, 
+                            plot_type, self.plot_characteristics[plot_type])
+                
             elif plot_option == 'regression':
                 linear_regression(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
                                   data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
@@ -3201,3 +3314,16 @@ class MPLCanvas(FigureCanvas):
 
         # update statistic in memory
         self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 
+
+    def update_option_on_combobox(self, event_source, index, uncheck=True):
+        """ Check or uncheck option in combobox dropdown
+        """
+
+        self.read_instance.block_MPL_canvas_updates = True
+        if uncheck:
+            event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+        else:
+            event_source.model().item(index).setCheckState(QtCore.Qt.Checked)
+        self.read_instance.block_MPL_canvas_updates = False
+
+        return None
