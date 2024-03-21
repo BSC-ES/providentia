@@ -10,6 +10,7 @@ import socket
 import subprocess
 import sys
 
+import matplotlib
 import numpy as np
 import pandas as pd
 
@@ -22,7 +23,7 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.json')))
 
 # set MACHINE to be the hub, workstation or local machine
-if MACHINE not in ['power', 'mn4', 'nord3v2']:
+if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
     hostname = os.environ.get('HOSTNAME', '')
     ip = socket.gethostbyname(socket.gethostname())
     if "bscearth" in hostname:
@@ -102,6 +103,7 @@ class ProvConfiguration:
             'statistic_aggregation': None,
             'periodic_statistic_mode': None,
             'periodic_statistic_aggregation': None,
+            'timeseries_statistic_aggregation': None,
             'plot_characteristics_filename': '',
             'harmonise_summary': True,
             'harmonise_stations': True,
@@ -155,7 +157,7 @@ class ProvConfiguration:
 
         elif key == 'available_cpus':
             # get available N CPUs
-            if MACHINE in ['power', 'mn4', 'nord3v2']:
+            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
                 # handle cases where are testing briefly on login nodes (1 cpu capped)
                 try:
                     return int(os.getenv('SLURM_CPUS_PER_TASK'))
@@ -171,7 +173,7 @@ class ProvConfiguration:
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
             # internet connection)
 
-            if MACHINE in ['power', 'mn4', 'nord3v2']:
+            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all other machines pull from internet
 
@@ -636,16 +638,32 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.periodic_statistic_aggregation = default
 
+        # check have timeseries_statistic_aggregation information,
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.timeseries_statistic_aggregation:
+            default = 'Median'
+            msg = "Timeseries statistic aggregation (timeseries_statistic_aggregation) was not "
+            msg += "defined in the configuration file. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            self.read_instance.timeseries_statistic_aggregation = default
+        else:
+            if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
+                and (self.read_instance.timeseries_statistic_aggregation != self.read_instance.statistic_aggregation)):
+                msg = "Aggregation statistic and timeseries aggregation statistic are not "
+                msg += "the same and Spatial|Temporal mode is active."
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
         if not self.read_instance.active_dashboard_plots:
             default = ['timeseries', 'statsummary', 'distribution', 'periodic']
             self.read_instance.active_dashboard_plots = default
-        # TODO: For Taylor diagrams, remove this piece of code until Matplotlib 3.7.2 is available
+        # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
         else:
-            if 'taylor' in self.read_instance.active_dashboard_plots:
-                error = 'It is not possible to create Taylor diagrams yet, please remove.'
-                sys.exit(error)
+            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
+                if 'taylor' in self.read_instance.active_dashboard_plots:
+                    error = 'It is not possible to create Taylor diagrams yet, please remove.'
+                    sys.exit(error)
 
         if (len(self.read_instance.active_dashboard_plots) != 4) and (not self.read_instance.offline) & (not self.read_instance.interactive):
             error = 'Error: there must be 4 "active_dashboard_plots"'

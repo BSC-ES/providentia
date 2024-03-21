@@ -3,7 +3,11 @@
 cores=12
 jobname="PRV"
 time="02:00:00"
-queue="debug"
+if [ "${BSC_MACHINE}" == "mn5" ]; then
+    queue="gp_debug"
+else
+    queue="debug"
+fi
 mem="20Gb"
 constraint="medmem"
 
@@ -97,6 +101,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+account_option="--account=bsc32"
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
@@ -125,8 +130,8 @@ else
     interactive=false
 fi
 
-# determine if need to just excecute python if have allocation made (i.e. are in debug mode)
-VALID_HOSTS="p9login1 login0 login1 login2 login3 login4"
+# determine if need to just execute python if have allocation made (i.e. are in debug mode)
+VALID_HOSTS="p9login1 login0 login1 login2 login3 login4 glogin1 glogin2 glogin3 glogin4"
 HOST=`hostname`
 if [[ " $VALID_HOSTS " =~ .*\ $HOST\ .* ]]; then
     debugexec=false
@@ -150,6 +155,7 @@ fi
 # execution
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
+    echo "INFO: Running on Power9..."
     
     if $interactive; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
@@ -173,9 +179,75 @@ if [ "${BSC_MACHINE}" == "power" ]; then
             eval "${salloc_command} ${queue_option} ${memory_option} srun ${python_command}"
         fi
     fi
-    
+
+# Marenostrum5
+elif [ "${BSC_MACHINE}" == "mn5" ]; then
+
+    echo "INFO: Running on MN5..."
+
+    # load modules from conda environment
+    active_env=false
+    eval "$(conda shell.bash hook)"
+    if { conda env list | grep 'providentia-env'; } >/dev/null 2>&1; then 
+        echo "Activating environment..."
+        conda activate providentia-env
+        active_env=true
+    else
+        # create environment if it does not exist if we are in glogin4 (with internet)
+        echo "Environment providentia-env does not exist."; 
+        node=$(hostname -s)
+        if [ "${node}" == "glogin4" ]; then
+            echo "Creating environment..."
+            conda create -n providentia-env -y
+            conda activate providentia-env
+            conda install -c conda-forge cartopy -y
+            conda install -c conda-forge jupyterlab -y
+            pip install -r requirements.txt
+            active_env=true
+        else
+            echo "Please connect to MN5 using glogin4 to create the environment automatically."
+        fi
+    fi
+
+    if $active_env; then
+        if $interactive; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            echo "Starting interactive jupyter session."
+            echo "Check 'interactive.out' for information on how to connect to session."
+            
+            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                eval "${interactive_alloc_command} ${account_option} ${queue_option} interactive.sh"
+            else
+                eval "${interactive_alloc_command} ${account_option} ${constraint_option} ${queue_option} interactive.sh"
+            fi
+
+        elif $debug; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            echo "Entering debug mode"
+            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                eval "${salloc_command} ${account_option} ${queue_option}"
+            else
+                eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option}"
+            fi
+
+        else
+            if $debugexec; then
+                eval "srun ${account_option} ${python_command}"
+            else
+                echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                    eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                else
+                    eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
+                fi
+            fi
+        fi
+    fi
+
 # Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
+    echo "INFO: Running on MN4..."
+
     # avoid magnified graphics
     eval export QT_AUTO_SCREEN_SCALE_FACTOR=0
 
@@ -216,7 +288,7 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
 
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
-
+    echo "INFO: Running on Nord3v2..."
     if $interactive; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
         echo "Starting interactive jupyter session."
@@ -254,7 +326,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
 
 # Hub
 elif [ "${ip}" == "84.88.185.48" ]; then
-    echo "Warning: running on the hub may make Providentia slower ..."
+    echo "INFO: Running on the hub..."
     eval "${load_command}"
     if $interactive; then
         echo "Starting interactive jupyter session."
@@ -266,6 +338,27 @@ elif [ "${ip}" == "84.88.185.48" ]; then
 
 # Local machines (Workstations, dust02 machine and personal laptops)
 else
+    echo "INFO: Running on a local machine..."
+    
+    # load modules from conda environment
+    active_env=false
+    eval "$(conda shell.bash hook)"
+    if { conda env list | grep 'providentia-env'; } >/dev/null 2>&1; then 
+        echo "Activating environment..."
+        conda activate providentia-env
+        active_env=true
+    else
+        # create environment if it does not exist
+        echo "Environment providentia-env does not exist."; 
+        echo "Creating environment..."
+        conda create -n providentia-env -y
+        conda activate providentia-env
+        conda install -c conda-forge cartopy -y
+        conda install -c conda-forge jupyterlab -y
+        pip install -r requirements.txt
+        active_env=true
+    fi
+
     if $interactive; then
         echo "Starting interactive jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}

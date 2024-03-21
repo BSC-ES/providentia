@@ -177,11 +177,11 @@ class SettingsMenu(object):
         slider.setTracking(element_settings['tracking'])
         slider.setTickInterval(element_settings['tick_interval'])
         if 'minimum' in element_settings.keys():
-            slider.setMinimum(element_settings['minimum'])
+            slider.setMinimum(int(element_settings['minimum']))
         if 'maximum' in element_settings.keys():
-            slider.setMaximum(element_settings['maximum'])
+            slider.setMaximum(int(element_settings['maximum']))
         if 'value' in element_settings.keys():
-            slider.setValue(element_settings['value'])
+            slider.setValue(int(element_settings['value']))
         slider.valueChanged.connect(partial(self.connect, element_settings['function']))
 
         return slider

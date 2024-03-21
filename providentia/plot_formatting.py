@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from .plot_aux import get_land_polygon_resolution, set_map_extent
-from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth
+from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth, threshold
 from .statistics import get_z_statistic_info
 
 def set_equal_axes(ax, plot_options):
@@ -525,7 +525,12 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
                    canvas_instance.plot_characteristics[plot_type], plot_options,
                    chunk_stat, chunk_resolution)
 
-
+        # threshold line
+        if 'threshold' in plot_options:
+            threshold(canvas_instance, read_instance, relevant_ax, networkspeci, base_plot_type,
+                      canvas_instance.plot_characteristics[plot_type])
+            
+            
 def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_characteristics, col_ii=0, last_valid_row=True, 
                 last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=None):
     """ Format a plotting axis.
@@ -726,7 +731,9 @@ def get_data_lims(ax, lim, plot_options):
             line_data = line.get_xdata()
         elif lim == 'ylim':
             line_data = line.get_ydata()
-        if (list(line_data) == [0, 1]) or (list(line_data) == [0, 0.5]):
+        if ((list(line_data) == [0, 1]) 
+            or (list(line_data) == [0, 0.5] 
+            or (list(line_data) == [[1.0], [1.0]]))):
             continue
         lines.extend(line_data)
 
