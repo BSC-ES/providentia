@@ -4,8 +4,10 @@ import copy
 import json
 import os
 import sys
+import time
 
 import matplotlib
+from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
         as FigureCanvas
 from matplotlib.figure import Figure
@@ -23,7 +25,7 @@ from .calculate import Stats, ExpBias
 from .canvas_menus import SettingsMenu
 from .dashboard_elements import ComboBox
 from .dashboard_elements import set_formatting
-from .dashboard_interactivity import LassoSelector, HoverAnnotation
+from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom_map_func
 from .filter import DataFilter
 from .plot import Plot
@@ -43,7 +45,6 @@ mplstyle.use('fast')
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet.json')))
 settings_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.json')))
 
 
@@ -179,16 +180,14 @@ class MPLCanvas(FigureCanvas):
         self.active_map_valid_station_inds = np.array([], dtype=np.int64)
 
         # setup blocker for picker events
-        self.figure.canvas.mpl_connect('axes_enter_event', lambda event: picker_block_func(self, event))
+        self.axes_enter_event = self.figure.canvas.mpl_connect('axes_enter_event', lambda event: picker_block_func(self, event))
 
         # setup legend line selection
-        self.figure.canvas.mpl_connect('pick_event', lambda event: legend_picker_func(self, event))
+        self.legend_pick = self.figure.canvas.mpl_connect('pick_event', lambda event: legend_picker_func(self, event))
 
-        # setup interactive lasso on map
-        self.lasso_left = LassoSelector(self, self.plot_axes['map'], onselect=self.onlassoselect_left,
-                                        useblit=False, props=self.lasso, button=[1])
-        self.lasso_right = LassoSelector(self, self.plot_axes['map'], onselect=self.onlassoselect_right,
-                                         useblit=False, props=self.lasso, button=[3])
+        # setup picker for station selection (left and right click)
+        self.lasso_active = False
+        self.station_pick = self.figure.canvas.mpl_connect('button_press_event', self.station_select)
 
         # setup station annotations
         self.annotations['map'] = HoverAnnotation(self, 'map', self.plot_axes['map'], self.plot_characteristics['map'])
@@ -197,8 +196,7 @@ class MPLCanvas(FigureCanvas):
             self.annotations['map'].hover_map_annotation)
 
         # setup zoom on scroll wheel on map
-        self.lock_zoom = False
-        self.figure.canvas.mpl_connect('scroll_event', lambda event: zoom_map_func(self, event))
+        self.zoom_map_event = self.figure.canvas.mpl_connect('scroll_event', lambda event: zoom_map_func(self, event))
 
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
@@ -206,10 +204,10 @@ class MPLCanvas(FigureCanvas):
                         self.plot_characteristics[plot_type], map_extent=self.read_instance.map_extent)
 
         # create covers to hide parts of canvas when updating / plotting
-        self.canvas_cover = set_formatting(QtWidgets.QWidget(self), formatting_dict['canvas_cover'])
-        self.top_right_canvas_cover = set_formatting(QtWidgets.QWidget(self), formatting_dict['canvas_cover'])
+        self.canvas_cover = set_formatting(QtWidgets.QWidget(self), self.read_instance.formatting_dict['canvas_cover'])
+        self.top_right_canvas_cover = set_formatting(QtWidgets.QWidget(self), self.read_instance.formatting_dict['canvas_cover'])
         self.top_right_canvas_cover.hide() 
-        self.lower_canvas_cover = set_formatting(QtWidgets.QWidget(self), formatting_dict['canvas_cover'])
+        self.lower_canvas_cover = set_formatting(QtWidgets.QWidget(self), self.read_instance.formatting_dict['canvas_cover'])
         self.lower_canvas_cover.hide()
         # place partial canvas covers below map elements 
         for element in self.map_elements:
@@ -625,25 +623,45 @@ class MPLCanvas(FigureCanvas):
             for collection in self.plot_axes['map'].collections:
                 if isinstance(collection, matplotlib.collections.PathCollection):
                     
-                    rgba_tuples = collection.get_facecolor()
-                    
-                    # set alpha of all stations (initally assuming zero stations are selected)
-                    rgba_tuples[:, -1] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']
-                    
-                    # have selected stations?
-                    if len(self.relative_selected_station_inds) > 0:
-                        
-                        # update markersize and alphas of non-selected stations
-                        markersizes[self.absolute_non_selected_station_inds] = self.plot_characteristics['map']['marker_unselected']['s']
-                        rgba_tuples[self.absolute_non_selected_station_inds, -1] = self.plot_characteristics['map']['marker_unselected']['alpha']
-                        
-                        # update markersize and alphas of selected stations
-                        markersizes[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['s']
-                        rgba_tuples[self.absolute_selected_station_inds, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
-                    
-                    # set new markersizes and alphas
-                    collection.set_sizes(markersizes)
-                    collection.set_facecolor(rgba_tuples)
+                    if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                        opacities = collection.get_facecolor()
+                        # set alpha of all stations (initally assuming zero stations are selected)
+                        opacities[:, -1] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']
+
+                        # have selected stations?
+                        if len(self.relative_selected_station_inds) > 0:
+
+                            # update markersize and alphas of non-selected stations
+                            markersizes[self.absolute_non_selected_station_inds] = self.plot_characteristics['map']['marker_unselected']['s']
+                            opacities[self.absolute_non_selected_station_inds, -1] = self.plot_characteristics['map']['marker_unselected']['alpha']
+
+                            # update markersize and alphas of selected stations
+                            markersizes[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['s']
+                            opacities[self.absolute_selected_station_inds, -1] = self.plot_characteristics['map']['marker_selected']['alpha']
+
+                        # set new markersizes and alphas
+                        collection.set_sizes(markersizes)
+                        collection.set_facecolor(opacities)
+
+                    else:   
+                        opacities = collection.get_facecolor()[:,-1]
+                        # set alpha of all stations (initally assuming zero stations are selected)
+                        opacities[:] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha'] 
+
+                        # have selected stations?
+                        if len(self.relative_selected_station_inds) > 0:
+
+                            # update markersize and alphas of non-selected stations
+                            markersizes[self.absolute_non_selected_station_inds] = self.plot_characteristics['map']['marker_unselected']['s']
+                            opacities[self.absolute_non_selected_station_inds] = self.plot_characteristics['map']['marker_unselected']['alpha']
+
+                            # update markersize and alphas of selected stations
+                            markersizes[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['s']
+                            opacities[self.absolute_selected_station_inds] = self.plot_characteristics['map']['marker_selected']['alpha']
+
+                        # set new markersizes and alphas
+                        collection.set_sizes(markersizes)
+                        collection.set_alpha(opacities)
         
         # redraw plot
         self.figure.canvas.draw()
@@ -711,6 +729,15 @@ class MPLCanvas(FigureCanvas):
                     if ylabel_units != '':
                         ylabel += ' [{}]'.format(ylabel_units)
                     xlabel = ''
+
+                    # if statistic type is 'expbias' and 'bias' in plot options, remove bias from plot options
+                    if (z_statistic_type == 'expbias') and ('bias' in plot_options):
+                        bias_index = self.plot_characteristics[plot_type]['plot_options'].index('bias')
+                        plot_options.remove('bias')
+                        self.plot_elements[plot_type]['active'] = 'absolute'
+                        self.read_instance.block_MPL_canvas_updates = True
+                        self.periodic_options.model().item(bias_index).setCheckState(QtCore.Qt.Unchecked)
+                        self.read_instance.block_MPL_canvas_updates = False
 
                 # create structure to store data for statsummary plot
                 elif plot_type == 'statsummary':
@@ -1835,7 +1862,101 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    def onlassoselect_left(self, verts):
+    def station_select(self, event):
+
+        # return if not on map axis
+        if event.inaxes != self.plot_axes['map']:
+            return
+
+        # return if lasso active
+        if self.lasso_active:
+            return
+
+        # check if have any plotted stations on map, if not, return
+        if len(self.active_map_valid_station_inds) == 0:
+            return
+
+        # if canvas drawing is locked, then return if not owner
+        if self.figure.canvas.widgetlock.locked():
+            if not self.figure.canvas.widgetlock.isowner(self.station_pick):
+                return
+        # else, lock canvas drawing
+        else:
+            self.figure.canvas.widgetlock(self.station_pick)
+        
+        # unselect all/intersect/extent checkboxes
+        self.unselect_map_checkboxes()
+
+        # make copy of current full array absolute abd relative selected stations indices, before selecting new ones
+        previous_absolute_selected_station_inds = copy.deepcopy(self.absolute_selected_station_inds)
+        previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
+
+        # get coordinates of selected point
+        verts = [(event.xdata, event.ydata)]
+        lasso_path = Path(verts)
+        lasso_path_vertices = lasso_path.vertices
+
+        # transform lasso coordinates from projected to standard geographic coordinates
+        lasso_path.vertices = self.datacrs.transform_points(self.plotcrs, lasso_path_vertices[:, 0], lasso_path_vertices[:, 1])[:, :2]
+
+        # get absolute selected indices of stations on map (the station coordinates contained within lasso)
+        absolute_selected_station_inds = np.nonzero(lasso_path.contains_points(self.map_points_coordinates))[0]
+
+        # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
+        if len(absolute_selected_station_inds) == 0:
+            # take first selected point coordinates and get matches of stations within tolerance 
+            self.read_instance.map_extent = get_map_extent(self)
+            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],
+                                    self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
+            point_coordinates = lasso_path.vertices[0:1,:]
+            sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
+            absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
+            
+            # if more than 1 point selected, limit this to be just nearest point
+            if len(absolute_selected_station_inds) > 1:
+                absolute_selected_station_inds = np.array([absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,absolute_selected_station_inds,:],axis=1))]], dtype=np.int64)
+
+        # handle left click event
+        if event.button is MouseButton.LEFT:
+
+            #set absolute selected inds to self
+            self.absolute_selected_station_inds = absolute_selected_station_inds
+
+        # handle right click event
+        elif event.button is MouseButton.RIGHT:
+
+            # if have zero stations selected then return, doing nothing to selection
+            if len(absolute_selected_station_inds) == 0:
+                return 
+
+            # update absolute indices of selected stations
+            # remove stations that were previously selected, and add stations that were not previously selected
+            self.absolute_selected_station_inds = np.setxor1d(previous_absolute_selected_station_inds, absolute_selected_station_inds)
+
+        # update previous selected absolute and relative inds
+        self.previous_absolute_selected_station_inds = previous_absolute_selected_station_inds
+        self.previous_relative_selected_station_inds = previous_relative_selected_station_inds
+
+        # get absolute non-selected station inds
+        self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
+                                                             self.absolute_selected_station_inds))[0]
+
+        # get new relative selected indices with respect to all available stations
+        self.relative_selected_station_inds = self.map_selected_station_inds_to_all_available_inds(self.absolute_selected_station_inds)
+
+        # if selected stations have changed from previous selected, update station selection and associated plots
+        if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
+            self.update_map_station_selection()
+            self.update_associated_active_dashboard_plots()
+
+        # draw changes
+        self.figure.canvas.draw_idle()
+
+        # unlock canvas drawing
+        if self.figure.canvas.widgetlock.isowner(self.station_pick):
+            self.figure.canvas.widgetlock.release(self.station_pick)
+        
+    def onlassoselect(self, verts):
         """ Function that handles station selection upon lasso selection with left click.
 
             Operation:
@@ -1875,7 +1996,6 @@ class MPLCanvas(FigureCanvas):
             point_coordinates = lasso_path.vertices[0:1,:]
             sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
             self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
-            
             # if more than 1 point selected, limit this to be just nearest point
             if len(self.absolute_selected_station_inds) > 1:
                 self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int64)
@@ -1888,78 +2008,7 @@ class MPLCanvas(FigureCanvas):
         self.relative_selected_station_inds = self.map_selected_station_inds_to_all_available_inds(self.absolute_selected_station_inds)
 
         # hide lasso after selection
-        self.lasso_left.set_visible(False)
-
-        # if selected stations have changed from previous selected, update station selection and associated plots
-        if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
-            self.update_map_station_selection()
-            self.update_associated_active_dashboard_plots()
-
-        # draw changes
-        self.figure.canvas.draw_idle()
-
-        return None
-
-    def onlassoselect_right(self, verts):
-        """ Function that handles station selection upon lasso selection with right click.
-        
-            Operation:
-            Unselect station/s (if station/s currently selected), 
-            or Select station/s (if station/s currently unselected).
-
-            If no station is found with right click, nothing happens.
-        """
-
-        # check if have any plotted stations on map, if not, return
-        if len(self.active_map_valid_station_inds) == 0:
-            return
-
-        # unselect all/intersect/extent checkboxes
-        self.unselect_map_checkboxes()
-
-        # make copy of current full array relative selected stations indices, before selecting new ones
-        previous_absolute_selected_station_inds = copy.deepcopy(self.absolute_selected_station_inds)
-        previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-
-        # get coordinates of drawn lasso
-        lasso_path = Path(verts)
-        lasso_path_vertices = lasso_path.vertices
-        # transform lasso coordinates from projected to standard geographic coordinates
-        lasso_path.vertices = self.datacrs.transform_points(self.plotcrs, lasso_path_vertices[:, 0], lasso_path_vertices[:, 1])[:, :2]
-        # get absolute selected indices of stations on map (the station coordinates contained within lasso)
-        absolute_selected_station_inds = np.nonzero(lasso_path.contains_points(self.map_points_coordinates))[0]
-
-        # if have no valid selected indices, add a small tolerance (variable by visible map extent) to try get a match 
-        if len(absolute_selected_station_inds) == 0:
-            # take first selected point coordinates and get matches of stations within tolerance
-            self.read_instance.map_extent = get_map_extent(self)
-            tolerance = np.average([self.read_instance.map_extent[1]-self.read_instance.map_extent[0],self.read_instance.map_extent[3]-self.read_instance.map_extent[2]]) / 100.0
-            point_coordinates = lasso_path.vertices[0:1,:]
-            sub_abs_vals = np.abs(self.map_points_coordinates[None,:,:] - point_coordinates[:,None,:])
-            absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
-            # if more than 1 point selected, limit this to be just nearest point
-            if len(absolute_selected_station_inds) > 1:
-                absolute_selected_station_inds = np.array([absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,absolute_selected_station_inds,:],axis=1))]], dtype=np.int64)
-
-        # if have zero stations selected then return, doing nothing to selection
-        if len(absolute_selected_station_inds) == 0:
-            return 
-
-        # update absolute indices of selected stations
-        # remove stations that were previously selected, and add stations that were not previously selected
-        self.absolute_selected_station_inds = np.setxor1d(previous_absolute_selected_station_inds, absolute_selected_station_inds)
-        self.previous_absolute_selected_station_inds = previous_absolute_selected_station_inds
-
-        # get absolute non-selected station inds
-        self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
-                                                             self.absolute_selected_station_inds))[0]
-
-        # get new relative selected indices with respect to all available stations
-        self.previous_relative_selected_station_inds = previous_relative_selected_station_inds
-        self.relative_selected_station_inds = self.map_selected_station_inds_to_all_available_inds(self.absolute_selected_station_inds)
-
-        # hide lasso after selection
-        self.lasso_right.set_visible(False)
+        self.lasso_event.set_visible(False)
 
         # if selected stations have changed from previous selected, update station selection and associated plots
         if not np.array_equal(self.previous_relative_selected_station_inds, self.relative_selected_station_inds):
@@ -1988,25 +2037,25 @@ class MPLCanvas(FigureCanvas):
 
         # LAYOUT OPTIONS #
         # add position 2 plot selector
-        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
         self.read_instance.cb_position_2.setToolTip('Select plot type in top right position')
         self.read_instance.cb_position_2.currentTextChanged.connect(self.read_instance.handle_layout_update)
         # self.read_instance.cb_position_2.hide()
 
         # add position 3 plot selector
-        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
         self.read_instance.cb_position_3.setToolTip('Select plot type in bottom left position')
         self.read_instance.cb_position_3.currentTextChanged.connect(self.read_instance.handle_layout_update)
         # self.read_instance.cb_position_3.hide()
 
         # add position 4 plot selector
-        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
         self.read_instance.cb_position_4.setToolTip('Select plot type in bottom centre position')
         self.read_instance.cb_position_4.currentTextChanged.connect(self.read_instance.handle_layout_update)
         # self.read_instance.cb_position_4.hide()
 
         # add position 5 plot selector
-        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
         self.read_instance.cb_position_5.setToolTip('Select plot type in bottom right position')
         self.read_instance.cb_position_5.currentTextChanged.connect(self.read_instance.handle_layout_update)
         # self.read_instance.cb_position_5.hide()
@@ -2324,7 +2373,7 @@ class MPLCanvas(FigureCanvas):
 
     def update_plot_option(self):
         """ Function to handle the update of the plot options. """
-        
+
         if not self.read_instance.block_MPL_canvas_updates:
 
             # get source
@@ -2365,11 +2414,11 @@ class MPLCanvas(FigureCanvas):
                         self.read_instance.block_MPL_canvas_updates = True
                         event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                         self.read_instance.block_MPL_canvas_updates = False
-                        return
+                        return None
 
                     # return from function if selected_station_data has not been updated for new species yet.
                     if self.read_instance.networkspeci not in self.selected_station_data:
-                        return
+                        return None
 
                     # undo plot options that were selected before but not now
                     if ((option in self.previous_plot_options[plot_type]) 
@@ -2385,7 +2434,7 @@ class MPLCanvas(FigureCanvas):
 
                     # if plot type not in plot_elements, then return
                     if plot_type not in self.plot_elements:
-                        return
+                        return None
 
                     # if no selected stations then remove all plot_elements for active plot_options,
                     # and then return
@@ -2398,7 +2447,7 @@ class MPLCanvas(FigureCanvas):
                                             for plot_element in self.plot_elements[plot_type][active_type][data_label][plot_option]:
                                                 plot_element.remove()
                                             del self.plot_elements[plot_type][active_type][data_label][plot_option]
-                        return 
+                        return None
 
                     # remove current option elements (both absolute and bias)
                     for active_type in self.plot_elements[plot_type]:
@@ -2518,7 +2567,8 @@ class MPLCanvas(FigureCanvas):
                             self.redraw_active_options(self.read_instance.data_labels, plot_type, 
                                                        'absolute', self.current_plot_options[plot_type],
                                                        z_statistic_sign=z_statistic_sign)
-
+                            return None
+                        
                         # if bias option is enabled then first check if bias elements stored
                         elif not undo:
 
@@ -2541,6 +2591,8 @@ class MPLCanvas(FigureCanvas):
                                     event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                     self.read_instance.block_MPL_canvas_updates = False
                                     self.plot_elements[plot_type]['active'] = 'absolute'
+                                    self.current_plot_options[plot_type] = copy.deepcopy(self.previous_plot_options[plot_type])
+                                    return None
 
                             if plot_type == 'timeseries':
 
@@ -2557,6 +2609,8 @@ class MPLCanvas(FigureCanvas):
                                         event_source.model().item(index).setCheckState(QtCore.Qt.Unchecked)
                                         self.read_instance.block_MPL_canvas_updates = False
                                         self.plot_elements[plot_type]['active'] = 'absolute'
+                                        self.current_plot_options[plot_type] = copy.deepcopy(self.previous_plot_options[plot_type])
+                                        return None
 
                             # iterate through valid data labels 
                             bias_labels_to_plot = []
@@ -2783,25 +2837,25 @@ class MPLCanvas(FigureCanvas):
 
         elif plot_type == 'map':
 
-            markersizes = self.plot_axes['map'].collections[-1].get_sizes()
-
             # zero selected and unselected stations
             if event_source == self.interactive_elements[plot_type]['markersize_sl'][0]:
 
                 # actually have zero selected stations currently?
                 # if so, update active markersizes
                 if len(self.absolute_selected_station_inds) == 0:
-                    markersizes[:] = markersize
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
+                            markersizes = collection.get_sizes()
+                            markersizes[:] = markersize
                             collection.set_sizes(markersizes)
 
                 # actually have selected stations currently?
                 # if so, update active opacities
                 elif (len(self.absolute_non_selected_station_inds) > 0) & (len(self.absolute_selected_station_inds) > 0):
-                    markersizes[self.absolute_non_selected_station_inds] = markersize
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
+                            markersizes = collection.get_sizes()
+                            markersizes[self.absolute_non_selected_station_inds] = markersize
                             collection.set_sizes(markersizes)
 
                 # update characteristics per plot type for unselected stations
@@ -2816,9 +2870,10 @@ class MPLCanvas(FigureCanvas):
                 # actually have selected stations currently?
                 # if so, update active opacities
                 if len(self.absolute_selected_station_inds) > 0:
-                    markersizes[self.absolute_selected_station_inds] = markersize
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
+                            markersizes = collection.get_sizes()
+                            markersizes[self.absolute_selected_station_inds] = markersize
                             collection.set_sizes(markersizes)
 
                 # update characteristics per plot type
@@ -2835,27 +2890,37 @@ class MPLCanvas(FigureCanvas):
         # set opacity
         if plot_type == 'map':
 
-            opacities = self.plot_axes['map'].collections[-1].get_facecolor()
-
             # zero selected and unselected stations
             if event_source == self.interactive_elements[plot_type]['opacity_sl'][0]:
 
                 # actually have zero selected stations currently?
                 # if so, update active opacities
                 if len(self.absolute_selected_station_inds) == 0:
-                    opacities[:, -1] = opacity
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
-                            collection.set_facecolor(opacities)
+                            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                                opacities = collection.get_facecolor()
+                                opacities[:, -1] = opacity
+                                collection.set_facecolor(opacities)
+                            else:
+                                opacities = collection.get_facecolor()[:,-1]
+                                opacities[:] = opacity
+                                collection.set_alpha(opacities)
 
                 # actually have selected stations currently?
                 # if so, update active opacities
                 elif (len(self.absolute_non_selected_station_inds) > 0) & (len(self.absolute_selected_station_inds) > 0):
-                    opacities[self.absolute_non_selected_station_inds, -1] = opacity
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
-                            collection.set_facecolor(opacities)
-
+                            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                                opacities = collection.get_facecolor()
+                                opacities[self.absolute_non_selected_station_inds, -1] = opacity
+                                collection.set_facecolor(opacities)
+                            else:
+                                opacities = collection.get_facecolor()[:,-1]
+                                opacities[self.absolute_non_selected_station_inds] = opacity
+                                collection.set_alpha(opacities)
+                            
                 # update characteristics per plot type for unselected stations
                 self.plot_characteristics['map']['marker_zero_stations_selected']['alpha'] = opacity
 
@@ -2868,11 +2933,17 @@ class MPLCanvas(FigureCanvas):
                 # actually have selected stations currently?
                 # if so, update active opacities
                 if len(self.absolute_selected_station_inds) > 0:
-                    opacities[self.absolute_selected_station_inds, -1] = opacity
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
-                            collection.set_facecolor(opacities)
-
+                            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                                opacities = collection.get_facecolor()
+                                opacities[self.absolute_selected_station_inds, -1] = opacity
+                                collection.set_facecolor(opacities)
+                            else:
+                                opacities = collection.get_facecolor()[:,-1]
+                                opacities[self.absolute_selected_station_inds] = opacity
+                                collection.set_alpha(opacities)
+                            
                 # update characteristics per plot type
                 self.plot_characteristics['map']['marker_selected']['alpha'] = opacity
 
