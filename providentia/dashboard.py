@@ -8,6 +8,7 @@ import sys
 
 from collections import OrderedDict
 from functools import partial
+import matplotlib
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
@@ -252,8 +253,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                         + str(position)]['y']
 
                     # calculate proportional position for different screen resolution
-                    x = (x * canvas_width) / 1848
-                    y = (y * canvas_height) / 1016
+                    x = int((x * canvas_width) / 1848)
+                    y = int((y * canvas_height) / 1016)
                     
                     # get geometries (old and new)
                     old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
@@ -261,7 +262,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     
                     # apply new geometry to menu and save buttons
                     menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(menu_button.x() - ((30 * canvas_width) / 1848), menu_button.y(), 20, 20)
+                    save_button.setGeometry(int(menu_button.x() - ((30 * canvas_width) / 1848)), int(menu_button.y()), 20, 20)
 
                     # show buttons if active
                     if show_buttons:
@@ -298,13 +299,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                             else:
                                 width_diff = 560
                             height_diff = 1
-                            new_x = menu_button.x() - ((width_diff * canvas_width) / 1848)
-                            new_y = menu_button.y() + ((height_diff * canvas_height) / 1016)
+                            new_x = int(menu_button.x() - ((width_diff * canvas_width) / 1848))
+                            new_y = int(menu_button.y() + ((height_diff * canvas_height) / 1016))
                             cb_position.move(new_x, new_y)
 
                             # apply new geometry to partial canvas covers
                             if position == 2:
-                                canvas_x = new_x - ((75 * canvas_width) / 1848) 
+                                canvas_x = int(new_x - ((75 * canvas_width) / 1848))
                                 self.mpl_canvas.top_right_canvas_cover.setGeometry(canvas_x, new_y,
                                                                                    canvas_width-canvas_x, 
                                                                                    canvas_height-new_y)
@@ -839,20 +840,20 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
     
-        # TODO: For Taylor diagrams, replace this piece of code for the one below when Matplotlib 3.8 is available
-        # # remove plot types that need active temporal colocation and experiments data
-        # for plot_type in ['scatter', 'taylor']:
-        #     if ((not self.temporal_colocation) 
-        #         or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
-        #         if plot_type in canvas_instance.layout_options:
-        #             canvas_instance.layout_options.remove(plot_type)
-        #     else:
-        #         if plot_type not in canvas_instance.layout_options:
-        #             canvas_instance.layout_options.append(plot_type)          
-
+        # TODO: For Taylor diagrams, replace this piece of code for the one below when we stop using Matplotlib 3.3
         # remove plot types that need active temporal colocation and experiments data
-        if 'taylor' in canvas_instance.layout_options:
-            canvas_instance.layout_options.remove('taylor')
+        if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
+            if 'taylor' in canvas_instance.layout_options:
+                canvas_instance.layout_options.remove('taylor')
+        else:
+            for plot_type in ['scatter', 'taylor']:
+                if ((not self.temporal_colocation) 
+                    or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+                    if plot_type in canvas_instance.layout_options:
+                        canvas_instance.layout_options.remove(plot_type)
+                else:
+                    if plot_type not in canvas_instance.layout_options:
+                        canvas_instance.layout_options.append(plot_type)   
 
         for plot_type in ['scatter']:
             if ((not self.temporal_colocation) 
@@ -1168,6 +1169,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 canvas_instance.annotations_lock[changed_plot_type][resolution] = False
                 canvas_instance.annotations_vline[changed_plot_type][resolution] = annotation.vline
             
+                # connect axis to xlim change on zoom
+                canvas_instance.plot_axes[changed_plot_type][resolution].callbacks.connect(
+                    'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
+            
             # connect axis to hover function
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
@@ -1191,6 +1196,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if add_vline:
                 canvas_instance.annotations_vline[changed_plot_type] = annotation.vline
 
+            # connect axis to xlim change on zoom
+            canvas_instance.plot_axes[changed_plot_type].callbacks.connect(
+                'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
+            
             # connect axis to hover function
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_annotation(event, changed_plot_type))

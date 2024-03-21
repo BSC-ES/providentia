@@ -24,6 +24,7 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
                            period_conf, representativity_conf)
 from .filter import DataFilter
 from .plot import Plot
+from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import (format_plot_options, format_axis, set_axis_label, set_axis_title, 
                               harmonise_xy_lims_paradigm)
 from .read import DataReader
@@ -181,7 +182,7 @@ class Interactive:
     def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
                   domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
-                  smooth=False, plot_options=None, save=False, return_plot=False, format=None):
+                  smooth=False, threshold=False, plot_options=None, save=False, return_plot=False, format=None):
         """ Wrapper method to make a Providentia plot.
 
         :param plot: Plot type
@@ -224,6 +225,8 @@ class Interactive:
         :type regression: bool, optional
         :param smooth: Indicates if timeseries has smooth line/s, defaults to False
         :type smooth: bool, optional
+        :param threshold: Indicates if plot has threshold line/s, defaults to False
+        :type threshold: bool, optional
         :param plot_options: List with plot options, defaults to None
         :type plot_options: list, optional
         :param save: Indicates if you want to save the figure, defaults to False
@@ -286,6 +289,9 @@ class Interactive:
                     pass
             if (type(smooth) == int) or (type(smooth) == float):
                 smooth_window = int(smooth)
+        if threshold:
+            if 'threshold' not in plot_options:
+                plot_options.append('threshold')
 
         # get base plot type (no plot options), and plot type (with plot options)
         base_plot_type = copy.deepcopy(plot)
@@ -343,7 +349,33 @@ class Interactive:
         if (base_plot_type == 'map') & (z_statistic_sign == 'bias') & (labelb == ''):
             print("Warning: Plotting a bias statistic, and only 1 label is set. Not making plot.")
             return
+        
+        # if bias and threshold plots are in plot options throw error
+        if ('bias' in plot_options) & ('threshold' in plot_options):
+            print("Warning: Cannot make a bias plot showing threshold lines. Not making plot.")
+            return
 
+        # do not make plot if hidedata is active but smooth is not in plot options
+        if (base_plot_type == 'timeseries') and ('hidedata' in plot_options) and ('smooth' not in plot_options):
+            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg += "timeseries plot, but 'smooth' is not active. Not making plot."
+            print(msg)
+            return
+        
+        # do not make plot if hidedata is active but regression is not in plot options
+        if (base_plot_type == 'scatter') and ('hidedata' in plot_options) and ('regression' not in plot_options):
+            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg += "scatter lot, but 'regression' is not active. Not making plot."
+            print(msg)
+            return
+        
+        # do not make Taylor diagram if statistic is not r or r2
+        if (base_plot_type == 'taylor') and (zstat not in ['r', 'r2']):
+            msg = f"Warning: Cannot make {plot_type} because statistic is not available or defined. "
+            msg += "Choose between 'taylor-r' or 'taylor-r2'. Not making plot."
+            print(msg)
+            return
+        
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)
@@ -389,9 +421,13 @@ class Interactive:
             px = 1.0/dpi
             fig = plt.figure(figsize=(width*px,height*px))
 
-        #create axes
+        # create axes
         if base_plot_type == 'map':
             ax = fig.add_subplot(111, projection=self.plotcrs)
+        elif base_plot_type == 'taylor':            
+            reference_stddev = 7.5
+            ghelper = get_taylor_diagram_ghelper(reference_stddev, self.plot_characteristics[plot_type])
+            ax = fig.add_subplot(111, axes_class=fa.FloatingAxes, grid_helper=ghelper)
         else:
             ax = fig.add_subplot(111)
 
@@ -584,9 +620,17 @@ class Interactive:
             else:
                 self.reset_filter()
         
+        # make timeseries plot
         elif base_plot_type == 'timeseries':
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                  plot_options, chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
+        
+        # make taylor diagram plot
+        elif base_plot_type == 'taylor':
+            stddev_max = self.selected_station_stddev_max[networkspeci]
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 plot_options, zstat=zstat, stddev_max=stddev_max)
+            
         # other plots
         else: 
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
