@@ -549,10 +549,9 @@ class Plot:
             :type chunk_resolution: str
         """
 
-        # if 'hidedata' in plot_options, do not plot any data
-        if 'hidedata' in plot_options:
-            if 'smooth' not in plot_options:
-                print("Warning: 'hidedata' plot option is set for timeseries plot, but 'smooth' is not active. This will result in an empty plot.")
+        # skip making timeseries (points) for offline and interactive mode
+        # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
+        if ((self.read_instance.offline) or (self.read_instance.interactive)) and ('hidedata' in plot_options):
             return
 
         # if 'obs' in plot_options, set data labels to just observations data label
@@ -636,7 +635,7 @@ class Plot:
             # update maximum smooth value
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
-                    self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts)*2 - 1)
+                    self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
 
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
@@ -1056,7 +1055,7 @@ class Plot:
             :param plot_options: Options to configure plot  
             :type plot_options: list
         """
-
+        
         # if 'obs' in plot_options, set data labels to just observations data label
         if 'obs' in plot_options:
             data_labels = [self.read_instance.observations_data_label]
@@ -1064,22 +1063,21 @@ class Plot:
         # add 1:1 line (if in plot_characteristics)
         if '1:1_line' in plot_characteristics:
             relevant_axis.plot([0, 1], [0, 1], transform=relevant_axis.transAxes, 
-                            **plot_characteristics['1:1_line'])
+                               **plot_characteristics['1:1_line'])
         # add 1:2 line (if in plot_characteristics)
         if '1:2_line' in plot_characteristics:
             relevant_axis.plot([0, 1], [0, 0.5], transform=relevant_axis.transAxes, 
-                            **plot_characteristics['1:2_line'])     
+                                **plot_characteristics['1:2_line'])     
         # add 2:1 line (if in plot_characteristics)
         if '2:1_line' in plot_characteristics:
             relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
-                            **plot_characteristics['2:1_line'])
+                               **plot_characteristics['2:1_line'])
 
-        # if 'hidedata' in plot_options, do not plot any data
-        if 'hidedata' in plot_options:
-            if 'regression' not in plot_options:
-                print("Warning: 'hidedata' plot option is set for scatter plot, but 'regression' is not active. This will result in an empty plot.")
+        # skip making scatter for offline and interactive mode
+        # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
+        if ((self.read_instance.offline) or (self.read_instance.interactive)) and ('hidedata' in plot_options):
             return
-
+        
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
 
@@ -1635,7 +1633,7 @@ class Plot:
             else:
                 self.track_plot_elements(self.read_instance.observations_data_label, 'table', 'plot', [table], bias=bias)
     
-    def make_taylor(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, 
+    def make_taylor(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, zstat,
                     stddev_max=None):
         """ Make Taylor diagram plot.
             Reference: https://gist.github.com/ycopin/3342888.
@@ -1653,9 +1651,14 @@ class Plot:
             :type plot_characteristics: dict
             :param plot_options: Options to configure plot  
             :type plot_options: list
+            :param zstat: Statistic
+            :type zstat: str
             :param stddev_max: Maximum standard deviation
             :type stddev_max: float
         """
+
+        if (self.read_instance.offline) or (self.read_instance.interactive):
+            self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
 
         # calculate statistics
         stats_dict = {}
@@ -1678,11 +1681,10 @@ class Plot:
         stats_dict['StdDev'] = stats_calc   
 
         # correlation - between observations and model
-        corr_stat = plot_characteristics['corr_stat']
-        stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, corr_stat, 
+        stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
                                          [self.read_instance.observations_data_label]*len(data_labels_sans_obs), data_labels_sans_obs)
         stats_calc = np.insert(stats_calc, obs_index, np.NaN)
-        stats_dict[corr_stat] = stats_calc
+        stats_dict[zstat] = stats_calc
         
         # get maximum stddev in dataframe (if not defined)
         if not stddev_max:
@@ -1795,18 +1797,20 @@ class Plot:
         ref_y = np.zeros_like(ref_x) + reference_stddev
         self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contours']['style']['obs'])
 
-        # create annotation on hover
-        annotation = HoverAnnotation(self.canvas_instance, 
-                                     'taylor', 
-                                     self.taylor_polar_relevant_axis,
-                                     plot_characteristics, 
-                                     add_vline=False)
-        self.canvas_instance.annotations['taylor'] = annotation.annotation
-        self.canvas_instance.annotations_lock['taylor'] = False
+        # set up annotations
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            # create annotation on hover
+            annotation = HoverAnnotation(self.canvas_instance, 
+                                        'taylor', 
+                                        self.taylor_polar_relevant_axis,
+                                        plot_characteristics, 
+                                        add_vline=False)
+            self.canvas_instance.annotations['taylor'] = annotation.annotation
+            self.canvas_instance.annotations_lock['taylor'] = False
 
-        # connect axis to hover function
-        self.canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-            lambda event: annotation.hover_annotation(event, 'taylor'))
+            # connect axis to hover function
+            self.canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                lambda event: annotation.hover_annotation(event, 'taylor'))
 
         # add models
         for data_label, stddev, corr_stat in zip(stats_df.index, 
