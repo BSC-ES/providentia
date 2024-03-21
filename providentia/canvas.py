@@ -756,7 +756,12 @@ class MPLCanvas(FigureCanvas):
                     
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
                          self.plot_characteristics[plot_type], plot_options,
-                         zstats=relevant_zstats, statsummary=True)                
+                         zstats=relevant_zstats, statsummary=True)   
+                # make taylor diagram
+                elif plot_type == 'taylor':
+                    corr_stat = self.plot_characteristics['taylor']['corr_stat']
+                    func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
+                         self.plot_characteristics[plot_type], plot_options, corr_stat)          
                 # other plots
                 else:
                     func(ax, self.read_instance.networkspeci, self.read_instance.data_labels, 
@@ -1173,7 +1178,7 @@ class MPLCanvas(FigureCanvas):
             # if correlation stat is empty string, it is because fields are being initialised for the first time
             if corr_stat == '':
                 # set stat to be the one in plot characteristics
-                corr_stat = self.plot_characteristics['taylor']['corr_stat']
+                corr_stat = available_corr_stats[0]
 
             # update statistic combobox (clear, then add items)
             self.taylor_corr_stat.clear()
