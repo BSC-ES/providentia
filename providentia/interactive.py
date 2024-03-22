@@ -70,14 +70,27 @@ class Interactive:
         if not valid_config:
             return
 
-        # create dictionary of all available observational GHOST data
-        self.all_observation_data = get_ghost_observational_tree(self)
-
-        # load dictionary with non-GHOST esarchive files to read
-        nonghost_observation_data_json = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_files.json')))
-        # merge to existing GHOST observational data dict if we have the path
+        # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
+        # generate file trees
+        if self.generate_file_tree:
+            self.all_observation_data = get_ghost_observational_tree(self)
+            if self.nonghost_root is not None:
+                nonghost_observation_data = get_nonghost_observational_tree(self)
+        # load file trees
+        else:
+            try:
+                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
+            except FileNotFoundError as file_error:
+                msg = "Error: Trying to load 'settings/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                sys.exit(msg)
+            if self.nonghost_root is not None:
+                try:
+                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json')))
+                except FileNotFoundError as file_error:
+                    msg = "Error: Trying to load 'settings/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                    sys.exit(msg)
+        # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:
-            nonghost_observation_data = get_nonghost_observational_tree(self, nonghost_observation_data_json)
             self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
 
         # initialise DataReader class
