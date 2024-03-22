@@ -152,7 +152,7 @@ class ProvConfiguration:
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
             # internet connection)
 
-            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
+            if MACHINE in ['power', 'mn4', 'nord3v2']:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all other machines pull from internet
 
