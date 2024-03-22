@@ -333,7 +333,6 @@
                                       "wspace": 0.0},
                   "grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                   "axis_title": {"label": "", "fontsize": 16, "loc": "center"},
-                  "corr_stat": "r", 
                   "xylabel": {"fontsize": 16},
                   "rlabel": {"fontsize": 16},
                   "xytick_params": {"fontsize": 14},

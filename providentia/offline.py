@@ -192,8 +192,8 @@ class ProvidentiaOffline:
 
             # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
             if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
-                for diagram_name in ['taylor', 'taylor-r', 'taylor-r2']:
-                    if (diagram_name in self.station_plots_to_make) or (diagram_name in self.summary_plots_to_make):
+                if plot_type[:6] == 'taylor':
+                    if (plot_type in self.station_plots_to_make) or (plot_type in self.summary_plots_to_make):
                         error = 'It is not possible to create Taylor diagrams yet, please remove.'
                         sys.exit(error)
 
@@ -1223,6 +1223,13 @@ class ProvidentiaOffline:
             print(msg)
             return plot_indices
         
+        # do not make Taylor diagram if statistic is not r or r2
+        if (base_plot_type == 'taylor') and (zstat not in ['r', 'r2']):
+            msg = f"Warning: Cannot make {plot_type} because statistic is not available or defined. "
+            msg += "Choose between 'taylor-r' or 'taylor-r2'. Not making plot."
+            print(msg)
+            return plot_indices
+
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
         data_labels_sans_obs.remove(self.observations_data_label)
@@ -1502,7 +1509,7 @@ class ProvidentiaOffline:
                          plot_options, data_range_min=data_range_min, data_range_max=data_range_max) 
                 elif base_plot_type == 'taylor':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                         plot_options, stddev_max=stddev_max)
+                         plot_options, zstat=zstat, stddev_max=stddev_max)
                 elif base_plot_type == 'timeseries':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                          plot_options, chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)   
