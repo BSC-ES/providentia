@@ -173,7 +173,7 @@ elif [ "${BSC_MACHINE}" == "mn5" ]; then
         node=$(hostname -s)
         if [ "${node}" == "glogin4" ]; then
             echo "Creating environment..."
-            conda create -n providentia-env -y
+            conda create -n providentia-env -y python=3.9.16
             conda activate providentia-env
             conda install -c conda-forge cartopy -y
             conda install -c conda-forge jupyterlab -y
@@ -326,7 +326,7 @@ else
         # create environment if it does not exist
         echo "Environment providentia-env does not exist."; 
         echo "Creating environment..."
-        conda create -n providentia-env -y
+        conda create -n providentia-env -y python=3.9.16
         conda activate providentia-env
         conda install -c conda-forge cartopy -y
         conda install -c conda-forge jupyterlab -y
