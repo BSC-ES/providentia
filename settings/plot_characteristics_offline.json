@@ -365,10 +365,9 @@
 
        "taylor": {"orientation": "portrait",
                   "figure": {"ncols": 2, "nrows": 3},
-                  "page_title": {"t": "StatSummary", "fontsize": 15, "ha": "left", "x": 0.05, "y": 0.98},
+                  "page_title": {"t": "Taylor diagram", "fontsize": 15, "ha": "left", "x": 0.05, "y": 0.98},
                   "grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
-                  "axis_title": {"label": "", "fontsize": 8, "pad": 22},
-                  "corr_stat": "r", 
+                  "axis_title": {"label": "", "fontsize": 8},
                   "xylabel": {"fontsize": 8},
                   "rlabel": {"fontsize": 8},
                   "xytick_params": {"fontsize": 7},
