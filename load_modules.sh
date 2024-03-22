@@ -16,6 +16,10 @@ if [ "${BSC_MACHINE}" == "power" ]; then
         kdepy/1.1.1-fosscuda-2019b-Python-3.7.4 \
         Ghostscript/9.50-GCCcore-8.3.0
 
+# Marenostrum5
+elif [ "${BSC_MACHINE}" == "mn5" ]; then
+    module load anaconda/2023.07
+
 # Marenostrum4
 elif [ "${BSC_MACHINE}" == "mn4" ]; then
     module load intel impi mkl \

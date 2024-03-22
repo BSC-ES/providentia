@@ -149,7 +149,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.full_window_geometry = None
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-
         # generate file trees
         if self.generate_file_tree:
             self.all_observation_data = get_ghost_observational_tree(self)
@@ -168,7 +167,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 except FileNotFoundError as file_error:
                     msg = "Error: Trying to load 'settings/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                     sys.exit(msg)
-
         # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:
             self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}

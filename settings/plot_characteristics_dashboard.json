@@ -95,7 +95,7 @@
                "marker_selected": {"s": 8, "alpha": 1.0},
                "marker_unselected": {"s": 4, "alpha": 0.4},
                "plot": {"s": 4, "zorder": 3, "linewidth": 0.0, "alpha": null, "picker": 1},
-               "plot_options": ["annotate"],
+               "plot_options": ["annotate", "domain"],
                "marker_annotate": {"xytext": [0, 0], "textcoords": "offset points", "size": 8, "ha": "center", 
                                      "zorder": 100},
                "marker_annotate_bbox": {"boxstyle": "round", "linewidth": 0.5, "facecolor": "white", 

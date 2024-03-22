@@ -56,6 +56,7 @@ class ProvConfiguration:
             'config': '',
             'config_dir': os.path.join(PROVIDENTIA_ROOT, 'configurations/'),
             'operating_system': '',
+            'machine': '',
             'cartopy_data_dir': '',
             'available_cpus': '',
             'n_cpus': '',
@@ -154,6 +155,9 @@ class ProvConfiguration:
                 error = 'Error: The OS cannot be detected.'
                 sys.exit(error)
             return operating_system
+        
+        elif key == 'machine':
+            return MACHINE
 
         elif key == 'available_cpus':
             # get available N CPUs
