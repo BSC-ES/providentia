@@ -209,6 +209,12 @@ class DataReader:
                 self.read_instance.metadata_dtype = self.read_instance.ghost_metadata_dtype
                 self.read_instance.metadata_vars_to_read = self.read_instance.ghost_metadata_vars_to_read
 
+            # show warning when there is a non-defined field
+            invalid_args = self.read_instance.non_default_args - set(self.read_instance.metadata_vars_to_read)
+            if invalid_args:
+                msg = f"Invalid field(s) {', '.join(invalid_args)} in config file {self.read_instance.config.split('/')[-1]}."
+                show_message(self.read_instance, msg)
+
             self.read_instance.metadata_in_memory = {networkspeci: 
                                                      np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
                                                               len(self.read_instance.yearmonths)),
