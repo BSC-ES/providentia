@@ -113,6 +113,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
                 sys.exit(error)
         
+        # get used fields
+        self.fields = set(self.current_config.keys())
+
         # set initial filter species
         self.previous_filter_species = {}
         self.filter_species = {}
