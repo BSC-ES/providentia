@@ -88,6 +88,12 @@ class ProvidentiaOffline:
         # initialise DataReader class
         self.datareader = DataReader(self)
 
+        # get used fields (all fields)
+        self.fields = []
+        for args in self.sub_opts.values():
+            self.fields += list(args.keys())
+        self.fields = set(self.fields)
+
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
 
