@@ -96,7 +96,7 @@ class ProvidentiaOffline:
 
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
-
+            print(self.filenames, self.parent_section_names)
             print('Starting to create PDF for {} section'.format(section))
 
             # update for new section parameters
@@ -741,6 +741,7 @@ class ProvidentiaOffline:
             (self.filter_species != self.previous_filter_species):
                 # re-read data
                 self.datareader.read_setup(['reset'])
+                print("ENtra en el if", (self.qa, self.previous_qa) , (self.flags , self.previous_flags) , (self.filter_species , self.previous_filter_species))
 
             # update fields available for filtering
             init_representativity(self)
