@@ -497,6 +497,9 @@ class ProvConfiguration:
     def check_validity(self):
         """ Check validity of set variables after parsing. """
         
+        #get non-default fields on config file
+        self.read_instance.non_default_args = self.read_instance.fields - set(self.var_defaults)
+
         # check have network information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:
