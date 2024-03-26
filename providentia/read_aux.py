@@ -251,6 +251,11 @@ def read_netcdf_data(tuple_arguments):
                 # GHOST metadata
                 else:
                     meta_var_nc = meta_var
+
+                    # check meta variable is in netCDF
+                    if meta_var_nc not in ncdf_root.variables:
+                        continue
+
                     meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
 
                 # put metadata in array
