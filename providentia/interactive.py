@@ -994,9 +994,6 @@ class Interactive:
                 if k not in kwargs:
                     setattr(self, k, provconf.parse_parameter(k, val))
 
-        # get used fields 
-        self.fields = set(self.subsection_opts.keys())
-
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
 
