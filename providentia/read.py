@@ -212,7 +212,7 @@ class DataReader:
             # show warning when there is a non-defined field
             invalid_args = self.read_instance.non_default_args - set(self.read_instance.metadata_vars_to_read)
             if invalid_args:
-                msg = f"Invalid field(s) {', '.join(invalid_args)} in config file {self.read_instance.config.split('/')[-1]}."
+                msg = f"Invalid field(s): {', '.join(invalid_args)} in configuration file {self.read_instance.config.split('/')[-1]}."
                 show_message(self.read_instance, msg)
 
             self.read_instance.metadata_in_memory = {networkspeci: 
