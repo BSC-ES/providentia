@@ -90,7 +90,6 @@ class ProvidentiaOffline:
 
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
-
             print('Starting to create PDF for {} section'.format(section))
 
             # update for new section parameters
@@ -731,8 +730,8 @@ class ProvidentiaOffline:
                 self.temporal_colocation = False    
 
             # determine if need to re-read data (qa, flags or filter_species have changed)
-            if (self.qa != self.previous_qa) or (self.flags != self.previous_flags) or\
-            (self.filter_species != self.previous_filter_species):
+            if (np.array_equal(self.qa, self.previous_qa) == False) or (np.array_equal(self.flags, self.previous_flags) == False) or\
+            (str(dict(sorted(self.filter_species.items()))) != str(dict(sorted(self.previous_filter_species.items())))):
                 # re-read data
                 self.datareader.read_setup(['reset'])
 
