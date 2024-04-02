@@ -209,14 +209,15 @@ class DataReader:
                 self.read_instance.metadata_dtype = self.read_instance.ghost_metadata_dtype
                 self.read_instance.metadata_vars_to_read = self.read_instance.ghost_metadata_vars_to_read
 
-            # show warning when there is a non-defined field
-            invalid_args = {field_name:fields-set(self.read_instance.metadata_vars_to_read) 
-                            for field_name,fields in self.read_instance.non_default_fields_per_section.items()}
-            invalid_var = [f"""{i} ('{"', '".join(j)}')""" for i,j in invalid_args.items() if j]
-            if invalid_var:
-                msg = f"Invalid field(s) in configuration file {self.read_instance.config.split('/')[-1]}. "
-                msg += f"Section(s) and Field(s): {', '.join(invalid_var)}."
-                show_message(self.read_instance, msg)
+            # show warning when there is a non-defined field if launching from a config file
+            if hasattr(self.read_instance, "non_default_fields_per_section"):
+                invalid_args = {field_name:fields-set(self.read_instance.metadata_vars_to_read) 
+                                for field_name, fields in self.read_instance.non_default_fields_per_section.items()}
+                invalid_var = [f"""{i} ('{"', '".join(j)}')""" for i,j in invalid_args.items() if j]
+                if invalid_var:
+                    msg = f"Invalid field(s) in configuration file {self.read_instance.config.split('/')[-1]}. "
+                    msg += f"Section(s) and Field(s): {', '.join(invalid_var)}."
+                    show_message(self.read_instance, msg)
 
             self.read_instance.metadata_in_memory = {networkspeci: 
                                                      np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
