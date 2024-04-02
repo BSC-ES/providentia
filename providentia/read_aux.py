@@ -74,8 +74,14 @@ def read_netcdf_data(tuple_arguments):
     else:
         #file_time_dt = num2date(file_time, units=time_units, calendar=time_calendar)
         file_time_dt = num2date(file_time, units=time_units)
-        # remove microseconds
-        file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
+        # convert to pandas datetime
+        try:
+            # remove microseconds
+            file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
+        except:
+            # bug fix for newer versions of cftime
+            file_time_dt = file_time_dt.astype('datetime64[ns]')
+            file_time_dt = pd.to_datetime([t for t in file_time_dt])
 
     # get file time as integer timestamp
     file_timestamp = file_time_dt.asi8
