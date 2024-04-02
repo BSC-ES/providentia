@@ -14,7 +14,7 @@ from aux import get_aeronet_bin_radius_from_bin_variable, check_for_ghost
 from mapping_species import mapping_species
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+CURRENT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 data_paths = json.load(open(os.path.join(CURRENT_PATH, 'settings/data_paths.json')))
 
 # set MACHINE to be the hub, workstation or local machine
