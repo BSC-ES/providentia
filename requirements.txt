@@ -12,7 +12,7 @@ PyQt5==5.15.10
 seaborn==0.13.2
 scipy==1.12.0
 ConfigArgParse==1.7
-cftime==1.0.3.4
+cftime==1.6.3
 KDEpy==1.1.9
 xarray==2024.2.0
 Sphinx==7.2.6
