@@ -436,6 +436,20 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Cannot make a bias plot showing threshold lines. Not making plot.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
+        <span class="c1"># do not make plot if hidedata is active but smooth is not in plot options</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;timeseries&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;hidedata&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;smooth&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Warning: Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2"> because &#39;hidedata&#39; plot option is set for &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;timeseries plot, but &#39;smooth&#39; is not active. Not making plot.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># do not make plot if hidedata is active but regression is not in plot options</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;scatter&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;hidedata&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;regression&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Warning: Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2"> because &#39;hidedata&#39; plot option is set for &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;scatter lot, but &#39;regression&#39; is not active. Not making plot.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
+        
         <span class="c1"># get data labels for plot</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">data_labels</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span>

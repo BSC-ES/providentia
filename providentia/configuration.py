@@ -152,7 +152,7 @@ class ProvConfiguration:
             # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
             # internet connection)
 
-            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
+            if MACHINE in ['power', 'mn4', 'nord3v2']:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all other machines pull from internet
 
@@ -497,6 +497,20 @@ class ProvConfiguration:
     def check_validity(self):
         """ Check validity of set variables after parsing. """
         
+        # get non-default fields on config file if launching from a config file
+        if hasattr(self.read_instance, "sub_opts"):
+            self.read_instance.fields_per_section = {}
+            for field_name, fields in self.read_instance.sub_opts.items():
+                if field_name in self.read_instance.subsection_names:
+                    section_field_name = field_name.split('·')[0]
+                    self.read_instance.fields_per_section[field_name] = \
+                        fields.keys() - set(self.read_instance.fields_per_section[section_field_name])
+                else:
+                    self.read_instance.fields_per_section[field_name] = set(fields.keys())
+            self.read_instance.non_default_fields_per_section = {
+                field_name:fields-set(self.var_defaults) 
+                for field_name, fields in self.read_instance.fields_per_section.items()}
+       
         # check have network information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:

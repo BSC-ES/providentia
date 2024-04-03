@@ -24,6 +24,7 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
                            period_conf, representativity_conf)
 from .filter import DataFilter
 from .plot import Plot
+from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import (format_plot_options, format_axis, set_axis_label, set_axis_title, 
                               harmonise_xy_lims_paradigm)
 from .read import DataReader
@@ -368,6 +369,13 @@ class Interactive:
             print(msg)
             return
         
+        # do not make Taylor diagram if statistic is not r or r2
+        if (base_plot_type == 'taylor') and (zstat not in ['r', 'r2']):
+            msg = f"Warning: Cannot make {plot_type} because statistic is not available or defined. "
+            msg += "Choose between 'taylor-r' or 'taylor-r2'. Not making plot."
+            print(msg)
+            return
+        
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)
@@ -413,9 +421,13 @@ class Interactive:
             px = 1.0/dpi
             fig = plt.figure(figsize=(width*px,height*px))
 
-        #create axes
+        # create axes
         if base_plot_type == 'map':
             ax = fig.add_subplot(111, projection=self.plotcrs)
+        elif base_plot_type == 'taylor':            
+            reference_stddev = 7.5
+            ghelper = get_taylor_diagram_ghelper(reference_stddev, self.plot_characteristics[plot_type])
+            ax = fig.add_subplot(111, axes_class=fa.FloatingAxes, grid_helper=ghelper)
         else:
             ax = fig.add_subplot(111)
 
@@ -608,9 +620,17 @@ class Interactive:
             else:
                 self.reset_filter()
         
+        # make timeseries plot
         elif base_plot_type == 'timeseries':
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                  plot_options, chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
+        
+        # make taylor diagram plot
+        elif base_plot_type == 'taylor':
+            stddev_max = self.selected_station_stddev_max[networkspeci]
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 plot_options, zstat=zstat, stddev_max=stddev_max)
+            
         # other plots
         else: 
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
