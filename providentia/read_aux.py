@@ -8,6 +8,7 @@ import sys
 import time
 
 import bisect
+import cftime
 from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
 import pandas as pd
@@ -67,18 +68,20 @@ def read_netcdf_data(tuple_arguments):
     # as num2date does not support 'months since' units)
     file_time = ncdf_root['time'][:] 
     time_units = ncdf_root['time'].units
-    #time_calendar = ncdf_root['time'].calendar
+    
+    # time_calendar = ncdf_root['time'].calendar
     if 'months' in time_units:
         monthly_start_date = time_units.split(' ')[2]
         file_time_dt = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
     else:
-        #file_time_dt = num2date(file_time, units=time_units, calendar=time_calendar)
+        # file_time_dt = num2date(file_time, units=time_units, calendar=time_calendar)
         file_time_dt = num2date(file_time, units=time_units)
+        
         # convert to pandas datetime
-        try:
+        if float(".".join(cftime. __version__.split(".")[:2])) == 1.0:
             # remove microseconds
             file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
-        except:
+        else:
             # bug fix for newer versions of cftime
             file_time_dt = file_time_dt.astype('datetime64[ns]')
             file_time_dt = pd.to_datetime([t for t in file_time_dt])
