@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration files &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=7ae09063" />
 
   
   <!--[if lt IE 9]>
@@ -158,9 +159,9 @@
 <p>It is mandatory to define sections to launch Providentia. Their names must be wrapped in brackets (<code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">]</span></code>) and cannot include interpuncts (<code class="docutils literal notranslate"><span class="pre">·</span></code>). Sections should contain the following fields:</p>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 20.0%" />
-<col style="width: 20.0%" />
-<col style="width: 60.0%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 60%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
@@ -203,81 +204,85 @@
 </tr>
 <tr class="row-even"><td><p>statistic_mode</p></td>
 <td><p>✗</p></td>
-<td><p>Statistic mode: Flattened (default), Spatial|Temporal or Temporal|Spatial.</p></td>
+<td><p>Statistic mode: Temporal|Spatial (default), Spatial|Temporal or Flattened.</p></td>
 </tr>
 <tr class="row-odd"><td><p>statistic_aggregation</p></td>
 <td><p>✗</p></td>
 <td><p>Aggregation statistic, e.g. Median.</p></td>
 </tr>
-<tr class="row-even"><td><p>periodic_statistic_mode</p></td>
+<tr class="row-even"><td><p>timeseries_statistic_aggregation</p></td>
+<td><p>✗</p></td>
+<td><p>Timeseries aggregation statistic, e.g. Median.</p></td>
+</tr>
+<tr class="row-odd"><td><p>periodic_statistic_mode</p></td>
 <td><p>✗</p></td>
 <td><p>Periodic statistic mode: Independent (default), Cycle.</p></td>
 </tr>
-<tr class="row-odd"><td><p>periodic_statistic_aggregation</p></td>
+<tr class="row-even"><td><p>periodic_statistic_aggregation</p></td>
 <td><p>✗</p></td>
 <td><p>Periodic aggregation statistic, e.g. Mean (default).</p></td>
 </tr>
-<tr class="row-even"><td><p>filter_species</p></td>
+<tr class="row-odd"><td><p>filter_species</p></td>
 <td><p>✗</p></td>
 <td><p>Filter read species by other species data within a data range (can be multiple) (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim),</span> <span class="pre">network2:species2</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim)</span></code>).</p></td>
 </tr>
-<tr class="row-odd"><td><p>lower_bound</p></td>
+<tr class="row-even"><td><p>lower_bound</p></td>
 <td><p>✗</p></td>
 <td><p>Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
 </tr>
-<tr class="row-even"><td><p>upper_bound</p></td>
+<tr class="row-odd"><td><p>upper_bound</p></td>
 <td><p>✗</p></td>
 <td><p>Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
 </tr>
-<tr class="row-odd"><td><p>report_type</p></td>
+<tr class="row-even"><td><p>report_type</p></td>
 <td><p>✗</p></td>
 <td><p>Type of report to generate that defines which plots the report will contain, from the options given in report_plots.json.</p></td>
 </tr>
-<tr class="row-even"><td><p>report_summary</p></td>
+<tr class="row-odd"><td><p>report_summary</p></td>
 <td><p>✗</p></td>
 <td><p>Boolean variable to set if you wish to make specific plots for each station in subsection.</p></td>
 </tr>
-<tr class="row-odd"><td><p>report_stations</p></td>
+<tr class="row-even"><td><p>report_stations</p></td>
 <td><p>✗</p></td>
 <td><p>Boolean variable to set if you wish to make summary plots across station subsection.</p></td>
 </tr>
-<tr class="row-even"><td><p>report_title</p></td>
+<tr class="row-odd"><td><p>report_title</p></td>
 <td><p>✗</p></td>
 <td><p>The header in the first page of the report (as in the PDF).</p></td>
 </tr>
-<tr class="row-odd"><td><p>report_filename</p></td>
+<tr class="row-even"><td><p>report_filename</p></td>
 <td><p>✗</p></td>
 <td><p>The filename of the report or the path to create the report (as in the PDF).</p></td>
 </tr>
-<tr class="row-even"><td><p>map_extent</p></td>
+<tr class="row-odd"><td><p>map_extent</p></td>
 <td><p>✗</p></td>
 <td><p>Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude.</p></td>
 </tr>
-<tr class="row-odd"><td><p>plot_characteristics_filename</p></td>
+<tr class="row-even"><td><p>plot_characteristics_filename</p></td>
 <td><p>✗</p></td>
 <td><p>The path to the file containing the plot characteristics.</p></td>
 </tr>
-<tr class="row-even"><td><p>active_dashboard_plots</p></td>
+<tr class="row-odd"><td><p>active_dashboard_plots</p></td>
 <td><p>✗</p></td>
 <td><p>Plots that will be active in the dashboard once it is launched (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries,</span> <span class="pre">periodic-violin,</span> <span class="pre">scatter,</span> <span class="pre">distribution</span></code>).</p></td>
 </tr>
-<tr class="row-odd"><td><p>harmonise_stations</p></td>
+<tr class="row-even"><td><p>harmonise_stations</p></td>
 <td><p>✗</p></td>
 <td><p>Boolean variable to set if you wish to harmonise axes limits across stations for stations report.</p></td>
 </tr>
-<tr class="row-even"><td><p>harmonise_summary</p></td>
+<tr class="row-odd"><td><p>harmonise_summary</p></td>
 <td><p>✗</p></td>
 <td><p>Boolean variable to set if you wish to harmonise axes limits across subsections for summary report.</p></td>
 </tr>
-<tr class="row-odd"><td><p>observations_data_label</p></td>
+<tr class="row-even"><td><p>observations_data_label</p></td>
 <td><p>✗</p></td>
 <td><p>Alternative name for observations.</p></td>
 </tr>
-<tr class="row-even"><td><p>remove_extreme_stations</p></td>
+<tr class="row-odd"><td><p>remove_extreme_stations</p></td>
 <td><p>✗</p></td>
 <td><p>Type of extreme stations removal, from the options given in <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.json</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p>resampling_resolution</p></td>
+<tr class="row-even"><td><p>resampling_resolution</p></td>
 <td><p>✗</p></td>
 <td><p>Resolution you want to resample your data to. Options: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">hourly_instantaneous</span></code>, <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">3hourly_instantaneous</span></code>, <code class="docutils literal notranslate"><span class="pre">6hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">6hourly_instantaneous</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code></p></td>
 </tr>
