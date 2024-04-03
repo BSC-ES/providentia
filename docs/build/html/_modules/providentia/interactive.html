@@ -4,8 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>providentia.interactive &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=7ae09063" />
 
   
   <!--[if lt IE 9]>
@@ -99,6 +100,7 @@
                            <span class="n">period_conf</span><span class="p">,</span> <span class="n">representativity_conf</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.filter</span> <span class="kn">import</span> <span class="n">DataFilter</span>
 <span class="kn">from</span> <span class="nn">.plot</span> <span class="kn">import</span> <span class="n">Plot</span>
+<span class="kn">from</span> <span class="nn">.plot_aux</span> <span class="kn">import</span> <span class="n">get_taylor_diagram_ghelper</span>
 <span class="kn">from</span> <span class="nn">.plot_formatting</span> <span class="kn">import</span> <span class="p">(</span><span class="n">format_plot_options</span><span class="p">,</span> <span class="n">format_axis</span><span class="p">,</span> <span class="n">set_axis_label</span><span class="p">,</span> <span class="n">set_axis_title</span><span class="p">,</span> 
                               <span class="n">harmonise_xy_lims_paradigm</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.read</span> <span class="kn">import</span> <span class="n">DataReader</span>
@@ -450,6 +452,13 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">return</span>
         
+        <span class="c1"># do not make Taylor diagram if statistic is not r or r2</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;taylor&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">zstat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;r2&#39;</span><span class="p">]):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Warning: Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2"> because statistic is not available or defined. &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Choose between &#39;taylor-r&#39; or &#39;taylor-r2&#39;. Not making plot.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
+        
         <span class="c1"># get data labels for plot</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">data_labels</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span>
@@ -495,9 +504,13 @@
             <span class="n">px</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">dpi</span>
             <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="o">*</span><span class="n">px</span><span class="p">,</span><span class="n">height</span><span class="o">*</span><span class="n">px</span><span class="p">))</span>
 
-        <span class="c1">#create axes</span>
+        <span class="c1"># create axes</span>
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;map&#39;</span><span class="p">:</span>
             <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plotcrs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;taylor&#39;</span><span class="p">:</span>            
+            <span class="n">reference_stddev</span> <span class="o">=</span> <span class="mf">7.5</span>
+            <span class="n">ghelper</span> <span class="o">=</span> <span class="n">get_taylor_diagram_ghelper</span><span class="p">(</span><span class="n">reference_stddev</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">])</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">axes_class</span><span class="o">=</span><span class="n">fa</span><span class="o">.</span><span class="n">FloatingAxes</span><span class="p">,</span> <span class="n">grid_helper</span><span class="o">=</span><span class="n">ghelper</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
 
@@ -690,9 +703,17 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
         
+        <span class="c1"># make timeseries plot</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;timeseries&#39;</span><span class="p">:</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> 
                  <span class="n">plot_options</span><span class="p">,</span> <span class="n">chunk_stat</span><span class="o">=</span><span class="n">chunk_stat</span><span class="p">,</span> <span class="n">chunk_resolution</span><span class="o">=</span><span class="n">chunk_resolution</span><span class="p">)</span>
+        
+        <span class="c1"># make taylor diagram plot</span>
+        <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;taylor&#39;</span><span class="p">:</span>
+            <span class="n">stddev_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_station_stddev_max</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">]</span>
+            <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> 
+                 <span class="n">plot_options</span><span class="p">,</span> <span class="n">zstat</span><span class="o">=</span><span class="n">zstat</span><span class="p">,</span> <span class="n">stddev_max</span><span class="o">=</span><span class="n">stddev_max</span><span class="p">)</span>
+            
         <span class="c1"># other plots</span>
         <span class="k">else</span><span class="p">:</span> 
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> 
