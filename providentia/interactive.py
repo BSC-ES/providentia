@@ -775,7 +775,7 @@ class Interactive:
                 figure_fname = copy.deepcopy(save)
             print('Saving {} figure to {}'.format(plot_type, figure_fname))
             # save figure
-            plt.savefig(figure_fname)
+            plt.savefig(figure_fname, bbox_inches='tight')
             return None
         # elif return_plot is passed then return plot axis/axes
         elif return_plot:
