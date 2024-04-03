@@ -92,10 +92,13 @@ It is mandatory to define sections to launch Providentia. Their names must be wr
      - Boolean variable to set if you want to spatially colocate the observation and experiment data across multiple species.
    * - statistic_mode
      - ✗
-     - Statistic mode: Flattened (default), Spatial|Temporal or Temporal|Spatial.
+     - Statistic mode: Temporal|Spatial (default), Spatial|Temporal or Flattened.
    * - statistic_aggregation
      - ✗
      - Aggregation statistic, e.g. Median.
+   * - timeseries_statistic_aggregation
+     - ✗
+     - Timeseries aggregation statistic, e.g. Median.
    * - periodic_statistic_mode
      - ✗
      - Periodic statistic mode: Independent (default), Cycle.
