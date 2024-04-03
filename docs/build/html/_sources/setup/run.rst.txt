@@ -58,13 +58,13 @@ The reports will be saved under the folder reports. You can add a path in the re
 Running the tool on a personal machine
 --------------------------------------
 
-If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file configuration.py and defining ghost_root, nonghost_root and exp_root. For instance:
+If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file ``/providentia/settings/data_paths.json`` and defining ``ghost_root``, ``nonghost_root`` and ``exp_root`` under ``local``. For instance:
 
 ::
     
-    'local_ghost_root': '/data/providentia/obs/ghost/'
-    'local_nonghost_root': '/data/providentia/obs/nonghost/'
-    'local_exp_root': '/data/providentia/exp/'
+    'ghost_root': '/data/providentia/obs/ghost/'
+    'nonghost_root': '/data/providentia/obs/nonghost/'
+    'exp_root': '/data/providentia/exp/'
 
 You should download the data that you need from the BSC systems to the local machine. The tool has set locations where it grabs the observational/experiment data on the **esarchive**:
 
@@ -74,16 +74,6 @@ You should download the data that you need from the BSC systems to the local mac
 
 The entire data collection comprises **several terabytes**, therefore it is not recommended to download the entire archive.
 
-If you are running the tool on a personal machine, you will also need to install all the modules by yourself. To do this you can create a virtual environment with Conda and install the necessary packages by:
-
-::
-    
-    conda create -n providentia-env python=3.9
-    conda activate providentia-env
-    conda install -c conda-forge cartopy
-    conda install -c conda-forge jupyterlab
-    pip install -r requirements.txt
-
-Once the environment is activated and all modules are installed, you can open the dashboard and generate reports as explained above.
+If it is the first time that you launch Providentia, an environment called ``providentia-env`` will be created with all the necessary dependencies.
 
 Enjoy!

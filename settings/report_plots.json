@@ -50,8 +50,9 @@
                   "table-Median", "table-Median_bias", "table-Mean_multispecies", 
                   "statsummary", "statsummary_multispecies", "statsummary_multispecies_bias",
                   "timeseries_threshold", "periodic-Mean_threshold", "periodic-violin_threshold", 
-                  "scatter_threshold", "boxplot_threshold", "distribution_threshold"],
+                  "scatter_threshold", "boxplot_threshold", "distribution_threshold",
+                  "taylor-r2", "taylor-r"],
     
-    "debug": ["scatter", "scatter_regression", "scatter_hidedata_regression"]
+    "debug": ["scatter", "taylor-r2", "taylor-r"]
 
 }
