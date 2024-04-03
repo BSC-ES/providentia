@@ -162,6 +162,7 @@ elif [ "${BSC_MACHINE}" == "mn5" ]; then
 
     # load modules from conda environment
     active_env=false
+    module load anaconda
     eval "$(conda shell.bash hook)"
     if { conda env list | grep 'providentia-env'; } >/dev/null 2>&1; then 
         echo "Activating environment..."
