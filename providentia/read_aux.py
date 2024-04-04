@@ -2,6 +2,7 @@
 
 import datetime
 from glob import glob
+import json
 import multiprocessing
 import os
 import sys
@@ -15,6 +16,9 @@ import pandas as pd
 
 # initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
+
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 
 def drop_nans(data):
@@ -256,6 +260,11 @@ def read_netcdf_data(tuple_arguments):
                 # GHOST metadata
                 else:
                     meta_var_nc = meta_var
+
+                    # check meta variable is in netCDF
+                    if meta_var_nc not in ncdf_root.variables:
+                        continue
+
                     meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
 
                 # put metadata in array
@@ -438,6 +447,7 @@ def get_ghost_observational_tree(instance):
         :rtype: dict
     """
 
+    # create dictionary for storing filetree
     ghost_observation_data = {}
 
     # iterate through available networks
@@ -489,26 +499,32 @@ def get_ghost_observational_tree(instance):
                     # write nested dictionary for species, with associated file yearmonths
                     ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
 
+    # save file tree out to json
+    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'), 'w') as json_file:
+        json.dump(ghost_observation_data, json_file, indent=4)
+
     return ghost_observation_data
 
 
-def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
+def get_nonghost_observational_tree(instance):
     """ Fill non-GHOST observational data tree,
         storing a list of start YYYYMM yearmonths per:
         network / resolution / matrix / speci
 
         :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
         :type instance: object
-        :param nonghost_observation_data_json: non-GHOST observational tree json
-        :type nonghost_observation_data_json: json
         :return: non-GHOST observational tree dictionary
         :rtype: dict
     """
 
+    # create dictionary for storing filetree
     nonghost_observation_data = {}
 
+    # load which non-GHOST networks to read
+    nonghost_networks = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.json')))
+
     # iterate through networks
-    for network in nonghost_observation_data_json:
+    for network in nonghost_networks:
 
         # check if directory for network exists
         # if not, continue
@@ -519,7 +535,7 @@ def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
         nonghost_observation_data[network] = {}
 
         # iterate through resolutions
-        for resolution in nonghost_observation_data_json[network]:
+        for resolution in nonghost_networks[network]:
 
             # check if directory for resolution exists
             # if not, continue
@@ -530,7 +546,7 @@ def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
             nonghost_observation_data[network][resolution] = {}
 
             # iterate through species
-            for speci in nonghost_observation_data_json[network][resolution]:
+            for speci in nonghost_networks[network][resolution]:
 
                 # get all available netCDF files 
                 available_files = glob('%s/%s/%s/%s/%s_??????.nc' % (instance.nonghost_root, network, resolution, speci, speci))
@@ -552,6 +568,10 @@ def get_nonghost_observational_tree(instance, nonghost_observation_data_json):
                     # write nested dictionary for species, with associated file yearmonths
                     nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
         
+    # save file tree out to json
+    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json'), 'w') as json_file:
+        json.dump(nonghost_observation_data, json_file, indent=4)
+
     return nonghost_observation_data
 
 
