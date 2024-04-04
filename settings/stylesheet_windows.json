@@ -1,0 +1,90 @@
+{
+    "title_menu":                {"font": {"style": "SansSerif", "size": 9.5, "bold": true}, 
+                                  "height": 20, 
+                                  "color": "black"},
+
+    "label_menu":                {"font": {"style": "SansSerif", "size": 9.5},
+                                  "height": 20, "width": 90,
+                                  "color": "black"},
+
+    "button_menu":               {"font": {"style": "SansSerif", "size": 9.5}, 
+                                  "height": 20, "width": 90,
+                                  "color": "black", "background-color": "white"},
+
+    "checkbox_menu":             {"font": {"style": "SansSerif", "size": 9.5},
+                                  "height": 20, "width": 90,
+                                  "color": "black"},
+
+    "combobox_menu":             {"font": {"style": "SansSerif", "size": 9.5},
+                                  "height": 20, "width": 90,
+                                  "color": "black", "background-color": "white", 
+                                  "selection-color": "white", "selection-background-color": "grey",
+                                  "border": {"colour": "lightgrey", "size": 1}},
+
+    "checkable_combobox_menu":   {"font": {"style": "SansSerif", "size": 9.5},
+                                  "height": 20, "width": 230,
+                                  "color": "black", "background-color": "white", 
+                                  "selection-color": "white", "selection-background-color": "grey",
+                                  "border": {"colour": "lightgrey", "size": 1}},
+
+    "lineedit_menu":             {"font": {"style": "SansSerif", "size": 9.5},
+                                  "height": 20, "width": 90,
+                                  "color": "black",
+                                  "border": {"colour": "lightgrey", "size": 1}},
+
+    "switch_menu":               {"font": {"style": "SansSerif", "size": 9},
+                                  "height": 20, "width": 50, "color": "black", 
+                                  "border": {"colour": "white", "size": 1}},
+
+    "title_popup":               {"font": {"style": "SansSerif", "size": 13, "bold": true}, 
+                                  "height": 23, 
+                                  "color": "black"},
+
+    "subtitle_popup":            {"font": {"style": "SansSerif", "size": 11, "bold": true},  
+                                  "height": 23, 
+                                  "color": "black"},
+
+    "button_popup":              {"font": {"style": "SansSerif", "size": 9.5}, 
+                                  "height": 20, 
+                                  "color": "black"},
+
+    "navigation_button_popup":   {"font": {"style": "SansSerif", "size": 9.5}, 
+                                  "height": 20, 
+                                  "color": "black"},
+
+    "checkbox_popup":            {"font": {"style": "SansSerif", "size": 9.5}, 
+                                  "height": 18, 
+                                  "color": "black"},
+
+    "rangebox_label_popup":      {"font": {"style": "SansSerif", "size": 9.5}, 
+                                  "height": 18, 
+                                  "color": "black"},
+                                
+    "rangebox_popup":            {"font": {"style": "SansSerif", "size": 9.5}, 
+                                  "height": 18, 
+                                  "max_width": 90, 
+                                  "color": "black"},
+
+    "multispecies_popup":        {"font": {"style": "SansSerif", "size": 9.5}, 
+                                  "height": 18, 
+                                  "color": "black"},
+
+    "column_header_label_popup": {"font": {"style": "SansSerif", "size": 9.5, "italic": true}, 
+                                  "height": 18, 
+                                  "color": "black"},
+
+    "tooltip":                   {"font": {"style": "SansSerif", "size": 8}},
+
+    "settings_container":        {"background-color": "white", 
+                                  "border": {"colour": "lightgrey", "size": 1}, 
+                                  "border-radius": 5, "padding": 5},
+
+    "settings_icon":             {"border": null},
+
+    "save_icon":                 {"border": null},
+    
+    "settings_label":            {"font": {"style": "SansSerif", "size": 9.5, "bold": true}},
+
+    "canvas_cover":             {"background-color": "white"}
+
+}
