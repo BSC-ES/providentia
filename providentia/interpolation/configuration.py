@@ -19,8 +19,8 @@ GHOST_version = 'default'
 n_neighbours_to_find = 'default'
 
 # define date range to process
-start_date = '202309'  # YYYYMM   START FROM THIS POINT
-end_date   = '202311'  # YYYYMM   GO UP TO THIS POINT
+start_date = '202401' #'202309'  # YYYYMM   START FROM THIS POINT
+end_date   = '202404' #'202311'  # YYYYMM   GO UP TO THIS POINT
 
 # define all experiments (by ID) to process
 experiments_to_process = ['a6gn']
