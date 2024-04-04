@@ -8,14 +8,17 @@ import socket
 import subprocess
 import sys
 import time
+from pydoc import locate
 import numpy as np
 
 from aux import get_aeronet_bin_radius_from_bin_variable, check_for_ghost
 from mapping_species import mapping_species
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
-CURRENT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-data_paths = json.load(open(os.path.join(CURRENT_PATH, 'settings/data_paths.json')))
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
+data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.json')))
+default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/prov_interp_defaults.json')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -80,8 +83,9 @@ class SubmitInterpolation(object):
         # import configuration file
         import configuration as config_args
 
-        # import configuration default formats
-        from configuration_defaults import config_format, bin_vars
+        # get configuration default formats
+        config_format = default_values['config_format']
+        bin_vars = default_values['bin_vars']
 
         # if have defined variables to set, do just that
         # otherwise set all variables in config file
@@ -123,14 +127,14 @@ class SubmitInterpolation(object):
                             setattr(config_args, var_to_set, config_format[var_to_set]['default'])
 
                 # check primary typing is correct
-                if config_format[var_to_set]['type'] != type(getattr(config_args, var_to_set)):
+                if locate(config_format[var_to_set]['type']) != type(getattr(config_args, var_to_set)):
                     sys.exit('CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A {} TYPE'.format(
                         var_to_set, config_format[var_to_set]['type']))
 
                 # check subtyping is correct
                 if 'subtype' in var_config_format:
                     for var in getattr(config_args, var_to_set):
-                        if config_format[var_to_set]['subtype'] != type(var):
+                        if locate(config_format[var_to_set]['subtype']) != type(var):
                             sys.exit('CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A LIST CONTAINING {} TYPES'.format(
                                 var_to_set, config_format[var_to_set]['subtype']))
 
