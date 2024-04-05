@@ -19,6 +19,7 @@ MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.json')))
+default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/prov_defaults.json')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -501,7 +502,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:
             #default = ['GHOST']
-            default = ['EBAS']
+            default = default_values['network']
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.network = default
@@ -509,7 +510,7 @@ class ProvConfiguration:
         # check have species information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.species:
-            default = ['sconco3']
+            default = default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.species = default
@@ -549,7 +550,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.resolution:
             #default = 'monthly'
-            default = 'hourly'
+            default = default_values['resolution']
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.resolution = default
@@ -557,7 +558,7 @@ class ProvConfiguration:
         # check have start_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.start_date:
-            default = '20180101'
+            default = default_values['start_date']
             msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.start_date = default
@@ -565,7 +566,7 @@ class ProvConfiguration:
         # check have end_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.end_date:
-            default = '20190101'
+            default = default_values['end_date']
             msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.end_date = default
@@ -573,30 +574,22 @@ class ProvConfiguration:
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.statistic_mode:
-            default = 'Temporal|Spatial'
+            default = default_values['statistic_mode']
             msg = "Statistic mode (statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.statistic_mode = default
 
         # check have statistic_aggregation information,
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.statistic_aggregation:
-            if self.read_instance.statistic_mode == 'Flattened':
-                default = ''
-            else:    
-                default = 'Median'
+        default = default_values['statistic_aggregation'][self.read_instance.statistic_mode]
+        if not self.read_instance.statistic_aggregation:  
+            if self.read_instance.statistic_mode != 'Flattened':
                 msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.statistic_aggregation = default
         # if statistic_aggregation is defined ensure that it matches with the statistic_mode
-        else:
-            if (self.read_instance.statistic_mode == 'Flattened') & (self.read_instance.statistic_aggregation != ''):
+        elif (self.read_instance.statistic_mode == 'Flattened'):
                 msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-                self.read_instance.statistic_aggregation = ''
-            elif (self.read_instance.statistic_mode != 'Flattened') & (self.read_instance.statistic_aggregation == ''):
-                default = 'Median'
-                msg = "statistic_mode is set to be '{}', therefore statistic_aggregation must not be empty. Setting to be '{}'.".format(self.read_instance.statistic_mode, default)                
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                 self.read_instance.statistic_aggregation = default
 
@@ -604,7 +597,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_mode:
             #default = 'Cycle'
-            default = 'Independent'
+            default = default_values['periodic_statistic_mode']
             msg = "Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.periodic_statistic_mode = default
@@ -612,7 +605,7 @@ class ProvConfiguration:
         # check have periodic_statistic_aggregation information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_aggregation:
-            default = 'Median'
+            default = default_values['periodic_statistic_aggregation']
             msg = "Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.periodic_statistic_aggregation = default
@@ -620,7 +613,7 @@ class ProvConfiguration:
         # check have timeseries_statistic_aggregation information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.timeseries_statistic_aggregation:
-            default = 'Median'
+            default = default_values['timeseries_statistic_aggregation']
             msg = "Timeseries statistic aggregation (timeseries_statistic_aggregation) was not "
             msg += "defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
@@ -635,7 +628,7 @@ class ProvConfiguration:
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
         if not self.read_instance.active_dashboard_plots:
-            default = ['timeseries', 'statsummary', 'distribution', 'periodic']
+            default = default_values['active_dashboard_plots']
             self.read_instance.active_dashboard_plots = default
         # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
         else:
