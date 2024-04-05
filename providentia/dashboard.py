@@ -112,7 +112,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 # have config, but path does not exist
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
                 sys.exit(error)
-        
+
         # set initial filter species
         self.previous_filter_species = {}
         self.filter_species = {}
@@ -1258,7 +1258,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.species[0] != self.previous_species[0]) or (
                 np.array_equal(self.qa, self.previous_qa) == False) or (
                 np.array_equal(self.flags, self.previous_flags) == False) or (
-                self.filter_species != self.previous_filter_species):
+                str(dict(sorted(self.filter_species.items()))) != str(dict(sorted(self.previous_filter_species.items())))):
             read_operations = ['reset']
 
         # key variables have not changed, has start/end date?
