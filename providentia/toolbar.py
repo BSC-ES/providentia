@@ -78,11 +78,11 @@ class NavigationToolbar(NavigationToolbar2QT):
         """ sync button checkstates to match active mode """
 
         if 'pan' in self._actions:
-            self._actions['pan'].setChecked(self.mode.name == 'PAN')
+            self._actions['pan'].setChecked(self.mode == 'pan/zoom')
         if 'zoom' in self._actions:
-            self._actions['zoom'].setChecked(self.mode.name == 'ZOOM')
+            self._actions['zoom'].setChecked(self.mode == 'zoom/rect')
         if 'connect_lasso' in self._actions:
-            self._actions['connect_lasso'].setChecked(self.mode.name == 'LASSO')
+            self._actions['connect_lasso'].setChecked(self.mode == 'lasso')
 
     def save_data(self):
         """ Pop window for choosing directory, filename and type
