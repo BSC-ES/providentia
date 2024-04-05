@@ -181,10 +181,10 @@ class NavigationToolbar(NavigationToolbar2QT):
 
             # connect lasso event
             if ((float(".".join(matplotlib. __version__.split(".")[:2])) < 3.2) or
-               (self.read_instance.machine in ['power', 'mn4', 'nord3v2'])):
-                blit=False
+               (self.read_instance.machine in ['power', 'mn4', 'nord3v2', 'mn5'])):
+                blit = False
             else:
-                blit=True
+                blit = True
             self.canvas_instance.lasso_event = LassoSelector(self.canvas_instance.plot_axes['map'], 
                                                              onselect=self.canvas_instance.onlassoselect, 
                                                              useblit=blit, props=self.canvas_instance.lasso, button=[1])
