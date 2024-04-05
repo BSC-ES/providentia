@@ -884,7 +884,7 @@ class Plot:
         # set data ranges for distribution plot grid if not set explicitly
         if not data_range_min:
             data_range_min = self.canvas_instance.selected_station_data_min[networkspeci]
-
+        
         if not data_range_max:
             data_range_max = self.canvas_instance.selected_station_data_max[networkspeci]
 
@@ -948,6 +948,13 @@ class Plot:
                         #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_obs)
                         #PDF_obs_sampled = PDF_fit.evaluate(x_grid)
 
+                        if PDF_obs_sampled is None:
+                            msg = 'Warning: The kernel bandwidth is 0 for {}. '.format(data_label)
+                            msg += 'The distribution plot will be created and not include data for this label. '
+                            msg += 'To change the bandwith, we recommend increasing the number of '
+                            msg += 'pdf_min_samples in the plot characteristics settings files.'
+                            print(msg)
+                            continue
 
                 # calculate model PDF
                 kde_data_model = drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])
@@ -964,6 +971,14 @@ class Plot:
                     continue
                 # calculate PDF
                 PDF_model_sampled = kde_fft(kde_data_model, xgrid=x_grid)
+                if PDF_model_sampled is None:
+                    msg = 'Warning: The kernel bandwidth is 0 for {}. '.format(data_label)
+                    msg += 'The distribution plot will be created and not include data for this label. '
+                    msg += 'To change the bandwith, we recommend increasing the number of '
+                    msg += 'pdf_min_samples in the plot characteristics settings files.'
+                    print(msg)
+                    continue
+    
                 #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_model)
                 #PDF_model_sampled = PDF_fit.evaluate(x_grid)
 
@@ -973,7 +988,7 @@ class Plot:
 
             # setup standard plot
             else:
-
+                
                 # if first data label and calculating distributions for violin plot,
                 # calculate the x_grid / data ranges per period  
                 # use min for min data range and upper inner Tukey fence for max data range
@@ -988,7 +1003,7 @@ class Plot:
                         period_data_range_min.append(min_data)
                         period_data_range_max.append(upper_inner_fence)
                         period_x_grid.append(np.linspace(min_data,upper_inner_fence,int(n_samples)))
-
+                
                 # get data (flattened and drop NaNs)
                 if violin_resolution:
                     kde_data_grouped = [drop_nans(group[valid_data_labels.index(data_label)].flatten()) for group in self.canvas_instance.selected_station_data[networkspeci][violin_resolution]['active_mode']]
@@ -1003,7 +1018,7 @@ class Plot:
                         data_range_min = period_data_range_min[period_ii]
                         data_range_max = period_data_range_max[period_ii]
                         x_grid = period_x_grid[period_ii]
-
+                    
                     #filter out data outside data range bounds
                     #kde_data = kde_data[(kde_data > data_range_min) & (kde_data < data_range_max)]
 
@@ -1018,6 +1033,14 @@ class Plot:
                         continue
                     else:
                         PDF_sampled = kde_fft(kde_data, xgrid=x_grid)
+                        if PDF_sampled is None:
+                            msg = 'Warning: The kernel bandwidth is 0 for {}. '.format(data_label)
+                            msg += 'The distribution plot will be created and not include data for this label. '
+                            msg += 'To change the bandwith, we recommend increasing the number of '
+                            msg += 'pdf_min_samples in the plot characteristics settings files.'
+                            print(msg)
+                            continue
+                        
                         #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data)
                         #PDF_sampled = PDF_fit.evaluate(x_grid)
                         # save PDF for violin plot
