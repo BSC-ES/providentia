@@ -230,7 +230,7 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     """
     # Variable check
     x = np.squeeze(np.asarray(xin))
-
+    
     # Default extents are the extent of the data
     if xgrid is not None:
         xmin, xmax = xgrid.min(), xgrid.max()
@@ -288,10 +288,13 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
         bw_factor =  ((n * 3 / 4.)**(-1. / 5)) * adjust 
 
     # Make the gaussian kernel ---------------------------------------------
-
     # First, determine the bandwidth using defined bandwidth estimator rule
     kern_nx = int(np.round(bw_factor * 2 * np.pi * std_x))
 
+    # If bandwidth is 0, skip plot for current data label
+    if kern_nx == 0:
+        return None
+    
     # Then evaluate the gaussian function on the kernel grid
     kernel = np.reshape(gaussian(kern_nx, bw_factor * std_x), (kern_nx, 1))
 
