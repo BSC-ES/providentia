@@ -1,6 +1,7 @@
 """ Navigation toolbar and buttons/options functions"""
 
 import configparser
+from enum import Enum
 import os
 import traceback
 
@@ -11,11 +12,27 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from .configuration import ProvConfiguration
 from .configuration import load_conf
 from .dashboard_elements import InputDialog
+from .dashboard_interactivity import LassoSelector
 from .fields_menus import metadata_conf, multispecies_conf, period_conf, representativity_conf
 from .warnings import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+
+
+class _Mode(str, Enum):
+
+    NONE = ""
+    PAN = "pan/zoom"
+    ZOOM = "zoom rect"
+    LASSO = "lasso"
+
+    def __str__(self):
+        return self.value
+
+    @property
+    def _navigate_mode(self):
+        return self.name if self is not _Mode.NONE else None
 
 
 class NavigationToolbar(NavigationToolbar2QT):
@@ -25,7 +42,7 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         self.read_instance = read_instance
         self.canvas_instance = canvas_instance
-        
+
         # only display wanted buttons
         NavigationToolbar2QT.toolitems = (
             ('Save data', 'Save current instance of data and metadata', '', 'save_data'),
@@ -37,19 +54,36 @@ class NavigationToolbar(NavigationToolbar2QT):
             (None, None, None, None),
             ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
             ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
+            ('Lasso', 'Select stations with lasso', '', 'connect_lasso'),
+            (None, None, None, None),
             ('Save figure', 'Save the figure', 'filesave', 'save_figure'),
         )
 
         # allow access to methods of parent class NavigationToolbar2QT
         super(NavigationToolbar, self).__init__(canvas_instance, read_instance)
 
+        # set toolbar icons
         actions = self.findChildren(QtWidgets.QAction)
         self._actions['save_data'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_icon.png")))
         self._actions['conf_dialogs'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/conf_icon.png")))
         self._actions['home'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/world_icon.png")))
         self._actions['zoom'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/zoom_icon.png")))
+        self._actions['connect_lasso'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/lasso_icon.png")))
         self._actions['save_figure'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
         
+        # allow lasso button to be checked        
+        self._actions['connect_lasso'].setCheckable(True)
+
+    def _update_buttons_checked(self):
+        """ sync button checkstates to match active mode """
+
+        if 'pan' in self._actions:
+            self._actions['pan'].setChecked(self.mode == 'pan/zoom')
+        if 'zoom' in self._actions:
+            self._actions['zoom'].setChecked(self.mode == 'zoom/rect')
+        if 'connect_lasso' in self._actions:
+            self._actions['connect_lasso'].setChecked(self.mode == 'lasso')
+
     def save_data(self):
         """ Pop window for choosing directory, filename and type
             for saving data, metadata and configuration.
@@ -122,6 +156,61 @@ class NavigationToolbar(NavigationToolbar2QT):
         except Exception as e:
             msg = 'There was an error loading the configuration file.'
             show_message(self.read_instance, msg)
+
+    def connect_lasso(self):
+        """ Connect / disconnect map lasso selection. """
+
+        if not self.canvas_instance.figure.canvas.widgetlock.available(self):
+            self.set_message("lasso unavailable")
+            self.mode = _Mode.NONE
+            self.canvas_instance.lasso_active = False
+            self._update_buttons_checked()
+            return
+
+        # if lasso button is pressed then activate lasso event
+        if self._actions['connect_lasso'].isChecked():
+
+            # update mode
+            self.mode = _Mode.LASSO
+            self.canvas_instance.lasso_active = True
+
+            # disconnect map annotation event
+            if not self.canvas_instance.map_annotation_disconnect:
+                self.canvas_instance.figure.canvas.mpl_disconnect(self.canvas_instance.map_annotation_event)
+                self.canvas_instance.map_annotation_disconnect = True
+
+            # connect lasso event
+            if ((float(".".join(matplotlib. __version__.split(".")[:2])) < 3.2) or
+               (self.read_instance.machine in ['power', 'mn4', 'nord3v2', 'mn5'])):
+                blit = False
+            else:
+                blit = True
+            self.canvas_instance.lasso_event = LassoSelector(self.canvas_instance.plot_axes['map'], 
+                                                             onselect=self.canvas_instance.onlassoselect, 
+                                                             useblit=blit, props=self.canvas_instance.lasso, button=[1])
+
+            # release canvas drawing (from self if owned by other toolbar buttons)
+            if self.canvas_instance.figure.canvas.widgetlock.isowner(self):
+                self.canvas_instance.figure.canvas.widgetlock.release(self)
+
+        # otherwise, deactivate lasso event
+        else:
+
+            # update mode
+            self.mode = _Mode.NONE
+            self.canvas_instance.lasso_active = False
+            
+            # reconnect map annotation event
+            if self.canvas_instance.map_annotation_disconnect:
+                self.canvas_instance.map_annotation_event = self.canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                    self.canvas_instance.annotations['map'].hover_map_annotation)
+                self.canvas_instance.map_annotation_disconnect = False
+
+            # disconnect lasso event
+            self.canvas_instance.lasso_event.disconnect_events()
+            
+        # update checked buttons
+        self._update_buttons_checked()
 
     def filename_dialog(self):
         """" Open dialog to choose configuration file. """
