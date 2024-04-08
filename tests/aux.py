@@ -7,7 +7,7 @@ def read_data(inst, test_name):
     # get data in memory in xarray format
     data = inst.get_data(format='xr')
     generated_output = data['EBAS|sconco3_data'].values
-    np.save(f'tests/data/{test_name}/EBAS_sconco3_data', generated_output)
+    #np.save(f'tests/data/{test_name}/EBAS_sconco3_data', generated_output)
 
     # read expected output
     expected_output = np.load(f'tests/data/{test_name}/EBAS_sconco3_data.npy', allow_pickle=True)
@@ -33,12 +33,11 @@ def make_plot(inst, plot_type, expected_annotations, test_name):
     
     for annotation, expected_annotation in zip(annotations.get_child().get_children(), 
                                                expected_annotations[plot_type]):
-        print(annotation.get_text())
         assert annotation.get_text() == expected_annotation
 
     for line_i, line in enumerate(fig.axes[0].lines):
         
-        np.save(f'tests/data/{test_name}/{plot_type}_line_{line_i}', line.get_xydata())
+        #np.save(f'tests/data/{test_name}/{plot_type}_line_{line_i}', line.get_xydata())
             
         # read expected output
         expected_output = np.load(f'tests/data/{test_name}/{plot_type}_line_{line_i}.npy', allow_pickle=True)
