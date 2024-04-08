@@ -7,7 +7,8 @@ from providentia import Interactive
 inst = Interactive(conf='local.conf')
 
 expected_annotations = {
-    "timeseries": ['EBAS | Mean: 32.91', 'MONARCH | Mean: 27.88, MB: -5.45, RMSE: 10.97, r: 0.68']
+    "timeseries": ["EBAS | Mean: 32.91", "MONARCH | Mean: 27.88, MB: -5.45, RMSE: 10.97, r: 0.68"],
+    "distribution": ["EBAS | Min: 1.78, Max: 80.38", "MONARCH | Min: 0.22, Max: 69.92"]
 }
 
 def test_data_read():
@@ -38,11 +39,11 @@ def make_plot(plot_type):
     annotations = [child for child in fig.axes[0].get_children() 
                    if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
     for annotation, expected_annotation in zip(annotations.get_child().get_children(), 
-                                               expected_annotations['timeseries']):
+                                               expected_annotations[plot_type]):
         assert annotation.get_text() == expected_annotation
 
     for line_i, line in enumerate(fig.axes[0].lines):
-
+        
         #np.save(f'tests/data/{plot_type}_line_{line_i}', line.get_xydata())
 
         # read expected output
@@ -62,3 +63,6 @@ def make_plot(plot_type):
 
 def test_make_timeseries():
     make_plot('timeseries')
+
+def test_make_distribution():
+    make_plot('distribution')
