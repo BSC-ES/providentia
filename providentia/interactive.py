@@ -54,14 +54,14 @@ class Interactive:
 
         self.kwargs = kwargs
 
-        #set mode as interactive
+        # set mode as interactive
         self.kwargs['interactive'] = True
 
         # load statistical jsons
         self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
         self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
 
-        #set configuration variables, as well as any other defined variables
+        # set configuration variables, as well as any other defined variables
         valid_config = self.set_config(**self.kwargs)
         # if configuration read was not valid then return here
         if not valid_config:
@@ -86,6 +86,7 @@ class Interactive:
                 except FileNotFoundError as file_error:
                     msg = "Error: Trying to load 'settings/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                     sys.exit(msg)
+        
         # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:
             self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
