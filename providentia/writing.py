@@ -329,9 +329,9 @@ def export_configuration(prv, cname, separator="||"):
         section = 'SECTION1'
         subsection = '[SUBSECTION1]'
     else:
-        if '|' in prv.section:
-            section = prv.section.split('|')[0]
-            subsection = '[' + prv.section.split('|')[1] + ']'
+        if '·' in prv.section:
+            section = prv.section.split('·')[0]
+            subsection = '[' + prv.section.split('·')[1] + ']'
         else:
             section = prv.section
             subsection = None
