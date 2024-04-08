@@ -8,7 +8,8 @@ inst = Interactive(conf='local.conf')
 
 expected_annotations = {
     "timeseries": ["EBAS | Mean: 32.91", "MONARCH | Mean: 27.88, MB: -5.45, RMSE: 10.97, r: 0.68"],
-    "distribution": ["EBAS | Min: 1.78, Max: 80.38", "MONARCH | Min: 0.22, Max: 69.92"]
+    "distribution": ["EBAS | Min: 1.78, Max: 80.38", "MONARCH | Min: 0.22, Max: 69.92"],
+    "scatter": ["MONARCH | r2: 0.46, RMSE: 10.97"]
 }
 
 def test_data_read():
@@ -38,6 +39,7 @@ def make_plot(plot_type):
     # check if annotations are correct
     annotations = [child for child in fig.axes[0].get_children() 
                    if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
+    print(annotations.get_child().get_children()[0].get_text())
     for annotation, expected_annotation in zip(annotations.get_child().get_children(), 
                                                expected_annotations[plot_type]):
         assert annotation.get_text() == expected_annotation
@@ -45,7 +47,7 @@ def make_plot(plot_type):
     for line_i, line in enumerate(fig.axes[0].lines):
         
         #np.save(f'tests/data/{plot_type}_line_{line_i}', line.get_xydata())
-
+            
         # read expected output
         expected_output = np.load(f'tests/data/{plot_type}_line_{line_i}.npy', allow_pickle=True)
 
@@ -66,3 +68,6 @@ def test_make_timeseries():
 
 def test_make_distribution():
     make_plot('distribution')
+
+#def test_make_scatter():
+#    make_plot('scatter')
