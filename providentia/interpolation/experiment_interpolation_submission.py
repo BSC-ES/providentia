@@ -15,8 +15,12 @@ from aux import get_aeronet_bin_radius_from_bin_variable, check_for_ghost
 from mapping_species import mapping_species
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
+
+# get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
+
+# load the data_paths for the different machines and the default values jsons
 data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.json')))
 default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/prov_interp_defaults.json')))
 
@@ -63,7 +67,7 @@ class SubmitInterpolation(object):
 
         # check have cloned unit_converter submodule correctly
         try:
-            sys.path.append('{}/unit-converter'.format('/'.join(os.path.abspath(inspect.getsourcefile(lambda:0)).split('/')[:-1])))
+            sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
             import unit_converter
         except:
             msg = 'unit-converter SUBMODULE NOT CLONED CORRECTLY. ADD "--recurse-submodules" when cloning repository'
