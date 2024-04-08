@@ -8,6 +8,8 @@ import subprocess
 import sys
 import time
 import traceback
+import json
+from pydoc import locate
 
 import datetime
 import dateutil.relativedelta as relativedelta
@@ -28,6 +30,13 @@ else:
     working_directory = os.getcwd().split('/submit')[0]
 os.chdir(working_directory)
 
+# get current path and providentia root path
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
+
+#load the default values json
+default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/prov_interp_defaults.json')))
+
 # read defined experiments dictionary
 from defined_experiments import defined_experiments_dictionary
 
@@ -37,32 +46,6 @@ import aux
 # add unit-converter submodule to python load path
 sys.path.append('{}/unit-converter'.format('/'.join(os.path.abspath(inspect.getsourcefile(lambda:0)).split('/')[:-1])))
 import unit_converter
-
-def create_output_logfile(process_code):
-    """ Create a logfile for stating outcome of interpolation job'
-        the filename is prefixed with a code referencing the job outcome.
-        The process codes are:
-        0: Process completed without issue
-        1: Caught error in process
-        2: Uncaught error in process
-
-        :param process_code: interpolation outcome code
-        :type process_code: int
-    """
-    output_logfile_dir = (f"{working_directory}/interpolation_logs/"
-    f"{submit_args['prov_exp_code']}/"
-    f"{submit_args['original_speci_to_process']}/"
-    f"{submit_args['network_to_interpolate_against']}/"
-    f"{submit_args['temporal_resolution_to_output']}/"
-    #f"{submit_args['yearmonth']}/"
-    f"{submit_args['id']}")
-
-    f = open(f"{output_logfile_dir}_{process_code}.out", "w")
-    f.write(str(log_file_str))
-    f.close() 
-
-    # exit from current process after writing logfile
-    sys.exit()
 
 class ExperimentInterpolation(object):
     """ Class which handles interpolation of experiment data to surface observations. """
@@ -169,8 +152,9 @@ class ExperimentInterpolation(object):
         # import configuration file
         import configuration as config_args
 
-        # import configuration default formats
-        from configuration_defaults import config_format, bin_vars
+        # get configuration default formats
+        config_format = default_values['config_format']
+        bin_vars = default_values['bin_vars']
 
         # if have defined variables to set, do just that
         # otherwise set all variables in config file
@@ -213,7 +197,7 @@ class ExperimentInterpolation(object):
                             setattr(config_args, var_to_set, config_format[var_to_set]['default'])
 
                 # check primary typing is correct
-                if config_format[var_to_set]['type'] != type(getattr(config_args, var_to_set)):
+                if locate(config_format[var_to_set]['type']) != type(getattr(config_args, var_to_set)):
                     log_file_str += 'CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A {} TYPE'.format(
                         var_to_set, config_format[var_to_set]['type'])
                     create_output_logfile(1)
@@ -221,7 +205,7 @@ class ExperimentInterpolation(object):
                 # check subtyping is correct
                 if 'subtype' in var_config_format:
                     for var in getattr(config_args, var_to_set):
-                        if config_format[var_to_set]['subtype'] != type(var):
+                        if locate(config_format[var_to_set]['subtype']) != type(var):
                             log_file_str += 'CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A LIST CONTAINING {} TYPES'.format(
                                 var_to_set, config_format[var_to_set]['subtype'])
                             create_output_logfile(1)
@@ -1131,7 +1115,32 @@ class ExperimentInterpolation(object):
         bin_transform_factor = 1.0/(np.log(rmax) - np.log(rmin))
 
         return bin_transform_factor
-    
+
+def create_output_logfile(process_code):
+    """ Create a logfile for stating outcome of interpolation job'
+        the filename is prefixed with a code referencing the job outcome.
+        The process codes are:
+        0: Process completed without issue
+        1: Caught error in process
+        2: Uncaught error in process
+
+        :param process_code: interpolation outcome code
+        :type process_code: int
+    """
+    output_logfile_dir = (f"{working_directory}/interpolation_logs/"
+    f"{submit_args['prov_exp_code']}/"
+    f"{submit_args['original_speci_to_process']}/"
+    f"{submit_args['network_to_interpolate_against']}/"
+    f"{submit_args['temporal_resolution_to_output']}/"
+    #f"{submit_args['yearmonth']}/"
+    f"{submit_args['id']}")
+
+    f = open(f"{output_logfile_dir}_{process_code}.out", "w")
+    f.write(str(log_file_str))
+    f.close() 
+
+    # exit from current process after writing logfile
+    sys.exit()    
 
 if __name__ == "__main__":
     try:
