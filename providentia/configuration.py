@@ -4,10 +4,12 @@ import configparser
 import copy
 import json
 import os
+import platform
 import re
 import socket
 import subprocess
 import sys
+
 import matplotlib
 import numpy as np
 import pandas as pd
@@ -54,12 +56,15 @@ class ProvConfiguration:
             'conf': '',
             'config': '',
             'config_dir': os.path.join(PROVIDENTIA_ROOT, 'configurations/'),
+            'operating_system': '',
+            'machine': '',
             'cartopy_data_dir': '',
             'available_cpus': '',
             'n_cpus': '',
             'ghost_root': '',
             'nonghost_root': '',
             'exp_root': '',
+            'generate_file_tree': False,
             'offline': False,
             'interactive': False,
             'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
@@ -105,8 +110,8 @@ class ProvConfiguration:
             'harmonise_summary': True,
             'harmonise_stations': True,
             'remove_extreme_stations': None,
-            'fixed_section_vars':  ['ghost_version', 'config_dir', 'cartopy_data_dir', 'available_cpus', 'n_cpus',
-                                    'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
+            'fixed_section_vars':  ['ghost_version', 'config_dir', 'operating_system', 'cartopy_data_dir', 'available_cpus', 
+                                    'n_cpus', 'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
                                     'available_resolutions', 'available_networks',
                                     'network', 'species', 'resolution', 'start_date', 'end_date', 
                                     'observations_data_label', 'experiments', 'temporal_colocation', 'spatial_colocation', 
@@ -137,7 +142,24 @@ class ProvConfiguration:
                     return value
             else:
                 return value
-                
+    
+        elif key == 'operating_system':
+            # get operating system
+            operating_system = platform.system()
+            if operating_system == 'Darwin':
+                operating_system = 'Mac'
+            elif operating_system == 'Linux':
+                operating_system = 'Linux'
+            elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
+                operating_system = 'Windows'
+            else:
+                error = 'Error: The OS cannot be detected.'
+                sys.exit(error)
+            return operating_system
+        
+        elif key == 'machine':
+            return MACHINE
+
         elif key == 'available_cpus':
             # get available N CPUs
             if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -147,14 +169,19 @@ class ProvConfiguration:
                 except:
                     return 1
             else:
-                return len(os.sched_getaffinity(0))
+                if self.read_instance.operating_system == 'Linux':
+                    return len(os.sched_getaffinity(0))
+                else:
+                    return os.cpu_count()
 
         elif key == 'cartopy_data_dir':
-            # set cartopy data directory (needed on CTE-POWER/MN4/N3 as has no external
+            # set cartopy data directory (needed on CTE-POWER/MN4/Nord3v2 as has no external
             # internet connection)
-
             if MACHINE in ['power', 'mn4', 'nord3v2']:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
+            # set directory in MN5 to avoid network issues
+            elif MACHINE == 'mn5':
+                return '/gpfs/tapes/MN4/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all other machines pull from internet
 
         elif key == 'n_cpus':
@@ -498,18 +525,19 @@ class ProvConfiguration:
     def check_validity(self):
         """ Check validity of set variables after parsing. """
         
-        # get non-default fields on config file
-        self.read_instance.fields_per_section = {}
-        for field_name,fields in self.read_instance.sub_opts.items():
-            if field_name in self.read_instance.subsection_names:
-                section_field_name = field_name.split('·')[0]
-                self.read_instance.fields_per_section[field_name] = \
-                    fields.keys() - set(self.read_instance.fields_per_section[section_field_name])
-            else:
-                self.read_instance.fields_per_section[field_name] = set(fields.keys())
-        self.read_instance.non_default_fields_per_section = {
-            field_name:fields-set(self.var_defaults) 
-            for field_name,fields in self.read_instance.fields_per_section.items()}
+        # get non-default fields on config file if launching from a config file
+        if hasattr(self.read_instance, "sub_opts"):
+            self.read_instance.fields_per_section = {}
+            for field_name, fields in self.read_instance.sub_opts.items():
+                if field_name in self.read_instance.subsection_names:
+                    section_field_name = field_name.split('·')[0]
+                    self.read_instance.fields_per_section[field_name] = \
+                        fields.keys() - set(self.read_instance.fields_per_section[section_field_name])
+                else:
+                    self.read_instance.fields_per_section[field_name] = set(fields.keys())
+            self.read_instance.non_default_fields_per_section = {
+                field_name:fields-set(self.var_defaults) 
+                for field_name, fields in self.read_instance.fields_per_section.items()}
        
         # check have network information, 
         # if offline, throw message, stating are using default instead

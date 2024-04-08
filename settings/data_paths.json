@@ -1,8 +1,8 @@
 {
     "local": {
-        "ghost_root": "/data/providentia/obs/ghost/", 
-        "nonghost_root": "/data/providentia/obs/nonghost/", 
-        "exp_root": "/data/providentia/exp/"
+        "ghost_root": "/Users/denebowdalo/local_ghost", 
+        "nonghost_root": "/Users/denebowdalo/local_nonghost", 
+        "exp_root": "/Users/denebowdalo/local_interp"
     },
     
     "mn5": {
