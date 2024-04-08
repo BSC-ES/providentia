@@ -4,7 +4,7 @@ import numpy as np
 from providentia import Interactive
 
 # initialise class
-inst = Interactive(conf='test_local.conf')
+inst = Interactive(conf='local.conf')
 
 
 def test_data_read():
