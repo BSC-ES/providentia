@@ -39,7 +39,7 @@ def make_plot(plot_type):
     # check if annotations are correct
     annotations = [child for child in fig.axes[0].get_children() 
                    if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
-    print(annotations.get_child().get_children()[0].get_text())
+    
     for annotation, expected_annotation in zip(annotations.get_child().get_children(), 
                                                expected_annotations[plot_type]):
         assert annotation.get_text() == expected_annotation
