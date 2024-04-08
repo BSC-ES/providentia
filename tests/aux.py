@@ -33,6 +33,7 @@ def make_plot(inst, plot_type, expected_annotations, test_name):
     
     for annotation, expected_annotation in zip(annotations.get_child().get_children(), 
                                                expected_annotations[plot_type]):
+        print(annotation.get_text())
         assert annotation.get_text() == expected_annotation
 
     for line_i, line in enumerate(fig.axes[0].lines):
