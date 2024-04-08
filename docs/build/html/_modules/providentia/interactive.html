@@ -82,8 +82,6 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib</span>
-<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;QT5Agg&#39;</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
 <span class="kn">from</span> <span class="nn">matplotlib.projections</span> <span class="kn">import</span> <span class="n">PolarAxes</span>
@@ -91,7 +89,6 @@
 <span class="kn">import</span> <span class="nn">mpl_toolkits.axisartist.floating_axes</span> <span class="k">as</span> <span class="nn">fa</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QWidget</span>
 
 <span class="kn">from</span> <span class="nn">.configuration</span> <span class="kn">import</span> <span class="n">load_conf</span>
 <span class="kn">from</span> <span class="nn">.configuration</span> <span class="kn">import</span> <span class="n">ProvConfiguration</span>
@@ -135,27 +132,41 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
-        <span class="c1">#set mode as interactive</span>
+        <span class="c1"># set mode as interactive</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;interactive&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># load statistical jsons</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">basic_stats</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/basic_stats.json&#39;</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expbias_stats</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/experiment_bias_stats.json&#39;</span><span class="p">)))</span>
 
-        <span class="c1">#set configuration variables, as well as any other defined variables</span>
+        <span class="c1"># set configuration variables, as well as any other defined variables</span>
         <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># if configuration read was not valid then return here</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="c1"># create dictionary of all available observational GHOST data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">all_observation_data</span> <span class="o">=</span> <span class="n">get_ghost_observational_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-        <span class="c1"># load dictionary with non-GHOST esarchive files to read</span>
-        <span class="n">nonghost_observation_data_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/nonghost_files.json&#39;</span><span class="p">)))</span>
-        <span class="c1"># merge to existing GHOST observational data dict if we have the path</span>
+        <span class="c1"># get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded</span>
+        <span class="c1"># generate file trees</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_file_tree</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">all_observation_data</span> <span class="o">=</span> <span class="n">get_ghost_observational_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonghost_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nonghost_observation_data</span> <span class="o">=</span> <span class="n">get_nonghost_observational_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># load file trees</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">all_observation_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/ghost_filetree.json&#39;</span><span class="p">)))</span> 
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">file_error</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Error: Trying to load &#39;settings/ghost_filetree.json&#39; but file does not exist. Run with the flag &#39;--gft&#39; to generate this file.&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonghost_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">nonghost_observation_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/nonghost_filetree.json&#39;</span><span class="p">)))</span>
+                <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">file_error</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Error: Trying to load &#39;settings/nonghost_filetree.json&#39; but file does not exist. Run with the flag &#39;--gft&#39; to generate this file.&quot;</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        
+        <span class="c1"># merge GHOST and non-GHOST filetrees</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonghost_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">nonghost_observation_data</span> <span class="o">=</span> <span class="n">get_nonghost_observational_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nonghost_observation_data_json</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">all_observation_data</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">all_observation_data</span><span class="p">,</span> <span class="o">**</span><span class="n">nonghost_observation_data</span><span class="p">}</span>
 
         <span class="c1"># initialise DataReader class</span>
@@ -265,7 +276,8 @@
     <span class="k">def</span> <span class="nf">make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                   <span class="n">cb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_obs_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
                   <span class="n">domain</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hidedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">multispecies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-                  <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                  <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make a Providentia plot.</span>
 
 <span class="sd">        :param plot: Plot type</span>
@@ -318,6 +330,10 @@
 <span class="sd">        :type return_plot: bool, optional</span>
 <span class="sd">        :param format: Format to overwrite the plots format taken from plot characteristics </span>
 <span class="sd">        :type format: dict, optional</span>
+<span class="sd">        :param width: Figure width</span>
+<span class="sd">        :type format: int, float, optional</span>
+<span class="sd">        :param height: Figure height</span>
+<span class="sd">        :type format: int, float, optional</span>
 <span class="sd">        :return: matplotlib.axes._axes.Axes</span>
 <span class="sd">        :rtype: Plot axes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -490,19 +506,12 @@
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">map_extent</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_extent</span><span class="p">):</span>
             <span class="n">map_extent</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_extent</span><span class="p">)</span>
 
-        <span class="c1"># create figure and axis/axes for plot</span>
-        <span class="c1"># differentiation in approach between jupyter and standard call for creation of figure geometry</span>
-        <span class="k">if</span> <span class="n">jupyter_session</span><span class="p">:</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;figsize&#39;</span><span class="p">])</span>
+        <span class="c1"># create figure</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">height</span><span class="p">):</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
-            <span class="n">desktop</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">desktop</span><span class="p">()</span>
-            <span class="n">screenRect</span> <span class="o">=</span> <span class="n">desktop</span><span class="o">.</span><span class="n">screenGeometry</span><span class="p">()</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="n">screenRect</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
-            <span class="n">height</span> <span class="o">=</span> <span class="n">screenRect</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
-            <span class="n">dpi</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.dpi&#39;</span><span class="p">]</span>
-            <span class="n">px</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">dpi</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="o">*</span><span class="n">px</span><span class="p">,</span><span class="n">height</span><span class="o">*</span><span class="n">px</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Width and/or height have not been passed. The default values will be set.&quot;</span><span class="p">)</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;figsize&#39;</span><span class="p">])</span>
 
         <span class="c1"># create axes</span>
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;map&#39;</span><span class="p">:</span>
@@ -878,7 +887,7 @@
                 <span class="n">figure_fname</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving </span><span class="si">{}</span><span class="s1"> figure to </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">figure_fname</span><span class="p">))</span>
             <span class="c1"># save figure</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">figure_fname</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">figure_fname</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="c1"># elif return_plot is passed then return plot axis/axes</span>
         <span class="k">elif</span> <span class="n">return_plot</span><span class="p">:</span>
