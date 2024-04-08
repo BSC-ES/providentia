@@ -2,15 +2,15 @@ import matplotlib
 import numpy as np
 
 
-def read_data(inst):
+def read_data(inst, mode):
 
     # read expected output
-    expected_output = np.load('tests/data/EBAS_sconco3_data.npy', allow_pickle=True)
+    expected_output = np.load('tests/data/{mode}/EBAS_sconco3_data.npy', allow_pickle=True)
     
     # get data in memory in xarray format
     data = inst.get_data(format='xr')
     generated_output = data['EBAS|sconco3_data'].values
-    # np.save('tests/data/EBAS_sconco3_data', generated_output)
+    np.save('tests/data/{mode}/EBAS_sconco3_data', generated_output)
 
     # replace nans by -999
     expected_output = np.nan_to_num(expected_output, copy=True, nan=-999, posinf=None, neginf=None)
@@ -19,7 +19,7 @@ def read_data(inst):
     assert (np.array_equal(generated_output, expected_output))
 
 
-def make_plot(inst, plot_type, expected_annotations):
+def make_plot(inst, plot_type, expected_annotations, mode):
 
     # make plot
     fig = inst.make_plot(plot_type, annotate=True, return_plot=True)
@@ -37,10 +37,10 @@ def make_plot(inst, plot_type, expected_annotations):
 
     for line_i, line in enumerate(fig.axes[0].lines):
         
-        # np.save(f'tests/data/{plot_type}_line_{line_i}', line.get_xydata())
+        np.save(f'tests/data/{mode}/{plot_type}_line_{line_i}', line.get_xydata())
             
         # read expected output
-        expected_output = np.load(f'tests/data/{plot_type}_line_{line_i}.npy', allow_pickle=True)
+        expected_output = np.load(f'tests/data/{mode}/{plot_type}_line_{line_i}.npy', allow_pickle=True)
 
         # get data
         generated_output = line.get_xydata()
