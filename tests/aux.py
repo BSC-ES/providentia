@@ -5,12 +5,12 @@ import numpy as np
 def read_data(inst, mode):
 
     # read expected output
-    expected_output = np.load('tests/data/{mode}/EBAS_sconco3_data.npy', allow_pickle=True)
+    expected_output = np.load(f'tests/data/{mode}/EBAS_sconco3_data.npy', allow_pickle=True)
     
     # get data in memory in xarray format
     data = inst.get_data(format='xr')
     generated_output = data['EBAS|sconco3_data'].values
-    np.save('tests/data/{mode}/EBAS_sconco3_data', generated_output)
+    np.save(f'tests/data/{mode}/EBAS_sconco3_data', generated_output)
 
     # replace nans by -999
     expected_output = np.nan_to_num(expected_output, copy=True, nan=-999, posinf=None, neginf=None)
