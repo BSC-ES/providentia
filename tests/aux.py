@@ -4,14 +4,14 @@ import numpy as np
 
 def read_data(inst, test_name):
 
-    # read expected output
-    expected_output = np.load(f'tests/data/{test_name}/EBAS_sconco3_data.npy', allow_pickle=True)
-    
     # get data in memory in xarray format
     data = inst.get_data(format='xr')
     generated_output = data['EBAS|sconco3_data'].values
     np.save(f'tests/data/{test_name}/EBAS_sconco3_data', generated_output)
 
+    # read expected output
+    expected_output = np.load(f'tests/data/{test_name}/EBAS_sconco3_data.npy', allow_pickle=True)
+    
     # replace nans by -999
     expected_output = np.nan_to_num(expected_output, copy=True, nan=-999, posinf=None, neginf=None)
     generated_output = np.nan_to_num(generated_output, copy=True, nan=-999, posinf=None, neginf=None)
