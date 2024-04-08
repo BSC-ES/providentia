@@ -1132,8 +1132,8 @@ def create_output_logfile(process_code):
     f"{submit_args['original_speci_to_process']}/"
     f"{submit_args['network_to_interpolate_against']}/"
     f"{submit_args['temporal_resolution_to_output']}/"
-    #f"{submit_args['yearmonth']}/"
-    f"{submit_args['id']}")
+    f"{submit_args['yearmonth']}")
+    # f"{submit_args['id']}")
 
     f = open(f"{output_logfile_dir}_{process_code}.out", "w")
     f.write(str(log_file_str))
