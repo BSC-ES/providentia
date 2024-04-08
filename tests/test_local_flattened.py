@@ -6,7 +6,7 @@ test_name = "local_flattened"
 inst = Interactive(conf='local.conf', statistic_mode="Flattened", statistic_aggregation="")
 expected_annotations = {
     "timeseries": ["EBAS | Mean: 34.56", "MONARCH | Mean: 29.55, MB: -5.00, RMSE: 11.64, r: 0.69"],
-    "distribution": ["Min: 0.00, Max: 119.35", "MONARCH | Min: 0.00, Max: 106.75"],
+    "distribution": ["EBAS | Min: 0.00, Max: 119.35", "MONARCH | Min: 0.00, Max: 106.75"],
     "scatter": [""]
 }
 
