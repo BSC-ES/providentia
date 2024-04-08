@@ -44,7 +44,7 @@ from defined_experiments import defined_experiments_dictionary
 import aux
 
 # add unit-converter submodule to python load path
-sys.path.append('{}/unit-converter'.format('/'.join(os.path.abspath(inspect.getsourcefile(lambda:0)).split('/')[:-1])))
+sys.path.append(os.path.join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
 import unit_converter
 
 class ExperimentInterpolation(object):
