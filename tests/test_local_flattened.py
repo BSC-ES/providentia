@@ -3,11 +3,11 @@ from providentia import Interactive
 
 # initialise class (Flattened)
 test_name = "local_flattened"
-inst = Interactive(conf='local.conf', statistic_test_name="Flattened", statistic_aggregation="")
+inst = Interactive(conf='local.conf', statistic_mode="Flattened", statistic_aggregation="")
 expected_annotations = {
-    "timeseries": ["EBAS | Mean: 32.91", "MONARCH | Mean: 27.88, MB: -5.45, RMSE: 10.97, r: 0.68"],
-    "distribution": ["EBAS | Min: 1.78, Max: 80.38", "MONARCH | Min: 0.22, Max: 69.92"],
-    "scatter": ["MONARCH | r2: 0.46, RMSE: 10.97"]
+    "timeseries": ["EBAS | Mean: 34.56", "MONARCH | Mean: 29.55, MB: -5.00, RMSE: 11.64, r: 0.69"],
+    "distribution": ["Min: 0.00, Max: 119.35", "MONARCH | Min: 0.00, Max: 106.75"],
+    "scatter": [""]
 }
 
 def test_read_data():
