@@ -77,14 +77,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     read_conf = True
 
             if read_conf:
-                if hasattr(self, 'section'):
+                if 'section' in kwargs:
                     # config and section defined 
                     load_conf(self, fpath=self.config)
-                    if self.section in self.all_sections:
+                    if kwargs['section'] in self.all_sections:
                         self.from_conf = True
-                        self.current_config = self.sub_opts[self.section]
+                        self.current_config = self.sub_opts[kwargs['section']]
+                        self.section = kwargs['section']
                     else:
-                        error = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.section)
+                        error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
                         tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
                         tip += 'before the subsection name (e.g. SECTIONA·Spain).'
                         sys.exit(error + '\n' + tip)
