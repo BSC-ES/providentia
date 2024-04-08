@@ -6,8 +6,6 @@ import json
 import os
 import sys
 
-import matplotlib
-matplotlib.use('QT5Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.projections import PolarAxes
@@ -15,7 +13,6 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
-from PyQt5.QtWidgets import QApplication, QWidget
 
 from .configuration import load_conf
 from .configuration import ProvConfiguration
@@ -195,7 +192,8 @@ class Interactive:
     def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
                   domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
-                  smooth=False, threshold=False, plot_options=None, save=False, return_plot=False, format=None):
+                  smooth=False, threshold=False, plot_options=None, save=False, return_plot=False, format=None,
+                  width=None, height=None):
         """ Wrapper method to make a Providentia plot.
 
         :param plot: Plot type
@@ -248,6 +246,10 @@ class Interactive:
         :type return_plot: bool, optional
         :param format: Format to overwrite the plots format taken from plot characteristics 
         :type format: dict, optional
+        :param width: Figure width
+        :type format: int, float, optional
+        :param height: Figure height
+        :type format: int, float, optional
         :return: matplotlib.axes._axes.Axes
         :rtype: Plot axes
         """
@@ -420,19 +422,12 @@ class Interactive:
         if (not map_extent) and (self.map_extent):
             map_extent = copy.deepcopy(self.map_extent)
 
-        # create figure and axis/axes for plot
-        # differentiation in approach between jupyter and standard call for creation of figure geometry
-        if jupyter_session:
-            fig = plt.figure(figsize=self.plot_characteristics[plot_type]['figsize'])
+        # create figure
+        if (width) and (height):
+            fig = plt.figure(figsize=(width, height))
         else:
-            app = QApplication(sys.argv)
-            desktop = app.desktop()
-            screenRect = desktop.screenGeometry()
-            width = screenRect.width()
-            height = screenRect.height()
-            dpi = plt.rcParams['figure.dpi']
-            px = 1.0/dpi
-            fig = plt.figure(figsize=(width*px,height*px))
+            print("Warning: Width and/or height have not been passed. The default values will be set.")
+            fig = plt.figure(figsize=self.plot_characteristics[plot_type]['figsize'])
 
         # create axes
         if base_plot_type == 'map':
