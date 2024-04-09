@@ -1,9 +1,10 @@
 {
-    "monarch": ["/esarchive/exp/monarch/",
-                "/gpfs/scratch/bsc32/bsc32359/esarchive_scratch/exp/monarch/"],
-    "nmmb-bsc-ctm": ["/esarchive/exp/nmmb-bsc-ctm/"], 
-    "wrf-hermes-cmaq":["/esarchive/exp/wrf-hermes-cmaq/"], 
-    "auto-wrf-hermes-cmaq": ["/esarchive/exp/auto-wrf-hermes-cmaq/"],
-    "cams61": ["/esarchive/recon/ecmwf/cams61/"],
-    "cams50": ["/esarchive/recon/ecmwf/"]
+    "monarch": {"esarchive":"/esarchive/exp/monarch/",
+                "gpfs":"/gpfs/scratch/bsc32/bsc32359/esarchive_scratch/exp/monarch/"}, 
+    "testing": {"esarchive":"/esarchive/scratch/bsc32443/testing/"}, 
+    "nmmb-bsc-ctm": {"esarchive":"/esarchive/exp/nmmb-bsc-ctm/"}, 
+    "wrf-hermes-cmaq": {"esarchive":"/esarchive/exp/wrf-hermes-cmaq/"}, 
+    "auto-wrf-hermes-cmaq": {"esarchive":"/esarchive/exp/auto-wrf-hermes-cmaq/"}, 
+    "ecmwf": {"esarchive":"/esarchive/recon/ecmwf/"}, 
+    "cams61": {"esarchive":"/esarchive/recon/ecmwf/cams61/"}
 }
