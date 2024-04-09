@@ -990,29 +990,15 @@ class MPLCanvas(FigureCanvas):
             # to the timeseries statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
 
-            # get currently selected statistic
-            zstat = self.timeseries_stat.currentText()
-
-            # update timeseries statistics
-            available_timeseries_stats = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
-
-            # if base_zstat is empty string, it is because fields are being initialised for the first time
-            if zstat == '':
-                # set timeseries stat to be Median
-                zstat = available_timeseries_stats[1]
-
-            # update timeseries statistic combobox (clear, then add items)
-            self.timeseries_stat.clear()
-            self.timeseries_stat.addItems(available_timeseries_stats)
-
-            # maintain currently selected timeseries statistic (if exists in new item list)
-            if zstat in available_timeseries_stats:
-                self.timeseries_stat.setCurrentText(zstat)
+            # update statistic
+            self.read_instance.selected_timeseries_stat = self.timeseries_stat.currentText()
+            self.read_instance.timeseries_stat = self.read_instance.selected_timeseries_stat
 
             # update aggregation statistic if it is different than timeseries statistic
             if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
-                and (zstat != self.read_instance.cb_statistic_aggregation.currentText())):
-                self.read_instance.cb_statistic_aggregation.setCurrentText(zstat)
+                and (self.read_instance.timeseries_stat != \
+                     self.read_instance.cb_statistic_aggregation.currentText())):
+                self.read_instance.cb_statistic_aggregation.setCurrentText(self.read_instance.timeseries_stat)
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -1409,25 +1395,9 @@ class MPLCanvas(FigureCanvas):
             # to the statsummary periodic aggregation combobox are made
             self.read_instance.block_config_bar_handling_updates = True
 
-            # get currently selected statistic
-            stat = self.statsummary_periodic_aggregation.currentText()
-
-            # update periodic aggregation
-            available_stats = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
-
-            # if stat is empty string, it is because fields are being initialised for the first time
-            if stat == '':
-                # set periodic stat to be Median
-                stat = available_stats[1]
-
-            # update periodic aggregation combobox (clear, then add items)
-            self.statsummary_periodic_aggregation.clear()
-            self.statsummary_periodic_aggregation.addItems(available_stats)
-
-            # maintain currently selected statistic (if exists in new item list)
-            if stat in available_stats:
-                self.statsummary_periodic_aggregation.setCurrentText(stat)
-                self.read_instance.periodic_statistic_aggregation = copy.deepcopy(stat)
+            # update statistic
+            self.read_instance.selected_periodic_statistic_aggregation = self.statsummary_periodic_aggregation.currentText()
+            self.read_instance.periodic_statistic_aggregation = self.read_instance.selected_periodic_statistic_aggregation 
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -1458,25 +1428,9 @@ class MPLCanvas(FigureCanvas):
             # to the statsummary periodic mode combobox are made
             self.read_instance.block_config_bar_handling_updates = True
 
-            # get currently selected mode
-            mode = self.statsummary_periodic_mode.currentText()
-
-            # update periodic mode
-            available_modes = ['Independent', 'Cycle']
-
-            # if mode is empty string, it is because fields are being initialised for the first time
-            if mode == '':
-                # set mode to be first available stat
-                mode = available_modes[0]
-
-            # update periodic mode combobox (clear, then add items)
-            self.statsummary_periodic_mode.clear()
-            self.statsummary_periodic_mode.addItems(available_modes)
-
-            # maintain currently selected mode (if exists in new item list)
-            if mode in available_modes:
-                self.statsummary_periodic_mode.setCurrentText(mode)
-                self.read_instance.periodic_statistic_mode = copy.deepcopy(mode)
+            # update statistic mode
+            self.read_instance.selected_periodic_statistic_mode = self.statsummary_periodic_mode.currentText()
+            self.read_instance.periodic_statistic_mode = self.read_instance.selected_periodic_statistic_mode
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
