@@ -9,3 +9,5 @@ tests:
     - export PYTHONPATH=$(pwd):${PYTHONPATH}
     - echo "Running unit tests..."
     - coverage run -m pytest tests
+    - coverage report -i -m
+  coverage: '/^TOTAL\s*\d+\s+\d+\s+(\d+)/'

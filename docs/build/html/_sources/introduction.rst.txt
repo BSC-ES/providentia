@@ -38,5 +38,6 @@ Developers:
 
 - Dene Bowdalo (dene.bowdalo@bsc.es) - Active
 - Alba Vilanova (alba.vilanova@bsc.es) - Active
+- Paula Serrano (paula.serrano@bsc.es) - Active
 - Amalia Vradi (amalia.vradi@bsc.es)
 - Francesco Benincasa (francesco.benincasa@bsc.es)
