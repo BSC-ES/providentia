@@ -37,8 +37,9 @@ PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 #load the default values json
 default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/prov_interp_defaults.json')))
 
-# read defined experiments dictionary
-from defined_experiments import defined_experiments_dictionary
+# load the defined experiments paths and agrupations jsons
+experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_paths.json')))
+experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_names.json')))
 
 # auxiliar functions
 import aux
@@ -51,9 +52,6 @@ class ExperimentInterpolation(object):
     """ Class which handles interpolation of experiment data to surface observations. """
 
     def __init__(self,submit_args):
-
-        # # initialise log file string
-        # self.log_file_str = 'STARTING INTERPOLATION\n'
 
         # set variables from input keywords
         self.prov_exp_code                        = submit_args['prov_exp_code']
@@ -79,19 +77,25 @@ class ExperimentInterpolation(object):
         else:
             self.ensemble_member = False
 
-        # put configuration variables into self, assigning defaults where neccessary 
-        self.set_configuration_defaults(vars_to_set=['GHOST_version'])
-        self.set_configuration_defaults(vars_not_to_set=['GHOST_version'])
+        # get experiment type and specific directory 
+            # log_file_str += 'CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set)
+        experiment_exists = False
+        for experiment_type in experiment_names:
+            if self.experiment_to_process in experiment_names[experiment_type]:
+                exp_dict = experiment_paths[experiment_type]
+                experiment_exists = True
+                break
 
-        # get experiment specific directory (take gpfs experiment
-        # directory preferentially over esarchive directory)
-        exp_dict = defined_experiments_dictionary[self.experiment_to_process]
+        # take gpfs directory preferentially over esarchive directory
         if 'gpfs' in list(exp_dict.keys()):
             exp_dir = exp_dict['gpfs']
         else:
             exp_dir = exp_dict['esarchive']
         if ('gpfs' in exp_dir) and (MACHINE == 'mn5'):
             exp_dir = exp_dir.replace('/gpfs/', '/gpfs/tapes/MN4/')
+
+        # add file to directory path
+        exp_dir += self.experiment_to_process
 
         # get model name
         self.model_name = exp_dir.split('/')[-3]
