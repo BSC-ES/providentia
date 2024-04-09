@@ -77,6 +77,10 @@ class ExperimentInterpolation(object):
         else:
             self.ensemble_member = False
 
+        # put configuration variables into self, assigning defaults where neccessary 
+        self.set_configuration_defaults(vars_to_set=['GHOST_version'])
+        self.set_configuration_defaults(vars_not_to_set=['GHOST_version'])
+
         # get experiment type and specific directory 
             # log_file_str += 'CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set)
         experiment_exists = False
@@ -95,10 +99,7 @@ class ExperimentInterpolation(object):
             exp_dir = exp_dir.replace('/gpfs/', '/gpfs/tapes/MN4/')
 
         # add file to directory path
-        exp_dir += self.experiment_to_process
-
-        # get model name
-        self.model_name = exp_dir.split('/')[-3]
+        exp_dir += f"{self.experiment_to_process}/" 
 
         # define if network is in GHOST format
         self.reading_ghost = aux.check_for_ghost(self.network_to_interpolate_against)
@@ -1092,7 +1093,7 @@ class ExperimentInterpolation(object):
             :type aeronet_bin_radius: float
         """ 
 
-        if self.model_name == 'monarch':
+        if experiment_type == 'monarch':
             # MONARCH bin radius edges (um)
             r_edges =[0.2, 0.36, 0.6, 1.2, 2.0, 3.6, 6.0, 12.0, 20.0]
             # assume bin rh

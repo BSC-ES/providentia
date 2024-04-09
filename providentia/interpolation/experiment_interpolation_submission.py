@@ -209,10 +209,7 @@ class SubmitInterpolation(object):
                 exp_dir = exp_dir.replace('/gpfs/', '/gpfs/tapes/MN4/')
 
             # add file to directory path
-            exp_dir += experiment_to_process
-
-            # get model name
-            self.model_name = exp_dir.split('/')[-3]
+            exp_dir += f"{experiment_to_process}/" 
 
             # get all grid type subdirectories for current experiment
             available_grid_types = [name for name in os.listdir("{}/".format(exp_dir)) if os.path.isdir("{}/{}".format(
@@ -241,7 +238,7 @@ class SubmitInterpolation(object):
                         # only keep available temporal resolutions which are equal or finer in resolution to that 
                         # wanted to output
                         # in case temporal_resolution_to_output is instantaneous, but this not available in model, 
-                        #attempt to take non-instantaneous resolution 
+                        # attempt to take non-instantaneous resolution 
                         # in case temporal_resolution_to_output is non-instantaneous, but this not available in model, 
                         # attempt to take instantaneous resolution
 
@@ -296,7 +293,7 @@ class SubmitInterpolation(object):
                                             # if not, do not process species
                                             if 'vconcaerobin' in speci_to_map:
                                                 # model is MONARCH?
-                                                if self.model_name == 'monarch':
+                                                if experiment_type == 'monarch':
                                                     # check if bin radius is within MONARCH's bin extents (0.2-20.0 um)
                                                     bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_map)
                                                     if (bin_radius >= 0.2) & (bin_radius <= 20.0):
@@ -332,7 +329,7 @@ class SubmitInterpolation(object):
                                             # if not, do not process species
                                             if 'vconcaerobin' in speci_to_map:
                                                 # model is MONARCH?
-                                                if self.model_name == 'monarch':
+                                                if experiment_type == 'monarch':
                                                     # check if bin radius is within MONARCH's bin extents (0.2-20.0 um)
                                                     bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_map)
                                                     if (bin_radius >= 0.2) & (bin_radius <= 20.0):
