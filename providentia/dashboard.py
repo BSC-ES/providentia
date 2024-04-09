@@ -77,14 +77,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     read_conf = True
 
             if read_conf:
-                if hasattr(self, 'section'):
+                if 'section' in kwargs:
                     # config and section defined 
                     load_conf(self, fpath=self.config)
-                    if self.section in self.all_sections:
+                    if kwargs['section'] in self.all_sections:
                         self.from_conf = True
-                        self.current_config = self.sub_opts[self.section]
+                        self.current_config = self.sub_opts[kwargs['section']]
+                        self.section = kwargs['section']
                     else:
-                        error = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.section)
+                        error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
                         tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
                         tip += 'before the subsection name (e.g. SECTIONA·Spain).'
                         sys.exit(error + '\n' + tip)
@@ -660,6 +661,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_resampling_resolution = copy.deepcopy(self.resampling_resolution)
             self.selected_statistic_mode = copy.deepcopy(self.statistic_mode)
             self.selected_statistic_aggregation = copy.deepcopy(self.statistic_aggregation)
+            self.selected_periodic_statistic_aggregation = copy.deepcopy(self.periodic_statistic_aggregation)
+            self.selected_periodic_statistic_mode = copy.deepcopy(self.periodic_statistic_mode)
+            self.selected_timeseries_stat = copy.deepcopy(self.timeseries_statistic_aggregation)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -693,6 +697,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.cb_resampling_resolution.clear()
         self.cb_statistic_mode.clear()
         self.cb_statistic_aggregation.clear()
+        self.mpl_canvas.statsummary_periodic_aggregation.clear()
+        self.mpl_canvas.statsummary_periodic_mode.clear()
+        self.mpl_canvas.timeseries_stat.clear()
 
         # if have no available observational data, return from function, updating variable informing that have no data
         if len(self.available_observation_data) == 0:
@@ -763,6 +770,30 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.cb_statistic_aggregation.setCurrentText(self.selected_statistic_aggregation)
         else:
             self.selected_statistic_aggregation = self.cb_statistic_aggregation.currentText()
+
+        # update statsummary periodic statistic aggregation field
+        available_periodic_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+        self.mpl_canvas.statsummary_periodic_aggregation.addItems(available_periodic_statistics)
+        if self.selected_periodic_statistic_aggregation in available_periodic_statistics:
+            self.mpl_canvas.statsummary_periodic_aggregation.setCurrentText(self.selected_periodic_statistic_aggregation)
+        else:
+            self.selected_periodic_statistic_aggregation = self.mpl_canvas.statsummary_periodic_aggregation.currentText()
+        
+        # update statsummary periodic statistic mode field
+        available_periodic_modes = ['Independent', 'Cycle']
+        self.mpl_canvas.statsummary_periodic_mode.addItems(available_periodic_modes)
+        if self.selected_periodic_statistic_mode in available_periodic_modes:
+            self.mpl_canvas.statsummary_periodic_mode.setCurrentText(self.selected_periodic_statistic_mode)
+        else:
+            self.selected_periodic_statistic_mode = self.mpl_canvas.statsummary_periodic_mode.currentText()
+
+        # update timeseries statistic field
+        available_timeseries_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+        self.mpl_canvas.timeseries_stat.addItems(available_timeseries_statistics)
+        if self.selected_timeseries_stat in available_timeseries_statistics:
+            self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_stat)
+        else:
+            self.selected_timeseries_stat = self.mpl_canvas.timeseries_stat.currentText()
 
         # get available resampling resolutions
         available_resampling_resolutions = get_lower_resolutions(self.selected_resolution)
