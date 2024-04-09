@@ -394,17 +394,17 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
        for different aggregation modes.
     """
 
-    #if data_labels_a, data_labels_b are strings then convert to lists
+    # if data_labels_a, data_labels_b are strings then convert to lists
     if type(data_labels_a) != list:
         data_labels_a = [data_labels_a]
     if type(data_labels_b) != list:
         data_labels_b = [data_labels_b]
 
-    #if have empty strings in lists then remove them
+    # if have empty strings in lists then remove them
     data_labels_a = [label for label in data_labels_a if label != '']
     data_labels_b = [label for label in data_labels_b if label != '']
 
-    #if zstats is str then make it a list
+    # if zstats is str then make it a list
     if type(zstats) != list:
         zstats = [zstats]
 
