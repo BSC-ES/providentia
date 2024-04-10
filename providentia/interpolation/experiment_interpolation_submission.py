@@ -186,9 +186,9 @@ class SubmitInterpolation(object):
 
             # get experiment type and specific directory 
             experiment_exists = False
-            for experiment_type in experiment_names:
-                if experiment_to_process in experiment_names[experiment_type]:
-                    exp_dict = experiment_paths[experiment_type]
+            for self.experiment_type in experiment_names:
+                if experiment_to_process in experiment_names[self.experiment_type]:
+                    exp_dict = experiment_paths[self.experiment_type]
                     experiment_exists = True
                     break
             
@@ -290,7 +290,7 @@ class SubmitInterpolation(object):
                                             # if not, do not process species
                                             if 'vconcaerobin' in speci_to_map:
                                                 # model is MONARCH?
-                                                if experiment_type == 'monarch':
+                                                if self.experiment_type == 'monarch':
                                                     # check if bin radius is within MONARCH's bin extents (0.2-20.0 um)
                                                     bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_map)
                                                     if (bin_radius >= 0.2) & (bin_radius <= 20.0):
@@ -326,7 +326,7 @@ class SubmitInterpolation(object):
                                             # if not, do not process species
                                             if 'vconcaerobin' in speci_to_map:
                                                 # model is MONARCH?
-                                                if experiment_type == 'monarch':
+                                                if self.experiment_type == 'monarch':
                                                     # check if bin radius is within MONARCH's bin extents (0.2-20.0 um)
                                                     bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_map)
                                                     if (bin_radius >= 0.2) & (bin_radius <= 20.0):
@@ -500,14 +500,13 @@ class SubmitInterpolation(object):
                                         for yearmonth in intersect_yearmonths:
 
                                             # append current iterative arguments to arguments list               
-                                            self.arguments.append("{} {} {} {} {} {} {} {}".format(prov_exp_code, 
+                                            self.arguments.append("{} {} {} {} {} {} {}".format(prov_exp_code, 
                                                                                                 model_temporal_resolution, 
                                                                                                 speci_to_process, 
                                                                                                 network_to_interpolate_against, 
                                                                                                 temporal_resolution_to_output, 
                                                                                                 yearmonth, 
-                                                                                                original_speci_to_process,
-                                                                                                self.unique_ID))
+                                                                                                original_speci_to_process))
 
                                             # append root name of .out file that will be output for each processed task
                                             self.output_log_roots.append('{}/{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
