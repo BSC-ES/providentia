@@ -92,8 +92,8 @@ def check_directory_existence(directory_tree_str, directories_not_to_test=None):
                 # give 770 permissions to directory
                 os.system("chmod 770 {}".format(alt_directory_str_to_test))
                 
-                # make group owner Earth
-                os.system("chgrp Earth {}".format(alt_directory_str_to_test))
+                # make group owner bsc32
+                os.system("chgrp bsc32 {}".format(alt_directory_str_to_test))
 
 def set_file_permissions_ownership(file_str):
     """ Set 770 permissions for a newly written file and also ensure group owner is bsc32.
@@ -114,8 +114,8 @@ def set_file_permissions_ownership(file_str):
     # give 770 permissions to file
     os.system("chmod 770 {}".format(file_str))
 
-    # make group owner Earth
-    os.system("chgrp Earth {}".format(file_str))
+    # make group owner bsc32
+    os.system("chgrp bsc32 {}".format(file_str))
 
 def findMiddle(input_len):
     """ Find middle index/indices of a list.
