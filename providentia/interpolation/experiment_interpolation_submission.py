@@ -21,12 +21,13 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 
 # load the data_paths for the different machines and the default values jsons
-data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.json')))
-default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/prov_interp_defaults.json')))
+data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.json')))
+config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'prov_interp_defaults.json')))
+bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'multispecies_shortcurts.json')))
 
 # load the defined experiments paths and agrupations jsons
-experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_paths.json')))
-experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_names.json')))
+experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_paths.json')))
+experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.json')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -90,10 +91,6 @@ class SubmitInterpolation(object):
 
         # import configuration file
         import configuration as config_args
-
-        # get configuration default formats
-        config_format = default_values['config_format']
-        bin_vars = default_values['bin_vars']
 
         # if have defined variables to set, do just that
         # otherwise set all variables in config file

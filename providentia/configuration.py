@@ -18,10 +18,15 @@ from .read_aux import check_for_ghost, get_default_qa
 from .warnings import show_message
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
+
+# get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.json')))
-default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/prov_defaults.json')))
+
+# load the data_paths for the different machines and the default values jsons
+data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.json')))
+default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'prov_defaults.json')))
+multispecies_map = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'multispecies_shortcurts.json')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -695,7 +700,7 @@ class ProvConfiguration:
         new_species = copy.deepcopy(self.read_instance.species)
         for speci_ii, speci in enumerate(self.read_instance.species): 
             if '*' in speci:
-                mapped_species = self.multispecies_mapping(speci)
+                mapped_species = multispecies_map[speci]
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
                 network_to_duplicate = self.read_instance.network[speci_ii]
@@ -823,18 +828,6 @@ class ProvConfiguration:
                     # update symbols next to values
                     self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
                                                                                               filter_species_fill_value]
-
-    def multispecies_mapping(self, species):
-        """ Map species special case str to multiple species names. """
-
-        multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4',
-                            'vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9',
-                            'vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14',
-                            'vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19',
-                            'vconcaerobin20','vconcaerobin21','vconcaerobin22']}
-
-        return multi_species_map[species]
-
 
 def read_conf(fpath=None):
     """ Read configuration files. """
