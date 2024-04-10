@@ -745,8 +745,11 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
             if not os.path.exists(files_directory):
                 continue
             else:
-                # get all available netCDF files
-                available_files = os.listdir(files_directory)
+                # get all available netCDF files (handling potential permissions issues)
+                try:
+                    available_files = os.listdir(files_directory)
+                except PermissionError as error:
+                    continue
 
             # get monthly start date (YYYYMM) of all files
             file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
