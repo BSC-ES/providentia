@@ -5,6 +5,6 @@
     "nmmb-bsc-ctm": {"esarchive":"/esarchive/exp/nmmb-bsc-ctm/"}, 
     "wrf-hermes-cmaq": {"esarchive":"/esarchive/exp/wrf-hermes-cmaq/"}, 
     "auto-wrf-hermes-cmaq": {"esarchive":"/esarchive/exp/auto-wrf-hermes-cmaq/"}, 
-    "ecmwf": {"esarchive":"/esarchive/recon/ecmwf/"}, 
+    "cams50": {"esarchive":"/esarchive/recon/ecmwf/"}, 
     "cams61": {"esarchive":"/esarchive/recon/ecmwf/cams61/"}
 }

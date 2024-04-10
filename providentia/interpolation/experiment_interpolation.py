@@ -34,12 +34,13 @@ os.chdir(working_directory)
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 
-#load the default values json
-default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/prov_interp_defaults.json')))
+# load the default values jsonsdefault_values
+config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'prov_interp_defaults.json')))
+bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'multispecies_shortcurts.json')))
 
 # load the defined experiments paths and agrupations jsons
-experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_paths.json')))
-experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_names.json')))
+experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_paths.json')))
+experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.json')))
 
 # auxiliar functions
 import aux
@@ -156,10 +157,6 @@ class ExperimentInterpolation(object):
 
         # import configuration file
         import configuration as config_args
-
-        # get configuration default formats
-        config_format = default_values['config_format']
-        bin_vars = default_values['bin_vars']
 
         # if have defined variables to set, do just that
         # otherwise set all variables in config file
