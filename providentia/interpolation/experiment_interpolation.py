@@ -83,12 +83,9 @@ class ExperimentInterpolation(object):
         self.set_configuration_defaults(vars_not_to_set=['GHOST_version'])
 
         # get experiment type and specific directory 
-            # log_file_str += 'CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set)
-        experiment_exists = False
-        for experiment_type in experiment_names:
-            if self.experiment_to_process in experiment_names[experiment_type]:
-                exp_dict = experiment_paths[experiment_type]
-                experiment_exists = True
+        for self.experiment_type in experiment_names:
+            if self.experiment_to_process in experiment_names[self.experiment_type]:
+                exp_dict = experiment_paths[self.experiment_type]
                 break
 
         # take gpfs directory preferentially over esarchive directory
@@ -1090,7 +1087,7 @@ class ExperimentInterpolation(object):
             :type aeronet_bin_radius: float
         """ 
 
-        if experiment_type == 'monarch':
+        if self.experiment_type == 'monarch':
             # MONARCH bin radius edges (um)
             r_edges =[0.2, 0.36, 0.6, 1.2, 2.0, 3.6, 6.0, 12.0, 20.0]
             # assume bin rh
@@ -1135,7 +1132,6 @@ def create_output_logfile(process_code):
     f"{submit_args['network_to_interpolate_against']}/"
     f"{submit_args['temporal_resolution_to_output']}/"
     f"{submit_args['yearmonth']}")
-    # f"{submit_args['id']}")
 
     f = open(f"{output_logfile_dir}_{process_code}.out", "w")
     f.write(str(log_file_str))
@@ -1159,8 +1155,7 @@ if __name__ == "__main__":
                        'network_to_interpolate_against': sys.argv[4], 
                        'temporal_resolution_to_output': sys.argv[5], 
                        'yearmonth': sys.argv[6], 
-                       'original_speci_to_process': sys.argv[7],
-                       'id': sys.argv[8]
+                       'original_speci_to_process': sys.argv[7]
                        }   
 
         # initialise ExperimentInterpolation object
