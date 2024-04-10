@@ -1,4 +1,6 @@
 #!/bin/bash
+#SBATCH --output=/dev/null
+#SBATCH --error=/dev/null
 
 rm -rf figures/*
 rm -rf plots/*
