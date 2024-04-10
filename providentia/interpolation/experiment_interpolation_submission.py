@@ -70,6 +70,12 @@ class SubmitInterpolation(object):
         self.set_configuration_defaults(vars_to_set=['GHOST_version'])
         self.set_configuration_defaults(vars_not_to_set=['GHOST_version'])
 
+        # define the QOS (Quality of Service) used to manage jobs on the SLURM system
+        if self.machine == 'mn5':
+            self.qos = 'gp_bsces'
+        else:
+            self.qos = 'bsc_es'
+
         # check have cloned unit_converter submodule correctly
         try:
             sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
