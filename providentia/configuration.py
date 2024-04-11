@@ -10,12 +10,8 @@ import socket
 import subprocess
 import sys
 
-import matplotlib
 import numpy as np
 import pandas as pd
-
-from .read_aux import check_for_ghost, get_default_qa
-from .warnings import show_message
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 
@@ -529,6 +525,15 @@ class ProvConfiguration:
 
     def check_validity(self):
         """ Check validity of set variables after parsing. """
+       
+        # import matplotlib for Taylor Diagrams
+        import matplotlib
+
+        # import check_for_ghost and get_default_qa
+        from .read_aux import check_for_ghost, get_default_qa
+
+        # import show_mesage from warnings
+        from .warnings import show_message
         
         # get non-default fields on config file if launching from a config file
         if hasattr(self.read_instance, "sub_opts"):
@@ -1035,6 +1040,8 @@ def split_options(read_instance, conf_string, separator="||"):
     """ For the options in the configuration that define the keep and remove
         options. Returns the values in two lists, the keeps and removes.
     """
+    # import show_mesage from warnings
+    from .warnings import show_message
     
     keeps, removes = [], []
 
