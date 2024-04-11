@@ -728,8 +728,6 @@ class SubmitInterpolation(object):
         submit_file.write("#SBATCH --nodes=1\n")
         submit_file.write("#SBATCH --time=02:00:00\n")
         submit_file.write("#SBATCH --array=1-{}\n".format(len(argument_files)))
-        if self.machine == 'mn5':
-          submit_file.write("#SBATCH --account=bsc32\n")  
         # if machine is power9, then there are 4 threads per physical CPU, which show as 4 separate CPUs. 
         # if multithreading is enabled, ensure 4 virtual cores are actually seen as 1 CPU.
         if (self.machine == 'power') & (self.multithreading == True):
@@ -738,7 +736,11 @@ class SubmitInterpolation(object):
         submit_file.write("##SBATCH --output=/dev/null\n")
         submit_file.write("##SBATCH --error=/dev/null\n")
         submit_file.write("\n")
-        if self.machine != 'mn5':
+        if self.machine == 'mn5':
+            submit_file.write("#SBATCH --account=bsc32\n")  
+            submit_file.write("#SBATCH --ntasks-per-node=1\n")
+            submit_file.write("#SBATCH --cpus-per-task={}\n".format(n_simultaneous_tasks+1))
+        else:
             submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
         submit_file.write("export GREASY_NWORKERS=$SLURM_NPROCS\n") 
         submit_file.write("export GREASY_LOGFILE={}/{}_$SLURM_ARRAY_TASK_ID.log\n".format(self.submit_dir, 

@@ -2,8 +2,10 @@
 
 #SBATCH --job-name=PRVI                                         
 #SBATCH --ntasks=1                                                
-#SBATCH --output=/dev/null
+#SBATCH --output=submission_logs/%J.out
 #SBATCH --error=/dev/null
+
+echo "Loading modules..."
 
 # load modules
 source load_modules.sh
