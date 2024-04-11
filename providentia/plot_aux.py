@@ -1,6 +1,9 @@
 """ Auxiliar functions to create plots """
 
+import sys
+import os
 import math
+import json
 
 import matplotlib as mpl
 from matplotlib.projections import PolarAxes
@@ -12,6 +15,9 @@ from scipy.signal import convolve, gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
 from .statistics import calculate_statistic, get_z_statistic_sign
+
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 def get_multispecies_aliases(networkspecies):
     """ Map networkspecies to networkspecies aliases.
@@ -145,7 +151,18 @@ def update_plotting_parameters(instance):
 
     # generate a list of RGB tuples for number of experiments there are
     sns.reset_orig()
-    clrs = sns.color_palette(instance.plot_characteristics_templates['general']['legend_color_palette'], n_colors=len(instance.data_labels)-1)
+    color_palette = instance.plot_characteristics_templates['general']['legend_color_palette']
+    color_palettes = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/color_palettes.json')))
+    if color_palette in color_palettes.keys():
+        if (len(instance.data_labels) - 1) > len(color_palettes[color_palette]):
+            msg = "Error: The number of experiments and palette colors should be equal. "
+            msg += f"Add more colors to your palette '{color_palette}' in settings/color_palettes.json "
+            msg += "or change your legend_color_palette in the plot characteristics files."
+            sys.exit()
+        else:
+            clrs = sns.color_palette(color_palettes[color_palette])
+    else:
+        clrs = sns.color_palette(color_palette, n_colors=len(instance.data_labels)-1)
 
     # add colour and zorder for observations
     instance.plotting_params[instance.observations_data_label]['colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
