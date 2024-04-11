@@ -67,8 +67,8 @@ class SubmitInterpolation(object):
         self.unique_ID = sys.argv[1]
 
         # put configuration variables into self, assigning defaults where neccessary 
-        self.set_configuration_defaults(vars_to_set=['GHOST_version'])
-        self.set_configuration_defaults(vars_not_to_set=['GHOST_version'])
+        self.set_configuration_defaults(vars_to_set=['ghost_version'])
+        self.set_configuration_defaults(vars_not_to_set=['ghost_version'])
 
         # define the QOS (Quality of Service) used to manage jobs on the SLURM system
         if self.machine == 'mn5':
@@ -96,19 +96,37 @@ class SubmitInterpolation(object):
         '''
 
         # import configuration file
-        import configuration as config_args
+        # import configuration as config_args
 
+        config_file = "/gpfs/scratch/bsc32/bsc32388/Providentia/configurations/pula.conf"
+
+        sys.path.append(os.path.abspath(os.path.join(PROVIDENTIA_ROOT, 'providentia')))
+        from configuration import read_conf
+
+        sub_opts, _, parent_sections, _, _ = read_conf(config_file)
+        print(sub_opts)
+        print(parent_sections)
+
+        config_dict = sub_opts[parent_sections[0]]
+        config_args = config_dict.keys()
+        # config_values = config_dict.values()
+        # print(self.current_config)
+        
+
+
+  
         # if have defined variables to set, do just that
         # otherwise set all variables in config file
         if not vars_to_set:
             vars_to_set = list(config_format.keys())
-
+        
         # remove variables that do not want to set
         if vars_not_to_set:
             for var_not_to_set in vars_not_to_set:
                 vars_to_set.remove(var_not_to_set)
             
         # check each variable to set
+
         for var_to_set in vars_to_set:
 
             # get format information for variable
@@ -116,56 +134,61 @@ class SubmitInterpolation(object):
 
             # if variable not in configuration file, then set default value for field if available
             # otherwise throw error
-            if not hasattr(config_args, var_to_set):
+            if not var_to_set in config_args: #var to set esta en el key del dictionary
                 if 'default' not in var_config_format:
                     sys.exit('CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set))
                 else:
                     if var_to_set == 'species_to_process':
-                        setattr(config_args, var_to_set, [self.standard_parameters[param]['bsc_parameter_name'] 
-                                                          for param in self.standard_parameters.keys()]) 
+                        config_dict[var_to_set] =  [self.standard_parameters[param]['bsc_parameter_name'] 
+                                                          for param in self.standard_parameters.keys()] 
                     else:
-                        setattr(config_args, var_to_set, config_format[var_to_set]['default'])
+                        config_dict[var_to_set] = config_format[var_to_set]['default']
                         
             # otherwise if variable in configuration file, make sure formatting is correct
             else:
                 # set default for config argument (if required)
                 if 'default' in var_config_format:
-                    if (getattr(config_args, var_to_set) == 'default') or (getattr(config_args, var_to_set) == ['default']):
+                    if (config_dict[var_to_set] == 'default') or (config_dict[var_to_set] == ['default']):
                         if var_to_set == 'species_to_process':
-                            setattr(config_args, var_to_set, [self.standard_parameters[param]['bsc_parameter_name'] 
-                                                              for param in self.standard_parameters.keys()]) 
+                            config_dict[var_to_set] =  [self.standard_parameters[param]['bsc_parameter_name'] 
+                                                              for param in self.standard_parameters.keys()]
                         else:
-                            setattr(config_args, var_to_set, config_format[var_to_set]['default'])
+                            config_dict[var_to_set] =  config_format[var_to_set]['default']
+                
+                # transform non-default atributes which are still in str format to list
+                if config_format[var_to_set]['type'] == 'list' and locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
+                    config_dict[var_to_set] = config_dict[var_to_set].strip().split(",")
 
                 # check primary typing is correct
-                if locate(config_format[var_to_set]['type']) != type(getattr(config_args, var_to_set)):
+                print(locate(config_format[var_to_set]['type']), type(config_dict[var_to_set]))
+                if locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
                     sys.exit('CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A {} TYPE'.format(
                         var_to_set, config_format[var_to_set]['type']))
 
                 # check subtyping is correct
                 if 'subtype' in var_config_format:
-                    for var in getattr(config_args, var_to_set):
+                    for var in config_dict[var_to_set]:
                         if locate(config_format[var_to_set]['subtype']) != type(var):
                             sys.exit('CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A LIST CONTAINING {} TYPES'.format(
                                 var_to_set, config_format[var_to_set]['subtype']))
 
-            # set some extra variables for GHOST_version
-            if var_to_set == 'GHOST_version':
+            # set some extra variables for ghost_version
+            if var_to_set == 'ghost_version':
                 # import GHOST standards
                 sys.path.insert(1, data_paths[self.machine]["ghost_root"] + '/GHOST_standards/{}'.format(
-                    getattr(config_args, 'GHOST_version')))
+                    config_dict['ghost_version']))
                 from GHOST_standards import standard_parameters
                 self.standard_parameters = standard_parameters
 
             # fill in bin wildcard parameters
             if var_to_set == 'species_to_process':
-                if getattr(config_args, var_to_set) != 'default':
-                    for arg_var in getattr(config_args, var_to_set):
+                if config_dict[var_to_set] != 'default':
+                    for arg_var in config_dict[var_to_set]:
                         if arg_var in list(bin_vars.keys()):
-                            setattr(config_args, var_to_set, bin_vars[arg_var]) 
+                            config_dict[var_to_set] = bin_vars[arg_var]
 
             # add config argument to self
-            setattr(self, var_to_set, getattr(config_args, var_to_set))
+            setattr(self, var_to_set, config_dict[var_to_set])
  
     def gather_arguments(self):
         ''' Gather list of arguments for all unique tasks to process, as defined in the configuration file. '''
@@ -177,7 +200,7 @@ class SubmitInterpolation(object):
         self.output_log_roots = []
 
         # iterate through desired experiment IDs
-        for experiment_to_process in self.experiments_to_process:
+        for experiment_to_process in self.experiments:
             
             print('EXPERIMENT: {0}'.format(experiment_to_process))
 
@@ -219,7 +242,7 @@ class SubmitInterpolation(object):
                 exp_dir,name))]
             
             # get intersection between desired grid types to process and grid types available in directory
-            available_grid_types = [x for x in available_grid_types if x in self.grid_types_to_process]
+            available_grid_types = [x for x in available_grid_types if x in self.domain]
 
             # iterate through grid types to process
             for grid_type in available_grid_types:
@@ -229,12 +252,12 @@ class SubmitInterpolation(object):
                                                         if os.path.isdir("{}/{}/{}".format(exp_dir, grid_type, name))]
 
                 # iterate through species to process
-                for speci_ii, speci_to_process in enumerate(self.species_to_process):
+                for speci_ii, speci_to_process in enumerate(self.species):
 
                     original_speci_to_process = copy.deepcopy(speci_to_process)
 
                     # iterate through temporal_resolutions to output
-                    for temporal_resolution_to_output in self.temporal_resolutions_to_output:
+                    for temporal_resolution_to_output in self.resolution:
 
                         experiment_species_ensemblestat = []
 
@@ -351,7 +374,7 @@ class SubmitInterpolation(object):
                         if have_valid_resolution:
 
                             # iterate through observational networks to interpolate against
-                            for network_to_interpolate_against in self.networks_to_interpolate_against:
+                            for network_to_interpolate_against in self.network:
 
                                 # define if network is in GHOST format
                                 self.reading_ghost = check_for_ghost(network_to_interpolate_against)
@@ -361,7 +384,7 @@ class SubmitInterpolation(object):
                                 if self.reading_ghost:
                                     obs_files = np.sort(glob.glob(
                                         data_paths[self.machine]['ghost_root'] + '/{}/{}/{}/{}/{}*.nc'.format(
-                                            network_to_interpolate_against, self.GHOST_version, 
+                                            network_to_interpolate_against, self.ghost_version, 
                                             temporal_resolution_to_output, original_speci_to_process, 
                                             original_speci_to_process)))
                                 # non-GHOST
@@ -558,7 +581,7 @@ class SubmitInterpolation(object):
         
         # if have no arguments for all experiments, return message stating that
         if len(self.arguments) == 0:
-            if len(self.experiments_to_process) > 1:
+            if len(self.experiments) > 1:
                 msg = 'INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT'
                 sys.exit(msg)
             else:
