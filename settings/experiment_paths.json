@@ -1,6 +1,7 @@
 {
-    "monarch": {"esarchive":"/esarchive/exp/monarch/",
-                "gpfs":"/gpfs/scratch/bsc32/bsc32359/esarchive_scratch/exp/monarch/"}, 
+    "monarch": {"esarchive":"/esarchive/exp/monarch/"},
+    "monarch_gpfs": {"esarchive":"/esarchive/exp/monarch/",
+                    "gpfs":"/gpfs/scratch/bsc32/bsc32359/esarchive_scratch/exp/monarch/"}, 
     "testing": {"esarchive":"/esarchive/scratch/bsc32443/testing/"}, 
     "nmmb-bsc-ctm": {"esarchive":"/esarchive/exp/nmmb-bsc-ctm/"}, 
     "wrf-hermes-cmaq": {"esarchive":"/esarchive/exp/wrf-hermes-cmaq/"}, 

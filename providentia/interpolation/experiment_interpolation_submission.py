@@ -66,9 +66,17 @@ class SubmitInterpolation(object):
         # defined to process in the configuration file
         self.unique_ID = sys.argv[1]
 
+        # dictionary to save utilized interpolation variables
+        self.interpolation_variables = {}
+
         # put configuration variables into self, assigning defaults where neccessary 
         self.set_configuration_defaults(vars_to_set=['ghost_version'])
         self.set_configuration_defaults(vars_not_to_set=['ghost_version'])
+
+        # print variables used        
+        print("Variables used for the interpolation:")
+        for arg,value in self.interpolation_variables.items():
+            print(f"{arg}: {value}")
 
         # define the QOS (Quality of Service) used to manage jobs on the SLURM system
         if self.machine == 'mn5':
@@ -95,25 +103,16 @@ class SubmitInterpolation(object):
             :type vars_not_to_set: list
         '''
 
-        # import configuration file
-        # import configuration as config_args
-
         config_file = "/gpfs/scratch/bsc32/bsc32388/Providentia/configurations/pula.conf"
 
+        # import read_conf to read .conf files
         sys.path.append(os.path.abspath(os.path.join(PROVIDENTIA_ROOT, 'providentia')))
         from configuration import read_conf
 
+        # get main section args
         sub_opts, _, parent_sections, _, _ = read_conf(config_file)
-        print(sub_opts)
-        print(parent_sections)
-
         config_dict = sub_opts[parent_sections[0]]
         config_args = config_dict.keys()
-        # config_values = config_dict.values()
-        # print(self.current_config)
-        
-
-
   
         # if have defined variables to set, do just that
         # otherwise set all variables in config file
@@ -134,7 +133,7 @@ class SubmitInterpolation(object):
 
             # if variable not in configuration file, then set default value for field if available
             # otherwise throw error
-            if not var_to_set in config_args: #var to set esta en el key del dictionary
+            if not var_to_set in config_args: 
                 if 'default' not in var_config_format:
                     sys.exit('CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set))
                 else:
@@ -148,19 +147,25 @@ class SubmitInterpolation(object):
             else:
                 # set default for config argument (if required)
                 if 'default' in var_config_format:
-                    if (config_dict[var_to_set] == 'default') or (config_dict[var_to_set] == ['default']):
+                    if config_dict[var_to_set] == 'default':
                         if var_to_set == 'species_to_process':
-                            config_dict[var_to_set] =  [self.standard_parameters[param]['bsc_parameter_name'] 
+                            config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
                                                               for param in self.standard_parameters.keys()]
                         else:
                             config_dict[var_to_set] =  config_format[var_to_set]['default']
+                    # transform ensemble_options to string when ensemble id is passed
+                    elif var_to_set == 'ensemble_options' and type(config_dict[var_to_set]) == int:
+                        ensembleid = str(config_dict[var_to_set])
+                        config_dict[var_to_set] = '0' * (3-len(ensembleid)) + ensembleid
                 
                 # transform non-default atributes which are still in str format to list
                 if config_format[var_to_set]['type'] == 'list' and locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
-                    config_dict[var_to_set] = config_dict[var_to_set].strip().split(",")
+                    if type(config_format[var_to_set]['type']) == str:
+                        config_dict[var_to_set] = config_dict[var_to_set].split("(")[0].replace(" ", "").split(",")
+                    if config_format[var_to_set]['subtype'] == 'int': # it is an int
+                        config_dict[var_to_set] = [int(var) for var in config_dict[var_to_set]]
 
                 # check primary typing is correct
-                print(locate(config_format[var_to_set]['type']), type(config_dict[var_to_set]))
                 if locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
                     sys.exit('CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A {} TYPE'.format(
                         var_to_set, config_format[var_to_set]['type']))
@@ -189,6 +194,9 @@ class SubmitInterpolation(object):
 
             # add config argument to self
             setattr(self, var_to_set, config_dict[var_to_set])
+
+            # add config argument to used interpolation variable list
+            self.interpolation_variables[var_to_set] = config_dict[var_to_set]
  
     def gather_arguments(self):
         ''' Gather list of arguments for all unique tasks to process, as defined in the configuration file. '''
@@ -202,7 +210,7 @@ class SubmitInterpolation(object):
         # iterate through desired experiment IDs
         for experiment_to_process in self.experiments:
             
-            print('EXPERIMENT: {0}'.format(experiment_to_process))
+            print('\nEXPERIMENT: {0}'.format(experiment_to_process))
 
             # create arguments list
             exp_arguments = []
@@ -238,7 +246,7 @@ class SubmitInterpolation(object):
             exp_dir += f"{experiment_to_process}/" 
 
             # get all grid type subdirectories for current experiment
-            available_grid_types = [name for name in os.listdir("{}/".format(exp_dir)) if os.path.isdir("{}/{}".format(
+            available_grid_types = [name for name in os.listdir(exp_dir) if os.path.isdir("{}/{}".format(
                 exp_dir,name))]
             
             # get intersection between desired grid types to process and grid types available in directory
