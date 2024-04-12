@@ -78,9 +78,12 @@ class ExperimentInterpolation(object):
         else:
             self.ensemble_member = False
 
+        # dictionary to save utilized interpolation variables
+        self.interpolation_variables = {}
+
         # put configuration variables into self, assigning defaults where neccessary 
-        self.set_configuration_defaults(vars_to_set=['GHOST_version'])
-        self.set_configuration_defaults(vars_not_to_set=['GHOST_version'])
+        self.set_configuration_defaults(vars_to_set=['ghost_version'])
+        self.set_configuration_defaults(vars_not_to_set=['ghost_version'])
 
         # get experiment type and specific directory 
         for self.experiment_type in experiment_names:
@@ -106,7 +109,7 @@ class ExperimentInterpolation(object):
         # GHOST
         if self.reading_ghost:
             self.obs_file = glob.glob(data_paths[MACHINE]['ghost_root'] + '/{}/{}/{}/{}/{}_{}*.nc'\
-                                      .format(self.network_to_interpolate_against, self.GHOST_version,
+                                      .format(self.network_to_interpolate_against, self.ghost_version,
                                               self.temporal_resolution_to_output, self.original_speci_to_process,
                                               self.original_speci_to_process, self.yearmonth))[0]
         # non-GHOST
@@ -152,8 +155,16 @@ class ExperimentInterpolation(object):
             :type vars_not_to_set: list
         '''
 
-        # import configuration file
-        import configuration as config_args
+        config_file = "/gpfs/scratch/bsc32/bsc32388/Providentia/configurations/pula.conf"
+
+        # import read_conf to read .conf files
+        sys.path.append(os.path.abspath(os.path.join(PROVIDENTIA_ROOT, 'providentia')))
+        from configuration import read_conf
+
+        # get main section args
+        sub_opts, _, parent_sections, _, _ = read_conf(config_file)
+        config_dict = sub_opts[parent_sections[0]]
+        config_args = config_dict.keys()
 
         # if have defined variables to set, do just that
         # otherwise set all variables in config file
@@ -173,47 +184,57 @@ class ExperimentInterpolation(object):
 
             # if variable not in configuration file, then set default value for field if available
             # otherwise throw error
-            if not hasattr(config_args, var_to_set):
+            if not var_to_set in config_args:
                 if 'default' not in var_config_format:
                     log_file_str += 'CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set)
                     create_output_logfile(1)
                 else:
                     if var_to_set == 'species_to_process':
-                        setattr(config_args, var_to_set, [self.standard_parameters[param]['bsc_parameter_name'] 
-                                                          for param in self.standard_parameters.keys()]) 
+                        config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
+                                                          for param in self.standard_parameters.keys()] 
                     else:
-                        setattr(config_args, var_to_set, config_format[var_to_set]['default'])
+                        config_dict[var_to_set] = config_format[var_to_set]['default']
                         
             # otherwise if variable in configuration file, make sure formatting is correct
             else:
                 # set default for config argument (if required)
                 if 'default' in var_config_format:
-                    if (getattr(config_args, var_to_set) == 'default') or (getattr(config_args, var_to_set) == ['default']):
+                    if config_dict[var_to_set] == 'default':
                         if var_to_set == 'species_to_process':
-                            setattr(config_args, var_to_set, [self.standard_parameters[param]['bsc_parameter_name'] 
-                                                              for param in self.standard_parameters.keys()]) 
+                            config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
+                                                              for param in self.standard_parameters.keys()]
                         else:
-                            setattr(config_args, var_to_set, config_format[var_to_set]['default'])
+                            config_dict[var_to_set] = config_format[var_to_set]['default']
+                    # transform ensemble_options to string when ensemble id is passed
+                    elif var_to_set == 'ensemble_options' and type(config_dict[var_to_set]) == int:
+                        ensembleid = str(config_dict[var_to_set])
+                        config_dict[var_to_set] = '0' * (3-len(ensembleid)) + ensembleid
+
+                # transform non-default atributes which are still in str format to list
+                if config_format[var_to_set]['type'] == 'list' and locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
+                    if type(config_format[var_to_set]['type']) == str:
+                        config_dict[var_to_set] = config_dict[var_to_set].split("(")[0].replace(" ", "").split(",")
+                    if config_format[var_to_set]['subtype'] == 'int': # it is an int
+                        config_dict[var_to_set] = [int(var) for var in config_dict[var_to_set]]
 
                 # check primary typing is correct
-                if locate(config_format[var_to_set]['type']) != type(getattr(config_args, var_to_set)):
+                if locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
                     log_file_str += 'CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A {} TYPE'.format(
                         var_to_set, config_format[var_to_set]['type'])
                     create_output_logfile(1)
 
                 # check subtyping is correct
                 if 'subtype' in var_config_format:
-                    for var in getattr(config_args, var_to_set):
+                    for var in config_dict[var_to_set]:
                         if locate(config_format[var_to_set]['subtype']) != type(var):
                             log_file_str += 'CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A LIST CONTAINING {} TYPES'.format(
                                 var_to_set, config_format[var_to_set]['subtype'])
                             create_output_logfile(1)
 
-            # set some extra variables for GHOST_version
-            if var_to_set == 'GHOST_version':
+            # set some extra variables for ghost_version
+            if var_to_set == 'ghost_version':
                 # import GHOST standards
-                sys.path.insert(1, '/gpfs/projects/bsc32/AC_cache/obs/ghost/GHOST_standards/{}'.format(getattr(config_args, 
-                                                                                                               'GHOST_version')))
+                sys.path.insert(1, '/gpfs/projects/bsc32/AC_cache/obs/ghost/GHOST_standards/{}'.format(config_dict['ghost_version']))
                 from GHOST_standards import standard_parameters
                 self.standard_parameters = standard_parameters
                 
@@ -229,13 +250,16 @@ class ExperimentInterpolation(object):
 
             # fill in bin wildcard parameters
             if var_to_set == 'species_to_process':
-                if getattr(config_args, var_to_set) != 'default':
-                    for arg_var in getattr(config_args, var_to_set):
+                if config_dict[var_to_set] != 'default':
+                    for arg_var in config_dict[var_to_set]:
                         if arg_var in list(bin_vars.keys()):
-                            setattr(config_args, var_to_set, bin_vars[arg_var]) 
+                            config_dict[var_to_set] = bin_vars[arg_var]
 
             # add config argument to self
-            setattr(self, var_to_set, getattr(config_args, var_to_set))
+            setattr(self, var_to_set, config_dict[var_to_set])
+
+            # add config argument to used interpolation variable list
+            self.interpolation_variables[var_to_set] = config_dict[var_to_set]
 
     def get_model_information(self):
         """ Take first valid model file in month and get grid dimension/coordinate information.
@@ -850,7 +874,7 @@ class ExperimentInterpolation(object):
         tree = spatial.cKDTree(mod_lonlat)
     
         # get n-neighbour nearest distances/indices (ravel form) of model gridcell centres from each observational station  
-        dists,idx = tree.query(obs_lonlat,k=int(self.n_neighbours_to_find))
+        dists,idx = tree.query(obs_lonlat,k=int(self.n_neighbours))
         
         # for n neighbours == 1, do rehsaping of array so doesn't break
         if len(dists.shape) == 1:
@@ -881,12 +905,12 @@ class ExperimentInterpolation(object):
             # as it appears in PRV (e.g. nasa-aeronet/oneill_v3-lev15 -> nasa-aeronet-oneill_v3-lev15)
             network_name = self.network_to_interpolate_against.replace('/', '-')
         output_dir = '/gpfs/projects/bsc32/AC_cache/recon/exp_interp/{}/{}/{}/{}/{}'.format(
-                self.GHOST_version, self.prov_exp_code, self.temporal_resolution_to_output, 
+                self.ghost_version, self.prov_exp_code, self.temporal_resolution_to_output, 
                 self.original_speci_to_process, network_name)
 
         # check if need to create any directories in path 
         aux.check_directory_existence(output_dir,'/gpfs/projects/bsc32/AC_cache/recon/exp_interp/{}'.format(
-            self.GHOST_version))
+            self.ghost_version))
 
         # create netCDF dataset
         netCDF_fname = '{}/{}_{}.nc'.format(output_dir, self.original_speci_to_process, self.yearmonth)
@@ -896,7 +920,7 @@ class ExperimentInterpolation(object):
         root_grp.set_auto_mask(True)	
 
         # file contents
-        msg = 'Inverse distance weighting ({} neighbours) interpolated '.format(self.n_neighbours_to_find)
+        msg = 'Inverse distance weighting ({} neighbours) interpolated '.format(self.n_neighbours)
         msg += '{} experiment data for the component {} '.format(self.experiment_to_process, 
                                                                  self.original_speci_to_process)
         msg += 'with reference to the measurement stations in the '
@@ -1035,8 +1059,8 @@ class ExperimentInterpolation(object):
                 interp_vals = np.full(len(self.yearmonth_time), np.NaN, dtype=np.float32)
             else:
                 # get reciprocal model data at N nearest neighbours to observational station 
-                cut_model_data = self.monthly_model_data[:,self.nearest_neighbour_inds[ii,:int(self.n_neighbours_to_find)],
-                                                                                       self.nearest_neighbour_inds[ii,int(self.n_neighbours_to_find):]]
+                cut_model_data = self.monthly_model_data[:,self.nearest_neighbour_inds[ii,:int(self.n_neighbours)],
+                                                                                       self.nearest_neighbour_inds[ii,int(self.n_neighbours):]]
                 
                 # create mask where data == NaN or infinite
                 invalid_mask = ~np.isfinite(cut_model_data)
