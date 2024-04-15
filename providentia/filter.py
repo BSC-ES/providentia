@@ -740,6 +740,7 @@ class DataFilter:
                     
                     msg = 'Applying calibration factor: '
                     msg += '{0} in {1}'.format(calibration_factor, data_label)
+                    print(msg)
                     
                     # apply calibration factor
                     if '*' in calibration_factor:
