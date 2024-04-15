@@ -721,7 +721,7 @@ class DataFilter:
             multiply or divide the experiment data by a certain value.
         """
 
-        if self.read_instance.calibration_factor is not None:
+        if self.read_instance.calibration_factor:
             
             print('Applying calibration factor...')
 
