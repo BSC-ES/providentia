@@ -117,6 +117,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.previous_filter_species = {}
         self.filter_species = {}
 
+        # set initial calibration factor
+        self.previous_calibration_factor = {}
+        self.calibration_factor = {}
+
         # update variables from defined config file
         if self.current_config:
             for k, val in self.current_config.items():
@@ -981,9 +985,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
                 init_multispecies(self)
 
-            # if calibration factor has been applied from config, turn off if we update the data
-            self.calibration_factor = None
-
             # update configuration bar fields
             self.update_configuration_bar_fields()
 
@@ -1314,7 +1315,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.species[0] != self.previous_species[0]) or (
                 np.array_equal(self.qa, self.previous_qa) == False) or (
                 np.array_equal(self.flags, self.previous_flags) == False) or (
-                str(dict(sorted(self.filter_species.items()))) != str(dict(sorted(self.previous_filter_species.items())))):
+                str(dict(sorted(self.filter_species.items()))) != str(dict(sorted(self.previous_filter_species.items())))) or (
+                str(dict(sorted(self.calibration_factor.items()))) != str(dict(sorted(self.previous_calibration_factor.items())))):
             read_operations = ['reset']
 
         # key variables have not changed, has start/end date?

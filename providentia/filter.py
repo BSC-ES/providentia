@@ -721,9 +721,7 @@ class DataFilter:
             multiply or divide the experiment data by a certain value.
         """
 
-        if self.read_instance.calibration_factor is not None:
-            
-            print('Applying calibration factor...')
+        if self.read_instance.calibration_factor:
 
             # iterate through networkspecies  
             for networkspeci_ii, networkspeci in enumerate(self.read_instance.networkspecies):      
@@ -740,7 +738,9 @@ class DataFilter:
                     if (len(self.read_instance.networkspecies) > 1) and (',' in calibration_factor):
                         calibration_factor = calibration_factor.split(',')[networkspeci_ii]
                     
-                    print('{0} in {1}'.format(calibration_factor, data_label))
+                    msg = 'Applying calibration factor: '
+                    msg += '{0} in {1}'.format(calibration_factor, data_label)
+                    print(msg)
                     
                     # apply calibration factor
                     if '*' in calibration_factor:
