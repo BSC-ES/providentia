@@ -265,10 +265,13 @@ class ProvidentiaOffline:
             # get subsection names
             self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
                                            if self.section == subsection_name.split('·')[0]]
-            if len(self.child_subsection_names) > 0:
-                self.subsections = self.child_subsection_names
+            if "section" in self.commandline_arguments.keys():
+                self.subsections = [self.commandline_arguments["section"]]
             else:
-                self.subsections = [self.section]
+                if len(self.child_subsection_names) > 0:
+                    self.subsections = self.child_subsection_names
+                else:
+                    self.subsections = [self.section]
 
             # make header
             self.plot.set_plot_characteristics(['header'])
