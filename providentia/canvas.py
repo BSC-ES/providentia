@@ -927,7 +927,10 @@ class MPLCanvas(FigureCanvas):
             if hasattr(self.read_instance, 'map_z'):
                 if self.read_instance.map_z in self.read_instance.basic_z_stats:
                     selected_z_stat = self.read_instance.map_z
-            if selected_z1_array == '':
+
+            # if z1 is initialised or labels have changed (by setting data label through a conf 
+            # for instance, we will reset z1)
+            if (selected_z1_array == '') or (selected_z1_array not in self.read_instance.data_labels):
                 selected_z1_array = copy.deepcopy(self.read_instance.observations_data_label)
 
             # update z statistic field to all basic stats if colocation not-active OR z2
