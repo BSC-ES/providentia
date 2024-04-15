@@ -1303,9 +1303,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set read operations to be empty list initially
         read_operations = []
 
-        print('Previous', self.previous_calibration_factor)
-        print('Current', self.calibration_factor)
-        
         # if first read then need to read all data
         if self.first_read:
             read_operations = ['reset']
