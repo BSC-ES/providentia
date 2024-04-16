@@ -35,7 +35,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,interactive,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,generate_file_tree,file_tree,gft,offline,interactive,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,interactive,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,generate_file_tree,file_tree,gft,offline,interactive,interpolation,interp,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -109,8 +109,8 @@ load_command="source load_modules.sh"
 python_command="python3 -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 interactive_alloc_command="sbatch -t $time -c $cores -J $jobname"
 
-# avoid x11 forwarding when creating offline reports
-if [[ $PARSED =~ "--offline" ]]; then
+# avoid x11 forwarding when creating offline reports or doing interpolations
+if [[ $PARSED =~ "--offline" || $PARSED =~ "--interp" || $PARSED =~ "--interpolation" ]]; then
     salloc_command="salloc -t $time -c $cores -J $jobname"
 else
     salloc_command="salloc -t $time -c $cores -J $jobname --x11"
@@ -128,6 +128,18 @@ if [[ $PARSED =~ "--interactive" ]]; then
     interactive=true
 else
     interactive=false
+fi
+
+# if using interpolation mode then
+# if it is not accompanied by config throw an error
+if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" ]]; then
+    if [[ ! $PARSED =~ "--config" ]]; then
+        echo "A CONFIGURATION FILE NEEDS TO BE SPECIFIED WHEN RUNNING INTERPOLATION, e.g. '--config=interpolation.conf'"
+        exit 2
+    fi
+    interpolation=true
+else
+    interpolation=false
 fi
 
 # determine if need to just execute python if have allocation made (i.e. are in debug mode)
