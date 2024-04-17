@@ -4,14 +4,14 @@ Interactive mode
 
 The interactive mode was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functions, as well as allowing for the running in Jupyter notebooks. 
 
-Using Providentia in your own scripts
--------------------------------------
-
 Providentia interactive can be used in any script, through simply importing the Interactive class as follows:   
 
 ::
 
    from providentia import Interactive
+
+Using Providentia in your own scripts
+-------------------------------------
 
 If your script is not inside the Providentia directory, in order to import from Providentia, then it is necessary to add these lines to your code first:            
 
@@ -23,9 +23,15 @@ If your script is not inside the Providentia directory, in order to import from 
       
 where ``provdir`` is the path where your Providentia code exists.
 
-NOTE: In the future we will allow for Providentia to be imported as a module on the BSC machines, making this step redundant. 
+You will also need to load the necessary modules for it to function, for this you can run:
+
+::
+   
+   source provdir/load_modules.sh
 
 After the import you will have full access to the backend of Providentia and all of its functions as described in the following sections.
+
+NOTE: In the future we will allow for Providentia to be imported as a module on the BSC machines, making this step redundant. 
 
 Starting a Jupyter notebook
 ---------------------------
