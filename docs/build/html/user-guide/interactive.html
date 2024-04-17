@@ -112,20 +112,24 @@
   <section id="interactive-mode">
 <h1>Interactive mode<a class="headerlink" href="#interactive-mode" title="Link to this heading"></a></h1>
 <p>The interactive mode was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functions, as well as allowing for the running in Jupyter notebooks.</p>
-<section id="using-providentia-in-your-own-scripts">
-<h2>Using Providentia in your own scripts<a class="headerlink" href="#using-providentia-in-your-own-scripts" title="Link to this heading"></a></h2>
 <p>Providentia interactive can be used in any script, through simply importing the Interactive class as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">providentia</span> <span class="kn">import</span> <span class="n">Interactive</span>
 </pre></div>
 </div>
+<section id="using-providentia-in-your-own-scripts">
+<h2>Using Providentia in your own scripts<a class="headerlink" href="#using-providentia-in-your-own-scripts" title="Link to this heading"></a></h2>
 <p>If your script is not inside the Providentia directory, in order to import from Providentia, then it is necessary to add these lines to your code first:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">provdir</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">provdir</span></code> is the path where your Providentia code exists.</p>
-<p>NOTE: In the future we will allow for Providentia to be imported as a module on the BSC machines, making this step redundant.</p>
+<p>You will also need to load the necessary modules for it to function, for this you can run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">provdir</span><span class="o">/</span><span class="n">load_modules</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
 <p>After the import you will have full access to the backend of Providentia and all of its functions as described in the following sections.</p>
+<p>NOTE: In the future we will allow for Providentia to be imported as a module on the BSC machines, making this step redundant.</p>
 </section>
 <section id="starting-a-jupyter-notebook">
 <h2>Starting a Jupyter notebook<a class="headerlink" href="#starting-a-jupyter-notebook" title="Link to this heading"></a></h2>
