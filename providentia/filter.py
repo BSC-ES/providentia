@@ -733,10 +733,15 @@ class DataFilter:
                 # get calibration factor per experiment
                 for data_label_ii, data_label in enumerate(relevant_data_labels):
 
+                    # get calibration factor per experiment
+                    if isinstance(self.read_instance.calibration_factor, dict):
+                        exp_label = list(self.read_instance.experiments.keys())[
+                            list(self.read_instance.experiments.values()).index(data_label)]
+                        calibration_factor = self.read_instance.calibration_factor[exp_label]
+                    else:
+                        calibration_factor = self.read_instance.calibration_factor
+
                     # get calibration factor per networkspeci
-                    exp_label = list(self.read_instance.experiments.keys())[
-                        list(self.read_instance.experiments.values()).index(data_label)]
-                    calibration_factor = self.read_instance.calibration_factor[exp_label]
                     if (len(self.read_instance.networkspecies) > 1) and (',' in calibration_factor):
                         calibration_factor = calibration_factor.split(',')[networkspeci_ii]
                     
