@@ -11,14 +11,18 @@ import time
 from pydoc import locate
 import numpy as np
 
-from aux import get_aeronet_bin_radius_from_bin_variable, check_for_ghost
-from mapping_species import mapping_species
-
 MACHINE = os.environ.get('BSC_MACHINE', '')
 
 # get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
+
+sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
+sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
+
+from aux import get_aeronet_bin_radius_from_bin_variable, check_for_ghost
+from mapping_species import mapping_species
+from configuration import ProvConfiguration, load_conf
 
 # load the data_paths for the different machines and the default values jsons
 data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.json')))
@@ -66,7 +70,36 @@ class SubmitInterpolation(object):
         # defined to process in the configuration file
         self.unique_ID = sys.argv[1]
 
-        # dictionary to save utilized interpolation variables
+        json_kwargs = "".join(sys.argv[2:]).replace(":", '":"').replace(",", '","').replace("{", '{"').replace("}", '"}')
+        kwargs = json.loads(json_kwargs)
+
+        # initialize commandline arguments, if given
+        provconf = ProvConfiguration(self, **kwargs)
+
+        # update variables from config file
+        if self.config != '':  
+            read_conf = False
+            if os.path.exists(self.config):
+                read_conf = True
+            else: 
+                if os.path.exists(os.path.join(self.config_dir, self.config)):
+                    self.config = os.path.join(self.config_dir, self.config)
+                    read_conf = True
+            if read_conf:
+                load_conf(self, self.config)
+                self.from_conf = True
+            else:
+                error = 'Error: The path to the configuration file specified in the command line does not exist.'
+                sys.exit(error)
+        else:
+            error = "Error: No configuration file found. The path to the config file must be added as an argument."
+            sys.exit(error)
+
+        # get main section args
+        self.config_dict = self.sub_opts[self.parent_section_names[0]]
+        self.config_args = self.config_dict.keys()
+
+        # dictionary that stores utilized interpolation variables
         self.interpolation_variables = {}
 
         # put configuration variables into self, assigning defaults where neccessary 
@@ -74,7 +107,7 @@ class SubmitInterpolation(object):
         self.set_configuration_defaults(vars_not_to_set=['ghost_version'])
 
         # print variables used        
-        print("Variables used for the interpolation:")
+        print("\nVariables used for the interpolation:")
         for arg,value in self.interpolation_variables.items():
             print(f"{arg}: {value}")
 
@@ -84,13 +117,9 @@ class SubmitInterpolation(object):
         else:
             self.qos = 'bsc_es'
 
-        # check have cloned unit_converter submodule correctly
-        try:
-            sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
-            import unit_converter
-        except:
-            msg = 'unit-converter SUBMODULE NOT CLONED CORRECTLY. ADD "--recurse-submodules" when cloning repository'
-            sys.exit(msg)
+        # import unit converter
+        sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
+        import unit_converter
 
     def set_configuration_defaults(self, vars_to_set=None, vars_not_to_set=None):
         ''' Fill relevant fields appropriately with defaults, where 'default' is set in configuration file.
@@ -102,17 +131,6 @@ class SubmitInterpolation(object):
             :param vars_not_to_set: list with configuration variables not to be set
             :type vars_not_to_set: list
         '''
-
-        config_file = "/gpfs/scratch/bsc32/bsc32388/Providentia/configurations/pula.conf"
-
-        # import read_conf to read .conf files
-        sys.path.append(os.path.abspath(os.path.join(PROVIDENTIA_ROOT, 'providentia')))
-        from configuration import read_conf
-
-        # get main section args
-        sub_opts, _, parent_sections, _, _ = read_conf(config_file)
-        config_dict = sub_opts[parent_sections[0]]
-        config_args = config_dict.keys()
   
         # if have defined variables to set, do just that
         # otherwise set all variables in config file
@@ -133,46 +151,46 @@ class SubmitInterpolation(object):
 
             # if variable not in configuration file, then set default value for field if available
             # otherwise throw error
-            if not var_to_set in config_args: 
+            if not var_to_set in self.config_args: 
                 if 'default' not in var_config_format:
                     sys.exit('CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set))
                 else:
                     if var_to_set == 'species_to_process':
-                        config_dict[var_to_set] =  [self.standard_parameters[param]['bsc_parameter_name'] 
+                        self.config_dict[var_to_set] =  [self.standard_parameters[param]['bsc_parameter_name'] 
                                                           for param in self.standard_parameters.keys()] 
                     else:
-                        config_dict[var_to_set] = config_format[var_to_set]['default']
+                        self.config_dict[var_to_set] = config_format[var_to_set]['default']
                         
             # otherwise if variable in configuration file, make sure formatting is correct
             else:
                 # set default for config argument (if required)
                 if 'default' in var_config_format:
-                    if config_dict[var_to_set] == 'default':
+                    if self.config_dict[var_to_set] == 'default':
                         if var_to_set == 'species_to_process':
-                            config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
+                            self.config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
                                                               for param in self.standard_parameters.keys()]
                         else:
-                            config_dict[var_to_set] =  config_format[var_to_set]['default']
+                            self.config_dict[var_to_set] =  config_format[var_to_set]['default']
                     # transform ensemble_options to string when ensemble id is passed
-                    elif var_to_set == 'ensemble_options' and type(config_dict[var_to_set]) == int:
-                        ensembleid = str(config_dict[var_to_set])
-                        config_dict[var_to_set] = '0' * (3-len(ensembleid)) + ensembleid
+                    elif var_to_set == 'ensemble_options' and type(self.config_dict[var_to_set]) == int:
+                        ensembleid = str(self.config_dict[var_to_set])
+                        self.config_dict[var_to_set] = '0' * (3-len(ensembleid)) + ensembleid
                 
                 # transform non-default atributes which are still in str format to list
-                if config_format[var_to_set]['type'] == 'list' and locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
+                if config_format[var_to_set]['type'] == 'list' and locate(config_format[var_to_set]['type']) != type(self.config_dict[var_to_set]):
                     if type(config_format[var_to_set]['type']) == str:
-                        config_dict[var_to_set] = config_dict[var_to_set].split("(")[0].replace(" ", "").split(",")
+                        self.config_dict[var_to_set] = self.config_dict[var_to_set].split("(")[0].replace(" ", "").split(",")
                     if config_format[var_to_set]['subtype'] == 'int': # it is an int
-                        config_dict[var_to_set] = [int(var) for var in config_dict[var_to_set]]
+                        self.config_dict[var_to_set] = [int(var) for var in self.config_dict[var_to_set]]
 
                 # check primary typing is correct
-                if locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
+                if locate(config_format[var_to_set]['type']) != type(self.config_dict[var_to_set]):
                     sys.exit('CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A {} TYPE'.format(
                         var_to_set, config_format[var_to_set]['type']))
 
                 # check subtyping is correct
                 if 'subtype' in var_config_format:
-                    for var in config_dict[var_to_set]:
+                    for var in self.config_dict[var_to_set]:
                         if locate(config_format[var_to_set]['subtype']) != type(var):
                             sys.exit('CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A LIST CONTAINING {} TYPES'.format(
                                 var_to_set, config_format[var_to_set]['subtype']))
@@ -181,22 +199,22 @@ class SubmitInterpolation(object):
             if var_to_set == 'ghost_version':
                 # import GHOST standards
                 sys.path.insert(1, data_paths[self.machine]["ghost_root"] + '/GHOST_standards/{}'.format(
-                    config_dict['ghost_version']))
+                    self.config_dict['ghost_version']))
                 from GHOST_standards import standard_parameters
                 self.standard_parameters = standard_parameters
 
             # fill in bin wildcard parameters
             if var_to_set == 'species_to_process':
-                if config_dict[var_to_set] != 'default':
-                    for arg_var in config_dict[var_to_set]:
+                if self.config_dict[var_to_set] != 'default':
+                    for arg_var in self.config_dict[var_to_set]:
                         if arg_var in list(bin_vars.keys()):
-                            config_dict[var_to_set] = bin_vars[arg_var]
+                            self.config_dict[var_to_set] = bin_vars[arg_var]
 
             # add config argument to self
-            setattr(self, var_to_set, config_dict[var_to_set])
+            setattr(self, var_to_set, self.config_dict[var_to_set])
 
             # add config argument to used interpolation variable list
-            self.interpolation_variables[var_to_set] = config_dict[var_to_set]
+            self.interpolation_variables[var_to_set] = self.config_dict[var_to_set]
  
     def gather_arguments(self):
         ''' Gather list of arguments for all unique tasks to process, as defined in the configuration file. '''

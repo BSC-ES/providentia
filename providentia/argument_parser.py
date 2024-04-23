@@ -31,6 +31,9 @@ class ProvArgumentParser(object):
                                      help="runs Providentia in debug mode, just reserving allocation")
             self.parser.add_argument('--interactive',
                                      help="runs Providentia interactive mode on Jupyter notebook")
+            self.parser.add_argument('--interpolation','--interp', 
+                                     action='store_true',
+                                     help='runs Providentia Interpolation') 
             self.parser.add_argument('--conf', '--config', 
                                      dest="config",
                                      help='specifies the config file to read') 
@@ -134,7 +137,6 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--remove_extreme_stations",
                                      dest="remove_extreme_stations",
                                      help="remove extreme stations using defined statistic limits")
-
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)

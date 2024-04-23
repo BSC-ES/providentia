@@ -56,8 +56,8 @@ class Providentia(object):
             if args.offline:
                 from . import offline as offline
                 offline.main(**res)
-            elif args.interactive:
-                return res
+            elif args.interpolation:
+                print(res)
             else:
                 from . import dashboard as dashboard
                 dashboard.main(**res)
@@ -73,8 +73,3 @@ def main():
         sys.exit(1)
     sys.exit(0)
 
-
-if __name__ == "__main__":
-    if Providentia(ProvArgumentParser()).main() is False:
-        sys.exit(1)
-    sys.exit(0)

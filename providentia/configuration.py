@@ -51,75 +51,8 @@ class ProvConfiguration:
         
         self.read_instance = read_instance 
 
-        # set variable defaults
-        self.var_defaults = {
-            'ghost_version': '1.5',
-            'conf': '',
-            'config': '',
-            'config_dir': os.path.join(PROVIDENTIA_ROOT, 'configurations/'),
-            'operating_system': '',
-            'machine': '',
-            'cartopy_data_dir': '',
-            'available_cpus': '',
-            'n_cpus': '',
-            'ghost_root': '',
-            'nonghost_root': '',
-            'exp_root': '',
-            'generate_file_tree': False,
-            'offline': False,
-            'interactive': False,
-            'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
-                                      '3hourly_instantaneous', '6hourly_instantaneous',
-                                      'daily', 'monthly'],
-            'available_networks': ['GHOST','AERONET_v3_lev1.5','AERONET_v3_lev2.0','BJMEMC','CANADA_NAPS','CAPMoN',
-                                   'CHILE_SINCA','CNEMC','EANET','EBAS','EBAS-ACTRIS','EBAS-AMAP','EBAS-CAMP', 
-                                   'EBAS_COLOSSAL','EBAS-EMEP','EBAS-EUCAARI','EBAS-EUSAAR','EBAS-GUAN','EBAS-HELCOM','EBAS-HTAP',
-                                   'EBAS-IMPACTS','EBAS-IMPROVE','EBAS-Independent','EBAS-MOE','EBAS-NILU',
-                                   'EBAS-NOAA_ESRL','EBAS-NOAA_GGGRN','EBAS-OECD','EBAS-UK_DECC','EBAS-WMO_WDCA', 'EBAS-WMO_WDCRG',
-                                   'EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX','MITECO',
-                                   'NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA','SEARCH','UK_AIR',
-                                   'US_EPA_AirNow_DOS','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG'], 
-            'network': None,
-            'species': None,
-            'resolution': None,
-            'start_date': None,
-            'end_date': None,
-            'observations_data_label': 'observations',
-            'experiments': {},
-            'qa': None,
-            'flags': None,
-            'temporal_colocation': False,
-            'spatial_colocation': True,
-            'map_extent': None, 
-            'filter_species': {},
-            'calibration_factor': None,
-            'lower_bound': None,
-            'upper_bound': None,
-            'report_type': 'standard',
-            'report_summary': True,
-            'report_stations': False,
-            'report_title': 'Providentia Offline Report',
-            'report_filename': 'PROVIDENTIA_Report',
-            'active_dashboard_plots': None,
-            'resampling_resolution': None,
-            'statistic_mode': None,
-            'statistic_aggregation': None,
-            'periodic_statistic_mode': None,
-            'periodic_statistic_aggregation': None,
-            'timeseries_statistic_aggregation': None,
-            'plot_characteristics_filename': '',
-            'harmonise_summary': True,
-            'harmonise_stations': True,
-            'remove_extreme_stations': None,
-            'fixed_section_vars':  ['ghost_version', 'config_dir', 'operating_system', 'cartopy_data_dir', 'available_cpus', 
-                                    'n_cpus', 'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
-                                    'available_resolutions', 'available_networks',
-                                    'network', 'species', 'resolution', 'start_date', 'end_date', 
-                                    'observations_data_label', 'experiments', 'temporal_colocation', 'spatial_colocation', 
-                                    'report_type', 'report_summary', 'report_stations', 'report_title', 
-                                    'report_filename', 'plot_characteristics_filename', 
-                                    'harmonise_summary', 'harmonise_stations']
-        }
+        self.var_defaults = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'prov_init_vars.json')))
+        self.var_defaults['config_dir'] = os.path.join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
 
         # if variable is given by command line, set that value, otherwise set as default value 
         for k, val in self.var_defaults.items():
@@ -1021,8 +954,8 @@ def load_conf(self, fpath=None):
     """ Load existing configurations from file
         for running offline Providentia.
     """
-
-    from .configuration import read_conf
+    sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
+    from configuration import read_conf
 
     if fpath is None:
         print("No configuration file found")
