@@ -152,7 +152,7 @@ It is mandatory to define sections to launch Providentia. Their names must be wr
      - Type of extreme stations removal, from the options given in ``remove_extreme_stations.json``.
    * - resampling_resolution
      - ✗
-     - Resolution you want to resample your data to. Options: ``hourly``, ``hourly_instantaneous``, ``3hourly``, ``3hourly_instantaneous``, ``6hourly``, ``6hourly_instantaneous``, ``daily``, ``monthly``, ``annual``
+     - Resolution you want to resample your data to. Options: ``hourly``, ``daily``, ``monthly``, ``annual``.
 
 Defining a list of experiments is optional since the user might only want to check the observations data.
 
