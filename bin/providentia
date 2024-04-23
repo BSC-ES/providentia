@@ -133,10 +133,6 @@ fi
 # if using interpolation mode then
 # if it is not accompanied by config throw an error
 if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" ]]; then
-    if [[ ! $PARSED =~ "--config" ]]; then
-        echo "A CONFIGURATION FILE NEEDS TO BE SPECIFIED WHEN RUNNING INTERPOLATION, e.g. '--config=interpolation.conf'"
-        exit 2
-    fi
     interpolation=true
 else
     interpolation=false
@@ -284,6 +280,15 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
         else
             eval "${salloc_command} ${constraint_option} ${queue_option}"
         fi
+
+    elif $interpolation; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        eval "${load_command}"
+        outputString=$(eval "srun ${python_command}")
+        jobid=$(eval "sbatch interpolation.sh $outputString | awk '{print \$4}'")
+        echo "Check submission info in providentia/interpolation/management_logs/$jobid.out"
+
+        echo 
 
     else
         if $debugexec; then
