@@ -14,6 +14,7 @@ rm interactive.out
 rm -rf providentia/interpolation/arguments/*
 rm -rf providentia/interpolation/interpolation_logs/*
 rm -rf providentia/interpolation/management_logs/*
+rm -rf providentia/interpolation/submission_logs/*
 rm -rf providentia/interpolation/submit/*
 rm -rf providentia/interpolation/__pycache__ 
 rm -rf providentia/interpolation/slurm*

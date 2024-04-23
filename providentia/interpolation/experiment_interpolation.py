@@ -1,5 +1,6 @@
 from calendar import monthrange
 import cartopy.crs as ccrs
+import cftime
 import glob
 import inspect
 import os
@@ -53,6 +54,9 @@ class ExperimentInterpolation(object):
     """ Class which handles interpolation of experiment data to surface observations. """
 
     def __init__(self,submit_args):
+
+        # set machine
+        self.machine = MACHINE
 
         # set variables from input keywords
         self.prov_exp_code                        = submit_args['prov_exp_code']
@@ -234,7 +238,8 @@ class ExperimentInterpolation(object):
             # set some extra variables for ghost_version
             if var_to_set == 'ghost_version':
                 # import GHOST standards
-                sys.path.insert(1, '/gpfs/projects/bsc32/AC_cache/obs/ghost/GHOST_standards/{}'.format(config_dict['ghost_version']))
+                sys.path.insert(1, data_paths[self.machine]["ghost_root"] + '/GHOST_standards/{}'.format(
+                    getattr(config_args, 'GHOST_version')))
                 from GHOST_standards import standard_parameters
                 self.standard_parameters = standard_parameters
                 
@@ -690,29 +695,44 @@ class ExperimentInterpolation(object):
         end_month_dt = start_month_dt + relativedelta.relativedelta(months=1)
         if self.temporal_resolution_to_output in ['hourly', 'hourly_instantaneous']:
             self.yearmonth_time = np.arange(0,days_in_month*24.0)
-            self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='H', closed='left')
+            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='H', inclusive='left')
+            else:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='H', closed='left')
             self.descriptive_temporal_resolution = 'hours'
             self.temporal_resolution_to_output_code = 'H'
         elif self.temporal_resolution_to_output in ['3hourly', '3hourly_instantaneous']:
             self.yearmonth_time = np.arange(0,days_in_month*24.0,3.0)
-            self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3H', closed='left')
+            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3H', inclusive='left')
+            else:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3H', closed='left')
             self.descriptive_temporal_resolution = 'hours'
             self.temporal_resolution_to_output_code = '3H'
         elif self.temporal_resolution_to_output in ['6hourly', '6hourly_instantaneous']:
             self.yearmonth_time = np.arange(0,days_in_month*24.0,6.0)
-            self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6H', closed='left')
+            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6H', inclusive='left')
+            else:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6H', closed='left')
             self.descriptive_temporal_resolution = 'hours'
             self.temporal_resolution_to_output_code = '6H'
         elif self.temporal_resolution_to_output == 'daily':
             self.yearmonth_time = np.arange(0,days_in_month)
-            self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='D', closed='left')
+            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='D', inclusive='left')
+            else:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='D', closed='left')
             self.descriptive_temporal_resolution = 'days'
             self.temporal_resolution_to_output_code = 'D'
         # monthly output resolution is initially in hours for processing reasons, this is modified later 
         elif self.temporal_resolution_to_output == 'monthly':
             # self.yearmonth_time = np.arange(0,days_in_month*24.0)
             self.yearmonth_time = np.arange(0,1)
-            self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='MS', closed='left')
+            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='MS', inclusive='left')
+            else:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='MS', closed='left')
             self.descriptive_temporal_resolution = 'months'
             self.temporal_resolution_to_output_code = 'MS'
 
@@ -767,9 +787,16 @@ class ExperimentInterpolation(object):
                     file_time_dt = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
                 else:
                     file_time_dt = num2date(file_time, units=time_units, calendar=time_calendar)
-                    # remove microseconds
-                    file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
-                
+
+                    # convert to pandas datetime
+                    if float(".".join(cftime. __version__.split(".")[:2])) == 1.0:
+                        # remove microseconds
+                        file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
+                    else:
+                        # bug fix for newer versions of cftime
+                        file_time_dt = file_time_dt.astype('datetime64[ns]')
+                        file_time_dt = pd.to_datetime([t for t in file_time_dt])
+
                 # get indices of file time inside yearmonth
                 valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
                 
