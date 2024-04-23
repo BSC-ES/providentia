@@ -311,9 +311,23 @@ class MPLCanvas(FigureCanvas):
         """ Function which handles updates of resampling. """
         
         if not self.read_instance.block_MPL_canvas_updates:
-
+            
             # update resampling resolution
             self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
+
+            # remove timeseries chunk resolution if resampling resolution is lower or equal to chunk resolution
+            chunk_resolution = self.timeseries_chunk_resolution.currentText()
+            chunk_stat = self.timeseries_chunk_stat.currentText()
+            if (chunk_stat != 'None') and (chunk_resolution != 'None'):
+                non_available_chunk_resolutions = get_lower_resolutions(self.read_instance.resampling_resolution)
+                if ((chunk_resolution in non_available_chunk_resolutions) 
+                    or (chunk_resolution == self.read_instance.resampling_resolution)):
+                    msg = 'Timeseries chunk resolution and statistic will be removed '
+                    msg += f'because resampling resolution ({self.read_instance.resampling_resolution}) '
+                    msg += f'is higher or equal than chunk resolution ({chunk_resolution}).'
+                    show_message(self.read_instance, msg)
+                    self.timeseries_chunk_stat.setCurrentText("None")
+                    self.timeseries_chunk_resolution.setCurrentText("None")
 
             # if have selected stations on map, then now remake plots
             if hasattr(self, 'relative_selected_station_inds'):
@@ -927,7 +941,10 @@ class MPLCanvas(FigureCanvas):
             if hasattr(self.read_instance, 'map_z'):
                 if self.read_instance.map_z in self.read_instance.basic_z_stats:
                     selected_z_stat = self.read_instance.map_z
-            if selected_z1_array == '':
+
+            # if z1 is initialised or labels have changed (by setting data label through a conf 
+            # for instance, we will reset z1)
+            if (selected_z1_array == '') or (selected_z1_array not in self.read_instance.data_labels):
                 selected_z1_array = copy.deepcopy(self.read_instance.observations_data_label)
 
             # update z statistic field to all basic stats if colocation not-active OR z2

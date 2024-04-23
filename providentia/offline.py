@@ -160,10 +160,11 @@ class ProvidentiaOffline:
             # read data
             self.datareader.read_setup(['reset'])
             
-            # initialise previous QA, flags and filter species as section values
+            # initialise previous QA, flags, filter species and calibration factor as section values
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
+            self.previous_calibration_factor = copy.deepcopy(self.calibration_factor)
 
             # if no valid data has been found be to be read, then skip to next section
             if self.invalid_read:
@@ -265,10 +266,13 @@ class ProvidentiaOffline:
             # get subsection names
             self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
                                            if self.section == subsection_name.split('·')[0]]
-            if len(self.child_subsection_names) > 0:
-                self.subsections = self.child_subsection_names
+            if "section" in self.commandline_arguments.keys():
+                self.subsections = [self.commandline_arguments["section"]]
             else:
-                self.subsections = [self.section]
+                if len(self.child_subsection_names) > 0:
+                    self.subsections = self.child_subsection_names
+                else:
+                    self.subsections = [self.section]
 
             # make header
             self.plot.set_plot_characteristics(['header'])
@@ -742,9 +746,11 @@ class ProvidentiaOffline:
             if len(self.experiments) == 0:
                 self.temporal_colocation = False    
 
-            # determine if need to re-read data (qa, flags or filter_species have changed)
-            if (np.array_equal(self.qa, self.previous_qa) == False) or (np.array_equal(self.flags, self.previous_flags) == False) or\
-            (str(dict(sorted(self.filter_species.items()))) != str(dict(sorted(self.previous_filter_species.items())))):
+            # determine if need to re-read data (qa, flags, filter_species or calibration factor have changed)
+            if (np.array_equal(self.qa, self.previous_qa) == False) or (
+                np.array_equal(self.flags, self.previous_flags) == False) or (
+                str(dict(sorted(self.filter_species.items()))) != str(dict(sorted(self.previous_filter_species.items())))) or (
+                str(dict(sorted(self.calibration_factor.items()))) != str(dict(sorted(self.previous_calibration_factor.items())))):
                 # re-read data
                 self.datareader.read_setup(['reset'])
 
@@ -759,10 +765,11 @@ class ProvidentiaOffline:
             update_metadata_fields(self)
             metadata_conf(self)
 
-            # set previous QA, flags and filter species as subsection
+            # set previous QA, flags, filter species and calibration factor as subsection
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
             self.previous_filter_species = copy.deepcopy(self.filter_species)
+            self.previous_calibration_factor = copy.deepcopy(self.calibration_factor)
 
             # filter dataset for current subsection
             print('\nFiltering data for {} subsection'.format(self.subsection))
