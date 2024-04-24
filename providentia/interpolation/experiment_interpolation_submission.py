@@ -97,7 +97,6 @@ class SubmitInterpolation(object):
 
         # get main section args
         self.config_dict = self.sub_opts[self.parent_section_names[0]]
-        self.config_args = self.config_dict.keys()
 
         # dictionary that stores utilized interpolation variables
         self.interpolation_variables = {}
@@ -106,10 +105,13 @@ class SubmitInterpolation(object):
         self.set_configuration_defaults(vars_to_set=['ghost_version'])
         self.set_configuration_defaults(vars_not_to_set=['ghost_version'])
 
-        # print variables used        
-        print("\nVariables used for the interpolation:")
+        # print variables used, if all species are used print "All Species"        
+        print("\nVariables used for the interpolation:\n")
         for arg,value in self.interpolation_variables.items():
-            print(f"{arg}: {value}")
+            if arg == "species" and hasattr(self,"all_species"):
+                print(f"{arg}: All Species")
+            else:
+                print(f"{arg}: {value}")
 
         # define the QOS (Quality of Service) used to manage jobs on the SLURM system
         if self.machine == 'mn5':
@@ -149,15 +151,20 @@ class SubmitInterpolation(object):
             # get format information for variable
             var_config_format = list(config_format[var_to_set].keys())
 
+            # if already passed as an argument, add it to the dictionary and check if correct          
+            if hasattr(self,var_to_set) and getattr(self,var_to_set):
+                self.config_dict[var_to_set] = getattr(self,var_to_set)
+
             # if variable not in configuration file, then set default value for field if available
             # otherwise throw error
-            if not var_to_set in self.config_args: 
+            if not var_to_set in self.config_dict: 
                 if 'default' not in var_config_format:
                     sys.exit('CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set))
                 else:
-                    if var_to_set == 'species_to_process':
+                    if var_to_set == 'species':
                         self.config_dict[var_to_set] =  [self.standard_parameters[param]['bsc_parameter_name'] 
                                                           for param in self.standard_parameters.keys()] 
+                        self.all_species = True
                     else:
                         self.config_dict[var_to_set] = config_format[var_to_set]['default']
                         
@@ -166,9 +173,10 @@ class SubmitInterpolation(object):
                 # set default for config argument (if required)
                 if 'default' in var_config_format:
                     if self.config_dict[var_to_set] == 'default':
-                        if var_to_set == 'species_to_process':
+                        if var_to_set == 'species':
                             self.config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
                                                               for param in self.standard_parameters.keys()]
+                            self.all_species = True
                         else:
                             self.config_dict[var_to_set] =  config_format[var_to_set]['default']
                     # transform ensemble_options to string when ensemble id is passed
@@ -204,7 +212,7 @@ class SubmitInterpolation(object):
                 self.standard_parameters = standard_parameters
 
             # fill in bin wildcard parameters
-            if var_to_set == 'species_to_process':
+            if var_to_set == 'species':
                 if self.config_dict[var_to_set] != 'default':
                     for arg_var in self.config_dict[var_to_set]:
                         if arg_var in list(bin_vars.keys()):
