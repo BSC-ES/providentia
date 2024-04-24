@@ -305,8 +305,8 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
     fi
 
 # Nord3v2
-elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
-    echo "INFO: Running on Nord3v2..."
+elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
+    echo "INFO: Running on ${BSC_MACHINE}..."
     if $interactive; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
         echo "Starting interactive jupyter session."
@@ -327,6 +327,15 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
         else
             eval "${salloc_command} ${constraint_option} ${queue_option}"
         fi
+    
+    elif $interpolation; then
+        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+        eval "${load_command}"
+        outputString=$(eval "srun ${python_command}")
+        jobid=$(eval "sbatch interpolation.sh $outputString | awk '{print \$4}'")
+        echo "Check submission info in providentia/interpolation/management_logs/$jobid.out"
+
+        echo 
 
     else
         if $debugexec; then

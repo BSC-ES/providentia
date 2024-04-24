@@ -193,7 +193,7 @@ class ExperimentInterpolation(object):
                     log_file_str += 'CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set)
                     create_output_logfile(1)
                 else:
-                    if var_to_set == 'species_to_process':
+                    if var_to_set == 'species':
                         config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
                                                           for param in self.standard_parameters.keys()] 
                     else:
@@ -204,7 +204,7 @@ class ExperimentInterpolation(object):
                 # set default for config argument (if required)
                 if 'default' in var_config_format:
                     if config_dict[var_to_set] == 'default':
-                        if var_to_set == 'species_to_process':
+                        if var_to_set == 'species':
                             config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
                                                               for param in self.standard_parameters.keys()]
                         else:
@@ -254,7 +254,7 @@ class ExperimentInterpolation(object):
                 self.GHOST_speci_upper_limit = self.standard_parameter_speci['extreme_upper_limit']
 
             # fill in bin wildcard parameters
-            if var_to_set == 'species_to_process':
+            if var_to_set == 'species':
                 if config_dict[var_to_set] != 'default':
                     for arg_var in config_dict[var_to_set]:
                         if arg_var in list(bin_vars.keys()):

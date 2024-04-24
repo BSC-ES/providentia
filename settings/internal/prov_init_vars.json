@@ -39,7 +39,7 @@
     "spatial_colocation": true,
     "map_extent": null, 
     "filter_species": {},
-    "calibration_factor": null,
+    "calibration_factor": {},
     "lower_bound": null,
     "upper_bound": null,
     "report_type": "standard",
