@@ -21,8 +21,8 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 # load the data_paths for the different machines and the default values jsons
 data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.json')))
-default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'prov_defaults.json')))
-multispecies_map = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'multispecies_shortcurts.json')))
+default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.json')))
+multispecies_map = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.json')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -51,7 +51,7 @@ class ProvConfiguration:
         
         self.read_instance = read_instance 
 
-        self.var_defaults = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'prov_init_vars.json')))
+        self.var_defaults = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_init_vars.json')))
         self.var_defaults['config_dir'] = os.path.join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
 
         # if variable is given by command line, set that value, otherwise set as default value 

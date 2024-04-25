@@ -131,11 +131,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # get operating system specific formatting
         if self.operating_system == 'Mac':
-            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_mac.json')))
+            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.json')))
         elif self.operating_system == 'Linux':
-            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_linux.json')))
+            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.json')))
         elif self.operating_system == 'Windows':
-            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_windows.json')))
+            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.json')))
 
         # load characteristics per plot type
         # check for self defined plot characteristics file
@@ -162,15 +162,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # load file trees
         else:
             try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
+                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree.json'))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/internal/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
-                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json')))
+                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
                 except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                    msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                     sys.exit(msg)
         # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:
