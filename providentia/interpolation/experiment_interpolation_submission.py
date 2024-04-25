@@ -95,8 +95,17 @@ class SubmitInterpolation(object):
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
 
-        # get main section args
-        self.config_dict = self.sub_opts[self.parent_section_names[0]]
+        # get section args
+        if "section" in kwargs:
+            section = kwargs["section"]
+            if section in self.parent_section_names:
+                self.config_dict = self.sub_opts[section]
+            else:
+                error = f"Error: Defined section '{section}' does not exist in configuration file."
+                sys.exit(error)
+        else:
+            self.config_dict = self.sub_opts[self.parent_section_names[0]]
+            print(f"Taking first defined section ({self.parent_section_names[0]}) to be read.")
 
         # dictionary that stores utilized interpolation variables
         self.interpolation_variables = {}
@@ -108,10 +117,7 @@ class SubmitInterpolation(object):
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
         for arg,value in self.interpolation_variables.items():
-            if arg == "species" and hasattr(self,"all_species"):
-                print(f"{arg}: All Species")
-            else:
-                print(f"{arg}: {value}")
+            print(f"{arg}: {value}")
 
         # define the QOS (Quality of Service) used to manage jobs on the SLURM system
         if self.machine == 'mn5':
