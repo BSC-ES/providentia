@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=PRVI                                         
 #SBATCH --ntasks=1                                                
-#SBATCH --output=submission_logs/%J.out
+#SBATCH --output=providentia/interpolation/submission_logs/%J.out
 #SBATCH --error=/dev/null
 #SBATCH --account=bsc32
 #SBATCH --qos=gp_bsces
@@ -35,4 +35,4 @@ fi
 echo "Loading greasy..."
 module load greasy/2.2.4.1
 
-srun --output=management_logs/$SLURM_JOB_ID.out python -u experiment_interpolation_submission.py $SLURM_JOB_ID
+srun --output=providentia/interpolation/management_logs/$SLURM_JOB_ID.out python -u providentia/interpolation/experiment_interpolation_submission.py $SLURM_JOB_ID $*
