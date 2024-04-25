@@ -59,7 +59,7 @@ class SubmitInterpolation(object):
 
         # define current working directory and
         # arguments/submit/interpolation log subdirectories
-        self.working_directory = os.getcwd()
+        self.working_directory = os.path.join(os.getcwd(),"providentia", "interpolation")     
         if self.machine == "nord3":
             self.working_directory = self.working_directory[17:]
         self.arguments_dir = '{}/arguments'.format(self.working_directory)
