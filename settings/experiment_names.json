@@ -16,5 +16,6 @@
                 "cams61_mocage_ph1", "cams61_silam_ph1", "cams61_camsra_ph2", "cams61_chimere_ph2", "cams61_dehm_ph2", 
                 "cams61_emep_ph2", "cams61_eurad_ph2", "cams61_lotoseuros_ph2", "cams61_match_ph2", "cams61_minni_ph2", 
                 "cams61_monarch_ph2", "cams61_silam_ph2", "cams61_chimere_ph3", "cams61_dehm_ph3", "cams61_emep_ph3", 
-                "cams61_eurad_ph3", "cams61_lotoseuros_ph3", "cams61_match_ph3", "cams61_minni_ph3", "cams61_monarch_ph3"]
+                "cams61_eurad_ph3", "cams61_lotoseuros_ph3", "cams61_match_ph3", "cams61_minni_ph3"],
+    "cams61_gpfs": ["cams61_monarch_ph3"]
 }
