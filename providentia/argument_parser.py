@@ -34,6 +34,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument('--interpolation','--interp', 
                                      action='store_true',
                                      help='runs Providentia Interpolation') 
+            self.parser.add_argument('--clean',
+                                     action='store_true',
+                                     help='cleans all output files')                    
             self.parser.add_argument('--conf', '--config', 
                                      dest="config",
                                      help='specifies the config file to read') 
