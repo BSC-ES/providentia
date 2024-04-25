@@ -100,8 +100,6 @@ class ExperimentInterpolation(object):
             exp_dir = exp_dict['gpfs']
         else:
             exp_dir = exp_dict['esarchive']
-        if ('gpfs' in exp_dir) and (MACHINE == 'mn5'):
-            exp_dir = exp_dir.replace('/gpfs/', '/gpfs/tapes/MN4/')
 
         # add file to directory path
         exp_dir += f"{self.experiment_to_process}/" 

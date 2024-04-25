@@ -265,8 +265,6 @@ class SubmitInterpolation(object):
                 exp_dir = exp_dict['gpfs']
             else:
                 exp_dir = exp_dict['esarchive']
-            if ('gpfs' in exp_dir) and (self.machine == 'mn5'):
-                exp_dir = exp_dir.replace('/gpfs/', '/gpfs/tapes/MN4/')
 
             # add file to directory path
             exp_dir += f"{experiment_to_process}/" 
@@ -769,12 +767,12 @@ class SubmitInterpolation(object):
         submit_file.write("#SBATCH --qos={}\n".format(self.qos))
         submit_file.write("##SBATCH --output=/dev/null\n")
         submit_file.write("##SBATCH --error=/dev/null\n")
-        submit_file.write("\n")
         if self.machine == 'mn5':
             submit_file.write("#SBATCH --account=bsc32\n")  
-            submit_file.write("#SBATCH --ntasks-per-node=1\n")
-            submit_file.write("#SBATCH --cpus-per-task={}\n".format(n_simultaneous_tasks+1))
+            submit_file.write("#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks+1))
+            submit_file.write("\n")
         else:
+            submit_file.write("\n")
             submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
         submit_file.write("export GREASY_NWORKERS=$SLURM_NPROCS\n") 
         submit_file.write("export GREASY_LOGFILE={}/{}_$SLURM_ARRAY_TASK_ID.log\n".format(self.submit_dir, 
