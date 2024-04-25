@@ -18,11 +18,11 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 # get operating system specific formatting
 operating_system = platform.system()
 if operating_system == 'Darwin':
-    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_mac.json')))
+    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.json')))
 elif operating_system == 'Linux':
-    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_linux.json')))
+    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.json')))
 elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
-    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_windows.json')))
+    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.json')))
 
 
 class PopUpWindow(QtWidgets.QWidget):
