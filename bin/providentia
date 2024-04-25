@@ -108,6 +108,7 @@ constraint_option="--constraint=$constraint"
 load_command="source load_modules.sh"
 python_command="python3 -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 interactive_alloc_command="sbatch -t $time -c $cores -J $jobname"
+script_dir=$(dirname $(realpath $(dirname $0)))
 
 # avoid x11 forwarding when creating offline reports or doing interpolations
 if [[ $PARSED =~ "--offline" || $PARSED =~ "--interp" || $PARSED =~ "--interpolation" ]]; then
@@ -238,6 +239,13 @@ elif [ "${BSC_MACHINE}" == "mn5" ]; then
             else
                 eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option}"
             fi
+        
+        elif $interpolation; then
+            echo "The absolute path to the script is: $script_dir/providentia/interpolation"
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+            outputString=$(eval "srun ${account_option} ${queue_option} ${python_command}")
+            jobid=$(eval "sbatch ${account_option} ${queue_option} ${script_dir}/providentia/interpolation/experiment_interpolation_submit_mn5.sh $outputString | awk '{print \$4}'")
+            echo "Check submission info in providentia/interpolation/management_logs/$jobid.out"
 
         else
             if $debugexec; then
@@ -285,10 +293,8 @@ elif [ "${BSC_MACHINE}" == "mn4" ]; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         eval "${load_command}"
         outputString=$(eval "srun ${python_command}")
-        jobid=$(eval "sbatch interpolation.sh $outputString | awk '{print \$4}'")
+        jobid=$(eval "sbatch ${script_dir}/providentia/interpolation/experiment_interpolation_submit.sh $outputString | awk '{print \$4}'")
         echo "Check submission info in providentia/interpolation/management_logs/$jobid.out"
-
-        echo 
 
     else
         if $debugexec; then
@@ -332,10 +338,8 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         eval "${load_command}"
         outputString=$(eval "srun ${python_command}")
-        jobid=$(eval "sbatch interpolation.sh $outputString | awk '{print \$4}'")
+        jobid=$(eval "sbatch ${script_dir}/providentia/interpolation/experiment_interpolation_submit.sh $outputString | awk '{print \$4}'")
         echo "Check submission info in providentia/interpolation/management_logs/$jobid.out"
-
-        echo 
 
     else
         if $debugexec; then
