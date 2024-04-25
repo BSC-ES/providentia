@@ -7,5 +7,7 @@
     "wrf-hermes-cmaq": {"esarchive":"/esarchive/exp/wrf-hermes-cmaq/"}, 
     "auto-wrf-hermes-cmaq": {"esarchive":"/esarchive/exp/auto-wrf-hermes-cmaq/"}, 
     "cams50": {"esarchive":"/esarchive/recon/ecmwf/"}, 
-    "cams61": {"esarchive":"/esarchive/recon/ecmwf/cams61/"}
+    "cams61": {"esarchive":"/esarchive/recon/ecmwf/cams61/"},
+    "cams61_gpfs": {"gpfs": "/gpfs/scratch/bsc32/bsc032781/data/cams61_monarch_ph3/",
+    "esarchive": "/esarchive/recon/ecmwf/cams61/cams61_monarch_ph3/"}
 }
