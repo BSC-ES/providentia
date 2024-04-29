@@ -45,7 +45,7 @@ mplstyle.use('fast')
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-settings_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.json')))
+settings_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.yaml')))
 
 
 class MPLCanvas(FigureCanvas):
