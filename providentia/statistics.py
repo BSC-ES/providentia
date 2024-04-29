@@ -6,6 +6,7 @@ import datetime
 import json
 import os
 import sys
+import yaml
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -19,8 +20,8 @@ from .read_aux import (drop_nans, get_nonrelevant_temporal_resolutions, get_rele
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
-expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
+basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
 
 def get_selected_station_data(read_instance, canvas_instance, networkspecies, 
@@ -1117,7 +1118,7 @@ def exceedance_lim(networkspeci):
     # get speci
     speci = networkspeci.split('|')[1]
 
-    exceedance_limits = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/exceedances.json')))
+    exceedance_limits = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/exceedances.yaml')))
     if networkspeci in exceedance_limits:
         return exceedance_limits[networkspeci]
     elif speci in exceedance_limits:
