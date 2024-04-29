@@ -3,6 +3,7 @@
 import json
 import os
 import platform
+import yaml
 
 from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets 
@@ -12,15 +13,15 @@ from .dashboard_elements import set_formatting
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-settings_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.json')))
+settings_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.yaml')))
 # get operating system specific formatting
 operating_system = platform.system()
 if operating_system == 'Darwin':
-    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_mac.json')))
+    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_mac.yaml')))
 elif operating_system == 'Linux':
-    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_linux.json')))
+    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_linux.yaml')))
 elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
-    formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_windows.json')))
+    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_windows.yaml')))
 
 class SettingsMenu(object):
 

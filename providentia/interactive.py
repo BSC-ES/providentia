@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 import sys
+import yaml
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -57,9 +58,9 @@ class Interactive:
         # set mode as interactive
         self.kwargs['interactive'] = True
 
-        # load statistical jsons
-        self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
-        self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
+        # load statistical yamls
+        self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+        self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
         # set configuration variables, as well as any other defined variables
         valid_config = self.set_config(**self.kwargs)
@@ -76,15 +77,15 @@ class Interactive:
         # load file trees
         else:
             try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
+                self.all_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.yaml'))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/ghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
-                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json')))
+                    nonghost_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.yaml')))
                 except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                    msg = "Error: Trying to load 'settings/nonghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
                     sys.exit(msg)
         
         # merge GHOST and non-GHOST filetrees
@@ -96,8 +97,8 @@ class Interactive:
 
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_interactive.json')
-        self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
+            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_interactive.yaml')
+        self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
 
         # initialise Plot class
         self.plot = Plot(read_instance=self, canvas_instance=self)
@@ -781,7 +782,7 @@ class Interactive:
                         try:
                             ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
                         except:
-                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.json, or passed via 'format' argument.\n\Taking first available axis.")
+                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via 'format' argument.\n\Taking first available axis.")
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         if ax_to_plot not in self.relevant_temporal_resolutions:
                             print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")
@@ -855,7 +856,7 @@ class Interactive:
         elif 'legend' in self.plot_characteristics[plot_type]:
             legend_characteristics = self.plot_characteristics[plot_type]['legend']
         else:
-            print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.json")
+            print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.yaml")
             return
 
         legend_handles = self.plot.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)
