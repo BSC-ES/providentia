@@ -420,33 +420,35 @@ class DataReader:
                         yearmonths_to_read = np.asarray(yearmonths_to_read)
                     yearmonths_to_read = list(yearmonths_to_read[~yearmonths_previously_read])
 
-                    # need to read new yearmonths?
-                    if len(yearmonths_to_read) > 0:
+                    # keep current month to update data array if number of months has not changed but number of days has
+                    if len(yearmonths_to_read) == 0:
+                        yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
+                                                                    self.read_instance.previous_start_date, self.read_instance.resolution)
 
-                        # add space for new data on left edge of the metadata array
-                        self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
-                            np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
-                                np.NaN, dtype=self.read_instance.metadata_dtype), self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]]), axis=1)
+                    # add space for new data on left edge of the metadata array
+                    self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
+                        np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
+                            np.NaN, dtype=self.read_instance.metadata_dtype), self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]]), axis=1)
 
-                        # insert space for new data on left edge of the data array
-                        self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
-                            np.concatenate((np.full((len(self.read_instance.previous_data_labels), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
-                                np.NaN, dtype=np.float32), self.read_instance.data_in_memory[self.read_instance.networkspecies[0]]), axis=2)
+                    # insert space for new data on left edge of the data array
+                    self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
+                        np.concatenate((np.full((len(self.read_instance.previous_data_labels), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
+                            np.NaN, dtype=np.float32), self.read_instance.data_in_memory[self.read_instance.networkspecies[0]]), axis=2)
 
-                        # add space for new data on left edge of the filter data array
-                        if self.read_instance.filter_species:  
-                            self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]] = \
-                                np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
-                                    np.NaN, dtype=np.float32), self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]]), axis=1)
+                    # add space for new data on left edge of the filter data array
+                    if self.read_instance.filter_species:  
+                        self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
+                                np.NaN, dtype=np.float32), self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]]), axis=1)
 
-                        # insert space for new ghost data on left edge of the ghost data array
-                        if self.read_instance.reading_ghost:
-                            self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
-                                np.concatenate((np.full((len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
-                                    np.NaN, dtype=np.float32), self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]]), axis=2)
-                        
-                        # add yearmonths_to_read to list for both edges
-                        all_yearmonths_to_read.extend(yearmonths_to_read)
+                    # insert space for new ghost data on left edge of the ghost data array
+                    if self.read_instance.reading_ghost:
+                        self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((np.full((len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_left_data_inds), 
+                                np.NaN, dtype=np.float32), self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]]), axis=2)
+                    
+                    # add yearmonths_to_read to list for both edges
+                    all_yearmonths_to_read.extend(yearmonths_to_read)
 
                 # need to read on right
                 if 'read_right' in operations:
@@ -470,37 +472,39 @@ class DataReader:
                         yearmonths_to_read = np.asarray(yearmonths_to_read)
                     yearmonths_to_read = list(yearmonths_to_read[~yearmonths_previously_read])
 
-                    # need to read new yearmonths?
-                    if len(yearmonths_to_read) > 0:
+                    # keep current month to update data array if number of months has not changed but number of days has
+                    if len(yearmonths_to_read) == 0:
+                        yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.previous_end_date,
+                                                                    self.read_instance.end_date, self.read_instance.resolution)
 
-                        # add space for new data on right edge of the metadata array
-                        self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
-                            np.concatenate((self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]], 
-                                np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
-                                    np.NaN, dtype=self.read_instance.metadata_dtype)), axis=1)
+                    # add space for new data on right edge of the metadata array
+                    self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
+                        np.concatenate((self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]], 
+                            np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
+                                np.NaN, dtype=self.read_instance.metadata_dtype)), axis=1)
 
-                        # insert space for new data on right edge of the data array
-                        self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
-                            np.concatenate((self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], 
-                                np.full((len(self.read_instance.previous_data_labels), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_right_data_inds), 
-                                    np.NaN, dtype=np.float32)), axis=2)
+                    # insert space for new data on right edge of the data array
+                    self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
+                        np.concatenate((self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], 
+                            np.full((len(self.read_instance.previous_data_labels), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_right_data_inds), 
+                                np.NaN, dtype=np.float32)), axis=2)
 
-                        # insert space for new data on right edge of the filter data array
-                        if self.read_instance.filter_species: 
-                            self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]] = \
-                                np.concatenate((self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]], 
-                                    np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_right_data_inds), 
-                                        np.NaN, dtype=np.float32)), axis=1)
+                    # insert space for new data on right edge of the filter data array
+                    if self.read_instance.filter_species: 
+                        self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((self.read_instance.filter_data_in_memory[self.read_instance.networkspecies[0]], 
+                                np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_right_data_inds), 
+                                    np.NaN, dtype=np.float32)), axis=1)
 
-                        # insert space for new ghost data on right edge of the ghost data array
-                        if self.read_instance.reading_ghost:
-                            self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
-                                np.concatenate((self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]], 
-                                    np.full((len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_right_data_inds), 
-                                        np.NaN, dtype=np.float32)), axis=2)    
+                    # insert space for new ghost data on right edge of the ghost data array
+                    if self.read_instance.reading_ghost:
+                        self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]], 
+                                np.full((len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_right_data_inds), 
+                                    np.NaN, dtype=np.float32)), axis=2)    
 
-                        # add yearmonths_to_read to list for both edges
-                        all_yearmonths_to_read.extend(yearmonths_to_read)
+                    # add yearmonths_to_read to list for both edges
+                    all_yearmonths_to_read.extend(yearmonths_to_read)
 
                 # read data 
                 self.read_data(all_yearmonths_to_read, self.read_instance.data_labels) 

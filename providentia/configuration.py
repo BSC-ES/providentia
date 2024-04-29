@@ -91,7 +91,7 @@ class ProvConfiguration:
             'spatial_colocation': True,
             'map_extent': None, 
             'filter_species': {},
-            'calibration_factor': None,
+            'calibration_factor': {},
             'lower_bound': None,
             'upper_bound': None,
             'report_type': 'standard',
@@ -504,14 +504,14 @@ class ProvConfiguration:
                 value_strip = "".join(value.split())
 
                 calibration_by_experiment = False
-                for experiment in self.read_instance.experiments.values():
+                for experiment in self.read_instance.experiments.keys():
                     if experiment in value_strip:
                         calibration_by_experiment = True
                         break
                 
                 if calibration_by_experiment:
                     calibration_factor_dict = {}
-                    for i, experiment in enumerate(self.read_instance.experiments.values()):
+                    for i, experiment in enumerate(self.read_instance.experiments.keys()):
                         calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
                         calibration_factor_dict[experiment] = calibration_factor_exp
                     return calibration_factor_dict
