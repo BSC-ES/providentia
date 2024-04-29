@@ -567,13 +567,14 @@ class SubmitInterpolation(object):
                                         for yearmonth in intersect_yearmonths:
 
                                             # append current iterative arguments to arguments list               
-                                            self.arguments.append("{} {} {} {} {} {} {}".format(prov_exp_code, 
+                                            self.arguments.append("{} {} {} {} {} {} {} {}".format(prov_exp_code, 
                                                                                                 model_temporal_resolution, 
                                                                                                 speci_to_process, 
                                                                                                 network_to_interpolate_against, 
                                                                                                 temporal_resolution_to_output, 
                                                                                                 yearmonth, 
-                                                                                                original_speci_to_process))
+                                                                                                original_speci_to_process,
+                                                                                                self.unique_ID))
 
                                             # append root name of .out file that will be output for each processed task
                                             self.output_log_roots.append('{}/{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 

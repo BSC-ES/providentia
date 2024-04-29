@@ -71,7 +71,8 @@ class ExperimentInterpolation(object):
         self.temporal_resolution_to_output        = submit_args['temporal_resolution_to_output']
         self.yearmonth                            = submit_args['yearmonth']
         self.original_speci_to_process            = submit_args['original_speci_to_process']
- 
+        self.unique_id                            = submit_args['job_id']
+        
         # get year/month string
         self.year = self.yearmonth[:4]
         self.month = self.yearmonth[4:]
@@ -84,10 +85,31 @@ class ExperimentInterpolation(object):
 
         # dictionary to save utilized interpolation variables
         self.interpolation_variables = {}
+        
+        # from file in management_logs, get and set the arguments which were not passed as a paremeter
+        submission_file = os.path.join(PROVIDENTIA_ROOT,'providentia','interpolation','management_logs',f'{self.unique_id}.out')
+        with open(submission_file, 'r') as f:
+            submission_file_txt = f.read().split()
 
-        # put configuration variables into self, assigning defaults where neccessary 
-        self.set_configuration_defaults(vars_to_set=['ghost_version'])
-        self.set_configuration_defaults(vars_not_to_set=['ghost_version'])
+        for variable_key in ["ghost_version","reverse_vertical_orientation","n_neighbours"]:
+            variable_val_idx = submission_file_txt.index(variable_key+":")+1
+            variable_val = submission_file_txt[variable_val_idx]
+            setattr(self, variable_key, variable_val)
+
+        # import GHOST standards
+        sys.path.insert(1, data_paths[self.machine]["ghost_root"] + '/GHOST_standards/{}'.format(self.ghost_version))
+        from GHOST_standards import standard_parameters
+        self.standard_parameters = standard_parameters
+        
+        # get cut of standard parameters for original speci to process
+        for standard_parameter in self.standard_parameters.keys():
+            if self.standard_parameters[standard_parameter]['bsc_parameter_name'] == self.original_speci_to_process:
+                self.standard_parameter_speci = self.standard_parameters[standard_parameter]
+                break
+        
+        # get GHOST lower/upper limits for variable
+        self.GHOST_speci_lower_limit = self.standard_parameter_speci['extreme_lower_limit']
+        self.GHOST_speci_upper_limit = self.standard_parameter_speci['extreme_upper_limit']
 
         # get experiment type and specific directory 
         for self.experiment_type in experiment_names:
@@ -145,124 +167,6 @@ class ExperimentInterpolation(object):
                                                         self.model_temporal_resolution,
                                                         self.speci_to_process, self.ensemble_option, 
                                                         self.speci_to_process, self.yearmonth, self.ensemble_option)))
-
-    def set_configuration_defaults(self, vars_to_set=None, vars_not_to_set=None):
-        ''' Fill relevant fields appropriately with defaults, where 'default' is set in configuration file.
-            Set some key variables for job submission.
-            Also check formatting of configuration file variables are correct, if not throw errors.
-
-            :param vars_to_set: list with configuration variables to be set
-            :type binvar: list
-            :param vars_not_to_set: list with configuration variables not to be set
-            :type vars_not_to_set: list
-        '''
-
-        config_file = "/gpfs/scratch/bsc32/bsc32388/Providentia/configurations/pula.conf"
-
-        # import read_conf to read .conf files
-        sys.path.append(os.path.abspath(os.path.join(PROVIDENTIA_ROOT, 'providentia')))
-        from configuration import read_conf
-
-        # get main section args
-        sub_opts, _, parent_sections, _, _ = read_conf(config_file)
-        config_dict = sub_opts[parent_sections[0]]
-        config_args = config_dict.keys()
-
-        # if have defined variables to set, do just that
-        # otherwise set all variables in config file
-        if not vars_to_set:
-            vars_to_set = list(config_format.keys())
-
-        # remove variables that do not want to set
-        if vars_not_to_set:
-            for var_not_to_set in vars_not_to_set:
-                vars_to_set.remove(var_not_to_set)
-            
-        # check each variable to set
-        for var_to_set in vars_to_set:
-
-            # get format information for variable
-            var_config_format = list(config_format[var_to_set].keys())
-
-            # if variable not in configuration file, then set default value for field if available
-            # otherwise throw error
-            if not var_to_set in config_args:
-                if 'default' not in var_config_format:
-                    log_file_str += 'CONFIGURATION FILE DOES NOT CONTAIN REQUIRED ARGUMENT: {}'.format(var_to_set)
-                    create_output_logfile(1)
-                else:
-                    if var_to_set == 'species':
-                        config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
-                                                          for param in self.standard_parameters.keys()] 
-                    else:
-                        config_dict[var_to_set] = config_format[var_to_set]['default']
-                        
-            # otherwise if variable in configuration file, make sure formatting is correct
-            else:
-                # set default for config argument (if required)
-                if 'default' in var_config_format:
-                    if config_dict[var_to_set] == 'default':
-                        if var_to_set == 'species':
-                            config_dict[var_to_set] = [self.standard_parameters[param]['bsc_parameter_name'] 
-                                                              for param in self.standard_parameters.keys()]
-                        else:
-                            config_dict[var_to_set] = config_format[var_to_set]['default']
-                    # transform ensemble_options to string when ensemble id is passed
-                    elif var_to_set == 'ensemble_options' and type(config_dict[var_to_set]) == int:
-                        ensembleid = str(config_dict[var_to_set])
-                        config_dict[var_to_set] = '0' * (3-len(ensembleid)) + ensembleid
-
-                # transform non-default atributes which are still in str format to list
-                if config_format[var_to_set]['type'] == 'list' and locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
-                    if type(config_format[var_to_set]['type']) == str:
-                        config_dict[var_to_set] = config_dict[var_to_set].split("(")[0].replace(" ", "").split(",")
-                    if config_format[var_to_set]['subtype'] == 'int': # it is an int
-                        config_dict[var_to_set] = [int(var) for var in config_dict[var_to_set]]
-
-                # check primary typing is correct
-                if locate(config_format[var_to_set]['type']) != type(config_dict[var_to_set]):
-                    log_file_str += 'CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A {} TYPE'.format(
-                        var_to_set, config_format[var_to_set]['type'])
-                    create_output_logfile(1)
-
-                # check subtyping is correct
-                if 'subtype' in var_config_format:
-                    for var in config_dict[var_to_set]:
-                        if locate(config_format[var_to_set]['subtype']) != type(var):
-                            log_file_str += 'CONFIGURATION FILE ARGUMENT: {} NEEDS TO BE A LIST CONTAINING {} TYPES'.format(
-                                var_to_set, config_format[var_to_set]['subtype'])
-                            create_output_logfile(1)
-
-            # set some extra variables for ghost_version
-            if var_to_set == 'ghost_version':
-                # import GHOST standards
-                sys.path.insert(1, data_paths[self.machine]["ghost_root"] + '/GHOST_standards/{}'.format(
-                    getattr(config_args, 'GHOST_version')))
-                from GHOST_standards import standard_parameters
-                self.standard_parameters = standard_parameters
-                
-                # get cut of standard parameters for original speci to process
-                for standard_parameter in self.standard_parameters.keys():
-                    if self.standard_parameters[standard_parameter]['bsc_parameter_name'] == self.original_speci_to_process:
-                        self.standard_parameter_speci = self.standard_parameters[standard_parameter]
-                        break
-                
-                # get GHOST lower/upper limits for variable
-                self.GHOST_speci_lower_limit = self.standard_parameter_speci['extreme_lower_limit']
-                self.GHOST_speci_upper_limit = self.standard_parameter_speci['extreme_upper_limit']
-
-            # fill in bin wildcard parameters
-            if var_to_set == 'species':
-                if config_dict[var_to_set] != 'default':
-                    for arg_var in config_dict[var_to_set]:
-                        if arg_var in list(bin_vars.keys()):
-                            config_dict[var_to_set] = bin_vars[arg_var]
-
-            # add config argument to self
-            setattr(self, var_to_set, config_dict[var_to_set])
-
-            # add config argument to used interpolation variable list
-            self.interpolation_variables[var_to_set] = config_dict[var_to_set]
 
     def get_model_information(self):
         """ Take first valid model file in month and get grid dimension/coordinate information.
@@ -1204,7 +1108,8 @@ if __name__ == "__main__":
                        'network_to_interpolate_against': sys.argv[4], 
                        'temporal_resolution_to_output': sys.argv[5], 
                        'yearmonth': sys.argv[6], 
-                       'original_speci_to_process': sys.argv[7]
+                       'original_speci_to_process': sys.argv[7],
+                       'job_id': sys.argv[8]
                        }   
 
         # initialise ExperimentInterpolation object
