@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 import sys
+import yaml
 
 import matplotlib
 from matplotlib.backends.backend_pdf import PdfPages
@@ -42,9 +43,9 @@ class ProvidentiaOffline:
     def __init__(self, **kwargs):
         print("Starting Providentia offline...")
 
-        # load statistical jsons
-        self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
-        self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
+        # load statistical yamls
+        self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+        self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -73,7 +74,7 @@ class ProvidentiaOffline:
             sys.exit(error)
 
         # load report plot presets
-        self.report_plots = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/report_plots.json')))
+        self.report_plots = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
         # generate file trees
@@ -84,15 +85,15 @@ class ProvidentiaOffline:
         # load file trees
         else:
             try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
+                self.all_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.yaml'))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/ghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
-                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json')))
+                    nonghost_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.yaml')))
                 except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                    msg = "Error: Trying to load 'settings/nonghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
                     sys.exit(msg)
         # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:
@@ -123,14 +124,14 @@ class ProvidentiaOffline:
 
             # check for self defined plot characteristics file
             if self.plot_characteristics_filename == '':
-                self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_offline.json')
-            self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
+                self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_offline.yaml')
+            self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
             self.plot_characteristics = {}
 
             # error when using wrong custom plot characteristics path to launch dashboard
             if 'header' not in self.plot_characteristics_templates.keys():
                 msg = 'It is not possible to use the dashboard plot characteristics path to generate offline reports. Consider adding another path to plot_characteristics_filename, as in: '
-                msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.json, offline:/path/plot_characteristics_offline.json.'
+                msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.yaml, offline:/path/plot_characteristics_offline.yaml.'
                 sys.exit(msg)
 
             # initialise Plot class
@@ -172,7 +173,7 @@ class ProvidentiaOffline:
             
             # check if report type is valid
             if self.report_type not in self.report_plots.keys():
-                msg = 'Error: The report type {0} cannot be found in settings/report_plots.json. '.format(self.report_type)
+                msg = 'Error: The report type {0} cannot be found in settings/report_plots.yaml. '.format(self.report_type)
                 msg += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
                 sys.exit(msg)
 
