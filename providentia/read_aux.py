@@ -7,6 +7,7 @@ import multiprocessing
 import os
 import sys
 import time
+import yaml
 
 import bisect
 import cftime
@@ -232,10 +233,12 @@ def read_netcdf_data(tuple_arguments):
                         else:
                             meta_var_nc = 'altitude'
                     elif meta_var == 'station_reference':
-                        if "station_reference" not in ncdf_root.variables:
-                            meta_var_nc = 'station_code'
-                        else:
+                        if 'station_reference' in ncdf_root.variables:
                             meta_var_nc = 'station_reference'
+                        elif 'station_code' in ncdf_root.variables:
+                            meta_var_nc = 'station_code'
+                        elif 'station_name' in ncdf_root.variables:
+                            meta_var_nc = 'station_name'
                     else:
                         meta_var_nc = meta_var
         
@@ -247,9 +250,12 @@ def read_netcdf_data(tuple_arguments):
                     meta_val = ncdf_root[meta_var_nc][current_file_station_indices]
                     meta_val_dtype = np.array([meta_val[0]]).dtype
 
-                    # some extra str formatting
-                    if meta_var in ['station_reference', 'station_name', 'station_classification', 
-                                    'area_classification', 'country']:
+                    # do str formatting where neccessary
+                    #if meta_var in ['station_reference', 'station_name', 'station_classification', 
+                    #                'area_classification', 'country']:
+                    if meta_val_dtype not in [np.int8, np.int16, np.int32, np.int64, 
+                                              np.uint8, np.uint16, np.uint32, np.uint64,
+                                              np.float16, np.float32, np.float64]:
 
                         if len(meta_shape) == 2:
                             if meta_val_dtype == np.dtype(object):
@@ -499,9 +505,9 @@ def get_ghost_observational_tree(instance):
                     # write nested dictionary for species, with associated file yearmonths
                     ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
 
-    # save file tree out to json
-    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'), 'w') as json_file:
-        json.dump(ghost_observation_data, json_file, indent=4)
+    # save file tree out to yaml
+    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.yaml'), 'w') as yaml_file:
+        yaml.safe_dump(ghost_observation_data, yaml_file, indent=4, sort_keys=False)
 
     return ghost_observation_data
 
@@ -521,7 +527,7 @@ def get_nonghost_observational_tree(instance):
     nonghost_observation_data = {}
 
     # load which non-GHOST networks to read
-    nonghost_networks = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.json')))
+    nonghost_networks = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.yaml')))
 
     # iterate through networks
     for network in nonghost_networks:
@@ -568,9 +574,9 @@ def get_nonghost_observational_tree(instance):
                     # write nested dictionary for species, with associated file yearmonths
                     nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
         
-    # save file tree out to json
-    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json'), 'w') as json_file:
-        json.dump(nonghost_observation_data, json_file, indent=4)
+    # save file tree out to yaml
+    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.yaml'), 'w') as yaml_file:
+        yaml.safe_dump(nonghost_observation_data, yaml_file, indent=4, sort_keys=False)
 
     return nonghost_observation_data
 

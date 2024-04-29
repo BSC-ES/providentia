@@ -9,6 +9,7 @@ import re
 import socket
 import subprocess
 import sys
+import yaml
 
 import matplotlib
 import numpy as np
@@ -20,7 +21,7 @@ from .warnings import show_message
 MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.json')))
+data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -488,7 +489,7 @@ class ProvConfiguration:
                             return value.split("interactive:")[1].split(',')[0]
                         else:
                             msg = 'It is necessary to include the words dashboard, offline or interactive to set different plot characteristics filenames, as in: '
-                            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.json, offline:/path/plot_characteristics_offline.json.'
+                            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.yaml, offline:/path/plot_characteristics_offline.yaml.'
                             sys.exit(msg)
                     # one path was provided
                     else:

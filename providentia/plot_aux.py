@@ -4,6 +4,7 @@ import sys
 import os
 import math
 import json
+import yaml
 
 import matplotlib as mpl
 from matplotlib.projections import PolarAxes
@@ -152,11 +153,11 @@ def update_plotting_parameters(instance):
     # generate a list of RGB tuples for number of experiments there are
     sns.reset_orig()
     color_palette = instance.plot_characteristics_templates['general']['legend_color_palette']
-    color_palettes = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/color_palettes.json')))
+    color_palettes = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
     if color_palette in color_palettes.keys():
         if (len(instance.data_labels) - 1) > len(color_palettes[color_palette]):
             msg = "Error: The number of experiments and palette colors should be equal. "
-            msg += f"Add more colors to your palette '{color_palette}' in settings/color_palettes.json "
+            msg += f"Add more colors to your palette '{color_palette}' in settings/color_palettes.yaml "
             msg += "or change your legend_color_palette in the plot characteristics files."
             sys.exit()
         else:
