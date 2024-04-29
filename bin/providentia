@@ -366,7 +366,7 @@ else
     if $interactive; then
         echo "Starting interactive jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
-        jupyter-lab
+        jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     else
         eval "${python_command}"
     fi

@@ -1,0 +1,14 @@
+services:
+  providentia:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - 8888:8888
+    volumes:
+      - /data:/data
+      - /home/avilanov/software/Providentia:/tmp/Providentia
+      - /tmp/.X11-unix/:/tmp/.X11-unix
+    stdin_open: true
+    tty: true
+    environment: 
+      - DISPLAY=$DISPLAY
