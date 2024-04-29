@@ -7,6 +7,7 @@ import os
 import pandas as pd
 import sys
 import xarray as xr
+from datetime import datetime, timedelta
 
 from .configuration import write_conf
 from .dashboard_elements import InputDialog
@@ -207,7 +208,19 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var.axis = 'T'
             var.calendar = 'standard'
             var.tz = 'UTC'
-            var[:] = np.arange(len(prv.time_array))
+            if prv.resolution in ['3hourly', '6hourly']:
+                # get indices of time_array in an array with all hours from start date to end date
+                all_hours_array = pd.to_datetime(np.arange(datetime(int(prv.start_date[0:4]), 
+                                                                    int(prv.start_date[4:6]), 
+                                                                    int(prv.start_date[6:8])), 
+                                                           datetime(int(prv.end_date[0:4]), 
+                                                                    int(prv.end_date[4:6]), 
+                                                                    int(prv.end_date[6:8])), 
+                                                           timedelta(hours=1)))
+                time_var = np.where(np.in1d(all_hours_array, prv.time_array))[0]
+            else:
+                time_var = np.arange(len(prv.time_array))
+            var[:] = time_var
             
             # miscellaneous variables 
             var = fout.createVariable('data_labels', str, ('data_label',))

@@ -1,4 +1,4 @@
-from .aux import read_data, make_plot
+from .aux_functions import read_data, make_plot
 from providentia import Interactive
 
 # initialise class (Flattened)
