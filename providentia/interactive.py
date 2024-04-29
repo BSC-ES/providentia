@@ -933,9 +933,11 @@ class Interactive:
                 self.from_conf = True
             else:
                 error = 'Error: The path to the configuration file passed as an argument does not exist.'
+                print(error)
                 return False
         else:
             error = "Error: The configuration file must be given as an argument: e.g. 'config=...'"
+            print(error)
             return False
 
         # parse section
