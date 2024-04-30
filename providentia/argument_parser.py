@@ -31,7 +31,7 @@ class ProvArgumentParser(object):
                                      help="runs Providentia in debug mode, just reserving allocation")
             self.parser.add_argument('--interactive',
                                      help="runs Providentia interactive mode on Jupyter notebook")
-            self.parser.add_argument('--interpolation','--interp', 
+            self.parser.add_argument('--interpolation','--interp','--interpolate', 
                                      action='store_true',
                                      help='runs Providentia Interpolation') 
             self.parser.add_argument('--clean',
