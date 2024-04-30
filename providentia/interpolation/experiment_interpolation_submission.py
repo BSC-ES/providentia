@@ -776,7 +776,8 @@ class SubmitInterpolation(object):
         submit_file.write("##SBATCH --error=/dev/null\n")
         if self.machine == 'mn5':
             submit_file.write("#SBATCH --account=bsc32\n")  
-            submit_file.write("#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks+1))
+            submit_file.write("#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks))
+            submit_file.write("#SBATCH --cpus-per-task=1\n")
             submit_file.write("\n")
         else:
             submit_file.write("\n")
