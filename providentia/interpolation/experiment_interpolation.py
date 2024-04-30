@@ -597,7 +597,9 @@ class ExperimentInterpolation(object):
         end_month_dt = start_month_dt + relativedelta.relativedelta(months=1)
         if self.temporal_resolution_to_output in ['hourly', 'hourly_instantaneous']:
             self.yearmonth_time = np.arange(0,days_in_month*24.0)
-            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+            if float(".".join(pd.__version__.split(".")[:2])) >= 2.2:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='h', inclusive='left')
+            elif float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='H', inclusive='left')
             else:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='H', closed='left')
@@ -605,7 +607,9 @@ class ExperimentInterpolation(object):
             self.temporal_resolution_to_output_code = 'H'
         elif self.temporal_resolution_to_output in ['3hourly', '3hourly_instantaneous']:
             self.yearmonth_time = np.arange(0,days_in_month*24.0,3.0)
-            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+            if float(".".join(pd.__version__.split(".")[:2])) >= 2.2:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3h', inclusive='left')
+            elif float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3H', inclusive='left')
             else:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3H', closed='left')
@@ -613,7 +617,9 @@ class ExperimentInterpolation(object):
             self.temporal_resolution_to_output_code = '3H'
         elif self.temporal_resolution_to_output in ['6hourly', '6hourly_instantaneous']:
             self.yearmonth_time = np.arange(0,days_in_month*24.0,6.0)
-            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+            if float(".".join(pd.__version__.split(".")[:2])) >= 2.2:
+                self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6h', inclusive='left')
+            elif float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6H', inclusive='left')
             else:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6H', closed='left')
