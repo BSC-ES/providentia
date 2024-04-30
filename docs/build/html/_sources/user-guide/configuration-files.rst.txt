@@ -116,7 +116,7 @@ It is mandatory to define sections to launch Providentia. Their names must be wr
      - Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. ``3, 4, 5``).
    * - report_type
      - ✗
-     - Type of report to generate that defines which plots the report will contain, from the options given in report_plots.json.
+     - Type of report to generate that defines which plots the report will contain, from the options given in report_plots.yaml.
    * - report_summary
      - ✗
      - Boolean variable to set if you wish to make specific plots for each station in subsection.
@@ -149,7 +149,7 @@ It is mandatory to define sections to launch Providentia. Their names must be wr
      - Alternative name for observations.
    * - remove_extreme_stations
      - ✗
-     - Type of extreme stations removal, from the options given in ``remove_extreme_stations.json``.
+     - Type of extreme stations removal, from the options given in ``remove_extreme_stations.yaml``.
    * - resampling_resolution
      - ✗
      - Resolution you want to resample your data to. Options: ``hourly``, ``daily``, ``monthly``, ``annual``.
