@@ -6,7 +6,7 @@
     },
     
     "mn5": {
-        "ghost_root": " /gpfs/projects/bsc32/AC_cache/obs/ghost",
+        "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
         "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
     },
