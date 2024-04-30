@@ -274,7 +274,7 @@ All plot types that are available in other modes of Providentia are available in
 where ``plot_type`` is the plot type wished to be made (all types stated later in this section).
 
 All plots have been tailored to appear nice in Jupyter notebooks, but any plot settings can be modified by the user, per plot type, in:      
-``settings/plot_characteristics_interactive.json``.
+``settings/plot_characteristics_interactive.yaml``.
 
 Plot customisation
 ^^^^^^^^^^^^^^^^^^
@@ -325,7 +325,7 @@ The title, xlabel and ylabel will be set automatically (if required) for all plo
 
 **Custom formatting**
 
-To have more granular control of the plot formatting, and overwrite specific variables set in ``settings/plot_characteristics_interactive.json``, the ``format`` argument can be used to pass a dictionary which sets specific plot type format variables to overwrite, e.g.:
+To have more granular control of the plot formatting, and overwrite specific variables set in ``settings/plot_characteristics_interactive.yaml``, the ``format`` argument can be used to pass a dictionary which sets specific plot type format variables to overwrite, e.g.:
 
 ::
 

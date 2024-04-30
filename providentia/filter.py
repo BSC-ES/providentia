@@ -1,9 +1,10 @@
 """ Class that filters observational/experiment data into memory as required """
 
 import copy
-
 import json
 import os
+import yaml
+
 import numpy as np
 import pandas as pd
 
@@ -323,19 +324,11 @@ class DataFilter:
                         # iterate through networkspecies  
                         for networkspeci in self.read_instance.networkspecies:
 
-                            # max gap variable?
-                            if 'max_gap' in var:
-                                max_gap_percent = Stats.max_repeated_nans_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds[0]:period_inds[-1]+1])
-                                inds_to_screen = np.where(max_gap_percent > data_availability_lower_bounds[var_ii])[0]
-                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
-
                             # data representativity variable?
-                            else:
-                                data_availability_percent = Stats.calculate_data_avail_fraction(
-                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds[0]:period_inds[-1]+1])
-                                inds_to_screen = np.where(data_availability_percent < data_availability_lower_bounds[var_ii])[0]
-                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
+                            data_availability_percent = Stats.calculate_data_avail_fraction(
+                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds[0]:period_inds[-1]+1])
+                            inds_to_screen = np.where(data_availability_percent < data_availability_lower_bounds[var_ii])[0]
+                            self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
 
     def filter_by_metadata(self):
         """ Filter data by selected metadata. """
@@ -461,9 +454,9 @@ class DataFilter:
         # option to remove extreme stations set?
         if self.read_instance.remove_extreme_stations:
 
-            # load json of defined stattistics limits
-            remove_extreme_stations_fname = os.path.join(PROVIDENTIA_ROOT, 'settings/remove_extreme_stations.json')
-            stat_defs = json.load(open(remove_extreme_stations_fname))
+            # load yaml of defined stattistics limits
+            remove_extreme_stations_fname = os.path.join(PROVIDENTIA_ROOT, 'settings/remove_extreme_stations.yaml')
+            stat_defs = yaml.safe_load(open(remove_extreme_stations_fname))
 
             # get specific set of limits (if available)
             # throw wraning if not

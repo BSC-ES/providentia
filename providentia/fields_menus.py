@@ -112,7 +112,7 @@ def init_representativity(instance):
     # if not, create it
     if not hasattr(instance, 'representativity_menu'):
         instance.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY', 
-                                          'page_title': 'Select % Data Representativity Bounds', 
+                                          'page_title': 'Select Minimum Required % Data Representativity', 
                                           'rangeboxes':{}}
     
     # reset fields
@@ -254,51 +254,29 @@ def update_representativity_fields(instance):
         if instance.reading_ghost:
 
             instance.representativity_menu['rangeboxes']['map_vars'] = ['hourly_native_representativity_percent',
-                                                                        'hourly_native_max_gap_percent',
                                                                         'daily_native_representativity_percent',
-                                                                        'daily_native_max_gap_percent',
                                                                         'monthly_native_representativity_percent',
-                                                                        'monthly_native_max_gap_percent',
                                                                         'daily_representativity_percent',
-                                                                        'daily_max_gap_percent',
                                                                         'monthly_representativity_percent',
-                                                                        'monthly_max_gap_percent',
-                                                                        'all_representativity_percent', 
-                                                                        'all_max_gap_percent']
-            
-            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Hourly Rep. %',
-            #                                                          'Max Hourly Gap %',
-            #                                                          'Min Daily Rep. %',
-            #                                                          'Max Daily Gap %',
-            #                                                          'Min Monthly Rep. %',
-            #                                                          'Max Monthly Gap %',
-            #                                                          'Min Daily Rep. %',
-            #                                                          'Max Daily Gap %',
-            #                                                          'Min Monthly Rep. %',
-            #                                                          'Max Monthly Gap %',
-            #                                                          'Min All Rep. %',
-            #                                                          'Max All Gap %']
-            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
+                                                                        'all_representativity_percent']
+            instance.representativity_menu['rangeboxes']['labels'] = ['Hourly',
+                                                                      'Daily',
+                                                                      'Monthly',
+                                                                      'Daily',
+                                                                      'Monthly',
+                                                                      'All']
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 6]
+            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 3]
 
         # non-GHOST
         else:
             instance.representativity_menu['rangeboxes']['map_vars'] = ['daily_representativity_percent',
-                                                                        'daily_max_gap_percent',
                                                                         'monthly_representativity_percent',
-                                                                        'monthly_max_gap_percent',
-                                                                        'all_representativity_percent', 
-                                                                        'all_max_gap_percent']
-
-            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Daily Rep. %',
-            #                                                          'Max Daily Gap %',
-            #                                                          'Min Monthly Rep. %',
-            #                                                          'Max Monthly Gap %',
-            #                                                          'Min All Rep. %',
-            #                                                          'Max All Gap %']
-            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
+                                                                        'all_representativity_percent']
+            instance.representativity_menu['rangeboxes']['labels'] = ['Daily',
+                                                                      'Monthly',
+                                                                      'All']
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
             instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0]                                                                   
@@ -310,39 +288,23 @@ def update_representativity_fields(instance):
         # GHOST 
         if instance.reading_ghost:
             instance.representativity_menu['rangeboxes']['map_vars'] = ['daily_native_representativity_percent',
-                                                                        'daily_native_max_gap_percent',
                                                                         'monthly_native_representativity_percent',
-                                                                        'monthly_native_max_gap_percent',
                                                                         'monthly_representativity_percent',
-                                                                        'monthly_max_gap_percent',
-                                                                        'all_representativity_percent', 
-                                                                        'all_max_gap_percent']
-
-            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Daily Rep. %',
-            #                                                          'Max Daily Gap %',
-            #                                                          'Min Monthly Rep. %',
-            #                                                          'Max Monthly Gap %',
-            #                                                          'Min Monthly Rep. %',
-            #                                                          'Max Monthly Gap %',
-            #                                                          'Min All Rep. %',
-            #                                                          'Max All Gap %']
-            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
+                                                                        'all_representativity_percent']
+            instance.representativity_menu['rangeboxes']['labels'] = ['Daily',
+                                                                      'Monthly',
+                                                                      'Monthly',
+                                                                      'All']
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 4]
+            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 2]
 
         # non-GHOST
         else:
             instance.representativity_menu['rangeboxes']['map_vars'] = ['monthly_representativity_percent',
-                                                                        'monthly_max_gap_percent',
-                                                                        'all_representativity_percent', 
-                                                                        'all_max_gap_percent']
-
-            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Monthly Rep. %',
-            #                                                          'Min All Rep. %',
-            #                                                          'Max Monthly Gap %',
-            #                                                          'Max All Gap %'] 
-            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
+                                                                        'all_representativity_percent']
+            instance.representativity_menu['rangeboxes']['labels'] = ['Monthly',
+                                                                      'All']
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
             instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0] 
@@ -352,27 +314,17 @@ def update_representativity_fields(instance):
         # GHOST 
         if instance.reading_ghost:
             instance.representativity_menu['rangeboxes']['map_vars'] = ['monthly_native_representativity_percent',
-                                                                        'monthly_native_max_gap_percent',
-                                                                        'all_representativity_percent', 
-                                                                        'all_max_gap_percent']
-
-            #instance.representativity_menu['rangeboxes']['labels'] = ['Min Monthly Rep. %',
-            #                                                          'Max Monthly Gap %',
-            #                                                          'Min All Rep. %',
-            #                                                          'Max All Gap %'] 
-            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
-
+                                                                        'all_representativity_percent']
+            instance.representativity_menu['rangeboxes']['labels'] = ['Monthly',
+                                                                      'All']
+            
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 2]  
+            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 1]  
 
         # non-GHOST
         else:
-            instance.representativity_menu['rangeboxes']['map_vars'] = ['all_representativity_percent', 
-                                                                        'all_max_gap_percent']
-            
-            #instance.representativity_menu['rangeboxes']['labels'] = ['Min All Rep. %',
-            #                                                          'Max All Gap %'] 
-            instance.representativity_menu['rangeboxes']['labels'] = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
+            instance.representativity_menu['rangeboxes']['map_vars'] = ['all_representativity_percent']
+            instance.representativity_menu['rangeboxes']['labels'] = ['All']
 
             instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
             instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0] 

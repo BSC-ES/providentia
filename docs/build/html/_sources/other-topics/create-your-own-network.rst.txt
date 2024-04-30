@@ -20,7 +20,7 @@ You can learn more about how to create your own datasets with the following tuto
 - Create hourly datasets from Port Barcelona: https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.4.Create_Points_Port_Barcelona.ipynb
 - Create monthly datasets from CSIC: https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create_Points_CSIC.ipynb
 
-Providentia will be able to find these datasets if they are saved in the directory /esarchive/obs/. The data path must be included in providentia/settings/nonghost_files.json. As an example, the path to the data from CSIC (/esarchive/obs/csic/csic/monthly/sconcnh3/) correspond in this dictionary to:
+Providentia will be able to find these datasets if they are saved in the directory /esarchive/obs/. The data path must be included in providentia/settings/internal/nonghost_filetree.yaml. As an example, the path to the data from CSIC (/esarchive/obs/csic/csic/monthly/sconcnh3/) correspond in this dictionary to:
 
 ::
 
