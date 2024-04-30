@@ -50,6 +50,9 @@ fi
 # reset SLURM_EXPORT_ENV so that things like srun & sbatch work out of the box
 export SLURM_EXPORT_ENV=ALL
 
+# workaround to stop driver conflict issue 
+#export QT_QPA_PLATFORM_PLUGIN_PATH=/gpfs/home/bsc/${USER}/.conda/envs/providentia-env/lib/python3.9/site-packages/PyQt5/Qt5/plugins
+
 # get OS
 #Mac OS X platform        
 if [ "$(uname)" == "Darwin" ]; then
@@ -402,7 +405,7 @@ else
     if $interactive; then
         echo "Starting interactive jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
-        jupyter-lab
+        jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     else
         eval "${python_command}"
     fi

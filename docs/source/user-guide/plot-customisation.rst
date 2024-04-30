@@ -6,13 +6,13 @@ Editing the plot style from the configuration files
 
 If you want to edit the style of your plots, you will need to edit it in one of the following files and launch the tool again:
 
-- Plots in the dashboard: ``/providentia/settings/plot_characteristics_dashboard.json``
-- Plots in the offline reports: ``/providentia/settings/plot_characteristics_offline.json``
+- Plots in the dashboard: ``/providentia/settings/plot_characteristics_dashboard.yaml``
+- Plots in the offline reports: ``/providentia/settings/plot_characteristics_offline.yaml``
 
 Setting custom bounds and cmap per species
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per species using a dictionary, with the keys being the names of the species inside ``basic_stats.json`` and ``experiment_bias_stats.json``. An example can be seen in the image below:
+Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per species using a dictionary, with the keys being the names of the species inside ``basic_stats.yaml`` and ``experiment_bias_stats.yaml``. An example can be seen in the image below:
 
 ::
 
@@ -34,7 +34,7 @@ If they define the cmap, they will need to give a complete list of cmap options 
 Remove extreme stations by their statistical values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file ``remove_extreme_stations.json``. An example of this exists for ``CAMS``:
+If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file ``remove_extreme_stations.yaml``. An example of this exists for ``CAMS``:
 
 ::
 
@@ -68,7 +68,7 @@ You will also need to add the variable ``remove_extreme_stations`` in your confi
 Calculating exceedances
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-In Providentia the ``exceedances`` statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the ``exceedances`` statistic simply gives the number of instances above the threshold. The threshold values can be set in the file ``settings/exceedances.json`` per component, or network-component pair, as so:
+In Providentia the ``exceedances`` statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the ``exceedances`` statistic simply gives the number of instances above the threshold. The threshold values can be set in the file ``settings/exceedances.yaml`` per component, or network-component pair, as so:
 
 ::
   

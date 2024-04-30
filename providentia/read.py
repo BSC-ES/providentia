@@ -163,9 +163,8 @@ class DataReader:
                     self.read_instance.ghost_data_vars_to_read = ['hourly_native_representativity_percent',
                                                                   'daily_native_representativity_percent',
                                                                   'monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent', 'hourly_native_max_gap_percent',
-                                                                  'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                                                  'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                                                  'annual_native_representativity_percent', 
+                                                                  'day_night_code', 'weekday_weekend_code',
                                                                   'season_code']
                 elif (self.read_instance.resolution == '3hourly') or \
                         (self.read_instance.resolution == '6hourly') or (self.read_instance.resolution == '3hourly_instantaneous') or \
@@ -173,19 +172,17 @@ class DataReader:
                     self.read_instance.ghost_data_vars_to_read = ['daily_native_representativity_percent',
                                                                   'monthly_native_representativity_percent',
                                                                   'annual_native_representativity_percent',
-                                                                  'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                                                  'annual_native_max_gap_percent', 'day_night_code', 'weekday_weekend_code',
+                                                                  'day_night_code', 'weekday_weekend_code',
                                                                   'season_code']
                 elif self.read_instance.resolution == 'daily':
                     self.read_instance.ghost_data_vars_to_read = ['daily_native_representativity_percent',
                                                                   'monthly_native_representativity_percent',
                                                                   'annual_native_representativity_percent',
-                                                                  'daily_native_max_gap_percent', 'monthly_native_max_gap_percent',
-                                                                  'annual_native_max_gap_percent', 'weekday_weekend_code', 'season_code']
+                                                                  'weekday_weekend_code', 'season_code']
                 elif self.read_instance.resolution == 'monthly':
                     self.read_instance.ghost_data_vars_to_read = ['monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent', 'monthly_native_max_gap_percent',
-                                                                  'annual_native_max_gap_percent', 'season_code']
+                                                                  'annual_native_representativity_percent', 
+                                                                  'season_code']
 
                 self.read_instance.ghost_data_in_memory = {networkspeci:
                                         np.full((len(self.read_instance.ghost_data_vars_to_read),
@@ -199,11 +196,16 @@ class DataReader:
             # metadata 
             # non-GHOST
             if not self.read_instance.reading_ghost:
-                self.read_instance.metadata_dtype = [('station_reference', object), ('latitude', np.float32),
-                                                     ('longitude', np.float32), ('altitude', np.float32),
-                                                     ('station_name', object), ('station_classification', object),
-                                                     ('area_classification', object), ('country', object)]
-                self.read_instance.metadata_vars_to_read = [meta_dtype[0] for meta_dtype in self.read_instance.metadata_dtype]
+                
+                self.read_instance.metadata_dtype = [(nonghost_var, self.read_instance.standard_metadata[nonghost_var]['data_type'])
+                                                      for nonghost_var in self.read_instance.nonghost_metadata_vars_to_read]
+                self.read_instance.metadata_vars_to_read = self.read_instance.nonghost_metadata_vars_to_read
+                #self.read_instance.metadata_dtype = [('station_reference', object), ('latitude', np.float32),
+                #                                     ('longitude', np.float32), ('altitude', np.float32),
+                #                                     ('station_name', object), ('station_classification', object),
+                #                                     ('area_classification', object), ('country', object)]
+                #self.read_instance.metadata_vars_to_read = [meta_dtype[0] for meta_dtype in self.read_instance.metadata_dtype]
+
             # GHOST
             else:
                 self.read_instance.metadata_dtype = self.read_instance.ghost_metadata_dtype
@@ -658,6 +660,7 @@ class DataReader:
 
             # non-GHOST - take from first file (metadata will be same across time)
             else:
+                self.read_instance.nonghost_metadata_vars_to_read = []
             
                 ncdf_root = Dataset(relevant_files[0])
                 if 'station_reference' in ncdf_root.variables:
@@ -669,6 +672,7 @@ class DataReader:
                 else: 
                     error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
                     sys.exit(error)
+                self.read_instance.nonghost_metadata_vars_to_read.append('station_reference') 
 
                 meta_shape = ncdf_root[station_reference_var].shape
                 self.read_instance.station_references[networkspeci] = ncdf_root[station_reference_var][:]
@@ -684,13 +688,15 @@ class DataReader:
                 non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(self.read_instance.station_references[networkspeci]) 
                                                     if ref.lower() != 'nan'])
                 self.read_instance.station_references[networkspeci] = self.read_instance.station_references[networkspeci][non_nan_station_indices]
-
+                
                 if "latitude" in ncdf_root.variables:
                     self.read_instance.station_longitudes[networkspeci] = ncdf_root['longitude'][non_nan_station_indices]
                     self.read_instance.station_latitudes[networkspeci] = ncdf_root['latitude'][non_nan_station_indices]
                 else:
                     self.read_instance.station_longitudes[networkspeci] = ncdf_root['lon'][non_nan_station_indices]
                     self.read_instance.station_latitudes[networkspeci] = ncdf_root['lat'][non_nan_station_indices]
+                self.read_instance.nonghost_metadata_vars_to_read.append('longitude') 
+                self.read_instance.nonghost_metadata_vars_to_read.append('latitude') 
 
                 if "station_name" in ncdf_root.variables:
                     meta_shape = ncdf_root['station_name'].shape
@@ -701,9 +707,19 @@ class DataReader:
                             self.read_instance.station_names[networkspeci] = np.array([''.join(val) for val in self.read_instance.station_names[networkspeci]])
                         else:
                             self.read_instance.station_names[networkspeci] = chartostring(self.read_instance.station_names[networkspeci])
+                    self.read_instance.nonghost_metadata_vars_to_read.append('station_name') 
+
+                if "measurement_altitude" in ncdf_root.variables:
+                    self.read_instance.station_measurement_altitudes[networkspeci] = ncdf_root['measurement_altitude'][non_nan_station_indices]
+                    self.read_instance.nonghost_metadata_vars_to_read.append('measurement_altitude') 
 
                 # get non-GHOST measurement units
                 self.read_instance.nonghost_units[speci] = ncdf_root[speci].units
+
+                # get list of nonghost variables to read (subset of GHOST variables)
+                for ghost_metadata_var in self.read_instance.ghost_metadata_vars_to_read:
+                    if (ghost_metadata_var in ncdf_root.variables) & (ghost_metadata_var not in self.read_instance.nonghost_metadata_vars_to_read):
+                        self.read_instance.nonghost_metadata_vars_to_read.append(ghost_metadata_var) 
 
                 ncdf_root.close()
 

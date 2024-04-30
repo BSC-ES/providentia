@@ -25,13 +25,13 @@ from mapping_species import mapping_species
 from configuration import ProvConfiguration, load_conf
 
 # load the data_paths for the different machines and the default values jsons
-data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.json')))
-config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_interp_defaults.json')))
-bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.json')))
+data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
+config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_interp_defaults.yaml')))
+bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # load the defined experiments paths and agrupations jsons
-experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_paths.json')))
-experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.json')))
+experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_paths.yaml')))
+experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.yaml')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
