@@ -1,20 +1,20 @@
 """ Module which provides main window """
-
+from collections import OrderedDict
 import copy
 import datetime
+from functools import partial
 import json
 import os
 import sys
+from weakref import WeakKeyDictionary
+import yaml
 
-from collections import OrderedDict
-from functools import partial
 import matplotlib
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore, QtWidgets
-from weakref import WeakKeyDictionary
 
 from .canvas import MPLCanvas
 from .configuration import load_conf
@@ -55,9 +55,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # allow access to methods of parent class QtWidgets.QWidget
         super(ProvidentiaMainWindow, self).__init__()
 
-        # load statistical jsons
-        self.basic_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.json')))
-        self.expbias_stats = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.json')))
+        # load statistical yamls
+        self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+        self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -131,23 +131,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # get operating system specific formatting
         if self.operating_system == 'Mac':
-            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.json')))
+            self.formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
         elif self.operating_system == 'Linux':
-            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.json')))
+            self.formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
         elif self.operating_system == 'Windows':
-            self.formatting_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.json')))
+            self.formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
 
         # load characteristics per plot type
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
             self.plot_characteristics_filename = os.path.join(
-                PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.json')
-        self.plot_characteristics_templates = json.load(open(self.plot_characteristics_filename))
+                PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.yaml')
+        self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
 
         # error when using wrong custom plot characteristics path to launch dashboard
         if 'header' in self.plot_characteristics_templates.keys():
             msg = 'It is not possible to use the offline plot characteristics path to launch the dashboard. Consider adding another path to plot_characteristics_filename, as in: '
-            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.json, offline:/path/plot_characteristics_offline.json.'
+            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.yaml, offline:/path/plot_characteristics_offline.yaml.'
             sys.exit(msg)
 
         # arguments are only local
@@ -162,15 +162,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # load file trees
         else:
             try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree.json'))) 
+                self.all_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree.yaml'))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/internal/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/internal/ghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
-                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
+                    nonghost_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.yaml')))
                 except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                    msg = "Error: Trying to load 'settings/internal/nonghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
                     sys.exit(msg)
         # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:

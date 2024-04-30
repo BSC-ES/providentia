@@ -58,7 +58,7 @@ The reports will be saved under the folder reports. You can add a path in the re
 Running the tool on a personal machine
 --------------------------------------
 
-If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file ``/providentia/settings/data_paths.json`` and defining ``ghost_root``, ``nonghost_root`` and ``exp_root`` under ``local``. For instance:
+If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file ``/providentia/settings/data_paths.yaml`` and defining ``ghost_root``, ``nonghost_root`` and ``exp_root`` under ``local``. For instance:
 
 ::
     
