@@ -6,9 +6,9 @@
     },
     
     "mn5": {
-        "ghost_root": "/gpfs/tapes/MN4/projects/bsc32/AC_cache/obs/ghost",
-        "nonghost_root": "/gpfs/tapes/MN4/projects/bsc32/AC_cache/obs/nonghost",
-        "exp_root": "/gpfs/tapes/MN4/projects/bsc32/AC_cache/recon/exp_interp"
+        "ghost_root": " /gpfs/projects/bsc32/AC_cache/obs/ghost",
+        "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
+        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
     },
     
     "mn4": {
