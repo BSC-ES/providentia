@@ -32,7 +32,8 @@ else
 fi
 
 # load greasy
-echo "Loading greasy..."
+echo "Loading dependencies..."
 module load greasy/2.2.4.1
+module load libexpat udunits hdf5 pnetcdf/1.12.3 netcdf nco/5.2.2
 
 srun --output=providentia/interpolation/management_logs/$SLURM_JOB_ID.out python -u providentia/interpolation/experiment_interpolation_submission.py $SLURM_JOB_ID $*
