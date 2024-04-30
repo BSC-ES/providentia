@@ -87,7 +87,7 @@ Namely, these are:
      - Filter read species by other species data within a data range (can be multiple) (e.g. ``network1:species1 (lowerlim, upperlim), network2:species2 (lowerlim, upperlim)``).
      -  
    * - report_type
-     - Type of report to generate that defines which plots the report will contain, from the options given in ``report_plots.json``.
+     - Type of report to generate that defines which plots the report will contain, from the options given in ``report_plots.yaml``.
      - 
    * - report_summary
      - Boolean variable to set if you wish to make specific plots for each station in subsection. 

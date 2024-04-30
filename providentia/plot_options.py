@@ -252,8 +252,8 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     
     # if no stats defined, then return
     if len(stats) == 0:
-        msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.json.'.format(base_plot_type)
-        msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.json.'.format(base_plot_type)
+        msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.yaml.'.format(base_plot_type)
+        msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.yaml.'.format(base_plot_type)
         show_message(read_instance, msg=msg_dashboard, msg_offline=msg_offline)
         return
 

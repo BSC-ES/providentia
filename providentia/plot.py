@@ -1950,7 +1950,7 @@ class Plot:
                 else:
                     markersize = plot_characteristics['markersize']['standard'] 
 
-                # add to plot_characteristics json
+                # add to plot_characteristics yaml
                 plot_characteristics['plot']['markersize'] = markersize
         
         elif base_plot_type == 'map':

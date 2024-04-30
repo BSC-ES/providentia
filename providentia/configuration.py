@@ -9,6 +9,7 @@ import re
 import socket
 import subprocess
 import sys
+import yaml
 
 import numpy as np
 import pandas as pd
@@ -18,11 +19,9 @@ MACHINE = os.environ.get('BSC_MACHINE', '')
 # get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-
-# load the data_paths for the different machines and the default values jsons
-data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.json')))
-default_values = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.json')))
-multispecies_map = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.json')))
+data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
+default_values = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
+multispecies_map = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -51,7 +50,7 @@ class ProvConfiguration:
         
         self.read_instance = read_instance 
 
-        self.var_defaults = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_init_vars.json')))
+        self.var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_init_vars.yaml')))
         self.var_defaults['config_dir'] = os.path.join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
 
         # if variable is given by command line, set that value, otherwise set as default value 
@@ -423,7 +422,7 @@ class ProvConfiguration:
                             return value.split("interactive:")[1].split(',')[0]
                         else:
                             msg = 'It is necessary to include the words dashboard, offline or interactive to set different plot characteristics filenames, as in: '
-                            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.json, offline:/path/plot_characteristics_offline.json.'
+                            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.yaml, offline:/path/plot_characteristics_offline.yaml.'
                             sys.exit(msg)
                     # one path was provided
                     else:
