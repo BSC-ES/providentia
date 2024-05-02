@@ -3,11 +3,6 @@
 cores=12
 jobname="PRV"
 time="02:00:00"
-if [ "${BSC_MACHINE}" == "mn5" ]; then
-    queue="gp_debug"
-else
-    queue="debug"
-fi
 mem="20Gb"
 constraint="medmem"
 
@@ -45,6 +40,21 @@ PARSED=$(getopt --options ${SHORT} \
 # exit if getopt has complained about wrong arguments to stdout
 if [[ $? -ne 0 ]]; then
     exit 2
+fi
+
+# set qos depending on the mode and machine
+if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
+    if [ "${BSC_MACHINE}" == "mn5" ]; then
+        queue="gp_bsces"
+    else
+        queue="bsc_es"
+    fi
+else
+    if [ "${BSC_MACHINE}" == "mn5" ]; then
+        queue="gp_debug"
+    else
+        queue="debug"
+    fi 
 fi
 
 # reset SLURM_EXPORT_ENV so that things like srun & sbatch work out of the box
