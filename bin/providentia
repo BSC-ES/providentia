@@ -192,25 +192,11 @@ elif [ "${BSC_MACHINE}" == "mn5" ]; then
     active_env=false
     module load anaconda
     eval "$(conda shell.bash hook)"
+    conda config --set env_prompt '($(basename {default_env})) '
     if { conda env list | grep 'providentia-env'; } >/dev/null 2>&1; then 
-        echo "Activating environment..."
-        conda activate providentia-env
+        echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env..."
+        conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env
         active_env=true
-    else
-        # create environment if it does not exist if we are in glogin4 (with internet)
-        echo "Environment providentia-env does not exist."; 
-        node=$(hostname -s)
-        if [ "${node}" == "glogin4" ]; then
-            echo "Creating environment..."
-            conda create -n providentia-env -y python=3.9.16
-            conda activate providentia-env
-            conda install -c conda-forge cartopy -y
-            conda install -c conda-forge jupyterlab -y
-            pip install -r requirements.txt
-            active_env=true
-        else
-            echo "Please connect to MN5 using glogin4 to create the environment automatically."
-        fi
     fi
 
     if $active_env; then
