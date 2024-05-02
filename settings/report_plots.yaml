@@ -36,7 +36,7 @@
 
     "cams2_82": ["metadata", "map-r", "map-MB", "map-RMSE", "map-MFB", "map-MFE", "timeseries_smooth",
                  "timeseries_bias_smooth", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
-				     
+
     "all_plots": ["metadata",
                   "map-Median", "map-Median_bias", "map-MB",
                   "timeseries", "timeseries_bias", "timeseries_smooth",
