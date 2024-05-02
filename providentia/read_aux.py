@@ -13,6 +13,7 @@ import bisect
 import cftime
 from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 
 # initialise dictionary for storing pointers to shared memory variables in read step 
@@ -83,7 +84,7 @@ def read_netcdf_data(tuple_arguments):
         file_time_dt = num2date(file_time, units=time_units)
         
         # convert to pandas datetime
-        if float(".".join(cftime. __version__.split(".")[:2])) == 1.0:
+        if Version(cftime.__version__) <= Version("1.0.3.4"):
             # remove microseconds
             file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
         else:
