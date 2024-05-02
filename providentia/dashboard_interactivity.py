@@ -9,6 +9,7 @@ import matplotlib
 from matplotlib.lines import Line2D
 from matplotlib.widgets import _SelectorWidget
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 
 from .plot_aux import get_map_extent
@@ -263,7 +264,7 @@ class HoverAnnotation(object):
                            "xycoords": xycoords, 
                            "bbox": {**plot_characteristics['marker_annotate_bbox']},
                            "arrowprops": {**plot_characteristics['marker_annotate_arrowprops']}}
-        if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+        if Version(matplotlib.__version__) >= Version("3.3"):
             annotation_dict["text"] = ""
         else:
             annotation_dict["s"] = ""

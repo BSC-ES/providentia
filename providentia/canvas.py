@@ -16,6 +16,7 @@ from matplotlib.offsetbox import AnchoredOffsetbox
 from matplotlib.path import Path
 import matplotlib.style as mplstyle
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtWidgets 
@@ -638,7 +639,7 @@ class MPLCanvas(FigureCanvas):
             for collection in self.plot_axes['map'].collections:
                 if isinstance(collection, matplotlib.collections.PathCollection):
                     
-                    if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                    if Version(matplotlib.__version__) < Version("3.4"):
                         opacities = collection.get_facecolor()
                         # set alpha of all stations (initally assuming zero stations are selected)
                         opacities[:, -1] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']
@@ -2982,7 +2983,7 @@ class MPLCanvas(FigureCanvas):
                 if len(self.absolute_selected_station_inds) == 0:
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
-                            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                            if Version(matplotlib.__version__) < Version("3.4"):
                                 opacities = collection.get_facecolor()
                                 opacities[:, -1] = opacity
                                 collection.set_facecolor(opacities)
@@ -2996,7 +2997,7 @@ class MPLCanvas(FigureCanvas):
                 elif (len(self.absolute_non_selected_station_inds) > 0) & (len(self.absolute_selected_station_inds) > 0):
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
-                            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                            if Version(matplotlib.__version__) < Version("3.4"):
                                 opacities = collection.get_facecolor()
                                 opacities[self.absolute_non_selected_station_inds, -1] = opacity
                                 collection.set_facecolor(opacities)
@@ -3019,7 +3020,7 @@ class MPLCanvas(FigureCanvas):
                 if len(self.absolute_selected_station_inds) > 0:
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
-                            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                            if Version(matplotlib.__version__) < Version("3.4"):
                                 opacities = collection.get_facecolor()
                                 opacities[self.absolute_selected_station_inds, -1] = opacity
                                 collection.set_facecolor(opacities)

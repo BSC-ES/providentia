@@ -15,6 +15,7 @@ from matplotlib.projections import PolarAxes
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 import pyproj
 import seaborn as sns
@@ -1407,7 +1408,8 @@ class Plot:
                         networkspeci_label = networkspeci.split('|')[1]
                     else:
                         networkspeci_label = networkspeci
-                    if float(".".join(matplotlib. __version__.split(".")[:2])) >= 3.3:
+                    
+                    if Version(matplotlib.__version__) >= Version("3.3"):
                         relevant_axis.annotate(text=networkspeci_label, annotation_clip=False,
                                                xy=(plot_characteristics['multispecies']['xmin'], y_position), 
                                                **plot_characteristics['multispecies']['yticklabels'])
