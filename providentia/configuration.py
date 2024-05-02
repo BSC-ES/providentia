@@ -13,6 +13,7 @@ import yaml
 
 import matplotlib
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 
 from .read_aux import check_for_ghost, get_default_qa
@@ -681,7 +682,7 @@ class ProvConfiguration:
             self.read_instance.active_dashboard_plots = default
         # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
         else:
-            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
+            if Version(matplotlib.__version__) < Version("3.8"):
                 if 'taylor' in self.read_instance.active_dashboard_plots:
                     error = 'It is not possible to create Taylor diagrams yet, please remove.'
                     sys.exit(error)
