@@ -22,7 +22,6 @@ from .argument_parser import ProvArgumentParser
 logging.basicConfig(level=logging.WARNING)
 LOG = logging.getLogger(__name__)
 
-
 class Providentia(object):
     """ Interface class for Providentia. """
 

@@ -1,4 +1,5 @@
 """ Module which provides main window """
+
 from collections import OrderedDict
 import copy
 import datetime
@@ -42,7 +43,6 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
     """ Class that generates Providentia dashboard. """
@@ -163,15 +163,15 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # load file trees
         else:
             try:
-                self.all_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.yaml'))) 
+                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/ghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
-                    nonghost_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.yaml')))
+                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json')))
                 except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/nonghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
+                    msg = "Error: Trying to load 'settings/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                     sys.exit(msg)
         # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:
