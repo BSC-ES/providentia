@@ -507,8 +507,8 @@ def get_ghost_observational_tree(instance):
                     ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
 
     # save file tree out to yaml
-    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.yaml'), 'w') as yaml_file:
-        yaml.safe_dump(ghost_observation_data, yaml_file, indent=4, sort_keys=False)
+    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'), 'w') as json_file:
+        json.dump(ghost_observation_data, json_file, indent=4)
 
     return ghost_observation_data
 
@@ -576,8 +576,8 @@ def get_nonghost_observational_tree(instance):
                     nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
         
     # save file tree out to yaml
-    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.yaml'), 'w') as yaml_file:
-        yaml.safe_dump(nonghost_observation_data, yaml_file, indent=4, sort_keys=False)
+    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json'), 'w') as json_file:
+        json.dump(nonghost_observation_data, json_file, indent=4)
 
     return nonghost_observation_data
 
