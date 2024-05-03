@@ -9,6 +9,7 @@ import sys
 import yaml
 
 import matplotlib
+from matplotlib import colors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -875,7 +876,59 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         z_vmin = -limit_stat
         z_vmax = limit_stat
 
-    return z_vmin, z_vmax, z_label, z_colourmap
+    # check if have defined n_discrete (in this order: 1. configuration file 2. specific for z statistic)
+    # if have no defined n_discrete, then take None
+    set_n_discrete = False
+    #1. check configuration file
+    if 'n_discrete' in plot_characteristics['cb']:
+        if plot_characteristics['cb']['n_discrete'] != '':
+            n_discrete = plot_characteristics['cb']['n_discrete']
+            set_n_discrete = True
+    #2. get n_discrete specific for z statistic
+    if not set_n_discrete:
+        if 'n_discrete' in stats_dict:
+            if stats_dict['n_discrete'] != '':
+                set_n_discrete = True
+                # 3. get n_discrete specific for species
+                if isinstance(stats_dict['n_discrete'], dict):
+                    if speci in stats_dict['n_discrete'].keys():
+                        n_discrete = stats_dict['n_discrete'][speci]
+                    else:
+                        set_n_discrete = False
+                else:
+                    n_discrete = stats_dict['n_discrete']
+    # if have no defined n_discrete, take None
+    if not set_n_discrete:
+        n_discrete = None
+        
+    # check if have defined n_ticks (in this order: 1. configuration file 2. specific for z statistic)
+    # if have no defined n_ticks, then raise error
+    set_n_ticks = False
+    #1. check configuration file
+    if 'n_ticks' in plot_characteristics['cb']:
+        if plot_characteristics['cb']['n_ticks'] != '':
+            n_ticks = plot_characteristics['cb']['n_ticks']
+            set_n_ticks = True
+    #2. get n_ticks specific for z statistic
+    if not set_n_ticks:
+        if 'n_ticks' in stats_dict:
+            if stats_dict['n_ticks'] != '':
+                set_n_ticks = True
+                # 3. get n_ticks specific for species
+                if isinstance(stats_dict['n_ticks'], dict):
+                    if speci in stats_dict['n_ticks'].keys():
+                        n_ticks = stats_dict['n_ticks'][speci]
+                    else:
+                        set_n_ticks = False
+                else:
+                    n_ticks = stats_dict['n_ticks']
+    # if have no defined n_ticks, raise error
+    if not set_n_ticks:
+        error = 'The number of ticks (n_ticks) in the colorbar need to be defined, either in the '
+        error = 'configuration files for the map or per statistic.'
+        sys.exit(error)
+
+    return z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks
 
 def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci):
     """ Function that generates colourbar.
@@ -903,21 +956,24 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         return
 
     # get colourbar limits/label
-    z_vmin, z_vmax, z_label, z_colourmap = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, 
-                                                                     plot_characteristics, speci)
+    z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks = generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, 
+                                                                                          plot_characteristics, speci)
 
     # generate colourbar tick array
-    tick_array = np.linspace(z_vmin, z_vmax, plot_characteristics['cb']['n_ticks'], endpoint=True)
+    tick_array = np.linspace(z_vmin, z_vmax, n_ticks, endpoint=True)
 
     # normalise colourbar range (into the 0.0 - 1.0 interval)
     norm = matplotlib.colors.Normalize(vmin=z_vmin, vmax=z_vmax)
 
+    # get color palettes
+    color_palettes = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
+
     # get cmap (handling discrete cases)
     if z_vmin != z_vmax:
-        if plot_characteristics['cb']['discrete']:
-            cmap = plt.get_cmap(z_colourmap, plot_characteristics['cb']['n_discrete'])
+        if z_colourmap in color_palettes.keys():
+            cmap = colors.LinearSegmentedColormap.from_list("providentia", color_palettes[z_colourmap], n_discrete)
         else:
-            cmap = plt.get_cmap(z_colourmap)
+            cmap = plt.get_cmap(z_colourmap, n_discrete)
     else:
         cmap = plt.get_cmap(z_colourmap, 1)
 
