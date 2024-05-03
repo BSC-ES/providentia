@@ -193,10 +193,12 @@ elif [ "${BSC_MACHINE}" == "mn5" ]; then
     module load anaconda
     eval "$(conda shell.bash hook)"
     conda config --set env_prompt '($(basename {default_env})) '
-    if { conda env list | grep 'providentia-env_2.4.0'; } >/dev/null 2>&1; then 
+    if { conda env list | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_2.4.0'; } >/dev/null 2>&1; then 
         echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_2.4.0..."
         conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_2.4.0
         active_env=true
+    else 
+        echo "Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/"
     fi
 
     if $active_env; then
