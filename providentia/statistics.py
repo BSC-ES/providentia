@@ -925,7 +925,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     # if have no defined n_ticks, raise error
     if not set_n_ticks:
         error = 'The number of ticks (n_ticks) in the colorbar need to be defined, either in the '
-        error = 'configuration files for the map or per statistic.'
+        error += 'configuration files for the map or per statistic.'
         sys.exit(error)
 
     return z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks
