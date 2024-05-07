@@ -161,7 +161,7 @@
            
                    "container": {"element_type": "container",
                                  "formatting_dict": "settings_container",
-                                 "size": [250, 330],
+                                 "size": [250, 380],
                                  "relative_position": [-230, 25]},
 
                    "settings_label": {"element_type": "label",
@@ -231,15 +231,32 @@
                                         "tick_interval": 2,
                                         "tracking": false,
                                         "function": "update_smooth_window_func"},
-                    
+
+
+                   "smooth_min_points_sl_label": {"element_type": "label",
+                                                  "size": [230, 20],
+                                                  "relative_position": [-220, 250],
+                                                  "text": "Smooth min. points (%)"},
+
+                   "smooth_min_points_sl": {"element_type": "slider",
+                                            "size": [230, 20],
+                                            "relative_position": [-220, 275],
+                                            "object_name": "timeseries_smooth_min_points_sl",
+                                            "minimum": 0,
+                                            "maximum": 100,
+                                            "value": 0,
+                                            "tick_interval": 10,
+                                            "tracking": false,
+                                            "function": "update_smooth_min_points_func"},
+
                    "smooth_linewidth_sl_label": {"element_type": "label",
                                                  "size": [230, 20],
-                                                 "relative_position": [-220, 250],
+                                                 "relative_position": [-220, 300],
                                                  "text": "Line width"},
                     
                    "smooth_linewidth_sl": {"element_type": "slider",
                                            "size": [230, 20],
-                                           "relative_position": [-220, 275],
+                                           "relative_position": [-220, 325],
                                            "object_name": "timeseries_smooth_linewidth_sl",
                                            "minimum": 0,
                                            "tick_interval": 2,
@@ -248,13 +265,13 @@
                     
                    "options_label": {"element_type": "label",
                                      "size": [230, 20],
-                                     "relative_position": [-220, 300],
+                                     "relative_position": [-220, 350],
                                      "text": "Options"},
                     
                    "options": {"element_type": "checkable_combobox",
                                "formatting_dict": "checkable_combobox_menu",
                                "size": [230, 20],
-                               "relative_position": [-220, 325],
+                               "relative_position": [-220, 375],
                                "object_name": "timeseries_options",
                                "function": "update_plot_option"}
                   },

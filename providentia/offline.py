@@ -14,6 +14,7 @@ from matplotlib.projections import PolarAxes
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 
 from .configuration import load_conf
@@ -85,15 +86,15 @@ class ProvidentiaOffline:
         # load file trees
         else:
             try:
-                self.all_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree.yaml'))) 
+                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree.json'))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/internal/ghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/internal/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
-                    nonghost_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.yaml')))
+                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
                 except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/internal/nonghost_filetree.yaml' but file does not exist. Run with the flag '--gft' to generate this file."
+                    msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                     sys.exit(msg)
         # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:
@@ -205,7 +206,7 @@ class ProvidentiaOffline:
                                 self.station_plots_to_make.append(plot_type)
 
             # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
-            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
+            if Version(matplotlib.__version__) < Version("3.8"):
                 if plot_type[:6] == 'taylor':
                     if (plot_type in self.station_plots_to_make) or (plot_type in self.summary_plots_to_make):
                         error = 'It is not possible to create Taylor diagrams yet, please remove.'

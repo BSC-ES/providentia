@@ -117,7 +117,7 @@
                       "annotate_text": {"s": "", "loc": "upper left", "fontsize": 13, "n_stations": false, 
                                         "exp_labels": true, "color": "", "round_decimal_places": 2},
                       "annotate_bbox": {"facecolor": "white", "edgecolor": "gainsboro", "alpha": 1, "zorder": 100},
-                      "smooth": {"window": 50, "min_points": 1, "format": {"linewidth": 2.0}},
+                      "smooth": {"window": 10, "min_points_percentage": 50, "format": {"linewidth": 2.0}},
                       "bias_line": {"y": 0.0, "linestyle": "--", "linewidth": 1.0, "color": "black", "zorder": 0},
                       "round_decimal_places": {"title": 2},
                       "markersize_npoints_threshold": 200,
