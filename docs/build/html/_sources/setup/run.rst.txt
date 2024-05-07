@@ -76,4 +76,25 @@ The entire data collection comprises **several terabytes**, therefore it is not 
 
 If it is the first time that you launch Providentia, an environment called ``providentia-env`` will be created with all the necessary dependencies.
 
+If you want to create the environment from scratch, you can use:
+
+::
+    
+    conda env create -f environment.yaml
+
+You might get a warning like:
+
+::
+
+    WARNING conda.models.version:get_matcher(556): Using .* with relational operator is superfluous and deprecated and will be removed in a future version of conda. Your spec was 1.6.0.*, but conda is ignoring the .* and treating it as 1.6.0
+
+This can be removed by updating conda:
+
+::
+    
+    conda update conda
+    conda install -n base conda=24.4.0 conda-build=24.3.0
+
+Check what the latest versions of `conda <https://github.com/conda/conda/releases>`__ and `conda-build <https://github.com/conda/conda-build/releases>`__ are.
+
 Enjoy!
