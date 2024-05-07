@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Run the tool &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=7ae09063" />
 
@@ -138,6 +138,20 @@ By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total 
 </ul>
 <p>The entire data collection comprises <strong>several terabytes</strong>, therefore it is not recommended to download the entire archive.</p>
 <p>If it is the first time that you launch Providentia, an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env</span></code> will be created with all the necessary dependencies.</p>
+<p>If you want to create the environment from scratch, you can use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>You might get a warning like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span> <span class="n">conda</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">version</span><span class="p">:</span><span class="n">get_matcher</span><span class="p">(</span><span class="mi">556</span><span class="p">):</span> <span class="n">Using</span> <span class="o">.*</span> <span class="k">with</span> <span class="n">relational</span> <span class="n">operator</span> <span class="ow">is</span> <span class="n">superfluous</span> <span class="ow">and</span> <span class="n">deprecated</span> <span class="ow">and</span> <span class="n">will</span> <span class="n">be</span> <span class="n">removed</span> <span class="ow">in</span> <span class="n">a</span> <span class="n">future</span> <span class="n">version</span> <span class="n">of</span> <span class="n">conda</span><span class="o">.</span> <span class="n">Your</span> <span class="n">spec</span> <span class="n">was</span> <span class="mf">1.6.0</span><span class="o">.*</span><span class="p">,</span> <span class="n">but</span> <span class="n">conda</span> <span class="ow">is</span> <span class="n">ignoring</span> <span class="n">the</span> <span class="o">.*</span> <span class="ow">and</span> <span class="n">treating</span> <span class="n">it</span> <span class="k">as</span> <span class="mf">1.6.0</span>
+</pre></div>
+</div>
+<p>This can be removed by updating conda:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">update</span> <span class="n">conda</span>
+<span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">n</span> <span class="n">base</span> <span class="n">conda</span><span class="o">=</span><span class="mf">24.4.0</span> <span class="n">conda</span><span class="o">-</span><span class="n">build</span><span class="o">=</span><span class="mf">24.3.0</span>
+</pre></div>
+</div>
+<p>Check what the latest versions of <a class="reference external" href="https://github.com/conda/conda/releases">conda</a> and <a class="reference external" href="https://github.com/conda/conda-build/releases">conda-build</a> are.</p>
 <p>Enjoy!</p>
 </section>
 </section>
