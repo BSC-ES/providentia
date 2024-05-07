@@ -7,6 +7,7 @@ import traceback
 
 import matplotlib
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
+from packaging.version import Version
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .configuration import ProvConfiguration
@@ -180,7 +181,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                 self.canvas_instance.map_annotation_disconnect = True
 
             # connect lasso event
-            if ((float(".".join(matplotlib. __version__.split(".")[:2])) < 3.2) or
+            if ((Version(matplotlib.__version__) < Version("3.2")) or
                (self.read_instance.machine in ['power', 'mn4', 'nord3v2', 'mn5'])):
                 blit = False
             else:
