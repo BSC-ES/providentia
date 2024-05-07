@@ -527,7 +527,7 @@ def get_nonghost_observational_tree(instance):
     nonghost_observation_data = {}
 
     # load which non-GHOST networks to read
-    nonghost_networks = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_networks.yaml')))
+    nonghost_networks = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.yaml')))
 
     # iterate through networks
     for network in nonghost_networks:
@@ -557,7 +557,7 @@ def get_nonghost_observational_tree(instance):
                 # get all available netCDF files 
                 available_files = glob('%s/%s/%s/%s/%s_??????.nc' % (instance.nonghost_root, network, resolution, speci, speci))
 
-                # coninue if have no files
+                # continue if have no files
                 if len(available_files) == 0:
                     continue
 
